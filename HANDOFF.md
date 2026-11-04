@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Haiku codes Task 49 swi-order-39 (Task 48 shipped as Iteration 138); Opus reviews, Sonnet fixes
+**Active agent:** Sonnet reworks Task 50 type-tests-errors-40 (Task 49 shipped as Iteration 139); Opus reviews
 **Branch in use:** none
 **Working tree clean:** main yes
 

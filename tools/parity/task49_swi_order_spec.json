@@ -1,0 +1,2776 @@
+{
+ "items": [
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i]*[i])",
+   "powerbi": "46",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]*[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])",
+   "powerbi": "46",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),DESC),[i]>0))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"q\",CALCULATE(SUM(Facts[Quantity]))),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i]>0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[d])",
+   "powerbi": "10",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],TRUE()),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Region],DESC),[i]*[i])",
+   "powerbi": "30",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),\"v\",[i])))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"q\",CALCULATE(SUM(Facts[Quantity]))),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i]*[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,BLANK()),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],TRUE()),[i])",
+   "powerbi": "1.83333333333333",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],DESC),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,Facts[Region],FALSE()),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i])",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),BLANK()),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i]*[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Note],ASC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]),[i]>0))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,Facts[Region],FALSE()),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],1),[i],\"|\",[i])",
+   "powerbi": "0|1|1|2|3|4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],DESC),[i])",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,0),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],FALSE()))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),LEN(Facts[Region]),DESC),[i]*[i])",
+   "powerbi": "39",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],DESC),[s])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),[Region],DESC),[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),DESC),[i]*[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1),\"v\",[i])))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Region],DESC),[i])",
+   "powerbi": "10",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,LEN(Facts[Region]),DESC),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],FALSE()),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],DESC,Facts[Note],ASC),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),IF(Facts[Region]=\"East\",1,2),ASC),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i])",
+   "powerbi": "0.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],1),[i]*[i])",
+   "powerbi": "31",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "2.16666666666667",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i])",
+   "powerbi": "0.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),1),[i],\"|\",[i])",
+   "powerbi": "0|1|2|2|3|4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],FALSE()),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i],\"|\",[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i]*[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),[Region],DESC),[i]>0))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],FALSE()),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),0),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,[Region],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,0),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),0),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],FALSE()),[i])",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]>0))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i]>0))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"q\",CALCULATE(SUM(Facts[Quantity]))),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i])",
+   "powerbi": "0.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],0),[i])",
+   "powerbi": "2.33333333333333",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,Facts[Region],TRUE()),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],FALSE()),[i]*[i])",
+   "powerbi": "30",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),\"v\",[i])))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[s])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],DESC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],DESC),[i])",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],TRUE()),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "2.33333333333333",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),[Region],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Note],DESC),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Region],0),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Note],ASC),[i])",
+   "powerbi": "10",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],TRUE))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),IF(Facts[Region]=\"East\",1,2),ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|1|2|3|4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Region],0),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],DESC),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,[Region],DESC),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],ASC),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[s])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),BLANK()),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),\"v\",[i])))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),BLANK()),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),0),\"v\",[i])))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,0),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Sales])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i]>0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Note],ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]>0))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],FALSE()),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"x\",1),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i]>0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i]*[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]*[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],1),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),\"v\",[i])))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Region],DESC))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i]>0))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,LEN(Facts[Region]),DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,CALCULATE(COUNTROWS(Facts)),ASC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i])",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],DESC),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],0),\"v\",[i])))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,BLANK()),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,Facts[Region],TRUE()),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],ASC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],FALSE()),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Sales])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i],\"|\",[i])",
+   "powerbi": "0|1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[s])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"d\",Facts[Quantity]*2),\"i\",Facts,CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),BLANK()),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC),[s])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Note],ASC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[i]>0))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,CALCULATE(COUNTROWS(Facts)),ASC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),\"v\",[i])))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),0),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i])",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),0),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),[Region],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"x\",1),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i])",
+   "powerbi": "0.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],TRUE),[i]>0))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],TRUE()))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),BLANK()),\"v\",[i])))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"x\",1),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Note],ASC),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),1),[i]*[i])",
+   "powerbi": "34",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region]),0),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),0),[i])",
+   "powerbi": "10",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(CALCULATETABLE(VALUES(Facts[Note]),Facts[Quantity]>1),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),1,ASC),[i]*[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "2.33333333333333",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]*[i])",
+   "powerbi": "38",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(ALL(Facts[Sales]),Facts[Sales]<>BLANK()),\"i\",TOPN(3,VALUES(Facts[Sales]),Facts[Sales],ASC),0,DESC),[i],\"|\",[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Note]),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note]),ISBLANK(Facts[Note]),ASC))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",Facts,Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),BLANK()),[i]*[i])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,Facts[Region]),[i]*[i])",
+   "powerbi": "38",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "1|2|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",Facts,Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]*[i])",
+   "powerbi": "30",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(ALL(Facts[Sales]),Facts[Sales]<>BLANK()),\"i\",TOPN(3,VALUES(Facts[Sales]),Facts[Sales],ASC),0,DESC),\"v\",[i])))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Region]),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),ASC))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),Facts[Region]))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",DISTINCT(Facts),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),BLANK()),[i]>=1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "39",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "14",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),ISBLANK(Facts[Quantity]),ASC),\"v\",[i])))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",Facts,Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),IF(ISBLANK(Facts[Note]),0,1),DESC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",DISTINCT(Facts),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(ALL(Facts[Sales]),Facts[Sales]<>BLANK()),\"i\",TOPN(3,VALUES(Facts[Sales]),Facts[Sales],ASC),0,DESC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",DISTINCT(Facts),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),CALCULATE(COUNTROWS(Facts)),DESC),[i]>=1))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",Facts,Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Region]),[i]*[i])",
+   "powerbi": "38",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],\"cnt\",COUNTROWS(Facts)),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note]),LEN(Facts[Note]),DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",Facts,Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",Facts,Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),CALCULATE(COUNTROWS(Facts)),DESC),\"v\",[i])))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",Facts,Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),\"v\",[i])))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "2.33333333333333",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts),Facts[Region]),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "39",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",DISTINCT(Facts),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",DISTINCT(Facts),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),LEN(Facts[Quantity]),DESC),[i])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),LEN(Facts[Quantity]),DESC),[i])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(CALCULATETABLE(VALUES(Facts[Note]),Facts[Quantity]>1),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),1,ASC),[i]>=1))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),ISBLANK(Facts[Quantity]),ASC),[i]*[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",DISTINCT(Facts),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),LEN(Facts[Quantity]),DESC),[i]>=1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Region]),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),ASC),\"v\",[i])))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),IF(ISBLANK(Facts[Quantity]),0,1),DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|2|3|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(CALCULATETABLE(VALUES(Facts[Note]),Facts[Quantity]>1),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),1,ASC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],\"cnt\",COUNTROWS(Facts)),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note]),LEN(Facts[Note]),DESC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i],\"|\",[i])",
+   "powerbi": "1|2|3|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),CALCULATE(COUNTROWS(Facts)),DESC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",Facts,Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),\"v\",[i])))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),IF(ISBLANK(Facts[Note]),0,1),DESC),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),IF(ISBLANK(Facts[Note]),0,1),DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Note]),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note]),ISBLANK(Facts[Note]),ASC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),ISBLANK(Facts[Quantity]),ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]*[i])",
+   "powerbi": "46",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "2.33333333333333",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",Facts,Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),IF(ISBLANK(Facts[Quantity]),0,1),DESC),[i]>=1))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Region]),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Note]),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note]),ISBLANK(Facts[Note]),ASC),[i]*[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",ALL(Facts),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),Facts[Region]),[i])",
+   "powerbi": "10",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),\"v\",[i])))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",Facts,Facts[Region]),[i])",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])",
+   "powerbi": "55",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"z\",1),\"i\",DISTINCT(Facts),Facts[Region]),[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Region]),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),ASC),[i]>=1))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),0),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),1),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),BLANK()),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),\"x\"),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),LEN(Facts[Region]),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),LEN(Facts[Region]),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),LEN(Facts[Region])),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),IF(Facts[Region]=\"East\",1,2),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),IF(Facts[Region]=\"East\",1,2),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:0|4:1|8:2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZECOLUMNS(Facts[Region],\"t\",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity])>=0),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),0),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),1),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),BLANK()),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),\"x\"),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region])),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:0|4:1|8:2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region]),CALCULATE(SUM(Facts[Quantity])>=0),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),0),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),1),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),BLANK()),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),\"x\"),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),LEN(Facts[Region]),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),LEN(Facts[Region]),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),LEN(Facts[Region])),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),IF(Facts[Region]=\"East\",1,2),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),IF(Facts[Region]=\"East\",1,2),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:0|4:1|8:2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),CALCULATE(SUM(Facts[Quantity])>=0),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region],ASC),0),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region],ASC),1),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region],ASC),BLANK()),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region],ASC),\"x\"),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",TOPN(2,VALUES(Facts[Region]),Facts[Region],ASC),CALCULATE(SUM(Facts[Quantity])>=0),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),0),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),1),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),BLANK()),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),\"x\"),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region])),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:2|4:0|8:1",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]=\"East\",1,2),DESC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:0|4:1|8:2",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),CALCULATE(SUM(Facts[Quantity])>=0),ASC),[s]&\":\"&[i],\"|\",[s])",
+   "powerbi": "3:1|4:2|8:0",
+   "now": "LOCAL-REJECT:The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied or"
+  }
+ ]
+}

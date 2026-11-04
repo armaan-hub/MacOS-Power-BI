@@ -32,10 +32,8 @@ class TestIteration122SwiOrder22(unittest.TestCase):
         )
 
     def test_part_a_unmodelled_index_tables_refuse(self) -> None:
-        # Multi-column SUMMARIZE with ties remains refused
-        self.assertTrue(
-            dax.local('MAXX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])').startswith("LOCAL-REJECT:")
-        )
+        # Task 49 (2026-11-05): answered now; live Power BI answer
+        self.assertEqual(dax.local('MAXX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])'), "4")
         # Base table Facts with ties remains refused
         self.assertTrue(
             dax.local('MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,IF(Facts[Region]="East",1,2),ASC),[i])').startswith("LOCAL-REJECT:")
@@ -44,10 +42,8 @@ class TestIteration122SwiOrder22(unittest.TestCase):
         self.assertTrue(
             dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>"West"),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()))').startswith("LOCAL-REJECT:")
         )
-        # Multi-column ALL with ties remains refused
-        self.assertTrue(
-            dax.local('SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])').startswith("LOCAL-REJECT:")
-        )
+        # Task 49 (2026-11-05): answered now; live Power BI answer
+        self.assertEqual(dax.local('SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])'), "46")
         # SUMMARIZECOLUMNS with ties remains refused
         self.assertTrue(
             dax.local('CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SUMMARIZECOLUMNS(Facts[Region],"t",SUM(Facts[Quantity])),0),[s]&":"&[i],"|",[s])').startswith("LOCAL-REJECT:")

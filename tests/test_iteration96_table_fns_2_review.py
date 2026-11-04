@@ -23,7 +23,6 @@ STAYS_REFUSED = [
     # tied order values over SUMMARIZECOLUMNS and SAMPLE
     'CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SUMMARIZECOLUMNS(Facts[Region],"t",SUM(Facts[Quantity])),0),[s]&":"&[i],"|",[s])',
     # tied order values over a base table
-    "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])",
     # SELECTCOLUMNS leaves the join no lineage in Power BI
     'COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(VALUES(Facts[Region]),"Region",Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region]))',
     'VAR t=SELECTCOLUMNS(Facts,"Region",Facts[Region]) RETURN COUNTROWS(SUBSTITUTEWITHINDEX(t,"i",VALUES(Facts[Region]),Facts[Region]))',
@@ -53,6 +52,10 @@ class SubstituteWithIndexReviewTest(unittest.TestCase):
             matched, bad = _replay(name)
             self.assertEqual([], bad, name)
             self.assertGreaterEqual(matched, minimum, name)
+
+    def test_tied_all_of_two_columns_is_answered(self) -> None:
+        # Task 49 (2026-11-05): answered now; live Power BI answer
+        self.assertEqual("46", dax.local('SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])'))
 
     def test_stays_refused(self) -> None:
         for expression in STAYS_REFUSED:
