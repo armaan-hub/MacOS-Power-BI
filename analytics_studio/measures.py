@@ -2632,6 +2632,19 @@ def _statistic_with_arithmetic(node: Any) -> bool:
     return found_statistic and found_arithmetic
 
 
+def _has_division(node: Any) -> bool:
+    """A division (/) anywhere in the expression, through call arguments and VAR bodies.  Task 47 Part A: Power BI divides the date serials as doubles
+    and the local engine divides in decimals; the two differ in the last digit for some serials, so a division in a date body is refused."""
+    stack = [node]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, (list, tuple)):
+            if isinstance(item, tuple) and len(item) > 1 and item[0] == "binary" and item[1] == "/":
+                return True
+            stack.extend(item)
+    return False
+
+
 def _coalesce_with_failing_argument(node: Any) -> bool:
     """A COALESCE anywhere in this expression with an argument other than the last that can raise an error (VALUE of text, ...): Power BI evaluates
     those arguments in an order the local engine does not reproduce (live probes, iteration 87), so the error may or may not surface."""
@@ -18824,12 +18837,21 @@ def evaluate_measures(
             if function in dax_math.STAT_ITERATORS:
                 if values and blank_results == len(values):
                     return None  # live Power BI (Task 11 review): nothing but BLANK results is BLANK, the blank-as-zero rule is for a mix
+                double_dates = False  # Task 47 Part A: set when the date rows spread in double arithmetic
                 if function[:4] in {"VARX", "STDE"}:
                     has_dates = any(isinstance(v, dax_dates.DaxDateTime) for v in values)
                     non_blank_vals = [v for v in values if v is not None and v.is_finite()]
                     exact_dates = bool(values) and dates_only_from_numbers(arguments[1], frame)  # Task 19 Part A: dates made from numbers spread as the numbers do
                     if len(set(non_blank_vals)) > 1 and not exact_dates and (body_kind in {"numdate", "date", "variant_dates"} or has_dates):
-                        raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
+                        if any(value is None or not value.is_finite() for value in values) or _has_division(arguments[1]):
+                            raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
+                        # Task 47 Part A: live Power BI adds the date serials as doubles in row order, so the spread is dax_math.double_statistic
+                        double_dates = True
+                    elif (len(set(non_blank_vals)) == 1 and len(non_blank_vals) == len(values) and len(values) > 1 and not _has_division(arguments[1])
+                          and abs(non_blank_vals[0]) < Decimal("1E100")  # a square beyond a double is not measured; those stay 0
+                          and (body_kind in {"numdate", "date", "variant_dates"} or has_dates)):
+                        # Task 47 (2026-11-04): one repeated fractional date is the same double sums, so VARX.S(Facts,DATE(2020,1,1)+0.1) is 3.8E-07
+                        double_dates = True
                     else:
                         # live Power BI (Task 15 review): VARX.P(Facts,DATE(2020,1,1)+0.5) is 0: one repeated date has no spread
                         values = [Decimal(v) if exact_dates and len(set(non_blank_vals)) > 1 else Decimal(0) if has_dates else v for v in values]
@@ -18843,7 +18865,7 @@ def evaluate_measures(
                 if currency_body and len(values) == 1:
                     raise MeasureRuntimeError("A division by zero has been encountered.")  # Task 19 Part A: one Currency row has no sample spread
                 try:
-                    answer = dax_math.statistic(function, values, percentile)
+                    answer = dax_math.double_statistic(function, values) if double_dates else dax_math.statistic(function, values, percentile)
                 except MeasureRuntimeError as error:
                     if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and "percentile value should be" in str(error):
                         raise _HardError(str(error)) from error  # live Power BI (Task 39 review): an out-of-range PERCENTILEX is thrown, IFERROR does not catch it

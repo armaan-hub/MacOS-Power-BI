@@ -335,6 +335,43 @@ def _interpolate(low: Decimal, high: Decimal, fraction: Decimal) -> Decimal:
     return high
 
 
+_STATISTIC_NAMES = {"VARX.S": "VAR.S", "VARX.P": "VAR.P", "STDEVX.S": "STDEV.S", "STDEVX.P": "STDEV.P"}
+
+
+def double_statistic(function: str, values: list[Decimal]) -> Decimal:
+    """VAR / STDEV of the rows in Power BI's double arithmetic (Task 47): the rows are added in row order, as doubles.
+
+    Live Power BI: VAR.P is the mean of the squares less the square of the mean; VAR.S is the sum of squares less the square of the
+    sum over the count, divided by count - 1 (so one repeated fraction gives float noise, 6.3 x 3 gives 7.1E-15, and 0 for VAR.P);
+    STDEV is the square root of that variance in double.  Rows that all repeat one value add it as count x value (the sum of squares
+    as (value x value) x count), measured on 78 repeated fractions; other rows are added one at a time in row order.
+    """
+    name = _STATISTIC_NAMES.get(function, function)
+    count = len(values)
+    numbers = [float(value) for value in values]
+    if all(number == numbers[0] for number in numbers):
+        total = numbers[0] * count
+        squares = numbers[0] * numbers[0] * count
+    else:
+        total = 0.0
+        squares = 0.0
+        for number in numbers:
+            total += number
+            squares += number * number
+    if name.endswith(".S"):
+        variance = (squares - total * total / count) / (count - 1)
+    else:
+        mean = total / count
+        variance = squares / count - mean * mean
+    if variance < 0:
+        variance = 0.0  # live Power BI (Task 47): a spread that rounds below zero (VARX.P of 0.1 x 3 is -1.7E-18 in double) is 0
+    if name.startswith("STDEV"):
+        variance = math.sqrt(variance)
+    if variance == 0:
+        return Decimal(0)
+    return Decimal(repr(variance))
+
+
 def statistic(function: str, values: list[Decimal], k: Decimal | None = None) -> Decimal | None:
     """Statistic over the non-blank numbers of a column or iterator; None when there is nothing to compute."""
     name = {"PERCENTILEX.INC": "PERCENTILE.INC", "PERCENTILEX.EXC": "PERCENTILE.EXC", "STDEVX.S": "STDEV.S",
@@ -409,7 +446,8 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
             return Decimal(0)
         if count > 1 and len(set(values)) == 1 and values[0] != values[0].to_integral_value():
             # live Power BI (Task 11 review): the spread of one repeated fraction is float noise (8.4E-08), not 0
-            raise dax_typed.refusal(f"{function} of one repeated fraction carries float noise that the local engine does not reproduce.")
+            # Task 47 Part B: the noise is the double arithmetic of the rows (double_statistic), not a refusal
+            return double_statistic(name, values)  # name is already the VAR.S / STDEV.P form here
         mean = sum(values, Decimal(0)) / count
         variance = sum(((value - mean) ** 2 for value in values), Decimal(0)) / (count - 1 if sample else count)
         return variance if name.startswith("VAR") else variance.sqrt()

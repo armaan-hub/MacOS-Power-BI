@@ -1,0 +1,3742 @@
+{
+ "items": [
+  {
+   "part": "B",
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),AVERAGE(Facts[Sales]))",
+   "powerbi": "8.42936970217881E-08",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),AVERAGE(Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),AVERAGE(Facts[Sales]))",
+   "powerbi": "7.105427357601E-15",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),AVERAGE(Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,COALESCE(DATE(2020,1,1)+Facts[Quantity],MAX(Facts[Quantity])))",
+   "powerbi": "3.5",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IFERROR(-1/0,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1.87082869338697",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(Facts[Quantity]>2,-Facts[Quantity],TIME(6,0,0)))",
+   "powerbi": "3.03108891324554",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(SELECTEDVALUE(Facts[Region])=\"East\",1,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,IF(Facts[Quantity]>2,DATE(2020,1,1)+Facts[Quantity],MAX(Facts[Quantity])))",
+   "powerbi": "576320670.4",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,VAR x=DATE(2020,1,1)+Facts[Quantity] RETURN IF(COUNTROWS(Facts)>3,x,1/0))",
+   "powerbi": "3.5",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),VAR x=CURRENCY(1.23456) RETURN IF(TRUE()&&FALSE(),x,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "0.816496629594713",
+   "now": "LOCAL-REJECT:STDEVX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(2,Facts,Facts[Quantity]),IF(SELECTEDVALUE(Facts[Region])=\"East\",Facts[Sales],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "0.707106781186548",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(\"\",2.5,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "3.5",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(DISTINCT(Facts),IF.EAGER(1=1,Facts[Sales],DATE(2020,1,1)))",
+   "powerbi": "8.0037491215055",
+   "now": "LOCAL-REJECT:STDEVX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(FALSE(),Facts[Sales]/0,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.08166603764366",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),IFERROR(DATE(2020,1,1)+Facts[Quantity],1))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(1.23456),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1.87082869338697",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(DISTINCT(Facts),IF(Facts[Quantity]>2,DATE(2020,1,1)+Facts[Quantity],Facts[Quantity]))",
+   "powerbi": "576425867.6",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))*1",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "-(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "-2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))-1",
+   "powerbi": "1.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "1.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "3.5",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "1.66666666666667",
+   "now": "LOCAL-REJECT:VARX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(Facts,VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "1.7078251509272",
+   "now": "LOCAL-REJECT:STDEVX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "1.11803398874989",
+   "now": "LOCAL-REJECT:STDEVX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "1.87082869338697",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "1.29099444873581",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(CONVERT(TRUE(),BOOLEAN))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG10(\"2\"))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(2^3)-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(IF(TRUE(),\"3\",1))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(COALESCE(BLANK(),DATE(2020,1,1)))*(AVERAGE(Facts[Quantity])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(STDEVX.P(VALUES(Facts[Region]),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(ABS(-1))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(VALUES(Facts[Region]),CONVERT(CURRENCY(1.5),CURRENCY))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(MAXX({1,DATE(2020,1,2)},[Value]))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(STDEVX.P(Facts,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(\"2\",MAX(Facts[Quantity])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(\"2\",10))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(RAND()*0)-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(STDEVX.P({1,2},CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(\"2\",DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(0.5,MAX(Facts[Quantity])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(CONVERT(\"3\",INTEGER))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(10,MAX(Facts[Quantity])))",
+   "powerbi": "2.98023223876953E-08",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(AVERAGE(Facts[Quantity]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(LEN(\"abc\"))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1=1)-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(CURRENCY(2)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(AVERAGE(Facts[Quantity]))-(DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1*DATE(2020,1,1))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/2)-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P({1,2},CONVERT(CURRENCY(1.5),CURRENCY))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(CONVERT(1,DOUBLE))-(TIME(6,0,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(FORMAT(1,\"0\"))/(DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},IFERROR(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,COALESCE(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},VAR v=CONVERT(CURRENCY(1.5),DOUBLE) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(VALUES(Facts[Region]),CONVERT(2.5,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,CONVERT(2.5,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,IFERROR(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({1,2},IFERROR(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},2.5)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},SUM(Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,2.5)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,SUM(Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({1,2},2.5)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({1,2},SUM(Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,2.5)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,SUM(Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IF(1=1,CONVERT(SUM(Facts[Sales]),DATETIME),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IF(1=2,1,CONVERT(SUM(Facts[Sales]),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,COALESCE(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IF(1=2,1,CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IFERROR(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IF(1=2,1,CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,COALESCE(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IF(1=1,CONVERT(2.5,DATETIME),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(1=1,CONVERT(Facts[Quantity],DATETIME),DATE(2020,1,1)))",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IF(1=2,1,CONVERT(2.5,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,COALESCE(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,COALESCE(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IF(1=2,1,CONVERT(2.5,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IFERROR(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IF(1=2,1,CONVERT(SUM(Facts[Sales]),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IFERROR(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IFERROR(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(1=1,CONVERT(Facts[Quantity],DATETIME),DATE(2020,1,1)))",
+   "powerbi": "1.87082869338697",
+   "now": "LOCAL-REJECT:STDEVX.S over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IFERROR(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IF(1=1,CONVERT(2.5,DATETIME),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,IFERROR(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P of one repeated fraction carries float noise that the local engine does not reproduce."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)+Facts[Quantity]))+1",
+   "powerbi": "3.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)-Facts[Quantity]))+1",
+   "powerbi": "3.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)-Facts[Quantity]))+1",
+   "powerbi": "3.88888888888869",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5-Facts[Quantity]))&\"z\"",
+   "powerbi": "2.88888889551163z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]))+1",
+   "powerbi": "3.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]*7))+1",
+   "powerbi": "142.555555582047",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]/3))&\"z\"",
+   "powerbi": "0.320987939834595z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]*0.25))+1",
+   "powerbi": "1.18055558204651",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]/3))+1",
+   "powerbi": "1.32098793983459",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)-Facts[Quantity]))+1",
+   "powerbi": "3.88888883590698",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]))&\"z\"",
+   "powerbi": "2.88888907432556z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]/3))&\"z\"",
+   "powerbi": "0.320988178253174z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]/3))+1",
+   "powerbi": "1.32098817825317",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)-Facts[Quantity]))+1",
+   "powerbi": "3.8888885974884",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]))&\"z\"",
+   "powerbi": "2.88888888888889z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*0.25))+1",
+   "powerbi": "1.18055555555556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]*0.25))&\"z\"",
+   "powerbi": "3.81640625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "2992.0625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)-Facts[Sales]))+1",
+   "powerbi": "62.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+Facts[Sales]*0.25))&\"z\"",
+   "powerbi": "3.81640625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)-Facts[Sales]))+1",
+   "powerbi": "62.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]*0.25))&\"z\"",
+   "powerbi": "3.81640625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]*7))&\"z\"",
+   "powerbi": "2992.0625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]/3))&\"z\"",
+   "powerbi": "6.78472220897675z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "2992.0625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]))+1",
+   "powerbi": "62.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]/3))&\"z\"",
+   "powerbi": "6.78472232818604z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]))+1",
+   "powerbi": "62.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*0.25))&\"z\"",
+   "powerbi": "3.81640625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*0.25))+1",
+   "powerbi": "4.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "2992.0625z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]/3))&\"z\"",
+   "powerbi": "6.78472222222222z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]*7))+1",
+   "powerbi": "143.916666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]/3))&\"z\"",
+   "powerbi": "0.324074074074074z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(1899,12,31)-Facts[Quantity]))&\"z\"",
+   "powerbi": "2.91666666666667z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(1899,12,31)-Facts[Quantity]))+1",
+   "powerbi": "3.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]/3))&\"z\"",
+   "powerbi": "0.324074074072541z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(1900,3,1)-Facts[Quantity]))&\"z\"",
+   "powerbi": "2.91666666666652z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.182291686534882z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*0.25))+1",
+   "powerbi": "1.18229174613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]/3))+1",
+   "powerbi": "1.32407379150391",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2000,1,1)-Facts[Quantity]))&\"z\"",
+   "powerbi": "2.91666674613953z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]/3))&\"z\"",
+   "powerbi": "0.324073791503906z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]))&\"z\"",
+   "powerbi": "2.91666674613953z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]))&\"z\"",
+   "powerbi": "2.91666666666667z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]*7))+1",
+   "powerbi": "143.916666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,TIME(6,0,0)-Facts[Quantity]))&\"z\"",
+   "powerbi": "2.91666666666667z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1899,12,31)+[Value]))+1",
+   "powerbi": "1.66666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1899,12,31)+[Value]*0.25))+1",
+   "powerbi": "1.04166666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1899,12,31)+[Value]*7))&\"z\"",
+   "powerbi": "32.6666666666667z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1899,12,31)-[Value]))&\"z\"",
+   "powerbi": "0.666666666666667z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1900,3,1)+[Value]*7))&\"z\"",
+   "powerbi": "32.666666666667z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1900,3,1)+[Value]/3))&\"z\"",
+   "powerbi": "7.40740740743604E-02z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1900,3,1)+[Value]/3))+1",
+   "powerbi": "1.07407407407436",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]*7))&\"z\"",
+   "powerbi": "32.6666666865349z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(1950,1,1)+0.5-[Value]))&\"z\"",
+   "powerbi": "0.666666686534882z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2000,1,1)+[Value]*0.25))&\"z\"",
+   "powerbi": "4.16667461395264E-02z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2000,1,1)+[Value]*7))+1",
+   "powerbi": "33.6666667461395",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2000,1,1)+[Value]/3))+1",
+   "powerbi": "1.07407402992249",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2000,1,1)-[Value]))&\"z\"",
+   "powerbi": "0.666666746139526z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2020,1,1)+[Value]))&\"z\"",
+   "powerbi": "0.666666746139526z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2020,1,1)+[Value]*0.25))+1",
+   "powerbi": "1.04166674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2020,1,1)+[Value]*7))&\"z\"",
+   "powerbi": "32.6666667461395z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2020,1,1)+[Value]/3))&\"z\"",
+   "powerbi": "7.40740299224854E-02z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2020,1,1)-[Value]))&\"z\"",
+   "powerbi": "0.666666746139526z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2020,1,1)-[Value]))+1",
+   "powerbi": "1.66666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2024,6,15)+[Value]))&\"z\"",
+   "powerbi": "0.666666746139526z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2024,6,15)+[Value]))+1",
+   "powerbi": "1.66666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2024,6,15)+[Value]*7))&\"z\"",
+   "powerbi": "32.6666667461395z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({1,2,3},DATE(2024,6,15)-[Value]))&\"z\"",
+   "powerbi": "0.666666746139526z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(1899,12,31)+[Value]*7))&\"z\"",
+   "powerbi": "196z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(1899,12,31)+[Value]/3))&\"z\"",
+   "powerbi": "0.444444444444445z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]*7))&\"z\"",
+   "powerbi": "196z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(1950,1,1)+0.5-[Value]))+1",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(2000,1,1)+[Value]))+1",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(2000,1,1)+[Value]*0.25))&\"z\"",
+   "powerbi": "0.25z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(2000,1,1)+[Value]*7))+1",
+   "powerbi": "197",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(2000,1,1)-[Value]))+1",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(2020,1,1)+[Value]))+1",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(2020,1,1)+[Value]*7))&\"z\"",
+   "powerbi": "196z",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},DATE(2020,1,1)+[Value]*7))+1",
+   "powerbi": "197",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P({5,9},TIME(6,0,0)+[Value]*7))+1",
+   "powerbi": "197",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)+Facts[Quantity]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.320987654320987",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]*0.25),Facts[Region]=\"West\")",
+   "powerbi": "0.180555522441864",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5-Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.88888889551163",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)-Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.88888883590698",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]*7),Facts[Region]=\"West\")",
+   "powerbi": "141.555555582047",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.320987939834595",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)-Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.88888883590698",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]*7),Facts[Region]=\"West\")",
+   "powerbi": "141.555555820465",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.320988178253174",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)-Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.8888885974884",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.320987654320987",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)-Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]*0.25),Facts[Region]=\"West\")",
+   "powerbi": "0.140625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*7),Facts[Region]=\"West\")",
+   "powerbi": "110.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(2020,1,1)-Facts[Quantity]),Facts[Region]=\"West\")",
+   "powerbi": "2.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]*7),Facts[Region]=\"West\")",
+   "powerbi": "110.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]*0.25),Facts[Region]=\"West\")",
+   "powerbi": "0.140625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({1,2,3},DATE(1899,12,31)+[Value]*7),Facts[Region]=\"West\")",
+   "powerbi": "32.6666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({1,2,3},DATE(1900,3,1)-[Value]),Facts[Region]=\"West\")",
+   "powerbi": "0.666666666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({1,2,3},DATE(2020,1,1)+[Value]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.0740740299224854",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({1,2,3},DATE(2020,1,1)-[Value]),Facts[Region]=\"West\")",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({1,2,3},DATE(2024,6,15)+[Value]),Facts[Region]=\"West\")",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(1899,12,31)-[Value]),Facts[Region]=\"West\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(1900,3,1)+[Value]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.444444444445253",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(2000,1,1)+[Value]),Facts[Region]=\"West\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(2000,1,1)+[Value]*0.25),Facts[Region]=\"West\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(2020,1,1)+[Value]),Facts[Region]=\"West\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(2020,1,1)+[Value]/3),Facts[Region]=\"West\")",
+   "powerbi": "0.44444465637207",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(2024,6,15)+[Value]*0.25),Facts[Region]=\"West\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},DATE(2024,6,15)+[Value]*7),Facts[Region]=\"West\")",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},TIME(6,0,0)+[Value]*0.25),Facts[Region]=\"West\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P({5,9},TIME(6,0,0)-[Value]),Facts[Region]=\"West\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]*7),\"a\")",
+   "powerbi": "141.555555555555",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5-Facts[Quantity]),\"a\")",
+   "powerbi": "2.88888889551163",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*7),\"a\")",
+   "powerbi": "141.555555555555",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]*0.25),\"a\")",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]*7),\"a\")",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]/3),\"a\")",
+   "powerbi": "6.78472222222222",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+Facts[Sales]*7),\"a\")",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]*0.25),\"a\")",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]/3),\"a\")",
+   "powerbi": "6.78472220897675",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)-Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]*7),\"a\")",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]/3),\"a\")",
+   "powerbi": "6.78472222222222",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)-Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]*0.25),\"a\")",
+   "powerbi": "0.182291666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]*7),\"a\")",
+   "powerbi": "142.916666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(1900,3,1)-Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666666666652",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]*7),\"a\")",
+   "powerbi": "142.916666686535",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]/3),\"a\")",
+   "powerbi": "0.32407408952713",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*0.25),\"a\")",
+   "powerbi": "0.182291746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]*7),\"a\")",
+   "powerbi": "142.916666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({1,2,3},DATE(1899,12,31)+[Value]/3),\"a\")",
+   "powerbi": "0.0740740740740735",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({1,2,3},DATE(1900,3,1)+[Value]/3),\"a\")",
+   "powerbi": "0.0740740740743604",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({1,2,3},DATE(2000,1,1)+[Value]/3),\"a\")",
+   "powerbi": "0.0740740299224854",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({1,2,3},DATE(2024,6,15)+[Value]*0.25),\"a\")",
+   "powerbi": "0.0416667461395264",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({1,2,3},TIME(6,0,0)-[Value]),\"a\")",
+   "powerbi": "0.666666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(1899,12,31)+[Value]),\"a\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]*7),\"a\")",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]/3),\"a\")",
+   "powerbi": "0.444444358348846",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(1950,1,1)+0.5-[Value]),\"a\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(2000,1,1)+[Value]*7),\"a\")",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(2020,1,1)+[Value]),\"a\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(2020,1,1)+[Value]*0.25),\"a\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(2024,6,15)+[Value]*0.25),\"a\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},DATE(2024,6,15)-[Value]),\"a\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P({5,9},TIME(6,0,0)+[Value]*7),\"a\")",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)+Facts[Quantity]*0.25),0)",
+   "powerbi": "0.180555555555555",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)-Facts[Quantity]),0)",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]),0)",
+   "powerbi": "2.88888888888914",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]),0)",
+   "powerbi": "2.88888883590698",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]*0.25),0)",
+   "powerbi": "0.180555582046509",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]),0)",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]*0.25),0)",
+   "powerbi": "0.180555820465088",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*0.25),0)",
+   "powerbi": "0.180555555555556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)-Facts[Sales]),0)",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)-Facts[Sales]),0)",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*0.25),0)",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(1899,12,31)-Facts[Quantity]),0)",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]/3),0)",
+   "powerbi": "0.324074074072541",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(1900,3,1)-Facts[Quantity]),0)",
+   "powerbi": "2.91666666666652",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]/3),0)",
+   "powerbi": "0.32407408952713",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]),0)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*0.25),0)",
+   "powerbi": "0.182291746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*7),0)",
+   "powerbi": "142.91666674614",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]),0)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]/3),0)",
+   "powerbi": "0.324074268341064",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(1899,12,31)+[Value]),0)",
+   "powerbi": "0.666666666666666",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(1900,3,1)+[Value]),0)",
+   "powerbi": "0.666666666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(1900,3,1)-[Value]),0)",
+   "powerbi": "0.666666666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(2000,1,1)+[Value]),0)",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(2020,1,1)+[Value]*0.25),0)",
+   "powerbi": "0.0416667461395264",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(2020,1,1)+[Value]*7),0)",
+   "powerbi": "32.6666667461395",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(2020,1,1)+[Value]/3),0)",
+   "powerbi": "0.0740740299224854",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({1,2,3},DATE(2024,6,15)+[Value]*0.25),0)",
+   "powerbi": "0.0416667461395264",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({5,9},DATE(1899,12,31)+[Value]*0.25),0)",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({5,9},DATE(1899,12,31)+[Value]*7),0)",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({5,9},DATE(1900,3,1)+[Value]),0)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]*7),0)",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({5,9},DATE(2020,1,1)+[Value]),0)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({5,9},DATE(2020,1,1)+[Value]*0.25),0)",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(1=1,VARX.P({5,9},DATE(2024,6,15)-[Value]),0)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]*0.25),\"a\")",
+   "powerbi": "0.180555555556111",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]*7),\"a\")",
+   "powerbi": "141.555555522442",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]/3),\"a\")",
+   "powerbi": "0.320987582206726",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)-Facts[Quantity]),\"a\")",
+   "powerbi": "2.88888883590698",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]*0.25),\"a\")",
+   "powerbi": "0.180555820465088",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]/3),\"a\")",
+   "powerbi": "0.320988178253174",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*7),\"a\")",
+   "powerbi": "141.555555555555",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]/3),\"a\")",
+   "powerbi": "0.320987654320987",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]/3),\"a\")",
+   "powerbi": "6.78472222222222",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5-Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)+Facts[Sales]/3),\"a\")",
+   "powerbi": "6.78472232818604",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)-Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]*0.25),\"a\")",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]/3),\"a\")",
+   "powerbi": "6.78472232818604",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)-Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*0.25),\"a\")",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)-Facts[Sales]),\"a\")",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]*7),\"a\")",
+   "powerbi": "142.916666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]/3),\"a\")",
+   "powerbi": "0.324074074074074",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]*0.25),\"a\")",
+   "powerbi": "0.182291686534882",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*7),\"a\")",
+   "powerbi": "142.91666674614",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]/3),\"a\")",
+   "powerbi": "0.324073791503906",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]*0.25),\"a\")",
+   "powerbi": "0.182291746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2024,6,15)-Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1899,12,31)+[Value]*0.25),\"a\")",
+   "powerbi": "0.0416666666666665",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1899,12,31)+[Value]*7),\"a\")",
+   "powerbi": "32.6666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1899,12,31)+[Value]/3),\"a\")",
+   "powerbi": "0.0740740740740735",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1900,3,1)+[Value]),\"a\")",
+   "powerbi": "0.666666666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1900,3,1)+[Value]*0.25),\"a\")",
+   "powerbi": "0.0416666666665151",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]),\"a\")",
+   "powerbi": "0.666666686534882",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]*0.25),\"a\")",
+   "powerbi": "0.0416666865348816",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]*7),\"a\")",
+   "powerbi": "32.6666666865349",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]/3),\"a\")",
+   "powerbi": "0.0740740299224854",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5-[Value]),\"a\")",
+   "powerbi": "0.666666686534882",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(2020,1,1)+[Value]*7),\"a\")",
+   "powerbi": "32.6666667461395",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(2020,1,1)+[Value]/3),\"a\")",
+   "powerbi": "0.0740740299224854",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(2024,6,15)+[Value]),\"a\")",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},TIME(6,0,0)+[Value]*0.25),\"a\")",
+   "powerbi": "0.0416666666666666",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1899,12,31)-[Value]),\"a\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1900,3,1)+[Value]*7),\"a\")",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1900,3,1)+[Value]/3),\"a\")",
+   "powerbi": "0.444444444445253",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]),\"a\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(2000,1,1)+[Value]*0.25),\"a\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(2000,1,1)+[Value]*7),\"a\")",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},TIME(6,0,0)+[Value]*0.25),\"a\")",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},TIME(6,0,0)+[Value]/3),\"a\")",
+   "powerbi": "0.444444444444444",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P({5,9},TIME(6,0,0)-[Value]),\"a\")",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)+Facts[Quantity]*7))",
+   "powerbi": "141.555555555556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)-Facts[Quantity]))",
+   "powerbi": "2.88888888888869",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]*7))",
+   "powerbi": "141.555555522442",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]/3))",
+   "powerbi": "0.320987582206726",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]*7))",
+   "powerbi": "141.555555582047",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]/3))",
+   "powerbi": "0.320987939834595",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)-Facts[Sales]))",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]*0.25))",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)+Facts[Sales]))",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)+Facts[Sales]*0.25))",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]))",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*0.25))",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]*0.25))",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)-Facts[Sales]))",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(1899,12,31)-Facts[Quantity]))",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]*0.25))",
+   "powerbi": "0.182291666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]/3))",
+   "powerbi": "0.324074074072541",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]*7))",
+   "powerbi": "142.916666686535",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(1950,1,1)+0.5-Facts[Quantity]))",
+   "powerbi": "2.91666668653488",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]*0.25))",
+   "powerbi": "0.182291746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]/3))",
+   "powerbi": "0.324074268341064",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2024,6,15)-Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]))",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(1899,12,31)+[Value]))",
+   "powerbi": "0.666666666666666",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(1899,12,31)+[Value]*7))",
+   "powerbi": "32.6666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(1900,3,1)+[Value]/3))",
+   "powerbi": "0.0740740740743604",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]*0.25))",
+   "powerbi": "0.0416666865348816",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(2020,1,1)+[Value]*0.25))",
+   "powerbi": "0.0416667461395264",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(2024,6,15)+[Value]*0.25))",
+   "powerbi": "0.0416667461395264",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(2024,6,15)+[Value]*7))",
+   "powerbi": "32.6666667461395",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({1,2,3},DATE(2024,6,15)-[Value]))",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(1899,12,31)+[Value]*0.25))",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(1900,3,1)+[Value]*0.25))",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]*0.25))",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(2000,1,1)+[Value]*7))",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(2000,1,1)-[Value]))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(2020,1,1)+[Value]*0.25))",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(2020,1,1)+[Value]*7))",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},DATE(2024,6,15)+[Value]*0.25))",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P({5,9},TIME(6,0,0)+[Value]*0.25))",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]*7),\"a\"))",
+   "powerbi": "17952.375",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)-Facts[Sales]),\"a\"))",
+   "powerbi": "366.375",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)-Facts[Sales]),\"a\"))",
+   "powerbi": "366.375",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]*0.25),\"a\"))",
+   "powerbi": "22.8984375",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]*7),\"a\"))",
+   "powerbi": "17952.375",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]/3),\"a\"))",
+   "powerbi": "40.7083339691162",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]/3),\"a\"))",
+   "powerbi": "40.7083325386047",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)-Facts[Sales]),\"a\"))",
+   "powerbi": "366.375",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]/3),\"a\"))",
+   "powerbi": "40.7083333333333",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)-Facts[Sales]),\"a\"))",
+   "powerbi": "366.375",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1899,12,31)-Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1900,3,1)-Facts[Quantity]),\"a\"))",
+   "powerbi": "17.4999999999991",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]*0.25),\"a\"))",
+   "powerbi": "1.09375011920929",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]/3),\"a\"))",
+   "powerbi": "1.94444453716278",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*0.25),\"a\"))",
+   "powerbi": "1.09375047683716",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2000,1,1)-Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)-Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]*7),\"a\"))",
+   "powerbi": "857.500000476837",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]/3),\"a\"))",
+   "powerbi": "1.94444444444445",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1899,12,31)-[Value]),\"a\"))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1900,3,1)+[Value]*0.25),\"a\"))",
+   "powerbi": "0.249999999999091",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1900,3,1)-[Value]),\"a\"))",
+   "powerbi": "3.99999999999909",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]),\"a\"))",
+   "powerbi": "4.00000011920929",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]*0.25),\"a\"))",
+   "powerbi": "0.25000011920929",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]*7),\"a\"))",
+   "powerbi": "196.000000119209",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(1950,1,1)+0.5-[Value]),\"a\"))",
+   "powerbi": "4.00000011920929",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(2000,1,1)+[Value]*7),\"a\"))",
+   "powerbi": "196.000000476837",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(2000,1,1)-[Value]),\"a\"))",
+   "powerbi": "4.00000047683716",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({1,2,3},DATE(2024,6,15)+[Value]*7),\"a\"))",
+   "powerbi": "196.000000476837",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1899,12,31)+[Value]*0.25),\"a\"))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1899,12,31)+[Value]*7),\"a\"))",
+   "powerbi": "1176",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1900,3,1)+[Value]*7),\"a\"))",
+   "powerbi": "1176",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]*0.25),\"a\"))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(2000,1,1)+[Value]),\"a\"))",
+   "powerbi": "24",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(2000,1,1)+[Value]/3),\"a\"))",
+   "powerbi": "2.66666793823242",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(2000,1,1)-[Value]),\"a\"))",
+   "powerbi": "24",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(2020,1,1)-[Value]),\"a\"))",
+   "powerbi": "24",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P({5,9},DATE(2024,6,15)-[Value]),\"a\"))",
+   "powerbi": "24",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)+Facts[Quantity]),2)",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)-Facts[Quantity]),2)",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]*0.25),2)",
+   "powerbi": "0.180555555556111",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]/3),2)",
+   "powerbi": "0.320987654321016",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]*7),2)",
+   "powerbi": "141.555555522442",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5-Facts[Quantity]),2)",
+   "powerbi": "2.88888889551163",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]),2)",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]*0.25),2)",
+   "powerbi": "0.180555820465088",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]*7),2)",
+   "powerbi": "141.555555820465",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*7),2)",
+   "powerbi": "141.555555555555",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)-Facts[Quantity]),2)",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]*7),2)",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]/3),2)",
+   "powerbi": "6.78472222222222",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]),2)",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]*7),2)",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]/3),2)",
+   "powerbi": "6.78472220897675",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)+Facts[Sales]),2)",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2000,1,1)+Facts[Sales]*0.25),2)",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]),2)",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]*0.25),2)",
+   "powerbi": "3.81640625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)-Facts[Sales]),2)",
+   "powerbi": "61.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]*7),2)",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]),2)",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]/3),2)",
+   "powerbi": "0.324074074074074",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]*0.25),2)",
+   "powerbi": "0.182291746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity]/3),2)",
+   "powerbi": "0.324073791503906",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),2)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]*0.25),2)",
+   "powerbi": "0.182291746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},DATE(1899,12,31)-[Value]),2)",
+   "powerbi": "0.666666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},DATE(1900,3,1)+[Value]),2)",
+   "powerbi": "0.666666666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},DATE(1900,3,1)+[Value]*7),2)",
+   "powerbi": "32.666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]/3),2)",
+   "powerbi": "0.0740740299224854",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},DATE(2020,1,1)+[Value]*0.25),2)",
+   "powerbi": "0.0416667461395264",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},DATE(2020,1,1)+[Value]/3),2)",
+   "powerbi": "0.0740740299224854",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},DATE(2020,1,1)-[Value]),2)",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({1,2,3},TIME(6,0,0)-[Value]),2)",
+   "powerbi": "0.666666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({5,9},DATE(1899,12,31)+[Value]*7),2)",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({5,9},DATE(2000,1,1)+[Value]/3),2)",
+   "powerbi": "0.44444465637207",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({5,9},DATE(2020,1,1)+[Value]*7),2)",
+   "powerbi": "196",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,1,VARX.P({5,9},DATE(2020,1,1)+[Value]/3),2)",
+   "powerbi": "0.44444465637207",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)+Facts[Quantity]*0.25)",
+   "powerbi": "0.180555555555555",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1899,12,31)-Facts[Quantity])",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.180555555556111",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]/3)",
+   "powerbi": "0.320987654321016",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)-Facts[Quantity])",
+   "powerbi": "2.88888888888869",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]*7)",
+   "powerbi": "141.555555522442",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5+Facts[Quantity]/3)",
+   "powerbi": "0.320987582206726",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2000,1,1)+Facts[Quantity]/3)",
+   "powerbi": "0.320987939834595",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]*0.25)",
+   "powerbi": "0.180555820465088",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity])",
+   "powerbi": "2.88888888888889",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1899,12,31)+Facts[Sales]/3)",
+   "powerbi": "6.78472222222222",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+Facts[Sales]*7)",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5+Facts[Sales]/3)",
+   "powerbi": "6.78472220897675",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]/3)",
+   "powerbi": "6.78472232818604",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*7)",
+   "powerbi": "2992.0625",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]*7)",
+   "powerbi": "142.916666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(1899,12,31)-Facts[Quantity])",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity])",
+   "powerbi": "2.91666666666652",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity])",
+   "powerbi": "2.91666668653488",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]*0.25)",
+   "powerbi": "0.182291686534882",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(1950,1,1)+0.5+Facts[Quantity]/3)",
+   "powerbi": "0.32407408952713",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(2000,1,1)+Facts[Quantity])",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(2000,1,1)-Facts[Quantity])",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]*0.25)",
+   "powerbi": "0.182291746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(1900,3,1)+[Value])",
+   "powerbi": "0.666666666666515",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(1900,3,1)+[Value]*7)",
+   "powerbi": "32.666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(1950,1,1)+0.5+[Value]*7)",
+   "powerbi": "32.6666666865349",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(2000,1,1)+[Value]*7)",
+   "powerbi": "32.6666667461395",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(2000,1,1)-[Value])",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(2020,1,1)+[Value])",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(2020,1,1)+[Value]*0.25)",
+   "powerbi": "0.0416667461395264",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},DATE(2024,6,15)+[Value])",
+   "powerbi": "0.666666746139526",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2,3},TIME(6,0,0)+[Value]*7)",
+   "powerbi": "32.6666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(1900,3,1)+[Value]*0.25)",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(1900,3,1)+[Value]/3)",
+   "powerbi": "0.444444444445253",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(1900,3,1)-[Value])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]*0.25)",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(1950,1,1)+0.5+[Value]/3)",
+   "powerbi": "0.444444358348846",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(1950,1,1)+0.5-[Value])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(2000,1,1)+[Value])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(2000,1,1)+[Value]/3)",
+   "powerbi": "0.44444465637207",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({5,9},DATE(2020,1,1)+[Value]*0.25)",
+   "powerbi": "0.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  }
+ ]
+}
