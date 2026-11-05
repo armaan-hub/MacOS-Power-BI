@@ -1,0 +1,634 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(FALSE(),Facts[Region],CURRENCY(3)))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(1=1,CURRENCY(3),Facts[Region]))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(1=1,CURRENCY(3),Facts[Region]))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(INT(1.5),CURRENCY(3)))",
+   "powerbi": "26.9999999999999",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(1=1,Facts[Sales],CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(TOPN(2,Facts,Facts[Quantity]),IF(TRUE()&&FALSE(),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IFERROR(Facts[Quantity]&\"\",CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(TOPN(2,Facts,Facts[Quantity]),IF(NOT(TRUE()),CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ALL(Facts),COALESCE(-Facts[Quantity],CURRENCY(1.23456)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(MAX(Facts[Quantity])>3,Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,VAR x=CURRENCY(3) RETURN IF(Facts[Quantity],x,Facts[Quantity]>2))",
+   "powerbi": "243",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ALL(Facts),IF.EAGER(Facts[Region]=\"East\",CURRENCY(3),1+1))",
+   "powerbi": "216",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(UPPER(\"true\"),CURRENCY(3),Facts[Quantity]>2))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(DISTINCT(Facts),IF(SELECTEDVALUE(Facts[Region])=\"East\",CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(VALUES(Facts[Region]),IF.EAGER(0,CURRENCY(3),Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(SELECTEDVALUE(Facts[Region])=\"East\",1=1,CURRENCY(3)))",
+   "powerbi": "26.9999999999999",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "8",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ROW(\"Value\",1),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ROW(\"Value\",1),COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "11.390625",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({\"a\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(COUNTX({1,2},COALESCE(DIVIDE(1,0),LASTNONBLANK(Facts[Region],1))),7)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(COUNTX({1,2},COALESCE(TIME(6,0,0),LASTNONBLANK(Facts[Region],1),VARX.S(FILTER(Facts,FALSE()),1))),7)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(COUNTX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),DATE(2020,1,1),LOG(-1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(SUMX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),DATE(2020,1,1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),0||\"\",VALUE(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "MINX({1,2},COALESCE(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"),CONVERT(0||\"\",DATETIME),LASTNONBLANK(Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX({1,2},COALESCE(BLANK(),LASTNONBLANK(Facts[Region],1),CONVERT(\"1\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX({1,2},COALESCE(CONVERT(\"3\",DOUBLE),ERROR(\"e\")))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),LASTNONBLANK(Facts[Region],1),FIRSTNONBLANKVALUE(Facts[Quantity],BLANK())))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),SUMX(Facts,Facts[Quantity])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(AVERAGEX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),0||\"\")),7)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(COUNTX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),MAX(Facts[Region]))),7)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(MINX(FILTER(Facts,Facts[Quantity]>2),COALESCE(DATE(2020,1,1),ERROR(\"e\"),\"a\")),7)",
+   "powerbi": "43831",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(SUMX({1,2},COALESCE(MAX(Facts[Region]),ERROR(\"e\"),DATE(9001,1,1))),7)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(COUNTX({1,2},COALESCE(DATE(2021,2,3)+0.5,ERROR(\"e\"),CONVERT(\"3\",DOUBLE))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),MEDIANX(Facts,Facts[Quantity]),SUMX(Facts,Facts[Quantity])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},COALESCE(VARX.S(FILTER(Facts,FALSE()),1),CONVERT(\"1\",INTEGER),LASTNONBLANK(Facts[Region],1)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "MINX({1,2},COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),LASTNONBLANK(Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "MINX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),MINX(Facts,Facts[Sales])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COALESCE(2,ERROR(\"e\"),Facts[Quantity]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1,2},COALESCE(CONVERT(\"1\",INTEGER),ERROR(\"e\"),VARX.S(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1,2},COALESCE(CONVERT(0||\"\",DATETIME),LASTNONBLANK(Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(0,1,CURRENCY(-1.1)))",
+   "powerbi": "1.771561",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(0,BLANK(),CURRENCY(1.5)))",
+   "powerbi": "11.390625",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(1,BLANK(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(1,BLANK(),CURRENCY(2.75)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales])))",
+   "powerbi": "50",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales]),TRUE()))",
+   "powerbi": "50",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "8.30439569671503E+18",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "11.390625",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1.771561",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(2.75),1))",
+   "powerbi": "432.510009765625",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),TRUE()))",
+   "powerbi": "-2",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),2.5))",
+   "powerbi": "1.771561",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),1))",
+   "powerbi": "64",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),1))",
+   "powerbi": "2.32329891992486",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(-2)))",
+   "powerbi": "15.9999999999999",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(Facts[Sales])))",
+   "powerbi": "524.999999999997",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(2.75),BLANK()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "525",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(1,DATE(2020,1,1)+Facts[Quantity],CURRENCY(7)))",
+   "powerbi": "3.69202155526736E+18",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(1,TRUE(),CURRENCY(1.5)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),Facts[Quantity],CURRENCY(0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "-350664",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,Facts[Sales],CURRENCY(1.23456)))",
+   "powerbi": "61.73",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,DATE(2020,1,1)+Facts[Quantity],CURRENCY(2.75)))",
+   "powerbi": "231630490201109",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,DATE(2020,1,1),CURRENCY(-1.1)))",
+   "powerbi": "-92626834547710.1",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),\"a\",CURRENCY(0)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),Facts[Quantity],CURRENCY(0)))",
+   "powerbi": "120",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(FALSE(),CURRENCY(1.23456),2.5))",
+   "powerbi": "39.0625",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))",
+   "powerbi": "120",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(7),TRUE()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(2.75)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(FALSE(),CURRENCY(7),BLANK()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Sales]>3),SWITCH(Facts[Quantity],2,CURRENCY(0.33333),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "14609.8722",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(0,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "7.09311325925216E+27",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(0,CURRENCY(2.75),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(1,CURRENCY(-2)))",
+   "powerbi": "63.9999999999994",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(Facts[Quantity]>=3,CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.33099999999999",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(1.23456),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "5.62661783146166E+18",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "50",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),1))",
+   "powerbi": "49.9999999999997",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(TRUE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(0,CURRENCY(1.5),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "7.09311325925216E+27",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(FALSE(),CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(-2),TRUE()))",
+   "powerbi": "-2",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(7),2.5))",
+   "powerbi": "683.59375",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({0.5,4},IF(0,DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.25",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(-1.1),\"a\"))",
+   "powerbi": "1.21",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "49",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),1))",
+   "powerbi": "-1.331",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.331",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1,2,3},IF(FALSE(),DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "3.375",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1,2,3},IF.EAGER(0,CURRENCY(0.33333),TRUE()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1,2,3},IF.EAGER(FALSE(),CURRENCY(-1.1),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1.5,2.5},IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.25",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({TRUE()},IF(0,\"a\",CURRENCY(1.23456)))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({TRUE()},SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),2.5))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  }
+ ]
+}
