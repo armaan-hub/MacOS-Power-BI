@@ -8457,6 +8457,19 @@ def evaluate_measures(
         raise MeasureError(str(error)) from error
 
 
+def _nan_walk_measured(table_node: Any, body: Any) -> bool:
+    """Task 63: a MAXX / MINX body that is an IF / IF.EAGER over the stored table Facts-style `table` or `ALL(table)` is walked in the dictionary
+    order of the columns it reads even when a double sits beside ONE other column (live Power BI on the Facts sample: Facts 25, ALL(Facts) 21 held-out
+    rows, all exact).  Other bodies (SWITCH, three columns), FILTER, INTERSECT / EXCEPT were not exact on every measured row and stay refused."""
+    plain = isinstance(table_node, tuple) and table_node and table_node[0] == "table"
+    all_of_table = (
+        isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] == "ALL"
+        and len(table_node[2]) == 1 and isinstance(table_node[2][0], tuple) and table_node[2][0][0] == "table"
+    )
+    conditional = isinstance(body, tuple) and len(body) == 3 and body[0] == "call" and body[1] in {"IF", "IF.EAGER"}
+    return bool((plain or all_of_table) and conditional)
+
+
 def _evaluate_measures_once(
     measures: list[dict[str, str]],
     rows: list[dict[str, Any]],
@@ -9674,7 +9687,7 @@ def _evaluate_measures_once(
         return profile_cache[key]
 
     def dictionary_ordered_rows(
-        table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]]
+        table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
@@ -9763,7 +9776,7 @@ def _evaluate_measures_once(
         source = next(iter(combination.values()))[0]
         try:
             profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
-            in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup)
+            in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
             major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
             def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
@@ -19634,7 +19647,7 @@ def _evaluate_measures_once(
                     # live Power BI (Task 12 review): NaN or the other value, depending on the order the engine walks the rows (which columns the body reads)
                     # Task 51 Part C: the running MAXX / MINX keeps the value it visits first, because NaN > x and x > NaN are both false: NaN
                     # when the walk visits a NaN first, otherwise the extreme of the numbers.  The walk is the dictionary order of the body's columns.
-                    walked = dictionary_ordered_rows(arguments[0], context, iteration_rows, [arguments[1]]) if _stored_scan(arguments[0], variable_nodes.get) is True else iteration_rows  # a derived table's walk is not measured
+                    walked = dictionary_ordered_rows(arguments[0], context, iteration_rows, [arguments[1]], beside_doubles=_nan_walk_measured(arguments[0], arguments[1])) if _stored_scan(arguments[0], variable_nodes.get) is True else iteration_rows  # a derived table's walk is not measured
                     if walked is iteration_rows or len(value_positions) != len(values):
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
                     slot_of_position = {position: index for index, position in enumerate(value_positions)}

@@ -1,0 +1,1312 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),Facts[Sales]/Facts[Quantity],\"5\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,Facts[Region],Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "-1.5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF.EAGER(FALSE(),\"a\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],TRUE()))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"a\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,\"5\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),Facts[Sales]/Facts[Quantity],\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),Facts[Region],Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),Facts[Quantity]/Facts[Sales],\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Sales]/Facts[Quantity],\"5\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],TRUE()))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),Facts[Region],Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),\"5\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(UNION(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(UNION(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(UNION(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(UNION(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(INTERSECT(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(UNION(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(INTERSECT(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ALLEXCEPT(Facts,Facts[Region]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ALLEXCEPT(Facts,Facts[Region]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(UNION(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(UNION(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(UNION(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ALL(Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(UNION(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),VAR x=1+1 RETURN IF(BLANK(),x,Facts[Sales]/0))",
+   "powerbi": "-Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(DISTINCT(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(DISTINCT(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(UNION(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ALL(Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])*(MAXX(Facts,1/0))),[q])",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(2.5&&\"\")),[q])",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(DIVIDE(1,0))),[q])",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(0||\"\")),[q])",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(0)/(IF(Facts[Quantity]>2,BLANK(),1)))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(Facts[Sales])/(BLANK()&&BLANK()))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]*2))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DOUBLE)),[q])",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]*2))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/([c]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/([c]))",
+   "powerbi": "1",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(SUM(Facts[Quantity])*CURRENCY(1))+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/([c]*2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DOUBLE)),[q])",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Sales]))+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DATETIME)),[q])",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]+1))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DATETIME)),[q])",
+   "powerbi": "12/31/9999 23:59:59",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/([c]*2))",
+   "powerbi": "0.5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Quantity]))+(Facts[Sales]/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/([c]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]*2)+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",COALESCE((Facts[Sales]&&\"\")/Facts[Quantity],5)),[q])",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c])+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]+1)+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Sales])))",
+   "powerbi": "1",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/([c]*2))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(SUM(Facts[Quantity])*CURRENCY(1)))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]-1)/0,0.75))&\"z\"",
+   "powerbi": "infz",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(PERCENTILEX.INC(Facts,IF(Facts[Quantity]>2,0/0,1/0),0.5))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(PERCENTILEX.INC({1,2},([Value]-1)/0,0.25))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(STDEVX.S({1,2,3},IF([Value]>1,0/0,[Value])))&\"z\"",
+   "powerbi": "0z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0)))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MEDIANX(Facts,(Facts[Quantity]-1)/0),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MEDIANX({1,2},([Value]-1)/0),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(PERCENTILEX.INC({1,2},([Value]-1)/0,0.75),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(STDEVX.S({-1,2,5,0},IF([Value]>1,0/0,[Value])),7)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(PERCENTILEX.INC({1,2},([Value]-1)/0,0.25))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(PERCENTILEX.INC({BLANK(),1},([Value]-1)/0,0.75))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({-1,2,5,0},IF([Value]>2,0/0,1/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({0,1},([Value]-1)/0)",
+   "powerbi": "-Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({0,1},[Value]/0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1,2,3},([Value]-1)/0)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1,2,3},IF([Value]>1,0/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1,2,3},IF([Value]>2,0/0,1/0))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({BLANK(),1},([Value]/0)*0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({BLANK(),1},[Value]*(1/0*0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]*(1/0*0),0.25)",
+   "powerbi": "BLANK",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC({1,2},([Value]-1)/0,0.5)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0),0.75)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,IF(Facts[Quantity]>2,0/0,1/0),0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>1,0/0,[Value]),0.75)",
+   "powerbi": "-0.75",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>2,0/0,1/0),0.25)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({1,2,3},([Value]-1)/0,0)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({1,2,3},IF([Value]>2,0/0,1/0),0.5)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({1,2},([Value]-1)/0,0.25)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({BLANK(),1},([Value]/0)*0,0)",
+   "powerbi": "BLANK",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({BLANK(),1},([Value]/0)*0,0.25)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({BLANK(),1},[Value]*(1/0*0),0)",
+   "powerbi": "BLANK",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({BLANK(),1},[Value]*(1/0*0),1)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({-1,2,5,0},IF([Value]>1,0/0,[Value]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1,2,3},IF([Value]>1,0/0,[Value]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(MEDIANX({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+   "powerbi": "infz",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(MEDIANX({0,3,7},IF([Value]=3,0/0,[Value])))&\"z\"",
+   "powerbi": "0z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(MEDIANX({1,2,3,4},IF([Value]=3,0/0,[Value])))&\"z\"",
+   "powerbi": "1.5z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(PERCENTILEX.INC(GENERATESERIES(1,5),([Value]-2)/([Value]-2),0.4))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.5))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(PERCENTILEX.INC({1,2,3,4},IF([Value]>1,1/0-1/0,[Value]),0.6))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(PERCENTILEX.INC({1,2},([Value]-1)/0,0.5))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(STDEVX.S({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+   "powerbi": "0z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.S({BLANK(),2,3},([Value]-2)/([Value]-2)))&\"z\"",
+   "powerbi": "0z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity])),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MEDIANX({-2,3},IF([Value]>1,1/0-1/0,[Value])),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]),0.4),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])),0.4),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]),0.8),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.6),7)",
+   "powerbi": "7",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(PERCENTILEX.INC({1,2,3,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.6),7)",
+   "powerbi": "2.8",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(STDEVX.S({-1,-2,4},IF([Value]>1,1/0-1/0,[Value])),7)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(MEDIANX(GENERATESERIES(1,5),([Value]-2)/([Value]-2)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(MEDIANX({BLANK(),2,3},[Value]*(1/0*0)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]),0.6))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(PERCENTILEX.EXC({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]),0.6))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(PERCENTILEX.EXC({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.4))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(PERCENTILEX.INC({0,3,7},IF([Value]=3,0/0,[Value]),0.2))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(STDEVX.S({-2,3},IF([Value]>1,1/0-1/0,[Value])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(STDEVX.S({1,2,3,4},IF([Value]>1,1/0-1/0,[Value])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(VARX.S(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(VARX.S({BLANK(),2,3},IF(ISBLANK([Value]),0/0,[Value])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(GENERATESERIES(1,5),IF([Value]=3,0/0,[Value]))",
+   "powerbi": "2",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "-2",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({-2,3},IF([Value]=3,0/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({-2,3},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({BLANK(),2,3},IF([Value]=3,0/0,[Value]))",
+   "powerbi": "BLANK",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({BLANK(),2,3},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales]),0.5)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC({BLANK(),2,3},([Value]*0)*(1/0),0.5)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>1,1/0-1/0,Facts[Quantity]),0.6)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(GENERATESERIES(1,5),([Value]-2)/([Value]-2),0.2)",
+   "powerbi": "1",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(GENERATESERIES(1,5),IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.8)",
+   "powerbi": "Infinity",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])),0.5)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({0,3,7},IF([Value]=3,0/0,[Value]),0.4)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.8)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC({1,2,3,4},([Value]-2)/([Value]-2),0.4)",
+   "powerbi": "NaN",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({0,3,7},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({1,2,3,4},([Value]-2)/([Value]-2))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({1,2,3,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  }
+ ]
+}
