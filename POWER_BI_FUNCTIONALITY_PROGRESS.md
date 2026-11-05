@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 139 / Task 49 swi-order-39, SUBSTITUTEWITHINDEX with tied order keys, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2671 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 479492 answers with 475600 match, 3892 refused, 0 DIFF, 0 CRASH, locked 475580. Next: Task 50 type-tests-errors-40 (type tests of a failing value), Sonnet reworking Haiku's rules
+**Latest status (2026-11-05, after Iteration 140 / Task 50 type-tests-errors-40, type tests and BLANK tests of a failing value, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2677 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 479897 answers with 476231 match, 3666 refused, 0 DIFF, 0 CRASH, locked 476211. Next: Task 51 row-order-41 (Sonnet reviewing), then follow-ups (5 type-test and 2 half-second answers also wrong on main)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
