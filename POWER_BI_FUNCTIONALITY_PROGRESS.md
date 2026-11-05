@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 142 / Task 53 main-wrong-answers, seven answers that were wrong on main now refuse, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2683 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 480052 answers with 476428 match, 3624 refused, 0 DIFF, 0 CRASH, locked 476412. Next: Task 54 xirr-iter-44 (XIRR iteration), coded by Haiku
+**Latest status (2026-11-05, after Iteration 143 / Task 54 xirr-iter-44, XIRR follows Power BI's bisection bracket in more cases, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2687 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 481209 answers with 477620 match, 3589 refused, 0 DIFF, 0 CRASH, locked 477600. Next: Task 55 big-rounding-45 (rounding of values from 1E15 to 2^53), coded by Haiku
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
