@@ -1,0 +1,3122 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(1,CURRENCY(-1.1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(1,CURRENCY(1.23456)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(1,CURRENCY(10)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(1,CURRENCY(3)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(1,CURRENCY(Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(2.5,CURRENCY(-1.1)))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(2.5,CURRENCY(0.5)))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(2.5,CURRENCY(3)))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(2.5,CURRENCY(Facts[Quantity])))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(BLANK(),CURRENCY(2.75)))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(BLANK(),CURRENCY(3)))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(-1.1),2.5))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(-2),BLANK()))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0.5),2.5))",
+   "powerbi": "0.015625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "0.015625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "0.015625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "0.015625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "3.54125854753734"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "3.54125854753734"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(10),1))",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(10),BLANK()))",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(2.75),2.5))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(3),1))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(3),2.5))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(3),BLANK()))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(3),Facts[Sales]))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(7),1))",
+   "powerbi": "117649"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(7),Facts[Quantity]))",
+   "powerbi": "117649"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "117649"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(DATE(2020,1,1),CURRENCY(1.23456)))",
+   "powerbi": "7.09068634572633E+27"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(DATE(2020,1,1),CURRENCY(7)))",
+   "powerbi": "7.09068634572633E+27"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(DATE(2020,1,1),CURRENCY(Facts[Quantity])))",
+   "powerbi": "7.09068634572633E+27"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(Facts[Quantity],CURRENCY(-1.1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(Facts[Quantity],CURRENCY(Facts[Quantity])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(Facts[Sales],CURRENCY(-1.1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(Facts[Sales],CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(Facts[Sales],CURRENCY(1.23456)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,1,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,1,CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,1,CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "3.54125854753734"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,1,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,1,CURRENCY(2.75),2.5))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,1,CURRENCY(2.75),BLANK()))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "7.09068634572633E+27"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(1.23456),2.5))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "7.09068634572633E+27"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "7.09068634572633E+27"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(7),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(7),2.5))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "7.09068634572633E+27"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,2,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,3,CURRENCY(-2),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,3,CURRENCY(1.23456),2.5))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,3,CURRENCY(2.75),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,3,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(1,3,CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.77950650915995E+23"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-3.23546638029081E+23"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(10),BLANK()))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "4.85319957043622E+23"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),BLANK()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "4.44876627289987E+23"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "4.85319957043622E+23"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],3,CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],3,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],3,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "1.13241323310178E+24"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.015625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(3),2.5))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(3),Facts[Sales]))",
+   "powerbi": "729"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(1,CURRENCY(0.5)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(1,CURRENCY(1.23456)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(1,CURRENCY(10)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(1,CURRENCY(2.75)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(1,CURRENCY(7)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(1,CURRENCY(Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(2.5,CURRENCY(0.5)))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(2.5,CURRENCY(3)))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(2.5,CURRENCY(Facts[Quantity])))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(BLANK(),CURRENCY(-2)))",
+   "powerbi": "-7.99999999999996"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(BLANK(),CURRENCY(0.5)))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(BLANK(),CURRENCY(3)))",
+   "powerbi": "26.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(-1.1),1))",
+   "powerbi": "-1.33099999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.33099999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.33099999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "-7.99999999999996"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(0.5),1))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(0.5),2.5))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.88182319773599"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(10),1))",
+   "powerbi": "999.999999999996"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(10),2.5))",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(2.75),1))",
+   "powerbi": "20.796875"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(2.75),2.5))",
+   "powerbi": "20.796875"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(2.75),BLANK()))",
+   "powerbi": "20.796875"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "20.796875"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(3),1))",
+   "powerbi": "26.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(3),BLANK()))",
+   "powerbi": "26.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "26.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(3),Facts[Sales]))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(7),1))",
+   "powerbi": "342.999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(7),BLANK()))",
+   "powerbi": "342.999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(Facts[Quantity]),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2020,1,1),CURRENCY(-2)))",
+   "powerbi": "84206213225191.3"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2020,1,1),CURRENCY(0.5)))",
+   "powerbi": "84206213225191.3"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2020,1,1),CURRENCY(7)))",
+   "powerbi": "84206213225191.3"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(Facts[Quantity],CURRENCY(-2)))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(Facts[Quantity],CURRENCY(2.75)))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(Facts[Quantity],CURRENCY(Facts[Quantity])))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,1,CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "-1.331"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,1,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "-8"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,1,CURRENCY(0.5),1))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,1,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "343"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,2,CURRENCY(0.5),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,2,CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,2,CURRENCY(1.23456),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,2,CURRENCY(2.75),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(-1.1),2.5))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "-39.375"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "-39.375"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(1.23456),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(10),2.5))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(2.75),2.5))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(1,3,CURRENCY(7),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],1,CURRENCY(-2),BLANK()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],1,CURRENCY(2.75),1))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],1,CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],1,CURRENCY(3),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],2,CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "2.49999999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],2,CURRENCY(1.23456),2.5))",
+   "powerbi": "7.71625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],2,CURRENCY(2.75),2.5))",
+   "powerbi": "17.1875"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],2,CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "5283180542.75001"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],2,CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],2,CURRENCY(3),Facts[Sales]))",
+   "powerbi": "-11.25"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],3,CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "-39.375"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],3,CURRENCY(2.75),2.5))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],3,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "-39.375"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],3,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "84206213225191.3"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],3,CURRENCY(7),Facts[Sales]))",
+   "powerbi": "-39.375"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],3,CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(Facts[Quantity],3,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),1))",
+   "powerbi": "-1.33099999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.33099999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(0.5),1))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "999.999999999996"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(3),BLANK()))",
+   "powerbi": "26.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(7),2.5))",
+   "powerbi": "343"
+  },
+  {
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),TRUE(),CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(1,CURRENCY(-2)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(1,CURRENCY(1.23456)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(1,CURRENCY(10)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(1,CURRENCY(3)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(1,CURRENCY(7)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(1,CURRENCY(Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(2.5,CURRENCY(-1.1)))",
+   "powerbi": "39.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(2.5,CURRENCY(-2)))",
+   "powerbi": "39.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(2.5,CURRENCY(10)))",
+   "powerbi": "39.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(2.5,CURRENCY(3)))",
+   "powerbi": "39.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(BLANK(),CURRENCY(1.23456)))",
+   "powerbi": "2.32329891992486"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(BLANK(),CURRENCY(2.75)))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(BLANK(),CURRENCY(3)))",
+   "powerbi": "80.9999999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(BLANK(),CURRENCY(7)))",
+   "powerbi": "2400.99999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(BLANK(),CURRENCY(Facts[Quantity])))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(-1.1),1))",
+   "powerbi": "1.46409999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "1.46409999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "1.46409999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "1.4641"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(-2),BLANK()))",
+   "powerbi": "15.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "16"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "15.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(0.5),2.5))",
+   "powerbi": "0.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "0.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),1))",
+   "powerbi": "2.32329891992486"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),2.5))",
+   "powerbi": "2.32329891992487"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "2.32329891992486"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "2.32329891992486"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "2.32329891992487"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "9999.99999999997"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(2.75),1))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(2.75),BLANK()))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(3),1))",
+   "powerbi": "80.9999999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(3),2.5))",
+   "powerbi": "81"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(3),BLANK()))",
+   "powerbi": "80.9999999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "80.9999999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(3),Facts[Sales]))",
+   "powerbi": "81"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(7),1))",
+   "powerbi": "2400.99999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "2401"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "2401"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(Facts[Quantity]),2.5))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2020,1,1),CURRENCY(1.23456)))",
+   "powerbi": "3.69084253187335E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2020,1,1),CURRENCY(2.75)))",
+   "powerbi": "3.69084253187335E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2020,1,1),CURRENCY(Facts[Quantity])))",
+   "powerbi": "3.69084253187335E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(Facts[Quantity],CURRENCY(-2)))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(Facts[Quantity],CURRENCY(1.23456)))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(Facts[Quantity],CURRENCY(2.75)))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(Facts[Sales],CURRENCY(0.5)))",
+   "powerbi": "262.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(Facts[Sales],CURRENCY(10)))",
+   "powerbi": "5250"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(Facts[Sales],CURRENCY(Facts[Quantity])))",
+   "powerbi": "2100"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,1,CURRENCY(0.5),2.5))",
+   "powerbi": "0.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,1,CURRENCY(10),1))",
+   "powerbi": "9999.99999999997"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,1,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "81"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,2,CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "3.69084253187335E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,2,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,2,CURRENCY(3),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,2,CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "3.69084253187335E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,2,CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "525"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,3,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "525"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,3,CURRENCY(1.23456),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,3,CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,3,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "525"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,3,CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,3,CURRENCY(7),2.5))",
+   "powerbi": "39.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(1,3,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "3.69084253187335E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(0.5),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(1.23456),2.5))",
+   "powerbi": "39.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "3.69084253187335E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],2,CURRENCY(0.5),1))",
+   "powerbi": "0.499999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],2,CURRENCY(10),1))",
+   "powerbi": "9.99999999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],3,CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],3,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-43.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],3,CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],3,CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],3,CURRENCY(10),Facts[Sales]))",
+   "powerbi": "262.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],3,CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],3,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "1.46409999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),1))",
+   "powerbi": "15.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),BLANK()))",
+   "powerbi": "15.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "16"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "2.32329891992487"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "57.19140625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(3),BLANK()))",
+   "powerbi": "80.9999999999998"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(1,CURRENCY(-2)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(1,CURRENCY(3)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(2.5,CURRENCY(-1.1)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(2.5,CURRENCY(0.5)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(BLANK(),CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(BLANK(),CURRENCY(-2)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(BLANK(),CURRENCY(Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(-2),BLANK()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(0.5),1))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(1.23456),1))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(10),1))",
+   "powerbi": "9.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(10),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(10),BLANK()))",
+   "powerbi": "9.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(10),Facts[Sales]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(2.75),1))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(3),Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(7),BLANK()))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(7),Facts[Quantity]))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(Facts[Quantity]),2.5))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(DATE(2020,1,1),CURRENCY(-1.1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(DATE(2020,1,1),CURRENCY(3)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(DATE(2020,1,1),CURRENCY(7)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(DATE(2020,1,1),CURRENCY(Facts[Quantity])))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(Facts[Quantity],CURRENCY(-1.1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(Facts[Sales],CURRENCY(10)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),COALESCE(Facts[Sales],CURRENCY(Facts[Quantity])))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(10),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(3),2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(3),Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(7),2.5))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(7),BLANK()))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(7),Facts[Quantity]))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(1,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(-2),2.5))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(1.23456),2.5))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(10),BLANK()))",
+   "powerbi": "9.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(10),Facts[Sales]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(7),BLANK()))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(Facts[Quantity]),2.5))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(Facts[Quantity]>2,CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(-2),2.5))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(10),1))",
+   "powerbi": "9.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(7),1))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF(TRUE(),CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(0.5),2.5))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(1.23456),1))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(10),1))",
+   "powerbi": "9.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "9.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(2.75),1))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(3),2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(3),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(7),Facts[Sales]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),IF.EAGER(TRUE(),CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,1,CURRENCY(2.75),1))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,1,CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,1,CURRENCY(3),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,1,CURRENCY(7),BLANK()))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,1,CURRENCY(7),Facts[Sales]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,2,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,2,CURRENCY(1.23456),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,2,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,2,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,3,CURRENCY(1.23456),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,3,CURRENCY(10),Facts[Sales]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,3,CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,3,CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(1,3,CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],1,CURRENCY(-1.1),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],1,CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],1,CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],1,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],1,CURRENCY(7),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],1,CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],2,CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],2,CURRENCY(0.5),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],2,CURRENCY(7),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],3,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],3,CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],3,CURRENCY(0.5),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],3,CURRENCY(10),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],3,CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(Facts[Quantity],3,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(-2),1))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(7),BLANK()))",
+   "powerbi": "6.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(7),Facts[Sales]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>4),SWITCH(TRUE(),TRUE(),CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(1,CURRENCY(-1.1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(1,CURRENCY(10)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(1,CURRENCY(2.75)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(1,CURRENCY(3)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(1,CURRENCY(Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(2.5,CURRENCY(1.23456)))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(2.5,CURRENCY(7)))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(BLANK(),CURRENCY(-1.1)))",
+   "powerbi": "1.77156099999998"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(BLANK(),CURRENCY(1.23456)))",
+   "powerbi": "3.54125854753732"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(BLANK(),CURRENCY(2.75)))",
+   "powerbi": "432.510009765623"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(BLANK(),CURRENCY(Facts[Quantity])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(-1.1),1))",
+   "powerbi": "1.77156099999998"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "1.77156099999998"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(-2),1))",
+   "powerbi": "63.9999999999994"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(-2),BLANK()))",
+   "powerbi": "63.9999999999994"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(0.5),1))",
+   "powerbi": "0.0156249999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(0.5),2.5))",
+   "powerbi": "0.015625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.0156249999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "0.0156249999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(1.23456),1))",
+   "powerbi": "3.54125854753732"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(1.23456),2.5))",
+   "powerbi": "3.54125854753734"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "3.54125854753732"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "3.54125854753732"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(10),1))",
+   "powerbi": "999999.999999992"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "999999.999999992"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(10),Facts[Sales]))",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(2.75),2.5))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "432.510009765623"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(3),1))",
+   "powerbi": "728.999999999995"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(3),BLANK()))",
+   "powerbi": "728.999999999995"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(7),2.5))",
+   "powerbi": "117649"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(7),BLANK()))",
+   "powerbi": "117648.999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "117649"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "117649"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(DATE(2020,1,1),CURRENCY(-2)))",
+   "powerbi": "7.09068634572637E+27"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(DATE(2020,1,1),CURRENCY(1.23456)))",
+   "powerbi": "7.09068634572637E+27"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(DATE(2020,1,1),CURRENCY(3)))",
+   "powerbi": "7.09068634572637E+27"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(DATE(2020,1,1),CURRENCY(Facts[Quantity])))",
+   "powerbi": "7.09068634572637E+27"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Quantity],CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Quantity],CURRENCY(1.23456)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Quantity],CURRENCY(Facts[Quantity])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Sales],CURRENCY(-1.1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Sales],CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Sales],CURRENCY(0.5)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Sales],CURRENCY(3)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,COALESCE(Facts[Sales],CURRENCY(Facts[Quantity])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,1,CURRENCY(-1.1),2.5))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,1,CURRENCY(10),1))",
+   "powerbi": "999999.999999992"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,1,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "999999.999999992"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,1,CURRENCY(10),Facts[Sales]))",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,1,CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(-2),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(1.23456),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(10),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(10),2.5))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(3),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,2,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,3,CURRENCY(-2),2.5))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,3,CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "7.09068634572637E+27"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,3,CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,3,CURRENCY(1.23456),2.5))",
+   "powerbi": "244.140625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(1,3,CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(0.5),2.5))",
+   "powerbi": "48.828125"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(10),2.5))",
+   "powerbi": "976.5625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(10),BLANK()))",
+   "powerbi": "9.99999999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(2.75),1))",
+   "powerbi": "2.75000000000003"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(-1.1),2.5))",
+   "powerbi": "-107.421875"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(0.5),1))",
+   "powerbi": "0.500000000000003"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(-1.1),2.5))",
+   "powerbi": "-107.421875"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(-2),1))",
+   "powerbi": "-2.00000000000002"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(0.5),1))",
+   "powerbi": "0.500000000000003"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(10),2.5))",
+   "powerbi": "976.5625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(2.75),2.5))",
+   "powerbi": "268.5546875"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],3,CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(0.5),1))",
+   "powerbi": "0.0156249999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),1))",
+   "powerbi": "3.54125854753732"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(10),BLANK()))",
+   "powerbi": "999999.999999992"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(7),Facts[Quantity]))",
+   "powerbi": "117648.999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(1,CURRENCY(-1.1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(1,CURRENCY(0.5)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(1,CURRENCY(1.23456)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(1,CURRENCY(3)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(1,CURRENCY(7)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(2.5,CURRENCY(-2)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(2.5,CURRENCY(10)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(BLANK(),CURRENCY(10)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(BLANK(),CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(-2),2.5))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(0.5),1))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(1.23456),1))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(1.23456),2.5))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(10),1))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(10),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(2.75),1))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(3),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(3),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(7),2.5))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),COALESCE(CURRENCY(7),BLANK()))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(1,CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(1,CURRENCY(-2),1))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(1,CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(1,CURRENCY(0.5),1))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(1,CURRENCY(10),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(1,CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(1,CURRENCY(3),2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(TRUE(),CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(TRUE(),CURRENCY(-2),1))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(TRUE(),CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF(TRUE(),CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(-2),1))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(-2),2.5))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(1.23456),1))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(1.23456),2.5))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(10),1))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(10),BLANK()))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(3),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(7),1))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(7),2.5))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),IF.EAGER(TRUE(),CURRENCY(7),BLANK()))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,1,CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,1,CURRENCY(10),1))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,1,CURRENCY(3),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,1,CURRENCY(3),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,2,CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,2,CURRENCY(3),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,2,CURRENCY(7),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,3,CURRENCY(-1.1),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,3,CURRENCY(-1.1),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(1,3,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(1,CURRENCY(-1.1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(1,CURRENCY(0.5)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(1,CURRENCY(1.23456)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(1,CURRENCY(7)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(2.5,CURRENCY(-1.1)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(2.5,CURRENCY(Facts[Quantity])))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(BLANK(),CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(BLANK(),CURRENCY(1.23456)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(BLANK(),CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(BLANK(),CURRENCY(Facts[Quantity])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(-2),2.5))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(1.23456),2.5))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(3),Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(7),1))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(7),BLANK()))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(7),Facts[Quantity]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(DATE(2020,1,1),CURRENCY(-1.1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(DATE(2020,1,1),CURRENCY(-2)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(DATE(2020,1,1),CURRENCY(2.75)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(DATE(2020,1,1),CURRENCY(Facts[Quantity])))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(Facts[Quantity],CURRENCY(7)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(Facts[Sales],CURRENCY(0.5)))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(Facts[Sales],CURRENCY(1.23456)))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),COALESCE(Facts[Sales],CURRENCY(2.75)))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(10),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(10),Facts[Sales]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(3),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(3),2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(3),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(3),Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(1,CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(1.23456),1))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(3),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(7),BLANK()))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(-1.1),1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(0.5),2.5))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(-2),2.5))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(-2),BLANK()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(0.5),1))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(10),1))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(10),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(3),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(3),2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(3),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(7),2.5))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(7),Facts[Quantity]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(Facts[Quantity]),BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),IF.EAGER(TRUE(),CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,1,CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,1,CURRENCY(10),Facts[Sales]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,1,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,1,CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(0.5),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(10),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,2,CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(-1.1),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(0.5),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(10),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(2.75),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(Facts[Quantity]),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(1,3,CURRENCY(Facts[Quantity]),Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],1,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],1,CURRENCY(0.5),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],1,CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],1,CURRENCY(7),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],2,CURRENCY(-1.1),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],2,CURRENCY(0.5),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],2,CURRENCY(0.5),Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],2,CURRENCY(1.23456),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],2,CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],2,CURRENCY(2.75),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],2,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],3,CURRENCY(10),Facts[Quantity]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(Facts[Quantity],3,CURRENCY(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(TRUE(),TRUE(),CURRENCY(-2),1))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(TRUE(),TRUE(),CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(TRUE(),TRUE(),CURRENCY(3),Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),SWITCH(TRUE(),TRUE(),CURRENCY(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(1,CURRENCY(0.5)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(1,CURRENCY(3)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(1,CURRENCY(7)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(2.5,CURRENCY(-1.1)))",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(2.5,CURRENCY(-2)))",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(2.5,CURRENCY(0.5)))",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(2.5,CURRENCY(1.23456)))",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(2.5,CURRENCY(7)))",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(BLANK(),CURRENCY(-1.1)))",
+   "powerbi": "1.21"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(BLANK(),CURRENCY(0.5)))",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(BLANK(),CURRENCY(10)))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(BLANK(),CURRENCY(7)))",
+   "powerbi": "49"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(-1.1),1))",
+   "powerbi": "1.21"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "1.21"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(0.5),1))",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(0.5),DATE(2020,1,1)))",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.52423716"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(10),1))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(10),BLANK()))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(2.75),BLANK()))",
+   "powerbi": "7.5625"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(3),2.5))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(7),1))",
+   "powerbi": "49"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(7),2.5))",
+   "powerbi": "49"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "49"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(DATE(2020,1,1),CURRENCY(10)))",
+   "powerbi": "1921156561"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},COALESCE(DATE(2020,1,1),CURRENCY(2.75)))",
+   "powerbi": "1921156561"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(1,2,CURRENCY(-1.1),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(1,2,CURRENCY(10),2.5))",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(1,2,CURRENCY(3),2.5))",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(1,2,CURRENCY(7),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),BLANK()))",
+   "powerbi": "1.21"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(TRUE(),TRUE(),CURRENCY(-2),BLANK()))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(TRUE(),TRUE(),CURRENCY(0.5),BLANK()))",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),1))",
+   "powerbi": "1.52423716"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(TRUE(),TRUE(),CURRENCY(2.75),2.5))",
+   "powerbi": "7.5625"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},SWITCH(TRUE(),TRUE(),CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "7.5625"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(1,CURRENCY(1.23456)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(1,CURRENCY(10)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(1,CURRENCY(2.75)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(1,CURRENCY(7)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(2.5,CURRENCY(-1.1)))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(2.5,CURRENCY(2.75)))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(BLANK(),CURRENCY(-1.1)))",
+   "powerbi": "-1.331"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(BLANK(),CURRENCY(10)))",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.331"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.331"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-8"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(0.5),1))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(0.5),2.5))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "1.881823197736"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(10),1))",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(10),DATE(2020,1,1)))",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(2.75),1))",
+   "powerbi": "20.796875"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "20.796875"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(3),1))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(3),BLANK()))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(3),DATE(2020,1,1)))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(7),1))",
+   "powerbi": "343"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(7),2.5))",
+   "powerbi": "343"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(DATE(2020,1,1),CURRENCY(-1.1)))",
+   "powerbi": "84206213225191"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(DATE(2020,1,1),CURRENCY(10)))",
+   "powerbi": "84206213225191"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(DATE(2020,1,1),CURRENCY(2.75)))",
+   "powerbi": "84206213225191"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(1,1,CURRENCY(0.5),1))",
+   "powerbi": "0.125"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(1,1,CURRENCY(10),1))",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(1,2,CURRENCY(-1.1),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(1,2,CURRENCY(3),2.5))",
+   "powerbi": "15.625"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(1,3,CURRENCY(-2),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(1,3,CURRENCY(7),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(1,3,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "84206213225191"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.331"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(TRUE(),TRUE(),CURRENCY(-2),BLANK()))",
+   "powerbi": "-8"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},SWITCH(TRUE(),TRUE(),CURRENCY(7),2.5))",
+   "powerbi": "343"
+  }
+ ]
+}

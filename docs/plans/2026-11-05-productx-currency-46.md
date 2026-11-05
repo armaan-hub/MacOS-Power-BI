@@ -14,3 +14,14 @@ Compute, never look up (app code must never read `tools/parity/*.json` or test f
 
 ## Done when
 The scorer prints 0 wrong with as many matches as possible, the replay shows 0 DIFF and 0 CRASH, the full suite (`-n 12`) has only the two known flaky failures, and a ready-for-review entry with scorer counts per Part and the replay line is appended to this plan.
+
+## Ready for review (Task 56, builder)
+
+- **Part A (82):** 21 match, 61 still refused, 0 wrong. Matched: SWITCH / COALESCE bodies with CURRENCY and no IF inside (exact product of the row values), and any one-row PRODUCTX over a conditional Currency body (no product arithmetic). Refused: every IF / IF.EAGER body with several rows, because Power BI adds about 30 ulps of noise there (`728.999999999995`, `63.9999999999994`) that no candidate reproduced.
+- **Part B (23):** 0 match, 23 refused, 0 wrong. A constant-first COALESCE rule (first argument a constant number, DATE, TIME or CONVERT of a text number) matched 6 rows but was reverted: DATE / TIME first broke 9 locked answers (typed3_extra, bigorder28_extra, types20_extra), and the number-first subset is only 3 spec rows.
+- Scorer: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen /usr/local/bin/python3 tools/score_spec.py tools/parity/task56_productx_currency_spec.json` gives A gap-reject 61, A match 21, B gap-reject 23, 0 wrong.
+- Replay (no flags): `replayed 484189 Power BI answers: {'match': 480841, 'gap-reject': 3348, 'DIFF': 0, 'CRASH': 0}; locked 480800`, PARITY GATE PASSED. Ledger restored with git checkout.
+- Full suite (`-n 12`): 2 failed, 2698 passed. The failures are the two known flaky tests (`test_query_functions` signed int64, `test_transformations` group/pivot).
+- New tests: `tests/test_iteration146_productx_currency_46.py` (6 pass). No existing test was edited. `tests/test_no_answer_key_in_app.py` passes.
+- Changes: `analytics_studio/measures.py` helper `_switch_or_coalesce_root_without_if` (about line 3092), its use in the PRODUCTX conditional refusal (about line 19116, also exempts a one-row table).
+- Not run: `graphify update .` (project rule) in this worktree.
