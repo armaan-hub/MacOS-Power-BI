@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Haiku codes Task 52 linest-noise-42 (Task 51 shipped as Iteration 141); Opus reviews, Sonnet fixes
+**Active agent:** Haiku codes Task 54 xirr-iter-44 (Task 53 shipped as Iteration 142); Opus reviews, Sonnet fixes
 **Branch in use:** none
 **Working tree clean:** main yes
 

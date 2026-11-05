@@ -112,13 +112,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_swiorder39_extra | 900 | 0 | 0 | 0 | 0 |
 | dax_battery_typeerr40_extra | 346 | 0 | 59 | 0 | 0 |
 | dax_battery_roworder41_extra | 148 | 0 | 0 | 0 | 0 |
+| dax_battery_mainfix43_extra | 4 | 0 | 3 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (3617): Power BI answers, the app refuses
+## Pending work (3620): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -5407,6 +5408,9 @@ North`) [dax_battery_logic4_extra]
 - `ISTEXT(((FACT(-1))+(MAX(Facts[Region])))*(""))` (Power BI: `False`) [dax_battery_typeerr40_extra]
 - `ISTEXT((MAX(Facts[Region]))-(NOT("a")))` (Power BI: `False`) [dax_battery_typeerr40_extra]
 - `ISTEXT(CONCATENATE((-1)^0.5,MAX(Facts[Note])))` (Power BI: `True`) [dax_battery_typeerr40_extra]
+- `CONCATENATEX({1,2},DATE(1899,12,29)+1.5/86400+[Value],"|")` (Power BI: `12:00:01 AM|12/31/1899 12:00:01 AM`) [dax_battery_mainfix43_extra]
+- `CONCATENATEX({1,2},DATE(1899,12,29)+2.5/86400+[Value],"|")` (Power BI: `12:00:03 AM|12/31/1899 12:00:03 AM`) [dax_battery_mainfix43_extra]
+- `ISERROR(((VALUE("x"))*(SELECTEDVALUE(Facts[Quantity])))*(MAX(Facts[Note])))` (Power BI: `False`) [dax_battery_mainfix43_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 
