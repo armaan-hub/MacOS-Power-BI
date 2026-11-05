@@ -82,7 +82,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_blank8_extra | 74819 | 0 | 202 | 0 | 0 |
 | dax_battery_convert9_extra | 36847 | 0 | 355 | 0 | 0 |
 | dax_battery_never10_extra | 39014 | 0 | 51 | 0 | 0 |
-| dax_battery_currency11_extra | 8127 | 0 | 41 | 0 | 0 |
+| dax_battery_currency11_extra | 8140 | 0 | 28 | 0 | 0 |
 | dax_battery_double12_extra | 5739 | 0 | 28 | 0 | 0 |
 | dax_battery_big13_extra | 2182 | 0 | 6 | 0 | 0 |
 | dax_battery_topn14_extra | 413 | 0 | 4 | 0 | 0 |
@@ -119,6 +119,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_failtype47_extra | 316 | 0 | 35 | 0 | 0 |
 | dax_battery_missingfns48_extra | 232 | 0 | 0 | 0 | 0 |
 | dax_battery_swities49_extra | 308 | 0 | 0 | 0 | 0 |
+| dax_battery_typecols50_extra | 196 | 0 | 13 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
@@ -3468,31 +3469,18 @@ North`) [dax_battery_logic4_extra]
 - `(DATE(2020,1,1))-(CURRENCY(-9E14))` (Power BI: `12/31/9999 23:59:59`) [dax_battery_never10_extra]
 - `(ATAN(-(0/0)))&"z"` (Power BI: `1.77863632502849E-322z`) [dax_battery_never10_extra]
 - `AVERAGEX(FILTER(Facts,Facts[Quantity]>1),Facts[Sales]/3/CURRENCY(Facts[Quantity]))` (Power BI: `1.37962962962963`) [dax_battery_currency11_extra]
-- `ISDOUBLE(MAX(Facts[Sales])-"abc")` (Power BI: `True`) [dax_battery_currency11_extra]
 - `ISCURRENCY("abc"+MAX(Facts[Sales]))` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISCURRENCY(MAX(Facts[Sales])-"abc")` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISCURRENCY("abc"+CURRENCY(MAX(Facts[Sales])))` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISDOUBLE("abc"-MAX(Facts[Sales]))` (Power BI: `True`) [dax_battery_currency11_extra]
-- `ISINT64(MAX(Facts[Sales])*"")` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISDATETIME(MAX(Facts[Sales])+"TRUE")` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISDOUBLE(CURRENCY(MAX(Facts[Sales]))*"")` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISINT64(""-CURRENCY(MAX(Facts[Sales])))` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISDATETIME("TRUE"-CURRENCY(MAX(Facts[Sales])))` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISINT64(CURRENCY(MAX(Facts[Sales]))-"abc")` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISDOUBLE(""*CURRENCY(MAX(Facts[Sales])))` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISCURRENCY("TRUE"*MAX(Facts[Sales]))` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISCURRENCY(MAX(Facts[Sales])+"")` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISINT64("abc"*MAX(Facts[Sales]))` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISDATETIME(MAX(Facts[Sales])+"")` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISDOUBLE(""+CURRENCY(MAX(Facts[Sales])))` (Power BI: `True`) [dax_battery_currency11_extra]
 - `ISDATETIME("abc"*MAX(Facts[Sales]))` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISDOUBLE(MAX(Facts[Sales])-"TRUE")` (Power BI: `True`) [dax_battery_currency11_extra]
-- `ISINT64(""+MAX(Facts[Sales]))` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISDOUBLE(CURRENCY(MAX(Facts[Sales]))*"TRUE")` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISDATETIME(MAX(Facts[Sales])*"abc")` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISINT64(MAX(Facts[Sales])+"")` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISCURRENCY("abc"-MAX(Facts[Sales]))` (Power BI: `False`) [dax_battery_currency11_extra]
-- `ISINT64(CURRENCY(MAX(Facts[Sales]))+"abc")` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISDATETIME(CURRENCY(MAX(Facts[Sales]))-"abc")` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISDATETIME("TRUE"-MAX(Facts[Sales]))` (Power BI: `False`) [dax_battery_currency11_extra]
 - `ISCURRENCY(MAX(Facts[Sales])-"")` (Power BI: `False`) [dax_battery_currency11_extra]
@@ -4955,6 +4943,19 @@ North`) [dax_battery_logic4_extra]
 - `ISINT64((MIN(Facts[Note]))||(BLANK()))` (Power BI: `False`) [dax_battery_failtype47_extra]
 - `ISLOGICAL(("x"+1)&&(MIN(Facts[Note])))` (Power BI: `True`) [dax_battery_failtype47_extra]
 - `ISINT64(VAR v=VALUE("x") RETURN v-("b"-3))` (Power BI: `False`) [dax_battery_failtype47_extra]
+- `ISINT64(CURRENCY(MAX(Facts[Sales]))*"abc")` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISINT64(CURRENCY(SUM(Facts[Quantity]))+"x1")` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISBOOLEAN(CURRENCY(MIN(Facts[Quantity]))* "TRUE")` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISSTRING(CURRENCY(SUM(Facts[Quantity]))+ "TRUE")` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISNONTEXT(""*CURRENCY(SUM(Facts[Quantity])))` (Power BI: `True`) [dax_battery_typecols50_extra]
+- `ISLOGICAL(""+CURRENCY(SUM(Facts[Quantity])))` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISTEXT( "TRUE"*AVERAGE(Facts[Sales]))` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISNUMBER(MAX(Facts[Quantity])-"")` (Power BI: `True`) [dax_battery_typecols50_extra]
+- `ISNUMERIC(SUM(Facts[Sales])-"abc")` (Power BI: `True`) [dax_battery_typecols50_extra]
+- `ISNONTEXT(AVERAGE(Facts[Sales])+ "TRUE")` (Power BI: `True`) [dax_battery_typecols50_extra]
+- `ISBOOLEAN(MIN(Facts[Quantity])- "TRUE")` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISTEXT(AVERAGE(Facts[Sales])*"x1")` (Power BI: `False`) [dax_battery_typecols50_extra]
+- `ISTEXT(MIN(Facts[Sales])-"")` (Power BI: `False`) [dax_battery_typecols50_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 

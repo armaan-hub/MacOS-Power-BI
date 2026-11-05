@@ -22,3 +22,6 @@ operand reads a column (MAX(Facts[Note]), SUM(Facts[Sales]) ...) or is a VAR, an
 
 **Done when:** spec 0 wrong (report per part), full pytest, replay DIFF 0 CRASH 0, tests in
 tests/test_iteration150_type_tests_columns_50.py (answered rows plus one raising row that stays refused).
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 149. Locked 482890.

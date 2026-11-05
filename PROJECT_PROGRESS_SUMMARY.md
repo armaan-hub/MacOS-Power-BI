@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-05, after Iteration 148 / Task 59 swi-ties-49, SUBSTITUTEWITHINDEX over tied order values, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2727 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 485859 answers with 482701 match, 3158 refused, 0 DIFF, 0 CRASH, locked 482681. Next: Task 60 from the pending groups
+**Latest status (2026-11-05, after Iteration 149 / Task 60 type-tests-columns-50, type tests (ISDOUBLE, ISINT64, ISNUMBER, ...) over failing column-read arithmetic answered from a measured DAX type-promotion table, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2734 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 486068 answers with 482910 match, 3158 refused, 0 DIFF, 0 CRASH, locked 482890. Next: Task 61 from the pending groups (perfect-fit LINEST, big power rounding, TOCSV order)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
