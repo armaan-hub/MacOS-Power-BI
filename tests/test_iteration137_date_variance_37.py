@@ -10,6 +10,7 @@ from decimal import Decimal
 
 from analytics_studio import dax_math
 from tools import dax_oracle_diff as dax
+from tools.parity_check import status
 
 
 class DateVariance37Tests(unittest.TestCase):
@@ -38,10 +39,11 @@ class DateVariance37Tests(unittest.TestCase):
             dax.local("IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")"),
         ))
 
-    def test_part_a_division_in_date_body_stays_refused(self) -> None:
-        # Power BI divides in doubles; the decimal division differs in the last digit, so the row keeps refusing
-        self.assertTrue(dax.local("VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]/3)").startswith("LOCAL-REJECT"))
-        self.assertTrue(dax.local("STDEVX.P({5,9},DATE(1899,12,31)+[Value]/3)").startswith("LOCAL-REJECT"))
+    def test_part_a_division_in_date_body_matches_power_bi(self) -> None:
+        # Task 61 spec row 7: Power BI answers 0.324074074074074 (doubles, row order); the body is now evaluated in doubles
+        self.assertEqual(status("0.324074074074074", dax.local("VARX.P(Facts,DATE(1899,12,31)+Facts[Quantity]/3)")), "match")
+        # Task 61 fix: Power BI answers 0.666666666666667 (probed), so the list shape is answered too
+        self.assertEqual(status("0.666666666666667", dax.local("STDEVX.P({5,9},DATE(1899,12,31)+[Value]/3)")), "match")
 
     def test_part_b_repeated_fraction_matches_power_bi(self) -> None:
         self.assertTrue(dax.same(

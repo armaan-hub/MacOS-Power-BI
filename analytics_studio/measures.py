@@ -2667,6 +2667,50 @@ def _has_division(node: Any) -> bool:
     return False
 
 
+def _double_date_body(node: Any, frame: Any, read_leaf: Callable[[Any, Any], float | None]) -> float | None:
+    """Task 61: one row of a date body that divides, in the double arithmetic Power BI uses: each + - * / on doubles, left to right as
+    written.  Leaves are numeric literals, DATE / TIME of literal arguments and column references (read by read_leaf).  Any other node,
+    a division by zero or an unreadable leaf gives None, and the caller keeps the refusal."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "binary" and node[1] in {"+", "-", "*", "/"}:
+        left = _double_date_body(node[2], frame, read_leaf)
+        right = _double_date_body(node[3], frame, read_leaf)
+        if left is None or right is None:
+            return None
+        if node[1] == "+":
+            return left + right
+        if node[1] == "-":
+            return left - right
+        if node[1] == "*":
+            return left * right
+        return None if right == 0 else left / right
+    if node[0] == "number":
+        return float(node[1])
+    if node[0] == "call" and node[1] in {"DATE", "TIME"} and all(argument[0] == "number" for argument in node[2]):
+        return read_leaf(node, frame)
+    if node[0] == "reference":
+        return read_leaf(node, frame)
+    return None
+
+
+def _repeated_double_exact(value: float, count: int) -> bool:
+    """Task 61: whether the sums of ``count`` equal doubles are exact in double arithmetic (a power-of-two fraction, a whole number), so that the
+    spread of a constant body is robustly 0.  Power BI's spread of a repeated inexact value (DATE(1900,2,28)+1/7) is float noise (8.5E-07 over six
+    rows) that no row-order or count-times-value model reproduces (measured on 44 rows, 4 to 6 wrong), so the caller refuses those."""
+    from fractions import Fraction
+    exact = Fraction(value)
+    running = 0.0
+    squares = 0.0
+    for step in range(1, count + 1):
+        running += value
+        squares += value * value
+        if Fraction(running) != exact * step or Fraction(squares) != exact * exact * step:
+            return False
+    return (Fraction(running * running) == Fraction(running) ** 2 and Fraction(running * running / count) == Fraction(running) ** 2 / count
+            and Fraction(running / count) == Fraction(running) / count)
+
+
 def _coalesce_with_failing_argument(node: Any) -> bool:
     """A COALESCE anywhere in this expression with an argument other than the last that can raise an error (VALUE of text, ...): Power BI evaluates
     those arguments in an order the local engine does not reproduce (live probes, iteration 87), so the error may or may not surface."""
@@ -19435,6 +19479,8 @@ def _evaluate_measures_once(
                     raise MeasureError(f"{function} does not support expressions of type date.")
             values: list[Decimal] = []
             value_positions: list[int] = []  # Task 51 Part C: the position in iteration_rows each value came from
+            value_frames: list[Any] = []  # Task 61: the row each value came from, kept for a VARX / STDEVX date body with a division
+            keep_frames = function[:4] in {"VARX", "STDE"} and _has_division(arguments[1])
             blank_results = 0
             product_has_dates = function == "PRODUCTX" and _mentions_date(arguments[1], static_scope()[0])
             for position, frame in enumerate(iterate_rows(context, iteration_rows, "install")):
@@ -19458,6 +19504,8 @@ def _evaluate_measures_once(
                 if result is not None:
                     values.append(result if text_extreme and isinstance(result, str) else as_number(result))
                     value_positions.append(position)
+                    if keep_frames:
+                        value_frames.append(frame)
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                     values.append(Decimal(0))  # these three count a blank result as zero
                     blank_results += 1
@@ -19473,7 +19521,30 @@ def _evaluate_measures_once(
                     has_dates = any(isinstance(v, dax_dates.DaxDateTime) for v in values)
                     non_blank_vals = [v for v in values if v is not None and v.is_finite()]
                     exact_dates = bool(values) and dates_only_from_numbers(arguments[1], frame)  # Task 19 Part A: dates made from numbers spread as the numbers do
-                    if len(set(non_blank_vals)) > 1 and not exact_dates and (body_kind in {"numdate", "date", "variant_dates"} or has_dates):
+                    # Task 61: a body that divides and builds a date or time from numbers (DATE / TIME) is evaluated by Power BI in doubles, row by row, left to right,
+                    # whatever its type (a date plus a quotient, a quotient of a date, a constant like DATE(..)+1/3); the spread is then dax_math.double_statistic.
+                    # Only the shapes _double_date_body models are taken, and only over rows whose order is known (a stored scan or a constructor): the order
+                    # Power BI walks a TOPN in is not the one this engine gives (measured: STDEVX.P over TOPN differs in the 7th digit), so those refuse.
+                    double_division = (len(values) > 1 and not exact_dates and _has_division(arguments[1]) and (_calls_function(arguments[1], "DATE") or _calls_function(arguments[1], "TIME"))
+                                       and _double_date_body(arguments[1], None, lambda leaf, leaf_frame: 1.0) is not None)
+                    if double_division:
+                        if not (arguments[0][0] == "tableconstructor" or _stored_scan(arguments[0], variable_nodes.get) is True):
+                            raise MeasureError(f"{function} over a date body with a division, over rows in an order the local engine does not model, is not exact.")
+                        def read_double_leaf(leaf: Any, leaf_frame: Any) -> float | None:
+                            leaf_value = evaluate(leaf, leaf_frame)
+                            if leaf_value is None:
+                                return 0.0
+                            if isinstance(leaf_value, (bool, str)):
+                                return None
+                            return float(Decimal(leaf_value))
+                        row_doubles = [_double_date_body(arguments[1], row_frame, read_double_leaf) for row_frame in value_frames]
+                        if len(row_doubles) != len(values) or any(d is None or not math.isfinite(d) for d in row_doubles):
+                            raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
+                        if len(set(row_doubles)) == 1 and not _repeated_double_exact(row_doubles[0], len(row_doubles)):
+                            raise MeasureError(f"{function} over one repeated inexact date value has a float-noise spread the local engine does not model.")
+                        values = [Decimal(d) for d in row_doubles]
+                        double_dates = True
+                    elif len(set(non_blank_vals)) > 1 and not exact_dates and (body_kind in {"numdate", "date", "variant_dates"} or has_dates):
                         if any(value is None or not value.is_finite() for value in values) or _has_division(arguments[1]):
                             raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
                         # Task 47 Part A: live Power BI adds the date serials as doubles in row order, so the spread is dax_math.double_statistic
