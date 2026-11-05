@@ -133,12 +133,19 @@ def _constant_condition(node: Any) -> bool | None:
         return False
     if node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]:
         return node[1] == "TRUE"
+    if node[0] == "comparison" and node[1] == "=" and len(node) == 4 and node[2][0] == "number" and node[3][0] == "number":
+        return node[2][1] == node[3][1]  # Task 63 (live Power BI): IF(1=0, x, y) is folded to y like IF(FALSE(), x, y), so the dead branch's columns are not read
     return None
 
 
 def _folded_branch(node: Any) -> tuple[Any, ...] | None:
     """The branch an IF / IF.EAGER with a literal condition keeps (live Power BI, Task 10 review: the other branch is folded away before
     the table is walked, so only the columns of the kept branch decide the order); () when the kept branch is the implicit BLANK."""
+    if isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] == "SWITCH" and len(node[2]) == 4:
+        # Task 63 (live Power BI, held-out grid: exact on 17 of 17 stored-table rows): SWITCH(TRUE(), FALSE(), x, y) folds to y like IF(FALSE(), x, y)
+        if _constant_condition(node[2][0]) is True and _constant_condition(node[2][1]) is False:
+            return node[2][3]
+        return None
     if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in {"IF", "IF.EAGER"} and len(node[2]) >= 2):
         return None
     folded = _constant_condition(node[2][0])
@@ -294,12 +301,14 @@ def _dense_range(values: list[Any], is_date: bool) -> int | None:
     return (max(numbers) - low) // (1 if is_date else step or 1) + 1
 
 
-def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False) -> bool:
+def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, beside_doubles: bool = False) -> bool:
     """True when Power BI walks these columns in dictionary order, False when it keeps source-row order.
 
     `dedup` is a table that already holds each combination once (SUMMARIZE, VALUES, ALL of columns): only the per-column
     test applies to it, a lone date column always passes it, and a datetime with a time of day passes it alone while its
-    steps of time stay in range."""
+    steps of time stay in range.  `beside_doubles` lifts the refusal of a fractional column beside ONE other column: a MAXX / MINX
+    walk over a stored table with a NaN body (Task 63) keeps the dictionary order there (measured on the Facts sample); with three
+    columns it keeps the source order, which is not modelled, so the refusal stays."""
     for profile in profiles:
         if dedup and profile.timed:
             if len(profiles) > 1 or profile.time_steps is None or profile.time_steps * (row_count + 3) > _SINGLE_COLUMN_BUDGET:
@@ -311,7 +320,7 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False) ->
             return False
     if len(profiles) == 1 or dedup:
         return True
-    if any(profile.fractional for profile in profiles):  # a double beside another column
+    if any(profile.fractional for profile in profiles) and (not beside_doubles or len(profiles) != 2):  # a double beside another column (beside_doubles: measured for two columns only)
         return False
     if len(profiles) >= 3 and any(profile.is_date for profile in profiles):  # not measured: keep source order
         return False
