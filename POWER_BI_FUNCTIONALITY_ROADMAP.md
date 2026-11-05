@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-05, after Iteration 146 / Task 57 failing-type-tests-47, type tests around failing values, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2701 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 485319 answers with 481981 match, 3338 refused, 0 DIFF, 0 CRASH, locked 481961. Next: Task 58: the 10 missing DAX functions
+**Latest status (2026-11-05, after Iteration 147 / Task 58 missing-functions-48, the 10 missing DAX functions, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2722 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 485551 answers with 482213 match, 3338 refused, 0 DIFF, 0 CRASH, locked 482193. Next: Task 59 from the pending groups (perfect-fit LINEST, SWITCH index order)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

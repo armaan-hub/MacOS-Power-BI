@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -15,6 +16,7 @@ from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
+from analytics_studio import dax_intellisense
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import parse_file
 
@@ -233,6 +235,10 @@ class FormulaBarWindowTests(unittest.TestCase):
 
     def test_unsupported_function_cannot_be_accepted_and_says_why(self) -> None:
         self.open_measure()
+        # Task 58 (2026-11-05): function now supported; DATESWTD is made unsupported here by patching the supported set
+        patcher = mock.patch.object(dax_intellisense, "SUPPORTED_FUNCTIONS", dax_intellisense.SUPPORTED_FUNCTIONS - {"DATESWTD"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.type_formula("Wtd", "dateswtd")
         self.assertIn("DATESWTD", self.completion_labels())
         self.key(Qt.Key.Key_Tab)

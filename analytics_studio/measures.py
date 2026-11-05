@@ -54,7 +54,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_order, dax_time_sets, dax_typed
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_time_sets, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -541,6 +541,7 @@ _LOOKUP_ARITY = {
     "LASTNONBLANK": (2, 2), "FIRSTNONBLANKVALUE": (2, 2), "LASTNONBLANKVALUE": (2, 2), "GENERATESERIES": (2, 3),
     "ROW": (2, None),
 }
+_LOOKUP_ARITY |= dax_model_fns.LOOKUP_ARITY  # Task 58: PATH, USEROBJECTID
 class _UnmodelledField:
     """Sentinel for a Tabular Model metadata field not modelled by the local engine."""
     __slots__ = ("name",)
@@ -981,6 +982,9 @@ _FUNCTIONS |= {"ORDERBY", "PARTITIONBY", "MATCHBY"}
 _FUNCTIONS |= set(_TABLE_FUNCTION_ARITY) | set(_RANK_ARITY)
 _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets and balances (iteration 84)
 _FUNCTIONS.add("RELATEDTABLE")
+_FUNCTIONS |= dax_model_fns.NAMES  # Task 58: the ten model and selection functions
+_TABLE_FUNCTION_ARITY |= dax_model_fns.TABLE_ARITY  # Task 58: CALENDARAUTO is a table function like CALENDAR
+_NEW_TABLE_FUNCTIONS |= {"CALENDARAUTO"}  # Task 58: a Date table over the model dates
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
     "COUNTROWS", "CONCATENATEX", "XNPV", "XIRR", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
     "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS", "TOCSV", "TOJSON", "LINESTX",
@@ -1022,6 +1026,7 @@ _TYPED_RESULT_CATEGORY = {
     **dict.fromkeys(["DATE", "TIME", "EOMONTH", "EDATE", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW", "UTCTODAY", "UTCNOW"], "date/time"),
     **dax_ext.CATEGORY,
 }
+_TYPED_RESULT_CATEGORY |= dax_model_fns.RESULT_CATEGORY  # Task 58: PATH and USEROBJECTID are text
 # These literal/table forms have local parser support outside ``_FUNCTIONS``.
 # Keep them in the editor picker so the visible catalog matches what the local
 # evaluator can recognize.
@@ -2330,7 +2335,7 @@ def _is_all_table_value_argument(node: Any) -> bool:
         return True  # VALUES / DISTINCT of a column or table, or {1, 2, 3}
     if node[0] == "call" and node[1] == "CURRENTGROUP":
         return True
-    if node[0] == "call" and node[1] in {"GENERATESERIES", "ROW"}:
+    if node[0] == "call" and node[1] in {"GENERATESERIES", "ROW", "CALENDARAUTO"}:
         return True
     if node[0] == "call" and node[1] == "EVALUATEANDLOG" and node[2]:
         return _is_all_table_value_argument(node[2][0])
@@ -5861,6 +5866,8 @@ class _Parser:
                         arguments.append(("omitted",))
                         break
             self._expect(")")
+            if function in dax_model_fns.NAMES:
+                dax_model_fns.check_syntax(function, tuple(arguments))  # Task 58: measured argument errors at parse time
             if function in dax_math.STAT_PERCENTILE_COLUMN and len(arguments) == 2 and arguments[1][0] == "blank":
                 arguments[1] = ("number", Decimal(0))  # live Power BI (iteration 88): a BLANK() percentile is 0 (PERCENTILE.EXC of 0 is an error)
             if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and len(arguments) == 3 and arguments[2][0] == "blank":
@@ -11414,6 +11421,8 @@ def evaluate_measures(
             single["headers"] = [actual]
             single["lineage"] = {actual: (context, actual)}
             return single, value_rows
+        if function == "CALENDARAUTO":  # Task 58
+            return derived_table(["Date"], dax_model_fns.calendar_auto_rows(arguments, contexts_by_id.values()), None, {"Date": "date"})
         if function == "CALENDAR":
             bounds = []
             for argument in arguments:
@@ -16857,6 +16866,10 @@ def evaluate_measures(
     ) -> Any:
         if function == "USERNAME" or function == "USERPRINCIPALNAME":
             return getpass.getuser()
+        if function == "USEROBJECTID":
+            return dax_model_fns.user_object_id()
+        if function == "PATH":
+            return dax_model_fns.path_value(arguments, row_context, lambda table: contexts_by_id[resolve_table_context(table)["id"]], typed_row)
         if function == "COMBINEVALUES":
             delimiter = dax_typed.to_text(double_as_text(arguments[0], evaluate(arguments[0], row_context, allow_text=True), row_context))
             return delimiter.join(
@@ -20020,6 +20033,9 @@ def evaluate_measures(
             return evaluate_typed_function(function, arguments, row_context)
         if function in _LOOKUP_ARITY and function not in {"GENERATESERIES", "ROW"}:
             return evaluate_lookup_function(function, arguments, row_context)
+        if function == "CALENDARAUTO":  # Task 58: a table; the model decides whether it is an error
+            dax_model_fns.require_date_column(contexts_by_id.values())
+            raise MeasureError("CALENDARAUTO returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument.")
         if function in _TABLE_FUNCTION_ARITY or function in {"GENERATESERIES", "ROW"}:
             if function in _INFO_FUNCTIONS:
                 raise MeasureError(
