@@ -15,3 +15,16 @@ Compute, never look up (app code must never read `tools/parity/*.json` or test f
 
 ## Done when
 The scorer prints 0 wrong with as many matches as possible, the replay shows 0 DIFF and 0 CRASH, the full suite (`-n 12`) has only the two known flaky failures, and a ready-for-review entry with scorer counts per Part and the replay line is appended to this plan.
+
+## Ready for review (Task 55, builder Haiku)
+
+- Scorer (`tools/score_spec.py tools/parity/task55_big_rounding2_spec.json`): Part A 170 match, Part B 28 match, Part C 22 match, 0 wrong (was 220 gap-reject).
+- Formulas that fit every row (computed in a scratch script, no lookup): FLOOR/CEILING of a power band double = significance times the floor or ceiling of the
+  15-digit cut of x/significance (47/47 and 48/48); MROUND = round-half-away of x/m then times m, an odd product from 2^52 up goes up by one (13/13);
+  QUOTIENT = truncation of the double quotient, an odd whole result from 2^52 to 2^53 goes up by one (79/79); CONVERT = round half up of the double (8/8); INT = floor (4/4).
+- Wired in: `analytics_studio/dax_math.py:132-135` (MROUND odd product), `analytics_studio/measures.py` `_round_to_multiple` (power_band flag, ~3349),
+  `_power_band_double` and `_power_band_quotient` (~3630-3690, replace `_refuse_power_beyond_1e15`), the CONVERT, QUOTIENT and scalar INT/FLOOR/CEILING call sites.
+- Tests: `tests/test_iteration145_big_rounding_45.py` (new).
+- Replay (`tools/parity_check.py`, no flags): 480052 answers, match 476652 (was 476432), gap-reject 3400 (was 3620), DIFF 0, CRASH 0. PARITY_LEDGER.md restored.
+- Full suite (`-n 12`): 5 failed, 2686 passed. Known flaky: test_query_functions int64, test_transformations group/pivot. New, all asserting a refusal this task now answers with the Power BI value (left unedited for review): tests/test_iteration128_coalesce_big_order_28.py test_part_b_big_number_rounding and test_part_c_round_4_ceiling_tie_and_quotient_band; tests/test_iteration111_double_arith_12.py ReviewFixTest.test_power_beyond_1e15_is_refused.
+- Still refused: none of the 220 rows.

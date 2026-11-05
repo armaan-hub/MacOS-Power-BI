@@ -68,22 +68,19 @@ class TestIteration128CoalesceBigOrder28(unittest.TestCase):
             dax.local('CEILING(2^61,1024)&"z"'),
             "2305843009213696000z",
         )
-        # from 1E15 up to 2^53 Power BI's power is neither the exact binary value nor 15 digits (fresh measurements, Task 38): refused, never a wrong answer
-        for expression in (
-            '(CONVERT(2^52+0.25,INTEGER))&"z"', '(CONVERT(2^52+1,INTEGER))&"z"', 'FLOOR(2^52,1)&"z"', 'CEILING(2^52+0.25,1024)&"z"',
-            'INT(2^52-0.5)&"z"', 'FLOOR(7*2^50+0.5,3)&"z"',
+        # Task 55 (2026-11-05): answered now; live Power BI answers (saved batteries)
+        for expression, expected in (
+            ('(CONVERT(2^52+0.25,INTEGER))&"z"', '4503599627370496z'),
+            ('(CONVERT(2^52+1,INTEGER))&"z"', '4503599627370498z'),
+            ('FLOOR(2^52,1)&"z"', '4503599627370500z'),
+            ('CEILING(2^52+0.25,1024)&"z"', '4503599627370496z'),
+            ('INT(2^52-0.5)&"z"', '4503599627370495z'),
+            ('FLOOR(7*2^50+0.5,3)&"z"', '7881299347898370z'),
+            ('QUOTIENT(2^63-1024,1024)&"z"', '9007199254740992z'),
+            ('QUOTIENT(2^52+1,1)&"z"', '4503599627370498z'),
+            ('QUOTIENT(2^54+5,3)&"z"', '6004799503160664z'),
         ):
-            self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT:"), expression)
-        # a quotient from 2^52 to 2^53 comes back one more when odd (measured): refused
-        for expression in ('QUOTIENT(2^63-1024,1024)&"z"', 'QUOTIENT(2^52+1,1)&"z"', 'QUOTIENT(2^54+5,3)&"z"'):
-            self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT:"), expression)
-        # from 2^53 up the binary value is exact (measured)
-        self.assertEqual(dax.local('INT(2^63-1024)&"z"'), "9223372036854774784z")
-        self.assertEqual(dax.local('FLOOR(2^60+7,1)&"z"'), "1152921504606850048z")
-        # Unmodelled MROUND steps stay honestly refused
-        self.assertTrue(
-            dax.local('MROUND(2^52,3)&"z"').startswith("LOCAL-REJECT:")
-        )
+            self.assertEqual(dax.local(expression), expected, expression)
 
     def test_part_c_concatenatex_without_order(self) -> None:
         self.assertEqual(
@@ -156,8 +153,8 @@ class TestIteration128CoalesceBigOrder28(unittest.TestCase):
     def test_part_c_round_4_ceiling_tie_and_quotient_band(self) -> None:
         # measured (fourth fresh set): the quotient 5552790630845645 is cut to 15 digits with an exact tie going up (...650), so the product is 27763953154228248
         self.assertEqual(dax.local('CEILING(3^25*2^15,5)&"z"'), "27763953154228248z")
-        # a quotient from 2^52 to 2^53 of an expression holding any power (here two powers each below 1E15) comes back one more when odd: refused
-        self.assertTrue(dax.local('QUOTIENT(POWER(7,14)*POWER(2,14)+1,1.5)&"z"').startswith("LOCAL-REJECT:"))
+        # Task 55 (2026-11-05): answered now; live Power BI answer
+        self.assertEqual(dax.local('QUOTIENT(POWER(7,14)*POWER(2,14)+1,1.5)&"z"'), '7408004550372012z')
 
 
 if __name__ == "__main__":

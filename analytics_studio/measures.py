@@ -3347,9 +3347,10 @@ def _to_15_digits_half_up(value: float) -> float:
 
 
 def _round_to_multiple(
-    function: str, number: Decimal | None, significance: Decimal | None
+    function: str, number: Decimal | None, significance: Decimal | None, power_band: bool = False
 ) -> Decimal | None:
-    """CEILING/FLOOR to a multiple, following Power BI's sign and blank rules."""
+    """CEILING/FLOOR to a multiple, following Power BI's sign and blank rules.
+    power_band (Task 55): the number is the double of a power result from 1E15 to 2^53 (a positive one), rounded as beyond 2^53 is."""
     if number is None:
         return None
     if number == 0:
@@ -3362,11 +3363,20 @@ def _round_to_multiple(
         raise MeasureRuntimeError(
             f"{function} needs a significance with the same sign as the number."
         )
-    if 2 ** 53 <= abs(number) < 2 ** 63:
+    if power_band and number < 0 and significance > 0:
+        # Task 55 follow-up (measured, negative Doubles from -1E15 to -2^53): the signed quotient is cut to 15 digits (a tie away from zero), then floor or ceil of
+        # that signed value (FLOOR(-2E15+0.75,3) is -1999999999999998, CEILING(-2E15-3,4) is -2000000000000004), times the significance, an odd whole product comes back one more
+        q = float(number) / float(significance)
+        q15 = -_to_15_digits_half_up(-q)
+        whole = math.ceil(q15) if function == "CEILING" else math.floor(q15)
+        prod = float(_odd_band_up(Decimal(float(whole) * float(significance))))
+        return Decimal(int(prod)) if significance == significance.to_integral_value() else Decimal(prod)
+    if 2 ** 53 <= abs(number) < 2 ** 63 or power_band:
         q = float(abs(number)) / float(abs(significance))
         q15 = _to_15_digits_half_up(q)
         whole = math.ceil(q15) if function == "CEILING" else math.floor(q15)
         prod = float(whole) * float(abs(significance))
+        prod = float(_odd_band_up(Decimal(prod))) if power_band else prod  # Task 55 fix: an odd whole product from 2^52 up comes back one more
         if number < 0:  # measured: FLOOR and CEILING of a negative number beyond 2^53 are both the negated magnitude result
             prod = -prod
         if significance == significance.to_integral_value():
@@ -3626,12 +3636,85 @@ def _refuse_quotient_band(arguments: Any, values: list[Any], held: Callable[[str
             raise dax_typed.refusal("A QUOTIENT whose result is from 2^52 to 2^53 is not modelled by the local engine.")
 
 
-def _refuse_power_beyond_1e15(node: Any, value: Any, held: Callable[[str], Any]) -> None:
-    """INT, FLOOR, CEILING, QUOTIENT and CONVERT of a ^ or POWER result from 1E15 up to 2^53 (measured, Task 38): Power BI reads such a power as neither the exact
-    binary value nor 15 digits (FLOOR(2^52,1) is 4503599627370500, INT(2^52-0.5) is 4503599627370495, CONVERT(2^52+1,INTEGER) is 4503599627370498): refused.
-    From 2^53 up the double is exact and every measured answer (about 250 fresh ones) follows the binary value."""
-    if isinstance(value, Decimal) and value.is_finite() and Decimal("1E15") <= abs(value) < 2 ** 53 and _has_power(node, held):
-        raise dax_typed.refusal("A rounding to an integer of a power result from 1E15 to 2^53 is not modelled by the local engine.")
+_POWER_BAND_REFUSAL = "A rounding to an integer of a power result from 1E15 to 2^53 is not modelled by the local engine."
+
+
+def _odd_band_up(value: Any) -> Any:
+    """Task 55 fix (measured, 105 fresh answers): a whole result from 2^52 up to 2^53 that is odd comes back one more (INT(2^52+1) is 4503599627370498,
+    CEILING(1.5*2^52,11) is 6755399441055750, QUOTIENT(9E15+0.75,1) is 9000000000000002); below 2^52 it stays odd (MROUND(2^52,3) is 4503599627370495)."""
+    if isinstance(value, Decimal) and value.is_finite() and 2 ** 52 <= abs(value) < 2 ** 53 and value == value.to_integral_value() and int(value) % 2:
+        return value + 1 if value > 0 else value - 1
+    return value
+
+
+def _power_band_double(node: Any, value: Any, held: Callable[[str], Any], is_double: bool = False) -> float | None:
+    """Task 55 (measured on 220 saved answers): the Double of a ^ or POWER result from 1E15 up to 2^53. Power BI reads such a power as the double of the whole
+    expression (its operations rounded to doubles, as beyond 2^53), not the exact binary value nor 15 digits (FLOOR(2^52,1) is 4503599627370500,
+    INT(2^52-0.5) is 4503599627370495, CONVERT(2^52+1,INTEGER) is 4503599627370498). None when the value is not such a power result; refused when its double
+    arithmetic is not computable here or lands outside the band.
+    is_double (Task 55 fix): the argument is of the Double type; a constant Double expression without a power (4.6E15+3, 2E15) is read the same way when it is
+    computable here (a negative one too, Task 55 follow-up, measured on 51+ negative rows near -2E15), and is left to the older rules otherwise."""
+    if not (isinstance(value, Decimal) and value.is_finite() and not dax_dates.is_date(value) and Decimal("1E15") <= abs(value) < 2 ** 53):
+        return None
+    power = _has_power(node, held)
+    if not power and not is_double:
+        return None
+    try:
+        computed = _double_arithmetic(node, held)
+    except _InexactPower:
+        computed = None
+    if not power and (computed is None or computed[1] or not (1e15 <= abs(computed[0]) < 2.0 ** 53)):
+        return None
+    if computed is None or not (1e15 <= abs(computed[0]) < 2.0 ** 53):
+        raise dax_typed.refusal(_POWER_BAND_REFUSAL)
+    return computed[0]
+
+
+def _power_band_quotient(arguments: Any, values: list[Any], held: Callable[[str], Any], is_double: bool = False) -> Decimal | None:
+    """Task 55 (measured, 79 saved answers): QUOTIENT of a power numerator by a literal divisor, when the numerator is from 1E15 up to 2^63 (a power from 2^53 up
+    is the double of the whole expression, as INT and CONVERT read it). The Double quotient is truncated toward zero, and a whole result from 2^52 to 2^53 that
+    is odd goes up by one (QUOTIENT(2^52+1,1) is 4503599627370498, QUOTIENT(2^52+0.5,1.5) is 3002399751580330, QUOTIENT(3^34+1,3) is 5559060566555524).
+    None when the case is not one of these (the older rules apply)."""
+    if len(values) != 2 or not isinstance(values[0], Decimal) or not values[0].is_finite() or dax_dates.is_date(values[0]):
+        return None
+    if not (Decimal("1E15") <= abs(values[0]) < Decimal(2 ** 63)):
+        return None
+    if not _contains_power(arguments[0], held):
+        # Task 55 fix: a positive constant Double without a power (QUOTIENT(9E15+0.75,1) is 9000000000000002), by a positive literal divisor
+        if not (is_double and abs(values[0]) < 2 ** 53 and isinstance(values[1], Decimal) and values[1].is_finite() and values[1] > 0 and not _contains_power(arguments[1], held)):
+            return None
+        numerator = _power_band_double(arguments[0], values[0], held, True)
+        if numerator is None:
+            return None
+        whole = math.trunc(numerator / float(values[1]))
+        return Decimal(_odd_band_up(Decimal(whole)))
+    if abs(values[0]) < 2 ** 53:
+        numerator = _power_band_double(arguments[0], values[0], held)  # refused when its double arithmetic is not computable
+        if numerator is None:
+            return None
+    else:
+        try:
+            computed = _double_arithmetic(arguments[0], held)
+        except _InexactPower:
+            computed = None
+        if computed is None or not 2.0 ** 53 <= abs(computed[0]) < 2.0 ** 63:
+            return None  # the older rules (the double of the power, then the refusal of a quotient in the band) decide
+        numerator = computed[0]
+    divisor = values[1]
+    if not (isinstance(divisor, Decimal) and divisor.is_finite() and divisor != 0) or _has_power(arguments[1], held):
+        if abs(values[0]) < 2 ** 53:
+            raise dax_typed.refusal("A QUOTIENT of a power result from 1E15 to 2^53 by a divisor that is not a literal is not modelled by the local engine.")
+        return None
+    quotient = numerator / float(divisor)
+    if not math.isfinite(quotient) or abs(quotient) >= 2.0 ** 63:
+        raise dax_typed.refusal("A QUOTIENT whose result is from 2^52 to 2^53 is not modelled by the local engine.")
+    whole = math.trunc(quotient)
+    if 2 ** 52 <= abs(whole) < 2 ** 53:
+        if whole % 2 != 0:
+            whole += 1 if whole > 0 else -1
+    elif abs(values[0]) >= 2 ** 53:
+        return None  # a quotient beyond 2^53 from a numerator beyond 2^53: the older rule (an exact quotient of the double) decides
+    return Decimal(whole)
 
 
 class _InexactPower(Exception):
@@ -17366,7 +17449,14 @@ def evaluate_measures(
                 # Task 19 Part A: a plain BLANK is False; a logical operator's own BLANK (1&&"") stays a BLANK (locked items)
                 return None if (true_false_column(arguments[0]) or true_false_conditional(arguments[0], row_context)) else False
             if interval == "INTEGER":
-                _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
+                band = _power_band_double(arguments[0], values[0], variable_nodes.get, left_static_type(arguments[0], row_context) == "double")
+                if band is not None:
+                    if band < 0 and _has_power(arguments[0], variable_nodes.get):
+                        raise dax_typed.refusal(_POWER_BAND_REFUSAL)  # a negative power result from 1E15 is not measured
+                    if band < 0:
+                        return _odd_band_up(Decimal(-math.floor(-band + 0.5)))  # a negative Double rounds half away from zero (CONVERT(-2E15-0.5,INTEGER) is -2000000000000001)
+                    # Task 55: the double rounds half up, and an odd whole result from 2^52 up comes back one more (CONVERT(2^52+1,INTEGER) is 4503599627370498)
+                    return _odd_band_up(Decimal(math.floor(band + 0.5)))
                 values[0] = _power_as_double(arguments[0], values[0], variable_nodes.get)
             if interval == "INTEGER" and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
                 if abs(values[0]) >= 2 ** 53:
@@ -17401,7 +17491,9 @@ def evaluate_measures(
                 return _currency_wrap(values[0])  # Task 20 F5: a whole number of the Int64 type wraps
             raise _CurrencyConversionError("The result of a conversion or arithmetic operation is either too large or too small.")  # a Double beyond the range is the error
         if function == "QUOTIENT" and values:
-            _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
+            band_quotient = _power_band_quotient(arguments, values, variable_nodes.get, left_static_type(arguments[0], row_context) == "double")  # Task 55
+            if band_quotient is not None:
+                return band_quotient
             values[0] = _power_as_double(arguments[0], values[0], variable_nodes.get)
         if function == "MROUND" and values:
             values[0] = _power_as_double(arguments[0], values[0], variable_nodes.get)
@@ -20079,8 +20171,11 @@ def evaluate_measures(
                     if function in {"INT", "EXP", "ROUND", "ABS", "ROUNDUP", "ROUNDDOWN", "TRUNC", "SIGN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
                         raise _TextConversionFailure(str(error)) from error
                     raise
-                if function in {"INT", "FLOOR", "CEILING"}:
-                    _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
+                band = _power_band_double(arguments[0], values[0], variable_nodes.get, left_static_type(arguments[0], row_context) == "double") if function in {"INT", "FLOOR", "CEILING"} else None  # Task 55
+                if band is not None and function in {"FLOOR", "CEILING"} and not _has_power(arguments[0], variable_nodes.get) and (values[1] is None or not values[1].is_finite() or values[1] <= 0):
+                    band = None  # a Double without a power keeps the older rules for a blank, zero or negative significance
+                if band is not None:
+                    values[0] = Decimal(band)  # the double of the power, read as it is (not at 15 digits)
                 if function in {"INT", "FLOOR", "CEILING", "QUOTIENT", "MROUND"} and values:
                     values[0] = _power_as_double(arguments[0], values[0], variable_nodes.get)
                 if function == "QUOTIENT":
@@ -20089,12 +20184,19 @@ def evaluate_measures(
                     (function == "INT" or (function in {"FLOOR", "CEILING", "QUOTIENT"} and len(values) == 2 and values[1] is not None and values[1].is_finite() and values[1] == values[1].to_integral_value()))
                     and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double"
                 ):
-                    values[0] = _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike
+                    values[0] = values[0] if band is not None else _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike (not a power band double, Task 55)
                 if function == "TRUNC" and len(values) == 2 and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
                     values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does
                 if function == "MOD" and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
                     values[0] = Decimal(float(values[0]))
-                math_result = _scalar_math(function, values)  # raises the measured errors and refusals first
+                if band is not None and function in {"FLOOR", "CEILING"}:  # Task 55: FLOOR/CEILING of a power band double, rounded as beyond 2^53 is
+                    if band == 0 or (band < 0 and _has_power(arguments[0], variable_nodes.get)) or values[1] is None or not values[1].is_finite() or values[1] == 0:
+                        raise dax_typed.refusal(_POWER_BAND_REFUSAL)
+                    math_result = _round_to_multiple(function, values[0], values[1], power_band=True)
+                else:
+                    math_result = _scalar_math(function, values)  # raises the measured errors and refusals first
+                    if band is not None and function == "INT":
+                        math_result = _odd_band_up(math_result)  # Task 55 fix
                 if (
                     function == "MOD" and math_result is not None and values[0] is not None and values[1] is not None
                     and values[0].is_finite() and values[1].is_finite() and left_static_type(arguments[0], row_context) == "double"

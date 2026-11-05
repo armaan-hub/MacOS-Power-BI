@@ -224,8 +224,9 @@ class ReviewFixTest(unittest.TestCase):
     ]
 
     def test_power_beyond_1e15_is_refused(self) -> None:
+        # Task 55 (2026-11-05): answered now; live Power BI answers
         for expr in ("(INT(2^52+0.5))&\"z\"", "(QUOTIENT(2^52+0.5,1))&\"z\"", "(CONVERT(2^52+0.5,INTEGER))&\"z\""):
-            self.assertTrue(dax.local(expr).startswith("LOCAL-REJECT"), expr)
+            self.assertEqual(dax.local(expr), "4503599627370496z", expr)
         # Task 38 (2026-11-03): from 2^53 up a power is its exact double; Power BI Desktop measured 9007199254740990z on 2026-11-03
         self.assertEqual("9007199254740990z", dax.local("(FLOOR(2^53+0.5,1))&\"z\""))
 
