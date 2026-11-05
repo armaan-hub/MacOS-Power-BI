@@ -38,8 +38,12 @@ FRESH = (
 REFUSED_NOISE = (
     "VARX.S(Facts,DATE(2000,5,3)+1/3)",
     "STDEVX.S(Facts,TIME(22,56,42)+1/7)",
-    "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2020,5,19)+Facts[Quantity]*2/9)",
-    "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(2020,4,21)/1.5+Facts[Quantity])",
+)
+
+# Task 62 (varx-topn-52): TOPN walk order is now modelled, so these two TOPN shapes answer and match their measured Power BI answers
+TOPN_MATCHED = (
+    ("STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2020,5,19)+Facts[Quantity]*2/9)", "0.27716015393773"),
+    ("STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(2020,4,21)/1.5+Facts[Quantity])", "1.52752520563835"),
 )
 
 # a division inside an IF in the body is not a double-evaluated shape: it must stay refused
@@ -63,6 +67,11 @@ class DateDivisionAnswers(unittest.TestCase):
         for expression in REFUSED_NOISE:
             with self.subTest(expression=expression):
                 self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT:"), dax.local(expression))
+
+    def test_topn_shapes_match_task62(self):
+        for expression, powerbi in TOPN_MATCHED:
+            with self.subTest(expression=expression):
+                self.assertEqual(status(powerbi, dax.local(expression)), "match")
 
     def test_shape_with_a_conditional_stays_refused(self):
         for expression in REFUSED:

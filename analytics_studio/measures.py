@@ -2809,6 +2809,11 @@ def _computed_rows(table: Any, held: Callable[[str], Any]) -> bool:
     return False
 
 
+def _double_division_body(node: Any) -> bool:
+    """Task 61 shape: a body that divides and builds a date or time from numbers (DATE / TIME), in the doubles _double_date_body models."""
+    return _has_division(node) and (_calls_function(node, "DATE") or _calls_function(node, "TIME")) and _double_date_body(node, None, lambda leaf, leaf_frame: 1.0) is not None
+
+
 def _stored_scan(table: Any, held: Callable[[str], Any]) -> bool | None:
     """True when an iterator walks rows the storage engine holds (a whole table, with or without a row filter), False for a row set the formula engine
     builds, None when the shape was not measured (live Power BI, Task 13 review: 28 tables by 61 bodies on two Facts tables).  Over a stored scan
@@ -10409,6 +10414,10 @@ def _evaluate_measures_once(
                             raise MeasureError("Unexpected value for the ORDER argument. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
                         descending = order[1] == 0 or order[1] is False  # 0 / FALSE sort descending
                         index += 1
+                    else:
+                        # live Power BI (Task 62): the argument after an order expression is always the ORDER, so a column or other expression
+                        # there is a syntax error ("Unexpected value for ORDER argument in TOPN function"), not a second sort expression
+                        raise MeasureError("Unexpected value for the ORDER argument in the TOPN function. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
                 keys_spec.append((expression, descending))
             if not rows:
                 refuse_foreign_columns_of_empty_iteration(context, *(expression for expression, _descending in keys_spec))
@@ -10456,9 +10465,16 @@ def _evaluate_measures_once(
 
             scored = score_rows(rows)
             ordered = sort_scored(scored)
-            if walk_nodes is not None and not evaluation_filter_ids:
+            if walk_nodes is not None and (not evaluation_filter_ids or id(argument) in topn_walk_under_filter):
                 # consumed by CONCATENATEX: the source is walked in dictionary order over the columns
                 # read and the kept rows come back as the array of Power BI's heap (rows tied at the cut-off stay in the heap)
+                if evaluation_filter_ids and id(argument) in topn_walk_under_filter and len(rows) > 1:
+                    # Task 62: a column an outer filter left with one value is not measured (live Power BI: the walk of VALUES(Facts) under Region = "East"
+                    # followed the other column, where every unconstant shape measured followed the source order)
+                    constant_sources = dax_iteration_order.columns_read([*walk_nodes, *(expression for expression, _d in keys_spec)], lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS)
+                    constant_headers = {name.casefold() for _table, name in constant_sources} if constant_sources is not None else set()
+                    if any(header.casefold() in constant_headers and len({row.get(header) for row in rows}) == 1 for header in context["headers"]):
+                        raise dax_typed.refusal("The walk order of a TOPN over a column an outer filter holds to one value is not settled by the local engine.")
                 walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)])
                 scored = score_rows(walked)
                 if limit >= len(scored):
@@ -12050,6 +12066,7 @@ def _evaluate_measures_once(
     iterator_depth = 0
     variable_nodes: dict[str, Any] = {}  # VAR name -> the expression it was declared with (to walk a table held in a VAR)
     topn_walk_nodes: dict[int, list[tuple[Any, ...]]] = {}  # id of a TOPN node -> expressions its CONCATENATEX consumer reads
+    topn_walk_under_filter: set[int] = set()  # TOPN nodes read by a VARX / STDEVX that are walked in dictionary order (heap) under a CALCULATE filter too (Task 62)
     lazy_column_calls: list[Any] = []  # ADDCOLUMNS/SELECTCOLUMNS nodes whose columns COUNTROWS never reads
 
     def _is_bare_table_var(var_name: str) -> tuple[bool, str]:
@@ -19384,6 +19401,13 @@ def _evaluate_measures_once(
                         for r in col_refs
                     ):
                         raise MeasureError("The iterator body must reference a column of the iterated table variable.")
+            # Task 62: a VARX / STDEVX over TOPN with a date body that divides is walked in the TOPN heap order CONCATENATEX reads (the body's columns
+            # and the TOPN keys are the reads), not the sorted order; only when the source table's walk order is modelled
+            topn_walk = (function[:4] in {"VARX", "STDE"} and arguments[0][0] == "call" and arguments[0][1] == "TOPN" and len(arguments[0][2]) > 1
+                         and _double_division_body(arguments[1]) and dax_iteration_order.plan(arguments[0][2][1], variable_nodes.get) is not None)
+            if topn_walk:
+                topn_walk_nodes[id(arguments[0])] = [arguments[1]]
+                topn_walk_under_filter.add(id(arguments[0]))
             try:
                 context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             except MeasureRuntimeError as error:
@@ -19392,6 +19416,10 @@ def _evaluate_measures_once(
                     # column of the other table, not the calendar), so what the data error would hide is not known here
                     raise MeasureError(f"{error} The iterator body also reads a column by table name, which the local engine cannot validate first.") from error
                 raise
+            finally:
+                if topn_walk:
+                    topn_walk_nodes.pop(id(arguments[0]), None)
+                    topn_walk_under_filter.discard(id(arguments[0]))
             refuse_one_to_one_values_iteration(arguments[0])
             refuse_column_no_row_holds(context, iteration_rows, arguments[1])
             if iteration_rows and _nested_nan_extreme(arguments[1]):
@@ -19525,10 +19553,9 @@ def _evaluate_measures_once(
                     # whatever its type (a date plus a quotient, a quotient of a date, a constant like DATE(..)+1/3); the spread is then dax_math.double_statistic.
                     # Only the shapes _double_date_body models are taken, and only over rows whose order is known (a stored scan or a constructor): the order
                     # Power BI walks a TOPN in is not the one this engine gives (measured: STDEVX.P over TOPN differs in the 7th digit), so those refuse.
-                    double_division = (len(values) > 1 and not exact_dates and _has_division(arguments[1]) and (_calls_function(arguments[1], "DATE") or _calls_function(arguments[1], "TIME"))
-                                       and _double_date_body(arguments[1], None, lambda leaf, leaf_frame: 1.0) is not None)
+                    double_division = len(values) > 1 and not exact_dates and _double_division_body(arguments[1])
                     if double_division:
-                        if not (arguments[0][0] == "tableconstructor" or _stored_scan(arguments[0], variable_nodes.get) is True):
+                        if not (arguments[0][0] == "tableconstructor" or _stored_scan(arguments[0], variable_nodes.get) is True or topn_walk):
                             raise MeasureError(f"{function} over a date body with a division, over rows in an order the local engine does not model, is not exact.")
                         def read_double_leaf(leaf: Any, leaf_frame: Any) -> float | None:
                             leaf_value = evaluate(leaf, leaf_frame)
