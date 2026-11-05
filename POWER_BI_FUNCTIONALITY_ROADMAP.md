@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-05, after Iteration 143 / Task 54 xirr-iter-44, XIRR follows Power BI's bisection bracket in more cases, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2687 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 481209 answers with 477620 match, 3589 refused, 0 DIFF, 0 CRASH, locked 477600. Next: Task 55 big-rounding-45 (rounding of values from 1E15 to 2^53), coded by Haiku
+**Latest status (2026-11-05, after Iteration 144 / Task 55 big-rounding-45, FLOOR/CEILING/MROUND/QUOTIENT/INT/CONVERT of values from 1E15 to 2^53, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2693 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 484189 answers with 480820 match, 3369 refused, 0 DIFF, 0 CRASH, locked 480800. Next: next: PRODUCTX over a Currency in a conditional, coded by Haiku
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

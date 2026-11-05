@@ -129,9 +129,9 @@ def math_function(function: str, args: list[object]) -> object:
             steps = int(math.floor(abs(q) + 0.5))
             if multiple == multiple.to_integral_value():
                 prod = steps * abs(int(multiple))
-                if prod % 2 != 0:
-                    if abs(number) < Decimal("5E15"):  # MROUND(4503599627370497,13) stays odd in Power BI but MROUND(4503599627370497,17) goes up: below 5E15 an odd product is not settled
-                        raise dax_typed.refusal("MROUND with an odd product between 2^52 and 5E15 is not modelled by the local engine.")
+                if prod % 2 != 0 and (abs(number) >= Decimal("5E15") or prod >= 2 ** 52):
+                    # Task 55 (measured, 13 rows): an odd product from 2^52 up goes up by one (MROUND(4.6E15,3) is 4600000000000000); an odd product below 2^52
+                    # stays odd (MROUND(2^52,3) is 4503599627370495, MROUND(4503599627370497,13) is 4503599627370493)
                     prod += 1
                 result = Decimal(-prod if number < 0 else prod)
             else:
