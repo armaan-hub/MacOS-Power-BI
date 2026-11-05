@@ -4398,6 +4398,64 @@ def _structural_parts(node: Any, calls: set[str], operators: set[str]) -> None:
                     _structural_parts(item, calls, operators)
 
 
+def _failing_convert_unmeasured(node: Any, held: Callable[[str], Any]) -> bool:
+    """Task 53: a type test of arithmetic around a CONVERT of a text literal that cannot convert is answered by the static type only in the
+    shapes the locked batteries measured (a single column read beside the failing CONVERT, no division).  Power BI raised the conversion
+    error for these live shapes, so they are refused: (1) a division anywhere, beside a column read; (2) three or more operands of + - * only
+    with two or more reading data."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    convert = any(isinstance(part, tuple) and len(part) > 2 and part[0] == "call" and part[1] == "CONVERT" and isinstance(part[2], list | tuple) and part[2]
+                  and isinstance(part[2][0], tuple) and part[2][0][0] == "string" for part in _walk_nodes(node))
+    if not convert:
+        return False
+    leaves: list[Any] = []
+    divides = False
+    arithmetic_only = True
+
+    def flatten(part: Any) -> None:
+        nonlocal divides, arithmetic_only
+        if isinstance(part, tuple) and part and part[0] in {"binary", "logical"}:
+            divides = divides or part[1] == "/"
+            arithmetic_only = arithmetic_only and part[0] == "binary" and part[1] in {"+", "-", "*"}
+            flatten(part[2])
+            flatten(part[3])
+        elif isinstance(part, tuple) and part and part[0] == "concat":
+            arithmetic_only = False
+            flatten(part[1])
+            flatten(part[2])
+        else:
+            leaves.append(part)
+
+    flatten(node)
+    reading = [leaf for leaf in leaves if not _reads_no_data(leaf, held)]
+    if divides and reading:
+        return True
+    return arithmetic_only and len(leaves) >= 3 and len(reading) >= 2
+
+
+def _value_blank_data_product(node: Any, held: Callable[[str], Any]) -> bool:
+    """Task 53: an unmeasured shape that the local engine answers wrongly: a product of three or more factors with a failing VALUE of a text
+    literal, a BLANK that works out without a scan (SELECTEDVALUE ...) and one more factor that reads data
+    (ISERROR((VALUE("x")*SELECTEDVALUE(Facts[Quantity]))*MAX(Facts[Note])) is False in Power BI, the engine raised).  Refused."""
+    factors: list[Any] = []
+
+    def flatten(part: Any) -> None:
+        if isinstance(part, tuple) and len(part) == 4 and part[0] == "binary" and part[1] == "*":
+            flatten(part[2])
+            flatten(part[3])
+        else:
+            factors.append(part)
+
+    flatten(node)
+    if len(factors) < 3:
+        return False
+    value = [f for f in factors if isinstance(f, tuple) and f[:1] == ("call",) and f[1] == "VALUE" and len(f[2]) == 1 and f[2][0][0] == "string"]
+    blank = [f for f in factors if f not in value and not _reads_no_data(f, held) and _blank_without_scan(f, held)]
+    other = [f for f in factors if f not in value and f not in blank and not _reads_no_data(f, held)]
+    return bool(value and blank and other)
+
+
 def _structural_type_answer(function: str, argument: tuple[Any, ...]) -> bool | None:
     """Task 50: a type test of an argument whose evaluation failed, answered by the argument's static type alone.
     Measured on Power BI: only the families below answered (every other failing shape raised or is unmeasured, so None: the caller keeps its old behaviour).
@@ -17155,6 +17213,8 @@ def evaluate_measures(
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
     ) -> Any:
         if function == "ISERROR":
+            if _value_blank_data_product(arguments[0], variable_nodes.get):
+                raise dax_typed.refusal("ISERROR of a product of a failing VALUE, a BLANK and a column read is not modelled by the local engine.")
             try:
                 value = evaluate(arguments[0], row_context, allow_text=True)
             except (MeasureRuntimeError, DecimalException, OverflowError):
@@ -17247,6 +17307,8 @@ def evaluate_measures(
                     ):
                         hidden = False
             if isinstance(failure, _ConvertFailure):
+                if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _failing_convert_unmeasured(arguments[0], variable_nodes.get):
+                    raise dax_typed.refusal("A type test of arithmetic around a failing CONVERT beside data reads raised in Power BI and is not modelled by the local engine.") from failure
                 # When CONVERT of text fails, type tests for the target type or ISNUMBER cannot be answered statically (in Power BI they error)
                 target_t = static_type_of(arguments[0])
                 if (function in {"ISNUMBER", "ISNUMERIC"} and target_t in {"int64", "double", "currency", "decimal", "datetime"}) or (

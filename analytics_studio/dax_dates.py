@@ -104,6 +104,17 @@ def _refuse_half_second(value: Decimal) -> None:
         raise dax_typed._error("A time of day before December 30, 1899 on an exact half second is not supported in the local engine.")
 
 
+def _refuse_positive_half_second(value: Decimal) -> None:
+    """The text of a date at or after day zero whose time of day is an exact half second: the double Power BI holds is the sum of the
+    operands, whose last digits decide the rounding (DATE(1899,12,29)+1.5/86400+1 shows 12:00:01 AM and +2.5/86400+1 shows 12:00:03 AM, the
+    exact half second of the local decimal rounds the same way for both), so the shown text stays refused (Task 53)."""
+    if not value.is_finite() or value <= 0 or value == value.to_integral_value():
+        return
+    scaled = (value - value.to_integral_value(rounding=ROUND_FLOOR)) * _SECONDS_PER_DAY
+    if abs(scaled - scaled.quantize(Decimal(1), rounding=ROUND_FLOOR) - Decimal("0.5")) < Decimal("0.000000001"):
+        raise dax_typed._error("A time of day on an exact half second is not supported in the local engine.")
+
+
 def to_datetime(serial: Decimal, rounding: str = ROUND_HALF_UP, shown: bool = False) -> datetime:
     if not serial.is_finite():
         raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
@@ -175,6 +186,7 @@ def date_text(value: Decimal, pad_year: bool = False) -> str:
     if value.is_infinite():
         raise dax_typed._error("The parameter is incorrect.")  # Task 21 Part D: a date beside +Infinity or -Infinity has no text (NaN is day zero, as the text of a time)
     _refuse_half_second(value)
+    _refuse_positive_half_second(value)
     moment = _shown_moment(value, NEAREST_SECOND)  # live Power BI: the text of a date shows the time of day rounded to the nearest second
     time_text = f"{moment.hour % 12 or 12}:{moment.minute:02d}:{moment.second:02d} {'AM' if moment.hour < 12 else 'PM'}"
     if (moment.year, moment.month, moment.day) == (1899, 12, 30):
