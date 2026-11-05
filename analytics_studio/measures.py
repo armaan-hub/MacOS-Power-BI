@@ -54,7 +54,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_time_sets, dax_typed
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_swi_ties, dax_time_sets, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -3943,6 +3943,26 @@ _TOCSV_CONSTANT_TABLES = frozenset({"ROW", "DATATABLE", "GENERATESERIES", "CALEN
 _TOCSV_DICTIONARY_TABLES = frozenset({"ALL", "ALLNOBLANKROW", "ALLSELECTED", "ALLEXCEPT"})  # FILTERS (Power BI sorts it) is refused; TREATAS is checked in _tocsv_row_order
 _TOCSV_JOIN_TABLES = frozenset({"EXCEPT", "INTERSECT", "CROSSJOIN", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "GENERATE", "GENERATEALL"})
 _TOCSV_SIGNED_ZERO_CALLS = frozenset({"CEILING", "FLOOR", "ISO.CEILING", "TRUNC", "ROUNDUP", "ROUNDDOWN", "DIVIDE", "POWER", "MOD"})
+
+
+def _swi_row_set_stable(node: Any, lookup: Any, _depth: int = 0) -> bool:
+    """Task 59: False when the index table's ROWS (not only their order) depend on Power BI's internal row order.
+
+    TOPN and SAMPLE keep a row chosen by Power BI's order at the cutoff, and SUMMARIZECOLUMNS lays its rows out in its own
+    order, so a tie-order search over them cannot give the answer.  Such index tables stay refused.
+    """
+    if _depth > 200:
+        return False
+    if isinstance(node, (list, tuple)):
+        if len(node) >= 2 and isinstance(node[0], str) and node[0] in {"call", "table_call"} and node[1] in {"TOPN", "SAMPLE", "SUMMARIZECOLUMNS"}:
+            return False
+        if len(node) == 2 and node[0] == "var" and isinstance(node[1], str):
+            held = lookup(node[1])
+            if held is not None and not _swi_row_set_stable(held, lookup, _depth + 1):
+                return False
+            return True
+        return all(_swi_row_set_stable(child, lookup, _depth + 1) for child in node if isinstance(child, (list, tuple)))
+    return True
 
 
 def _swi_tied_order_known(node: tuple[Any, ...], lookup: Any) -> bool:
@@ -8209,7 +8229,46 @@ def evaluate_measures(
     active_table_id: str | None = None,
     visual_axis_context: VisualAxisContext | None = None,
 ) -> dict[str, Decimal | None]:
-    """Evaluate measures over local tables and their active relationship paths."""
+    """Evaluate measures over local tables and their active relationship paths.
+
+    Task 59: when SUBSTITUTEWITHINDEX meets tied order values, the whole evaluation is re-run under every tie order
+    (analytics_studio/dax_swi_ties.py) and answered only when all of them agree; otherwise the refusal is raised.
+    """
+    measures = list(measures)  # inputs are read once per tie-order run
+    relationships = list(relationships)
+    filter_table_ids = list(filter_table_ids)
+    if measure_names is not None:
+        measure_names = list(measure_names)
+    if table_context is not None:
+        table_context = list(table_context)
+
+    def run() -> dict[str, Decimal | None]:
+        return _evaluate_measures_once(
+            measures, rows, headers, table_name, measure_names=measure_names, table_context=table_context,
+            relationships=relationships, filter_table_ids=filter_table_ids, active_table_id=active_table_id,
+            visual_axis_context=visual_axis_context,
+        )
+
+    try:
+        return dax_swi_ties.run_with_tie_orders(run, lambda first, second: repr(first) == repr(second))
+    except dax_swi_ties.TieRefused as error:
+        raise MeasureError(str(error)) from error
+
+
+def _evaluate_measures_once(
+    measures: list[dict[str, str]],
+    rows: list[dict[str, Any]],
+    headers: list[str],
+    table_name: str,
+    *,
+    measure_names: Iterable[str] | None,
+    table_context: Iterable[dict[str, Any]] | None,
+    relationships: Iterable[dict[str, Any]],
+    filter_table_ids: Iterable[str],
+    active_table_id: str | None,
+    visual_axis_context: VisualAxisContext | None,
+) -> dict[str, Decimal | None]:
+    """One evaluation of the measures with the tie orders chosen by the enclosing driver (see evaluate_measures)."""
     definitions = validate_measures(list(measures))
     by_name = {item["name"].casefold(): item for item in definitions}
     parsed = {item["name"].casefold(): parse_expression(item["expression"]) for item in definitions}
@@ -11180,7 +11239,22 @@ def evaluate_measures(
         if any(ranked[n][0] == ranked[n + 1][0] for n in range(len(ranked) - 1)) and not _swi_tied_order_known(arguments[2], variable_nodes.get):
             # rows the order expressions cannot tell apart keep the index table's own row order in Power BI, which is only
             # modelled for a few table expressions (TOPN, SAMPLE, base tables and several-column tables lay their rows out differently)
-            raise MeasureError("The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied order values over it.")
+            # Task 59: the whole measure is re-run under every tie order (analytics_studio/dax_swi_ties.py), answered only when all agree
+            tie_refusal = "The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied order values over it."
+            driver = dax_swi_ties.current_driver()
+            if driver is None or not _swi_row_set_stable(arguments[2], variable_nodes.get):
+                raise MeasureError(tie_refusal)
+            tie_groups: list[tuple[int, int]] = []
+            group_start = 0
+            for n in range(1, len(ranked) + 1):
+                if n == len(ranked) or ranked[n][0] != ranked[n - 1][0]:
+                    if n - group_start > 1:
+                        tie_groups.append((group_start, n))
+                    group_start = n
+            try:
+                ranked = driver.choose(ranked, tie_groups, tie_refusal)
+            except dax_swi_ties.TieRefused as error:  # too many tie orders: the same refusal as before, catchable the same way
+                raise MeasureError(tie_refusal) from error
         index_map: dict[tuple[Any, ...], list[int]] = {}
         for idx, (_keys, row_dict) in enumerate(ranked):
             typed = typed_row(right_context, row_dict)

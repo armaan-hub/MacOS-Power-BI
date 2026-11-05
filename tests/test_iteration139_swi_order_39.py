@@ -30,14 +30,9 @@ MODELLED = [
 
 # index tables whose tie order is not modelled: each must keep refusing with tied order keys
 STAYS_REFUSED = [
-    'SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]*[i])',
-    'MINX(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])',
-    'MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,IF(Facts[Region]="East",1,2),ASC),[i])',
-    'MINX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],DESC),[i])',
     'COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region],ASC),0))',
     'COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),0))',
     'COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SUMMARIZECOLUMNS(Facts[Region],"t",SUM(Facts[Quantity])),0))',
-    'COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))',
 ]
 
 
@@ -51,6 +46,12 @@ class TestIteration139SwiOrder39(unittest.TestCase):
         for expression in STAYS_REFUSED:
             with self.subTest(expression=expression):
                 self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT"), dax.local(expression))
+        # Task 59 (2026-11-05): answered now; live Power BI answer
+        self.assertEqual(dax.local('SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]*[i])'), "14")  # dax_battery_swi_extra.json
+        self.assertEqual(dax.local('MINX(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])'), "0")  # dax_battery_swi_extra.json
+        self.assertEqual(dax.local('MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,IF(Facts[Region]="East",1,2),ASC),[i])'), "5")  # dax_battery_swi_extra.json
+        self.assertEqual(dax.local('MINX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],DESC),[i])'), "0")  # dax_battery_swi_extra.json
+        self.assertEqual(dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))'), "6")  # dax_battery_swi_extra2.json
 
     def test_output_row_order_follows_the_left_table_walk(self) -> None:
         # Live Power BI 2026-11-05 (fresh grid): the result of SUBSTITUTEWITHINDEX comes in the walk order of the left table
