@@ -1,0 +1,1324 @@
+{
+ "items": [
+  {
+   "part": "C",
+   "expr": "(MROUND(2^52,3))&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(2^52,3))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MROUND(2^52,5))&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(2^52,5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(2^52+0.5,INTEGER))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(CONVERT(2^52+0.5,INTEGER))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(2^52+0.25,INTEGER))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(CONVERT(2^52+0.25,INTEGER))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(FLOOR(2^52+0.5,1))&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(FLOOR(2^52+0.5,1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CEILING(2^52+0.5,2))&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(CEILING(2^52+0.5,2))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(QUOTIENT(2^52+0.5,1))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(QUOTIENT(2^52+0.5,1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(INT(2^52+0.5))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(INT(2^52+0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(2^52,3)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(2^52,5)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(4.6E15,3)&\"z\"",
+   "powerbi": "4600000000000000z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(4.6E15,3))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(4.6E15,9)&\"z\"",
+   "powerbi": "4600000000000000z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(4.6E15,9))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(4.9E15,3)&\"z\"",
+   "powerbi": "4900000000000000z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(4.9E15,3))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(4.9E15,13)&\"z\"",
+   "powerbi": "4900000000000002z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(4.9E15,13))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(4.9E15,17)&\"z\"",
+   "powerbi": "4900000000000000z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(4.9E15,17))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(4503599627370497,13)&\"z\"",
+   "powerbi": "4503599627370493z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(4503599627370497,13))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(4503599627370497,17)&\"z\"",
+   "powerbi": "4503599627370498z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(MROUND(4503599627370497,17))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(2^52+1,INTEGER))&\"z\"",
+   "powerbi": "4503599627370498z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(2^52,INTEGER))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(2^52-0.5,INTEGER))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(7*2^50+0.5,INTEGER))&\"z\"",
+   "powerbi": "7881299347898368z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.25,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.25,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.25,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.25,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.25,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.5,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.5,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.5,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.5,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.5,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+0.5,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+1,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+1,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+1,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+1,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52+1,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52-0.5,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52-0.5,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52-0.5,1.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52-0.5,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52-0.5,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^52-0.5,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(7*2^50+0.5,0.5)&\"z\"",
+   "powerbi": "7.88129934789835E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(7*2^50+0.5,1)&\"z\"",
+   "powerbi": "7881299347898370z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(7*2^50+0.5,1.5)&\"z\"",
+   "powerbi": "7.88129934789837E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(7*2^50+0.5,1024)&\"z\"",
+   "powerbi": "7881299347898368z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(7*2^50+0.5,2)&\"z\"",
+   "powerbi": "7881299347898360z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(7*2^50+0.5,3)&\"z\"",
+   "powerbi": "7881299347898370z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(7*2^50+0.5,7)&\"z\"",
+   "powerbi": "7881299347898340z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.25,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.25,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.25,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.25,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.25,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.25,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.5,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.5,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.5,1.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.5,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+0.5,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+1,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+1,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+1,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+1,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+1,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52+1,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52,1.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52-0.5,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52-0.5,1)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52-0.5,1.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52-0.5,2)&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52-0.5,3)&\"z\"",
+   "powerbi": "4503599627370510z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^52-0.5,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(7*2^50+0.5,0.5)&\"z\"",
+   "powerbi": "7.88129934789835E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(7*2^50+0.5,1.5)&\"z\"",
+   "powerbi": "7.88129934789837E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(7*2^50+0.5,1024)&\"z\"",
+   "powerbi": "7881299347898368z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(7*2^50+0.5,2)&\"z\"",
+   "powerbi": "7881299347898360z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(7*2^50+0.5,3)&\"z\"",
+   "powerbi": "7881299347898370z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(7*2^50+0.5,7)&\"z\"",
+   "powerbi": "7881299347898340z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "INT(2^52)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "INT(2^52+0.5)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "INT(2^52-0.5)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(INT(2^52))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(INT(2^52+0.25))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(INT(2^52-0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(INT(7*2^50+0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(2^52+0.25,3)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MROUND(2^52+0.5,3)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:MROUND with an odd product between #^# and #E# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(-(2^53)-1,-2)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(-(2^53)-1,2)&\"z\"",
+   "powerbi": "-4503599627370496z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(-(2^55)+1,7)&\"z\"",
+   "powerbi": "-5146971002709138z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(10^16+1,1.5)&\"z\"",
+   "powerbi": "6666666666666668z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.25,-2)&\"z\"",
+   "powerbi": "-2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.25,0.5)&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.25,1)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.25,1.5)&\"z\"",
+   "powerbi": "3002399751580330z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.25,2)&\"z\"",
+   "powerbi": "2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.25,3)&\"z\"",
+   "powerbi": "1501199875790165z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.25,7)&\"z\"",
+   "powerbi": "643371375338642z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.5,-2)&\"z\"",
+   "powerbi": "-2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.5,0.5)&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.5,1)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.5,1.5)&\"z\"",
+   "powerbi": "3002399751580330z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.5,1024)&\"z\"",
+   "powerbi": "4398046511104z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+0.5,7)&\"z\"",
+   "powerbi": "643371375338642z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+1,-2)&\"z\"",
+   "powerbi": "-2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+1,1)&\"z\"",
+   "powerbi": "4503599627370498z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+1,1.5)&\"z\"",
+   "powerbi": "3002399751580331z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+1,3)&\"z\"",
+   "powerbi": "1501199875790165z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52+1,7)&\"z\"",
+   "powerbi": "643371375338642z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52,-2)&\"z\"",
+   "powerbi": "-2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52,0.5)&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52,1)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52,1.5)&\"z\"",
+   "powerbi": "3002399751580330z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52,1024)&\"z\"",
+   "powerbi": "4398046511104z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52,2)&\"z\"",
+   "powerbi": "2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52,3)&\"z\"",
+   "powerbi": "1501199875790165z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52-0.5,0.5)&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52-0.5,1)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52-0.5,1.5)&\"z\"",
+   "powerbi": "3002399751580330z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52-0.5,2)&\"z\"",
+   "powerbi": "2251799813685247z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^52-0.5,7)&\"z\"",
+   "powerbi": "643371375338642z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^53+1,-2)&\"z\"",
+   "powerbi": "-4503599627370496z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^53+1,1.5)&\"z\"",
+   "powerbi": "6004799503160662z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^53+1,2)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^54+5,3)&\"z\"",
+   "powerbi": "6004799503160664z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^56/3,3)&\"z\"",
+   "powerbi": "8006399337547548z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^62+512,1024)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^63-1024,1024)&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(3*2^61,1024)&\"z\"",
+   "powerbi": "6755399441055744z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(7*2^50+0.5,-2)&\"z\"",
+   "powerbi": "-3940649673949184z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(7*2^50+0.5,0.5)&\"z\"",
+   "powerbi": "15762598695796736z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(7*2^50+0.5,1)&\"z\"",
+   "powerbi": "7881299347898368z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(7*2^50+0.5,1.5)&\"z\"",
+   "powerbi": "5254199565265580z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(7*2^50+0.5,3)&\"z\"",
+   "powerbi": "2627099782632789z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(7*2^50+0.5,7)&\"z\"",
+   "powerbi": "1125899906842624z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(2^51+0.5,INTEGER))&\"z\"",
+   "powerbi": "2251799813685249z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(CONVERT(6^20,INTEGER))&\"z\"",
+   "powerbi": "3656158440062976z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,0.25)&\"z\"",
+   "powerbi": "2.25179981368525E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,1)&\"z\"",
+   "powerbi": "2251799813685250z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,11)&\"z\"",
+   "powerbi": "2251799813685246z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,2)&\"z\"",
+   "powerbi": "2251799813685240z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,2.5)&\"z\"",
+   "powerbi": "2.25179981368525E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,2048)&\"z\"",
+   "powerbi": "2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,3)&\"z\"",
+   "powerbi": "2251799813685249z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(2^51+0.5,9)&\"z\"",
+   "powerbi": "2251799813685249z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(6^20,1)&\"z\"",
+   "powerbi": "3656158440062980z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(6^20,11)&\"z\"",
+   "powerbi": "3656158440062975z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(6^20,2)&\"z\"",
+   "powerbi": "3656158440062980z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(6^20,3)&\"z\"",
+   "powerbi": "3656158440062970z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CEILING(6^20,9)&\"z\"",
+   "powerbi": "3656158440062976z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^51+0.5,0.25)&\"z\"",
+   "powerbi": "2.25179981368525E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^51+0.5,2)&\"z\"",
+   "powerbi": "2251799813685240z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^51+0.5,2.5)&\"z\"",
+   "powerbi": "2.25179981368525E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^51+0.5,2048)&\"z\"",
+   "powerbi": "2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(2^51+0.5,9)&\"z\"",
+   "powerbi": "2251799813685249z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(6^20,11)&\"z\"",
+   "powerbi": "3656158440062975z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(6^20,2)&\"z\"",
+   "powerbi": "3656158440062980z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(6^20,2.5)&\"z\"",
+   "powerbi": "3.65615844006298E+15z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(6^20,2048)&\"z\"",
+   "powerbi": "3656158440062976z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(6^20,3)&\"z\"",
+   "powerbi": "3656158440062970z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FLOOR(6^20,9)&\"z\"",
+   "powerbi": "3656158440062976z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(INT(2^51+0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(INT(6^20))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(-(2^56)+3,11)&\"z\"",
+   "powerbi": "-6550690367084358z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(-(2^56)+3,9)&\"z\"",
+   "powerbi": "-8006399337547548z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^51+0.5,0.25)&\"z\"",
+   "powerbi": "9007199254740994z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^51+0.5,1)&\"z\"",
+   "powerbi": "2251799813685248z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^51+0.5,11)&\"z\"",
+   "powerbi": "204709073971386z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^51+0.5,2.5)&\"z\"",
+   "powerbi": "900719925474099z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^51+0.5,2048)&\"z\"",
+   "powerbi": "1099511627776z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(2^51+0.5,3)&\"z\"",
+   "powerbi": "750599937895082z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^52*3+1,-3)&\"z\"",
+   "powerbi": "-4503599627370496z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^52*3+1,2)&\"z\"",
+   "powerbi": "6755399441055744z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^53*1.5+1,2)&\"z\"",
+   "powerbi": "6755399441055744z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^53*1.5+1,2.5)&\"z\"",
+   "powerbi": "5404319552844596z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^53*1.5+1,3)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^53+5,2)&\"z\"",
+   "powerbi": "4503599627370498z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^54+3,2.5)&\"z\"",
+   "powerbi": "7205759403792796z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^54+3,3)&\"z\"",
+   "powerbi": "6004799503160664z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(3^34+1,-3)&\"z\"",
+   "powerbi": "-5559060566555524z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(3^34+1,2)&\"z\"",
+   "powerbi": "8338590849833284z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(3^34+1,2.5)&\"z\"",
+   "powerbi": "6670872679866628z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(3^34+1,3)&\"z\"",
+   "powerbi": "5559060566555524z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,-3)&\"z\"",
+   "powerbi": "-1218719480020992z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,1)&\"z\"",
+   "powerbi": "3656158440062976z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,11)&\"z\"",
+   "powerbi": "332378040005725z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,2)&\"z\"",
+   "powerbi": "1828079220031488z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,2.5)&\"z\"",
+   "powerbi": "1462463376025190z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,2048)&\"z\"",
+   "powerbi": "1785233613312z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,3)&\"z\"",
+   "powerbi": "1218719480020992z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "QUOTIENT(6^20,9)&\"z\"",
+   "powerbi": "406239826673664z",
+   "now": "LOCAL-REJECT:A rounding to an integer of a power result from #E# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(POWER(3,35),9)&\"z\"",
+   "powerbi": "5559060566555524z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(POWER(7,14)*POWER(2,14)+1,1.5)&\"z\"",
+   "powerbi": "7408004550372012z",
+   "now": "LOCAL-REJECT:A QUOTIENT whose result is from #^# to #^# is not modelled by the local engine."
+  }
+ ]
+}
