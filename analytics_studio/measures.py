@@ -4365,6 +4365,142 @@ def _is_datetime_conversion(node: Any) -> bool:
             and node[2][1][0] == "table" and str(node[2][1][1]).upper() == "DATETIME")
 
 
+_STRUCTURAL_CALLS = frozenset({"AND", "CALCULATE", "CONCATENATE", "COUNTROWS", "DATE", "FACT", "FILTER", "IF", "MAX", "MAXX", "MIN", "MOD", "NOT", "OR", "SELECTEDVALUE", "SUM", "SUMX", "UPPER"})
+_STRUCTURAL_TEXT_WRAPPED = frozenset({"ABS", "EXP", "ROUND", "INT", "TRUNC", "SIGN", "CURRENCY"})
+_STRUCTURAL_TEXT_RESULT = {
+    "ISTEXT": True, "ISSTRING": True, "ISNONTEXT": False, "ISNUMBER": False, "ISNUMERIC": False, "ISLOGICAL": False, "ISBOOLEAN": False,
+    "ISDOUBLE": False, "ISDECIMAL": False, "ISDATETIME": False, "ISINTEGER": False, "ISINT64": False, "ISCURRENCY": False,
+}
+
+
+def _structural_parts(node: Any, calls: set[str], operators: set[str]) -> None:
+    """Collect the call names and the arithmetic operators used anywhere under node (let bindings included)."""
+    if not isinstance(node, tuple) or not node:
+        return
+    if node[0] == "call":
+        calls.add(str(node[1]).upper())
+        for argument in node[2]:
+            _structural_parts(argument, calls, operators)
+    elif node[0] == "binary":
+        operators.add(str(node[1]))
+        for operand in node[2:4]:
+            _structural_parts(operand, calls, operators)
+    elif node[0] == "let":
+        for _, bound in node[1]:
+            _structural_parts(bound, calls, operators)
+        _structural_parts(node[2], calls, operators)
+    else:
+        for child in node[1:]:
+            if isinstance(child, tuple):
+                _structural_parts(child, calls, operators)
+            elif isinstance(child, list):
+                for item in child:
+                    _structural_parts(item, calls, operators)
+
+
+def _structural_type_answer(function: str, argument: tuple[Any, ...]) -> bool | None:
+    """Task 50: a type test of an argument whose evaluation failed, answered by the argument's static type alone.
+    Measured on Power BI: only the families below answered (every other failing shape raised or is unmeasured, so None: the caller keeps its old behaviour).
+    All calls under the argument must be in a small measured set and there is no division (a division by zero is seen at once).
+      arithmetic + - * : ISTEXT / ISNONTEXT / ISLOGICAL always; ISCURRENCY / ISDATETIME when no FACT / MOD / ^ / DATE is involved; ISINT64 likewise for *.
+      & (concatenation) : text (ISTEXT True, others False); with FACT or ^ only ISLOGICAL and ISNUMBER.
+      CONCATENATE / UPPER : text, around ABS EXP ROUND INT TRUNC SIGN CURRENCY too.
+      && || AND OR : ISLOGICAL True."""
+    if function not in _STRUCTURAL_TEXT_RESULT or not isinstance(argument, tuple) or not argument:
+        return None
+    calls: set[str] = set()
+    operators: set[str] = set()
+    _structural_parts(argument, calls, operators)
+    if "/" in operators:
+        return None
+    if any(isinstance(part, tuple) and part and part[0] == "reference" for part in _walk_nodes(argument)):
+        return None  # a column read beside the failing part: Power BI raises there (measured, 26 rows), so refuse; only literal-constant operands are answered
+    risky = bool(calls & {"FACT", "MOD"}) or "^" in operators
+    head = argument[0]
+    if head == "binary" and argument[1] in {"+", "-", "*"}:
+        if not calls <= _STRUCTURAL_CALLS:
+            return None
+        if function in {"ISTEXT", "ISLOGICAL"}:
+            return False
+        if function == "ISNONTEXT":
+            return True
+        if risky or "DATE" in calls:
+            return None  # a date in the arithmetic makes it a date (ISDATETIME True, measured)
+        if function in {"ISCURRENCY", "ISDATETIME"} or (function == "ISINT64" and argument[1] == "*"):
+            return False
+        return None
+    if head == "concat":
+        if not calls <= _STRUCTURAL_CALLS or "CONVERT" in calls:
+            return None
+        if bool(calls & {"FACT"}) or "^" in operators:
+            return False if function in {"ISLOGICAL", "ISNUMBER"} else None
+        return _STRUCTURAL_TEXT_RESULT[function]
+    if head == "call" and str(argument[1]).upper() in {"CONCATENATE", "UPPER"}:
+        if not calls <= (_STRUCTURAL_CALLS | _STRUCTURAL_TEXT_WRAPPED) or calls & {"FACT", "MOD"}:
+            return None  # CONCATENATE / UPPER of FACT or MOD raise in Power BI (measured)
+        return _STRUCTURAL_TEXT_RESULT[function]
+    if function == "ISLOGICAL" and (head == "logical" or (head == "call" and str(argument[1]).upper() in {"AND", "OR"})):
+        if not calls <= _STRUCTURAL_CALLS:
+            return None
+        return True
+    return None
+
+
+_EMPTY_OPERAND_CALLS = frozenset({"COUNTROWS", "SUMX", "MINX", "MAXX", "CALCULATE", "LOOKUPVALUE"})
+
+
+def _blank_product_hides_failure(node: Any, is_empty: Callable[[Any], bool]) -> bool:
+    """Task 50: a product / quotient is BLANK when one of its factors (or its dividend) is an aggregate that evaluates to BLANK, even if
+    another factor fails; a BLANK divisor is a division by zero, so it does not count.  A failing factor that iterates a table (SUMX(Facts, ERROR("x")))
+    is raised before the BLANK is seen, unless a BLANK factor stands to its left.  Measured on VAR q = ... RETURN ISBLANK(q) (14 rows, 0 counterexamples)."""
+    if not isinstance(node, tuple) or node[0] != "binary" or node[1] not in {"*", "/"}:
+        return False
+    factors: list[Any] = []
+
+    def flatten(part: Any, dividend: bool) -> None:
+        if isinstance(part, tuple) and part and part[0] == "binary" and part[1] in {"*", "/"}:
+            flatten(part[2], dividend)
+            if part[1] == "*":
+                flatten(part[3], dividend)
+            else:
+                factors.append(("divisor", part[3]))
+        else:
+            factors.append(("factor", part))
+
+    flatten(node, True)
+    seen_empty = False
+    for role, part in factors:
+        iterates = any(
+            isinstance(child, tuple) and child and child[0] == "call" and str(child[1]).upper() in _ITERATOR_CALLS and not _structural_filter_false(child)
+            for child in _walk_nodes(part)
+        )
+        if role == "factor" and isinstance(part, tuple) and part[0] == "call" and str(part[1]).upper() in _EMPTY_OPERAND_CALLS and is_empty(part):
+            seen_empty = True
+        elif iterates and not seen_empty:
+            return False
+    return seen_empty
+
+
+def _walk_nodes(node: Any) -> Iterable[Any]:
+    if isinstance(node, tuple) and node:
+        yield node
+        for child in (node if isinstance(node[0], tuple) else node[1:]):  # an argument tuple holds nodes from its first item
+            if isinstance(child, tuple):
+                yield from _walk_nodes(child)
+            elif isinstance(child, list):
+                for item in child:
+                    yield from _walk_nodes(item)
+
+
+def _structural_filter_false(call: tuple[Any, ...]) -> bool:
+    """An iterator over FILTER(table, FALSE()): no rows, so nothing inside it runs."""
+    table = call[2][0] if len(call) > 2 and call[2] else None
+    return (
+        isinstance(table, tuple) and table[0] == "call" and str(table[1]).upper() == "FILTER" and len(table[2]) == 2
+        and isinstance(table[2][1], tuple) and table[2][1][0] == "call" and str(table[2][1][1]).upper() == "FALSE"
+    )
+
+
 def _currency_divisions(node: Any, currency_typed: Callable[[Any], bool]) -> list[tuple[Any, ...]]:
     """The divisions inside this node whose numerator is a Currency that reads data and whose divisor is not a Currency: Power BI raises
     their division by zero even where ISBLANK skips the rest (Task 19 Part C). A division that can itself never be BLANK (its numerator cannot)
@@ -4372,6 +4508,8 @@ def _currency_divisions(node: Any, currency_typed: Callable[[Any], bool]) -> lis
     found: list[tuple[Any, ...]] = []
     if not isinstance(node, tuple) or not node:
         return found
+    if _never_blank(node):
+        return found  # Task 50 Part A: a Currency division under a never-blank operator (2/(CURRENCY(x)/0), (CURRENCY(x)/0)&"z", ...+1) is not raised by ISBLANK (measured)
     if node[0] == "binary" and node[1] == "/" and currency_typed(node[2]) and not currency_typed(node[3]) and any(True for _ in _iter_reference_nodes(node[2])) and not _never_blank(node):
         found.append(node)
     children = node if isinstance(node[0], tuple) else node[1:]
@@ -17072,6 +17210,10 @@ def evaluate_measures(
                 raise
             values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
         except (MeasureRuntimeError, _HardError) as failure:
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
+                structural = _structural_type_answer(function, arguments[0])  # Task 50: a failing argument answered by its static type
+                if structural is not None:
+                    return structural
             if isinstance(failure, _PowerFailure) and function in _TYPE_TESTS and len(arguments) == 1 and (
                 not _is_bare_power(arguments[0]) or (failure.zero_base and failure.row_dependent)
             ):
@@ -19547,6 +19689,12 @@ def evaluate_measures(
         if function == "ALLCROSSFILTERED":
             raise MeasureError("ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.")
         if function == "ISBLANK":
+            def _evaluates_blank(part: tuple[Any, ...], context: Any) -> bool:
+                try:
+                    return evaluate(part, context, allow_text=True) is None
+                except (MeasureRuntimeError, _HardError):
+                    return False
+
             held_argument = bound_expression(arguments[0])  # Task 19 Part C: an argument that is a VAR is judged by its expression
             if _never_blank(held_argument):
                 # Task 19 Part C: an argument that can never be BLANK is not evaluated, so its run-time errors are not seen. A Currency division
@@ -19581,9 +19729,14 @@ def evaluate_measures(
                 except (MeasureRuntimeError, _HardError):
                     pass  # an error of a row or of an operand: the operator is typed True/False, so ISBLANK never asks for its value
                 return False
-            return _isblank_consume(
-                lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean), arguments[0]
-            )  # Task 20 Part A: an argument that can never be BLANK was answered above; any other error propagates
+            try:
+                return _isblank_consume(
+                    lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean), arguments[0]
+                )  # Task 20 Part A: an argument that can never be BLANK was answered above; any other error propagates
+            except (MeasureRuntimeError, _HardError):
+                if arguments[0][0] == "var" and _blank_product_hides_failure(held_argument, lambda part: _evaluates_blank(part, row_context)):
+                    return True  # Task 50 Part A: VAR q = (a failing value) * (a BLANK) RETURN ISBLANK(q) is True (measured; the same ISBLANK(...) written inline raises)
+                raise
         if function == "IFERROR":
             hits_before = len(nan_date_extreme)
             iferror_depth[0] += 1
