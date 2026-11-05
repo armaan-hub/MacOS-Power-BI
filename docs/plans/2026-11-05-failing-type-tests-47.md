@@ -16,3 +16,6 @@ Compute, never look up (app code must never read `tools/parity/*.json` or test f
 
 ## Done when
 The scorer prints 0 wrong with as many matches as possible, `tools/parity_check.py` replay (no `--tests`) shows 0 DIFF and 0 CRASH, and a ready-for-review entry with scorer counts per Part and the replay line is appended to this plan.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 146. Locked 481961.

@@ -1944,3 +1944,9 @@ Power BI rounds values from 1E15 to 2^53 in doubles: FLOOR/CEILING cut x/signifi
 Haiku coded, Opus planned and reviewed. PRODUCTX over a Currency value inside SWITCH or COALESCE bodies with no IF inside now answers with the exact product of the row values, and a one-row table with a conditional Currency body answers too; IF/IF.EAGER bodies over several rows stay refused (Power BI adds unexplained noise there). A fresh Power BI grid of 779 such formulas matched 779 of 779; they are saved as dax_battery_productx46_extra.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2697 passed; replay 484968: 481620 match, 3348 refused, 0 DIFF, 0 CRASH; locked 480800 to 481600. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 146 (Task 57 failing-type-tests-47: type tests around failing values)
+
+Haiku extended the static type answers for type tests (ISLOGICAL, ISNUMBER, ISDOUBLE, ISTEXT and others) over concat, logical and arithmetic shapes whose operands fail. Its first version answered 135 saved shapes wrongly; Sonnet narrowed it back to the measured call set, refused column reads under && and ||, and refused type tests over two failing operands when one is DATEVALUE/TIMEVALUE text (3 wrong answers that main also had). Fresh Power BI grid: 351 shapes, 316 match, 35 refused, 0 wrong; saved as dax_battery_failtype47_extra.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2701 passed; replay 485319: 481981 match, 3338 refused, 0 DIFF, 0 CRASH; locked 481600 to 481961. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
