@@ -2203,10 +2203,12 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
     flow_signs = [value > 0.0 for value, _ in ordered if value != 0.0]
     sign_flips = sum(1 for a, b in zip(flow_signs, flow_signs[1:]) if a != b)
     first_row_earliest = flows[0][1] == first_day
-    if root_count >= 2 and not first_row_earliest:
-        # Measured: four fresh answers with several roots and the first table row not at the earliest date broke every model
-        # (two "couldn't find a solution" where a bracket exists, one number where no bracket exists, one lowest root).  Refuse.
-        return ("refuse", None)
+    # The NPV tends to the sum of the earliest-date flows as 1 + rate grows and to the sum of the latest-date flows as it shrinks to 0.
+    early_sum = sum(value for value, day in ordered if day == first_day)
+    late_sum = sum(value for value, day in ordered if day == ordered[-1][1])
+    hidden_root = (
+        early_sum != 0.0 and late_sum != 0.0 and (root_count % 2 == 1) != ((early_sum > 0.0) != (late_sum > 0.0))
+    )  # a root beyond the grid (1 + rate above 1e6 or below 1e-6)
 
     def npv(u: float) -> float:
         y = base * u
@@ -2241,11 +2243,26 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
                 # Several brackets on one side of the guess.  Measured: Power BI took the first bracket going down only when it
                 # was the very first halving and nothing was found going up (5 answers); a first bracket at the 2nd halving
                 # answered "couldn't find a solution", and a second bracket going up made it answer the lower root.  Refuse the rest.
-                if direction == -1 and dn_k == 1 and up_k is None and sign_flips == 2 and root_count == 2:
+                if direction == -1 and dn_k == 1 and up_k is None and sign_flips == 2 and root_count == 2 and first_row_earliest and not positive_start:
                     continue  # only with exactly two sign flips in the date-ordered flows and two roots (3 answers); 4 flips, 2 roots was an error
+                if direction == 1 and dn_k is None:
+                    continue  # Part A (task 54): several brackets above the guess and none below: Power BI took the lowest of them (13 answers)
                 return ("refuse", None)
     except (OverflowError, ZeroDivisionError):
         return ("refuse", None)
+    if hidden_root and up_k is not None and dn_k is not None and dn_k <= 10:
+        # Measured (Task 54): a bracket going up (k=1) and one going down (k=2, a root at 2^-28 is not found by Power BI) plus a root
+        # beyond the grid: Power BI answered the lowest root where the app takes the up bracket.  Not understood: refuse.
+        return ("refuse", None)
+    if up_k is None:
+        try:
+            late_up = any((npv(2.0 ** k) > 0.0) != positive_start for k in range(61, 82))
+        except (OverflowError, ZeroDivisionError):
+            return ("refuse", None)
+        if late_up:
+            # A first bracket between 2^60 and 2^81.  Measured (Task 54): Power BI answered a root near 6e18 (bracket at k=61) where the
+            # app took the bracket going down; a first bracket at k=82 was "couldn't find a solution".  Nothing between is measured: refuse.
+            return ("refuse", None)
     if up_k is None and dn_k is None:
         if root_count:
             return ("refuse", None)  # a root exists but the doubling search misses it: Power BI returned a number for such a case
