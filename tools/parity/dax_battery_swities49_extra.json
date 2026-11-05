@@ -1,0 +1,1238 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),IF(Facts[Region]=\"East\",1,2),DESC),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),1,ASC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),1,DESC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region])),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",TRUE()),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),1),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),1,TRUE()),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,1),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Note],ASC),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]>2,TRUE()),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\"),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,ASC),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),IF(Facts[Region]=\"East\",1,2),DESC),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),LEN(Facts[Region]),TRUE()),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region],1),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),IF(Facts[Region]=\"East\",1,2),ASC),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),IF(Facts[Region]=\"East\",1,2),DESC),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],ASC),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,TRUE()),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",0),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,DESC),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),ASC),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Note],0),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]>2),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Note],1),[i])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region]),ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region])),[i],\"|\",[i])",
+   "powerbi": "0|1|2"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,1),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region]&\"x\"),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Note]),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),IF(Facts[Region]=\"East\",1,2)),[i],\"|\",[i])",
+   "powerbi": "0|1|2"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),1),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,TRUE()),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",TRUE()),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),1,ASC),[i],\"|\",[i])",
+   "powerbi": "0|1|2"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),TRUE()),[i],\"|\",[i])",
+   "powerbi": "0|1|2"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),LEN(Facts[Region]),DESC),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]>2,1),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\"),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",1),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,IF(Facts[Region]=\"East\",1,2)),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,IF(Facts[Region]=\"East\",1,2),ASC),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),IF(Facts[Region]=\"East\",1,2),TRUE()),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Quantity]>2,TRUE()),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Region],0),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),DESC),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),TRUE()),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,Facts[Quantity]>2,TRUE()),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,IF(Facts[Region]=\"East\",1,2),0),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),1,DESC),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Note],1),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region]&\"x\"),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),1,TRUE()),\"v\",[i])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region]&\"x\",0),\"v\",[i])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region]),\"v\",[i])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Quantity]>2,0),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],1),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),0),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],1),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),IF(Facts[Region]=\"East\",1,2),1),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,ASC),\"v\",[i])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],ASC),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,ASC),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),LEN(Facts[Region]),DESC),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,ASC),[i]>=1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),IF(Facts[Region]=\"East\",1,2),0),[i]>=1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Note],0),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region],0),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,DESC),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note]),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",DESC),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),IF(Facts[Region]=\"East\",1,2),ASC),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region],ASC),[i]>=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Quantity]>2,0),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region],TRUE()),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region],DESC),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],0),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),IF(Facts[Region]=\"East\",1,2),TRUE()),[i]>=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),ASC),[i]>=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),1,ASC),[i]>=1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note]),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),1,ASC),[i]>=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],0),[i]>=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,ASC),[i]>=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts),IF(Facts[Region]=\"East\",1,2),0),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Region]&\"x\"),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Region]&\"x\",ASC),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),IF(Facts[Region]=\"East\",1,2),ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),LEN(Facts[Region]),TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],ASC))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),IF(Facts[Region]=\"East\",1,2),0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",DESC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts),Facts[Region]&\"x\",0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Note],TRUE()))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region]&\"x\",ASC))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Note],0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",DISTINCT(Facts),Facts[Note],1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]>2))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,DESC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),LEN(Facts[Region]),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Note],0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),IF(Facts[Region]=\"East\",1,2),TRUE()))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region]&\"x\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]>2,TRUE()))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region],TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts),Facts[Note],DESC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Quantity]>2,TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),IF(Facts[Region]=\"East\",1,2),0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Quantity]>2,1),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,TRUE()),[i])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region]&\"x\",1),[i]*2+1)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region]&\"x\",0),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Region],ASC),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),IF(Facts[Region]=\"East\",1,2),DESC),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,ASC),[i]*2+1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],1),[i]*2+1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],ASC),[i]*2+1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],DESC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",1),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),ASC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,IF(Facts[Region]=\"East\",1,2),1),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region]),ASC),[i])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,DESC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],DESC),[i]*2+1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",ASC),[i]*2+1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),IF(Facts[Region]=\"East\",1,2),0),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),TRUE()),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",Facts,Facts[Note],DESC),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Region]&\"x\",0),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),IF(Facts[Region]=\"East\",1,2),TRUE()),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),LEN(Facts[Region]),TRUE()),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Note],0),[i]*2+1)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),1,DESC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],1),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\"),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,IF(Facts[Region]=\"East\",1,2)),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,DESC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),1,1),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),1,ASC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),1,DESC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",TRUE()),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts),1,1),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts),Facts[Quantity]>2,TRUE()),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,ASC),[i])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,TRUE()),[i]*2+1)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region]&\"x\",DESC),[i]*2+1)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region]),0),[i]*2+1)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),1,DESC),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),LEN(Facts[Region]),0),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],ASC),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,IF(Facts[Region]=\"East\",1,2),0),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Quantity]>2,TRUE()),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region]&\"x\"),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region]),1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),1,DESC),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],0),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),1,1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region],TRUE()),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),TRUE()),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region]&\"x\",1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,TRUE()),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]>2),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),IF(Facts[Region]=\"East\",1,2)),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],TRUE()),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),Facts[Quantity]>2),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),LEN(Facts[Region]),1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Note],TRUE()),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]>2,ASC),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],TRUE()),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",DESC),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,1,0),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,LEN(Facts[Region]),0),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note]),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,ASC),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),IF(Facts[Region]=\"East\",1,2)),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region])),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],ASC),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,Facts[Note],1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Quantity]>2,DESC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Quantity]>2,TRUE()),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),Facts[Region]&\"x\",TRUE()),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts),LEN(Facts[Region]),0),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),1,ASC),[i])",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,1),[i]*[i])",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),Facts[Quantity]>2,1),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",DISTINCT(Facts),LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note]),[i]*[i])",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\",1),[i])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Note],DESC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,ASC),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,DESC),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\"),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",ASC),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Quantity]>2,ASC),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Quantity]>2,DESC),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,Facts[Region]&\"x\",ASC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,LEN(Facts[Region]),0),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",Facts,LEN(Facts[Region]),ASC),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),1,0),[i]*[i])",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&\"x\"),[i])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",FILTER(Facts,Facts[Sales]>0),IF(Facts[Region]=\"East\",1,2),TRUE()),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),LEN(Facts[Region]),1),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts),LEN(Facts[Region]),DESC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),1,1),[i])",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region]),DESC),[i]*[i])",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),LEN(Facts[Region]),TRUE()),[i])",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",DISTINCT(Facts),Facts[Region]&\"x\",1),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Quantity]>2,DESC),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",1),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,Facts[Quantity]>2,ASC),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",Facts,LEN(Facts[Region]),ASC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",DESC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),IF(Facts[Region]=\"East\",1,2)),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",FILTER(Facts,Facts[Sales]>0),IF(Facts[Region]=\"East\",1,2),TRUE()),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts),Facts[Region]&\"x\",1),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts),IF(Facts[Region]=\"East\",1,2),0),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Quantity]>2,1),[i]*[i])",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),1,ASC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Quantity]>2,ASC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",DISTINCT(Facts),LEN(Facts[Region]),ASC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region]&\"x\",ASC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),Facts[Region],1),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",FILTER(Facts,Facts[Sales]>0),IF(Facts[Region]=\"East\",1,2),ASC),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,1),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,1,DESC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,IF(Facts[Region]=\"East\",1,2),0),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",Facts,LEN(Facts[Region]),ASC),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts[Quantity]),1),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),1),[i]*[i])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),DESC),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),1,DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),LEN(Facts[Region]),TRUE()),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),1,1),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),1,TRUE()),[i],\"|\",[i])",
+   "powerbi": "0|0|1|1|2"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),1),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),1),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2,TRUE()),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),0),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),1,TRUE()),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),1),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2,0),\"v\",[i])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",VALUES(Facts[Region]),LEN(Facts[Region]),1),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2)),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),LEN(Facts[Region]),0),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),Facts[Region]&\"x\",1),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),TRUE()),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),Facts[Region]&\"x\",DESC),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",VALUES(Facts[Region]),LEN(Facts[Region]),1),[i]>=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Quantity]),1,ASC),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),0),[i]*[i])",
+   "powerbi": "9"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2,TRUE()),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),0),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2)),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),1,TRUE()),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),1,TRUE()),[i])",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),LEN(Facts[Region])),[i],\"|\",[i])",
+   "powerbi": "0|1|2"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),1,TRUE()),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2,TRUE()),[i]*[i])",
+   "powerbi": "55"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",VALUES(Facts[Region]),LEN(Facts[Region]),0),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",VALUES(Facts[Region]),1,DESC),[i])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Quantity]),1,1),[i])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]&\"x\",DESC),[i]*[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",VALUES(Facts[Region]),Facts[Region]&\"x\",0),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",VALUES(Facts[Region]),Facts[Region]&\"x\",DESC),[i]>=1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),1,TRUE()),[i],\"|\",[i])",
+   "powerbi": "0|0|0|1|1|2"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts[Quantity]),1),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),1,1),[i])",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),1,DESC),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),\"i\",ALL(Facts[Quantity]),1,0),[i],\"|\",[i])",
+   "powerbi": "2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),LEN(Facts[Region]),DESC),[i],\"|\",[i])",
+   "powerbi": "0|1|1|1|2|2"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),Facts[Region]&\"x\",0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),1,1),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2,1),[i]>=1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),1),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),Facts[Region]&\"x\",ASC))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2,1),[i]*2+1)",
+   "powerbi": "11"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),LEN(Facts[Region]),ASC),\"v\",[i])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,\"i\",VALUES(Facts[Region]),1,0),[i],\"|\",[i])",
+   "powerbi": "0|0|0|1|1|2"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),1,TRUE()),[i]*[i])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2),\"v\",[i])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),1,DESC),[i],\"|\",[i])",
+   "powerbi": "0|0|1|1|2"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),1),[i]*2+1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),\"i\",ALL(Facts[Quantity]),Facts[Quantity]>2,ASC),[i]*[i])",
+   "powerbi": "55"
+  }
+ ]
+}
