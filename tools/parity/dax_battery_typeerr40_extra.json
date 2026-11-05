@@ -1,0 +1,1626 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "ISBLANK((\"\")/((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((\"a\")*(2))&&(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((\"a\"+1)&&(COUNTROWS(FILTER(Facts,FALSE()))))-(\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((((-1)^0.5)+(CURRENCY(2)))&&(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((((-1)^0.5)||(SUM(Facts[Sales])))&(MAX(Facts[Region])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((DATE(2020,13,40))&(CURRENCY(2)))^(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((DATE(2020,13,40))&(MAX(Facts[Region])))&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((ERROR(\"x\"))+(\"\"))||(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((FACT(-1))*(COUNTROWS(FILTER(Facts,FALSE()))))||(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((LN(0))-(MAX(Facts[Note])))^(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((LOG10(-5))-(BLANK()))-(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((MOD(1,0))-(2.5))+(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((MOD(1,0))-(SELECTEDVALUE(Facts[Quantity])))&&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(((NOT(\"a\"))&&(1))&&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((1)&&(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((1)&(FACT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((1)^((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((1)^(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((1/0)&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((2.5)||(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((BLANK())-(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((DATE(2020,1,1))*(LOG10(-5)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((DATE(2020,1,1))||((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((ERROR(\"x\"))-(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((LOG10(-5))&(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((MAX(Facts[Region]))+(SQRT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((SELECTEDVALUE(Facts[Quantity]))-(VALUE(\"x\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((SELECTEDVALUE(Facts[Quantity]))||(ERROR(\"x\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((SQRT(-1))+(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((TRUE())*(LOG10(-5)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((VALUE(\"x\"))/(MAX(Facts[Region])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(ABS(LN(0)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(CONCATENATE(DATE(2020,13,40),MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN((\"a\")&(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(((DATE(2020,13,40))||(BLANK()))*(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN((COUNTROWS(FILTER(Facts,FALSE())))&((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN((DATE(2020,1,1))||(FACT(-1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN((TRUE())||(DATE(2020,13,40)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(AND(DATE(2020,13,40),CURRENCY(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(UPPER((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(UPPER(MOD(1,0)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((\"\")||(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(((\"a\"+1)&&(DATE(2020,1,1)))&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((((\"a\")*(2))*(MAX(Facts[Note])))*(MAX(Facts[Region])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((((\"a\")*(2))+(BLANK()))-(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((((-1)^0.5)*(SELECTEDVALUE(Facts[Quantity])))||(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(((CONVERT(\"z\",INTEGER))*(1))+(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(((MOD(1,0))||(DATE(2020,1,1)))+(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((CONVERT(\"z\",INTEGER))&&(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((CONVERT(\"z\",INTEGER))&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((CONVERT(\"z\",INTEGER))+(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((DATE(2020,13,40))-(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((ERROR(\"x\"))||(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((LN(0))||(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((MAX(Facts[Region]))+(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((SELECTEDVALUE(Facts[Quantity]))-(\"a\"+1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 64) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISCURRENCY(AND((\"a\")*(2),BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(AND(ERROR(\"x\"),\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(CONCATENATE((\"a\")*(2),DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(CONCATENATE(FACT(-1),\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(UPPER((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(UPPER((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(UPPER(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((\"a\"+1)-(DATE(2020,1,1)))+(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((1/0)&(\"\"))&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((1/0)/(COUNTROWS(FILTER(Facts,FALSE()))))+(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((CONVERT(\"z\",INTEGER))-(BLANK()))^(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((CONVERT(\"z\",INTEGER))||(1))+(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((DATE(2020,13,40))&(2.5))&(\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((DATE(2020,13,40))^(1))+(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((ERROR(\"x\"))&&(SUM(Facts[Sales])))&&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((LN(0))^(TRUE()))||(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((NOT(\"a\"))&(TRUE()))&&(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((NOT(\"a\"))*(SELECTEDVALUE(Facts[Quantity])))&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(((NOT(\"a\"))||(MAX(Facts[Note])))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((1/0)||(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((2.5)-(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((COUNTROWS(FILTER(Facts,FALSE())))&(MOD(1,0)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((COUNTROWS(FILTER(Facts,FALSE())))+(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((DATE(2020,1,1))||(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((NOT(\"a\"))-(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(CONCATENATE((-1)^0.5,SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISDATETIME(CONCATENATE(MOD(1,0),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(UPPER(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(UPPER(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((\"a\"+1)&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(((\"a\")*(2))&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((((\"a\")*(2))&(DATE(2020,1,1)))&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(((DATE(2020,13,40))&(MAX(Facts[Region])))&(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(((FACT(-1))*(BLANK()))^(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(((LOG10(-5))^(TRUE()))&&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(((NOT(\"a\"))-(SUM(Facts[Sales])))&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((BLANK())+((\"a\")*(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE((BLANK())||(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((LN(0))&&(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((MOD(1,0))&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Division by zero has occurred when evaluating function 'MOD'.\""
+  },
+  {
+   "expr": "ISDOUBLE(CONCATENATE((\"a\")*(2),SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CONCATENATE((-1)^0.5,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CONCATENATE(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Division by zero has occurred when evaluating function 'MOD'.\""
+  },
+  {
+   "expr": "ISDOUBLE(UPPER(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(UPPER((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(UPPER(FACT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((\"\")^(FACT(-1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((\"a\")*(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((\"a\")*(1/0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((\"a\")-(LN(0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((\"a\")^((\"a\")*(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((\"a\")||((\"a\")*(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((\"a\"+1)+(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((\"a\")*(2))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((\"a\"+1)&&(1))*(CURRENCY(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((\"a\"+1)/(BLANK()))-(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((((\"a\")*(2))&&(MAX(Facts[Region])))*(MAX(Facts[Region])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((((\"a\")*(2))+(DATE(2020,1,1)))&&(MAX(Facts[Region])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((((\"a\")*(2))+(SUM(Facts[Sales])))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((((-1)^0.5)&(1))+(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((((-1)^0.5)*(1))^(TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((-1)^0.5)&(SUM(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((CONVERT(\"z\",INTEGER))/(\"a\"))&&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((CONVERT(\"z\",INTEGER))^(2.5))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(((DATE(2020,13,40))||(MAX(Facts[Region])))&&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(((ERROR(\"x\"))&(COUNTROWS(FILTER(Facts,FALSE()))))+(\"a\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((ERROR(\"x\"))/(DATE(2020,1,1)))+(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((ERROR(\"x\"))||(SUM(Facts[Sales])))+(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((FACT(-1))+(SELECTEDVALUE(Facts[Quantity])))+(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((LN(0))/(\"\"))/(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((LOG10(-5))&&(COUNTROWS(FILTER(Facts,FALSE()))))&&(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((LOG10(-5))-(\"\"))/(MAX(Facts[Region])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((MOD(1,0))||(\"\"))*(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((NOT(\"a\"))*(MAX(Facts[Region])))+(CURRENCY(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((SQRT(-1))/(TRUE()))+(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(((VALUE(\"x\"))+(MAX(Facts[Region])))||(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((1)&(LN(0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((1/0)&&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((2.5)*(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((2.5)^((\"a\")*(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((2.5)^(MOD(1,0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((BLANK())&(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((CONVERT(\"z\",INTEGER))||(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((COUNTROWS(FILTER(Facts,FALSE())))*(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((CURRENCY(2))&(MOD(1,0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((CURRENCY(2))*((-1)^0.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((CURRENCY(2))+(LN(0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((DATE(2020,13,40))*(\"a\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((ERROR(\"x\"))*(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((MAX(Facts[Note]))&(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((MAX(Facts[Region]))&&(DATE(2020,13,40)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((MOD(1,0))&&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((MOD(1,0))*(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((NOT(\"a\"))^(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((SUM(Facts[Sales]))^(LOG10(-5)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((TRUE())&&(FACT(-1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((VALUE(\"x\"))/(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(AND(\"a\"+1,2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(CONCATENATE(ERROR(\"x\"),SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(LEFT(1/0,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(LEFT(NOT(\"a\"),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(LEFT(SQRT(-1),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(OR(DATE(2020,1,1),DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(((\"a\")*(2))||(\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(((\"a\"+1)-(MAX(Facts[Region])))*(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(((-1)^0.5)||(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(((1/0)||(\"a\"))*(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(((MOD(1,0))-(MAX(Facts[Note])))&(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(((SQRT(-1))&&(\"\"))||(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(((SQRT(-1))-(DATE(2020,1,1)))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((1/0)+(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((BLANK())*(MOD(1,0)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((BLANK())||(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((DATE(2020,1,1))&&(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((MAX(Facts[Note]))*(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((MOD(1,0))&(MAX(Facts[Region])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((NOT(\"a\"))&(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((NOT(\"a\"))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((NOT(\"a\"))||(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((SUM(Facts[Sales]))&(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((SUM(Facts[Sales]))||(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((TRUE())^(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((VALUE(\"x\"))&&(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(ABS(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(OR(2.5,ERROR(\"x\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(UPPER(FACT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(((\"a\"+1)*(1))||(\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(((CONVERT(\"z\",INTEGER))*(TRUE()))&&(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(((CONVERT(\"z\",INTEGER))||(SUM(Facts[Sales])))&(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(((MOD(1,0))||(CURRENCY(2)))+(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(((NOT(\"a\"))&(\"\"))&(MAX(Facts[Region])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(((SQRT(-1))&&(\"\"))&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((BLANK())*(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((CONVERT(\"z\",INTEGER))^(\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((DATE(2020,13,40))-(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((DATE(2020,13,40))-(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((MOD(1,0))&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((NOT(\"a\"))&(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((NOT(\"a\"))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((SELECTEDVALUE(Facts[Quantity]))&(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((SUM(Facts[Sales]))-(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(CONCATENATE(MOD(1,0),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(UPPER(MOD(1,0)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"a\")&((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"a\"+1)*(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((\"a\")*(2))*(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((\"a\")*(2))||(MAX(Facts[Note])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(((\"a\"+1)&(BLANK()))*(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((\"a\"+1)+(BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((\"a\"+1)-(SELECTEDVALUE(Facts[Quantity])))+(TRUE()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL(((\"a\"+1)-(TRUE()))||(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL((((\"a\")*(2))^(TRUE()))&&(MAX(Facts[Region])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((((\"a\")*(2))||(SELECTEDVALUE(Facts[Quantity])))&(\"\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL((((\"a\")*(2))||(SUM(Facts[Sales])))&&(MAX(Facts[Note])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((((-1)^0.5)+(COUNTROWS(FILTER(Facts,FALSE()))))&(\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((((-1)^0.5)+(MAX(Facts[Note])))*(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((-1)^0.5)&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((-1)^0.5)*(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((-1)^0.5)+(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((-1)^0.5)-(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISLOGICAL(((DATE(2020,13,40))-(COUNTROWS(FILTER(Facts,FALSE()))))-(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((FACT(-1))||(DATE(2020,1,1)))-(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(((FACT(-1))||(SUM(Facts[Sales])))&&(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(((MOD(1,0))+(1))||(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(((NOT(\"a\"))+(2.5))||(\"a\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(((NOT(\"a\"))||(\"a\"))&&(SUM(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(((SQRT(-1))^(COUNTROWS(FILTER(Facts,FALSE()))))||(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((COUNTROWS(FILTER(Facts,FALSE())))&&(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((COUNTROWS(FILTER(Facts,FALSE())))&(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((COUNTROWS(FILTER(Facts,FALSE())))*((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((MAX(Facts[Note]))&&(NOT(\"a\")))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((MAX(Facts[Region]))&&((\"a\")*(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((NOT(\"a\"))+(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((NOT(\"a\"))||(MAX(Facts[Region])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((SELECTEDVALUE(Facts[Quantity]))||(\"a\"+1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 64) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))&(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))*((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))-(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((TRUE())+(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(ABS(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(AND(FACT(-1),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(AND(MOD(1,0),DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(AND(MOD(1,0),TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(CONCATENATE(DATE(2020,13,40),SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(CONCATENATE(FACT(-1),SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) An argument of function 'FACT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISLOGICAL(CONCATENATE(NOT(\"a\"),2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(CONCATENATE(NOT(\"a\"),DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(OR(\"a\",\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(OR(CURRENCY(2),VALUE(\"x\")))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(OR(MAX(Facts[Region]),FACT(-1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(UPPER(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(UPPER((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(UPPER(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(UPPER(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((\"\")-(MOD(1,0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((\"a\")&(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(((\"a\")*(2))*(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((\"a\"+1)-(MAX(Facts[Region])))&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((((\"a\")*(2))||(SELECTEDVALUE(Facts[Quantity])))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNONTEXT((((-1)^0.5)&&(BLANK()))&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((((-1)^0.5)-(TRUE()))*(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((-1)^0.5)+(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((1/0)&&(\"\"))-(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((DATE(2020,13,40))&(\"\"))&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(((DATE(2020,13,40))/(TRUE()))*(CURRENCY(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((FACT(-1))&&(DATE(2020,1,1)))*(MAX(Facts[Region])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((FACT(-1))&(COUNTROWS(FILTER(Facts,FALSE()))))+(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((FACT(-1))+(BLANK()))-(\"a\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(((NOT(\"a\"))&(2.5))+(MAX(Facts[Region])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((1)+(MOD(1,0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((1/0)-(TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((2.5)-(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((BLANK())-(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((COUNTROWS(FILTER(Facts,FALSE())))&&(DATE(2020,13,40)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((COUNTROWS(FILTER(Facts,FALSE())))&(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((FACT(-1))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((MAX(Facts[Region]))&(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((NOT(\"a\"))&(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((SELECTEDVALUE(Facts[Quantity]))*(NOT(\"a\")))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((SELECTEDVALUE(Facts[Quantity]))-((\"a\")*(2)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 64) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))+(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((TRUE())&(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((TRUE())&(MOD(1,0)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((TRUE())+(NOT(\"a\")))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(CONCATENATE(\"a\"+1,MAX(Facts[Region])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(CONCATENATE(1/0,TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(CONCATENATE(FACT(-1),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((\"a\")&((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((\"a\")*(DATE(2020,13,40)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((\"a\"+1)&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMBER((((\"a\")*(2))&(1))^(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((((\"a\")*(2))^(SELECTEDVALUE(Facts[Quantity])))&(TRUE()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMBER((((-1)^0.5)-(SUM(Facts[Sales])))&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(((-1)^0.5)&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(((1/0)*(SUM(Facts[Sales])))||(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(((1/0)+(2.5))*(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(((FACT(-1))^(SELECTEDVALUE(Facts[Quantity])))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(((LN(0))*(TRUE()))||(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(((NOT(\"a\"))&(MAX(Facts[Note])))&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(((NOT(\"a\"))+(\"a\"))&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'a' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISNUMBER((1/0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((BLANK())&(FACT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((CURRENCY(2))*((\"a\")*(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((MAX(Facts[Note]))&((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((MOD(1,0))&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((SELECTEDVALUE(Facts[Quantity]))&&(VALUE(\"x\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((SELECTEDVALUE(Facts[Quantity]))/(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(UPPER((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(UPPER(FACT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((\"a\"+1)*(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(((\"a\"+1)&(SUM(Facts[Sales])))&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((((\"a\")*(2))&&(\"a\"))*(CURRENCY(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(((CONVERT(\"z\",INTEGER))+(2.5))&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(((CONVERT(\"z\",INTEGER))^(MAX(Facts[Region])))&&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(((DATE(2020,13,40))/(2.5))&&(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(((NOT(\"a\"))+(\"a\"))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((BLANK())&(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((DATE(2020,13,40))&&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((MAX(Facts[Note]))&(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((MAX(Facts[Region]))&(\"a\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((NOT(\"a\"))&(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((SUM(Facts[Sales]))&&(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC((TRUE())-(1/0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(ABS(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(AND(DATE(2020,13,40),BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(CONCATENATE((-1)^0.5,SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((\"\")*(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((\"a\")+(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((\"a\")^((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((((\"a\")*(2))||(CURRENCY(2)))*(\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(((DATE(2020,13,40))||(1))+(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(((FACT(-1))||(DATE(2020,1,1)))&(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING(((MOD(1,0))/(COUNTROWS(FILTER(Facts,FALSE()))))||(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(((NOT(\"a\"))*(DATE(2020,1,1)))&(SUM(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING(((NOT(\"a\"))-(\"\"))&(\"a\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((1/0)-(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((CURRENCY(2))||((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((DATE(2020,1,1))||(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((DATE(2020,13,40))&(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((DATE(2020,13,40))+(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((DATE(2020,13,40))^(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((MAX(Facts[Note]))&(MOD(1,0)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((NOT(\"a\"))&(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((SELECTEDVALUE(Facts[Quantity]))/(ERROR(\"x\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((SUM(Facts[Sales]))||(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(ABS((\"a\")*(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(OR(MAX(Facts[Region]),1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(UPPER(\"a\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING(UPPER((\"a\")*(2)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING(UPPER(FACT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) An argument of function 'FACT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISTEXT(((\"a\")*(2))+(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISTEXT(((\"a\")*(2))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((((\"a\")*(2))||(\"\"))*(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((((-1)^0.5)&&(BLANK()))*(MAX(Facts[Region])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((((-1)^0.5)*(TRUE()))+(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((((-1)^0.5)+(BLANK()))||(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((((-1)^0.5)||(MAX(Facts[Region])))*(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(((CONVERT(\"z\",INTEGER))&(1))*(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(((ERROR(\"x\"))-(\"a\"))||(CURRENCY(2)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(((FACT(-1))+(MAX(Facts[Region])))*(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((2.5)*((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((2.5)/(DATE(2020,13,40)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((BLANK())^(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((COUNTROWS(FILTER(Facts,FALSE())))*(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((COUNTROWS(FILTER(Facts,FALSE())))-((-1)^0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((DATE(2020,13,40))^(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((FACT(-1))+(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((FACT(-1))-(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((MAX(Facts[Region]))-(NOT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((MOD(1,0))-(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((NOT(\"a\"))*(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((NOT(\"a\"))+(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'a' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISTEXT((NOT(\"a\"))-(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'a' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISTEXT((SELECTEDVALUE(Facts[Quantity]))&((\"a\")*(2)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 61) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISTEXT((SELECTEDVALUE(Facts[Quantity]))*(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((VALUE(\"x\"))||(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(CONCATENATE(\"a\"+1,TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(CONCATENATE((-1)^0.5,MAX(Facts[Note])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(CONCATENATE(FACT(-1),BLANK()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) An argument of function 'FACT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "VAR q=(\"\")&&(1/0) RETURN ISINT64(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(\"a\")||(1/0) RETURN ISBOOLEAN(q)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR q=(\"a\"+1)||(1) RETURN ISINT64(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((\"a\"+1)&&(BLANK()))+(DATE(2020,1,1)) RETURN ISTEXT(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((-1)^0.5)&(2.5) RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((1/0)&(SELECTEDVALUE(Facts[Quantity])))&&(SELECTEDVALUE(Facts[Quantity])) RETURN ISINT64(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((CONVERT(\"z\",INTEGER))-(CURRENCY(2)))/(SELECTEDVALUE(Facts[Quantity])) RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((CONVERT(\"z\",INTEGER))||(SELECTEDVALUE(Facts[Quantity])))||(DATE(2020,1,1)) RETURN ISBOOLEAN(q)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR q=((DATE(2020,13,40))+(SELECTEDVALUE(Facts[Quantity])))||(SUM(Facts[Sales])) RETURN ISDATETIME(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((ERROR(\"x\"))-(TRUE()))||(TRUE()) RETURN ISNONTEXT(q)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR q=((FACT(-1))||(CURRENCY(2)))||(SUM(Facts[Sales])) RETURN ISNONTEXT(q)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR q=((LN(0))||(TRUE()))^(SELECTEDVALUE(Facts[Quantity])) RETURN ISDATETIME(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((LOG10(-5))-(SELECTEDVALUE(Facts[Quantity])))||(\"\") RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=((NOT(\"a\"))&&(SELECTEDVALUE(Facts[Quantity])))&(CURRENCY(2)) RETURN ISBOOLEAN(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(1/0)&&(1) RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(1/0)&(\"a\") RETURN ISTEXT(q)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR q=(1/0)-(1) RETURN ISCURRENCY(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(1/0)||(2.5) RETURN ISINTEGER(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(2.5)&(1/0) RETURN ISLOGICAL(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(BLANK())*((-1)^0.5) RETURN ISERROR(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(CURRENCY(2))&&(ERROR(\"x\")) RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(DATE(2020,13,40))&(MAX(Facts[Note])) RETURN ISDATETIME(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(LN(0))&&(\"\") RETURN ISTEXT(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(MOD(1,0))||(2.5) RETURN ISINT64(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(SELECTEDVALUE(Facts[Quantity]))/(1/0) RETURN ISINTEGER(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=(SELECTEDVALUE(Facts[Quantity]))/(VALUE(\"x\")) RETURN ISBOOLEAN(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=LEFT((\"a\")*(2),1) RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=LEFT(SQRT(-1),1) RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=OR(CURRENCY(2),VALUE(\"x\")) RETURN ISBLANK(q)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR q=OR(DATE(2020,1,1),MOD(1,0)) RETURN ISNONTEXT(q)",
+   "powerbi": "True"
+  }
+ ]
+}
