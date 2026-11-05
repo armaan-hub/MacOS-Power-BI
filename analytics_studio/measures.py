@@ -12661,14 +12661,15 @@ def evaluate_measures(
         spine = body
         while spine[0] == "let":
             spine = spine[2]
-        if _conditional_is_constant(spine) and next(iter(_direct_column_references(spine)), None) is not None and (spine[1] not in {"IF", "IF.EAGER"} or not (_constant_boolean(spine[2][0]) or spine[2][0][0] in {"number", "blank"})):
+        if _conditional_is_constant(spine) and next(iter(_direct_column_references(spine)), None) is not None and (spine[1] not in {"IF", "IF.EAGER"} or not (_constant_boolean(spine[2][0]) or spine[2][0][0] in {"number", "blank"})) and not ((_stored_scan(table, variable_nodes.get) is True or (table[0] == "call" and table[1] == "TOPN" and _stored_scan(table[2][1], variable_nodes.get) is True)) and spine[1] in {"IF", "IF.EAGER"}):
             context, rows = table_argument_value(table, allow_keepfilters=True)
             if conditional_type(body, (context, rows[0] if rows else {}, 1)) in {"variant", "numdate"}:
                 return True  # live Power BI (Task 13 review): the same walk, whatever the condition that reads no row
         if spine[0] == "call" and spine[1] in {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"} and (
             (spine[1] == "COALESCE" and spine[2][0] == ("blank",) and (next(iter(_direct_column_references(spine)), None) is not None or _calls_function(spine, "TIME")))
             or (table[0] in {"call", "table_call"} and table[1] in {"DISTINCT", "TOPN"} and next(iter(_direct_column_references(spine)), None) is not None
-                and len(table_argument_value(table, allow_keepfilters=True)[1]) > 1)
+                and len(table_argument_value(table, allow_keepfilters=True)[1]) > 1
+                and not (table[0] == "call" and table[1] == "TOPN" and _stored_scan(table[2][1], variable_nodes.get) is True and spine[1] in {"IF", "IF.EAGER"}))
         ):
             return True  # live Power BI (Task 13 review): the rows come in the order of the values these expressions read
         body = spine
@@ -18959,9 +18960,10 @@ def evaluate_measures(
                 if body_category == "date/time" and function in _EMPTY_BODY_NOT_DATE:
                     raise MeasureError(f"{function} does not support expressions of type date.")
             values: list[Decimal] = []
+            value_positions: list[int] = []  # Task 51 Part C: the position in iteration_rows each value came from
             blank_results = 0
             product_has_dates = function == "PRODUCTX" and _mentions_date(arguments[1], static_scope()[0])
-            for frame in iterate_rows(context, iteration_rows, "install"):
+            for position, frame in enumerate(iterate_rows(context, iteration_rows, "install")):
                 result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=text_extreme or variant_body or result_category == "variant"))
                 if (variant_body or result_category == "variant") and isinstance(result, (bool, str)):
                     continue
@@ -18981,6 +18983,7 @@ def evaluate_measures(
                     raise MeasureError(f"{function} over a Variant that returns text is not modelled by the local engine.")  # live Power BI (Task 12 review): BLANK, the text never read as the number it spells
                 if result is not None:
                     values.append(result if text_extreme and isinstance(result, str) else as_number(result))
+                    value_positions.append(position)
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                     values.append(Decimal(0))  # these three count a blank result as zero
                     blank_results += 1
@@ -19057,7 +19060,16 @@ def evaluate_measures(
                     return values[0]  # live Power BI (Task 12 review): over a Variant nothing but NaN is NaN (its own sign, Part B), where a plain number body gives BLANK
                 if (variant_body or row_set) and len(ordered) != len(values):
                     # live Power BI (Task 12 review): NaN or the other value, depending on the order the engine walks the rows (which columns the body reads)
-                    raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    # Task 51 Part C: the running MAXX / MINX keeps the value it visits first, because NaN > x and x > NaN are both false: NaN
+                    # when the walk visits a NaN first, otherwise the extreme of the numbers.  The walk is the dictionary order of the body's columns.
+                    walked = dictionary_ordered_rows(arguments[0], context, iteration_rows, [arguments[1]]) if _stored_scan(arguments[0], variable_nodes.get) is True else iteration_rows  # a derived table's walk is not measured
+                    if walked is iteration_rows or len(value_positions) != len(values):
+                        raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    slot_of_position = {position: index for index, position in enumerate(value_positions)}
+                    index_of_row = {id(row): index for index, row in enumerate(iteration_rows)}
+                    walked_values = [values[slot_of_position[index_of_row[id(row)]]] for row in walked if index_of_row[id(row)] in slot_of_position]
+                    if walked_values[0].is_nan():
+                        return walked_values[0]
                 if not ordered:
                     if values and arguments[0][0] == "table_call" and arguments[0][1] == "VALUES" and _zero_division_beside_other_operand(arguments[1]):
                         # Task 45 Part C: BLANK (or a count that may be BLANK) minus / plus 1/0*0 is NaN in Power BI, kept by MINX / MAXX over VALUES of a column (the iterated table Facts gives BLANK, measured), where this engine gives BLANK

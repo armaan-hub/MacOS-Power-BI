@@ -104,6 +104,8 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
             return Plan(dedup=True)
         if name != "DISTINCT" and len(arguments) == 1 and arguments[0][0] == "table":
             return Plan()  # every row of the table, as the table itself
+    if name == "ALLSELECTED" and len(arguments) == 1 and arguments[0][0] == "table":
+        return Plan()  # Task 51 (live Power BI 2026-11-05): ALLSELECTED(table) is walked as ALL(table) is
     return None
 
 
