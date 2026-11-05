@@ -1,0 +1,34 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "CONCATENATEX({1,2},DATE(1899,12,29)+1.5/86400+[Value],\"|\")",
+   "powerbi": "12:00:01 AM|12/31/1899 12:00:01 AM"
+  },
+  {
+   "expr": "CONCATENATEX({1,2},DATE(1899,12,29)+2.5/86400+[Value],\"|\")",
+   "powerbi": "12:00:03 AM|12/31/1899 12:00:03 AM"
+  },
+  {
+   "expr": "ISDATETIME(((CONVERT(\"z\",INTEGER))-(SELECTEDVALUE(Facts[Quantity])))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'z' of type Text to type Integer.\""
+  },
+  {
+   "expr": "ISERROR(((VALUE(\"x\"))*(SELECTEDVALUE(Facts[Quantity])))*(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(((CONVERT(\"z\",INTEGER))/(COUNTROWS(FILTER(Facts,FALSE()))))^(MAX(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'z' of type Text to type Integer.\""
+  },
+  {
+   "expr": "ISLOGICAL((CONVERT(\"z\",INTEGER))/(MAX(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'z' of type Text to type Integer.\""
+  },
+  {
+   "expr": "ISSTRING(((CONVERT(\"z\",INTEGER))||(MAX(Facts[Region])))/(TRUE()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'z' of type Text to type Integer.\""
+  }
+ ]
+}
