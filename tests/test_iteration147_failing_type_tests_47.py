@@ -40,6 +40,12 @@ class FailingTypeTests47Tests(unittest.TestCase):
         self.assertRefused('ISDOUBLE(("a"*2)*(SUMX(FILTER(Facts,FALSE()),1)))')
         self.assertRefused('ISNUMBER((SUMX(FILTER(Facts,FALSE()),1))+(VAR y="b" RETURN y))')
 
+    def test_failing_datevalue_beside_another_failing_operand_is_refused(self) -> None:
+        # Power BI (measured live) raises "Cannot convert ..." for each of these
+        self.assertRefused('ISDOUBLE(("b"-3)*(DATEVALUE("zz")))')
+        self.assertRefused('ISTEXT((INT("a"))&&(DATEVALUE("zz")))')
+        self.assertRefused('ISINT64(("b"-3)||(DATEVALUE("zz")))')
+
 
 if __name__ == "__main__":
     unittest.main()

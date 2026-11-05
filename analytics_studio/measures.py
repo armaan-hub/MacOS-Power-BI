@@ -17106,6 +17106,28 @@ def evaluate_measures(
             return False
         return static_t in {"currency", "decimal"}  # ISDECIMAL, ISCURRENCY
 
+    def _both_operands_fail_with_date_text(node: Any, row_context: Any) -> bool:
+        """Task 57: a binary / logical operator (or AND / OR) of two operands that both fail, one of them holding a DATEVALUE / TIMEVALUE call."""
+        if not isinstance(node, tuple) or len(node) < 4 and not (len(node) == 3 and node[0] == "call"):
+            return False
+        if node[0] in {"binary", "logical"} and len(node) == 4:
+            operands = [node[2], node[3]]
+        elif node[0] == "call" and str(node[1]).upper() in {"AND", "OR"} and len(node[2]) == 2:
+            operands = list(node[2])
+        else:
+            return False
+
+        def fails_here(part: Any) -> bool:
+            try:
+                evaluate(part, row_context, allow_text=True, allow_boolean=True)
+            except Exception:
+                return True
+            return False
+
+        if not all(isinstance(operand, tuple) and operand and fails_here(operand) for operand in operands):
+            return False
+        return any(isinstance(part, tuple) and len(part) > 2 and part[0] == "call" and str(part[1]).upper() in {"DATEVALUE", "TIMEVALUE"} for operand in operands for part in _walk_nodes(operand))
+
     def hidden_failure_verdict(function: str, node: tuple[Any, ...], row_context: Any) -> str | None:
         """Task 41: where a type test of a failing argument may be answered by the argument's static type.  Measured on fresh Power BI shapes
         (never on the saved ones): the static type answers only for the shape families below; a failing value that changes kind under IF /
@@ -17408,6 +17430,10 @@ def evaluate_measures(
                 raise
             values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
         except (MeasureRuntimeError, _HardError) as failure:
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _both_operands_fail_with_date_text(arguments[0], row_context):
+                # Task 57: a type test over a binary / logical operator where one operand holds a DATEVALUE / TIMEVALUE of an unparsable text and the
+                # other operand fails as well: Power BI raised the conversion error in every live row (the static type does not hide it)
+                raise dax_typed.refusal("A type test over an operator with a failing DATEVALUE operand beside another failing operand raises in Power BI and is not modelled by the local engine.") from failure
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
                 structural = _structural_type_answer(function, arguments[0])  # Task 50: a failing argument answered by its static type
                 if structural is not None:

@@ -1,0 +1,1410 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "ISBOOLEAN((\"t\")&&(\"t\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN((MAX(Facts[Note]))&(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN((MAX(Facts[Note]))&(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(OR(FALSE(),\"a\"*2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY((\"a\"*2)&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((SUM(Facts[Sales]))&(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(AND(\"a\"*2,\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(OR(\"\",\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(OR(\"q\"*\"r\",\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((\"b\"-3)&(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((\"t\")||(0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((\"x\"+1)&(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((\"x\"+1)&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(OR(\"q\"*\"r\",\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(OR(\"t\",\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(OR(\"x\"+1,\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME(OR(\"x\"+1,\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((\"t\")&&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((BLANK())||(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((FALSE())||(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((MAX(Facts[Quantity]))&(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(AND(\"b\"-3,\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(AND(1,\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((\"b\"-3)&(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((\"b\"-3)&(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((\"t\")&&(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((\"t\")||(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((MIN(Facts[Note]))&(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(AND(\"b\"-3,\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(OR(\"t\",\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(OR(\"t\",0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(OR(0,\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"a\"*2)&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"x\"+1)&(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((MIN(Facts[Note]))&(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((MIN(Facts[Note]))&(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(OR(\"b\"-3,\"t\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(OR(\"b\"-3,FALSE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((\"a\"*2)&(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((\"t\")||(0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((SUM(Facts[Sales]))&(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(AND(TRUE(),\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(OR(\"a\"*2,BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(OR(\"t\",\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(AND(2.5,\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(OR(FALSE(),\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((MAX(Facts[Note]))&(\"b\"-3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT((MAX(Facts[Quantity]))&(\"b\"-3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(OR(\"\",\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(OR(\"b\"-3,\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(OR(FALSE(),\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((BLANK())&(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN((MAX(Facts[Note]))*(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((TRUE())||(SQRT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((\"a\"*2)*(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((INT(\"a\"))&(FALSE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((2.5)||(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(VAR v=\"\" RETURN v-(SUM(Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL((MAX(Facts[Quantity]))+(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((2.5)||(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((DATEVALUE(\"zz\"))&&(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISSTRING((BLANK())+(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((SQRT(-1))&(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(OR(\"\",\"a\"*2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(VAR v=\"b\"-3 RETURN v-(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK((\"a\"*2)||(INT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((1)+(0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64((\"\")||(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(AND(SUM(Facts[Sales]),1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((MAX(Facts[Note]))||(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'Paid' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISINTEGER((\"x\"+1)&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((SUM(Facts[Sales]))&(LEFT(\"a\",0)*1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((FALSE())+(0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((MAX(Facts[Note]))&(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((LEFT(\"a\",0)*1)||(MAX(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((\"x\"+1)&(FALSE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((MIN(Facts[Note]))&&(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'Late' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISDOUBLE((INT(\"a\"))||(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((SQRT(-1))||(FALSE()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISBLANK((SQRT(-1))||(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((\"x\"+1)&(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE((MAX(Facts[Quantity]))+(SUM(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((\"a\"*2)||(INT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((INT(\"a\"))*(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((VALUE(\"x\"))+(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISERROR((\"\")&&(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"\")&&(SQRT(-1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(OR(SUM(Facts[Sales]),MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((LEFT(\"a\",0)*1)||(\"t\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMBER((SQRT(-1))&(1/0))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISINT64((LEFT(\"a\",0)*1)&(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((FALSE())*(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((INT(\"a\"))||(1/0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(AND(INT(\"a\"),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((LEFT(\"a\",0)*1)+(1/0))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDECIMAL((SQRT(-1))&&(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISINT64((TRUE())&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((\"b\"-3)||(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((SUM(Facts[Sales]))&(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((MAX(Facts[Note]))&&(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((SQRT(-1))&(\"b\"-3))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISDECIMAL((TRUE())+(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(AND(SQRT(-1),\"t\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISINT64((2.5)&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((LEFT(\"a\",0)*1)+(SUM(Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISSTRING((MIN(Facts[Note]))&&(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'Late' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISLOGICAL(VAR v=LEFT(\"a\",0)*1 RETURN v-(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((TRUE())||(DATEVALUE(\"zz\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((\"q\"*\"r\")||(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((FALSE())&&(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((1)&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((FALSE())+(INT(\"a\")))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDECIMAL((BLANK())&&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((BLANK())&&(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT((SUM(Facts[Sales]))&&(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((INT(\"a\"))||(\"q\"*\"r\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY((0)&&(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((\"b\"-3)&&(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'b' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISSTRING((SUM(Facts[Sales]))||(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((VALUE(\"x\"))&(FALSE()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDECIMAL((\"b\"-3)||(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(VAR v=0 RETURN v-(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((BLANK())||(TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((DATEVALUE(\"zz\"))*(0))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISBLANK((SQRT(-1))||(SQRT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(AND(MIN(Facts[Note]),1/0))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'Late' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISBLANK(VAR v=TRUE() RETURN v-(MAX(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'Paid' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISINTEGER((\"\")&&(LEFT(\"a\",0)*1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(VAR v=MIN(Facts[Note]) RETURN v-(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((1)*(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDECIMAL((0)&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((MAX(Facts[Note]))+(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'Paid' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDOUBLE((VALUE(\"x\"))*(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((0)||(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((\"b\"-3)*(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'b' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISTEXT((INT(\"a\"))&&(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISTEXT((SQRT(-1))+(\"q\"*\"r\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISDOUBLE(VAR v=2.5 RETURN v-(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 48) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISNONTEXT((1)||(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING(AND(FALSE(),MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(OR(SUM(Facts[Sales]),0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"q\"*\"r\")||(0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER((SQRT(-1))&&(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISINT64((\"b\"-3)||(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'b' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((\"q\"*\"r\")&&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((SQRT(-1))&(BLANK()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISSTRING(AND(0,SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((1)&(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(OR(SQRT(-1),SUM(Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISDOUBLE((0)+(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 33) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISNONTEXT((TRUE())+(\"t\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN((2.5)&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((\"t\")&(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISLOGICAL((1/0)||(SQRT(-1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(AND(BLANK(),2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((\"b\"-3)||(FALSE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((MIN(Facts[Note]))&&(INT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((FALSE())&(1/0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((1)&(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((\"x\"+1)&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"\")&(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((\"a\"*2)||(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((FALSE())&(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT((INT(\"a\"))&(MAX(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER((MAX(Facts[Quantity]))||(VALUE(\"x\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((MIN(Facts[Note]))*(SUM(Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'Late' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((MIN(Facts[Note]))+(MAX(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Late' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDOUBLE(OR(MIN(Facts[Note]),MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((FALSE())&(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISTEXT((SUM(Facts[Sales]))||(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((MAX(Facts[Note]))&&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((BLANK())&(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((TRUE())&&(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((SUM(Facts[Sales]))||(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN((VALUE(\"x\"))+(1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISCURRENCY((\"q\"*\"r\")||(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'q' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((2.5)||(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((DATEVALUE(\"zz\"))||(\"x\"+1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISBLANK((1/0)&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((1/0)&&(MAX(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) Cannot convert value 'Paid' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISERROR((MAX(Facts[Quantity]))||(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((\"b\"-3)&(FALSE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(AND(\"\",\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((MIN(Facts[Note]))||(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(VAR v=MIN(Facts[Note]) RETURN v-(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((MAX(Facts[Note]))&&(1/0))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISBOOLEAN((TRUE())*(INT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((\"x\"+1)*(1/0))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDECIMAL((\"\")||(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((\"x\"+1)||(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((\"t\")&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((MIN(Facts[Note]))||(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((LEFT(\"a\",0)*1)&&(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISINTEGER((BLANK())+(FALSE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((INT(\"a\"))+(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((\"\")&&(\"t\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(VAR v=1 RETURN v-(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((INT(\"a\"))&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((\"b\"-3)&(FALSE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((VALUE(\"x\"))+(INT(\"a\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISINTEGER(OR(MAX(Facts[Quantity]),SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((MIN(Facts[Note]))&(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((SUM(Facts[Sales]))||(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(AND(1/0,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((VALUE(\"x\"))+(\"a\"*2))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISERROR((SUM(Facts[Sales]))*(\"t\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((TRUE())||(LEFT(\"a\",0)*1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((2.5)*(1/0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(OR(LEFT(\"a\",0)*1,MAX(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK((DATEVALUE(\"zz\"))&(DATEVALUE(\"zz\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((TRUE())&&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((BLANK())&&(LEFT(\"a\",0)*1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((\"b\"-3)&&(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDATETIME((MIN(Facts[Note]))&&(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((VALUE(\"x\"))&&(SQRT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((\"a\"*2)&&(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((MIN(Facts[Note]))&(BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT((TRUE())+(MIN(Facts[Note])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT((MAX(Facts[Quantity]))||(0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((MAX(Facts[Note]))||(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(AND(VALUE(\"x\"),MIN(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMBER((BLANK())&(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((MIN(Facts[Note]))*(\"q\"*\"r\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'Late' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISTEXT((\"b\"-3)&(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'b' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNONTEXT((\"\")*(0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER((1/0)&(\"b\"-3))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'b' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBOOLEAN((INT(\"a\"))&&(\"t\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64((VALUE(\"x\"))&(2.5))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDATETIME((0)*(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((DATEVALUE(\"zz\"))+(\"a\"*2))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISBOOLEAN((\"a\"*2)+(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(VAR v=\"x\"+1 RETURN v-(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(OR(MIN(Facts[Note]),TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER((\"\")+(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISINT64((VALUE(\"x\"))&&(\"x\"+1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDECIMAL((\"\")&(TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((SQRT(-1))&&(\"a\"*2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDATETIME((1)*(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((\"t\")||(VALUE(\"x\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(VAR v=MAX(Facts[Quantity]) RETURN v-(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(AND(0,SQRT(-1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((LEFT(\"a\",0)*1)&&(MIN(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMBER((SQRT(-1))*(MAX(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISDECIMAL((1/0)*(\"t\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 't' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISSTRING((TRUE())*(INT(\"a\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(AND(\"t\",LEFT(\"a\",0)*1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((MAX(Facts[Quantity]))&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((\"b\"-3)||(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((\"\")*(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((INT(\"a\"))||(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDOUBLE((1)&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((\"\")&&(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((FALSE())&(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISCURRENCY((SQRT(-1))&&(INT(\"a\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISINT64((TRUE())&&(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISSTRING((MAX(Facts[Quantity]))+(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((LEFT(\"a\",0)*1)||(\"\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((2.5)||(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((LEFT(\"a\",0)*1)&(TRUE()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNONTEXT((\"x\"+1)||(1/0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64((1/0)&(0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK((BLANK())*(0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDATETIME(VAR v=LEFT(\"a\",0)*1 RETURN v-(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((\"q\"*\"r\")&&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((MAX(Facts[Note]))&&(MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((BLANK())+(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISINTEGER(AND(\"b\"-3,LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'b' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNONTEXT(AND(DATEVALUE(\"zz\"),\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE((FALSE())&&(DATEVALUE(\"zz\")))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((FALSE())||(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((MAX(Facts[Quantity]))+(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((SQRT(-1))+(\"a\"*2))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISTEXT((BLANK())+(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((0)*(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((2.5)&&(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((\"q\"*\"r\")*(\"t\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN((MAX(Facts[Quantity]))||(SUM(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(OR(2.5,\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((\"t\")&(MAX(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((2.5)&&(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDECIMAL((1)&(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDECIMAL((\"x\"+1)&&(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((\"a\"*2)&(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((SQRT(-1))||(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISLOGICAL((BLANK())&(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISINTEGER((VALUE(\"x\"))||(FALSE()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISINTEGER(AND(INT(\"a\"),2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((MAX(Facts[Quantity]))*(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((\"t\")&(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING((DATEVALUE(\"zz\"))&(BLANK()))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISDATETIME((DATEVALUE(\"zz\"))&(\"a\"*2))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISINTEGER((1)||(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(AND(MAX(Facts[Quantity]),MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((2.5)&&(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(AND(\"q\"*\"r\",DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'q' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL((MAX(Facts[Quantity]))||(MAX(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDATETIME((SUM(Facts[Sales]))&(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDATETIME((\"x\"+1)||(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(AND(SQRT(-1),1/0))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 33) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISCURRENCY(VAR v=1/0 RETURN v-(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((SUM(Facts[Sales]))*(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((SQRT(-1))&&(\"q\"*\"r\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISCURRENCY((\"a\"*2)||(MIN(Facts[Note])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((\"\")||(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL((2.5)||(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64((SUM(Facts[Sales]))||(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((MIN(Facts[Note]))&&(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64((0)+(TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY((VALUE(\"x\"))&(\"\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBOOLEAN((\"\")&(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(VAR v=MAX(Facts[Quantity]) RETURN v-(FALSE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(AND(SUM(Facts[Sales]),\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((SUM(Facts[Sales]))*(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISERROR((BLANK())&&(\"\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((\"a\"*2)*(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(VAR v=TRUE() RETURN v-(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((DATEVALUE(\"zz\"))&(SQRT(-1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDECIMAL((\"\")*(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY((MAX(Facts[Quantity]))*(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 54) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISNONTEXT(VAR v=SQRT(-1) RETURN v-(MAX(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT((MAX(Facts[Note]))&(MAX(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64((MIN(Facts[Note]))||(BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR((SQRT(-1))&(MAX(Facts[Note])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING((\"a\"*2)||(\"a\"*2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((\"q\"*\"r\")&(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'q' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISCURRENCY((LEFT(\"a\",0)*1)||(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDOUBLE((2.5)&(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISBLANK((MIN(Facts[Note]))*(SQRT(-1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Late' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK((\"x\"+1)||(\"q\"*\"r\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER((0)||(LEFT(\"a\",0)*1))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMBER((BLANK())&&(\"x\"+1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(OR(INT(\"a\"),TRUE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER((\"b\"-3)||(FALSE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT((\"q\"*\"r\")&&(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN((MAX(Facts[Note]))&(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN((MAX(Facts[Note]))||(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER((\"x\"+1)&(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER((LEFT(\"a\",0)*1)||(DATEVALUE(\"zz\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISCURRENCY(AND(1/0,\"a\"*2))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISERROR((MIN(Facts[Note]))&(\"a\"*2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE((INT(\"a\"))+(\"\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(AND(DATEVALUE(\"zz\"),MIN(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'zz' of type Text to type Date.\""
+  },
+  {
+   "expr": "ISLOGICAL((\"x\"+1)&&(MIN(Facts[Note])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(AND(1/0,MAX(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL((MAX(Facts[Quantity]))+(SUM(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT((MAX(Facts[Note]))&&(VALUE(\"x\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'Paid' of type Text to type True/False.\""
+  },
+  {
+   "expr": "ISINT64(VAR v=VALUE(\"x\") RETURN v-(\"b\"-3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE((\"b\"-3)*(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR((LEFT(\"a\",0)*1)&(1/0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL((1)&&(\"x\"+1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY((\"a\"*2)&(\"b\"-3))",
+   "powerbi": "False"
+  }
+ ]
+}
