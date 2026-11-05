@@ -28,3 +28,6 @@ The scorer prints 0 wrong with as many matches as possible, the replay shows 0 D
 - Replay (`tools/parity_check.py`, no flags): 480052 answers, match 476652 (was 476432), gap-reject 3400 (was 3620), DIFF 0, CRASH 0. PARITY_LEDGER.md restored.
 - Full suite (`-n 12`): 5 failed, 2686 passed. Known flaky: test_query_functions int64, test_transformations group/pivot. New, all asserting a refusal this task now answers with the Power BI value (left unedited for review): tests/test_iteration128_coalesce_big_order_28.py test_part_b_big_number_rounding and test_part_c_round_4_ceiling_tie_and_quotient_band; tests/test_iteration111_double_arith_12.py ReviewFixTest.test_power_beyond_1e15_is_refused.
 - Still refused: none of the 220 rows.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 144. Locked 480800.
