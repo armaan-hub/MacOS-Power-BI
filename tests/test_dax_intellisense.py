@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import unittest
+from unittest import mock
 
-from analytics_studio import measures
+from analytics_studio import dax_intellisense, measures
 from analytics_studio.dax_intellisense import (
     FUNCTION_NAMES,
     complete,
@@ -70,7 +71,9 @@ class FunctionCompletionTests(unittest.TestCase):
         self.assertEqual(labels(complete("stdev.", 6, MODEL))[:2], ["STDEV.P", "STDEV.S"])
 
     def test_unsupported_functions_are_flagged_and_never_insert_text(self) -> None:
-        items = {item["label"]: item for item in complete("dateswtd", 8, MODEL)}
+        # Task 58 (2026-11-05): function now supported; DATESWTD is made unsupported here by patching the supported set
+        with mock.patch.object(dax_intellisense, "SUPPORTED_FUNCTIONS", dax_intellisense.SUPPORTED_FUNCTIONS - {"DATESWTD"}):
+            items = {item["label"]: item for item in complete("dateswtd", 8, MODEL)}
         wtd = items["DATESWTD"]
         self.assertFalse(wtd["supported"])
         self.assertEqual(wtd["insertText"], "")
@@ -219,7 +222,9 @@ class SignatureHelpTests(unittest.TestCase):
         self.assertIsNone(signature_help("IF(// ", 6))
 
     def test_unsupported_function_hint_is_flagged(self) -> None:
-        hint = signature_help("DATESWTD(", 9)
+        # Task 58 (2026-11-05): function now supported; DATESWTD is made unsupported here by patching the supported set
+        with mock.patch.object(dax_intellisense, "SUPPORTED_FUNCTIONS", dax_intellisense.SUPPORTED_FUNCTIONS - {"DATESWTD"}):
+            hint = signature_help("DATESWTD(", 9)
         self.assertEqual(hint["function"], "DATESWTD")
         self.assertFalse(hint["supported"])
 

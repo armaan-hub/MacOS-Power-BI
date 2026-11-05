@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
+from unittest import mock
 from decimal import Decimal
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
+from analytics_studio import dax_intellisense
 from analytics_studio.dax_intellisense import apply_completion, complete_formula
 from analytics_studio.file_import import parse_file
 
@@ -89,9 +91,10 @@ class FormulaBarTests(unittest.TestCase):
 
     def test_unknown_function_error_is_the_engines_text(self) -> None:
         self.bar.beginNewMeasure()
-        self.bar.setText("Bad = DATESWTD(Orders[Quantity])")
+        # Task 58 (2026-11-05): function now supported (DATESWTD); a made-up name keeps the unknown-function path tested
+        self.bar.setText("Bad = NOSUCHFUNCTION(Orders[Quantity])")
         self.assertFalse(self.bar.commit())
-        self.assertIn("DATESWTD", self.bar.error)
+        self.assertIn("NOSUCHFUNCTION", self.bar.error)
         self.assertIsNone(self.measure("Bad"))
 
     def test_text_without_an_equals_sign_is_rejected_with_help(self) -> None:
@@ -248,7 +251,9 @@ class FormulaBarTests(unittest.TestCase):
 
     def test_apply_completion_inserts_and_moves_the_caret(self) -> None:
         text = "Measure = d"
-        items = complete_formula(text, len(text), {})
+        # Task 58 (2026-11-05): function now supported; DATESWTD is made unsupported here by patching the supported set
+        with mock.patch.object(dax_intellisense, "SUPPORTED_FUNCTIONS", dax_intellisense.SUPPORTED_FUNCTIONS - {"DATESWTD"}):
+            items = complete_formula(text, len(text), {})
         date = next(item for item in items if item["label"] == "DATE")
         self.assertEqual(apply_completion(text, date), ("Measure = DATE(", 15))
         wtd = next(item for item in items if item["label"] == "DATESWTD")
@@ -261,7 +266,9 @@ class FormulaBarTests(unittest.TestCase):
     def test_apply_completion_slot_refuses_unsupported_functions_with_a_message(self) -> None:
         self.bar.beginNewMeasure()
         text = "Measure = dateswtd"
-        item = next(i for i in self.bar.completions(text, len(text), False) if i["label"] == "DATESWTD")
+        # Task 58 (2026-11-05): function now supported; DATESWTD is made unsupported here by patching the supported set
+        with mock.patch.object(dax_intellisense, "SUPPORTED_FUNCTIONS", dax_intellisense.SUPPORTED_FUNCTIONS - {"DATESWTD"}):
+            item = next(i for i in self.bar.completions(text, len(text), False) if i["label"] == "DATESWTD")
         result = self.bar.applyCompletion(text, item)
         self.assertEqual(result["text"], text)
         self.assertIn("not supported", result["message"].lower())

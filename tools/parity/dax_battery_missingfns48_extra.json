@@ -1,0 +1,934 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "APPROXIMATEDISTINCTCOUNT(Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "APPROXIMATEDISTINCTCOUNT(Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "APPROXIMATEDISTINCTCOUNT(Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "APPROXIMATEDISTINCTCOUNT(Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "CALENDARAUTO()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "CALENDARAUTO(-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "CALENDARAUTO(0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "CALENDARAUTO(12)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "CALENDARAUTO(13)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "CALENDARAUTO(3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "COUNTROWS(APPROXIMATEDISTINCTCOUNT(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(APPROXIMATEDISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(APPROXIMATEDISTINCTCOUNT(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(CALENDARAUTO())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "COUNTROWS(CALENDARAUTO(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "COUNTROWS(CALENDARAUTO(0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "COUNTROWS(CALENDARAUTO(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "COUNTROWS(CALENDARAUTO(13))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "COUNTROWS(CALENDARAUTO(3))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "COUNTROWS(DATESWTD(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DATESWTD(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DATESWTD(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DATESWTD(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(12))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(3))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(SUM(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(SUM(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(SUM(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(DETAILROWS(SUM(Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "COUNTROWS(ISSELECTEDMEASURE(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "COUNTROWS(ISSELECTEDMEASURE(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "COUNTROWS(ISSELECTEDMEASURE(12))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "COUNTROWS(ISSELECTEDMEASURE(13))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(-1,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(1,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(12,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(3,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(Facts[Quantity],Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(Facts[Quantity],Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(Facts[Sales],Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(PATH(Facts[Sales],Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Sales] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "COUNTROWS(SELECTEDMEASURE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(SELECTEDMEASURENAME())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(TOTALWTD(SUM(Facts[Note]),Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "COUNTROWS(TOTALWTD(SUM(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "COUNTROWS(TOTALWTD(SUM(Facts[Region]),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "COUNTROWS(TOTALWTD(SUM(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 56) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "DATESWTD(Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "DATESWTD(Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "DATESWTD(Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "DATESWTD(Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "DETAILROWS(-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "DETAILROWS(0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "DETAILROWS(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "DETAILROWS(SUM(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "DETAILROWS(SUM(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "DETAILROWS(SUM(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,APPROXIMATEDISTINCTCOUNT(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "IF(1,APPROXIMATEDISTINCTCOUNT(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "IF(1,APPROXIMATEDISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "IF(1,CALENDARAUTO())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "IF(1,CALENDARAUTO(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "IF(1,CALENDARAUTO(0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "IF(1,CALENDARAUTO(3))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "IF(1,DATESWTD(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "IF(1,DATESWTD(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "IF(1,DATESWTD(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "IF(1,DATESWTD(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(12))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(13))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(3))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(SUM(Facts[Note])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(SUM(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,DETAILROWS(SUM(Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IF(1,ISSELECTEDMEASURE(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IF(1,ISSELECTEDMEASURE(13))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IF(1,PATH(0,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IF(1,PATH(12,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IF(1,PATH(3,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IF(1,PATH(Facts[Quantity],Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Region] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IF(1,PATH(Facts[Quantity],Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Sales] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IF(1,PATH(Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\""
+  },
+  {
+   "expr": "IF(1,PATH(Facts[Region],Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Region] and 'Facts'[Quantity] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IF(1,PATH(Facts[Sales],Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Region] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IF(1,PATH(Facts[Sales],Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Sales] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IF(1,SELECTEDMEASURE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) There is no measure reference in the current context to be applied as SELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IF(1,SELECTEDMEASURENAME())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) There is no measure reference in the current context that can be used by SELECTEDMEASURENAME.\""
+  },
+  {
+   "expr": "IF(1,TOTALWTD(SUM(Facts[Note]),Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "IF(1,TOTALWTD(SUM(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "IF(1,TOTALWTD(SUM(Facts[Region]),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "IF(1,TOTALWTD(SUM(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "IFERROR(APPROXIMATEDISTINCTCOUNT(Facts[Note]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "IFERROR(APPROXIMATEDISTINCTCOUNT(Facts[Region]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "IFERROR(APPROXIMATEDISTINCTCOUNT(Facts[Sales]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "IFERROR(CALENDARAUTO(),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "IFERROR(CALENDARAUTO(1),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "IFERROR(CALENDARAUTO(12),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "IFERROR(DATESWTD(Facts[Note]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "IFERROR(DATESWTD(Facts[Quantity]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "IFERROR(DATESWTD(Facts[Region]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(0),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(12),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(13),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(3),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(SUM(Facts[Note])),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(SUM(Facts[Quantity])),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(SUM(Facts[Region])),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(DETAILROWS(SUM(Facts[Sales])),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "IFERROR(ISSELECTEDMEASURE(0),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IFERROR(ISSELECTEDMEASURE(1),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IFERROR(ISSELECTEDMEASURE(12),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IFERROR(ISSELECTEDMEASURE(13),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IFERROR(PATH(-1,BLANK()),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IFERROR(PATH(0,BLANK()),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IFERROR(PATH(12,BLANK()),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IFERROR(PATH(13,BLANK()),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IFERROR(PATH(3,BLANK()),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "IFERROR(PATH(Facts[Note],Facts[Region]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The value 'East' in 'Facts'[Region] must also exist in 'Facts'[Note]. Please add the missing data and try again.\""
+  },
+  {
+   "expr": "IFERROR(PATH(Facts[Quantity],Facts[Quantity]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Quantity] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IFERROR(PATH(Facts[Quantity],Facts[Region]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Region] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IFERROR(PATH(Facts[Region],Facts[Sales]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Region] and 'Facts'[Sales] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IFERROR(PATH(Facts[Sales],Facts[Sales]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Sales] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "IFERROR(SELECTEDMEASURE(),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) There is no measure reference in the current context to be applied as SELECTEDMEASURE.\""
+  },
+  {
+   "expr": "IFERROR(SELECTEDMEASURENAME(),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) There is no measure reference in the current context that can be used by SELECTEDMEASURENAME.\""
+  },
+  {
+   "expr": "IFERROR(TOTALWTD(SUM(Facts[Note]),Facts[Note]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "IFERROR(TOTALWTD(SUM(Facts[Quantity]),Facts[Quantity]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "IFERROR(TOTALWTD(SUM(Facts[Region]),Facts[Region]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "IFERROR(TOTALWTD(SUM(Facts[Sales]),Facts[Sales]),-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISERROR(APPROXIMATEDISTINCTCOUNT(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "ISERROR(APPROXIMATEDISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "ISERROR(APPROXIMATEDISTINCTCOUNT(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "ISERROR(CALENDARAUTO())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "ISERROR(CALENDARAUTO(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "ISERROR(CALENDARAUTO(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "ISERROR(CALENDARAUTO(12))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "ISERROR(CALENDARAUTO(13))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "ISERROR(CALENDARAUTO(3))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "ISERROR(DATESWTD(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISERROR(DATESWTD(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISERROR(DATESWTD(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(12))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(3))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(SUM(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(SUM(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(DETAILROWS(SUM(Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "ISERROR(ISSELECTEDMEASURE(-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISERROR(ISSELECTEDMEASURE(0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISERROR(ISSELECTEDMEASURE(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISERROR(ISSELECTEDMEASURE(12))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISERROR(PATH(0,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "ISERROR(PATH(13,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "ISERROR(PATH(3,BLANK()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "ISERROR(PATH(Facts[Quantity],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Note] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "ISERROR(PATH(Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\""
+  },
+  {
+   "expr": "ISERROR(PATH(Facts[Region],Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Region] and 'Facts'[Quantity] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "ISERROR(PATH(Facts[Sales],Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Region] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "ISERROR(SELECTEDMEASURE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) There is no measure reference in the current context to be applied as SELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISERROR(SELECTEDMEASURENAME())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) There is no measure reference in the current context that can be used by SELECTEDMEASURENAME.\""
+  },
+  {
+   "expr": "ISERROR(TOTALWTD(SUM(Facts[Note]),Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISERROR(TOTALWTD(SUM(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISERROR(TOTALWTD(SUM(Facts[Region]),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISERROR(TOTALWTD(SUM(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "ISSELECTEDMEASURE(-1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISSELECTEDMEASURE(0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISSELECTEDMEASURE(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISSELECTEDMEASURE(12)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "ISSELECTEDMEASURE(3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "PATH(-1,BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "PATH(0,BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "PATH(1,BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "PATH(12,BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "PATH(Facts[Quantity],Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Note] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "PATH(Facts[Region],Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\""
+  },
+  {
+   "expr": "PATH(Facts[Sales],Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Note] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "PATH(Facts[Sales],Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Quantity] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "SELECTEDMEASURE()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) There is no measure reference in the current context to be applied as SELECTEDMEASURE.\""
+  },
+  {
+   "expr": "SELECTEDMEASURENAME()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) There is no measure reference in the current context that can be used by SELECTEDMEASURENAME.\""
+  },
+  {
+   "expr": "TOTALWTD(SUM(Facts[Note]),Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "TOTALWTD(SUM(Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "TOTALWTD(SUM(Facts[Region]),Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "TOTALWTD(SUM(Facts[Sales]),Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=APPROXIMATEDISTINCTCOUNT(Facts[Note]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "VAR v=APPROXIMATEDISTINCTCOUNT(Facts[Region]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "VAR v=APPROXIMATEDISTINCTCOUNT(Facts[Sales]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) The function APPROXIMATEDISTINCTCOUNT isn't supported for this storage mode. See https://go.microsoft.com/fwlink/?linkid=2216355 to learn more.\""
+  },
+  {
+   "expr": "VAR v=CALENDARAUTO() RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "VAR v=CALENDARAUTO(-1) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "VAR v=CALENDARAUTO(0) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "VAR v=CALENDARAUTO(1) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "VAR v=CALENDARAUTO(12) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "VAR v=CALENDARAUTO(13) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "VAR v=CALENDARAUTO(3) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) CALENDARAUTO function can not find a base column of DateTime type in the model.\""
+  },
+  {
+   "expr": "VAR v=DATESWTD(Facts[Note]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=DATESWTD(Facts[Quantity]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=DATESWTD(Facts[Region]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=DATESWTD(Facts[Sales]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) DATESWTD's parameter 1 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=DETAILROWS(-1) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "VAR v=DETAILROWS(0) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "VAR v=DETAILROWS(1) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "VAR v=DETAILROWS(12) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "VAR v=DETAILROWS(3) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "VAR v=DETAILROWS(SUM(Facts[Quantity])) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "VAR v=DETAILROWS(SUM(Facts[Sales])) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The input parameter for the DETAILROWS function is not a valid measure reference.\""
+  },
+  {
+   "expr": "VAR v=ISSELECTEDMEASURE(0) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "VAR v=ISSELECTEDMEASURE(1) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "VAR v=ISSELECTEDMEASURE(12) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "VAR v=ISSELECTEDMEASURE(13) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "VAR v=ISSELECTEDMEASURE(3) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Invalid input arguments for ISSELECTEDMEASURE.\""
+  },
+  {
+   "expr": "VAR v=PATH(-1,BLANK()) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "VAR v=PATH(0,BLANK()) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "VAR v=PATH(1,BLANK()) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "VAR v=PATH(13,BLANK()) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "VAR v=PATH(3,BLANK()) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Function Path expects a column reference as argument number 1.\""
+  },
+  {
+   "expr": "VAR v=PATH(Facts[Quantity],Facts[Quantity]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Quantity] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "VAR v=PATH(Facts[Quantity],Facts[Sales]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Sales] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "VAR v=PATH(Facts[Region],Facts[Note]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\""
+  },
+  {
+   "expr": "VAR v=PATH(Facts[Region],Facts[Region]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Region] and 'Facts'[Region] do not satisfy these requirements.\""
+  },
+  {
+   "expr": "VAR v=SELECTEDMEASURE() RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) There is no measure reference in the current context to be applied as SELECTEDMEASURE.\""
+  },
+  {
+   "expr": "VAR v=SELECTEDMEASURENAME() RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) There is no measure reference in the current context that can be used by SELECTEDMEASURENAME.\""
+  },
+  {
+   "expr": "VAR v=TOTALWTD(SUM(Facts[Note]),Facts[Note]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=TOTALWTD(SUM(Facts[Quantity]),Facts[Quantity]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=TOTALWTD(SUM(Facts[Region]),Facts[Region]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) TOTALWTD's parameter 2 must be a calendar reference.\""
+  },
+  {
+   "expr": "VAR v=TOTALWTD(SUM(Facts[Sales]),Facts[Sales]) RETURN v",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) TOTALWTD's parameter 2 must be a calendar reference.\""
+  }
+ ]
+}
