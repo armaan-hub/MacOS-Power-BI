@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-05, after Iteration 149 / Task 60 type-tests-columns-50, type tests (ISDOUBLE, ISINT64, ISNUMBER, ...) over failing column-read arithmetic answered from a measured DAX type-promotion table, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2734 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 486068 answers with 482910 match, 3158 refused, 0 DIFF, 0 CRASH, locked 482890. Next: Task 61 from the pending groups (perfect-fit LINEST, big power rounding, TOCSV order)
+**Latest status (2026-11-05, after Iteration 150 / Task 61 varx-dates-51, VARX/STDEVX over date bodies with a division answered in doubles, row order, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2739 passed passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 488704 answers with 485223 match, 3481 refused, 0 DIFF, 0 CRASH, locked 485203. Next: Task 62: next pending group (linest21, convert9 or blank8)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
