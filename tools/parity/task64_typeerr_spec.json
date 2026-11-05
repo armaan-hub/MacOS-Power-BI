@@ -1,0 +1,982 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(TRUE())))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((DATE(2020,1,1)+\"a\")+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((EXP(\"w\"))+(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((SIGN(\"s\"))+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(COALESCE((VAR y=VALUE(\"x\") RETURN y),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=0,BLANK(),ABS(\"m\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=0,BLANK(),INT(\"a\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=1,DATE(2020,1,1)+\"a\",BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,(\"b\")*1,DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,(VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,ROUND(\"c\",1),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,ROUND(\"c\",1),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(TRUE(),1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(TRUE(),1=1,EXP(\"w\"),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=DIVIDE(\"a\",2) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=EDATE(\"e\",1) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=WEEKDAY(\"w\") RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(ABS(((VAR y=VALUE(\"x\") RETURN y))+(BLANK())))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(ABS((ABS(\"m\"))+(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(ABS((ROUND(\"c\",1))+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(ABS((TRUNC(\"k\"))+(CURRENCY(1))))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(COALESCE((VAR y=VALUE(\"x\") RETURN y),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),\"t\"))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(IF(1=1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(SWITCH(1,1,ABS(\"m\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(SWITCH(1,1,EXP(\"w\"),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(ABS((SIGN(\"s\"))+(1.5)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(ABS((TRUNC(\"k\"))+(1.5)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(COALESCE((VAR y=VALUE(\"x\") RETURN y),1))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),TRUE()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(IF(1=1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(IF(1=1,DATE(2020,1,1)+\"a\",1))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(IF(1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(IF(MAX(Facts[Sales])>0,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(SWITCH(1,1,DATE(2020,1,1)+\"a\",1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(SWITCH(1,1,EXP(\"w\"),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(SWITCH(1,1,INT(\"a\"),1))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(SWITCH(1,1,INT(\"a\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(SWITCH(1,1,ROUND(\"c\",1),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(SWITCH(TRUE(),1=1,INT(\"a\"),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(ABS((INT(\"a\"))+(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(ABS((TRUNC(\"k\"))+(TRUE())))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(IF(1=0,BLANK(),CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(IF(1=0,BLANK(),TRUNC(\"k\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(IF(1=1,DATE(2020,1,1)+\"a\",1))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(IF(1=1,INT(\"a\"),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(SWITCH(1,1,ABS(\"m\"),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(SWITCH(1,1,EXP(\"w\"),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(SWITCH(TRUE(),1=1,CONVERT(\"z\",INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(SWITCH(TRUE(),1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(VAR v=DATEVALUE(\"q\") RETURN v+1)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDECIMAL(VAR v=DIVIDE(\"a\",2) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(ABS((EXP(\"w\"))+(\"t\")))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(ABS((SIGN(\"s\"))+(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(ABS((SIGN(\"s\"))+(TRUE())))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(VAR v=EDATE(\"e\",1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(ABS((INT(\"a\"))+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(ABS((ROUND(\"c\",1))+(CURRENCY(1))))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(IF(1=1,DATE(2020,1,1)+\"a\",1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(ABS((TRUNC(\"k\"))+(TRUE())))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(IF(1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(SWITCH(1,1,\"a\"+0,BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(SWITCH(1,1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(SWITCH(1,1,ROUND(\"c\",1),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(SWITCH(TRUE(),1=1,ABS(\"m\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(SWITCH(TRUE(),1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(SWITCH(TRUE(),1=1,ROUND(\"c\",1),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(ABS((ROUND(\"c\",1))+(TRUE())))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(COALESCE((VAR y=VALUE(\"x\") RETURN y),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(IF(MAX(Facts[Sales])>0,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(SWITCH(1,1,INT(\"a\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(SWITCH(1,1,TRUNC(\"k\"),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(SWITCH(TRUE(),1=1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR v=EDATE(\"e\",1) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR v=FACT(\"f\") RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR v=TIME(\"h\",1,1) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(ABS((SIGN(\"s\"))+(DATE(2020,1,1))))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(ABS((TRUNC(\"k\"))+(BLANK())))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(COALESCE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(IF(MAX(Facts[Sales])>0,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(IFERROR((VAR y=VALUE(\"x\") RETURN y),DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(SWITCH(1,1,(\"b\")*1,BLANK()))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(SWITCH(1,1,(VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(SWITCH(1,1,CONVERT(\"z\",INTEGER),BLANK()))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(SWITCH(TRUE(),1=1,INT(\"a\"),DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(VAR v=EDATE(\"e\",1) RETURN v)",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(VAR v=TIME(\"h\",1,1) RETURN v)",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(ABS((INT(\"a\"))+(1.5)))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(CONCATENATE(CONVERT(\"z\",INTEGER),MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(IF(1=1,DATE(2020,1,1)+\"a\",1))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(UPPER((VAR y=VALUE(\"x\") RETURN y)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC((\"t\")+(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC((1)+(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC((CURRENCY(1))+(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC((DATE(2020,1,1))+(\"a\"+0))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC((DATE(2020,1,1)+\"a\")=(BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(ABS((ABS(\"m\"))+(1)))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(ABS((TRUNC(\"k\"))+(TRUE())))",
+   "powerbi": "True",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(DATE(2020,1,1)+\"a\")",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(IF(1=1,DATE(2020,1,1)+\"a\",DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(NOT(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMERIC(UPPER((VAR y=VALUE(\"x\") RETURN y)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(ABS(((\"b\")*1)+(DATE(2020,1,1))))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(ABS((SIGN(\"s\"))+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(COALESCE((VAR y=VALUE(\"x\") RETURN y),1))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(COALESCE((VAR y=VALUE(\"x\") RETURN y),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(IF(1=0,BLANK(),DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(IF(1=0,BLANK(),ROUND(\"c\",1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(IF(1=0,BLANK(),TRUNC(\"k\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(IF(1=1,CONVERT(\"z\",INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(IF(1=1,DATE(2020,1,1)+\"a\",BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(SWITCH(1,1,(\"b\")*1,DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(SWITCH(1,1,EXP(\"w\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(SWITCH(1,1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(VAR v=DATEVALUE(\"q\") RETURN v+1)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(VAR v=TIMEVALUE(\"t\") RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(ABS((CONVERT(\"z\",INTEGER))+(DATE(2020,1,1))))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(ABS((DATE(2020,1,1)+\"a\")+(\"t\")))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(ABS((DATE(2020,1,1)+\"a\")+(DATE(2020,1,1))))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(IF(1=0,1,DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(IF(1=1,CONVERT(\"z\",INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(IF(1=1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(IFERROR((VAR y=VALUE(\"x\") RETURN y),BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(SWITCH(1,1,(VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(SWITCH(1,1,CONVERT(\"z\",INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(SWITCH(1,1,CONVERT(\"z\",INTEGER),MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(SWITCH(1,1,DATE(2020,1,1)+\"a\",BLANK()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(SWITCH(TRUE(),1=1,CONVERT(MAX(Facts[Region]),INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(VAR v=DIVIDE(\"a\",2) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(VAR v=FACT(\"f\") RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(VAR v=WEEKDAY(\"w\") RETURN v)",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(AND(INT(\"a\"),TRUE()))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(AND(INT(\"a\"),2.5))",
+   "powerbi": "False",
+   "now": "gap-reject"
+  }
+ ]
+}
