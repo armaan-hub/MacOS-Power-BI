@@ -1,0 +1,3130 @@
+{
+ "items": [
+  {
+   "part": "D",
+   "expr": "\"a\"||VAR y=1 RETURN COUNTROWS(FILTER(Facts,y=1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"1\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"TRUE\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"-1\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"2.5\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(2.5&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(TRUE()&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"0\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"false\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(0||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(FALSE()||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(BLANK()||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"1\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"TRUE\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"-1\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"2.5\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(1,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(2.5,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(TRUE(),MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"0\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"false\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(0,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(FALSE(),MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(BLANK(),MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(MAX(Facts[Region]),VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(MAX(Facts[Region]),VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Region])&&VAR y=\"b\" RETURN y)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER({1&&MIN(Facts[Note])&\"\"},ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISBLANK([Value]),1,2))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISLOGICAL([Value]),1,2))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTROWS({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"})",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "n|n",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISNUMBER([Value]),1,2))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISTEXT([Value]),1,2))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISNONTEXT([Value]),1,2))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(VAR t={1&&MIN(Facts[Note])&\"\"} RETURN t,ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(UNION({1&&MIN(Facts[Note])&\"\"},{1&&MIN(Facts[Note])&\"\"}),ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER({(1&&MIN(Facts[Note])&\"\")},ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISLOGICAL(1&&Facts[Note]&\"\"),1,0))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISLOGICAL(1&&Facts[Note]),1,0))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(2.5&&MAX(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"0\"||MAX(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Note])&\"\"&&1)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Note])&\"\"||0)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(1,MAX(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(MAX(Facts[Note])&\"\",0))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Note])&\"\"&&MAX(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(2.5&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"0\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MIN(Facts[Note])&\"\"&&1)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MIN(Facts[Note])&\"\"||0)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(1,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(MIN(Facts[Note])&\"\",0))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MIN(Facts[Note])&\"\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(CURRENCY(\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(CURRENCY(\"a\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(CURRENCY(\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(CURRENCY(\"a\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(NOT(\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(NOT(\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(NOT(\"a\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(NOT(\"a\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "D",
+   "expr": "SWITCH((SUMX(FILTER(Facts,FALSE()),1))/(MAXX(Facts,1/0))*(VAR y=\"b\" RETURN y),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(SUMX(FILTER(Facts,FALSE()),1))/(VALUE(\"x\")) RETURN q",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "MAXX({1,2},(\"a\"*2)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "MAXX({1,2},(\"a\"*2)*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((MAXX({BLANK()},[Value]))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "COALESCE((INT(\"a\"))*(SUMX(FILTER(Facts,FALSE()),1))+(FORMAT(1,\"0\")),5)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((MAX(Facts[Note]))*(\"2\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((\"a\")*(1)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "MAXX({1,2},(\"a\")*(MAXX({BLANK()},[Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(MAXX({BLANK()},[Value]))/(VALUE(\"x\")) RETURN q",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAXX({BLANK()},[Value]))*(\"a\")+(VAR y=1/0 RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(INT(\"a\"))*(MAXX({BLANK()},[Value])) RETURN q",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((\"a\")*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((MAX(Facts[Note]))*(TRUE()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(COUNTROWS(FILTER(Facts,FALSE())))/(INT(\"a\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((VAR y=VALUE(\"x\") RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SWITCH((\"a\")*(MAXX({BLANK()},[Value])),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "COALESCE((INT(\"a\"))*(SUMX(FILTER(Facts,FALSE()),1))*(FORMAT(1,\"0\")),5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((VAR y=VALUE(\"x\") RETURN y)*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((SUM(Facts[Sales]))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(SELECTEDVALUE(Facts[Quantity]))*(Facts[Note])*(VALUE(\"x\"))),[q])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))*(-1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(SUMX(FILTER(Facts,FALSE()),1))/(MAX(Facts[Note])) RETURN q",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "(SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((VAR y=1/0 RETURN y)*(\"a\"*2))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))*(MAXX({BLANK()},[Value])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((MAX(Facts[Note]))*(\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX(Facts,(SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*(\"a\"),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "|||||",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((VAR y=1/0 RETURN y)*(UPPER(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(\"a\")*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((\"a\")*(VAR y=1/0 RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((\"a\")*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((DIVIDE(1,BLANK()))*(VAR y=BLANK() RETURN y)+(\"a\"+1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAX(Facts[Note]))*(-1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "IF((SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*(\"a\"),1,2)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAX(Facts[Note]))*(\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(LEFT(\"a\",0))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((\"a\")*(VAR y=1/0 RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(UPPER(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SWITCH((VAR y=\"b\" RETURN y)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "(SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*(\"a\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "COALESCE((\"a\"*2)*(SUMX(FILTER(Facts,FALSE()),1)),5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "MAXX({1,2},(SUMX(FILTER(Facts,FALSE()),1))*(MAXX(Facts,1/0))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(SUMX(FILTER(Facts,FALSE()),1))*(MAX(Facts[Note])) RETURN q",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((\"a\")*(1)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((DIVIDE(1,BLANK()))*(VAR y=BLANK() RETURN y)+(\"a\"+1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((\"\")*(MAX(Facts[Note]))*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(\"a\"+1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((INT(\"a\"))*(MAXX({BLANK()},[Value])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SWITCH((COUNTROWS(FILTER(Facts,FALSE())))/(MAX(Facts[Note])),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "NOT((SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(SUMX(FILTER(Facts,FALSE()),1))*(MAX(Facts[Note])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((VAR y=VALUE(\"x\") RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SWITCH((TRUE())*(SUMX(FILTER(Facts,FALSE()),1))*(\"a\"*2),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((SUMX(FILTER(Facts,FALSE()),1))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((INT(\"a\"))*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "STDEVX.P(Facts,(SELECTEDVALUE(Facts[Quantity]))/(Facts[Note])*(VALUE(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((COUNTROWS(FILTER(Facts,FALSE())))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAXX({BLANK()},[Value]))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((VAR y=\"b\" RETURN y)*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(-(VAR y=\"b\" RETURN y)*1)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(\"a\")/(1)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")) RETURN q",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(UPPER(\"a\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((COUNTROWS(FILTER(Facts,FALSE())))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(MAXX({BLANK()},[Value]))*(MAX(Facts[Note])) RETURN q",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((MAX(Facts[Sales]))+(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(\"a\"+1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((VAR y=\"b\" RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))*(\"a\"+1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((1)+((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((\"a\"+1)&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAX(Facts[Note]))*((-1)^0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((MAX(Facts[Sales]))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((MAX(Facts[Note]))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Sales]))+((-1)^0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))+((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((2.5)+((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"*2)+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)+(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))*((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((\"a\"*2)*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((\"a\"+1)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((VAR y=VALUE(\"x\") RETURN y)+(\"b\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(((-1)^0.5)&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"+1)&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(((-1)^0.5)*(\"b\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((MAX(Facts[Note]))*(\"a\"*2))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))*((-1)^0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((IF(SUM(Facts[Sales])>0,1,2))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(((-1)^0.5)&(\"b\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"*2)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))*(\"a\"*2))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(((-1)^0.5)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((2.5)*((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((\"a\"+1)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((SUMX(FILTER(Facts,FALSE()),1))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(((-1)^0.5)+(1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"+1)+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((VAR y=\"b\" RETURN y)+(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((VAR y=VALUE(\"x\") RETURN y)&(\"b\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((VAR y=\"b\" RETURN y)+(2.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((IF(SUM(Facts[Sales])>0,1,2))*(\"a\"*2))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((VAR y=VALUE(\"x\") RETURN y)+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((MAX(Facts[Sales]))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((MAX(Facts[Note]))+((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((SUM(Facts[Sales]))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"*2)&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))*((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((\"a\"+1)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((SUM(Facts[Sales]))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"*2)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAX(Facts[Note]))+(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((VAR y=VALUE(\"x\") RETURN y)+(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(((-1)^0.5)+(SUM(Facts[Sales])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"*2)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((VAR y=VALUE(\"x\") RETURN y)+(2.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"*2)+(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((\"a\"+1)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(((-1)^0.5)&(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))+((-1)^0.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)+(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))+((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE((MAX(Facts[Note]))-(BLANK()&&BLANK()))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAX(Facts[Note]))-(1&&BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1&&TRIM(\"\"))^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((BLANK()||BLANK())^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((0||\"\")-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER((MAX(Facts[Note]))+(OR(0,\"\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE((MAX(Facts[Note]))-(0||BLANK()))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((2.5&&\"\")-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((OR(0,\"\"))^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((2.5&&\"\")+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))+(1&&TRIM(\"\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1&&TRIM(\"\"))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE((BLANK()||BLANK())+(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE((MAX(Facts[Note]))+(FALSE()||\"\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER((MAX(Facts[Note]))+(BLANK()&&BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((MAX(Facts[Note]))-(BLANK()&&BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE((2.5&&\"\")-(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((0||BLANK())^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((MAX(Facts[Note]))*(0||BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))+(BLANK()||BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1&&BLANK())-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((MAX(Facts[Note]))+(BLANK()&&BLANK()))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((AND(1,\"\"))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME((0||BLANK())^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((0||BLANK())+(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Quantity]&\"\"+0),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(MAX(Facts[Note])+0)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Quantity]&\"/2/2020\"+0),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(MAX(Facts[Note])+0)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(MIN(Facts[Region])+0)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(MIN(Facts[Region])+0)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Sales]&\"\"+0),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(SIN(\"a\")),5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(VALUE(\"x\")),5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "VAR q=(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(SIN(\"a\")) RETURN COALESCE(q,5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))*(\"a\"*2),1)),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((VALUE(\"x\"))*(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(- DATE(2020,1,1)*(1-1)^-MAX(Facts[Quantity])*\"2\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(2^0^- 0.5+0.5)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(-CURRENCY(2)-0^+1.5*0.0^-1E-200)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(+(1-1)^(0*-1)^- (0*-1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(MIN(Facts[Sales])^-1E15^-CURRENCY(2)+-\"2\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((0.0*-1)^SUM(Facts[Sales])^1E15)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(1.5^1E15*3-1E-200)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(0.5*- 0^- CURRENCY(2))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(1.5^+MIN(Facts[Sales])^MIN(Facts[Sales])+-DATE(2020,1,1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(+1.5+0^+COUNTROWS(Facts)^1*-0)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(- (1-1)^BLANK()*-(0.0*-1)-1)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(MIN(Facts[Sales])^+1E-200*2*COUNTROWS(Facts)-+(0*-1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((1-1)^(0.0*-1)-+1.5)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(MAX(Facts[Sales])-\"abc\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(\"abc\"+MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(MAX(Facts[Sales])-\"abc\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(\"abc\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(\"abc\"-MAX(Facts[Sales]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(MAX(Facts[Sales])*\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(MAX(Facts[Sales])+\"TRUE\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))*\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(\"\"-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(\"TRUE\"-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(CURRENCY(MAX(Facts[Sales]))-\"abc\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(\"\"*CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(\"TRUE\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(MAX(Facts[Sales])+\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(\"abc\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(MAX(Facts[Sales])+\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(\"\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(\"abc\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(MAX(Facts[Sales])-\"TRUE\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(\"\"+MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))*\"TRUE\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(MAX(Facts[Sales])*\"abc\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(MAX(Facts[Sales])+\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(\"abc\"-MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(CURRENCY(MAX(Facts[Sales]))+\"abc\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(CURRENCY(MAX(Facts[Sales]))-\"abc\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(\"TRUE\"-MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(MAX(Facts[Sales])-\"\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(\"\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))-\"TRUE\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(\"TRUE\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))+\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE((((2.5&&\"\"))+(MAX(Facts[Note])))*(\"a\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((((OR(0,\"\")))&(BLANK()))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((AND(1,\"\")))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(((COUNTROWS(Facts)&&\"\"))^(\"TRUE\"))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>2),COALESCE(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"),\"a\",VALUE(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(TRUE())))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((DATE(2020,1,1)+\"a\")+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((EXP(\"w\"))+(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(ABS((SIGN(\"s\"))+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(COALESCE((VAR y=VALUE(\"x\") RETURN y),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=0,BLANK(),ABS(\"m\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=0,BLANK(),INT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(IF(1=1,DATE(2020,1,1)+\"a\",BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,(\"b\")*1,DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,(VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,ROUND(\"c\",1),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(1,1,ROUND(\"c\",1),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(TRUE(),1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(SWITCH(TRUE(),1=1,EXP(\"w\"),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=DIVIDE(\"a\",2) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=EDATE(\"e\",1) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBOOLEAN(VAR v=WEEKDAY(\"w\") RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(ABS(((VAR y=VALUE(\"x\") RETURN y))+(BLANK())))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(ABS((ABS(\"m\"))+(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(ABS((ROUND(\"c\",1))+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(ABS((TRUNC(\"k\"))+(CURRENCY(1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(COALESCE((VAR y=VALUE(\"x\") RETURN y),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),\"t\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(IF(1=1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(INT(FACT(\"f\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(SWITCH(1,1,ABS(\"m\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(SWITCH(1,1,EXP(\"w\"),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(ABS((SIGN(\"s\"))+(1.5)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(ABS((TRUNC(\"k\"))+(1.5)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(COALESCE((VAR y=VALUE(\"x\") RETURN y),1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),TRUE()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(IF(1=1,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(IF(1=1,DATE(2020,1,1)+\"a\",1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(IF(1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(IF(MAX(Facts[Sales])>0,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(SWITCH(1,1,DATE(2020,1,1)+\"a\",1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(SWITCH(1,1,EXP(\"w\"),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(SWITCH(1,1,INT(\"a\"),1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(SWITCH(1,1,INT(\"a\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(SWITCH(1,1,ROUND(\"c\",1),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(SWITCH(TRUE(),1=1,INT(\"a\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(ABS((CONVERT(MAX(Facts[Region]),INTEGER))+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(ABS((INT(\"a\"))+(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(ABS((TRUNC(\"k\"))+(TRUE())))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(IF(1=0,BLANK(),CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(IF(1=0,BLANK(),TRUNC(\"k\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(IF(1=1,DATE(2020,1,1)+\"a\",1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(IF(1=1,INT(\"a\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(INT(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(SWITCH(1,1,ABS(\"m\"),DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(SWITCH(1,1,EXP(\"w\"),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(SWITCH(TRUE(),1=1,CONVERT(\"z\",INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(SWITCH(TRUE(),1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(VAR v=DATEVALUE(\"q\") RETURN v+1)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDECIMAL(VAR v=DIVIDE(\"a\",2) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(ABS((EXP(\"w\"))+(\"t\")))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(ABS((SIGN(\"s\"))+(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(ABS((SIGN(\"s\"))+(TRUE())))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(IF(1=1,DATE(2020,1,1)+\"a\",BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(IF(1=1,INT(\"a\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(INT(FACT(\"f\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(VAR v=EDATE(\"e\",1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(ABS((INT(\"a\"))+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(ABS((ROUND(\"c\",1))+(CURRENCY(1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(IF(1=1,DATE(2020,1,1)+\"a\",1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(ABS((TRUNC(\"k\"))+(TRUE())))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(IF(1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(SWITCH(1,1,\"a\"+0,BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(SWITCH(1,1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(SWITCH(1,1,ROUND(\"c\",1),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(SWITCH(TRUE(),1=1,ABS(\"m\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(SWITCH(TRUE(),1=1,EXP(\"w\"),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(SWITCH(TRUE(),1=1,ROUND(\"c\",1),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(ABS((ROUND(\"c\",1))+(TRUE())))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(COALESCE((VAR y=VALUE(\"x\") RETURN y),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(IF(MAX(Facts[Sales])>0,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(SWITCH(1,1,INT(\"a\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(SWITCH(1,1,TRUNC(\"k\"),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(SWITCH(TRUE(),1=1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR v=EDATE(\"e\",1) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR v=FACT(\"f\") RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR v=TIME(\"h\",1,1) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(ABS((SIGN(\"s\"))+(DATE(2020,1,1))))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(ABS((TRUNC(\"k\"))+(BLANK())))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(COALESCE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(IF(MAX(Facts[Sales])>0,CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(IFERROR((VAR y=VALUE(\"x\") RETURN y),DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(INT(CONVERT(\"z\",INTEGER)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(INT(INT(FACT(\"f\"))))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(SWITCH(1,1,(\"b\")*1,BLANK()))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(SWITCH(1,1,(VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(SWITCH(1,1,CONVERT(\"z\",INTEGER),BLANK()))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(SWITCH(1,1,CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(SWITCH(TRUE(),1=1,INT(\"a\"),DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(VAR v=EDATE(\"e\",1) RETURN v)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(VAR v=TIME(\"h\",1,1) RETURN v)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(ABS((INT(\"a\"))+(1.5)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(CONCATENATE(CONVERT(\"z\",INTEGER),MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(IF(1=1,DATE(2020,1,1)+\"a\",1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(UPPER((VAR y=VALUE(\"x\") RETURN y)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((\"t\")+(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((1)+(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((COUNTROWS(FILTER(Facts,FALSE())))+((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((CURRENCY(1))+(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((DATE(2020,1,1))+(\"a\"+0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((DATE(2020,1,1)+\"a\")=(BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(ABS((ABS(\"m\"))+(1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(ABS((TRUNC(\"k\"))+(TRUE())))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(DATE(2020,1,1)+\"a\")",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(IF(1=1,DATE(2020,1,1)+\"a\",DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(NOT(DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(UPPER((VAR y=VALUE(\"x\") RETURN y)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING((\"\")&((-1)^0.5))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(((-1)^0.5)^(1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(ABS(((\"b\")*1)+(DATE(2020,1,1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(ABS((SIGN(\"s\"))+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(COALESCE((VAR y=VALUE(\"x\") RETURN y),1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(COALESCE((VAR y=VALUE(\"x\") RETURN y),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(IF(1=0,BLANK(),DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(IF(1=0,BLANK(),ROUND(\"c\",1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(IF(1=0,BLANK(),TRUNC(\"k\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(IF(1=1,(-1)^0.5,2.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(IF(1=1,CONVERT(\"z\",INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(IF(1=1,DATE(2020,1,1)+\"a\",BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(INT(INT(FACT(\"f\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(SWITCH(1,1,(\"b\")*1,DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(SWITCH(1,1,EXP(\"w\"),CURRENCY(1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(SWITCH(1,1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(VAR v=DATEVALUE(\"q\") RETURN v+1)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(VAR v=TIMEVALUE(\"t\") RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(ABS((CONVERT(\"z\",INTEGER))+(DATE(2020,1,1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(ABS((DATE(2020,1,1)+\"a\")+(\"t\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(ABS((DATE(2020,1,1)+\"a\")+(DATE(2020,1,1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(IF(1=0,1,DATE(2020,1,1)+\"a\"))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(IF(1=1,CONVERT(\"z\",INTEGER),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(IF(1=1,ROUND(\"c\",1),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(IFERROR((VAR y=VALUE(\"x\") RETURN y),BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(SWITCH(1,1,(VAR y=VALUE(\"x\") RETURN y),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(SWITCH(1,1,CONVERT(\"z\",INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(SWITCH(1,1,CONVERT(\"z\",INTEGER),MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(SWITCH(1,1,DATE(2020,1,1)+\"a\",BLANK()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(SWITCH(TRUE(),1=1,CONVERT(MAX(Facts[Region]),INTEGER),1.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(VAR v=DIVIDE(\"a\",2) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(VAR v=FACT(\"f\") RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(VAR v=SQRT(-1) RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(VAR v=WEEKDAY(\"w\") RETURN v)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of a failing value Power BI may raise the error for is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY(((\"a\"+1)&&(DATE(2020,1,1)))&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((((\"a\")*(2))*(MAX(Facts[Note])))*(MAX(Facts[Region])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISCURRENCY((MAX(Facts[Region]))+(\"a\"+1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(((NOT(\"a\"))||(MAX(Facts[Note])))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE((((\"a\")*(2))&(DATE(2020,1,1)))&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(((NOT(\"a\"))-(SUM(Facts[Sales])))&(TRUE()))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "ISDOUBLE(CONCATENATE((\"a\")*(2),SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(((\"a\"+1)-(MAX(Facts[Region])))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64((MAX(Facts[Note]))*(\"a\"+1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISINTEGER(((NOT(\"a\"))&(\"\"))&(MAX(Facts[Region])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((\"a\")*(2))||(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((((\"a\")*(2))^(TRUE()))&&(MAX(Facts[Region])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((((\"a\")*(2))||(SUM(Facts[Sales])))&&(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((((-1)^0.5)+(MAX(Facts[Note])))*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((DATE(2020,13,40))-(COUNTROWS(FILTER(Facts,FALSE()))))-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((FACT(-1))||(DATE(2020,1,1)))-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((NOT(\"a\"))||(\"a\"))&&(SUM(Facts[Sales])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))&&(NOT(\"a\")))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Region]))&&((\"a\")*(2)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((NOT(\"a\"))||(MAX(Facts[Region])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))&(NOT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))*((\"a\")*(2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))-(NOT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(MAX(Facts[Region]),FACT(-1)))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(((\"a\"+1)-(MAX(Facts[Region])))&(2.5))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(((NOT(\"a\"))&(2.5))+(MAX(Facts[Region])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((MAX(Facts[Region]))&(NOT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISNONTEXT(CONCATENATE(\"a\"+1,MAX(Facts[Region])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((((-1)^0.5)-(SUM(Facts[Sales])))&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(((-1)^0.5)&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(((NOT(\"a\"))&(MAX(Facts[Note])))&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER((MAX(Facts[Note]))&((\"a\")*(2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(((\"a\"+1)&(SUM(Facts[Sales])))&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((MAX(Facts[Note]))&(NOT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC((MAX(Facts[Region]))&(\"a\"+1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "D",
+   "expr": "ISNUMERIC(CONCATENATE((-1)^0.5,SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISSTRING(((NOT(\"a\"))*(DATE(2020,1,1)))&(SUM(Facts[Sales])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((((-1)^0.5)&&(BLANK()))*(MAX(Facts[Region])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type Number."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((((-1)^0.5)||(MAX(Facts[Region])))*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT((MAX(Facts[Region]))-(NOT(\"a\")))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Cannot convert value # of type Text to type True/False."
+  },
+  {
+   "part": "C",
+   "expr": "ISTEXT(CONCATENATE((-1)^0.5,MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A type test of arithmetic around a failing power is not modelled by the local engine."
+  }
+ ]
+}
