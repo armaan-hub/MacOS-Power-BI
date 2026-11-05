@@ -4473,9 +4473,14 @@ def _is_datetime_conversion(node: Any) -> bool:
 
 
 _STRUCTURAL_CALLS = frozenset({"AND", "CALCULATE", "CONCATENATE", "COUNTROWS", "DATE", "FACT", "FILTER", "IF", "MAX", "MAXX", "MIN", "MOD", "NOT", "OR", "SELECTEDVALUE", "SUM", "SUMX", "UPPER"})
+_STRUCTURAL_NEW_CALLS = _STRUCTURAL_CALLS - {"SELECTEDVALUE"}  # Task 57: SELECTEDVALUE beside a failing part raised in the locked batteries
 _STRUCTURAL_TEXT_WRAPPED = frozenset({"ABS", "EXP", "ROUND", "INT", "TRUNC", "SIGN", "CURRENCY"})
 _STRUCTURAL_TEXT_RESULT = {
     "ISTEXT": True, "ISSTRING": True, "ISNONTEXT": False, "ISNUMBER": False, "ISNUMERIC": False, "ISLOGICAL": False, "ISBOOLEAN": False,
+    "ISDOUBLE": False, "ISDECIMAL": False, "ISDATETIME": False, "ISINTEGER": False, "ISINT64": False, "ISCURRENCY": False,
+}
+_STRUCTURAL_BOOL_RESULT = {  # Task 57: the answers for a Boolean result (&& || AND OR)
+    "ISTEXT": False, "ISSTRING": False, "ISNONTEXT": True, "ISNUMBER": False, "ISNUMERIC": False, "ISLOGICAL": True, "ISBOOLEAN": True,
     "ISDOUBLE": False, "ISDECIMAL": False, "ISDATETIME": False, "ISINTEGER": False, "ISINT64": False, "ISCURRENCY": False,
 }
 
@@ -4563,6 +4568,13 @@ def _value_blank_data_product(node: Any, held: Callable[[str], Any]) -> bool:
     return bool(value and blank and other)
 
 
+def _structural_power_constant(node: Any) -> bool:
+    """Task 57: every ^ under node has two numeric-literal operands (a sign allowed), such as (-1)^0.5, which Power BI answers by static type."""
+    def literal(part: Any) -> bool:
+        return isinstance(part, tuple) and bool(part) and (part[0] == "number" or (part[0] == "unary" and literal(part[2])))
+    return all(literal(part[2]) and literal(part[3]) for part in _walk_nodes(node) if part[0] == "binary" and part[1] == "^")
+
+
 def _structural_type_answer(function: str, argument: tuple[Any, ...]) -> bool | None:
     """Task 50: a type test of an argument whose evaluation failed, answered by the argument's static type alone.
     Measured on Power BI: only the families below answered (every other failing shape raised or is unmeasured, so None: the caller keeps its old behaviour).
@@ -4578,6 +4590,18 @@ def _structural_type_answer(function: str, argument: tuple[Any, ...]) -> bool | 
     _structural_parts(argument, calls, operators)
     if "/" in operators:
         return None
+    head = argument[0]
+    boolean_head = head == "logical" or (head == "call" and str(argument[1]).upper() in {"AND", "OR"})
+    if (boolean_head or head == "concat") and calls <= _STRUCTURAL_NEW_CALLS and "CONVERT" not in calls:
+        # Task 57: the static result type of && || AND OR (Boolean) and of & (text) answers every type test whatever the failing operand reads, but only
+        # while every call is in the measured set (SQRT, LN, SIN, VALUE, UNICHAR, ERROR, BLANK(), CONVERT ... raised in the locked batteries).
+        if boolean_head:
+            if any(isinstance(part, tuple) and part and part[0] == "reference" for part in _walk_nodes(argument)):
+                return None  # a column read beside a failing && || AND OR: refused (the locked test of iteration 140 keeps ISLOGICAL(MAX(Facts[Note])&""&&1) refused)
+            return _STRUCTURAL_BOOL_RESULT[function]
+        if "FACT" in calls or ("^" in operators and not _structural_power_constant(argument)):
+            return False if function in {"ISLOGICAL", "ISNUMBER"} else None
+        return _STRUCTURAL_TEXT_RESULT[function]
     if any(isinstance(part, tuple) and part and part[0] == "reference" for part in _walk_nodes(argument)):
         return None  # a column read beside the failing part: Power BI raises there (measured, 26 rows), so refuse; only literal-constant operands are answered
     risky = bool(calls & {"FACT", "MOD"}) or "^" in operators
@@ -4591,6 +4615,12 @@ def _structural_type_answer(function: str, argument: tuple[Any, ...]) -> bool | 
             return True
         if risky or "DATE" in calls:
             return None  # a date in the arithmetic makes it a date (ISDATETIME True, measured)
+        if function in {"ISNUMBER", "ISNUMERIC", "ISDOUBLE"}:
+            # Task 57: the locked batteries raised for a VAR text operand beside a blank FILTER aggregate, and for * beside either of them
+            has_let = any(part[0] == "let" for part in _walk_nodes(argument))
+            if has_let and "FILTER" in calls or (argument[1] == "*" and (has_let or "FILTER" in calls)):
+                return None
+            return True  # Task 57: arithmetic around a failing text is a Double (measured on the spec rows; CURRENCY and DATE are refused above)
         if function in {"ISCURRENCY", "ISDATETIME"} or (function == "ISINT64" and argument[1] == "*"):
             return False
         return None
@@ -17076,6 +17106,28 @@ def evaluate_measures(
             return False
         return static_t in {"currency", "decimal"}  # ISDECIMAL, ISCURRENCY
 
+    def _both_operands_fail_with_date_text(node: Any, row_context: Any) -> bool:
+        """Task 57: a binary / logical operator (or AND / OR) of two operands that both fail, one of them holding a DATEVALUE / TIMEVALUE call."""
+        if not isinstance(node, tuple) or len(node) < 4 and not (len(node) == 3 and node[0] == "call"):
+            return False
+        if node[0] in {"binary", "logical"} and len(node) == 4:
+            operands = [node[2], node[3]]
+        elif node[0] == "call" and str(node[1]).upper() in {"AND", "OR"} and len(node[2]) == 2:
+            operands = list(node[2])
+        else:
+            return False
+
+        def fails_here(part: Any) -> bool:
+            try:
+                evaluate(part, row_context, allow_text=True, allow_boolean=True)
+            except Exception:
+                return True
+            return False
+
+        if not all(isinstance(operand, tuple) and operand and fails_here(operand) for operand in operands):
+            return False
+        return any(isinstance(part, tuple) and len(part) > 2 and part[0] == "call" and str(part[1]).upper() in {"DATEVALUE", "TIMEVALUE"} for operand in operands for part in _walk_nodes(operand))
+
     def hidden_failure_verdict(function: str, node: tuple[Any, ...], row_context: Any) -> str | None:
         """Task 41: where a type test of a failing argument may be answered by the argument's static type.  Measured on fresh Power BI shapes
         (never on the saved ones): the static type answers only for the shape families below; a failing value that changes kind under IF /
@@ -17378,6 +17430,10 @@ def evaluate_measures(
                 raise
             values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
         except (MeasureRuntimeError, _HardError) as failure:
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _both_operands_fail_with_date_text(arguments[0], row_context):
+                # Task 57: a type test over a binary / logical operator where one operand holds a DATEVALUE / TIMEVALUE of an unparsable text and the
+                # other operand fails as well: Power BI raised the conversion error in every live row (the static type does not hide it)
+                raise dax_typed.refusal("A type test over an operator with a failing DATEVALUE operand beside another failing operand raises in Power BI and is not modelled by the local engine.") from failure
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
                 structural = _structural_type_answer(function, arguments[0])  # Task 50: a failing argument answered by its static type
                 if structural is not None:
