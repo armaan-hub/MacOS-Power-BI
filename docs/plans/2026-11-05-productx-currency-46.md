@@ -25,3 +25,6 @@ The scorer prints 0 wrong with as many matches as possible, the replay shows 0 D
 - New tests: `tests/test_iteration146_productx_currency_46.py` (6 pass). No existing test was edited. `tests/test_no_answer_key_in_app.py` passes.
 - Changes: `analytics_studio/measures.py` helper `_switch_or_coalesce_root_without_if` (about line 3092), its use in the PRODUCTX conditional refusal (about line 19116, also exempts a one-row table).
 - Not run: `graphify update .` (project rule) in this worktree.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 145. Locked 481600.

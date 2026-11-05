@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-05, after Iteration 144 / Task 55 big-rounding-45, FLOOR/CEILING/MROUND/QUOTIENT/INT/CONVERT of values from 1E15 to 2^53, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2693 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 484189 answers with 480820 match, 3369 refused, 0 DIFF, 0 CRASH, locked 480800. Next: next: PRODUCTX over a Currency in a conditional, coded by Haiku
+**Latest status (2026-11-05, after Iteration 145 / Task 56 productx-currency-46, PRODUCTX over Currency in SWITCH/COALESCE bodies without IF and one-row conditional bodies, Haiku coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2697 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 484968 answers with 481620 match, 3348 refused, 0 DIFF, 0 CRASH, locked 481600. Next: Task 57 failing-type-tests-47 (type tests of a failing value, 521 rows).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
