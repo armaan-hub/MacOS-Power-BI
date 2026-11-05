@@ -181,8 +181,9 @@ class RefusalsTest(unittest.TestCase):
             f'CONCATENATEX(Facts,COALESCE(BLANK(),{Q}>2,Facts[Sales]),"|")',
             f'CONCATENATEX(DISTINCT(Facts),IF({Q}>2,1,2),"|")',
             f'CONCATENATEX(TOPN(2,Facts,{Q}),COALESCE(Facts[Sales],1),"|")',
-            f'CONCATENATEX(Facts,IF(MAX({Q})>3,{Q}>2,UPPER({R})),"|")',
         ])
+        # Task 51 (2026-11-05): answered now; live Power BI answer (measured 2026-11-05)
+        self.assertEqual("FALSE|FALSE|FALSE|TRUE|TRUE|TRUE", dax.local(f'CONCATENATEX(Facts,IF(MAX({Q})>3,{Q}>2,UPPER({R})),"|")'))
 
     def test_statistics_the_engine_computes_otherwise(self) -> None:
         _refused(self, [

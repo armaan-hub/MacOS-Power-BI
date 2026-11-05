@@ -1,0 +1,598 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"k\",1),Facts[Region])",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"k\",1),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Region])",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(ALLSELECTED(Facts),Facts[Region])",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(ALLSELECTED(Facts),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),Facts[Region])",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Region])",
+   "powerbi": "EastWestEastNorthWestEast"
+  },
+  {
+   "expr": "CONCATENATEX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Region],\"|\")",
+   "powerbi": "East|West|East|North|West|East"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>0),Facts[Region])",
+   "powerbi": "EastEastEastWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>0),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region])",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Note],2))",
+   "powerbi": "PaidPaidPaidLate"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Note],2),\"|\")",
+   "powerbi": "||Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(FALSE(),1,Facts[Region]))",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(FALSE(),1,Facts[Region]),\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(MAX(Facts[Quantity])>3,Facts[Quantity]>2,UPPER(Facts[Region])))",
+   "powerbi": "FALSEFALSEFALSETRUETRUETRUE"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(MAX(Facts[Quantity])>3,Facts[Quantity]>2,UPPER(Facts[Region])),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(MIN(Facts[Quantity])>3,Facts[Quantity]>2,UPPER(Facts[Region])),\"|\")",
+   "powerbi": "EAST|EAST|EAST|WEST|WEST|NORTH"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),Facts[Quantity],\"a\"))",
+   "powerbi": "012345"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),Facts[Quantity],\"a\"),\"|\")",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),Facts[Region],1),\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(INTERSECT(Facts,Facts),Facts[Region])",
+   "powerbi": "EastWestEastNorthWestEast"
+  },
+  {
+   "expr": "CONCATENATEX(INTERSECT(Facts,Facts),Facts[Region],\"|\")",
+   "powerbi": "East|West|East|North|West|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region]),Facts[Region])",
+   "powerbi": "WestWest"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region]),Facts[Region],\"|\")",
+   "powerbi": "West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Region])",
+   "powerbi": "WestNorthEast"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Region],\"|\")",
+   "powerbi": "West|North|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales],ASC),Facts[Region])",
+   "powerbi": "EastWestEastNorth"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales],ASC),Facts[Region],\"|\")",
+   "powerbi": "East|West|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts),Facts[Region])",
+   "powerbi": "EastEastEastWestWestNorth"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"k\",1),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"k\",1),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ALL(Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(ALL(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ALL(Facts),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MAXX(ALL(Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ALL(Facts),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(ALL(Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(Facts),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(Facts),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>0),Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>0),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>0),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>0),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>0),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>0),IF.EAGER(FALSE(),\"a\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "6.66666666666667"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>0),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(Facts,IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"a\",Facts[Quantity]/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,Facts[Region],Facts[Quantity]/0))",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(Facts,IF(MAX(Facts[Quantity])>3,Facts[Quantity]>2,UPPER(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,\"a\",Facts[Quantity]/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(2,Facts,Facts[Region]),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(TOPN(2,Facts,Facts[Region]),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(TOPN(2,Facts,Facts[Region]),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(3,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(TOPN(3,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(TOPN(3,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(3,Facts,Facts[Quantity]),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(3,Facts,Facts[Quantity]),IF.EAGER(FALSE(),\"a\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "6.66666666666667"
+  },
+  {
+   "expr": "MAXX(TOPN(3,Facts,Facts[Quantity]),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(4,Facts,Facts[Sales],ASC),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(4,Facts,Facts[Sales],ASC),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"k\",1),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"k\",1),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ALL(Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "MINX(ALL(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ALL(Facts),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(ALL(Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ALL(Facts),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(ALL(Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(Facts),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(Facts),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),Facts[Sales]/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Note]<>\"x\"),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),Facts[Sales]/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),IF.EAGER(FALSE(),\"a\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(Facts,Facts[Sales]/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "MINX(Facts,IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,IF(MAX(Facts[Quantity])>3,Facts[Quantity]>2,UPPER(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(INTERSECT(Facts,Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(TOPN(2,Facts,Facts[Region]),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(TOPN(2,Facts,Facts[Region]),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(TOPN(2,Facts,Facts[Region]),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(TOPN(3,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MINX(TOPN(3,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MINX(TOPN(3,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(TOPN(3,Facts,Facts[Quantity]),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(TOPN(3,Facts,Facts[Quantity]),IF.EAGER(FALSE(),\"a\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "MINX(TOPN(3,Facts,Facts[Quantity]),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(TOPN(4,Facts,Facts[Sales],ASC),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(TOPN(4,Facts,Facts[Sales],ASC),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(VALUES(Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "MINX(VALUES(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(VALUES(Facts),IF(Facts[Quantity]>2,0/0,Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(VALUES(Facts),IF(Facts[Quantity]>3,1/0-1/0,\"x\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(VALUES(Facts),IF(Facts[Region]=\"East\",0/0,Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(VALUES(Facts),IF.EAGER(TRUE(),Facts[Sales]-Facts[Sales]/0*0,\"b\"))",
+   "powerbi": "NaN"
+  }
+ ]
+}

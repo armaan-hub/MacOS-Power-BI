@@ -154,9 +154,8 @@ class TestIteration129NanInfIterators29(unittest.TestCase):
         self.assertTrue(local('VARX.S(CALCULATETABLE(Facts,Facts[Region]="East"),IF(Facts[Quantity]>1,0/0,Facts[Quantity]))').startswith("LOCAL-REJECT:"))
 
     def test_part_c_maxx_minx_variant_nan_honest_refusal(self) -> None:
-        self.assertTrue(
-            dax.local('MAXX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,"a"))').startswith("LOCAL-REJECT:")
-        )
+        # Task 51 (2026-11-05): answered now; live Power BI answer (tools/parity/dax_battery_variant2_extra.json)
+        self.assertEqual(dax.local('MAXX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,"a"))'), "NaN")
         self.assertTrue(
             dax.local('MINX(Facts,IF.EAGER(Facts[Quantity]>2,Facts[Region],Facts[Sales]/Facts[Quantity]))').startswith("LOCAL-REJECT:")
         )

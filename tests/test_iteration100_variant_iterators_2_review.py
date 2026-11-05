@@ -104,7 +104,9 @@ class InfinityAndNanInVariantsTest(unittest.TestCase):
 
     def test_nan_beside_other_numbers_depends_on_the_walk_and_is_refused(self) -> None:
         # Power BI: Infinity with a text column in the other branch (the walk follows it), NaN with a literal
-        _refused(self, [f"MAXX(Facts,IF(Facts[Quantity]>2,{R},Facts[Quantity]/0))", 'MAXX(Facts,IF(Facts[Quantity]>2,"a",Facts[Quantity]/0))'])
+        # Task 51 (2026-11-05): answered now; live Power BI answer (tools/parity/dax_battery_variant2_extra.json: Infinity; the IF.EAGER form with a literal: NaN)
+        self.assertEqual("Infinity", dax.local(f"MAXX(Facts,IF(Facts[Quantity]>2,{R},Facts[Quantity]/0))"))
+        self.assertEqual("NaN", dax.local('MAXX(Facts,IF.EAGER(Facts[Quantity]>2,"a",Facts[Quantity]/0))'))
 
     def test_value_cannot_read_infinity_or_nan(self) -> None:
         _refused(self, ["VALUE(1/0)", 'VALUE(MAXX(Facts,IF(TRUE(),0/0,"a")))'])
