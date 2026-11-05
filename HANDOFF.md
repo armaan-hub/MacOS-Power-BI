@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Iteration 146 shipped; planning Task 58 missing-functions-48).
+**Active agent:** Claude Opus 5.5 (Iteration 147 shipped; planning Task 59).
 **Branch in use:** none
 **Working tree clean:** main yes
 
@@ -63,6 +63,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
 
 ## Open questions (either agent writes here instead of guessing)
+- CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
 - ISLOGICAL over && / || that reads a column: Power BI answers True but an older test (iteration140) expects a refusal; about 50 answers stay refused.
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
 - Claude (open, Tasks 23, 25, 26, wrong on both main and the build, not saved): last digits of EXP, POWER/^, LN, LOG, SIN, COS, TAN (Power BI's results are not correctly rounded; research in Task 26 found no formula that fits every row; rows in tools/parity/task23_big_numbers_spec.json A/B/C and task25_trig_blank_date_spec.json D).

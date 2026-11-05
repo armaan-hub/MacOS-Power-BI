@@ -40,3 +40,6 @@ tests/test_iteration148_missing_functions_48.py):**
 **Done when:** every Power BI answer above matches (errors match errors), dax_intellisense shows all 10 as supported,
 full pytest + replay pass with 0 DIFF/0 CRASH, no app code reads tools/parity or fixtures.
 **Open (needs a model change on the guest; ask the user later):** measure CALENDARAUTO/PATH with a date table and a parent-child table.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 147. Locked 482193.

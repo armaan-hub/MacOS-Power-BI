@@ -117,6 +117,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_biground45_extra | 2980 | 0 | 0 | 0 | 0 |
 | dax_battery_productx46_extra | 779 | 0 | 0 | 0 | 0 |
 | dax_battery_failtype47_extra | 316 | 0 | 35 | 0 | 0 |
+| dax_battery_missingfns48_extra | 232 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
