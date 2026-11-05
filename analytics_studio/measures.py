@@ -3089,6 +3089,13 @@ def _calls_function(node: Any, name: str) -> bool:
     return any(_calls_function(child, name) for child in children if isinstance(child, tuple))
 
 
+def _switch_or_coalesce_root_without_if(node: Any) -> bool:
+    """Task 56: a PRODUCTX body whose root is SWITCH or COALESCE, with no IF or IF.EAGER anywhere inside, multiplies the exact row values (measured on 14 rows)."""
+    if not isinstance(node, tuple) or len(node) < 3 or node[0] != "call" or node[1] not in {"SWITCH", "COALESCE"}:
+        return False
+    return not (_calls_function(node, "IF") or _calls_function(node, "IF.EAGER"))
+
+
 def _divides_by_number(node: Any) -> bool:
     """Whether a / appears in the expression (a Currency divided by a number is still Currency-built for XNPV's BLANK rule)."""
     if not isinstance(node, tuple) or not node:
@@ -19086,7 +19093,7 @@ def evaluate_measures(
                 raise MeasureError(f"{function} does not support expressions of type date.")
             if body_kind == "variant_dates" and function != "AVERAGEX":
                 raise MeasureError(f"{function} over a Variant that holds a number type with dates inside is not supported in the local engine.")
-            if iteration_rows and function == "PRODUCTX" and conditional_body and _calls_function(arguments[1], "CURRENCY"):
+            if iteration_rows and function == "PRODUCTX" and conditional_body and _calls_function(arguments[1], "CURRENCY") and not _switch_or_coalesce_root_without_if(arguments[1]) and len(iteration_rows) != 1:  # Task 56: one row is one factor, so no product arithmetic
                 # live Power BI (Task 13 review): GEOMEANX gives 30000 or 1.5E-322, STDEVX four decimals, PERCENTILEX a BLANK where the app reads a number;
                 # the fresh Task 43 grids measured STDEVX / VARX / GEOMEANX / MEDIANX / PERCENTILEX bodies one by one (modelled or refused below), PRODUCTX still has no rule
                 raise MeasureError(f"{function} over a Currency in a conditional is not modelled by the local engine.")

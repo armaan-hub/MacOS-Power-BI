@@ -75,12 +75,12 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_gaps2_extra | 9791 | 0 | 0 | 0 | 0 |
 | dax_battery_gaps2_extra2 | 13425 | 0 | 2 | 0 | 0 |
 | dax_battery_variant2_extra | 17506 | 0 | 80 | 0 | 0 |
-| dax_battery_typed3_extra | 29519 | 0 | 152 | 0 | 0 |
+| dax_battery_typed3_extra | 29520 | 0 | 151 | 0 | 0 |
 | dax_battery_logic4_extra | 36048 | 0 | 70 | 0 | 0 |
 | dax_battery_typed5_extra | 12261 | 0 | 31 | 0 | 0 |
 | dax_battery_strict6_extra | 18028 | 0 | 36 | 0 | 0 |
-| dax_battery_blank8_extra | 74818 | 0 | 203 | 0 | 0 |
-| dax_battery_convert9_extra | 36818 | 0 | 384 | 0 | 0 |
+| dax_battery_blank8_extra | 74819 | 0 | 202 | 0 | 0 |
+| dax_battery_convert9_extra | 36822 | 0 | 380 | 0 | 0 |
 | dax_battery_never10_extra | 39014 | 0 | 51 | 0 | 0 |
 | dax_battery_currency11_extra | 8127 | 0 | 41 | 0 | 0 |
 | dax_battery_double12_extra | 5739 | 0 | 28 | 0 | 0 |
@@ -103,7 +103,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_datestats30_extra | 2914 | 0 | 243 | 0 | 0 |
 | dax_battery_typeerr31_extra | 2672 | 0 | 177 | 0 | 0 |
 | dax_battery_roworder32_extra | 809 | 0 | 58 | 0 | 0 |
-| dax_battery_mixed33_extra | 1328 | 0 | 72 | 0 | 0 |
+| dax_battery_mixed33_extra | 1343 | 0 | 57 | 0 | 0 |
 | dax_battery_counttext34_extra | 1529 | 0 | 41 | 0 | 0 |
 | dax_battery_xnpvblank35_extra | 1330 | 0 | 66 | 0 | 0 |
 | dax_battery_biground36_extra | 1825 | 0 | 0 | 0 | 0 |
@@ -115,13 +115,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_mainfix43_extra | 4 | 0 | 3 | 0 | 0 |
 | dax_battery_xirr44_extra | 1137 | 0 | 20 | 0 | 0 |
 | dax_battery_biground45_extra | 2980 | 0 | 0 | 0 | 0 |
+| dax_battery_productx46_extra | 779 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (3369): Power BI answers, the app refuses
+## Pending work (3348): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -2711,7 +2712,6 @@ North,4`) [dax_battery_table_fns2]
 - `MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF("",Facts[Quantity]/0,Facts[Quantity]/0))` (Power BI: `Infinity`) [dax_battery_typed3_extra]
 - `CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(UPPER(Facts[Region]),1=1),"|")` (Power BI: `NORTH|EAST`) [dax_battery_typed3_extra]
 - `CONCATENATEX(Facts,COALESCE(BLANK(),DATE(2020,1,1)+Facts[Quantity],Facts[Region]),"|")` (Power BI: `1/1/2020|1/2/2020|1/3/2020|1/4/2020|1/5/2020|1/6/2020`) [dax_battery_typed3_extra]
-- `PRODUCTX(ALL(Facts),COALESCE(-Facts[Quantity],CURRENCY(1.23456)))` (Power BI: `0`) [dax_battery_typed3_extra]
 - `MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))` (Power BI: `Infinity`) [dax_battery_typed3_extra]
 - `CONCATENATEX(Facts,SWITCH(TRUE(),FALSE(),-Facts[Quantity],Facts[Quantity]>2),"|")` (Power BI: `FALSE|FALSE|FALSE|TRUE|TRUE|TRUE`) [dax_battery_typed3_extra]
 - `MAXX(ADDCOLUMNS(Facts,"z",1),IF(1,Facts[Quantity]/0,"a"))` (Power BI: `NaN`) [dax_battery_typed3_extra]
@@ -3081,7 +3081,6 @@ North`) [dax_battery_logic4_extra]
 - `MAXX({1,2},(2.5)*(ERROR("x"))*(SUMX(FILTER(Facts,FALSE()),1)))` (Power BI: `BLANK`) [dax_battery_blank8_extra]
 - `(SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*("a")` (Power BI: `BLANK`) [dax_battery_blank8_extra]
 - `COALESCE((SUMX(FILTER(Facts,FALSE()),1))*(CURRENCY(1)/BLANK())+(1/0),5)` (Power BI: `Infinity`) [dax_battery_blank8_extra]
-- `PRODUCTX({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))` (Power BI: `2`) [dax_battery_blank8_extra]
 - `COALESCE(("a"*2)*(SUMX(FILTER(Facts,FALSE()),1)),5)` (Power BI: `5`) [dax_battery_blank8_extra]
 - `MAXX({1,2},(SUMX(FILTER(Facts,FALSE()),1))*(MAXX(Facts,1/0))*(VAR y="b" RETURN y))` (Power BI: `BLANK`) [dax_battery_blank8_extra]
 - `COUNTAX(Facts,(MAXX({BLANK()},[Value]))*(Facts[Region]))` (Power BI: `BLANK`) [dax_battery_blank8_extra]
@@ -3161,10 +3160,6 @@ North`) [dax_battery_logic4_extra]
 - `VAR v=CONVERT(1E300,DATETIME) RETURN v` (Power BI: `12/31/9999 23:59:59`) [dax_battery_convert9_extra]
 - `MINX({1,2},IFERROR(CONVERT(1E300,DATETIME),CONVERT(1E300,DATETIME)))` (Power BI: `12/31/9999 23:59:59`) [dax_battery_convert9_extra]
 - `MAXX(ROW("Value",1),IFERROR(CONVERT(1E300,DATETIME),CONVERT(1E300,DATETIME)))` (Power BI: `12/31/9999 23:59:59`) [dax_battery_convert9_extra]
-- `PRODUCTX(ROW("Value",1),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))` (Power BI: `1.5`) [dax_battery_convert9_extra]
-- `PRODUCTX(ROW("Value",1),COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))` (Power BI: `2`) [dax_battery_convert9_extra]
-- `PRODUCTX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))` (Power BI: `11.390625`) [dax_battery_convert9_extra]
-- `PRODUCTX({"a"},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))` (Power BI: `1.5`) [dax_battery_convert9_extra]
 - `ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]="Nope"))+(BLANK()^BLANK()))` (Power BI: `False`) [dax_battery_convert9_extra]
 - `ISNONTEXT((MAX(Facts[Sales]))+(VAR y="b" RETURN y))` (Power BI: `True`) [dax_battery_convert9_extra]
 - `ISLOGICAL((SUM(Facts[Sales]))*(FACT(-1)))` (Power BI: `False`) [dax_battery_convert9_extra]
@@ -4917,12 +4912,6 @@ North`) [dax_battery_logic4_extra]
 - `PRODUCTX(ADDCOLUMNS(Facts,"z",1),IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))` (Power BI: `11.390625`) [dax_battery_mixed33_extra]
 - `PRODUCTX(ADDCOLUMNS(Facts,"z",1),IF(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)+Facts[Quantity]))` (Power BI: `1.771561`) [dax_battery_mixed33_extra]
 - `PRODUCTX(ADDCOLUMNS(Facts,"z",1),IF(TRUE(),CURRENCY(2.75),1))` (Power BI: `432.510009765625`) [dax_battery_mixed33_extra]
-- `PRODUCTX(ADDCOLUMNS(Facts,"z",1),SWITCH(Facts[Quantity],2,CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))` (Power BI: `1.5`) [dax_battery_mixed33_extra]
-- `PRODUCTX(ADDCOLUMNS(Facts,"z",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),Facts[Sales]))` (Power BI: `0`) [dax_battery_mixed33_extra]
-- `PRODUCTX(ADDCOLUMNS(Facts,"z",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),TRUE()))` (Power BI: `-2`) [dax_battery_mixed33_extra]
-- `PRODUCTX(ADDCOLUMNS(Facts,"z",1),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),2.5))` (Power BI: `1.771561`) [dax_battery_mixed33_extra]
-- `PRODUCTX(ADDCOLUMNS(Facts,"z",1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),1))` (Power BI: `64`) [dax_battery_mixed33_extra]
-- `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),1))` (Power BI: `2.32329891992486`) [dax_battery_mixed33_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(-2)))` (Power BI: `15.9999999999999`) [dax_battery_mixed33_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(Facts[Sales])))` (Power BI: `524.999999999997`) [dax_battery_mixed33_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(2.75),BLANK()))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
@@ -4939,11 +4928,8 @@ North`) [dax_battery_logic4_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),"a",CURRENCY(0)))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),Facts[Quantity],CURRENCY(0)))` (Power BI: `120`) [dax_battery_mixed33_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(FALSE(),CURRENCY(1.23456),2.5))` (Power BI: `39.0625`) [dax_battery_mixed33_extra]
-- `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))` (Power BI: `120`) [dax_battery_mixed33_extra]
-- `PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(7),TRUE()))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(2.75)))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
 - `PRODUCTX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(FALSE(),CURRENCY(7),BLANK()))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
-- `PRODUCTX(FILTER(Facts,Facts[Sales]>3),SWITCH(Facts[Quantity],2,CURRENCY(0.33333),DATE(2020,1,1)+Facts[Quantity]))` (Power BI: `14609.8722`) [dax_battery_mixed33_extra]
 - `PRODUCTX(Facts,IF(0,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))` (Power BI: `7.09311325925216E+27`) [dax_battery_mixed33_extra]
 - `PRODUCTX(Facts,IF(0,CURRENCY(2.75),"a"))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
 - `PRODUCTX(Facts,IF(1,CURRENCY(-2)))` (Power BI: `63.9999999999994`) [dax_battery_mixed33_extra]
@@ -4954,19 +4940,13 @@ North`) [dax_battery_logic4_extra]
 - `PRODUCTX(Facts,IF(TRUE(),CURRENCY(Facts[Sales])))` (Power BI: `0`) [dax_battery_mixed33_extra]
 - `PRODUCTX(Facts,IF.EAGER(0,CURRENCY(1.5),DATE(2020,1,1)+Facts[Quantity]))` (Power BI: `7.09311325925216E+27`) [dax_battery_mixed33_extra]
 - `PRODUCTX(Facts,IF.EAGER(FALSE(),CURRENCY(-2),Facts[Sales]))` (Power BI: `0`) [dax_battery_mixed33_extra]
-- `PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(-2),TRUE()))` (Power BI: `-2`) [dax_battery_mixed33_extra]
-- `PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(7),2.5))` (Power BI: `683.59375`) [dax_battery_mixed33_extra]
 - `PRODUCTX({0.5,4},IF(0,DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))` (Power BI: `2.25`) [dax_battery_mixed33_extra]
 - `PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(-1.1),"a"))` (Power BI: `1.21`) [dax_battery_mixed33_extra]
 - `PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(7)))` (Power BI: `49`) [dax_battery_mixed33_extra]
-- `PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),1))` (Power BI: `-1.331`) [dax_battery_mixed33_extra]
-- `PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),BLANK()))` (Power BI: `-1.331`) [dax_battery_mixed33_extra]
 - `PRODUCTX({1,2,3},IF(FALSE(),DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))` (Power BI: `3.375`) [dax_battery_mixed33_extra]
 - `PRODUCTX({1,2,3},IF.EAGER(0,CURRENCY(0.33333),TRUE()))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
 - `PRODUCTX({1,2,3},IF.EAGER(FALSE(),CURRENCY(-1.1),"a"))` (Power BI: `BLANK`) [dax_battery_mixed33_extra]
 - `PRODUCTX({1.5,2.5},IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))` (Power BI: `2.25`) [dax_battery_mixed33_extra]
-- `PRODUCTX({TRUE()},IF(0,"a",CURRENCY(1.23456)))` (Power BI: `1.2346`) [dax_battery_mixed33_extra]
-- `PRODUCTX({TRUE()},SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),2.5))` (Power BI: `1.2346`) [dax_battery_mixed33_extra]
 - `STDEVX.P(ADDCOLUMNS(Facts,"z",1),COALESCE(CURRENCY(Facts[Sales]),Facts[Quantity]))` (Power BI: `7.3565`) [dax_battery_mixed33_extra]
 - `STDEVX.P(Facts,IF(FALSE(),CURRENCY(Facts[Sales]),Facts[Sales]))` (Power BI: `8.0037491215055`) [dax_battery_mixed33_extra]
 - `STDEVX.S(ADDCOLUMNS(Facts,"z",1),IF.EAGER(0,CURRENCY(Facts[Sales]),Facts[Quantity]))` (Power BI: `1.8708`) [dax_battery_mixed33_extra]
