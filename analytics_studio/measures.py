@@ -4600,7 +4600,157 @@ def _structural_power_constant(node: Any) -> bool:
     return all(literal(part[2]) and literal(part[3]) for part in _walk_nodes(node) if part[0] == "binary" and part[1] == "^")
 
 
-def _structural_type_answer(function: str, argument: tuple[Any, ...]) -> bool | None:
+# Task 60: a type test of one + - * / of two leaves, where a leaf reads a column aggregate, is answered from the static result type of the arithmetic.
+# The leaf types and the promotion table below come from the saved Power BI rows (type test over one binary of two leaves, keyed by operator and
+# the two leaf TYPES, never by column name); a cell is answered only for the type tests that have evidence for it (_ARITHMETIC_EVIDENCE).
+_PROMOTION_INT, _PROMOTION_DOUBLE, _PROMOTION_CURRENCY, _PROMOTION_TEXT = "Int64", "Double", "Currency", "Text"
+_ARITHMETIC_EVIDENCE: dict[tuple[str, str, str], frozenset[str]] = {  # (operator, left type, right type) -> the type tests with >= 5 saved Power BI rows in the cell, all agreeing with the table, none an error;
+    # a CURRENCY of a column read is its own leaf type, Currency[Int64] / Currency[Double] (the Currency of a literal is plain Currency): the cells differ
+    ('*', 'Currency', 'Currency'): frozenset({'ISDOUBLE'}),
+    ('*', 'Currency', 'Double'): frozenset({'ISDOUBLE', 'ISINT64', 'ISNUMBER'}),
+    ('*', 'Currency', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Currency', 'Text'): frozenset({'ISDOUBLE', 'ISINT64', 'ISNUMBER'}),
+    ('*', 'Currency[Double]', 'Double'): frozenset({'ISDOUBLE'}),
+    ('*', 'Currency[Double]', 'Text'): frozenset({'ISDOUBLE'}),
+    ('*', 'Currency[Int64]', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Double', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64', 'ISNUMBER'}),
+    ('*', 'Double', 'Currency[Int64]'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Double', 'Double'): frozenset({'ISDOUBLE'}),
+    ('*', 'Double', 'Int64'): frozenset({'ISDOUBLE'}),
+    ('*', 'Double', 'Text'): frozenset({'ISINT64'}),
+    ('*', 'Int64', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Int64', 'Double'): frozenset({'ISDOUBLE'}),
+    ('*', 'Int64', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Int64', 'Text'): frozenset({'ISDOUBLE'}),
+    ('*', 'Text', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Text', 'Currency[Double]'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Text', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Text', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Currency', 'Currency'): frozenset({'ISDOUBLE'}),
+    ('+', 'Currency', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Currency', 'Int64'): frozenset({'ISDOUBLE'}),
+    ('+', 'Currency', 'Text'): frozenset({'ISINT64'}),
+    ('+', 'Currency[Double]', 'Text'): frozenset({'ISINT64'}),
+    ('+', 'Currency[Int64]', 'Double'): frozenset({'ISINT64'}),
+    ('+', 'Double', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Double', 'Double'): frozenset({'ISDOUBLE'}),
+    ('+', 'Double', 'Int64'): frozenset({'ISDOUBLE'}),
+    ('+', 'Double', 'Text'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Int64', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Int64', 'Double'): frozenset({'ISDOUBLE'}),
+    ('+', 'Int64', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Text', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Text', 'Currency[Double]'): frozenset({'ISDOUBLE'}),
+    ('+', 'Text', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('+', 'Text', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64', 'ISNUMBER'}),
+    ('-', 'Currency', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('-', 'Currency', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('-', 'Currency', 'Text'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('-', 'Double', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('-', 'Double', 'Currency[Int64]'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('-', 'Double', 'Double'): frozenset({'ISDOUBLE'}),
+    ('-', 'Double', 'Int64'): frozenset({'ISDOUBLE'}),
+    ('-', 'Double', 'Text'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('-', 'Int64', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('-', 'Int64', 'Double'): frozenset({'ISDOUBLE'}),
+    ('-', 'Int64', 'Int64'): frozenset({'ISDOUBLE'}),
+    ('-', 'Int64', 'Text'): frozenset({'ISINT64'}),
+    ('-', 'Text', 'Currency'): frozenset({'ISINT64'}),
+    ('-', 'Text', 'Currency[Double]'): frozenset({'ISINT64'}),
+    ('-', 'Text', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('/', 'Currency', 'Currency'): frozenset({'ISDOUBLE'}),
+    ('/', 'Currency', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('/', 'Currency', 'Text'): frozenset({'ISINT64'}),
+    ('/', 'Currency[Double]', 'Double'): frozenset({'ISDOUBLE', 'ISNUMBER'}),
+    ('/', 'Double', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64', 'ISNUMBER'}),
+    ('/', 'Double', 'Currency[Double]'): frozenset({'ISNUMBER'}),
+    ('/', 'Double', 'Currency[Int64]'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('/', 'Double', 'Double'): frozenset({'ISDOUBLE'}),
+    ('/', 'Double', 'Int64'): frozenset({'ISDOUBLE'}),
+    ('/', 'Int64', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('/', 'Int64', 'Double'): frozenset({'ISDOUBLE'}),
+    ('/', 'Int64', 'Int64'): frozenset({'ISBOOLEAN', 'ISDOUBLE', 'ISINT64', 'ISSTRING'}),
+    ('/', 'Text', 'Currency'): frozenset({'ISINT64'}),
+}
+
+
+def _arithmetic_result_type(operator: str, left: str, right: str) -> str | None:
+    """Task 60: the promotion table of + - * / over the leaf types Int64, Double, Currency and Text (a text operand is read as a number).
+      + -  : Int64 with Int64; Currency with Currency or Int64; any Double, or a Text, or Currency against Double or Text, gives Double.
+      *    : Int64 with Int64; Currency times Currency is Double; Currency times anything else is Currency; every other pair is Double.
+      /    : Currency over Currency is Double; Currency over anything else is Currency; anything over Currency is Double; every other pair is Double."""
+    int64, double, currency, text = _PROMOTION_INT, _PROMOTION_DOUBLE, _PROMOTION_CURRENCY, _PROMOTION_TEXT
+    left, right = left.split("[")[0], right.split("[")[0]  # Currency[Int64] and Currency[Double] promote as Currency
+    if operator not in {"+", "-", "*", "/"} or not {left, right} <= {int64, double, currency, text}:
+        return None
+    if operator in {"+", "-"}:
+        if left == right == int64:
+            return int64
+        if currency in {left, right} and not {left, right} & {double, text}:
+            return currency
+        return double
+    if operator == "*":
+        if left == right == int64:
+            return int64
+        if left == right == currency:
+            return double
+        return currency if currency in {left, right} else double
+    if left == right == currency:
+        return double
+    if left == currency:
+        return currency
+    return double
+
+
+def _arithmetic_leaf(node: Any, columns: dict[str, dict[str, str]] | None) -> tuple[str, bool] | None:
+    """Task 60: (static type, reads a column) of one operand: a text literal, a numeric literal, CURRENCY of a leaf, or MIN / MAX / SUM / AVERAGE of a column
+    typed Int64 or Double in the model (AVERAGE is a Double); None for anything else (a column of another type is unknown, so no answer)."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "string":
+        return _PROMOTION_TEXT, False
+    if node[0] == "number":
+        literal = _static_numeric_type(node)
+        return (_PROMOTION_INT if literal == "int64" else _PROMOTION_DOUBLE, False) if literal in {"int64", "double"} else None
+    if node[0] != "call" or len(node[2]) != 1:
+        return None
+    function = str(node[1]).upper()
+    if function == "CURRENCY":
+        inner = _arithmetic_leaf(node[2][0], columns)
+        if inner is None or inner[0] == _PROMOTION_CURRENCY or inner[0].startswith(_PROMOTION_CURRENCY + "["):
+            return None
+        return (f"{_PROMOTION_CURRENCY}[{inner[0]}]" if inner[1] else _PROMOTION_CURRENCY), inner[1]  # the Currency of a column read keeps that column's type
+    reference = node[2][0]
+    if function in {"MIN", "MAX", "SUM", "AVERAGE"} and isinstance(reference, tuple) and len(reference) == 3 and reference[0] == "reference" and columns:
+        column_type = _static_numeric_type(reference, columns)
+        if column_type == "int64":
+            return (_PROMOTION_DOUBLE if function == "AVERAGE" else _PROMOTION_INT), True
+        if column_type == "double":
+            return _PROMOTION_DOUBLE, True
+    return None
+
+
+def _measured_column_arithmetic_answer(function: str, argument: Any, columns: dict[str, dict[str, str]] | None = None) -> bool | None:
+    """Task 60: a type test of one + - * / of two leaves where one reads a column aggregate, answered by the promotion table.
+    A (type test, operator, left type, right type) cell without saved Power BI evidence keeps the Task 50 refusal (None)."""
+    if not isinstance(argument, tuple) or len(argument) != 4 or argument[0] != "binary" or argument[1] not in {"+", "-", "*", "/"}:
+        return None
+    left, right = _arithmetic_leaf(argument[2], columns), _arithmetic_leaf(argument[3], columns)
+    if left is None or right is None or not (left[1] or right[1]):
+        return None
+    if function not in _ARITHMETIC_EVIDENCE.get((argument[1], left[0], right[0]), frozenset()):
+        return None
+    result = _arithmetic_result_type(argument[1], left[0], right[0])
+    if result is None:
+        return None
+    if function == "ISDOUBLE":
+        return result == _PROMOTION_DOUBLE
+    if function == "ISINT64":
+        return result == _PROMOTION_INT
+    return function in {"ISNUMBER", "ISNUMERIC", "ISNONTEXT"}  # every result is a number: ISTEXT / ISSTRING / ISLOGICAL / ISBOOLEAN are False
+
+
+def _structural_type_answer(function: str, argument: tuple[Any, ...], columns: dict[str, dict[str, str]] | None = None) -> bool | None:
     """Task 50: a type test of an argument whose evaluation failed, answered by the argument's static type alone.
     Measured on Power BI: only the families below answered (every other failing shape raised or is unmeasured, so None: the caller keeps its old behaviour).
     All calls under the argument must be in a small measured set and there is no division (a division by zero is seen at once).
@@ -4608,6 +4758,9 @@ def _structural_type_answer(function: str, argument: tuple[Any, ...]) -> bool | 
       & (concatenation) : text (ISTEXT True, others False); with FACT or ^ only ISLOGICAL and ISNUMBER.
       CONCATENATE / UPPER : text, around ABS EXP ROUND INT TRUNC SIGN CURRENCY too.
       && || AND OR : ISLOGICAL True."""
+    measured = _measured_column_arithmetic_answer(function, argument, columns)  # Task 60: the promotion table, for the type tests it has evidence for
+    if measured is not None:
+        return measured
     if function not in _STRUCTURAL_TEXT_RESULT or not isinstance(argument, tuple) or not argument:
         return None
     calls: set[str] = set()
@@ -17522,7 +17675,7 @@ def _evaluate_measures_once(
                 # other operand fails as well: Power BI raised the conversion error in every live row (the static type does not hide it)
                 raise dax_typed.refusal("A type test over an operator with a failing DATEVALUE operand beside another failing operand raises in Power BI and is not modelled by the local engine.") from failure
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
-                structural = _structural_type_answer(function, arguments[0])  # Task 50: a failing argument answered by its static type
+                structural = _structural_type_answer(function, arguments[0], static_scope()[0])  # Task 50: a failing argument answered by its static type
                 if structural is not None:
                     return structural
             if isinstance(failure, _PowerFailure) and function in _TYPE_TESTS and len(arguments) == 1 and (

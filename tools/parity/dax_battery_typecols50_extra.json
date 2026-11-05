@@ -1,0 +1,842 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-05",
+ "items": [
+  {
+   "expr": "ISDOUBLE(MIN(Facts[Sales])-\"\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(\"abc\"+MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(\"x1\"+AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(AVERAGE(Facts[Sales])- \"TRUE\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(AVERAGE(Facts[Sales])-\"\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(MAX(Facts[Sales]))*\"abc\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(SUM(Facts[Quantity]))+\"x1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(\"x1\"+MIN(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(CURRENCY(MIN(Facts[Quantity]))*\"\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 59) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL(CURRENCY(MAX(Facts[Sales]))+MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAX(Facts[Sales])-2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(CURRENCY(SUM(Facts[Quantity]))+\"3\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(MAX(Facts[Quantity])/2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(SUM(Facts[Quantity])+-1.25)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(AVERAGE(Facts[Quantity])*CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(MAX(Facts[Sales])/CURRENCY(0.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(MIN(Facts[Quantity]))* \"TRUE\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(\"3\"/MAX(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(SUM(Facts[Quantity]))+ \"TRUE\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(\"\"/CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMERIC(AVERAGE(Facts[Quantity])+AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(MAX(Facts[Sales])+CURRENCY(3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(CURRENCY(SUM(Facts[Quantity]))*SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(3)/MIN(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) A division by zero has been encountered.\""
+  },
+  {
+   "expr": "ISNUMBER(2+CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(SUM(Facts[Quantity])-\"3\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(2.5/MIN(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(-1.25/CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(MAX(Facts[Sales]))/ \"TRUE\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 58) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISSTRING(\"1e2\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(\"\"*AVERAGE(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBOOLEAN(\"1e2\"/CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(AVERAGE(Facts[Sales])*CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(\"3\"*MIN(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(MIN(Facts[Sales])/CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(AVERAGE(Facts[Sales])/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(AVERAGE(Facts[Sales])+MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(MIN(Facts[Sales])-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(\"3\"/CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(MAX(Facts[Sales]))/2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(MAX(Facts[Quantity])-CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(CURRENCY(SUM(Facts[Quantity]))+MAX(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(SUM(Facts[Quantity])/AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(MIN(Facts[Sales])-CURRENCY(3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(MIN(Facts[Sales])/\"3\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(2.5+CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(AVERAGE(Facts[Sales])*AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Quantity])*CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(SUM(Facts[Quantity])-SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(MIN(Facts[Quantity]))/CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(MIN(Facts[Sales])+SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(SUM(Facts[Quantity])+CURRENCY(3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(MAX(Facts[Sales]))*CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(0+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(2.5/CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(7+CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(SUM(Facts[Quantity]))/CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(SUM(Facts[Quantity]))*MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(CURRENCY(0.5)/AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(AVERAGE(Facts[Sales])-\"1e2\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(2*AVERAGE(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(MIN(Facts[Quantity]))-CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(SUM(Facts[Quantity])-2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(\"x1\"/MAX(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'x1' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISSTRING(AVERAGE(Facts[Quantity])-SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(\"3\"+CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(2+AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(CURRENCY(SUM(Facts[Quantity]))+\"1e2\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(\"1e2\"+MIN(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(MAX(Facts[Quantity])/\"\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISNUMBER(\"\"/MIN(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL(AVERAGE(Facts[Quantity])-AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(CURRENCY(MIN(Facts[Quantity]))-CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(CURRENCY(MIN(Facts[Quantity]))-SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(CURRENCY(3)*MIN(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(\"\"*CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(\"\"+CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(AVERAGE(Facts[Quantity])+CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(2.5/AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(0/MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(0.5)+SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(MAX(Facts[Sales]))+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(\"1e2\"*SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(CURRENCY(MIN(Facts[Quantity]))-AVERAGE(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(\"\"*CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISLOGICAL(MIN(Facts[Quantity])*MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(AVERAGE(Facts[Sales])-SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Quantity])*-1.25)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(SUM(Facts[Quantity])-CURRENCY(0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(CURRENCY(3)-MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(AVERAGE(Facts[Quantity])/MIN(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(MIN(Facts[Quantity])/AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MIN(Facts[Sales])*MAX(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(MAX(Facts[Sales])-CURRENCY(0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAX(Facts[Sales])-CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(MIN(Facts[Sales])-0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(SUM(Facts[Sales])-SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(CURRENCY(SUM(Facts[Quantity]))+AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(AVERAGE(Facts[Sales])+AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(2.5+MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(MAX(Facts[Sales]))+2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT( \"TRUE\"*AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(MAX(Facts[Sales])*2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(MIN(Facts[Sales])/0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(-1.25+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(MIN(Facts[Quantity]))/CURRENCY(0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(CURRENCY(MAX(Facts[Sales]))+AVERAGE(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(2.5+AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(MAX(Facts[Sales]))/MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(SUM(Facts[Quantity]))*MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(MAX(Facts[Quantity])-\"\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(0*MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(\"3\"+MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(7-CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(AVERAGE(Facts[Sales])+MIN(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MIN(Facts[Sales])+MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(CURRENCY(3)/MIN(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) A division by zero has been encountered.\""
+  },
+  {
+   "expr": "ISLOGICAL(MIN(Facts[Sales])+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(AVERAGE(Facts[Sales])/MIN(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(CURRENCY(MIN(Facts[Quantity]))*MIN(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(SUM(Facts[Quantity])/ \"TRUE\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Sales])+AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(SUM(Facts[Quantity])+AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(SUM(Facts[Quantity])+SUM(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(MAX(Facts[Sales])+2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(MIN(Facts[Quantity])+CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(MIN(Facts[Quantity])-MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(2.5/SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(7*MAX(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(CURRENCY(SUM(Facts[Quantity]))/AVERAGE(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(CURRENCY(MIN(Facts[Quantity]))-\"3\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(CURRENCY(SUM(Facts[Quantity]))-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(AVERAGE(Facts[Sales])/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Quantity])-AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISSTRING(MIN(Facts[Quantity])/CURRENCY(3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(MAX(Facts[Quantity])+SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(SUM(Facts[Sales])-\"abc\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAX(Facts[Sales])-7)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(0.5)-MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(\"3\"+SUM(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAX(Facts[Sales])-MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(SUM(Facts[Quantity])*SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(SUM(Facts[Sales])/CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(AVERAGE(Facts[Sales])+ \"TRUE\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(SUM(Facts[Sales])+\"x1\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(SUM(Facts[Quantity])/AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(0.5)-MIN(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(0*MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(MIN(Facts[Sales])/2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(SUM(Facts[Sales])+MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(SUM(Facts[Sales])+SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(2/AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(MIN(Facts[Quantity])/AVERAGE(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(7-MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(3)+SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(MIN(Facts[Sales])*CURRENCY(0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(\"3\"*AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(SUM(Facts[Quantity]))*CURRENCY(3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(CURRENCY(MAX(Facts[Sales]))*0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(-1.25+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(AVERAGE(Facts[Sales])/7)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(-1.25+CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMERIC(AVERAGE(Facts[Sales])+MIN(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(SUM(Facts[Sales])-MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(MIN(Facts[Quantity]))/CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(CURRENCY(MIN(Facts[Quantity]))-CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(CURRENCY(MAX(Facts[Sales]))-CURRENCY(SUM(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(MAX(Facts[Quantity])*SUM(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(CURRENCY(MIN(Facts[Quantity]))/\"x1\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 60) Cannot convert value 'x1' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBOOLEAN(MAX(Facts[Quantity])+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(MIN(Facts[Quantity])*MAX(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNONTEXT(MAX(Facts[Quantity])+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(CURRENCY(SUM(Facts[Quantity]))*CURRENCY(0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(CURRENCY(0.5)*CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(2.5*CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(MAX(Facts[Quantity])+CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(AVERAGE(Facts[Quantity])*CURRENCY(3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(MIN(Facts[Quantity])-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(MIN(Facts[Quantity])- \"TRUE\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(SUM(Facts[Quantity]))-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(SUM(Facts[Sales])*SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(SUM(Facts[Quantity]))*CURRENCY(0.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK( \"TRUE\"+MIN(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(MIN(Facts[Quantity])/AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBOOLEAN(CURRENCY(SUM(Facts[Quantity]))*AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(\"\"/AVERAGE(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "ISBLANK(CURRENCY(MAX(Facts[Sales]))*MIN(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(7*MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(MAX(Facts[Quantity])*CURRENCY(MIN(Facts[Quantity])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(-1.25/AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(AVERAGE(Facts[Sales])*\"x1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(AVERAGE(Facts[Quantity])-0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(AVERAGE(Facts[Sales])+-1.25)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(0*AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(MAX(Facts[Sales])*MIN(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(\"3\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(\"1e2\"-AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(MAX(Facts[Sales])-7)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(\"1e2\"/MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(CURRENCY(MAX(Facts[Sales]))+AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(MIN(Facts[Sales])-\"\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(MAX(Facts[Sales])+SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISSTRING(MIN(Facts[Sales])/MIN(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMERIC(MAX(Facts[Sales])/CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(-1.25-AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(-1.25/SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAX(Facts[Sales])/AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(MAX(Facts[Sales])/SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBOOLEAN(AVERAGE(Facts[Quantity])*AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  }
+ ]
+}
