@@ -1,0 +1,1468 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),(DATE(2024,5,26)+Facts[Quantity])/1.5))",
+   "powerbi": "0.83147952990817",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),(TIME(3,42,14)+Facts[Quantity])/5))",
+   "powerbi": "0.24944382578493",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/1.5))",
+   "powerbi": "0.831479419283097",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/4))",
+   "powerbi": "0.311804782231163",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/5+Facts[Sales]/0.7),Facts[Region]<>\"West\")",
+   "powerbi": "7.29330137166698",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(10,43,3)-Facts[Sales]/3),Facts[Region]<>\"West\")",
+   "powerbi": "1.49278098250493",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(6,7,3)+1/9),Facts[Region]<>\"West\")",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1899,2,15)+Facts[Quantity])/12))",
+   "powerbi": "0.127293769305189",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]/12+Facts[Sales]/13))",
+   "powerbi": "1.40395957275124",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(2000,4,28)*Facts[Quantity]/7))",
+   "powerbi": "7996.3763698077",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(2,40,46)+1/0.7))",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+(Facts[Sales]+1)/6),Facts[Region]<>\"West\")",
+   "powerbi": "0.557098765432098",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/8))",
+   "powerbi": "0.799479166666515",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)-Facts[Sales]/9),Facts[Region]<>\"West\")",
+   "powerbi": "0.247599451301994",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]*2/0.25))",
+   "powerbi": "3274.66666666667",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1901,3,22)+Facts[Sales]*2/0.3))",
+   "powerbi": "2274.07407407404",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(17,47,46)-Facts[Quantity]/11))",
+   "powerbi": "0.0128558310376492",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(4,44,22)+Facts[Quantity]/4-1))",
+   "powerbi": "0.0972222222222223",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1899,12,31)+Facts[Sales])/8))",
+   "powerbi": "1.19921875",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]/0.3-1))",
+   "powerbi": "852.777777777778",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Quantity]/13))",
+   "powerbi": "49.7041420118344",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/11+Facts[Sales]/0.3))",
+   "powerbi": "899.927226813596",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)-Facts[Sales]/0.3))",
+   "powerbi": "852.777777777778",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(2024,4,28)+Facts[Quantity]/11+Facts[Quantity]/6),Facts[Region]<>\"West\")",
+   "powerbi": "0.154805660247803",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/3+TIME(3,46,41)),Facts[Region]<>\"West\")",
+   "powerbi": "0.25925925925926",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(16,3,49)+Facts[Sales]/7),Facts[Region]<>\"West\")",
+   "powerbi": "0.613945578231293",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(21,15,23)/8+Facts[Sales]),Facts[Region]<>\"West\")",
+   "powerbi": "30.0833333333333",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(22,38,35)+Facts[Sales]/12+Facts[Sales]/3))",
+   "powerbi": "13.3246527777778",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),(DATE(1900,3,1)+Facts[Sales])/12)",
+   "powerbi": "0.596090659274305",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),(DATE(1950,8,10)+Facts[Quantity])/9)",
+   "powerbi": "0.138579905596898",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/4)",
+   "powerbi": "0.311804782231163",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/9+Facts[Quantity]/1.5)",
+   "powerbi": "0.970059322496949",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]/3+Facts[Sales]/3)",
+   "powerbi": "4.76872527419443",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)-Facts[Quantity]/0.3)+1",
+   "powerbi": "5.15739709641549",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)/2+Facts[Quantity])",
+   "powerbi": "1.24721912892465",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,10,1)+Facts[Sales]/3-1)",
+   "powerbi": "2.3843626370936",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Sales]/0.25)",
+   "powerbi": "1716.74109870999",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Sales]/5)+1",
+   "powerbi": "86.8370549354997",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+(Facts[Sales]+1)/1.5)",
+   "powerbi": "4.76872527419444",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]*2/1.5)",
+   "powerbi": "1.66295883856631",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/1.5)",
+   "powerbi": "0.831479419283155",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/6)",
+   "powerbi": "0.207869854818533",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/6+Facts[Quantity]/3)",
+   "powerbi": "0.623609564462526",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/2.5)",
+   "powerbi": "2.86123516451679",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/4+Facts[Sales]/4)",
+   "powerbi": "3.57654395564586",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)/2.5+Facts[Sales])",
+   "powerbi": "7.15308791129165",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)*Facts[Sales]/5)",
+   "powerbi": "87.2676725177581",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+1/0.7)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/6)",
+   "powerbi": "0.207869854819627",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/7+Facts[Quantity]/7)",
+   "powerbi": "0.356348322549221",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)-Facts[Quantity]/11)&\"z\"",
+   "powerbi": "0.113383557178502z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)-Facts[Quantity]/7)",
+   "powerbi": "0.178174161273653",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,7,3)+Facts[Quantity]/0.25-1)",
+   "powerbi": "4.98887651569875",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,8,14)+Facts[Sales]/2)",
+   "powerbi": "3.57654395564548",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1901,5,13)+Facts[Sales]/1.5+Facts[Sales]/7)+1",
+   "powerbi": "6.79059497580659",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1901,5,26)+1/13)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1999,7,28)+Facts[Quantity]/5)",
+   "powerbi": "0.249444344040761",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2010,8,28)+1/0.7)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2020,2,2)+Facts[Sales]/6-1)",
+   "powerbi": "1.19218124448003",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2020,3,10)/2+Facts[Quantity])",
+   "powerbi": "1.24721913954465",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2020,5,19)+Facts[Quantity]*2/9)",
+   "powerbi": "0.27716015393773",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2020,6,28)-Facts[Quantity]/2)",
+   "powerbi": "0.623609521982292",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2022,7,27)/2.5+Facts[Quantity])",
+   "powerbi": "1.24721913954465",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/1.5+TIME(8,39,16))",
+   "powerbi": "0.831479419283098",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/11+DATE(1899,12,31))",
+   "powerbi": "0.113383557174969",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/4+DATE(1900,3,1))",
+   "powerbi": "0.311804782231081",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/5+DATE(1900,3,2))",
+   "powerbi": "0.249443825786031",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/0.7+DATE(1999,11,3))",
+   "powerbi": "10.2186970257334",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/3+DATE(1900,3,1))",
+   "powerbi": "2.38436263709722",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/3+TIME(10,37,58))",
+   "powerbi": "2.38436263709722",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/6+DATE(1900,2,28))",
+   "powerbi": "1.19218131854852",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(15,52,0)+Facts[Quantity]/13)",
+   "powerbi": "0.0959399329942043",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(15,7,58)+Facts[Sales]/0.7-1)",
+   "powerbi": "10.2186970161309",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(16,43,44)-Facts[Quantity]/3)+1",
+   "powerbi": "1.41573970964155",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(17,57,50)+(Facts[Sales]+1)/8)",
+   "powerbi": "0.894135988911455",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(19,13,48)-Facts[Sales]/3)",
+   "powerbi": "2.38436263709721",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(19,23,31)+Facts[Quantity]/5+Facts[Quantity]/2.5)",
+   "powerbi": "0.748331477354788",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(2,7,22)-Facts[Sales]/0.25)",
+   "powerbi": "28.6123516451666",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(22,51,8)+Facts[Sales]/0.3+Facts[Sales]/11)",
+   "powerbi": "24.4939070901805",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(4,29,46)/12+Facts[Sales])",
+   "powerbi": "7.15308791129165",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(4,46,35)+1/0.7)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1899,12,31)+Facts[Sales])/8)",
+   "powerbi": "1.09508846674595",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1900,2,28)+Facts[Sales])/2)",
+   "powerbi": "4.38035386698381",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1900,2,28)+Facts[Sales])/5)",
+   "powerbi": "1.75214154679351",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1900,2,28)+Facts[Sales])/8)",
+   "powerbi": "1.09508846674595",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1900,3,1)+Facts[Quantity])/9)",
+   "powerbi": "0.169725025739117",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(DATE(1901,3,13)+Facts[Sales])/13)",
+   "powerbi": "0.673900594920808",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(TIME(1,13,9)+Facts[Quantity])/0.7)",
+   "powerbi": "2.18217890235993",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),(TIME(22,59,51)+Facts[Sales])/12)",
+   "powerbi": "0.730058977830635",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)*Facts[Sales]/0.7)",
+   "powerbi": "12.5152967628109",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+1/1.5)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]*2/11)",
+   "powerbi": "1.59285595163048",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]*2/6)",
+   "powerbi": "2.92023591132254",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]/0.3+Facts[Sales]/4)",
+   "powerbi": "31.3925360467173",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]/3)+1",
+   "powerbi": "3.92023591132254",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)/13+Facts[Sales])+1",
+   "powerbi": "9.76070773396762",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,7,18)+(Facts[Quantity]+1)/5)+1",
+   "powerbi": "1.30550504633769",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Sales]/13)",
+   "powerbi": "40.4340356952352",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Sales]/3)",
+   "powerbi": "175.214154679352",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+(Facts[Quantity]+1)/13)",
+   "powerbi": "0.117501940896044",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]*2/3)",
+   "powerbi": "1.01835015443437",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/11)+1",
+   "powerbi": "1.13886593015041",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/13)",
+   "powerbi": "0.117501940896044",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/0.7)",
+   "powerbi": "12.5152967628109",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/2)",
+   "powerbi": "4.38035386698381",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/3)",
+   "powerbi": "2.92023591132263",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)-Facts[Quantity]/0.3)",
+   "powerbi": "5.09175077217322",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)*Facts[Quantity]/0.3)",
+   "powerbi": "310.596797102562",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)*Facts[Sales]/1.5)",
+   "powerbi": "356.26878118135",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)*Facts[Sales]/5)+1",
+   "powerbi": "107.880634354405",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+1/2.5)",
+   "powerbi": "9.5367431640625E-07",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/7)",
+   "powerbi": "0.218217890238572",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)/12+Facts[Sales])+1",
+   "powerbi": "9.76070773396761",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,6,21)+(Facts[Quantity]+1)/4)",
+   "powerbi": "0.381881307916162",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,6,8)+1/13)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,7,6)+Facts[Sales]/2)",
+   "powerbi": "4.38035386698381",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1901,2,28)+Facts[Sales]*2/7)",
+   "powerbi": "2.50305935254604",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1901,2,4)/12+Facts[Quantity])",
+   "powerbi": "1.52752523165185",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1901,3,24)/0.7+Facts[Sales])",
+   "powerbi": "8.76070773396762",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1901,9,28)+Facts[Sales]/0.25+Facts[Sales]/2.5)",
+   "powerbi": "38.5471140294591",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(2000,8,14)*Facts[Sales]/7)",
+   "powerbi": "45996.2186626825",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(2020,4,21)/1.5+Facts[Quantity])",
+   "powerbi": "1.52752520563835",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/0.25+DATE(1899,12,31))",
+   "powerbi": "6.11010092660779",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/12+DATE(2022,12,23))",
+   "powerbi": "0.12729633595362",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/1.5+TIME(8,15,10))",
+   "powerbi": "5.84047182264508",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/11+DATE(1899,12,31))",
+   "powerbi": "0.796427975815238",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(0,10,31)+Facts[Quantity]/2-1)&\"z\"",
+   "powerbi": "0.763762615825973z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(1,47,51)+Facts[Sales]/4-1)",
+   "powerbi": "2.1901769334919",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(12,2,4)+Facts[Sales]/4-1)",
+   "powerbi": "2.1901769334919",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(13,52,58)+Facts[Sales]/0.7)",
+   "powerbi": "12.5152967628109",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(15,5,16)-Facts[Sales]/9)",
+   "powerbi": "0.973411970440846",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(17,34,27)+Facts[Quantity]*2/8)&\"z\"",
+   "powerbi": "0.381881307912986z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(18,18,21)+Facts[Quantity]*2/3)",
+   "powerbi": "1.01835015443463",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(21,32,52)*Facts[Quantity]/12)",
+   "powerbi": "0.114287410561058",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(3,53,51)+Facts[Sales]/1.5+Facts[Sales]/0.3)",
+   "powerbi": "35.0428309358705",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),(DATE(1900,2,28)+Facts[Sales])/2)",
+   "powerbi": "12.7916666666667",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),(DATE(1999,4,15)+Facts[Sales])/5)",
+   "powerbi": "2.04666666686535",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),(DATE(2022,3,2)+Facts[Sales])/12)+1",
+   "powerbi": "1.35532407462597",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,1,26)+(Facts[Quantity]+1)/2.5)&\"z\"",
+   "powerbi": "0.24888888890564z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,1,7)+Facts[Sales]*2/3)",
+   "powerbi": "22.74074074073",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,10)/8+Facts[Sales])",
+   "powerbi": "51.1666666666667",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+(Facts[Quantity]+1)/7)",
+   "powerbi": "0.0317460317460312",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+1/6)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]*2/2)",
+   "powerbi": "1.55555555555556",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]*2/5)",
+   "powerbi": "0.248888888888887",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/7+Facts[Quantity]/7)",
+   "powerbi": "0.126984126984127",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]*2/0.25)+1",
+   "powerbi": "3275.66666666667",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]*2/7)",
+   "powerbi": "4.17687074829932",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]/6+Facts[Sales]/0.3)",
+   "powerbi": "626.791666666667",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Sales]/6-1)",
+   "powerbi": "1.4212962962963",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)-Facts[Quantity]/5)",
+   "powerbi": "0.0622222222222222",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)-Facts[Sales]/7)",
+   "powerbi": "1.04421768707483",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)/0.25+Facts[Quantity])",
+   "powerbi": "1.55555555555556",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Quantity]/0.25)",
+   "powerbi": "89600",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+(Facts[Quantity]+1)/1.5)",
+   "powerbi": "0.691358024691908",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+1/1.5)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]*2/0.25)",
+   "powerbi": "99.5555555555547",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/12)",
+   "powerbi": "0.0108024691362516",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/12-1)",
+   "powerbi": "0.0108024691367063",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Quantity]/2.5+Facts[Quantity]/0.25)",
+   "powerbi": "30.1155555555542",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)/0.7+Facts[Quantity])",
+   "powerbi": "1.55555555555657",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)*Facts[Sales]/0.3)",
+   "powerbi": "2115457.40740741",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+1/3)",
+   "powerbi": "4.54747350886464E-13",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/12+Facts[Quantity]/8)",
+   "powerbi": "0.0675154320997535",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/13+Facts[Quantity]/0.7)",
+   "powerbi": "3.52568798722587",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/7+Facts[Quantity]/2)",
+   "powerbi": "0.642857142856883",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/9+Facts[Quantity]/3)",
+   "powerbi": "0.30727023319514",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]/12-1)+1",
+   "powerbi": "1.35532407407436",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]/2+Facts[Sales]/7)",
+   "powerbi": "21.1454081632655",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]/2.5-1)",
+   "powerbi": "8.18666666666741",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]/7+Facts[Sales]/2)",
+   "powerbi": "21.1454081632655",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)-Facts[Quantity]/4)+1",
+   "powerbi": "1.09722222222263",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)/1.5+Facts[Quantity])",
+   "powerbi": "1.55555555555543",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)/1.5+Facts[Sales])",
+   "powerbi": "51.1666666666665",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1950,10,10)/2.5+Facts[Quantity])",
+   "powerbi": "1.55555555969477",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(1999,12,21)+Facts[Quantity]*2/8)+1",
+   "powerbi": "1.09722208976746",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),DATE(2031,4,27)-Facts[Quantity]/6)&\"z\"",
+   "powerbi": "0.043210506439209z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/9+TIME(7,51,0))&\"z\"",
+   "powerbi": "0.01920438957476z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/4+TIME(8,36,19))&\"z\"",
+   "powerbi": "3.19791666666666z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(16,31,8)-Facts[Quantity]/5)",
+   "powerbi": "0.0622222222222222",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(17,37,54)+Facts[Sales]/5-1)",
+   "powerbi": "2.04666666666667",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(20,26,25)*Facts[Sales]/1.5)",
+   "powerbi": "16.4951287781949",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(21,29,57)-Facts[Quantity]/0.3)",
+   "powerbi": "17.2839506172839",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(23,29,32)+Facts[Quantity]/0.25+Facts[Quantity]/0.25)",
+   "powerbi": "99.5555555555558",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(4,20,56)+Facts[Sales]/11+Facts[Sales]/7)",
+   "powerbi": "2.79608702985327",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(3,Facts,Facts[Sales]),TIME(5,53,24)+1/11)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,2)+Facts[Sales]/12-1)",
+   "powerbi": "0.532986111111086",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)*Facts[Quantity]/12)",
+   "powerbi": "0.0162037037037037",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+(Facts[Quantity]+1)/1.5)",
+   "powerbi": "1.03703703703704",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+1/1.5)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+1/5)",
+   "powerbi": "4.44089209850063E-16",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]*2/2)",
+   "powerbi": "2.33333333333333",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/2+Facts[Quantity]/11)+1",
+   "powerbi": "1.81473829201102",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/4-1)",
+   "powerbi": "0.145833333333333",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/9)",
+   "powerbi": "0.0288065843621408",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+Facts[Quantity]/9+Facts[Quantity]/6)",
+   "powerbi": "0.180041152263374",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)-Facts[Quantity]/2)",
+   "powerbi": "0.583333333333333",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)-Facts[Quantity]/6)",
+   "powerbi": "0.0648148148148148",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,7,20)-Facts[Sales]/8)",
+   "powerbi": "1.19921875",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Quantity]/0.25)",
+   "powerbi": "134400",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)*Facts[Sales]/3)",
+   "powerbi": "30700",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]*2/0.7)",
+   "powerbi": "626.530612244898",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]*2/12)",
+   "powerbi": "2.13194444444434",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)+Facts[Sales]/5)",
+   "powerbi": "3.07000000000062",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)-Facts[Sales]/0.3)",
+   "powerbi": "852.777777777778",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)-Facts[Sales]/9)+1",
+   "powerbi": "1.94753086419678",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)/11+Facts[Quantity])",
+   "powerbi": "2.33333333333333",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,2,28)/7+Facts[Quantity])",
+   "powerbi": "2.33333333333331",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)*Facts[Quantity]/3)",
+   "powerbi": "964.703703703703",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)*Facts[Quantity]/5)",
+   "powerbi": "347.293333333334",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+1/0.25)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]*2/1.5)",
+   "powerbi": "4.14814814814781",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]*2/5)",
+   "powerbi": "0.373333333332994",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/3)",
+   "powerbi": "0.259259259260944",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/8+Facts[Quantity]/13)",
+   "powerbi": "0.095136834319419",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]/9)&\"z\"",
+   "powerbi": "2.88065843633376E-02z",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]/9-1)",
+   "powerbi": "0.947530864198598",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)-Facts[Sales]/7)",
+   "powerbi": "1.56632653061297",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)/2.5+Facts[Quantity])",
+   "powerbi": "2.33333333333371",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)/3+Facts[Quantity])",
+   "powerbi": "2.33333333333337",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1950,2,20)+Facts[Quantity]/3)",
+   "powerbi": "0.259259104728699",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1950,9,5)+Facts[Quantity]*2/0.25)",
+   "powerbi": "149.333333313465",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(2000,4,15)+(Facts[Quantity]+1)/6)",
+   "powerbi": "0.0648150444030762",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(2020,11,14)+Facts[Sales]/1.5+Facts[Sales]/11)+1",
+   "powerbi": "45.0484390258789",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(2024,3,3)-Facts[Sales]/2)",
+   "powerbi": "19.1875",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(2031,7,6)+Facts[Quantity]*2/2)",
+   "powerbi": "2.33333349227905",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(2031,9,2)+(Facts[Quantity]+1)/6)",
+   "powerbi": "0.0648150444030762",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/0.3+DATE(2020,10,17))",
+   "powerbi": "25.9259262084961",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/3+DATE(1900,2,28))",
+   "powerbi": "0.259259259260944",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/3+DATE(1901,7,23))",
+   "powerbi": "0.259259259386454",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),Facts[Quantity]/4+DATE(1899,12,31))",
+   "powerbi": "0.145833333333333",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),Facts[Sales]/3+DATE(1900,3,1))",
+   "powerbi": "8.52777777777828",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(12,53,49)+Facts[Sales]/0.3)",
+   "powerbi": "852.777777777778",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(14,28,32)+Facts[Quantity]/1.5)",
+   "powerbi": "1.03703703703704",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(14,52,16)+1/5)",
+   "powerbi": "0",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(15,15,23)+(Facts[Sales]+1)/3)",
+   "powerbi": "8.52777777777777",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(16,57,15)+(Facts[Sales]+1)/3)",
+   "powerbi": "8.52777777777779",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(19,46,56)*Facts[Sales]/13)",
+   "powerbi": "0.308545593532114",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(20,20,25)+(Facts[Quantity]+1)/13)",
+   "powerbi": "0.0138067061143983",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(21,3,7)+Facts[Sales]/13)",
+   "powerbi": "0.45414201183432",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(23,17,22)+(Facts[Sales]+1)/2)",
+   "powerbi": "19.1875",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(23,6,8)+Facts[Quantity]*2/13)",
+   "powerbi": "0.0552268244575935",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(7,39,33)+(Facts[Sales]+1)/0.3)+1",
+   "powerbi": "853.777777777778",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(9,39,4)+(Facts[Sales]+1)/4)",
+   "powerbi": "4.796875",
+   "now": "gap-reject"
+  }
+ ]
+}
