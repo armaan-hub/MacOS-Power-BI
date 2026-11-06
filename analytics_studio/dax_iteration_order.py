@@ -163,6 +163,33 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
     return None
 
 
+def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[Any]]:
+    """Task 70 (live Power BI, rankx audit grid t70a): for every RANKX in `nodes` that ranks the rows of `table_name` through ALL / ALLSELECTED /
+    VALUES / DISTINCT of its columns (or the table itself), returns the nodes with that table argument replaced by a number (the table is not
+    read by the iterator, and a table_call would hide the reads of the rest) and the RANKX expression, which the iterator DOES read in its walk:
+    a body reading Facts[Note] walks the rows blank first, then the text in first-seen order, although the RANKX reads them row by row."""
+    bodies: list[Any] = []
+
+    def ranks_walked_table(ranked: Any) -> bool:
+        if isinstance(ranked, tuple) and len(ranked) == 3 and ranked[0] in {"call", "table_call"} and ranked[1] in {"ALL", "ALLSELECTED", "VALUES", "DISTINCT"}:
+            # ALL(table), ALL(Table[column]), VALUES(Table[column]): every argument a column (or the table) of the walked table; VALUES and
+            # DISTINCT of one column carry the argument directly (a table_call)
+            arguments = ranked[2] if ranked[0] == "call" and isinstance(ranked[2], tuple) else (ranked[2],) if ranked[0] == "table_call" else ()
+            return bool(arguments) and all(isinstance(a, tuple) and a[:1] in {("reference",), ("table",)} and str(a[1]).casefold() == str(table_name).casefold() for a in arguments)
+        return isinstance(ranked, tuple) and len(ranked) == 2 and ranked[0] == "table" and str(ranked[1]).casefold() == str(table_name).casefold()
+
+    def rebuild(node: Any) -> Any:
+        if not isinstance(node, tuple) or not node:
+            return node
+        if node[0] == "call" and node[1] == "RANKX" and isinstance(node[2], tuple) and len(node[2]) >= 2 and ranks_walked_table(node[2][0]):
+            bodies.append(node[2][1])
+            return ("call", "RANKX", (("number", 0), *node[2][1:]), *node[3:])
+        return tuple(rebuild(child) if isinstance(child, tuple) else child for child in node)
+
+    rebuilt = [rebuild(node) for node in nodes]
+    return rebuilt, bodies
+
+
 def _mentions_outer_row(node: Any) -> bool:
     """A predicate that reaches into an enclosing row context (EARLIER); the walk order of such a filter is not measured."""
     if not isinstance(node, tuple) or not node:

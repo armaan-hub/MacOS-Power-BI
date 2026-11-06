@@ -9796,15 +9796,17 @@ def _evaluate_measures_once(
 
     def dictionary_ordered_rows(
         table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False,
-        scan_filters: bool = False, keep_undecided: bool = False,
+        scan_filters: bool = False, keep_undecided: bool = False, unmodelled: list[bool] | None = None,
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
         Rows come back unchanged whenever the order is not a measured one: that is the order the app always used."""
         plan = dax_iteration_order.plan(table_node, variable_nodes.get)
         header_by_key = {h.casefold(): h for h in context["headers"]}
+        # Task 70: a RANKX over ALL / ALLSELECTED of the walked table reads its expression's columns in the walk (live Power BI, rankx audit grid)
+        walk_nodes, ranked_bodies = dax_iteration_order.rankx_walk(nodes, table_node[1]) if table_node[0] == "table" else (list(nodes), [])
         read = dax_iteration_order.columns_read(
-            nodes,
+            [*walk_nodes, *ranked_bodies],
             lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS,
             lambda name: name in _AGGREGATING_CALLS or name in _TABLE_FUNCTION_ARITY,
             lambda name: name.casefold() in by_name and name.casefold() not in header_by_key,
@@ -9909,6 +9911,8 @@ def _evaluate_measures_once(
                         return rows
                     reader = source_readers[only_key]
                     return sorted(rows, key=lambda row: min(only_profile.key(reader(member)) for member in origin_rows[("group", id(row))]))
+                if unmodelled is not None and not plan.dedup and len(profiles) > 1 and not beside_doubles and any(profile.fractional for profile in profiles.values()):
+                    unmodelled.append(True)  # Task 70: a fractional double beside another column walks in an order not measured (grouped refuses it)
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
                 if plan.projects and plan.eager and in_dictionary_order and len(profiles) > 1:
                     in_dictionary_order = dax_iteration_order.projection_order(len(source["rows"]), list(profiles.values()))  # Task 69
@@ -17747,7 +17751,10 @@ def _evaluate_measures_once(
             if (dax_typed.compare("<", value, wanted) if ascending else dax_typed.compare(">", value, wanted))
         ]
         if dense:
-            better = list({row_key([value]): value for value in better}.values())
+            # Task 70 (live Power BI, rankx audit grid t70a, part A): DENSE counts a BLANK and a 0 as one value (the numeric values of the
+            # column carry the 0); a BLANK among numbers is not a value of its own
+            numeric = any(isinstance(value, (int, float, Decimal)) and not isinstance(value, bool) for value in values)
+            better = list({row_key([Decimal(0) if numeric and value is None else value]): value for value in better}.values())
         return Decimal(len(better) + 1)
 
     def static_type_answer(function: str, static_t: str | None) -> bool | None:
@@ -21821,7 +21828,8 @@ def _evaluate_measures_once(
                         key_numeric = dax_iteration_order.Profile([typed_cell(context, key_header, row.get(key_header)) for row in iteration_rows]).is_numeric
                 if dax_iteration_order.window_walk_undecided(walked_table, len(iteration_rows), key_numeric):
                     raise MeasureError("The row order of a relative WINDOW / OFFSET over ORDERBY(..., DESC) is not modelled in the local engine.")
-            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True)
+            walk_unmodelled: list[bool] = []  # Task 70: set when the walk of the rows is an order the engine does not model
+            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True, unmodelled=walk_unmodelled)
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
                 iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)
             if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
@@ -21860,6 +21868,11 @@ def _evaluate_measures_once(
                 # live Power BI (iteration 88): the walk order of an expression that reads a column of an enclosing row context through a nested iterator
                 # differs from the one the local engine uses; only a total ORDER BY makes the text independent of it
                 raise MeasureError("The order of a CONCATENATEX whose expression reads an enclosing row context is not modelled in the local engine.")
+            if order_spec and walk_unmodelled and len({row_key(item[0]) for item in entries}) == 1 and len({text for _key, text in entries}) > 1:  # the order can change the text
+                # Task 70 (live Power BI, rankx audit grid t70a, part C): when the ORDER BY keys tie on every row, the walk order alone gives the text.
+                # The walk of a fractional column beside another one is not measured (grouped refuses it), and the measured case (a filter that
+                # leaves one Note value, ORDER BY Note DESC twice) comes out sorted by the fractional column, which the storage order does not give
+                raise MeasureError("The order of CONCATENATEX rows whose ORDER BY keys tie on every row, over a walk of a fractional column beside another column, is not modelled in the local engine.")
             for key_index in range(len(order_spec) - 1, -1, -1):
                 column_keys = blank_aware_keys([item[0][key_index] for item in entries])
                 try:
