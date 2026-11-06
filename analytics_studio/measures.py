@@ -21728,13 +21728,13 @@ def _evaluate_measures_once(
                         raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
-            if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] == "ADDMISSINGITEMS":
+            if len(iteration_rows) > 1 and not order_spec and walked_table[0] == "call" and walked_table[1] == "ADDMISSINGITEMS":
                 # Task 68 (live Power BI, order audit 3 grid + datasets d2 to d10): the groups of a SUMMARIZE under an outer filter on another column
                 # come out in the order of the scan over the group columns plus the filtered columns (see rows_in_storage_scan)
                 added = next((a for a in walked_table[2] if a[0] == "call" and a[1] == "SUMMARIZE"), None)
                 if added is not None and added[2][0][0] == "table" and filtered_scan_columns(added):
                     iteration_rows = rows_in_storage_scan(added, context, iteration_rows)
-            if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] == "SAMPLE" and len(walked_table[2]) in {3, 4} and walked_table[2][2][0] == "reference":
+            if len(iteration_rows) > 1 and not order_spec and walked_table[0] == "call" and walked_table[1] == "SAMPLE" and len(walked_table[2]) in {3, 4} and walked_table[2][2][0] == "reference":
                 # Task 68 (live Power BI, order audit 3 grid): SAMPLE over a text column walks the table in dictionary order whatever the direction (blank, then
                 # first-seen text: ,Paid,Late for ASC and DESC) when it keeps every row (SAMPLE(n >= rows) is the table itself). Numeric samples keep their picks
                 sample_context, sample_rows = table_argument_value(walked_table[2][1])
@@ -21746,7 +21746,7 @@ def _evaluate_measures_once(
                             raise MeasureError("The row order of a SAMPLE of a text column that drops rows is not modelled in the local engine for this direction.")
                     else:
                         iteration_rows = dictionary_ordered_rows(walked_table[2][1], sample_context, sample_rows, read_nodes)
-            if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] in {"WINDOW", "OFFSET"}:
+            if len(iteration_rows) > 1 and not order_spec and walked_table[0] == "call" and walked_table[1] in {"WINDOW", "OFFSET"}:
                 # Task 68 (live Power BI, order audit 3 grid): a relative WINDOW over DESC, or an OFFSET over DESC of a numeric column, comes back in an order
                 # the ORDERBY does not explain; refused rather than walked in the ORDERBY order
                 ordering = dax_iteration_order.descending_orderby(walked_table)
