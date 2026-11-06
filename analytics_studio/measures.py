@@ -385,6 +385,37 @@ def _consume_infinity(thunk: Any) -> Any:
 
 _CURRENCY_LIMIT = Decimal("922337203685477.5807")  # the Currency type's range
 _TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISDATETIME", "ISBOOLEAN", "ISSTRING", "ISNUMERIC", "ISBLANK"})
+
+
+_TASK64_OWN_TYPE = {  # a type test that asks for exactly one static result type
+    "ISINTEGER": {"int64"}, "ISINT64": {"int64"}, "ISDOUBLE": {"double"}, "ISDECIMAL": {"currency", "decimal"}, "ISCURRENCY": {"currency", "decimal"}, "ISDATETIME": {"datetime"},
+}
+
+_TASK64_RANGE_FAILURES = (_IntegerRangeFailure, _CurrencyRangeFailure, _TextRangeFailure, _PowerFailure, _CurrencyOverflowError)  # range failures keep their own measured rules
+
+
+def _task64_wrapped(node: Any) -> bool:
+    """Task 64: a VAR ... RETURN, a COALESCE or SWITCH, or an IF with a BLANK branch (measured: every such row with a failing own-type value raised)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "let":
+        return True
+    if node[0] != "call":
+        return False
+    name = str(node[1]).upper()
+    if name in {"COALESCE", "SWITCH"}:
+        return True
+    return name in {"IF", "IF.EAGER"} and any(isinstance(part, tuple) and (part == ("blank",) or part[:2] == ("call", "BLANK")) for part in node[2][1:])
+
+
+def _task64_isblank_refused(node: Any, failed_operand: Callable[[Any], bool]) -> bool:
+    """Task 64 Part B: ISBLANK of a comparison of a failing call with a text literal raises in Power BI (measured: ISBLANK((ABS("m"))=("t")))."""
+    if not isinstance(node, tuple) or not node or node[0] != "comparison":
+        return False
+    operands = [operand for operand in node[2:4] if isinstance(operand, tuple) and operand]
+    if not any(operand[0] == "string" for operand in operands):
+        return False
+    return any(operand[0] == "call" and failed_operand(operand) for operand in operands)
 _DATETIME_CLAMP_LOW = dax_dates.from_datetime(datetime(100, 1, 1))  # Task 19 Part A: CONVERT of -Infinity or a too small number
 _CURRENCY_INFINITY = object()  # any value but None: ISBLANK of a constant Currency / 0 is False (Part F)
 
@@ -7033,6 +7064,15 @@ def evaluate_calculated_columns(
                     return evaluate(arguments[1], row, row_index)
                 return evaluate(arguments[2], row, row_index) if len(arguments) == 3 else None
             if function == "ISBLANK":
+                def _task64_fails(part: Any) -> bool:
+                    try:
+                        evaluate(part, row, row_index)
+                    except Exception:
+                        return True
+                    return False
+
+                if _task64_isblank_refused(arguments[0], _task64_fails):  # Task 64 Part B: a failing call compared with text raises under ISBLANK
+                    raise dax_typed.refusal("ISBLANK of a comparison of a failing call with text is not modelled by the local engine.")
                 return _isblank_consume(lambda: evaluate(arguments[0], row, row_index), arguments[0])
             if function == "IFERROR":
                 try:
@@ -17442,11 +17482,119 @@ def _evaluate_measures_once(
             return False
         return any(isinstance(part, tuple) and len(part) > 2 and part[0] == "call" and str(part[1]).upper() in {"DATEVALUE", "TIMEVALUE"} for operand in operands for part in _walk_nodes(operand))
 
+    def task64_family(function: str, node: Any, row_context: Any) -> str | None:
+        """Task 64: families of a type test of a failing value settled by the typeerr-fail-54 grid (1,500 fresh Power BI shapes) and the saved
+        batteries.  Returns "static" (the static type answers), "error" (the failure shows), "refuse", or None (no family: the older rules decide).
+        A family is used only where every measured row agrees with it.
+        """
+        if not isinstance(node, tuple) or not node:
+            return None
+
+        def failed(part: Any) -> bool:
+            try:
+                evaluate(part, row_context, allow_text=True, allow_boolean=True)
+            except Exception:
+                return True
+            return False
+
+        def resolved(part: Any) -> Any:
+            """A VAR ... RETURN var part is its bound expression (the kind of the value it returns)."""
+            if isinstance(part, tuple) and part and part[0] == "let":
+                defs = {str(name): bound for name, bound in part[1]}
+                body = part[2]
+                if isinstance(body, tuple) and body and body[0] == "var" and str(body[1]) in defs:
+                    return defs[str(body[1])]
+                return None
+            return part
+
+        def kind(part: Any) -> str:
+            part = resolved(part)
+            if not isinstance(part, tuple) or not part:
+                return "?"
+            if part == ("blank",) or part[:2] == ("call", "BLANK"):
+                return "blank"
+            return {"int64": "num", "double": "num", "decimal": "num", "currency": "cur", "datetime": "date", "text": "text", "bool": "bool"}.get(
+                static_type_of(part), "?"
+            )
+
+        def branches(part: Any) -> list[Any] | None:
+            if part[0] != "call":
+                return None
+            name, args = str(part[1]).upper(), part[2]
+            if name in {"IF", "IF.EAGER"}:
+                return list(args[1:])
+            if name == "COALESCE":
+                return list(args)
+            if name == "SWITCH":
+                results = [args[index] for index in range(2, len(args), 2)]
+                if len(args) >= 4 and len(args) % 2 == 0:
+                    results.append(args[-1])
+                return results
+            return None
+
+        def calls_named(part: Any, names: set[str]) -> bool:
+            if not isinstance(part, tuple) or not part:
+                return False
+            if part[0] == "call" and str(part[1]).upper() in names:
+                return True
+            return any(calls_named(child, names) for child in part if isinstance(child, tuple))
+
+        if function == "ISBLANK":
+            # ISBLANK of a comparison of a failing call with a text literal: Power BI raises (measured on the Task 64 Part B rows)
+            if node[0] == "comparison" and any(failed(op) for op in node[2:4] if isinstance(op, tuple) and op[:1] == ("call",)) and any(
+                isinstance(op, tuple) and op[:1] == ("string",) for op in node[2:4]
+            ):
+                return "refuse"
+            return None
+        if function not in _TYPE_TESTS:
+            return None
+        date_calls = {"DATE", "TIME", "DATEVALUE"}
+        if (node[0] == "binary" and node[1] == "+") or node[0] == "comparison":
+            # a DATE / TIME / DATEVALUE call that fails, added to or compared with another operand: Power BI raised in every measured row
+            if any(isinstance(op, tuple) and op[:1] == ("call",) and str(op[1]).upper() in date_calls and failed(op) for op in node[2:4]):
+                return "error"
+            return None
+        if node[0] == "let":
+            # VAR ... RETURN v & "" over a failing non-date bound: the measured VAR-suffix shapes are mixed (error or False), so refused
+            body = node[2]
+            if isinstance(body, tuple) and body and body[0] == "concat" and any(failed(bound) for _name, bound in node[1]):
+                return "refuse"  # VAR v = failing call RETURN v & "": the concatenation shapes are mixed in the grid (error or False), so refused
+            return None
+        if node[0] == "call" and str(node[1]).upper() == "ABS" and len(node[2]) == 1:
+            inner = node[2][0]
+            if isinstance(inner, tuple) and inner[:2] == ("binary", "+"):
+                if sum(failed(op) for op in inner[2:4]) == 1 and any(isinstance(op, tuple) and op[:1] == ("call",) and failed(op) for op in inner[2:4]):
+                    st = static_type_of(node)
+                    if st is not None and not (function in {"ISNUMERIC", "ISDOUBLE"} and st == "datetime"):
+                        return "static"
+            return None
+        results = branches(node)
+        if results is None:
+            return None
+        failing = [part for part in results if failed(part)]
+        if not failing:
+            return None
+        ok_kinds = {kind(part) for part in results if not failed(part)}
+        fail_kinds = {kind(part) for part in failing}
+        if ok_kinds & {"text", "bool"} and fail_kinds <= {"num", "cur", "?"}:
+            return "error"  # a text or logical result beside a failing number: a Variant, and the failure shows in every measured row
+        if function in {"ISNUMBER", "ISNUMERIC", "ISDOUBLE"} and str(node[1]).upper() in {"SWITCH", "COALESCE"} and ok_kinds <= {"num", "cur", "date", "blank"}:
+            return "error"  # a numeric test of a branch that fails beside numbers, dates or BLANK: raised in every measured row
+        non_numeric = {"ISBOOLEAN", "ISCURRENCY", "ISDATETIME", "ISDECIMAL", "ISINT64", "ISINTEGER", "ISLOGICAL", "ISNONTEXT", "ISSTRING", "ISTEXT"}
+        if function in non_numeric and ok_kinds and ok_kinds <= {"num", "cur", "date", "blank"} and not any(calls_named(part, {"SIGN"}) for part in failing):
+            return "static"  # the other type tests of such a branch are answered by the static type (SIGN branches disagree in the grid, so not used)
+        return None
+
     def hidden_failure_verdict(function: str, node: tuple[Any, ...], row_context: Any) -> str | None:
         """Task 41: where a type test of a failing argument may be answered by the argument's static type.  Measured on fresh Power BI shapes
         (never on the saved ones): the static type answers only for the shape families below; a failing value that changes kind under IF /
         SWITCH shows its error; a wrapper or a shape that was not measured is refused.  Returns "error" (the failure shows), "refuse" (not
         settled by the rows), or None (the static type answers).  ISBLANK is never changed."""
+        family = task64_family(function, node, row_context)
+        if family == "static":
+            return None
+        if family is not None:
+            return family
         if function == "ISBLANK" or not isinstance(node, tuple) or not node:
             return None
         kinds = {"int64": "num", "double": "num", "currency": "num", "decimal": "num", "number": "num", "datetime": "date", "text": "text", "bool": "bool", "blank": "blank"}
@@ -17748,6 +17896,18 @@ def _evaluate_measures_once(
                 # Task 57: a type test over a binary / logical operator where one operand holds a DATEVALUE / TIMEVALUE of an unparsable text and the
                 # other operand fails as well: Power BI raised the conversion error in every live row (the static type does not hide it)
                 raise dax_typed.refusal("A type test over an operator with a failing DATEVALUE operand beside another failing operand raises in Power BI and is not modelled by the local engine.") from failure
+            if function in _TYPE_TESTS and len(arguments) == 1:
+                task64 = task64_family(function, arguments[0], row_context)  # Task 64: the measured families of a failing value (before the static answer)
+                if task64 == "refuse":
+                    raise dax_typed.refusal("A type test of a failing value in this shape is not modelled by the local engine.") from failure
+                if task64 == "error":
+                    raise  # Power BI raises the failure in every measured row of this family
+            if function in _TASK64_OWN_TYPE and len(arguments) == 1 and not isinstance(failure, _TASK64_RANGE_FAILURES) and _task64_wrapped(arguments[0]):
+                # Task 64: a wrapper (VAR ... RETURN, COALESCE, SWITCH, or IF beside a BLANK branch) around a failing value whose own result type is the one the
+                # test asks for (INT -> int64, DATE -> datetime, CURRENCY -> currency): the failure shows, as the CONVERT same-target-type rule below says.
+                # A bare failing call or arithmetic around it is not touched (measured True: ISINT64(INT("b")), ISDOUBLE(ABS("m")), ISINTEGER(SIGN("s"))).
+                if static_type_of(arguments[0]) in _TASK64_OWN_TYPE[function]:
+                    raise
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
                 structural = _structural_type_answer(function, arguments[0], static_scope()[0])  # Task 50: a failing argument answered by its static type
                 if structural is not None:
@@ -20292,6 +20452,15 @@ def _evaluate_measures_once(
                 except (MeasureRuntimeError, _HardError):
                     return False
 
+            def _task64_fails(part: tuple[Any, ...]) -> bool:
+                try:
+                    evaluate(part, row_context, allow_text=True)
+                except Exception:
+                    return True
+                return False
+
+            if _task64_isblank_refused(arguments[0], _task64_fails):  # Task 64 Part B: a failing call compared with text raises under ISBLANK
+                raise dax_typed.refusal("ISBLANK of a comparison of a failing call with text is not modelled by the local engine.")
             held_argument = bound_expression(arguments[0])  # Task 19 Part C: an argument that is a VAR is judged by its expression
             if _never_blank(held_argument):
                 # Task 19 Part C: an argument that can never be BLANK is not evaluated, so its run-time errors are not seen. A Currency division
