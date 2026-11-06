@@ -9838,6 +9838,10 @@ def _evaluate_measures_once(
 
         def take_expression(expression: tuple[Any, ...]) -> bool:
             sources = dax_iteration_order.columns_read([expression], lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS)
+            if sources is None and expression[0] == "call" and expression[1] == "RANKX" and len(expression[2]) >= 2 and _is_all_table_value_argument(expression[2][0]):
+                # Task 67 (live Power BI, audit2 grid): RANKX(ALL(table), expression) walks the table's rows for the expression; the columns the
+                # expression reads are the ones the added column pulls into the walk, the table itself reads none
+                sources = dax_iteration_order.columns_read([expression[2][1]], lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS)
             if sources is None:
                 return False
             for _table, name in sources:
@@ -9878,6 +9882,8 @@ def _evaluate_measures_once(
         if len({key[0] for key in combination}) != 1:
             return rows
         source = next(iter(combination.values()))[0]
+        if any(name not in {h.casefold() for h in source["headers"]} or not source_profile(source, next(h for h in source["headers"] if h.casefold() == name)).is_numeric for name in plan.excepted):
+            return rows  # Task 67: an ALLEXCEPT that keeps filters on a text column walks in source order (measured on Facts)
         try:
             profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
             in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
@@ -13217,10 +13223,14 @@ def _evaluate_measures_once(
                 if key not in seen_tuples:
                     seen_tuples.add(key)
                     distinct_rows.append(values)
-            return derived_table(
+            allexcept_context, allexcept_rows = derived_table(
                 remaining, distinct_rows, {header: (kept_context, header) for header in remaining},
                 {header: kept_context.get("column_types", {}).get(header, "text") for header in remaining},
             )
+            walk = dax_iteration_order.plan(argument)  # Task 67: the kept columns walk in dictionary order (TOCSV / TOJSON read this table too)
+            if walk is not None and walk.dedup and len(allexcept_rows) > 1:
+                allexcept_rows = dictionary_ordered_rows(argument, allexcept_context, allexcept_rows, [("reference", "", h) for h in remaining])
+            return allexcept_context, allexcept_rows
         if argument[0] == "call" and argument[1] in {
             "ALL", "ALLNOBLANKROW", "ALLSELECTED"
         }:

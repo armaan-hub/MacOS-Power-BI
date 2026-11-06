@@ -45,6 +45,7 @@ class Plan:
     computed: dict[str, Any] = field(default_factory=dict)
     eager: list[Any] = field(default_factory=list)
     projects: bool = False  # SELECTCOLUMNS: the columns it reads are resolved in the table it selects from
+    excepted: tuple[str, ...] = ()  # ALLEXCEPT: the columns it keeps filters on (casefolded); when one of them is text the rows keep the storage order
 
 
 def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | None:
@@ -104,6 +105,18 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
             return Plan(dedup=True)
         if name != "DISTINCT" and len(arguments) == 1 and arguments[0][0] == "table":
             return Plan()  # every row of the table, as the table itself
+    if name == "GROUPBY" and len(arguments) >= 2 and plan(arguments[0], bound) is not None:
+        groups = []  # the group columns come first, then the name / expression pairs
+        for argument in arguments[1:]:
+            if argument[0] != "reference":
+                break
+            groups.append(argument)
+        if groups:
+            return Plan(dedup=True)  # Task 67 (live Power BI, audit2 grid): GROUPBY lists its groups in the dictionary order of the group columns, like SUMMARIZE
+    if name == "SUMMARIZECOLUMNS" and arguments and all(argument[0] == "reference" for argument in arguments):
+        return Plan(dedup=True)  # Task 67 (live Power BI, audit2 grid): SUMMARIZECOLUMNS of plain columns walks its combinations in dictionary order
+    if name == "ALLEXCEPT" and len(arguments) >= 2 and arguments[0][0] == "table" and all(argument[0] == "reference" for argument in arguments[1:]):
+        return Plan(dedup=True, excepted=tuple(str(argument[2]).casefold() for argument in arguments[1:]))  # Task 67 (live Power BI, audit2 grid): ALLEXCEPT is walked over its kept columns in dictionary order when the excepted column is numeric
     if name == "ALLSELECTED" and len(arguments) == 1 and arguments[0][0] == "table":
         return Plan()  # Task 51 (live Power BI 2026-11-05): ALLSELECTED(table) is walked as ALL(table) is
     return None
