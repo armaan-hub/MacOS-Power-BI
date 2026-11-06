@@ -9859,6 +9859,39 @@ def _evaluate_measures_once(
         except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
             return rows
 
+    def union_walked_rows(
+        union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]]
+    ) -> tuple[list[dict[str, Any]], bool]:
+        """Task 66 (live Power BI, audit grid: 37 of 37 shapes, and UNION(Facts, Facts) of Task 65): UNION lists its tables one after the other and
+        walks each of them on its own, in the dictionary order of the columns `nodes` read. Only unions of whole-table arms (a table, ALL(table),
+        FILTER / CALCULATETABLE of them) are walked; (rows, whether the walk is NOT measured). Under an outer filter only ALL-rooted arms are measured."""
+        def whole_table(node: Any) -> bool:
+            arm_plan = dax_iteration_order.plan(node, variable_nodes.get)
+            return arm_plan is not None and not (arm_plan.dedup or arm_plan.computed or arm_plan.projects or arm_plan.eager)
+
+        def all_rooted(node: Any) -> bool:
+            while node[0] == "call" and node[1] in {"FILTER", "CALCULATETABLE"} and node[2]:
+                node = node[2][0]
+            return node[0] == "call" and node[1] == "ALL" and len(node[2]) == 1 and node[2][0][0] == "table"
+
+        arms = union_node[2]
+        if len(arms) < 2 or not all(whole_table(arm) for arm in arms):
+            return rows, False
+        if evaluation_filter_ids and not all(all_rooted(arm) for arm in arms):
+            return rows, True  # the rows under a filter that reaches into an arm were not measured
+        first_headers = list(context["headers"])
+        output: list[dict[str, Any]] = []
+        for arm in arms:
+            arm_context, arm_rows = table_argument_value(arm)
+            if len(arm_context["headers"]) != len(first_headers):
+                return rows, False
+            walked = dictionary_ordered_rows(arm, arm_context, arm_rows, nodes)
+            for row in (typed_row(arm_context, r) for r in walked):
+                output.append({h: row[o] for h, o in zip(first_headers, arm_context["headers"])})
+        if len(output) != len(rows):
+            return rows, False
+        return output, False
+
     def summarize_related_group(
         context: dict[str, Any], reference: tuple[Any, ...], own_header: str | None
     ) -> tuple[dict[str, Any], str, Callable[[dict[str, Any]], Any]] | None:
@@ -11325,6 +11358,19 @@ def _evaluate_measures_once(
             right_headers = list(right_context["headers"])
             right_types = dict(right_context.get("column_types", {}))
             right_lineage = base_lineage(right_context)
+        def values_of_column(node: tuple[Any, ...]) -> bool:
+            return node[0] == "table_call" and node[1] == "VALUES" and node[2][0] == "reference"
+
+        if (
+            values_of_column(arguments[0]) and values_of_column(arguments[1]) and len(pending) > 1
+            and all(len(matches) > 1 and matches == pending[0][1] for _left, matches in pending)
+        ):
+            # Task 66 (live Power BI, audit grid: 26 of 26 shapes over two VALUES(column) arguments, bare and under a CALCULATE filter): the two
+            # lists do not depend on each other, so Power BI walks the RIGHT list as the major key and the left one fastest
+            for position in range(len(pending[0][1])):
+                for left, matches in pending:
+                    output.append({**left, **{h: matches[position][h] for h in right_headers}})
+            pending = []
         for left, matches in pending:
             if matches:
                 output.extend({**left, **{h: match[h] for h in right_headers}} for match in matches)
@@ -21180,6 +21226,18 @@ def _evaluate_measures_once(
                         # row (VALUES(Region)) does not; the local filter state cannot tell them apart
                         raise MeasureError("The row order under a filter that keeps every row is not modelled in the local engine.")
                     reverse = removed
+            elif (
+                order_class == "dictionary" and table_node[0] == "call" and table_node[1] == "ALLSELECTED"
+                and len(table_node[2]) == 1 and table_node[2][0][0] == "table"
+            ):
+                # Task 66 (live Power BI, audit grid: 20 of 20 shapes that cut rows): under an outer filter ALLSELECTED(table) comes back in reverse
+                # storage order like a filtered scan, whole and unfiltered it keeps the storage order
+                allselected_source = table_node[2][0]
+                removed = total_row_count < full_row_count(allselected_source)
+                filtered_here = has_column_filter(allselected_source)
+                if (removed or filtered_here) and (arguments[0][0] == "let" or (removed and (max_rows < 0 or max_rows < total_row_count)) or not removed):
+                    raise MeasureError("The row order of ALLSELECTED(table) under an outer filter is not modelled in the local engine for this shape.")
+                reverse = removed
             elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
                 group_filtered or has_column_filter(group_source[2][0])
             ) and any(
@@ -21512,6 +21570,9 @@ def _evaluate_measures_once(
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
+            union_walk_unmeasured = False
+            if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
+                iteration_rows, union_walk_unmeasured = union_walked_rows(walked_table, context, iteration_rows, read_nodes)
             if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
                 iteration_rows = context["swi_walk_rows"]  # Task 49: SUBSTITUTEWITHINDEX result, walked as its left table is
             def order_value(expression: tuple[Any, ...], inner: tuple[Any, ...]) -> Any:
@@ -21530,6 +21591,8 @@ def _evaluate_measures_once(
                     raise MeasureError("A CONCATENATEX of dates on 9999-12-31 or later is not modelled by the local engine.")
                 text = dax_typed.to_text(double_as_text(arguments[1], body_value, inner))
                 entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
+            if union_walk_unmeasured and not order_spec and len({text for _key, text in entries}) > 1:
+                raise MeasureError("CONCATENATEX over a UNION of tables an outer filter reaches is walked in an order the local engine does not model.")
             if allselected_walk_unmeasured and len({text for _key, text in entries}) > 1:
                 raise MeasureError("CONCATENATEX over ALLSELECTED(table) under an outer filter, reading several columns, is walked in an order the local engine does not model.")
             if walk_refusal is not None and (not entries or len({text for _key, text in entries}) > 1 or not _order_free_text_body(arguments[1])):
