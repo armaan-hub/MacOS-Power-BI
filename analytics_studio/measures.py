@@ -9939,6 +9939,47 @@ def _evaluate_measures_once(
                 return rows
             raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.") from None
 
+    def filtered_scan_columns(summarize: tuple[Any, ...]) -> list[str]:
+        """Columns of the summarized table that an outer filter restricts to two or more values and that are not group columns."""
+        base = contexts_by_id.get(resolve_table_context(str(summarize[2][0][1]))["id"])
+        held = evaluation_contexts_by_id.get(base["id"], base).get("filter_column_rows") or {} if base is not None else {}
+        groups = {str(a[2]).casefold() for a in summarize[2][1:] if a[0] == "reference"}
+        return [
+            column for column in base["headers"] if column in held and column.casefold() not in groups
+            and len({row_key([typed_cell(base, column, base["rows"][i].get(column))]) for i in held[column]}) >= 2
+        ] if base is not None else []
+
+    def rows_in_storage_scan(summarize: tuple[Any, ...], walked: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        base = contexts_by_id.get(resolve_table_context(str(summarize[2][0][1]))["id"])
+        group_names = [a[2] for a in summarize[2][1:] if a[0] == "reference"]
+        source_columns = [next((h for h in base["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
+        walked_columns = [next((h for h in walked["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
+        if None in source_columns or None in walked_columns or not source_columns:
+            raise MeasureError("The row order of a SUMMARIZE under filters on other columns is not modelled in the local engine for this shape.")
+        scan = [*source_columns, *filtered_scan_columns(summarize)]
+        decided = dax_iteration_order.multi_column_order(len(base["rows"]), [source_profile(base, c) for c in scan], True)
+        if decided is None:
+            raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
+        _scanned_context, scanned_rows = table_argument_value(summarize[2][0])
+        first: dict[tuple[Any, ...], Any] = {}
+        if decided:  # a measured sorted space: a group comes where its first combination does in the dictionary-ordered scan (later table column the major key)
+            scan_profiles = {c: source_profile(base, c) for c in scan}
+            major_first = sorted(scan, key=lambda c: -base["headers"].index(c))
+            for scanned in scanned_rows:
+                key = row_key(typed_cell(base, c, scanned.get(c)) for c in source_columns)
+                walk = tuple(scan_profiles[c].key(typed_cell(base, c, scanned.get(c))) for c in major_first)
+                if key not in first or walk < first[key]:
+                    first[key] = walk
+        else:
+            for position, scanned in enumerate(scanned_rows):
+                first.setdefault(row_key(typed_cell(base, c, scanned.get(c)) for c in source_columns), position)
+        derived_walk = bool(walked.get("derived"))
+        keys = [row_key((row.get(c) if derived_walk else typed_cell(walked, c, row.get(c))) for c in walked_columns) for row in rows]
+        # ADDMISSINGITEMS appends the items the SUMMARIZE lacks after its groups: they keep their place at the end
+        found = [(key, row) for key, row in zip(keys, rows) if key in first]
+        appended = [row for key, row in zip(keys, rows) if key not in first]
+        return [row for _key, row in sorted(found, key=lambda pair: first[pair[0]])] + appended
+
     def union_walked_rows(
         union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], topn_walked: bool = True
     ) -> list[dict[str, Any]]:
@@ -10516,14 +10557,54 @@ def _evaluate_measures_once(
                 if id(row) in source_positions:
                     detail_members.setdefault(key, []).append(source_positions[id(row)])
             detail_keys = list(detail_groups)
-            if has_rollup and source_base is not None and len(detail_keys) > 1:
-                try:  # the detail rows of a loaded table come in dictionary order (later table column the major key)
-                    profiles = {c: source_profile(source_base, c) for c in group_columns if c in source_base["headers"]}
-                    if len(profiles) == len(group_columns):
-                        major_first = sorted(group_columns, key=lambda c: -source_base["headers"].index(c))
-                        detail_keys.sort(key=lambda k: tuple(profiles[c].key(detail_groups[k][c]) for c in major_first))
+            order_undecided_levels: list[bool] = []
+
+            def rollup_level_order(
+                keys: list[tuple[Any, ...]], groups: dict[tuple[Any, ...], dict[str, Any]], members: dict[tuple[Any, ...], list[int]], kept_columns: list[str]
+            ) -> list[tuple[Any, ...]]:
+                """Task 68 (live Power BI, order audit 3 grid): the groups of one level of a SUMMARIZE ... ROLLUP over a loaded table come out in the order the
+                scan meets them. The scan keys are the columns the level keeps plus the columns an outer filter restricts to two or more values (a rolled-up
+                column drops out); inside the measured key space (multi_column_order) that scan is in dictionary order, the later table column the major key,
+                and a group comes where its first scanned combination does; outside it (792 over 6 rows) the groups keep the storage order of their first row.
+                A space no measured point covers keeps the dictionary order of the kept columns, as before."""
+                if source_base is None or len(keys) < 2 or not kept_columns:
+                    return keys
+                try:
+                    if any(c not in source_base["headers"] for c in kept_columns):
+                        return keys
+                    filtered = evaluation_contexts_by_id.get(source_base["id"], source_base).get("filter_column_rows") or {}
+                    extras = [
+                        c for c in source_base["headers"]
+                        if c in filtered and c not in kept_columns
+                        and len({row_key([typed_cell(source_base, c, source_base["rows"][i].get(c))]) for i in filtered[c]}) >= 2
+                    ] if arguments[0][0] == "table" else []
+                    scan = [*kept_columns, *extras]
+                    scan_profiles = {c: source_profile(source_base, c) for c in scan}
+                    decided = dax_iteration_order.multi_column_order(len(source_base["rows"]), [scan_profiles[c] for c in scan], True)
+                    major_first = sorted(scan, key=lambda c: -source_base["headers"].index(c))
+                    if decided is False and all(p.size is not None for p in scan_profiles.values()):
+                        return keys
+                    if decided is None and extras:
+                        # datasets d12 and d14: beyond the measured sorted points the scan with filtered columns is not decided by a measured point; the groups
+                        # stay as they come and the table says so, so an iterator that reads the rows in order refuses
+                        order_undecided_levels.append(True)
+                        return keys
+                    if decided and extras:
+                        def first_scanned(key: tuple[Any, ...]) -> tuple[Any, ...]:
+                            return min(
+                                tuple(scan_profiles[c].key(typed_cell(source_base, c, source_base["rows"][i].get(c))) for c in major_first)
+                                for i in members[key]
+                            )
+                        if all(members.get(key) for key in keys):
+                            return sorted(keys, key=first_scanned)
+                    kept_first = sorted(kept_columns, key=lambda c: -source_base["headers"].index(c))
+                    kept_profiles = {c: scan_profiles[c] for c in kept_columns}
+                    return sorted(keys, key=lambda k: tuple(kept_profiles[c].key(groups[k][c]) for c in kept_first))
                 except Exception:
-                    pass
+                    return keys
+
+            if has_rollup and source_base is not None and len(detail_keys) > 1:
+                detail_keys = rollup_level_order(detail_keys, detail_groups, detail_members, list(group_columns))
             all_group_rows: list[dict[str, Any]] = [detail_groups[k] for k in detail_keys]
             all_group_members: list[list[int]] = [detail_members.get(k, []) for k in detail_keys]
             all_group_rolled_up: list[frozenset[str]] = [frozenset() for _ in detail_keys]
@@ -10546,14 +10627,7 @@ def _evaluate_measures_once(
                         if id(row) in source_positions:
                             level_members.setdefault(key, []).append(source_positions[id(row)])
                     level_keys = list(level_groups)
-                    if source_base is not None and len(level_keys) > 1 and kept_columns:
-                        try:
-                            level_profiles = {c: source_profile(source_base, c) for c in kept_columns if c in source_base["headers"]}
-                            if len(level_profiles) == len(kept_columns):
-                                level_major = sorted(kept_columns, key=lambda c: -source_base["headers"].index(c))
-                                level_keys.sort(key=lambda k: tuple(level_profiles[c].key(level_groups[k][c]) for c in level_major))
-                        except Exception:
-                            pass
+                    level_keys = rollup_level_order(level_keys, level_groups, level_members, kept_columns)
                     for key in level_keys:
                         all_group_rows.append(level_groups[key])
                         all_group_members.append(level_members.get(key, []))
@@ -10594,6 +10668,8 @@ def _evaluate_measures_once(
             summarized = derived_table(list(group_columns) + names, out_rows, lineage, group_types, certain_types=static_extension_names)
             if has_rollup and not names:
                 summarized[0]["rollup_level_count"] = rollup_level_count if out_rows else 0
+            if order_undecided_levels:
+                summarized[0]["order_undecided"] = True
             return summarized
         if function == "TOPN":
             count = Decimal(dax_typed.whole(in_row_expression(lambda: evaluate(arguments[0])), "TOPN"))
@@ -21302,6 +21378,13 @@ def _evaluate_measures_once(
             # The order of the rows (live Power BI, iteration 94): a filtered scan of a loaded table comes back in reverse
             # storage order after the first `max_rows` rows were cut off; a negative limit keeps the storage order.
             reverse = False
+            if order_class == "grouped" and total_row_count > 1 and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
+                filtered_scan_columns(group_source)
+            ):
+                # Task 68 (live Power BI, order audit 3 grid): the groups of a SUMMARIZE under filters on other columns come out in the order of the scan over
+                # the group columns plus the filtered columns; where that key space is a measured storage-order one (multi_column_order False: 792 over 6 rows)
+                # the groups keep the storage order of their first row, where no measured point covers it the order is not modelled
+                iteration_rows = rows_in_storage_scan(group_source, context, iteration_rows)
             if order_class == "scan":
                 scan_table, via_all = _tocsv_scan_table_node(table_node)
                 reverse = _tocsv_scan_filtered(table_node)
@@ -21638,6 +21721,8 @@ def _evaluate_measures_once(
             finally:
                 topn_walk_nodes.pop(id(walked_table), None)
                 topn_walk_under_filter.discard(id(walked_table))
+            if context.get("order_undecided") and len(iteration_rows) > 1 and not order_spec:
+                raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
             entries = []
             if len(iteration_rows) > 1 and walked_table[:2] != ("call", "TABLEOF") and _contains_function_call(walked_table, "TABLEOF"):
                 if walked_table[0] in {"call", "table_call"} and walked_table[1] in {"UNION", "DISTINCT"}:
@@ -21655,6 +21740,35 @@ def _evaluate_measures_once(
                         raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
+            if len(iteration_rows) > 1 and not order_spec and walked_table[0] == "call" and walked_table[1] == "ADDMISSINGITEMS":
+                # Task 68 (live Power BI, order audit 3 grid + datasets d2 to d10): the groups of a SUMMARIZE under an outer filter on another column
+                # come out in the order of the scan over the group columns plus the filtered columns (see rows_in_storage_scan)
+                added = next((a for a in walked_table[2] if a[0] == "call" and a[1] == "SUMMARIZE"), None)
+                if added is not None and added[2][0][0] == "table" and filtered_scan_columns(added):
+                    iteration_rows = rows_in_storage_scan(added, context, iteration_rows)
+            if len(iteration_rows) > 1 and not order_spec and walked_table[0] == "call" and walked_table[1] == "SAMPLE" and len(walked_table[2]) in {3, 4} and walked_table[2][2][0] == "reference":
+                # Task 68 (live Power BI, order audit 3 grid): SAMPLE over a text column walks the table in dictionary order whatever the direction (blank, then
+                # first-seen text: ,Paid,Late for ASC and DESC) when it keeps every row (SAMPLE(n >= rows) is the table itself). Numeric samples keep their picks
+                sample_context, sample_rows = table_argument_value(walked_table[2][1])
+                sample_key = next((h for h in sample_context["headers"] if h.casefold() == str(walked_table[2][2][2]).casefold()), None)
+                if sample_key is not None and any(isinstance(typed_cell(sample_context, sample_key, row.get(sample_key)), str) for row in sample_rows):
+                    if len(iteration_rows) < len(sample_rows):
+                        # a sample that drops rows is a materialised pick in the ORDER BY order (datasets d7 and d9: East,South,West for ASC); only ASC was measured
+                        if len(walked_table[2]) == 4 and not (walked_table[2][3][0] == "table" and str(walked_table[2][3][1]).upper() == "ASC"):
+                            raise MeasureError("The row order of a SAMPLE of a text column that drops rows is not modelled in the local engine for this direction.")
+                    else:
+                        iteration_rows = dictionary_ordered_rows(walked_table[2][1], sample_context, sample_rows, read_nodes)
+            if len(iteration_rows) > 1 and not order_spec and walked_table[0] == "call" and walked_table[1] in {"WINDOW", "OFFSET"}:
+                # Task 68 (live Power BI, order audit 3 grid): a relative WINDOW over DESC, or an OFFSET over DESC of a numeric column, comes back in an order
+                # the ORDERBY does not explain; refused rather than walked in the ORDERBY order
+                ordering = dax_iteration_order.descending_orderby(walked_table)
+                key_numeric = False
+                if ordering is not None and ordering[0][0] == "reference":
+                    key_header = next((h for h in iteration_rows[0] if h.casefold() == str(ordering[0][2]).casefold()), None)
+                    if key_header is not None:
+                        key_numeric = dax_iteration_order.Profile([typed_cell(context, key_header, row.get(key_header)) for row in iteration_rows]).is_numeric
+                if dax_iteration_order.window_walk_undecided(walked_table, len(iteration_rows), key_numeric):
+                    raise MeasureError("The row order of a relative WINDOW / OFFSET over ORDERBY(..., DESC) is not modelled in the local engine.")
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True)
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
                 iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)

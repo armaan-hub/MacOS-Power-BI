@@ -1,0 +1,100 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(OFFSET(1,ALL(Facts[Sales]),ORDERBY(Facts[Sales],DESC)),Facts[Sales],\",\"),Facts[Region]=\"West\")",
+   "powerbi": ",10.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(SAMPLE(3,ALL(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\"),Facts[Quantity]>1)",
+   "powerbi": ",Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(SAMPLE(3,ALL(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\"),Facts[Quantity]<>3,Facts[Region]=\"West\")",
+   "powerbi": "East,West,North",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),Facts[Sales],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "10.5,-1.5,,0,2.5,0,-1.5,10.5,,2.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),Facts[Quantity],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,4,0,,,",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity])),Facts[Sales],\",\"),Facts[Quantity]>=2,Facts[Region]<>\"East\")",
+   "powerbi": "20,,20,",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Sales]),\"s\",SUM(Facts[Quantity])),Facts[Sales],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "20,,0,,,,",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Sales]),\"s\",SUM(Facts[Quantity])),Facts[Sales],\",\"),Facts[Quantity]>1)",
+   "powerbi": "10.5,20,,2.5,,,,",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Region]),\"s\",SUM(Facts[Quantity])),Facts[Sales],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "10.5,20,,2.5,10.5,20,,2.5,",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note],\",\"),Facts[Region]=\"West\")",
+   "powerbi": "Late,,Paid",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Sales]),ORDERBY(Facts[Sales],DESC)),Facts[Sales],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "0,,-1.5,2.5,10.5,20",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(TOJSON(ADDMISSINGITEMS(Facts[Note],SUMMARIZE(Facts,Facts[Note],\"s\",SUM(Facts[Sales])),Facts[Note])),Facts[Quantity]>1,Facts[Sales]>0)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\", \"[s]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"Paid\", 10.5],\n\t\t[null, 22.5]\n\t]\n}",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\")",
+   "powerbi": ",Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SAMPLE(3,ALL(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\")",
+   "powerbi": ",Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note],\",\")",
+   "powerbi": "Late,,Paid",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity],\",\")",
+   "powerbi": "1,0,2,3,4,5",
+   "now": "DIFF"
+  }
+ ]
+}

@@ -36,6 +36,11 @@ _SINGLE_COLUMN_BUDGET = 8200
 # more rows is sorted; a space no smaller than a measured storage-order one over no more rows is storage order; anything else is not decided.
 _MEASURED_SORTED = ((396, 6), (429, 7), (567, 9), (2994, 12))
 _MEASURED_STORAGE = ((792, 6), (8982, 12))
+# Task 68 (live Power BI, SUMMARIZE ... ROLLUP / ADDMISSINGITEMS(SUMMARIZE) under an outer filter, datasets d7 and d9): the scan over the group columns plus the
+# filtered columns was still sorted at a space of 840 over 8 rows, 1,596 over 10 rows and (dataset d10) 36 over 5 rows, and (round 3, datasets d12 and d14) 2,250 over 11 rows (sorted); 7,600 over 14 rows was storage order. These points apply to that scan only.
+# Beyond them the scan has no storage point of its own: the groups of a filtered scan are then refused where they are read in order (never the (8982, 12) storage point)
+_MEASURED_SORTED_SCAN = _MEASURED_SORTED + ((840, 8), (1596, 10), (36, 5), (2250, 11))
+_MEASURED_STORAGE_SCAN = ((792, 6), (7600, 14))  # the detail scan of d14 (Sales x Quantity x Region = 7,600 over 14 rows) came back in storage order
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -361,7 +366,7 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, be
     return combinations * row_count <= budget
 
 
-def multi_column_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool = False) -> bool | None:
     """True when the columns of an ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS table are walked in dictionary order, False when they keep the storage
     order, None when the key space is not covered by a measured point. Dates are not covered: they keep the older `grouped` test."""
     space = 1
@@ -369,11 +374,39 @@ def multi_column_order(row_count: int, profiles: Sequence[Profile]) -> bool | No
         if profile.size is None:
             return False  # a column with no regular range: the order the app always used
         space *= profile.size
-    if any(space <= measured and row_count >= rows for measured, rows in _MEASURED_SORTED):
+    if any(space <= measured and row_count >= rows for measured, rows in (_MEASURED_SORTED_SCAN if scan else _MEASURED_SORTED)):
         return True
-    if any(space >= measured and row_count <= rows for measured, rows in _MEASURED_STORAGE):
+    if any(space >= measured and row_count <= rows for measured, rows in (_MEASURED_STORAGE_SCAN if scan else _MEASURED_STORAGE)):
         return False
     return None
+
+
+def descending_orderby(table_node: Any) -> tuple[Any, bool] | None:
+    """(key expression, descending) of the ORDERBY argument of a WINDOW / OFFSET call, or None when it has none."""
+    orderby = next((a for a in table_node[2] if isinstance(a, tuple) and len(a) == 3 and a[0] == "call" and a[1] == "ORDERBY"), None)
+    if orderby is None or not orderby[2]:
+        return None
+    return orderby[2][0], any(isinstance(a, tuple) and len(a) == 2 and a[0] == "table" and str(a[1]).upper() == "DESC" for a in orderby[2])
+
+
+def window_walk_undecided(table_node: Any, row_count: int, key_is_numeric: bool) -> bool:
+    """True when an iterator walks a WINDOW / OFFSET over ORDERBY(column, DESC) in a shape whose row order is not measured.
+
+    Task 68 (live Power BI, order audit 3 grid): a relative WINDOW (REL bounds) over DESC comes back in no order the ORDERBY explains
+    (Quantity 0..5: 1,0,2,3,4,5; Note: Late,,Paid), so it is refused. No one rule fits the eleven DESC WINDOW / OFFSET rows of that grid
+    (walking the current rows upward and listing each window in ORDERBY order fits every WINDOW row, but the OFFSET rows over text need the
+    opposite walk), so the shape stays refused instead of answered from a fit. OFFSET over DESC of a numeric column walks ascending (0,1,2,3,4;
+    the window of Sales: -1.5, blank, 0, 2.5, 10.5), while the same OFFSET over text keeps the DESC order (Late, blank), so only the
+    numeric two-row-or-more case is refused. ASC windows and ABS windows keep the ORDERBY order that was measured before."""
+    if not (isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] in {"WINDOW", "OFFSET"}):
+        return False
+    ordering = descending_orderby(table_node)
+    if ordering is None or not ordering[1]:
+        return False
+    if table_node[1] == "WINDOW":
+        # a window is fixed by its bounds alone only when both are ABS; a bound written without a type is REL
+        return sum(1 for a in table_node[2] if isinstance(a, tuple) and len(a) == 2 and a[0] == "table" and str(a[1]).upper() == "ABS") < 2
+    return key_is_numeric and row_count > 1
 
 
 class AmbiguousTieOrder(Exception):
