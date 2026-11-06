@@ -4022,6 +4022,37 @@ _CURRENCY_MAX = Decimal("922337203685477.5807")  # a Currency is an Int64 of ten
 _TOCSV_CONSTANT_TABLES = frozenset({"ROW", "DATATABLE", "GENERATESERIES", "CALENDAR", "CALENDARAUTO"}) | _INFO_FUNCTIONS
 _TOCSV_DICTIONARY_TABLES = frozenset({"ALL", "ALLNOBLANKROW", "ALLSELECTED", "ALLEXCEPT"})  # FILTERS (Power BI sorts it) is refused; TREATAS is checked in _tocsv_row_order
 _TOCSV_JOIN_TABLES = frozenset({"EXCEPT", "INTERSECT", "CROSSJOIN", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "GENERATE", "GENERATEALL"})
+_CONCATENATE_FILTERED_UNMODELLED_WALKS = frozenset({"TOPN", "ALLSELECTED"})  # Task 65: under a CALCULATE filter Power BI walks these in an order the plain walk does not give (fresh grid: 10 of 10 differed); a folded body over them is refused there
+_CONCATENATE_MEASURED_WALKS = frozenset({"VALUES", "ALL", "ALLSELECTED", "FILTER", "CALCULATETABLE", "DISTINCT", "SUMMARIZE", "ADDCOLUMNS", "TOPN"})  # Task 65: the table walks whose row order the local engine reproduces; a folded body is answered only over a bare table or these (ALLEXCEPT, GENERATE, SUMMARIZECOLUMNS, UNION, ALLNOBLANKROW, SELECTCOLUMNS are not)
+
+
+def _is_plain_fold_result(node: Any) -> bool:
+    """Task 65: a column reference or a literal, the only branches a constant IF / COALESCE fold keeps as they are."""
+    return isinstance(node, tuple) and bool(node) and node[0] in {"reference", "string", "number"}
+
+
+def _reads_no_row_or_filter(node: Any) -> bool:
+    """Task 65: an expression that reads no column, table or variable, so its value is the same in every row and under every filter
+    (TRUE(), 1=1, NOT(TRUE()), 0/0). ALLSELECTED(Facts[Region]) or COUNTROWS(Facts) are not constant: they are refused in folds."""
+    if isinstance(node, (list, tuple)):
+        if node and isinstance(node[0], str) and node[0] in {"reference", "table", "table_call", "var", "let"}:
+            return False
+        if node and isinstance(node[0], str) and node[0] == "call" and len(node) > 1 and node[1] in {"ALLSELECTED", "CALCULATE", "CALCULATETABLE", "FILTER", "COUNTROWS", "SELECTEDVALUE", "HASONEVALUE", "ISFILTERED", "ISCROSSFILTERED"}:
+            return False
+        return all(_reads_no_row_or_filter(child) for child in node)
+    return True
+
+
+def _order_free_text_body(node: Any) -> bool:
+    """Task 65: a CONCATENATEX body whose value is the same text whatever the walk: MIN / MAX of literals and column references only.
+    A conditional, a CALCULATE or a date constructor is typed by Power BI in ways the local values do not follow, so it is not answered."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] in {"string", "number", "reference"}:
+        return True
+    if node[0] == "call" and node[1] in {"MIN", "MAX"}:
+        return all(_order_free_text_body(argument) for argument in node[2])
+    return False
 _TOCSV_SIGNED_ZERO_CALLS = frozenset({"CEILING", "FLOOR", "ISO.CEILING", "TRUNC", "ROUNDUP", "ROUNDDOWN", "DIVIDE", "POWER", "MOD"})
 
 
@@ -9518,6 +9549,8 @@ def _evaluate_measures_once(
         value_context = dict(source_context)
         value_context["headers"] = output_headers
         value_context["rows"] = output_rows
+        if len(arguments) == 1 and arguments[0][0] == "table" and function == "ALLSELECTED":
+            value_context["profile_rows"] = source_context["rows"]  # Task 65 Part C (live Power BI): the visible rows of ALLSELECTED(table) are walked by the dictionary of the whole column
         if not (len(arguments) == 1 and arguments[0][0] == "table"):
             value_context["lineage"] = {header: (source_context, header) for header in output_headers}
         return value_context, output_rows
@@ -9721,7 +9754,7 @@ def _evaluate_measures_once(
             profile_cache[key] = dax_iteration_order.Profile(  # the whole loaded column: filters never shrink a dictionary
                 [
                     None if raw is None or (not is_text and isinstance(raw, str) and not raw.strip()) else typed_cell(source, column, raw)
-                    for raw in (row.get(column) for row in source["rows"])
+                    for raw in (row.get(column) for row in source.get("profile_rows", source["rows"]))
                 ]
             )
         return profile_cache[key]
@@ -13235,6 +13268,32 @@ def _evaluate_measures_once(
         if reads_a_column and table[0] != "table":
             return True
         return body[1] == "IF" and _calls_function(taken, "DATE" if not _calls_function(taken, "TIME") else "TIME") and not _calls_function(other, "DATE") and not _calls_function(other, "TIME")
+
+    def fold_constant_body(body: Any) -> Any:
+        """Task 65: a CONCATENATEX body with IF / COALESCE folded where the condition reads no row: IF(TRUE(), x, y) is x, IF(FALSE(), x) is
+        BLANK, COALESCE(BLANK(), x, ...) is COALESCE(x, ...). Anything else is returned as it is."""
+        if not isinstance(body, tuple) or len(body) != 3 or body[0] != "call" or not isinstance(body[2], (list, tuple)):
+            return body
+        args = body[2]
+        if body[1] == "COALESCE" and len(args) == 2 and args[0] == ("blank",) and _is_plain_fold_result(args[1]):
+            return args[1]  # COALESCE(BLANK(), x) is x; with more arguments the later ones are read too, so it is not folded
+        if body[1] == "IF" and len(args) in (2, 3) and _reads_no_row_or_filter(args[0]):
+            try:
+                holds = as_boolean(evaluate(args[0], None, allow_text=True, allow_boolean=True))
+            except _DivisionError:
+                holds = True
+            except (MeasureError, MeasureRuntimeError):
+                return body
+            taken = args[1] if holds else (args[2] if len(args) == 3 else ("blank",))
+            discarded = (args[2] if holds else args[1]) if len(args) == 3 else ("blank",)
+            if any(_calls_function(taken, name) for name in ("DATE", "TIME", "CONVERT")):
+                return body  # a date or time beside a number is typed as a number by Power BI's IF; the folded branch would keep the date
+            if next(iter(_direct_column_references(discarded)), None) is not None:
+                return body  # the discarded branch reads a column, which Power BI still evaluates (and may reject) on the walked table
+            if not _is_plain_fold_result(taken):
+                return body  # only a column or a literal is folded: a BLANK() or a call is typed by the other branch in Power BI (IF(FALSE(), TRUE(), BLANK()) is FALSE; IF("", n, DATEVALUE(..)) is a number)
+            return fold_constant_body(taken)
+        return body
 
     def column_read_through_constant_if(body: tuple[Any, ...]) -> tuple[Any, ...] | None:
         """The bare column an IF / IF.EAGER whose condition reads no row reduces to, or None.  IF reduces beside any other branch, IF.EAGER, which
@@ -21353,15 +21412,23 @@ def _evaluate_measures_once(
             ]
             formatted_headers = ", ".join(json.dumps(header_text(h), ensure_ascii=False) for h in headers)
             return f"{{\n\t\"header\": [{formatted_headers}],\n\t\"rowCount\": {total_row_count},\n\t\"data\": [\n" + ",\n".join(data_lines) + "\n\t]\n}"
+        # Task 65 (order-free): without an ORDER BY the walk order is refused, unless every row gives the same text (then the order cannot show)
+        # or the body folds to the branch a constant condition takes, whose walk is modelled on its own. The refusal is raised after the rows are read.
+        walk_refusal: str | None = None
+        if function == "CONCATENATEX" and len(arguments) <= 3 and len(arguments) > 1:
+            folded_body = fold_constant_body(arguments[1])
+            walked = arguments[0]
+            if folded_body is not arguments[1] and (current_context == 0 or not (walked[0] in {"call", "table_call"} and walked[1] in _CONCATENATE_FILTERED_UNMODELLED_WALKS)) and (walked[0] == "table" or (walked[0] in {"call", "table_call"} and walked[1] in _CONCATENATE_MEASURED_WALKS)):
+                arguments = [walked, folded_body, *arguments[2:]]  # the folded body keeps the walk of its columns; only the measured table walks keep it, and only with no CALCULATE filter around (live Power BI, Task 65 grid: under an outer filter TOPN / ALLSELECTED are walked in an order the plain walk does not reproduce)
         if function == "CONCATENATEX" and len(arguments) <= 3 and len(arguments) > 1 and _holds_table_calculate(arguments[1]):
-            raise MeasureError("CONCATENATEX over a table on a row walks the rows in an order the local engine does not model.")  # live Power BI (Task 17 review)
+            walk_refusal = "CONCATENATEX over a table on a row walks the rows in an order the local engine does not model."  # live Power BI (Task 17 review)
         if function == "CONCATENATEX":
             if _statistic_with_arithmetic(arguments[1]):
                 # live Power BI (iteration 87): a statistic in arithmetic is a double, shown with 15 digits and a signed zero; the local decimals differ in the last digit
                 raise MeasureError("CONCATENATEX of arithmetic with a statistical function is not exact in the local engine.")
             refuse_column_no_row_holds(*table_argument_value(arguments[0], allow_keepfilters=True), arguments[1])
             if len(arguments) <= 3 and concatenate_walk_is_unmodelled(arguments[0], arguments[1]):
-                raise MeasureError("CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model.")
+                walk_refusal = walk_refusal or "CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
             delimiter = "" if len(arguments) < 3 else dax_typed.to_text(evaluate(arguments[2], row_context, allow_text=True))
             order_spec: list[tuple[Any, bool]] = []  # (expression, descending); ASC is the default here
             position = 3
@@ -21390,8 +21457,11 @@ def _evaluate_measures_once(
                         except (MeasureError, MeasureRuntimeError):
                             holds = None
                         if holds is not None:
+                            if not (_constant_boolean(cond) or cond[0] in {"number", "blank"}):
+                                folded_on_filter_context.append(True)  # a condition read from the filter context (COUNTROWS, ALLSELECTED, ...), not a literal
                             return fold_read_node(n[2][1] if holds else (n[2][2] if len(n[2]) > 2 else ("blank",)))
                 return n
+            folded_on_filter_context: list[bool] = []
             read_nodes = [fold_read_node(arguments[1]), *(fold_read_node(expression) for expression, _d in order_spec)]
             walked_table = arguments[0]
             if walked_table[0] == "call" and walked_table[1] == "KEEPFILTERS" and len(walked_table[2]) == 1:
@@ -21403,11 +21473,27 @@ def _evaluate_measures_once(
                 # review 2026-10-29: Power BI walks a TOPN held in a variable in the order it walks a TOPN written in place, which depends on
                 # the rows read (see topn_walk_nodes); the variable hides those reads, so the walk order is not reproduced
                 raise MeasureError("CONCATENATEX over a TOPN held in a variable is walked in an order the local engine does not reproduce.")
+            if walk_refusal is not None and not _order_free_text_body(arguments[1]):
+                raise MeasureError(walk_refusal)  # Task 65: only a MIN / MAX body may be answered without the walk (its rows are read below)
+            allselected_walk_unmeasured = False
+            if evaluation_filter_ids and not order_spec and walked_table[0] == "call" and walked_table[1] == "ALLSELECTED" and len(walked_table[2]) == 1 and walked_table[2][0][0] == "table":
+                # Task 65 Part C: the visible rows of ALLSELECTED(table) under an outer filter were measured for a body reading ONE column (the dictionary
+                # of the whole column, 5 of 5 shapes exact); a walk over several columns, or read through a folded condition, was not: the text may
+                # only be given when every row gives the same one (checked once the rows are read)
+                allselected_reads = dax_iteration_order.columns_read(read_nodes, lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS)
+                allselected_walk_unmeasured = (
+                    bool(folded_on_filter_context) or allselected_reads is None or len({name.casefold() for _table, name in allselected_reads}) > 1
+                )
             topn_walk_nodes[id(walked_table)] = read_nodes  # a TOPN argument is walked as this CONCATENATEX reads it
+            if walked_table[0] == "call" and walked_table[1] == "TOPN" and not folded_on_filter_context:
+                # Task 65 Part C: under an outer filter the same walk and heap; not when the reads were found by folding a condition that reads the
+                # filter context (live Power BI: such a body reads every column, the fold would give the walk of a body that reads none)
+                topn_walk_under_filter.add(id(walked_table))
             try:
                 context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             finally:
                 topn_walk_nodes.pop(id(walked_table), None)
+                topn_walk_under_filter.discard(id(walked_table))
             entries = []
             if len(iteration_rows) > 1 and walked_table[:2] != ("call", "TABLEOF") and _contains_function_call(walked_table, "TABLEOF"):
                 if walked_table[0] in {"call", "table_call"} and walked_table[1] in {"UNION", "DISTINCT"}:
@@ -21444,6 +21530,10 @@ def _evaluate_measures_once(
                     raise MeasureError("A CONCATENATEX of dates on 9999-12-31 or later is not modelled by the local engine.")
                 text = dax_typed.to_text(double_as_text(arguments[1], body_value, inner))
                 entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
+            if allselected_walk_unmeasured and len({text for _key, text in entries}) > 1:
+                raise MeasureError("CONCATENATEX over ALLSELECTED(table) under an outer filter, reading several columns, is walked in an order the local engine does not model.")
+            if walk_refusal is not None and (not entries or len({text for _key, text in entries}) > 1 or not _order_free_text_body(arguments[1])):
+                raise MeasureError(walk_refusal)  # Task 65: the walk order shows in the text unless every row gives the same text
             if (
                 outer_row_reads[0] != outer_reads_before
                 or _contains_function_call(arguments[1], "OFFSET")  # relative to the current row: its order decides the text

@@ -1,0 +1,790 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[Standar",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[Standar",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],[w]))",
+   "powerbi": "[Slope1],[Slope2],[Slope3],[Intercept],[StandardErrorSlope1]",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[Standar",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINEST(Facts[Sales],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],Facts[Quantity],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{1,3}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{1,3}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,3}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,3}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(FILTER(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[x]>10),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorInt",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]*2))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[Standar",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales]),1,\";\",FALSE())",
+   "powerbi": "3.74955783516095E-02;2.30314821365405;0.109677417431646;1.01",
+   "now": "gap-reject"
+  },
+  {
+   "part": "A",
+   "expr": "LEN(TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales])))",
+   "powerbi": "358",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(FILTER(VALUES(Facts[Region]),TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ALL(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ALL(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidLate",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "WestWest",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidPaidPaidLate",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(VALUES(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "BLANK",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),MIN(\"a\",Facts[Region]))",
+   "powerbi": "aa",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(GENERATE(VALUES(Facts[Note]),VALUES(Facts[Region])),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestWestNorthNorthNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,IF(FALSE(),Facts[Region],TIME(1,0,0)))",
+   "powerbi": "1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ALLEXCEPT(Facts,Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),TIME(1,0,0),Facts[Sales]))",
+   "powerbi": "4.16666666666667E-024.16666666666667E-024.16666666666667E-02",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),MAX(\"a\",\"b\"))",
+   "powerbi": "bbb",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorthEastWestNorthEastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),LASTNONBLANK(Facts[Note],1))",
+   "powerbi": "Paid",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(FILTER(Facts,TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,MAX(\"a\",\"b\"))",
+   "powerbi": "bbbbbb",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorthEastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,MIN(\"a\",Facts[Region]))",
+   "powerbi": "aaaaaa",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "WestNorthEast",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>2),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(1,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "East",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"w\",1),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,MAX(Facts[Region],\"a\"))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ALLNOBLANKROW(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),MAX(\"a\",\"b\"))",
+   "powerbi": "bbb",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),MAX(Facts[Region],\"a\"))",
+   "powerbi": "EastWestNorthEastWestNorthEastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Sales]))",
+   "powerbi": "438314383143831438314383143831",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ALLSELECTED(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidPaidPaidPaidLate",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Region]))",
+   "powerbi": "1/1/20201/1/20201/1/20201/1/20201/1/20201/1/2020",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INTERSECT(Facts,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastWestNorth",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ALL(Facts),LASTNONBLANK(Facts[Note],1))",
+   "powerbi": "PaidPaidPaidLate",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,IF(1=1,DATE(2020,1,1),Facts[Sales]))",
+   "powerbi": "438314383143831438314383143831",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(BLANK(),DATE(2020,1,1)+Facts[Quantity],\"a\"),\"|\")",
+   "powerbi": "1/5/2020|1/6/2020",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),VAR x=INT(2.5) RETURN IF(BLANK(),x,-Facts[Quantity]),\"|\")",
+   "powerbi": "-4|-5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(TIME(6,0,0),Facts[Region]),\"|\")",
+   "powerbi": "6:00:00 AM|6:00:00 AM|6:00:00 AM",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),NOT(TRUE()),Facts[Quantity]/0),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),VAR x=-1/0 RETURN IF(TRUE()&&FALSE(),x,Facts[Quantity]),\"|\")",
+   "powerbi": "2|3|1|4|0|5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(BLANK(),TIME(6,0,0),MAX(Facts[Quantity])),\"|\")",
+   "powerbi": "0.25|0.25|0.25",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),COALESCE(MAX(Facts[Region]),Facts[Quantity]/0),\"|\")",
+   "powerbi": "West|West|West",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),TIME(6,0,0)+TRUE(),SUM(Facts[Quantity])),\"|\")",
+   "powerbi": "1.25|1.25|1.25|1.25|1.25|1.25",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF.EAGER(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Quantity],Facts[Quantity]/0),\"|\")",
+   "powerbi": "43833|43834|43832|43835|43831|43836",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),SWITCH(TRUE(),TRUE(),Facts[Note],TRUE()),\"|\")",
+   "powerbi": "|||Paid|Paid|Paid|Late|Late|Late",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IFERROR(Facts[Quantity],-Facts[Quantity]),\"|\")",
+   "powerbi": "2|3|1|4|0|5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(0/0,Facts[Region],1=1),\"|\")",
+   "powerbi": "East|West|North|East|West|North|East|West|North",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(ISBLANK(Facts[Sales]),1+1,TIME(6,0,0)),\"|\")",
+   "powerbi": "0.25|0.25|0.25|2|0.25|0.25",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(BLANK(),CURRENCY(3),Facts[Quantity]>2),\"|\")",
+   "powerbi": "3|3",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),SWITCH(TRUE(),Facts[Region]=\"East\",-Facts[Quantity],TRUE()),\"|\")",
+   "powerbi": "TRUE|-5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(Facts[Sales],DATE(2020,1,1)),\"|\")",
+   "powerbi": "43831|2.5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(UPPER(Facts[Region]),1=1),\"|\")",
+   "powerbi": "NORTH|EAST",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),DATE(2020,1,1)+Facts[Quantity],Facts[Region]),\"|\")",
+   "powerbi": "1/1/2020|1/2/2020|1/3/2020|1/4/2020|1/5/2020|1/6/2020",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,SWITCH(TRUE(),FALSE(),-Facts[Quantity],Facts[Quantity]>2),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),COUNTROWS(Facts)>3,-Facts[Quantity],\"5\"),\"|\")",
+   "powerbi": "-1|-2|-5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),SWITCH(TRUE(),Facts[Quantity]>2,-1/0,TRUE()),\"|\")",
+   "powerbi": "TRUE|-inf|TRUE|-inf|TRUE|-inf",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),IF(\"\",UPPER(Facts[Region]),1+1),\"|\")",
+   "powerbi": "2|2|2",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),CURRENCY(3),Facts[Region]),\"|\")",
+   "powerbi": "3|3|3|3|3|3",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),UPPER(Facts[Region]),CURRENCY(1.23456)),\"|\")",
+   "powerbi": "EAST|EAST|EAST|WEST|WEST|NORTH",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(UPPER(\"true\"),MAX(Facts[Quantity]),Facts[Region]),\"|\")",
+   "powerbi": "5|5|5|5|5|5|5|5|5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IFERROR(Facts[Sales]/0,Facts[Sales]/0),\"|\")",
+   "powerbi": "inf|inf|-inf||-nan(ind)|inf",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),SWITCH(TRUE(),1=1,\"\",Facts[Sales]),\"|\")",
+   "powerbi": "BLANK",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IFERROR(1=1,-Facts[Quantity]),\"|\")",
+   "powerbi": "TRUE|TRUE",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),TIME(6,0,0)+TRUE(),BLANK()),\"|\")",
+   "powerbi": "12/31/1899 6:00:00 AM|12/31/1899 6:00:00 AM|12/31/1899 6:00:",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"z\",1),VAR x=1/0 RETURN IF(BLANK(),x,-Facts[Quantity]),\"|\")",
+   "powerbi": "0|-1|-2|-3|-4|-5",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),SWITCH(TRUE(),ISBLANK(Facts[Sales]),-Facts[Quantity],Facts[Note]),\"|\")",
+   "powerbi": "Paid||Paid|-4|Paid|",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(EXCEPT(Facts,Facts),IF.EAGER(INT(1.5),Facts[Sales],1=1),\"|\")",
+   "powerbi": "BLANK",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"z\",1),VAR x=TIME(6,0,0) RETURN IF(BLANK(),x,Facts[Region]),\"|\")",
+   "powerbi": "East|East|East|West|West|North",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(ISBLANK(Facts[Sales]),Facts[Sales]/0,-1/0),\"|\")",
+   "powerbi": "-inf|-inf|-inf||-inf|-inf",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),\"a\",UPPER(Facts[Region])),\"|\")",
+   "powerbi": "a|a|a|a|a|a",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",2.5&&\"\"),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",\"0\"||LEFT(\"a\",0)),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",TRUE()&&VAR y=\"\" RETURN y),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",OR(0,\"\")),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",AND(\"-1\",\"\")),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},MAX(1E15,1))",
+   "powerbi": "1E+15",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},MIN(1E15,2E15))",
+   "powerbi": "1E+15",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1,2},MAX(1E15,1),\",\")",
+   "powerbi": "1E+15,1E+15",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1,2},IF(1=1,CONVERT(DATE(2020,1,1),DATETIME),1))",
+   "powerbi": "4383143831",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1,2},IF(1=1,CONVERT(DATE(2020,1,1),DATETIME),BLANK()))",
+   "powerbi": "1/1/20201/1/2020",
+   "now": "gap-reject"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1,2},IF(1=2,1,CONVERT(DATE(2020,1,1),DATETIME)))",
+   "powerbi": "4383143831",
+   "now": "gap-reject"
+  }
+ ]
+}
