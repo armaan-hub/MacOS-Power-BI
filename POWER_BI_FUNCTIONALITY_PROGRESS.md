@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 152 / Task 63 maxx-nan-53, MAXX/MINX over a Variant with NaN answered for IF/IF.EAGER bodies over Facts and ALL(Facts), mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2748 passed passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 494925 answers with 490990 match, 3935 refused, 0 DIFF, 0 CRASH, locked 490970. Next: Task 64: next pending group
+**Latest status (2026-11-05, after Iteration 153 / Task 64 typeerr-fail-54, Type tests of a failing value answered or shown as errors by measured shape family, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2752 passed passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 497467 answers with 493232 match, 4235 refused, 0 DIFF, 0 CRASH, locked 493212. Next: Task 65: next pending group
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

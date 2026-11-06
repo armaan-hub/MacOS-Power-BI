@@ -41,3 +41,6 @@ Make them show the error, or refuse.
 - `tools/parity_check.py` shows DIFF 0 and CRASH 0; then run `git checkout -- PARITY_LEDGER.md`.
 
 Run the full pytest at the end. A separate held-out grid will be run by Opus afterwards.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 153. Locked 493212.
