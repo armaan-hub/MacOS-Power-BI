@@ -11884,6 +11884,15 @@ def _evaluate_measures_once(
             context, ordered = sorted_table(arguments[1], tuple(arguments[2:]))
             if size == 0 or not ordered:
                 return context, []
+            if len(arguments) in {3, 4} and arguments[2][0] == "reference":
+                key_header = next((h for h in ordered[0] if h.casefold() == str(arguments[2][2]).casefold()), None)
+                if key_header is not None and any(isinstance(typed_cell(context, key_header, row.get(key_header)), str) for row in ordered):
+                    # Task 68 (live Power BI, order audit 3 grid): SAMPLE over a text column walks the table in dictionary order whatever the direction
+                    # (blank, then first-seen text: ,Paid,Late for ASC and DESC); with fewer rows than it holds the picks are not measured
+                    if size < len(ordered):
+                        raise MeasureError("The sample of a text column with fewer rows than it holds is not modelled in the local engine.")
+                    table_context, table_rows = table_argument_value(arguments[1])
+                    return table_context, dictionary_ordered_rows(arguments[1], table_context, table_rows, [arguments[2]])
             if size >= len(ordered):
                 return context, list(ordered)
             if size == 1:
@@ -21324,6 +21333,13 @@ def _evaluate_measures_once(
                 if (removed or filtered_here) and (arguments[0][0] == "let" or (removed and max_rows < 0) or not removed):
                     raise MeasureError("The row order of ALLSELECTED(table) under an outer filter is not modelled in the local engine for this shape.")
                 reverse = removed
+            elif order_class == "grouped" and total_row_count > 1 and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and sum(
+                1 for column in (evaluation_contexts_by_id.get(resolve_table_context(str(group_source[2][0][1]))["id"], {}).get("filter_column_rows") or {})
+                if column.casefold() not in {str(a[2]).casefold() for a in group_source[2][1:] if a[0] == "reference"}
+            ) >= 2:
+                # Task 68 (live Power BI, order audit 3 grid): ADDMISSINGITEMS over a SUMMARIZE under two filters on other columns lists its rows in first-scanned
+                # order (Paid, then blank), not the dictionary order the local engine uses; the one-filter shapes are measured and stay
+                raise MeasureError("The row order of ADDMISSINGITEMS under filters on two other columns is not modelled in the local engine.")
             elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
                 group_filtered or has_column_filter(group_source[2][0])
             ) and any(
@@ -21655,6 +21671,27 @@ def _evaluate_measures_once(
                         raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
+            if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] in {"WINDOW", "OFFSET"}:
+                # Task 68 (live Power BI, order audit 3 grid): a relative WINDOW over DESC, or an OFFSET over DESC of a numeric column, comes back in an order
+                # the ORDERBY does not explain; refused rather than walked in the ORDERBY order
+                ordering = dax_iteration_order.descending_orderby(walked_table)
+                key_numeric = False
+                if ordering is not None and ordering[0][0] == "reference":
+                    key_header = next((h for h in iteration_rows[0] if h.casefold() == str(ordering[0][2]).casefold()), None)
+                    if key_header is not None:
+                        key_numeric = dax_iteration_order.Profile([typed_cell(context, key_header, row.get(key_header)) for row in iteration_rows]).is_numeric
+                if dax_iteration_order.window_walk_undecided(walked_table, len(iteration_rows), key_numeric):
+                    raise MeasureError("The row order of a relative WINDOW / OFFSET over ORDERBY(..., DESC) is not modelled in the local engine.")
+            if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] == "SUMMARIZE":
+                # Task 68 (live Power BI, order audit 3 grid): a fractional group column walked beside a ROLLUP over two or more values is not measured
+                for node in read_nodes:
+                    key_header = next((h for h in iteration_rows[0] if isinstance(node, tuple) and len(node) == 3 and node[0] == "reference" and h.casefold() == str(node[2]).casefold()), None)
+                    if key_header is None or key_header not in base_lineage(context):
+                        continue
+                    base, column = base_lineage(context)[key_header]
+                    fractional = dax_iteration_order.Profile([typed_cell(base, column, row.get(column)) for row in base["rows"]]).fractional
+                    if dax_iteration_order.rollup_plain_fractional_undecided(walked_table, key_header, [row.get(key_header) for row in iteration_rows], fractional):
+                        raise MeasureError("The row order of SUMMARIZE with ROLLUP walked by a fractional group column is not modelled in the local engine.")
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True)
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
                 iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)

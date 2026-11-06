@@ -376,6 +376,46 @@ def multi_column_order(row_count: int, profiles: Sequence[Profile]) -> bool | No
     return None
 
 
+def descending_orderby(table_node: Any) -> tuple[Any, bool] | None:
+    """(key expression, descending) of the ORDERBY argument of a WINDOW / OFFSET call, or None when it has none."""
+    orderby = next((a for a in table_node[2] if isinstance(a, tuple) and len(a) == 3 and a[0] == "call" and a[1] == "ORDERBY"), None)
+    if orderby is None or not orderby[2]:
+        return None
+    return orderby[2][0], any(isinstance(a, tuple) and len(a) == 2 and a[0] == "table" and str(a[1]).upper() == "DESC" for a in orderby[2])
+
+
+def window_walk_undecided(table_node: Any, row_count: int, key_is_numeric: bool) -> bool:
+    """True when an iterator walks a WINDOW / OFFSET over ORDERBY(column, DESC) in a shape whose row order is not measured.
+
+    Task 68 (live Power BI, order audit 3 grid): a relative WINDOW (REL bounds) over DESC comes back in no order the ORDERBY explains
+    (Quantity 0..5: 1,0,2,3,4,5; Note: Late,,Paid), so it is refused. OFFSET over DESC of a numeric column walks ascending (0,1,2,3,4;
+    the window of Sales: -1.5, blank, 0, 2.5, 10.5), while the same OFFSET over text keeps the DESC order (Late, blank), so only the
+    numeric two-row-or-more case is refused. ASC windows and ABS windows keep the ORDERBY order that was measured before."""
+    if not (isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] in {"WINDOW", "OFFSET"}):
+        return False
+    ordering = descending_orderby(table_node)
+    if ordering is None or not ordering[1]:
+        return False
+    if table_node[1] == "WINDOW":
+        return any(isinstance(a, tuple) and len(a) == 2 and a[0] == "table" and str(a[1]).upper() == "REL" for a in table_node[2])
+    return key_is_numeric and row_count > 1
+
+
+def rollup_plain_fractional_undecided(table_node: Any, walked_name: str, values: Sequence[Any], fractional: bool) -> bool:
+    """True when an iterator walks SUMMARIZE(table, column, ..., ROLLUP(...)) by a plain group column that holds fractional numbers
+    beside the rollup, over two or more distinct values (Task 68, live Power BI, order audit 3 grid: SUMMARIZE(Facts, Sales, ROLLUP(Note))
+    and SUMMARIZE(Facts, Sales, ROLLUP(Region)) walk the Sales values in an order neither the dictionary nor the storage order explains).
+    The same shape over one distinct value (20, 20) is one row and stays as it was; ROLLUP over the walked column itself is not refused."""
+    if not (isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] == "SUMMARIZE"):
+        return False
+    arguments = table_node[2]
+    if not any(isinstance(a, tuple) and a and a[0] == "call" and a[1] in {"ROLLUP", "ROLLUPGROUP"} for a in arguments[1:]):
+        return False
+    if not any(isinstance(a, tuple) and len(a) == 3 and a[0] == "reference" and str(a[2]).casefold() == walked_name.casefold() for a in arguments[1:]):
+        return False
+    return fractional and len({None if v is None else v for v in values}) >= 2  # `fractional`: the loaded column holds decimals, not only the walked rows
+
+
 class AmbiguousTieOrder(Exception):
     """Two readings of the measured heap give a different row order and no live answer separates them."""
 
