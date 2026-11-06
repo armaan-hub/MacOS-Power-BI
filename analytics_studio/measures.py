@@ -12148,6 +12148,17 @@ def _evaluate_measures_once(
             keys.append([evaluate(expression, frame, allow_text=True) for expression, _desc in order_spec])
         window.order_keys = keys
         window.order_desc = [desc for _expression, desc in order_spec]
+        # Task 71 (live Power BI, rank audit grid t71a, 1,500 probes, 260 ROWNUMBER answers and 54 errors): ROWNUMBER over ALL(table) or ALLSELECTED(table)
+        # (the whole rows of a table, filtered only by ALLSELECTED's outer context) raises "Tied rows detected" when two of those rows agree on the
+        # PARTITIONBY columns and the ORDERBY keys. ROWNUMBER over a column list or no relation is answered (no tie error in the measured shapes).
+        if function == "ROWNUMBER" and order_spec and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table":
+            members = list(range(len(window.rows)))
+            if relation[1] == "ALLSELECTED":  # the rows the outer filters leave visible (the iterator's own row does not narrow ALLSELECTED)
+                live = {row_key(typed_row(window.context, row)[h] for h in headers) for row in rows_by_table_id.get(window.context["id"], window.rows)}
+                members = [i for i in members if row_key(window.typed[i][h] for h in headers) in live]
+            identities = [row_key([*(window.typed[i][c] for c in window.partition_columns), *keys[i]]) for i in members]
+            if len(set(identities)) < len(identities):
+                raise MeasureRuntimeError(f"Tied rows detected in the relation parameter for {function} function.")
         tie_columns = [h for h in headers if h not in window.partition_columns]
         window.tie_columns = tie_columns
         total = list(range(len(window.rows)))
