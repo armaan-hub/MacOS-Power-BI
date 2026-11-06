@@ -98,16 +98,17 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         while position < len(arguments):
             if arguments[position][0] == "reference":  # a bare column reference keeps its own name
                 chosen.computed[str(arguments[position][2]).casefold()] = arguments[position]
-                chosen.eager.append(arguments[position])
                 position += 1
             elif arguments[position][0] == "string" and position + 1 < len(arguments):
                 chosen.computed[str(arguments[position][1]).casefold()] = arguments[position + 1]
-                # Task 69 (live Power BI, order audit 4 grid, part D): every projected column joins the walk key, as ADDCOLUMNS does
-                # (SELECTCOLUMNS(Facts, "d", DATE(..) - Quantity, "r", Region) walks Region first, then Quantity)
-                chosen.eager.append(arguments[position + 1])
                 position += 2
             else:
                 return None
+        # Task 69 (live Power BI, order audit 4 grid, part D): once one projection is computed, every projected column joins the walk key, as
+        # ADDCOLUMNS does: SELECTCOLUMNS(Facts, "d", DATE(..) - Quantity, "r", Region) walks Region first, then Quantity. Bare columns alone keep
+        # the columns the iterator reads (measured: SELECTCOLUMNS(Facts, "a", Region, "b", Note) read through [a] walks Region alone).
+        if any(value[0] != "reference" for value in chosen.computed.values()):
+            chosen.eager = list(chosen.computed.values())
         return chosen
     if name == "ADDCOLUMNS":
         inner = plan(arguments[0], bound)

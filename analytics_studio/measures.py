@@ -10755,8 +10755,11 @@ def _evaluate_measures_once(
                         raise dax_typed.refusal("The walk order of a TOPN over a column an outer filter holds to one value is not settled by the local engine.")
                 walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)])
                 scored = score_rows(walked)
-                if limit > len(scored):
-                    return dict(context), [item[1] for item in scored]  # nothing is cut: the table comes back in walk order
+                window_relation = arguments[1][0] == "call" and arguments[1][1] in {"WINDOW", "OFFSET"}
+                if limit > len(scored) or (limit == len(scored) and not window_relation):
+                    # nothing is cut: the table comes back in walk order. Task 69: a window relation of exactly `limit` rows goes through the heap
+                    # (measured: TOPN(2, OFFSET(-1, ...)) and TOPN(2, WINDOW(... DESC ...)) come back ascending), other tables keep the walk order
+                    return dict(context), [item[1] for item in scored]
                 column_keys = [blank_aware_keys([item[0][p] for item in scored]) for p in range(len(keys_spec))]
 
                 def beats(a: int, b: int) -> bool:
