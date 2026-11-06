@@ -41,6 +41,14 @@ _MEASURED_STORAGE = ((792, 6), (8982, 12))
 # Beyond them the scan has no storage point of its own: the groups of a filtered scan are then refused where they are read in order (never the (8982, 12) storage point)
 _MEASURED_SORTED_SCAN = _MEASURED_SORTED + ((840, 8), (1596, 10), (36, 5), (2250, 11))
 _MEASURED_STORAGE_SCAN = ((792, 6), (7600, 14))  # the detail scan of d14 (Sales x Quantity x Region = 7,600 over 14 rows) came back in storage order
+# Task 69 (live Power BI, order audit 4 grids t69a / t69b and nine datasets, SELECTCOLUMNS(Facts, "d", DATE(..) - Quantity, "r", <column>) read through [d]): the projected
+# columns are walked in dictionary order (the later table column the major key) while their dense key space (product of the value-range sizes) is small for the rows, and in
+# storage order when it is large: sorted at (space, rows) = (8, 5), (18, 6), (210, 8), (237, 12) and the many smaller ones they cover; storage order at (730, 13), (936, 16)
+# (and (750, 11), (1900, 14), (4921, 10), (78842, 12), which those cover). A space between them is not decided.
+_PROJECTION_SORTED = ((8, 5), (18, 6), (210, 8), (237, 12))
+_PROJECTION_STORAGE = ((730, 13), (936, 16))
+# DISTINCT(SELECTCOLUMNS(..)) over one source column: walked by that column in dictionary order, a value where its first source row is; sorted up to a range of 998 over 12 rows
+_PROJECTION_DISTINCT_BUDGET = 14970
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -80,6 +88,12 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         return None
     if name == "TABLEOF":
         return Plan()
+    if name == "DISTINCT" and len(arguments) == 1 and isinstance(arguments[0], tuple) and arguments[0][:1] in {("call",), ("table_call",)}:
+        # Task 69 (live Power BI, order audit 4 grid, part C): DISTINCT of a SELECTCOLUMNS walks the distinct rows in the order of the columns the
+        # projection reads (DISTINCT(SELECTCOLUMNS(Facts, "y", YEAR(DATE(2020 + Quantity, 1, 1)))) comes out 2020, 2021, ... ascending)
+        inner = plan(arguments[0], bound)
+        if inner is not None and inner.projects:
+            return Plan(dedup=True, projects=True, computed=inner.computed, eager=inner.eager)
     if name == "KEEPFILTERS" and len(arguments) == 1:
         return plan(arguments[0], bound)  # live Power BI (Part C review): the wrapper does not change the walk order
     if name in {"FILTER", "CALCULATETABLE"}:
@@ -98,6 +112,11 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
                 position += 2
             else:
                 return None
+        # Task 69 (live Power BI, order audit 4 grid, part D): once one projection is computed, every projected column joins the walk key, as
+        # ADDCOLUMNS does: SELECTCOLUMNS(Facts, "d", DATE(..) - Quantity, "r", Region) walks Region first, then Quantity. Bare columns alone keep
+        # the columns the iterator reads (measured: SELECTCOLUMNS(Facts, "a", Region, "b", Note) read through [a] walks Region alone).
+        if any(value[0] != "reference" for value in chosen.computed.values()):
+            chosen.eager = list(chosen.computed.values())
         return chosen
     if name == "ADDCOLUMNS":
         inner = plan(arguments[0], bound)
@@ -364,6 +383,20 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, be
         combinations *= profile.size if profile.is_date else profile.distinct
     budget = _DATE_COMBINATION_BUDGET if any(profile.is_date for profile in profiles) else _COMBINATION_BUDGET
     return combinations * row_count <= budget
+
+
+def projection_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True / False / None (not decided) for the walk of the columns a SELECTCOLUMNS with a computed projection holds (see _PROJECTION_SORTED)."""
+    space = 1
+    for profile in profiles:
+        if profile.size is None:
+            return False  # a column with no regular range (a fractional double): storage order, as measured
+        space *= profile.size
+    if any(space <= measured and row_count >= rows for measured, rows in _PROJECTION_SORTED):
+        return True
+    if any(space >= measured and row_count <= rows for measured, rows in _PROJECTION_STORAGE):
+        return False
+    return None
 
 
 def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool = False) -> bool | None:

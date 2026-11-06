@@ -9816,6 +9816,7 @@ def _evaluate_measures_once(
         origin = context.get("order_source")
         # (source table id, source column) -> (source table, column, reader of that column's value for one walked row)
         combination: dict[tuple[str, str], tuple[dict[str, Any], str, Callable[[dict[str, Any]], Any]]] = {}
+        source_readers: dict[tuple[str, str], Callable[[dict[str, Any]], Any]] = {}
 
         def take_header(header: str) -> None:
             base, column = lineage[header]
@@ -9834,6 +9835,7 @@ def _evaluate_measures_once(
                 return False
             base, column = source_lineage[header]
             source_derived = bool(source_context.get("derived"))
+            source_readers[(base["id"], column)] = lambda source, h=header: source.get(h) if source_derived else typed_cell(source_context, h, source.get(h))
             combination.setdefault((base["id"], column), (base, column, (
                 lambda row, h=header: (
                     lambda source: source.get(h) if source_derived else typed_cell(source_context, h, source.get(h))
@@ -9896,7 +9898,22 @@ def _evaluate_measures_once(
         try:
             try:
                 profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
+                if plan.dedup and plan.projects:
+                    # Task 69: DISTINCT(SELECTCOLUMNS(..)) over one source column: its rows come in the column's dictionary order, each projected value where its first
+                    # source row stands (live Power BI: LEN(Sales) over Sales 5, BLANK, 5, -2, ... gives BLANK, 2, 1, 3, the lengths in the order of the sorted Sales)
+                    (only_key, only_profile), = profiles.items()
+                    origin_rows = origin[1] if origin is not None else {}
+                    if only_profile.size is not None and only_profile.size * (len(source["rows"]) + 3) > dax_iteration_order._PROJECTION_DISTINCT_BUDGET:
+                        raise _KeySpaceUndecided()
+                    if any(("group", id(row)) not in origin_rows for row in rows):
+                        return rows
+                    reader = source_readers[only_key]
+                    return sorted(rows, key=lambda row: min(only_profile.key(reader(member)) for member in origin_rows[("group", id(row))]))
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+                if plan.projects and plan.eager and in_dictionary_order and len(profiles) > 1:
+                    in_dictionary_order = dax_iteration_order.projection_order(len(source["rows"]), list(profiles.values()))  # Task 69
+                    if in_dictionary_order is None:
+                        raise _KeySpaceUndecided()
                 if plan.measured_space and not any(profile.is_date for profile in profiles.values()):  # dictionary order only inside the measured key space
                     decided = dax_iteration_order.multi_column_order(len(source["rows"]), list(profiles.values()))
                     if plan.scanned:  # SUMMARIZE of a table: a measured sorted space lifts the older budget (Facts of 12 rows, Sales up to 999), nothing else changes
@@ -10755,8 +10772,11 @@ def _evaluate_measures_once(
                         raise dax_typed.refusal("The walk order of a TOPN over a column an outer filter holds to one value is not settled by the local engine.")
                 walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)])
                 scored = score_rows(walked)
-                if limit >= len(scored):
-                    return dict(context), [item[1] for item in scored]  # nothing is cut: the table comes back in walk order
+                window_relation = arguments[1][0] == "call" and arguments[1][1] == "OFFSET"
+                if limit > len(scored) or (limit == len(scored) and not window_relation):
+                    # nothing is cut: the table comes back in walk order. Task 69: a window relation of exactly `limit` rows goes through the heap
+                    # (measured: TOPN(2, OFFSET(-1, ...)) and TOPN(2, WINDOW(... DESC ...)) come back ascending), other tables keep the walk order
+                    return dict(context), [item[1] for item in scored]
                 column_keys = [blank_aware_keys([item[0][p] for item in scored]) for p in range(len(keys_spec))]
 
                 def beats(a: int, b: int) -> bool:
@@ -12105,6 +12125,7 @@ def _evaluate_measures_once(
         if function in {"INDEX", "OFFSET", "WINDOW"} and relation_may_have_duplicates(relation):
             raise MeasureRuntimeError(f"{function}'s Relation parameter may have duplicate rows. This is not allowed.")
         window = _Window()
+        window.relation = relation
         window.context, window.rows = table_argument_value(relation)
         window.typed = [typed_row(window.context, row) for row in window.rows]
         window.keywords = keywords
@@ -12151,6 +12172,14 @@ def _evaluate_measures_once(
             link = (lineage or {}).get(header)
             if link is not None:
                 groups.setdefault(link[0]["id"], (link[0], []))[1].append((header, link[1]))
+        # Task 69 (live Power BI, order audit 4 grids): the rows of a relation over columns of one table are walked in dictionary order, the later table column
+        # the major key (blank first, numbers ascending, text first-seen); `walk_key` ranks them so
+        window.walk_key = None
+        if len(groups) == 1 and len(next(iter(groups.values()))[1]) == len(headers):
+            (base_context, pairs), = groups.values()
+            ordered_pairs = sorted(pairs, key=lambda pair: -base_context["headers"].index(pair[1]))
+            walk_profiles = [(header, source_profile(base_context, column)) for header, column in ordered_pairs]
+            window.walk_key = {i: tuple(profile.key(window.typed[i][header]) for header, profile in walk_profiles) for i in total}
         visible: dict[str, set[tuple[Any, ...]]] = {}
         for table_id, (base_context, pairs) in groups.items():
             # Power BI also reads the row contexts on the stack as filters on the base table (columns that carry lineage).
@@ -12239,6 +12268,7 @@ def _evaluate_measures_once(
             rest = arguments[1:]
         window = window_setup(tuple(rest), function)
         selected: set[int] = set()
+        picked: dict[int, list[int]] = {}  # the rows each current row picks, in ORDERBY order (OFFSET, relative WINDOW)
         if function == "INDEX":
             value = scalar(lead)
             if value is None:
@@ -12263,6 +12293,7 @@ def _evaluate_measures_once(
                         target = members.index(i) + delta
                         if 0 <= target < len(members):
                             selected.add(members[target])
+                            picked[i] = [members[target]]
             else:
                 from_value = int(dax_typed.to_number(scalar(from_node) or Decimal(0)).quantize(Decimal(1), rounding=ROUND_HALF_UP))
                 to_value = int(dax_typed.to_number(scalar(to_node) or Decimal(0)).quantize(Decimal(1), rounding=ROUND_HALF_UP))
@@ -12285,7 +12316,20 @@ def _evaluate_measures_once(
                             low = max(bound(from_value, from_type, where, len(members)), 0)
                             high = min(bound(to_value, to_type, where, len(members)), len(members) - 1)
                             selected.update(members[low:high + 1] if low <= high else [])
-        return window.context, [window.rows[i] for i in window.ordered if i in selected]
+                            picked[i] = members[low:high + 1] if low <= high else []
+        emitted = [i for i in window.ordered if i in selected]
+        if picked and window.walk_key is not None:
+            # Task 69 (live Power BI, order audit 4: t69a, t69b and nine datasets): an OFFSET or relative WINDOW lists the rows picked by the current rows in the
+            # walk order of the CURRENT rows, each current row's pick in ORDERBY order, a row once: OFFSET(-1, ALL(Note), ORDERBY(Note, ASC)) over Paid, BLANK, Late
+            # stored gives "Late," (Paid picks Late first), WINDOW(0, REL, 0, REL, ALL(Sales, Region), ORDERBY(Sales), PARTITIONBY(Region)) lists the rows by Region, then Sales
+            emitted = []
+            listed: set[int] = set()
+            for current in sorted(picked, key=lambda i: window.walk_key[i]):
+                for row in picked[current]:
+                    if row not in listed:
+                        listed.add(row)
+                        emitted.append(row)
+        return window.context, [window.rows[i] for i in emitted]
 
     def window_scalar(function: str, arguments: tuple[tuple[Any, ...], ...]) -> Any:
         rest = arguments
@@ -13262,12 +13306,20 @@ def _evaluate_measures_once(
                     raise MeasureError("DISTINCT of ADDMISSINGITEMS is an error in Power BI.")
                 inner_context, inner_rows = table_argument_value(source)
                 distinct_rows: list[dict[str, Any]] = []
-                seen_inner: set[tuple[Any, ...]] = set()
+                seen_inner: dict[tuple[Any, ...], list[Any]] = {}
+                first_key: dict[int, tuple[Any, ...]] = {}
+                origin = inner_context.get("order_source")
                 for inner_row in inner_rows:
                     key = row_key(typed_row(inner_context, inner_row).values())
                     if key not in seen_inner:
-                        seen_inner.add(key)
+                        seen_inner[key] = []
+                        first_key[id(inner_row)] = key
                         distinct_rows.append(inner_row)
+                    if origin is not None and id(inner_row) in origin[1]:
+                        seen_inner[key].append(origin[1][id(inner_row)])
+                if origin is not None:
+                    for distinct_row in distinct_rows:  # Task 69: every source row of a distinct projected row (the walk of DISTINCT(SELECTCOLUMNS) is that of its first source row in the column's order)
+                        origin[1][("group", id(distinct_row))] = seen_inner[first_key[id(distinct_row)]]
                 return inner_context, distinct_rows
             if source[0] == "table":
                 context, source_rows = table_argument_value(source, include_unknown=argument[1] == "VALUES")

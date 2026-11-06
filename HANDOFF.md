@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Opus (Task 69: WINDOW/OFFSET over DESC and date-column order audit; Task 68 shipped as Iteration 157)
+**Active agent:** Opus (Task 70: next audit area; Task 69 shipped as Iteration 158)
 **Branch in use:** none
 **Working tree clean:** main yes
 
