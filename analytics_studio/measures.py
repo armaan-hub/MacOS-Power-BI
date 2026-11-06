@@ -9939,6 +9939,46 @@ def _evaluate_measures_once(
                 return rows
             raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.") from None
 
+    def filtered_scan_columns(summarize: tuple[Any, ...]) -> list[str]:
+        """Columns of the summarized table that an outer filter restricts to two or more values and that are not group columns."""
+        base = contexts_by_id.get(resolve_table_context(str(summarize[2][0][1]))["id"])
+        held = evaluation_contexts_by_id.get(base["id"], base).get("filter_column_rows") or {} if base is not None else {}
+        groups = {str(a[2]).casefold() for a in summarize[2][1:] if a[0] == "reference"}
+        return [
+            column for column in base["headers"] if column in held and column.casefold() not in groups
+            and len({row_key([typed_cell(base, column, base["rows"][i].get(column))]) for i in held[column]}) >= 2
+        ] if base is not None else []
+
+    def rows_in_storage_scan(summarize: tuple[Any, ...], walked: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        base = contexts_by_id.get(resolve_table_context(str(summarize[2][0][1]))["id"])
+        group_names = [a[2] for a in summarize[2][1:] if a[0] == "reference"]
+        source_columns = [next((h for h in base["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
+        walked_columns = [next((h for h in walked["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
+        if None in source_columns or None in walked_columns or not source_columns:
+            raise MeasureError("The row order of a SUMMARIZE under filters on other columns is not modelled in the local engine for this shape.")
+        scan = [*source_columns, *filtered_scan_columns(summarize)]
+        decided = dax_iteration_order.multi_column_order(len(base["rows"]), [source_profile(base, c) for c in scan], True)
+        if decided is None:
+            raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
+        _scanned_context, scanned_rows = table_argument_value(summarize[2][0])
+        first: dict[tuple[Any, ...], Any] = {}
+        if decided:  # a measured sorted space: a group comes where its first combination does in the dictionary-ordered scan (later table column the major key)
+            scan_profiles = {c: source_profile(base, c) for c in scan}
+            major_first = sorted(scan, key=lambda c: -base["headers"].index(c))
+            for scanned in scanned_rows:
+                key = row_key(typed_cell(base, c, scanned.get(c)) for c in source_columns)
+                walk = tuple(scan_profiles[c].key(typed_cell(base, c, scanned.get(c))) for c in major_first)
+                if key not in first or walk < first[key]:
+                    first[key] = walk
+        else:
+            for position, scanned in enumerate(scanned_rows):
+                first.setdefault(row_key(typed_cell(base, c, scanned.get(c)) for c in source_columns), position)
+        derived_walk = bool(walked.get("derived"))
+        keys = [row_key((row.get(c) if derived_walk else typed_cell(walked, c, row.get(c))) for c in walked_columns) for row in rows]
+        if any(key not in first for key in keys):
+            raise MeasureError("The row order of a SUMMARIZE under filters on other columns is not modelled in the local engine for this shape.")
+        return [row for _key, row in sorted(zip(keys, rows), key=lambda pair: first[pair[0]])]
+
     def union_walked_rows(
         union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], topn_walked: bool = True
     ) -> list[dict[str, Any]]:
@@ -10532,12 +10572,12 @@ def _evaluate_measures_once(
                     filtered = evaluation_contexts_by_id.get(source_base["id"], source_base).get("filter_column_rows") or {}
                     extras = [
                         c for c in source_base["headers"]
-                        if c in filtered and c not in group_columns
+                        if c in filtered and c not in kept_columns
                         and len({row_key([typed_cell(source_base, c, source_base["rows"][i].get(c))]) for i in filtered[c]}) >= 2
                     ] if arguments[0][0] == "table" else []
                     scan = [*kept_columns, *extras]
                     scan_profiles = {c: source_profile(source_base, c) for c in scan}
-                    decided = dax_iteration_order.multi_column_order(len(source_base["rows"]), [scan_profiles[c] for c in scan])
+                    decided = dax_iteration_order.multi_column_order(len(source_base["rows"]), [scan_profiles[c] for c in scan], True)
                     major_first = sorted(scan, key=lambda c: -source_base["headers"].index(c))
                     if decided is False and all(p.size is not None for p in scan_profiles.values()):
                         return keys
@@ -21313,39 +21353,6 @@ def _evaluate_measures_once(
                 base = resolve_table_context(str(source[1]))
                 return len(contexts_by_id.get(base["id"], base)["rows"])
 
-            def filtered_scan_columns(summarize: tuple[Any, ...]) -> list[str]:
-                """Columns of the summarized table that an outer filter restricts to two or more values and that are not group columns."""
-                base = contexts_by_id.get(resolve_table_context(str(summarize[2][0][1]))["id"])
-                held = evaluation_contexts_by_id.get(base["id"], base).get("filter_column_rows") or {} if base is not None else {}
-                groups = {str(a[2]).casefold() for a in summarize[2][1:] if a[0] == "reference"}
-                return [
-                    column for column in base["headers"] if column in held and column.casefold() not in groups
-                    and len({row_key([typed_cell(base, column, base["rows"][i].get(column))]) for i in held[column]}) >= 2
-                ] if base is not None else []
-
-            def rows_in_storage_scan(summarize: tuple[Any, ...], walked: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-                base = contexts_by_id.get(resolve_table_context(str(summarize[2][0][1]))["id"])
-                group_names = [a[2] for a in summarize[2][1:] if a[0] == "reference"]
-                source_columns = [next((h for h in base["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
-                walked_columns = [next((h for h in walked["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
-                if None in source_columns or None in walked_columns or not source_columns:
-                    raise MeasureError("The row order of a SUMMARIZE under filters on other columns is not modelled in the local engine for this shape.")
-                scan = [*source_columns, *filtered_scan_columns(summarize)]
-                decided = dax_iteration_order.multi_column_order(len(base["rows"]), [source_profile(base, c) for c in scan])
-                if decided:
-                    return rows  # a measured sorted space: the dictionary order the local engine uses
-                if decided is None:
-                    raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
-                _scanned_context, scanned_rows = table_argument_value(summarize[2][0])
-                first: dict[tuple[Any, ...], int] = {}
-                for position, scanned in enumerate(scanned_rows):
-                    first.setdefault(row_key(typed_cell(base, c, scanned.get(c)) for c in source_columns), position)
-                derived_walk = bool(walked.get("derived"))
-                keys = [row_key((row.get(c) if derived_walk else typed_cell(walked, c, row.get(c))) for c in walked_columns) for row in rows]
-                if any(key not in first for key in keys):
-                    raise MeasureError("The row order of a SUMMARIZE under filters on other columns is not modelled in the local engine for this shape.")
-                return [row for _key, row in sorted(zip(keys, rows), key=lambda pair: first[pair[0]])]
-
             def has_column_filter(source: tuple[Any, ...]) -> bool:
                 """An outer CALCULATE filter on a column of the table, even one that keeps every row."""
                 base = resolve_table_context(str(source[1]))
@@ -21721,15 +21728,24 @@ def _evaluate_measures_once(
                         raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
+            if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] == "ADDMISSINGITEMS":
+                # Task 68 (live Power BI, order audit 3 grid + datasets d2 to d10): the groups of a SUMMARIZE under an outer filter on another column
+                # come out in the order of the scan over the group columns plus the filtered columns (see rows_in_storage_scan)
+                added = next((a for a in walked_table[2] if a[0] == "call" and a[1] == "SUMMARIZE"), None)
+                if added is not None and added[2][0][0] == "table" and filtered_scan_columns(added):
+                    iteration_rows = rows_in_storage_scan(added, context, iteration_rows)
             if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] == "SAMPLE" and len(walked_table[2]) in {3, 4} and walked_table[2][2][0] == "reference":
                 # Task 68 (live Power BI, order audit 3 grid): SAMPLE over a text column walks the table in dictionary order whatever the direction (blank, then
-                # first-seen text: ,Paid,Late for ASC and DESC) when it keeps every row; a sample that drops text rows is not measured. Numeric samples keep their picks
+                # first-seen text: ,Paid,Late for ASC and DESC) when it keeps every row (SAMPLE(n >= rows) is the table itself). Numeric samples keep their picks
                 sample_context, sample_rows = table_argument_value(walked_table[2][1])
                 sample_key = next((h for h in sample_context["headers"] if h.casefold() == str(walked_table[2][2][2]).casefold()), None)
                 if sample_key is not None and any(isinstance(typed_cell(sample_context, sample_key, row.get(sample_key)), str) for row in sample_rows):
                     if len(iteration_rows) < len(sample_rows):
-                        raise MeasureError("The row order of a SAMPLE of a text column that drops rows is not modelled in the local engine.")
-                    iteration_rows = dictionary_ordered_rows(walked_table[2][1], sample_context, sample_rows, read_nodes)
+                        # a sample that drops rows is a materialised pick in the ORDER BY order (datasets d7 and d9: East,South,West for ASC); only ASC was measured
+                        if len(walked_table[2]) == 4 and not (walked_table[2][3][0] == "table" and str(walked_table[2][3][1]).upper() == "ASC"):
+                            raise MeasureError("The row order of a SAMPLE of a text column that drops rows is not modelled in the local engine for this direction.")
+                    else:
+                        iteration_rows = dictionary_ordered_rows(walked_table[2][1], sample_context, sample_rows, read_nodes)
             if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] in {"WINDOW", "OFFSET"}:
                 # Task 68 (live Power BI, order audit 3 grid): a relative WINDOW over DESC, or an OFFSET over DESC of a numeric column, comes back in an order
                 # the ORDERBY does not explain; refused rather than walked in the ORDERBY order

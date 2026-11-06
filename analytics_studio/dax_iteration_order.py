@@ -36,6 +36,9 @@ _SINGLE_COLUMN_BUDGET = 8200
 # more rows is sorted; a space no smaller than a measured storage-order one over no more rows is storage order; anything else is not decided.
 _MEASURED_SORTED = ((396, 6), (429, 7), (567, 9), (2994, 12))
 _MEASURED_STORAGE = ((792, 6), (8982, 12))
+# Task 68 (live Power BI, SUMMARIZE ... ROLLUP / ADDMISSINGITEMS(SUMMARIZE) under an outer filter, datasets d7 and d9): the scan over the group columns plus the
+# filtered columns was still sorted at a space of 840 over 8 rows, 1,596 over 10 rows and (dataset d10) 36 over 5 rows; these points apply to that scan only
+_MEASURED_SORTED_SCAN = _MEASURED_SORTED + ((840, 8), (1596, 10), (36, 5))
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -361,7 +364,7 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, be
     return combinations * row_count <= budget
 
 
-def multi_column_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool = False) -> bool | None:
     """True when the columns of an ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS table are walked in dictionary order, False when they keep the storage
     order, None when the key space is not covered by a measured point. Dates are not covered: they keep the older `grouped` test."""
     space = 1
@@ -369,7 +372,7 @@ def multi_column_order(row_count: int, profiles: Sequence[Profile]) -> bool | No
         if profile.size is None:
             return False  # a column with no regular range: the order the app always used
         space *= profile.size
-    if any(space <= measured and row_count >= rows for measured, rows in _MEASURED_SORTED):
+    if any(space <= measured and row_count >= rows for measured, rows in (_MEASURED_SORTED_SCAN if scan else _MEASURED_SORTED)):
         return True
     if any(space >= measured and row_count <= rows for measured, rows in _MEASURED_STORAGE):
         return False

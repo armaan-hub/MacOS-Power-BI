@@ -85,5 +85,34 @@ class TestIteration158OrderAudit3(unittest.TestCase):
         self.assertEqual(status("'Facts'[Note],[s]\n,22.5\nPaid,10.5", str(dax.local(expr))), "match")
 
 
+    def test_round2_scan_order_on_other_row_sets(self) -> None:
+        """Live Power BI answers on three more Facts row sets (datasets d2, d7, d10 of the round-2 probe grids)."""
+        d2 = [("5", "7", "North", "Late"), ("", "2", "East", ""), ("5", "3", "West", "Paid"), ("-2", "7", "East", "Paid"), ("8", "1", "North", ""),
+              ("1.5", "2", "West", "Late"), ("8", "9", "East", "Paid"), ("0", "3", "North", "Paid"), ("3", "5", "West", "")]
+        d7 = [("11", "1", "West", "Paid"), ("2", "3", "West", "Paid"), ("30", "5", "East", "Late"), ("-4", "3", "West", "Paid"), ("27", "3", "West", "Late"),
+              ("", "0", "North", ""), ("25", "1", "West", "Paid"), ("0", "1", "South", "")]
+        d10 = [("2", "3", "West", ""), ("1", "2", "North", "Paid"), ("3", "2", "West", "Late"), ("0", "3", "South", ""), ("3", "2", "South", "")]
+        saved = (dax.ROWS, dax.LOCAL_ROWS, dax.FACTS_DAX)
+        cases = [
+            (d2, 'CALCULATE(CONCATENATEX(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],"s",SUM(Facts[Sales])),Facts[Sales]),Facts[Sales],","),Facts[Region]<>"East")', "0,5,8,1.5,3"),
+            (d2, 'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Region]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Region]<>"East")', "0,5,8,1.5,3,5,0,5,8,1.5,3"),
+            (d7, 'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Quantity]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Region]<>"East")', "11,25,-4,2,27,,0,-4,2,11,25,27,,0"),
+            (d7, 'CALCULATE(CONCATENATEX(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC),Facts[Region],","),Facts[Quantity]>2)', "East,South,West"),
+            (d10, 'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Region]<>"East")', "2,0,3,1,3,2,3,1,0"),
+        ]
+        try:
+            for rows, expr, expected in cases:
+                dax.ROWS = rows
+                dax.LOCAL_ROWS = [{h: (v if v != "" else None) for h, v in zip(dax.HEADERS, r)} for r in rows]
+                with self.subTest(expr=expr):
+                    self.assertEqual(str(dax.local(expr)), expected)
+            dax.ROWS = d7
+            dax.LOCAL_ROWS = [{h: (v if v != "" else None) for h, v in zip(dax.HEADERS, r)} for r in d7]
+            desc = 'CALCULATE(CONCATENATEX(SAMPLE(3,ALL(Facts[Region]),Facts[Region],DESC),Facts[Region],","),Facts[Quantity]>2)'
+            self.assertTrue(str(dax.local(desc)).startswith("LOCAL-REJECT:"))  # a dropping text sample was measured for ASC only
+        finally:
+            dax.ROWS, dax.LOCAL_ROWS, dax.FACTS_DAX = saved
+
+
 if __name__ == "__main__":
     unittest.main()
