@@ -175,6 +175,18 @@ def _order_expressions(arguments: Sequence[Any]) -> tuple[Any, ...]:
     return tuple(kept)
 
 
+def filtered_whole_table(node: Any, table_name: str) -> bool:
+    """FILTER(ALL(table), predicate) or FILTER(table, predicate) of the walked table, whose predicate reaches no outer row."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] == "FILTER" and isinstance(node[2], tuple) and len(node[2]) == 2):
+        return False
+    source, predicate = node[2]
+    if _mentions_outer_row(predicate):
+        return False
+    if isinstance(source, tuple) and source[:1] == ("table",):
+        return str(source[1]).casefold() == str(table_name).casefold()
+    return isinstance(source, tuple) and len(source) == 3 and source[0] == "call" and source[1] == "ALL" and len(source[2]) == 1 and source[2][0][:1] == ("table",) and str(source[2][0][1]).casefold() == str(table_name).casefold()
+
+
 def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[Any]]:
     """Task 70 (live Power BI, rankx audit grid t70a): for every RANKX in `nodes` that ranks the rows of `table_name` through ALL / ALLSELECTED /
     VALUES / DISTINCT of its columns (or the table itself), returns the nodes with that table argument replaced by a number (the table is not
@@ -196,6 +208,11 @@ def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[A
         if node[0] == "call" and node[1] == "RANKX" and isinstance(node[2], tuple) and len(node[2]) >= 2 and ranks_walked_table(node[2][0]):
             bodies.append(node[2][1])
             return ("call", "RANKX", (("number", 0), *node[2][1:]), *node[3:])
+        # Task 71 (live Power BI, rank audit grid t71a, Part C): RANKX over FILTER(ALL(table), predicate) walks the rows by the columns its expression and its
+        # explicit value argument read (RANKX(FILTER(ALL(Facts), Quantity > 1), Sales, Sales, ASC) walks by Sales); the ORDER token is not read
+        if node[0] == "call" and node[1] == "RANKX" and isinstance(node[2], tuple) and len(node[2]) >= 3 and filtered_whole_table(node[2][0], table_name):
+            bodies.extend(argument for argument in node[2][1:3] if isinstance(argument, tuple) and argument[0] != "table")
+            return ("call", "RANKX", (("number", 0),), *node[3:])
         # Task 71 (live Power BI, rank audit grid t71a, Part C): RANK and ROWNUMBER over ALL / ALLSELECTED / VALUES of the walked table walk the rows
         # by the columns of their ORDERBY (and PARTITIONBY) arguments, as the RANKX body does; the relation is replaced by a number as above
         if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2]:
