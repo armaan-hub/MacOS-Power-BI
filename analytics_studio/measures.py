@@ -9796,7 +9796,7 @@ def _evaluate_measures_once(
 
     def dictionary_ordered_rows(
         table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False,
-        scan_filters: bool = False,
+        scan_filters: bool = False, keep_undecided: bool = False,
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
@@ -9934,6 +9934,9 @@ def _evaluate_measures_once(
             except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
                 return rows
         except _KeySpaceUndecided:
+            if keep_undecided:  # a table that may be read in order by a later TOCSV / TOJSON: the rows stay as they come, the context says so
+                context["order_undecided"] = True
+                return rows
             raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.") from None
 
     def union_walked_rows(
@@ -12350,7 +12353,7 @@ def _evaluate_measures_once(
         walk = dax_iteration_order.plan(argument)
         if walk is not None and walk.dedup and len(rows) > 1:
             lineage = base_lineage(context)
-            rows = dictionary_ordered_rows(argument, context, rows, [("reference", "", h) for h in context["headers"] if h in lineage])
+            rows = dictionary_ordered_rows(argument, context, rows, [("reference", "", h) for h in context["headers"] if h in lineage], keep_undecided=True)
         return context, rows
 
     def cell_to_date(context: dict[str, Any], header: str, value: Any) -> date | None:
@@ -13269,7 +13272,7 @@ def _evaluate_measures_once(
             )
             walk = dax_iteration_order.plan(argument)  # Task 67: the kept columns walk in dictionary order (TOCSV / TOJSON read this table too)
             if walk is not None and walk.dedup and len(allexcept_rows) > 1:
-                allexcept_rows = dictionary_ordered_rows(argument, allexcept_context, allexcept_rows, [("reference", "", h) for h in remaining])
+                allexcept_rows = dictionary_ordered_rows(argument, allexcept_context, allexcept_rows, [("reference", "", h) for h in remaining], keep_undecided=True)
             return allexcept_context, allexcept_rows
         if argument[0] == "call" and argument[1] in {
             "ALL", "ALLNOBLANKROW", "ALLSELECTED"
@@ -21277,6 +21280,8 @@ def _evaluate_measures_once(
             if len({h.casefold() for h in headers}) != len(headers):
                 raise MeasureError(f"{function} table contains duplicate column names.")
             total_row_count = len(iteration_rows)
+            if context.get("order_undecided") and total_row_count > 1:
+                raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
 
             def full_row_count(source: tuple[Any, ...]) -> int:
                 base = resolve_table_context(str(source[1]))
