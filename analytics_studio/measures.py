@@ -21868,7 +21868,7 @@ def _evaluate_measures_once(
                 # live Power BI (iteration 88): the walk order of an expression that reads a column of an enclosing row context through a nested iterator
                 # differs from the one the local engine uses; only a total ORDER BY makes the text independent of it
                 raise MeasureError("The order of a CONCATENATEX whose expression reads an enclosing row context is not modelled in the local engine.")
-            if order_spec and walk_unmodelled and len(entries) > 1 and len({row_key(item[0]) for item in entries}) == 1:
+            if order_spec and walk_unmodelled and len({row_key(item[0]) for item in entries}) == 1 and len({text for _key, text in entries}) > 1:  # the order can change the text
                 # Task 70 (live Power BI, rankx audit grid t70a, part C): when the ORDER BY keys tie on every row, the walk order alone gives the text.
                 # The walk of a fractional column beside another one is not measured (grouped refuses it), and the measured case (a filter that
                 # leaves one Note value, ORDER BY Note DESC twice) comes out sorted by the fractional column, which the storage order does not give
