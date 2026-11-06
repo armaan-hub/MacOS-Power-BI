@@ -1,0 +1,1600 @@
+{
+ "items": [
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(Facts,Facts[Sales],\",\",Facts[Note],DESC,Facts[Note],DESC),Facts[Note]=\"Paid\")",
+   "powerbi": "-1.5,0,10.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),CALCULATE(SUM(Facts[Sales])),,ASC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "4,1,2,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),CALCULATE(SUM(Facts[Sales])),,ASC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "5,2,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Note]),\",\"),Facts[Sales]>0)",
+   "powerbi": "5,5,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Note],,ASC),\",\"),Facts[Sales]>0)",
+   "powerbi": "1,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Note],,DESC,SKIP),\",\"),Facts[Sales]>0)",
+   "powerbi": "5,5,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*-1),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "1,2,3,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*-1,,ASC),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*-1,,ASC,DENSE),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*-1,,DESC,DENSE),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*0.5,,DESC,DENSE),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "6,5,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*1,,ASC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*1,,DESC,SKIP),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "6,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity],,DESC),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "6,5,4,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity],,DESC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "6,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity],,DESC,SKIP),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "6,5,4,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Region],,ASC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Region],,DESC,SKIP),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales]),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "4,6,4,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales]),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "4,4,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales]),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "4,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales],,ASC),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "1,2,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales],,ASC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "2,2,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales],,DESC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "4,5,4,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales],,DESC,SKIP),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "4,4,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Note]),,ASC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "1,2,2,2,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Note]),,DESC),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Note]),,DESC,SKIP),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Region])),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Region]),,ASC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "1,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Region]),,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Sales]),,ASC,DENSE),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "5,2,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Sales]),,DESC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "6,5,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),Facts[Note],,ASC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),Facts[Note],,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),LEN(Facts[Note]),,DESC),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "3,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity]*0.5,,ASC),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "1,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity]*1,,DESC),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity]*1,,DESC,SKIP),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "6,5,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity],,ASC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity],,DESC),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity],,DESC,DENSE),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "6,5,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity],,DESC,DENSE),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),Facts[Region],,DESC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "3,3,3,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),Facts[Region],,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,ASC),\",\"),Facts[Sales]>0)",
+   "powerbi": "4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,ASC,DENSE),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "2,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,ASC,DENSE),\",\"),Facts[Sales]>0)",
+   "powerbi": "3,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "4,4,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,DESC,DENSE),\",\"),Facts[Sales]>0)",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),LEN(Facts[Sales]),,ASC,DENSE),\",\"),Facts[Sales]>0)",
+   "powerbi": "4,5,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),CALCULATE(SUM(Facts[Sales])),,ASC,DENSE),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "5,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Note]),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,1,1,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*-1,,DESC),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "1,2,3,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*0.5),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "6,5,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*0.5),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "6,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*0.5),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*0.5,,DESC,SKIP),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*1),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "6,5,4,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*1,,DESC),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "6,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity],,ASC),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Region]),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Region],,ASC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "5,5,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Region],,DESC,SKIP),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Sales]),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "6,4,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Sales]),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "4,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Note]),,DESC,SKIP),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Region])),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Region]),,DESC),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Sales])),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "6,5,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Sales]),,ASC,DENSE),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,CALCULATE(SUM(Facts[Sales])),,ASC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "4,1,2,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Note],,ASC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Note],,ASC),\",\"),Facts[Sales]>0)",
+   "powerbi": "1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*-1,,DESC,SKIP),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*0.5),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*1),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*1,,ASC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*1,,DESC,DENSE),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*1,,DESC,SKIP),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity],,ASC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "1,2,3,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity],,DESC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity],,DESC,SKIP),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Region]),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Sales]),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,Facts[Sales],,DESC,SKIP),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Note])),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Note]),,ASC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "1,2,2,2,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Region]),,ASC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Region]),,DESC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Region]),,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Sales])),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,1,4,3,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Sales])),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Sales]),,ASC),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,3,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Sales]),,DESC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "4,1,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note]),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note]),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,ASC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,DESC),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,DESC,SKIP),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,DESC,SKIP),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),LEN(Facts[Note]),,DESC),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity]*-1,,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity],,DESC),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity],,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region]),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,DESC),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,DESC,DENSE),\",\"),Facts[Sales]>0)",
+   "powerbi": "2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,DESC,SKIP),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "3,3,3,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),LEN(Facts[Region]),,ASC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales]),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales]),\",\"),Facts[Region]=\"West\")",
+   "powerbi": "2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,ASC,DENSE),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "1,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,ASC,DENSE),\",\"),Facts[Quantity]<>3)",
+   "powerbi": "2,1,2,3,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,ASC,DENSE),\",\"),Facts[Sales]>0)",
+   "powerbi": "1,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),LEN(Facts[Sales]),,ASC),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),LEN(Facts[Sales]),,DESC),\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "1,3,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),LEN(Facts[Sales]),,DESC,DENSE),\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(MAXX(Facts,RANKX(ALL(Facts),CALCULATE(SUM(Facts[Sales])),,ASC,DENSE)),Facts[Region]=\"West\")",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(MAXX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,ASC,DENSE)),Facts[Quantity]<>3)",
+   "powerbi": "4",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOCSV(ADDCOLUMNS(Facts,\"r\",RANKX(Facts,Facts[Sales],,ASC,DENSE)),100),Facts[Quantity]<>3)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note],[r]\n10.5,2,East,Paid,4\n-1.5,1,East,Paid,1\n,4,North,Late,2\n0,0,West,Paid,2\n2.5,5,East,,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),CALCULATE(SUM(Facts[Sales])),,ASC,DENSE),\",\")",
+   "powerbi": "4,5,1,2,2,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Note]),\",\")",
+   "powerbi": "5,5,1,1,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Note],,ASC),\",\")",
+   "powerbi": "1,1,4,4,4,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*-1),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*-1,,ASC),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*0.5,,DESC),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*1),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*1,,ASC),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*1,,DESC),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity]*1,,DESC,DENSE),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Quantity],,DESC,SKIP),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Region]),\",\")",
+   "powerbi": "4,4,4,1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Region],,DESC,DENSE),\",\")",
+   "powerbi": "3,3,3,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales]),\",\")",
+   "powerbi": "4,6,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales],,ASC),\",\")",
+   "powerbi": "2,1,2,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales],,DESC),\",\")",
+   "powerbi": "4,6,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),Facts[Sales],,DESC,DENSE),\",\")",
+   "powerbi": "4,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Note]),,DESC,SKIP),\",\")",
+   "powerbi": "5,5,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Region])),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Region]),,DESC),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Region]),,DESC,DENSE),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Region]),,DESC,SKIP),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Sales]),,ASC,DENSE),\",\")",
+   "powerbi": "1,5,2,4,5,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Sales]),,DESC),\",\")",
+   "powerbi": "6,1,5,3,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Sales]),,DESC,DENSE),\",\")",
+   "powerbi": "5,1,4,2,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts),LEN(Facts[Sales]),,DESC,SKIP),\",\")",
+   "powerbi": "6,1,5,3,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),Facts[Note]),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),Facts[Note],,ASC,DENSE),\",\")",
+   "powerbi": "1,1,3,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),Facts[Note],,DESC),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),Facts[Note],,DESC,DENSE),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),Facts[Note],,DESC,SKIP),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),LEN(Facts[Note]),,ASC),\",\")",
+   "powerbi": "1,1,2,2,2,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Note]),LEN(Facts[Note]),,DESC),\",\")",
+   "powerbi": "3,3,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Quantity]),Facts[Quantity]*1,,ASC,DENSE),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),Facts[Region]),\",\")",
+   "powerbi": "3,3,3,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),Facts[Region],,ASC,DENSE),\",\")",
+   "powerbi": "1,1,1,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),Facts[Region],,DESC,DENSE),\",\")",
+   "powerbi": "3,3,3,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),Facts[Region],,DESC,SKIP),\",\")",
+   "powerbi": "3,3,3,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),LEN(Facts[Region]),,DESC),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Region]),LEN(Facts[Region]),,DESC,SKIP),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales]),\",\")",
+   "powerbi": "4,6,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,ASC),\",\")",
+   "powerbi": "2,1,2,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,ASC,DENSE),\",\")",
+   "powerbi": "2,1,2,3,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,DESC,DENSE),\",\")",
+   "powerbi": "4,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,DESC,SKIP),\",\")",
+   "powerbi": "4,6,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),LEN(Facts[Sales])),\",\")",
+   "powerbi": "6,1,5,3,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),LEN(Facts[Sales]),,ASC),\",\")",
+   "powerbi": "1,5,2,4,5,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALL(Facts[Sales]),LEN(Facts[Sales]),,ASC,DENSE),\",\")",
+   "powerbi": "1,5,2,4,5,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),CALCULATE(SUM(Facts[Sales])),,DESC,DENSE),\",\")",
+   "powerbi": "2,1,5,4,4,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Note],,DESC),\",\")",
+   "powerbi": "5,5,1,1,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Note],,DESC,DENSE),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*-1),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*-1,,DESC,DENSE),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*-1,,DESC,SKIP),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*0.5,,ASC),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*0.5,,ASC,DENSE),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*0.5,,DESC,DENSE),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*1),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*1,,ASC),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*1,,DESC,DENSE),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity]*1,,DESC,SKIP),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity],,DESC),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Quantity],,DESC,DENSE),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Region],,ASC,DENSE),\",\")",
+   "powerbi": "1,1,1,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Sales]),\",\")",
+   "powerbi": "4,6,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Sales],,ASC),\",\")",
+   "powerbi": "2,1,2,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),Facts[Sales],,DESC,DENSE),\",\")",
+   "powerbi": "4,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Note])),\",\")",
+   "powerbi": "5,5,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Note]),,DESC),\",\")",
+   "powerbi": "5,5,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Note]),,DESC,DENSE),\",\")",
+   "powerbi": "2,2,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Region]),,DESC),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Region]),,DESC,DENSE),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Sales])),\",\")",
+   "powerbi": "6,1,5,3,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Sales]),,ASC,DENSE),\",\")",
+   "powerbi": "1,5,2,4,5,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Sales]),,DESC),\",\")",
+   "powerbi": "6,1,5,3,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(ALLSELECTED(Facts),LEN(Facts[Sales]),,DESC,DENSE),\",\")",
+   "powerbi": "5,1,4,2,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,CALCULATE(SUM(Facts[Sales])),,DESC,DENSE),\",\")",
+   "powerbi": "2,1,5,4,4,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Note],,DESC),\",\")",
+   "powerbi": "5,5,1,1,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Note],,DESC,SKIP),\",\")",
+   "powerbi": "5,5,1,1,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*-1,,DESC),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*-1,,DESC,DENSE),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*-1,,DESC,SKIP),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*0.5),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*0.5,,ASC),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*0.5,,DESC),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*0.5,,DESC,DENSE),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity]*1),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity],,DESC),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Quantity],,DESC,DENSE),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Region]),\",\")",
+   "powerbi": "4,4,4,1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Region],,ASC,DENSE),\",\")",
+   "powerbi": "1,1,1,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Region],,DESC,SKIP),\",\")",
+   "powerbi": "4,4,4,1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Sales],,ASC),\",\")",
+   "powerbi": "2,1,2,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Sales],,ASC,DENSE),\",\")",
+   "powerbi": "2,1,2,3,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,Facts[Sales],,DESC,DENSE),\",\")",
+   "powerbi": "4,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Note])),\",\")",
+   "powerbi": "5,5,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Region])),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Region]),,ASC),\",\")",
+   "powerbi": "1,1,1,1,1,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Region]),,DESC,DENSE),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Region]),,DESC,SKIP),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Sales]),,ASC,DENSE),\",\")",
+   "powerbi": "1,5,2,4,5,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Sales]),,DESC),\",\")",
+   "powerbi": "6,1,5,3,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(Facts,LEN(Facts[Sales]),,DESC,DENSE),\",\")",
+   "powerbi": "5,1,4,2,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note]),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,ASC),\",\")",
+   "powerbi": "1,1,3,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,ASC,DENSE),\",\")",
+   "powerbi": "1,1,3,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,DESC),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),Facts[Note],,DESC,SKIP),\",\")",
+   "powerbi": "3,3,1,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),LEN(Facts[Note]),,ASC),\",\")",
+   "powerbi": "1,1,2,2,2,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Note]),LEN(Facts[Note]),,DESC),\",\")",
+   "powerbi": "3,3,1,1,1,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity]),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity]*1),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity]*1,,DESC,SKIP),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity],,ASC),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity],,ASC,DENSE),\",\")",
+   "powerbi": "1,2,3,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity],,DESC,DENSE),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Quantity]),Facts[Quantity],,DESC,SKIP),\",\")",
+   "powerbi": "6,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region]),\",\")",
+   "powerbi": "3,3,3,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,ASC),\",\")",
+   "powerbi": "1,1,1,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,ASC,DENSE),\",\")",
+   "powerbi": "1,1,1,3,3,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,DESC),\",\")",
+   "powerbi": "3,3,3,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),Facts[Region],,DESC,DENSE),\",\")",
+   "powerbi": "3,3,3,1,1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),LEN(Facts[Region]),,ASC),\",\")",
+   "powerbi": "1,1,1,1,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),LEN(Facts[Region]),,DESC),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Region]),LEN(Facts[Region]),,DESC,SKIP),\",\")",
+   "powerbi": "2,2,2,2,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales]),\",\")",
+   "powerbi": "4,6,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,ASC),\",\")",
+   "powerbi": "2,1,2,4,5,6",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,ASC,DENSE),\",\")",
+   "powerbi": "2,1,2,3,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,DESC),\",\")",
+   "powerbi": "4,6,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,DESC,DENSE),\",\")",
+   "powerbi": "4,5,4,3,2,1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),LEN(Facts[Sales])),\",\")",
+   "powerbi": "6,1,5,3,1,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,RANKX(VALUES(Facts[Sales]),LEN(Facts[Sales]),,DESC,DENSE),\",\")",
+   "powerbi": "5,1,4,2,1,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,RANKX(ALL(Facts[Sales]),Facts[Sales],,DESC,DENSE))",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,RANKX(ALLSELECTED(Facts),CALCULATE(SUM(Facts[Sales])),,DESC,DENSE))",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,RANKX(Facts,CALCULATE(SUM(Facts[Sales])),,DESC,DENSE))",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,RANKX(VALUES(Facts[Sales]),Facts[Sales],,ASC,DENSE))",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(ADDCOLUMNS(Facts,\"r\",RANKX(ALL(Facts),CALCULATE(SUM(Facts[Sales])),,ASC,DENSE)),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note],[r]\n10.5,2,East,Paid,4\n20,3,West,,5\n-1.5,1,East,Paid,1\n,4,North,Late,2\n0,0,West,Paid,2\n2.5,5,East,,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(ADDCOLUMNS(Facts,\"r\",RANKX(ALL(Facts),CALCULATE(SUM(Facts[Sales])),,DESC,DENSE)),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note],[r]\n10.5,2,East,Paid,2\n20,3,West,,1\n-1.5,1,East,Paid,5\n,4,North,Late,4\n0,0,West,Paid,4\n2.5,5,East,,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(ADDCOLUMNS(Facts,\"r\",RANKX(ALL(Facts),Facts[Sales],,ASC,DENSE)),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note],[r]\n10.5,2,East,Paid,4\n20,3,West,,5\n-1.5,1,East,Paid,1\n,4,North,Late,2\n0,0,West,Paid,2\n2.5,5,East,,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(ADDCOLUMNS(Facts,\"r\",RANKX(ALLSELECTED(Facts),Facts[Sales],,ASC,DENSE)),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note],[r]\n10.5,2,East,Paid,4\n20,3,West,,5\n-1.5,1,East,Paid,1\n,4,North,Late,2\n0,0,West,Paid,2\n2.5,5,East,,3",
+   "now": "DIFF"
+  }
+ ]
+}
