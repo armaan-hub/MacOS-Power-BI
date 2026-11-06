@@ -41,6 +41,14 @@ _MEASURED_STORAGE = ((792, 6), (8982, 12))
 # Beyond them the scan has no storage point of its own: the groups of a filtered scan are then refused where they are read in order (never the (8982, 12) storage point)
 _MEASURED_SORTED_SCAN = _MEASURED_SORTED + ((840, 8), (1596, 10), (36, 5), (2250, 11))
 _MEASURED_STORAGE_SCAN = ((792, 6), (7600, 14))  # the detail scan of d14 (Sales x Quantity x Region = 7,600 over 14 rows) came back in storage order
+# Task 69 (live Power BI, order audit 4 grids t69a / t69b and nine datasets, SELECTCOLUMNS(Facts, "d", DATE(..) - Quantity, "r", <column>) read through [d]): the projected
+# columns are walked in dictionary order (the later table column the major key) while their dense key space (product of the value-range sizes) is small for the rows, and in
+# storage order when it is large: sorted at (space, rows) = (8, 5), (18, 6), (210, 8), (237, 12) and the many smaller ones they cover; storage order at (730, 13), (936, 16)
+# (and (750, 11), (1900, 14), (4921, 10), (78842, 12), which those cover). A space between them is not decided.
+_PROJECTION_SORTED = ((8, 5), (18, 6), (210, 8), (237, 12))
+_PROJECTION_STORAGE = ((730, 13), (936, 16))
+# DISTINCT(SELECTCOLUMNS(..)) over one source column: walked by that column in dictionary order, a value where its first source row is; sorted up to a range of 998 over 12 rows
+_PROJECTION_DISTINCT_BUDGET = 14970
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -377,6 +385,20 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, be
     return combinations * row_count <= budget
 
 
+def projection_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True / False / None (not decided) for the walk of the columns a SELECTCOLUMNS with a computed projection holds (see _PROJECTION_SORTED)."""
+    space = 1
+    for profile in profiles:
+        if profile.size is None:
+            return False  # a column with no regular range (a fractional double): storage order, as measured
+        space *= profile.size
+    if any(space <= measured and row_count >= rows for measured, rows in _PROJECTION_SORTED):
+        return True
+    if any(space >= measured and row_count <= rows for measured, rows in _PROJECTION_STORAGE):
+        return False
+    return None
+
+
 def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool = False) -> bool | None:
     """True when the columns of an ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS table are walked in dictionary order, False when they keep the storage
     order, None when the key space is not covered by a measured point. Dates are not covered: they keep the older `grouped` test."""
@@ -398,38 +420,6 @@ def descending_orderby(table_node: Any) -> tuple[Any, bool] | None:
     if orderby is None or not orderby[2]:
         return None
     return orderby[2][0], any(isinstance(a, tuple) and len(a) == 2 and a[0] == "table" and str(a[1]).upper() == "DESC" for a in orderby[2])
-
-
-def offset_walk_reversed(delta: int, key_values: Sequence[Any]) -> bool:
-    """True when an OFFSET with a negative offset over a TEXT ORDERBY key lists its rows in the reverse of the ORDERBY order.
-
-    Task 69 (live Power BI, order audit 4 grid, part B): OFFSET(-1, ALL(Facts[Note]), ORDERBY(Facts[Note], ASC)) under Quantity >= 2 comes back
-    "Late," where the ORDERBY order (blank, Late, Paid) would give ",Late"; the DESC form gives "Late,Paid" (DESC order: Paid, Late, blank). The same
-    shape over Region (ASC, DESC) and the positive offsets (1, 2) over text, and every numeric key, keep the ORDERBY order (measured on the same grid).
-    No walk order was measured beyond a single ORDERBY key, so the rule applies to one key only (the caller passes its values)."""
-    if delta >= 0:
-        return False
-    present = [value for value in key_values if value is not None]
-    return bool(present) and all(isinstance(value, str) for value in present)
-
-
-def partitioned_window_walk(ordered: Sequence[int], partition_of: dict[int, Any], key_values: Sequence[Any], storage_rank: dict[int, int]) -> list[int]:
-    """The rows of an ASC WINDOW with PARTITIONBY in the order Power BI walks them (`ordered`: the ORDERBY order, `key_values[i]` the key of row i).
-
-    Task 69 (live Power BI, order audit 4 grid, part A): a numeric ORDERBY key walks partition by partition, the partitions in the order their first row
-    is stored, each one in ORDERBY order: ALL(Quantity, Region) ORDERBY(Quantity, ASC) PARTITIONBY(Region) comes out 1,2,5 (East), 0,3 (West), 4 (North).
-    A text key walks the text dictionary (BLANK first, then first-seen text), and the partitions in stored order within one value:
-    ALL(Note, Region) ORDERBY(Note, ASC) PARTITIONBY(Region) under Quantity >= 2 comes out ",,Paid,Late" (not the alphabetical ",,Late,Paid").
-    DESC walks are not measured here and keep the ORDERBY order."""
-    first_seen: dict[Any, int] = {}
-    for i in sorted(ordered, key=lambda i: storage_rank[i]):
-        first_seen.setdefault(partition_of[i], storage_rank[i])
-    position = {i: p for p, i in enumerate(ordered)}
-    present = [value for value in key_values if value is not None]
-    if present and all(isinstance(value, str) for value in present):
-        dictionary = Profile([key_values[i] for i in sorted(ordered, key=lambda i: storage_rank[i])])  # text: first-seen in storage order
-        return sorted(ordered, key=lambda i: (dictionary.key(key_values[i]), first_seen[partition_of[i]], position[i]))
-    return sorted(ordered, key=lambda i: (first_seen[partition_of[i]], position[i]))
 
 
 def window_walk_undecided(table_node: Any, row_count: int, key_is_numeric: bool) -> bool:
