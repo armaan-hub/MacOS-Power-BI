@@ -80,6 +80,12 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         return None
     if name == "TABLEOF":
         return Plan()
+    if name == "DISTINCT" and len(arguments) == 1 and isinstance(arguments[0], tuple) and arguments[0][:1] in {("call",), ("table_call",)}:
+        # Task 69 (live Power BI, order audit 4 grid, part C): DISTINCT of a SELECTCOLUMNS walks the distinct rows in the order of the columns the
+        # projection reads (DISTINCT(SELECTCOLUMNS(Facts, "y", YEAR(DATE(2020 + Quantity, 1, 1)))) comes out 2020, 2021, ... ascending)
+        inner = plan(arguments[0], bound)
+        if inner is not None and inner.projects:
+            return Plan(dedup=True, projects=True, computed=inner.computed, eager=inner.eager)
     if name == "KEEPFILTERS" and len(arguments) == 1:
         return plan(arguments[0], bound)  # live Power BI (Part C review): the wrapper does not change the walk order
     if name in {"FILTER", "CALCULATETABLE"}:
@@ -92,9 +98,13 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         while position < len(arguments):
             if arguments[position][0] == "reference":  # a bare column reference keeps its own name
                 chosen.computed[str(arguments[position][2]).casefold()] = arguments[position]
+                chosen.eager.append(arguments[position])
                 position += 1
             elif arguments[position][0] == "string" and position + 1 < len(arguments):
                 chosen.computed[str(arguments[position][1]).casefold()] = arguments[position + 1]
+                # Task 69 (live Power BI, order audit 4 grid, part D): every projected column joins the walk key, as ADDCOLUMNS does
+                # (SELECTCOLUMNS(Facts, "d", DATE(..) - Quantity, "r", Region) walks Region first, then Quantity)
+                chosen.eager.append(arguments[position + 1])
                 position += 2
             else:
                 return None
@@ -387,6 +397,38 @@ def descending_orderby(table_node: Any) -> tuple[Any, bool] | None:
     if orderby is None or not orderby[2]:
         return None
     return orderby[2][0], any(isinstance(a, tuple) and len(a) == 2 and a[0] == "table" and str(a[1]).upper() == "DESC" for a in orderby[2])
+
+
+def offset_walk_reversed(delta: int, key_values: Sequence[Any]) -> bool:
+    """True when an OFFSET with a negative offset over a TEXT ORDERBY key lists its rows in the reverse of the ORDERBY order.
+
+    Task 69 (live Power BI, order audit 4 grid, part B): OFFSET(-1, ALL(Facts[Note]), ORDERBY(Facts[Note], ASC)) under Quantity >= 2 comes back
+    "Late," where the ORDERBY order (blank, Late, Paid) would give ",Late"; the DESC form gives "Late,Paid" (DESC order: Paid, Late, blank). The same
+    shape over Region (ASC, DESC) and the positive offsets (1, 2) over text, and every numeric key, keep the ORDERBY order (measured on the same grid).
+    No walk order was measured beyond a single ORDERBY key, so the rule applies to one key only (the caller passes its values)."""
+    if delta >= 0:
+        return False
+    present = [value for value in key_values if value is not None]
+    return bool(present) and all(isinstance(value, str) for value in present)
+
+
+def partitioned_window_walk(ordered: Sequence[int], partition_of: dict[int, Any], key_values: Sequence[Any], storage_rank: dict[int, int]) -> list[int]:
+    """The rows of an ASC WINDOW with PARTITIONBY in the order Power BI walks them (`ordered`: the ORDERBY order, `key_values[i]` the key of row i).
+
+    Task 69 (live Power BI, order audit 4 grid, part A): a numeric ORDERBY key walks partition by partition, the partitions in the order their first row
+    is stored, each one in ORDERBY order: ALL(Quantity, Region) ORDERBY(Quantity, ASC) PARTITIONBY(Region) comes out 1,2,5 (East), 0,3 (West), 4 (North).
+    A text key walks the text dictionary (BLANK first, then first-seen text), and the partitions in stored order within one value:
+    ALL(Note, Region) ORDERBY(Note, ASC) PARTITIONBY(Region) under Quantity >= 2 comes out ",,Paid,Late" (not the alphabetical ",,Late,Paid").
+    DESC walks are not measured here and keep the ORDERBY order."""
+    first_seen: dict[Any, int] = {}
+    for i in sorted(ordered, key=lambda i: storage_rank[i]):
+        first_seen.setdefault(partition_of[i], storage_rank[i])
+    position = {i: p for p, i in enumerate(ordered)}
+    present = [value for value in key_values if value is not None]
+    if present and all(isinstance(value, str) for value in present):
+        dictionary = Profile([key_values[i] for i in sorted(ordered, key=lambda i: storage_rank[i])])  # text: first-seen in storage order
+        return sorted(ordered, key=lambda i: (dictionary.key(key_values[i]), first_seen[partition_of[i]], position[i]))
+    return sorted(ordered, key=lambda i: (first_seen[partition_of[i]], position[i]))
 
 
 def window_walk_undecided(table_node: Any, row_count: int, key_is_numeric: bool) -> bool:

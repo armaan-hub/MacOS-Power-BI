@@ -10755,7 +10755,7 @@ def _evaluate_measures_once(
                         raise dax_typed.refusal("The walk order of a TOPN over a column an outer filter holds to one value is not settled by the local engine.")
                 walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)])
                 scored = score_rows(walked)
-                if limit >= len(scored):
+                if limit > len(scored):
                     return dict(context), [item[1] for item in scored]  # nothing is cut: the table comes back in walk order
                 column_keys = [blank_aware_keys([item[0][p] for item in scored]) for p in range(len(keys_spec))]
 
@@ -12123,6 +12123,8 @@ def _evaluate_measures_once(
             keys.append([evaluate(expression, frame, allow_text=True) for expression, _desc in order_spec])
         window.order_keys = keys
         window.order_desc = [desc for _expression, desc in order_spec]
+        window.explicit_order = len(order_spec) == 1  # one ORDERBY key: the only walk the partitioned WINDOW was measured on (Task 69)
+        window.order_values = [row_keys[0] for row_keys in keys] if order_spec else []
         tie_columns = [h for h in headers if h not in window.partition_columns]
         window.tie_columns = tie_columns
         total = list(range(len(window.rows)))
@@ -12151,6 +12153,16 @@ def _evaluate_measures_once(
             link = (lineage or {}).get(header)
             if link is not None:
                 groups.setdefault(link[0]["id"], (link[0], []))[1].append((header, link[1]))
+        # Task 69: where each relation row is first stored in its base table (the order PARTITIONBY lists its partitions in); the relation's own
+        # rows come in dictionary order, which is not the stored order
+        window.storage_rank = {i: len(window.rows) for i in total}
+        if len(groups) == 1 and function == "WINDOW" and window.partition_columns and window.explicit_order and not window.order_desc[0]:
+            (base_context, pairs), = groups.values()
+            first_stored: dict[tuple[Any, ...], int] = {}
+            for position, base_row in enumerate(base_context["rows"]):
+                first_stored.setdefault(row_key(typed_cell(base_context, column_name, base_row.get(column_name)) for _h, column_name in pairs), position)
+            for i in total:
+                window.storage_rank[i] = first_stored.get(row_key(window.typed[i][h] for h, _c in pairs), len(base_context["rows"]))
         visible: dict[str, set[tuple[Any, ...]]] = {}
         for table_id, (base_context, pairs) in groups.items():
             # Power BI also reads the row contexts on the stack as filters on the base table (columns that carry lineage).
@@ -12257,6 +12269,7 @@ def _evaluate_measures_once(
             if function == "OFFSET":
                 delta_value = scalar(lead)
                 delta = 0 if delta_value is None else int(dax_typed.to_number(delta_value).quantize(Decimal(1), rounding=ROUND_HALF_UP))
+                offset_delta = delta
                 for key, current_rows in current_by_partition.items():
                     members = window.partitions[key]
                     for i in current_rows:
@@ -12285,7 +12298,12 @@ def _evaluate_measures_once(
                             low = max(bound(from_value, from_type, where, len(members)), 0)
                             high = min(bound(to_value, to_type, where, len(members)), len(members) - 1)
                             selected.update(members[low:high + 1] if low <= high else [])
-        return window.context, [window.rows[i] for i in window.ordered if i in selected]
+        emitted = window.ordered
+        if function == "OFFSET" and window.explicit_order and dax_iteration_order.offset_walk_reversed(offset_delta, window.order_values):
+            emitted = list(reversed(window.ordered))  # Task 69: see offset_walk_reversed
+        if function == "WINDOW" and window.partition_columns and window.explicit_order and not window.order_desc[0]:
+            emitted = dax_iteration_order.partitioned_window_walk(window.ordered, window.partition_of, window.order_values, window.storage_rank)  # Task 69: see partitioned_window_walk
+        return window.context, [window.rows[i] for i in emitted if i in selected]
 
     def window_scalar(function: str, arguments: tuple[tuple[Any, ...], ...]) -> Any:
         rest = arguments
