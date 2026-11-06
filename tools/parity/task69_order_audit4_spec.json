@@ -1,0 +1,250 @@
+{
+ "items": [
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y],\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "2020,2021,2022",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "2020,2021,2022,2024,2025",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y],\",\"),Facts[Quantity]<>3,Facts[Note]=\"Paid\")",
+   "powerbi": "2020,2021,2022",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "2020,2023,2024",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y],\",\"),Facts[Region]=\"West\")",
+   "powerbi": "2020,2023",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y],\",\"),Facts[Region]=\"West\",Facts[Region]=\"West\")",
+   "powerbi": "2020,2023",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(OFFSET(-1,ALL(Facts[Note]),ORDERBY(Facts[Note],ASC)),Facts[Note],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "Late,",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(OFFSET(-1,ALL(Facts[Note]),ORDERBY(Facts[Note],ASC)),Facts[Note],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "Late,",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(OFFSET(-1,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "Late,Paid",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(OFFSET(-1,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "Late,Paid",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(OFFSET(-1,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC)),Facts[Region],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "North,West",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",DATE(2020,1,1)-Facts[Quantity],\"r\",Facts[Region]),[d],\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "12/31/2019,12/30/2019,1/1/2020",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",DATE(2020,1,1)-Facts[Quantity],\"r\",Facts[Region]),[d],\",\"),Facts[Note]=\"Paid\",Facts[Note]=\"Paid\")",
+   "powerbi": "12/31/2019,12/30/2019,1/1/2020",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",DATE(2020,1,1)-Facts[Quantity],\"r\",Facts[Region]),[d],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "12/31/2019,12/30/2019,12/27/2019,1/1/2020,12/28/2019",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",DATE(2020,1,1)-Facts[Quantity],\"r\",Facts[Region]),[d],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "12/30/2019,12/27/2019,12/29/2019,12/28/2019",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",DATE(2020,1,1)-Facts[Quantity],\"r\",Facts[Region]),[d],\",\"),Facts[Quantity]>=2,Facts[Quantity]<>3)",
+   "powerbi": "12/30/2019,12/27/2019,12/28/2019",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",DATE(2020,1,1)-Facts[Quantity],\"r\",Facts[Region]),[d],\",\"),Facts[Sales]>0)",
+   "powerbi": "12/30/2019,12/27/2019,12/29/2019",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(2,DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y]),[y],\",\"),Facts[Region]=\"West\")",
+   "powerbi": "2020,2023",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(2,OFFSET(-1,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC)),Facts[Region]),Facts[Region],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "North,West",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(2,OFFSET(1,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC)),Facts[Region]),Facts[Region],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "East,North",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(2,OFFSET(2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity]),Facts[Quantity],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "1,2",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(2,WINDOW(0,REL,0,REL,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity],DESC),PARTITIONBY(Facts[Region])),Facts[Quantity]),Facts[Quantity],\",\"),Facts[Region]=\"West\")",
+   "powerbi": "0,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(2,WINDOW(0,REL,0,REL,ALL(Facts[Region],Facts[Region]),ORDERBY(Facts[Region],DESC),PARTITIONBY(Facts[Region])),Facts[Region]),Facts[Region],\",\"),Facts[Sales]>0)",
+   "powerbi": "East,West",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Note],Facts[Region]),ORDERBY(Facts[Note],ASC),PARTITIONBY(Facts[Region])),Facts[Note],\",\"),Facts[Quantity]>=2)",
+   "powerbi": ",,Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Note],Facts[Region]),ORDERBY(Facts[Note],ASC),PARTITIONBY(Facts[Region])),Facts[Note],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": ",Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity],ASC),PARTITIONBY(Facts[Region])),Facts[Quantity],\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "1,2,0",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity],ASC),PARTITIONBY(Facts[Region])),Facts[Quantity],\",\"),Facts[Sales]>0)",
+   "powerbi": "2,5,3",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Region],Facts[Region]),ORDERBY(Facts[Region],ASC),PARTITIONBY(Facts[Region])),Facts[Region],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "East,West,North",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Sales],Facts[Region]),ORDERBY(Facts[Sales],ASC),PARTITIONBY(Facts[Region])),Facts[Sales],\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "-1.5,10.5,0",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Sales],Facts[Region]),ORDERBY(Facts[Sales],ASC),PARTITIONBY(Facts[Region])),Facts[Sales],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "-1.5,2.5,10.5,0,",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Sales],Facts[Region]),ORDERBY(Facts[Sales],ASC),PARTITIONBY(Facts[Region])),Facts[Sales],\",\"),Facts[Quantity]<>3,Facts[Quantity]>=2)",
+   "powerbi": "2.5,10.5,",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Sales],Facts[Region]),ORDERBY(Facts[Sales],ASC),PARTITIONBY(Facts[Region])),Facts[Sales],\",\"),Facts[Quantity]>=2)",
+   "powerbi": "2.5,10.5,20,",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"y\",YEAR(DATE(2020+Facts[Quantity],1,1)))),[y],\",\")",
+   "powerbi": "2020,2021,2022,2023,2024,2025",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(OFFSET(-1,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note],\",\")",
+   "powerbi": "Late,Paid",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(OFFSET(-1,ALL(Facts[Region]),ORDERBY(Facts[Region],ASC)),Facts[Region],\",\")",
+   "powerbi": "North,East",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(OFFSET(-1,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC)),Facts[Region],\",\")",
+   "powerbi": "North,West",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",DATE(2020,1,1)-Facts[Quantity],\"r\",Facts[Region]),[d],\",\")",
+   "powerbi": "12/31/2019,12/30/2019,12/27/2019,1/1/2020,12/29/2019,12/28/2019",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(2,OFFSET(-1,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note]),Facts[Note],\",\")",
+   "powerbi": "Late,Paid",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity],ASC),PARTITIONBY(Facts[Region])),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5,0,3,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Region],Facts[Region]),ORDERBY(Facts[Region],ASC),PARTITIONBY(Facts[Region])),Facts[Region],\",\")",
+   "powerbi": "East,West,North",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(WINDOW(0,REL,0,REL,ALL(Facts[Sales],Facts[Region]),ORDERBY(Facts[Sales],ASC),PARTITIONBY(Facts[Region])),Facts[Sales],\",\")",
+   "powerbi": "-1.5,2.5,10.5,0,20,",
+   "now": "DIFF"
+  }
+ ]
+}
