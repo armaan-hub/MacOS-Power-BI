@@ -9975,9 +9975,10 @@ def _evaluate_measures_once(
                 first.setdefault(row_key(typed_cell(base, c, scanned.get(c)) for c in source_columns), position)
         derived_walk = bool(walked.get("derived"))
         keys = [row_key((row.get(c) if derived_walk else typed_cell(walked, c, row.get(c))) for c in walked_columns) for row in rows]
-        if any(key not in first for key in keys):
-            raise MeasureError("The row order of a SUMMARIZE under filters on other columns is not modelled in the local engine for this shape.")
-        return [row for _key, row in sorted(zip(keys, rows), key=lambda pair: first[pair[0]])]
+        # ADDMISSINGITEMS appends the items the SUMMARIZE lacks after its groups: they keep their place at the end
+        found = [(key, row) for key, row in zip(keys, rows) if key in first]
+        appended = [row for key, row in zip(keys, rows) if key not in first]
+        return [row for _key, row in sorted(found, key=lambda pair: first[pair[0]])] + appended
 
     def union_walked_rows(
         union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], topn_walked: bool = True
