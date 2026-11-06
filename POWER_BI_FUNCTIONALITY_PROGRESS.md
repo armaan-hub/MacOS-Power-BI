@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 154 / Task 65 order-free-55, CONCATENATEX over TOPN / ALLSELECTED under a CALCULATE filter fixed; order-free CONCATENATEX bodies answered, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2758 passed passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 501363 answers with 497106 match, 4257 refused, 0 DIFF, 0 CRASH, locked 497086. Next: Task 66: audit other iterators over TOPN/ALLSELECTED under filters (MAXX, FIRSTNONBLANK, TOCSV) for the same order bug
+**Latest status (2026-11-05, after Iteration 155 / Task 66 order-audit-56, GENERATE / UNION / ALLSELECTED walk orders in CONCATENATEX, TOCSV and TOJSON match Power BI (fixes 862 wrong answers on two held-out grids), Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2763 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 504099 answers with 499219 match, 4880 refused, 0 DIFF, 0 CRASH, locked 499199. Next: Task 67: continue the order audit (FIRSTNONBLANK/LASTNONBLANK, INDEX/OFFSET/WINDOW, SUMMARIZECOLUMNS and ADDCOLUMNS outputs under filters); recover the TOCSV(ALLSELECTED(Facts),-1) refusals
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

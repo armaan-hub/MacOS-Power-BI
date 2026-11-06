@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Opus (Task 66: audit order-sensitive iterators over TOPN/ALLSELECTED under filters)
+**Active agent:** Opus (Task 67: continue the order audit; Task 66 shipped as Iteration 155)
 **Branch in use:** none
 **Working tree clean:** main yes
 

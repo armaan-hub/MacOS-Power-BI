@@ -125,13 +125,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_maxxnan53_extra | 1131 | 0 | 669 | 0 | 0 |
 | dax_battery_typeerr54_extra | 2140 | 0 | 402 | 0 | 0 |
 | dax_battery_orderfree55_extra | 3846 | 0 | 50 | 0 | 0 |
+| dax_battery_orderaudit56_extra | 2113 | 0 | 623 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (4257): Power BI answers, the app refuses
+## Pending work (4880): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -6060,6 +6061,1934 @@ North`) [dax_battery_logic4_extra]
 - `CALCULATE(CONCATENATEX(TOPN(4,FILTER(Facts,Facts[Quantity]>0),Facts[Note]),Facts[Region],","),Facts[Quantity]<>4,Facts[Sales]<=10.5)` (Power BI: `East,East,East`) [dax_battery_orderfree55_extra]
 - `CALCULATE(CONCATENATEX(TOPN(4,Facts,Facts[Sales],ASC),Facts[Note]),Facts[Note]="Paid")` (Power BI: `PaidPaidPaid`) [dax_battery_orderfree55_extra]
 - `CALCULATE(CONCATENATEX(TOPN(4,Facts,Facts[Sales],ASC),Facts[Note],","),Facts[Note]="Paid")` (Power BI: `Paid,Paid,Paid`) [dax_battery_orderfree55_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts)),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts)),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts),100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts),100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(ALLSELECTED(Facts),2),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),ALL(Facts))),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),ALL(Facts)),0),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),ALL(Facts),FILTER(Facts,Facts[Sales]>0))),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Sales]>0,Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Note]<>"Late",Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),ALL(Facts))),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),Facts),100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Quantity]>1,Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts))),1),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))),3),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>50)),2),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales])),2),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>0))),Facts[Note]="Paid",Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(Facts,ALL(Facts))),-1),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>50))),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),Facts)),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),Facts,FILTER(Facts,Facts[Sales]>50)),0),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]="Paid",Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="East")),0),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),ALL(Facts))),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(ALL(Facts),Facts[Region]="East")),100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(Facts,ALL(Facts)),Facts),1),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(ALL(Facts),Facts[Quantity]<=5),ALL(Facts))),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(ALL(Facts),Facts[Quantity]>4)),3),Facts[Quantity]>=0,Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>50),ALL(Facts)),0),Facts[Quantity]>1,Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),Facts)),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),Facts),100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="East")),3),Facts[Quantity]>1,Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),Facts),1),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>50)),100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(Facts,ALL(Facts)),Facts)),Facts[Region]<>"East",Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),FILTER(Facts,Facts[Sales]>50),Facts)),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),Facts),3),Facts[Quantity]<>3,Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<=3))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>50))),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts)),100),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<=3)),1),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))),1),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))),2),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))),3),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>0)),1),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales])),0),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(ALL(Facts),Facts[Quantity]>2),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>0)),3),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(ALL(Facts),Facts[Region]="East")),100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),Facts),1),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),Facts,CALCULATETABLE(Facts,ALL(Facts)))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>0)),3),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]),Facts),0),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<2),FILTER(ALL(Facts),Facts[Quantity]<4),ALL(Facts)),3),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<3),FILTER(ALL(Facts),Facts[Quantity]>1))),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<3),TOPN(2,ALL(Facts),Facts[Sales])),1),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<4),CALCULATETABLE(Facts,ALL(Facts))),1),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<4),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<5),FILTER(ALL(Facts),Facts[Quantity]<4),Facts)),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=2),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=4),Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="East")),3),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="East")),100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>0)),-1),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>1),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>1),FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>=1),CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts))),Facts[Quantity]<10,Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>=2),Facts,TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>=3),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))),100),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>=4),FILTER(ALL(Facts),Facts[Quantity]<4))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts)),FILTER(ALL(Facts),Facts[Quantity]>=4)),2),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),FILTER(ALL(Facts),Facts[Quantity]<=4),FILTER(Facts,Facts[Sales]>0)),100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),FILTER(ALL(Facts),Facts[Quantity]>=3)),1),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),FILTER(Facts,Facts[Sales]>50),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="East")),2),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>2)),100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),ALL(Facts))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),ALL(Facts)),100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Sales]>0,Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(ALL(Facts),Facts[Region]="West")),100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(Facts,ALL(Facts))),2),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),FILTER(ALL(Facts),Facts[Quantity]>3),FILTER(Facts,Facts[Sales]>0)),1),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),FILTER(Facts,Facts[Sales]>0)),-1),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),ALL(Facts)),1),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),CALCULATETABLE(ALL(Facts),Facts[Region]="West")),3),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),FILTER(ALL(Facts),Facts[Quantity]>=3),CALCULATETABLE(ALL(Facts),Facts[Region]="East")),100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),FILTER(Facts,Facts[Sales]>50)),1),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=1))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),3),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,ALL(Facts))),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,ALL(Facts),ALL(Facts)),100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="East")),3),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>50)),3),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="West")),3),Facts[Region]<>"East",Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="West"),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]<>"East",Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(Facts,ALL(Facts))),100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]<2))),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]<2)),100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]<=4)),1),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]>1)),0),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]>1)),2),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(Facts,Facts[Sales]>100))),Facts[Note]="Paid",Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(Facts,Facts[Sales]>50))),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,FILTER(Facts,Facts[Sales]>50)),100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,Facts)),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,Facts),-1),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,Facts,CALCULATETABLE(Facts,ALL(Facts)))),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,Facts,FILTER(Facts,Facts[Sales]>100)),3),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales])),0),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales])),3),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]="West",Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<3)),0),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Sales]>0,Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Sales]>0,Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=4)),100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=5))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>0)),2),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>100)),100),Facts[Note]<>"Late",Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),Facts),2),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>1))),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]),Facts)),Facts[Region]<>"East",Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Note]
+
+Paid
+
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Note]="Paid")` (Power BI: `'Facts'[Note]
+Paid
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Quantity]<>3)` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Region]<>"East")` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Region]<>"East",Facts[Quantity]<10)` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])),0),Facts[Region]<>"East")` (Power BI: `'Facts'[Note]
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])),1),Facts[Region]<>"East")` (Power BI: `'Facts'[Note]
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])),100),Facts[Quantity]>1)` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])),100),Facts[Sales]>0)` (Power BI: `'Facts'[Note]
+
+Paid
+
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+5
+0
+1
+2
+3
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]<>3,Facts[Quantity]<10)` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+4
+5
+0
+1
+2
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]<>3,Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity]
+0
+4
+0
+4`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity]
+2
+3
+4
+5
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]>1,Facts[Region]="West")` (Power BI: `'Facts'[Quantity]
+3
+3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]>=2,Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity]
+2
+2`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Region]<>"East",Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity]
+0
+0`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),100),Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+0
+1
+2`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),100),Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity]
+2
+3
+4
+5
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),100),Facts[Region]="West")` (Power BI: `'Facts'[Quantity]
+0
+3
+0
+3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),100),Facts[Sales]>0,Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity]
+2
+3
+5
+2
+3
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),3),Facts[Note]="Paid",Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity]
+0
+0`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),3),Facts[Region]="West")` (Power BI: `'Facts'[Quantity]
+0
+3
+0`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),3),Facts[Sales]>0,Facts[Quantity]<>3)` (Power BI: `'Facts'[Quantity]
+2
+5
+2`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Region]
+East
+West
+East
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Quantity]<10)` (Power BI: `'Facts'[Region]
+East
+West
+North
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Quantity]>1)` (Power BI: `'Facts'[Region]
+East
+West
+North
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Quantity]>1,Facts[Region]="West")` (Power BI: `'Facts'[Region]
+West
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Region]="West",Facts[Note]="Paid")` (Power BI: `'Facts'[Region]
+West
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Sales]>0)` (Power BI: `'Facts'[Region]
+East
+West
+East
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),-1),Facts[Note]="Paid")` (Power BI: `'Facts'[Region]
+East
+West
+East
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),1),Facts[Quantity]>=2)` (Power BI: `'Facts'[Region]
+East`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Region]
+East
+West
+North
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),100),Facts[Quantity]>1,Facts[Region]="West")` (Power BI: `'Facts'[Region]
+West
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),100),Facts[Region]<>"East")` (Power BI: `'Facts'[Region]
+West
+North
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),3),Facts[Quantity]<10)` (Power BI: `'Facts'[Region]
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),3),Facts[Region]<>"East")` (Power BI: `'Facts'[Region]
+West
+North
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales]
+-1.5
+0
+2.5
+10.5
+20
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales]
+-1.5
+0
+10.5
+-1.5
+0
+10.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Note]="Paid",Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales]
+-1.5
+0
+10.5
+-1.5
+0
+10.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Quantity]<10,Facts[Quantity]>1)` (Power BI: `'Facts'[Sales]
+
+2.5
+10.5
+20
+
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+
+-1.5
+0
+2.5
+10.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales]
+
+2.5
+10.5
+20
+
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Quantity]>1,Facts[Sales]>0)` (Power BI: `'Facts'[Sales]
+2.5
+10.5
+20
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales]
+
+2.5
+10.5
+20
+
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales]
+
+0
+20
+
+0
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Region]="West",Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales]
+20
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Sales]>0)` (Power BI: `'Facts'[Sales]
+2.5
+10.5
+20
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])),3),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales]
+
+2.5
+10.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])),3),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales]
+
+0
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(ALLSELECTED(Facts)),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(ALLSELECTED(Facts)),Facts[Quantity]>=0)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),ALL(Facts),FILTER(Facts,Facts[Sales]>100))),Facts[Sales]>0)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),ALL(Facts),Facts)),Facts[Note]<>"Late",Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Quantity]>=2,Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Quantity]<>3,Facts[Quantity]>=2)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)),FILTER(ALL(Facts),Facts[Quantity]<=3))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<=4),ALL(Facts))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>50),FILTER(Facts,Facts[Sales]>0))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>50),Facts)),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),Facts)),Facts[Region]<>"East",Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(ALL(Facts),Facts,FILTER(Facts,Facts[Sales]>0))),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>50),Facts)),Facts[Note]="Paid",Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),Facts)),Facts[Quantity]>=0)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),ALL(Facts))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),FILTER(ALL(Facts),Facts[Quantity]<=3),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),FILTER(Facts,Facts[Sales]>100))),Facts[Quantity]<>3,Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),FILTER(Facts,Facts[Sales]>100))),Facts[Quantity]>=2)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts),Facts)),Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Quantity]<10,Facts[Sales]>0)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>0))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(ALL(Facts),Facts[Quantity]<3))),Facts[Quantity]>=0,Facts[Quantity]>=0)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>50),Facts)),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),Facts)),Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),Facts,TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]<3),ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]>=2))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]<4),FILTER(Facts,Facts[Sales]>0),Facts)),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]>2),FILTER(Facts,Facts[Sales]>50),ALL(Facts))),Facts[Note]="Paid",Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]>=1),Facts)),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>0),FILTER(Facts,Facts[Sales]>100),ALL(Facts))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(ALL(Facts),Facts[Region]="West"),ALL(Facts))),Facts[Quantity]>=0,Facts[Quantity]>=2)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>100),FILTER(ALL(Facts),Facts[Quantity]<2))),Facts[Quantity]<10,Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>100),FILTER(Facts,Facts[Sales]>100),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>100),Facts)),Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>50),ALL(Facts),Facts)),Facts[Quantity]<10,Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>50),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(ALL(Facts),Facts[Quantity]<=4))),Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>50),CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>50),FILTER(ALL(Facts),Facts[Quantity]<=4))),Facts[Quantity]<10,Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>50),FILTER(Facts,Facts[Sales]>0))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(FILTER(Facts,Facts[Sales]>50),FILTER(Facts,Facts[Sales]>100),Facts)),Facts[Region]="West",Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]<2),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Sales]>0)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]<3))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]>3),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]>=4),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,Facts,FILTER(ALL(Facts),Facts[Quantity]>5))),Facts[Sales]>0,Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>=2,Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>0))),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="East"))),Facts[Note]="Paid",Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]="West"))),Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<=4))),Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>100))),Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>=2)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 4,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Note]<>"Late",Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 4,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Quantity]<10,Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 6,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Quantity]>=0)` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 6,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Quantity]>=2)` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 6,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 6,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note]))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 4,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 6,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Note]="Paid",Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 6,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 12,
+	"data"`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 8,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Quantity]>=2)` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 8,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 6,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Region]<>"East",Facts[Sales]>0)` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 2,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 4,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Region]="West",Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 4,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Region]="West",Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 4,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity]))),Facts[Sales]>0,Facts[Quantity]>=0)` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 6,
+	"data":`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 4,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 4,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 6,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Quantity]<>3)` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 6,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 6,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 4,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 2,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Region]="West",Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 2,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))),Facts[Sales]>0)` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 4,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 10,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Note]="Paid")` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 6,
+	"data": [
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Quantity]<10)` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 12,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Quantity]>1)` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 8,
+	"data": [
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Region]<>"East",Facts[Region]<>"East")` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 6,
+	"data": [
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Region]="West")` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 4,
+	"data": [
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Sales]>0)` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 6,
+	"data": [
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales]))),Facts[Sales]>0,Facts[Note]<>"Late")` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 6,
+	"data": [
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Region]="West",Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Note]) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Note]
+
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Note]) RETURN TOCSV(T,100),Facts[Note]<>"Late",Facts[Quantity]>=2)` (Power BI: `'Facts'[Note]
+
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Note]) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Note]
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Note]) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Note]
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Note]) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Note]
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Note]) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Quantity]>1)` (Power BI: `'Facts'[Note]
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Quantity]) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Quantity]) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Quantity]) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity]
+2
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Quantity]) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity]
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Quantity]) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Quantity]
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Quantity]) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Region]) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Sales]>0)` (Power BI: `'Facts'[Region]
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Region]) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Region]
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Sales]) RETURN TOCSV(T,100),Facts[Note]<>"Late",Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Sales]) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Sales]) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=ALLSELECTED(Facts[Sales]) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Quantity]>1)` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,2
+Paid,2
+Late,2
+,3
+Paid,3
+L`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,0
+Paid,0
+,3
+Paid,3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]="West",Facts[Quantity]>1)` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Note]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Quantity]>=2)` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+Late,East
+,Nor`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Note]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Region]="West")` (Power BI: `'Facts'[Note],'Facts'[Region]
+,West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Quantity]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]="West",Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+2,East
+3,East
+4,East
+5,Eas`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Quantity]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Quantity],'Facts'[Sales]
+2,
+3,
+4,
+5,
+2,2.5
+3,2.5
+4,2`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Region],'Facts'[Note]
+East,
+West,
+North,
+East,Paid
+W`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Region]<>"East")` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+West,3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Quantity]>1)` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,
+North,
+East,2.5
+North,2`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Sales]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+,0
+-1.5,0
+0,0
+2.5,0
+10.5,0
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=CROSSJOIN(VALUES(Facts[Sales]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Region]
+20,West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Region]<>"East",Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Note]),ALL(Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,
+Paid,
+Late,
+,-1.5
+Paid,-1.5
+L`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Note]),ALL(Facts[Sales])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,
+Paid,
+Late,
+,-1.5
+Paid,-1.5
+L`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Note]),ALL(Facts[Sales])) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Sales]>0)` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,
+Paid,
+Late,
+,-1.5
+Paid,-1.5
+L`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+3,
+4,
+5,
+0,Paid
+1,P`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+3,
+4,
+5,
+0,Paid
+1,P`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+3,
+4,
+5,
+0,Paid
+1,P`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]<>"East",Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+3,
+4,
+5,
+0,Paid
+1,P`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+3,
+4,
+5,
+0,Paid
+1,P`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Region])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,East
+1,East
+2,East
+3,Eas`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Sales])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity],'Facts'[Sales]
+0,
+1,
+2,
+3,
+4,
+5,
+0,-1.5
+1,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Region]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Region],'Facts'[Note]
+East,
+West,
+North,
+East,Paid
+W`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Region]),ALL(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,0
+West,0
+North,0
+East`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Region]),ALL(Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,
+West,
+North,
+East,-1.5
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Sales]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Note]
+,
+-1.5,
+0,
+2.5,
+10.5,
+20,
+,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Sales]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Note]
+,
+-1.5,
+0,
+2.5,
+10.5,
+20,
+,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Sales]),ALL(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Note]
+,
+-1.5,
+0,
+2.5,
+10.5,
+20,
+,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Sales]),ALL(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+,0
+-1.5,0
+0,0
+2.5,0
+10.5,0
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(ALL(Facts[Sales]),ALL(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+,0
+-1.5,0
+0,0
+2.5,0
+10.5,0
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,0
+Paid,0
+,1
+Paid,1
+,2
+Paid,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Note]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+,West
+Paid,Wes`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Note]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Quantity]>1)` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+Late,East
+,Nor`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Note]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]>=0,Facts[Note]="Paid")` (Power BI: `'Facts'[Note],'Facts'[Sales]
+Paid,-1.5
+Paid,0
+Paid,10.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Quantity]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+3,
+5,
+0,Paid
+1,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Quantity]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+5,
+0,Paid
+1,Paid
+2,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Quantity]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]<>"East",Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+3,
+4,
+3,Late
+4,Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,East
+1,East
+2,East
+4,Eas`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+2,East
+3,East
+4,East
+5,Eas`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,West
+3,West
+4,West
+0,Nor`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Region]<>"East")` (Power BI: `'Facts'[Region],'Facts'[Note]
+West,
+North,
+West,Late
+North,L`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Region]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]<10,Facts[Note]="Paid")` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,0
+West,0
+East,1
+West,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Region]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,0
+West,0
+North,0
+East`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Region]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,2.5
+West,2.5
+East,10.5
+W`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Sales]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+-1.5,0
+0,0
+2.5,0
+10.5,0
+20,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Sales]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+,2
+2.5,2
+10.5,2
+20,2
+,3
+2.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(DISTINCT(Facts[Sales]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Region]
+0,West
+20,West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Quantity]),LEN(Facts[Quantity])>0)) RETURN TOCSV(T,100),Facts[Quantity]>=0,Facts[Sales]>0)` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,2
+Paid,2
+,3
+Paid,3
+,5
+Paid,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Quantity]),LEN(Facts[Quantity])>0)) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,0
+Paid,0
+,3
+Paid,3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Region]),LEN(Facts[Region])>0)) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Note],'Facts'[Region]
+Paid,East
+Paid,West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Region]),LEN(Facts[Region])>0)) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+Late,East
+,Wes`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Sales]),LEN(Facts[Sales])>0)) RETURN TOCSV(T,100),Facts[Note]<>"Late",Facts[Region]="West")` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,0
+Paid,0
+,20
+Paid,20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Sales]),LEN(Facts[Sales])>0)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,-1.5
+Paid,-1.5
+Late,-1.5
+,0
+Pa`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Note]<>"Late")` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,2
+Paid,2
+,3
+Paid,3
+,5
+Paid,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Quantity]<10)` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,2
+Paid,2
+Late,2
+,3
+Paid,3
+L`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,0
+Paid,0
+,3
+Paid,3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+Late,East
+,Wes`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Note],'Facts'[Sales]
+Paid,-1.5
+Paid,0
+Paid,10.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Note]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,
+Paid,
+Late,
+,-1.5
+Paid,-1.5
+L`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Note]),LEN(Facts[Note])>0)) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,Paid
+1,Paid
+2,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Sales]),LEN(Facts[Sales])>0)) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Quantity],'Facts'[Sales]
+0,0
+3,0
+0,20
+3,20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]="Paid",Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,Paid
+1,Paid
+2,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+3,
+4,
+0,Paid
+3,Paid
+4,Pai`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]<10,Facts[Quantity]>=2)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+2,East
+3,East
+4,East
+5,Eas`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]<>3,Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,West
+4,West
+0,North
+4,No`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Sales]>0)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+2,East
+3,East
+5,East
+2,Wes`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,East
+1,East
+2,East
+3,Eas`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,West
+3,West
+4,West
+0,Nor`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Quantity],'Facts'[Sales]
+2,2.5
+3,2.5
+5,2.5
+2,10.5
+3,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Note]),LEN(Facts[Note])>0)) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Region],'Facts'[Note]
+East,Paid
+West,Paid
+North,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Note]),LEN(Facts[Note])>0)) RETURN TOCSV(T,100),Facts[Region]<>"East",Facts[Note]<>"Late")` (Power BI: `'Facts'[Region],'Facts'[Note]
+West,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Quantity]),LEN(Facts[Quantity])>0)) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,2
+West,2
+North,2
+East`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Quantity]),LEN(Facts[Quantity])>0)) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Quantity]<>3)` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,2
+North,2
+East,4
+Nort`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Sales]),LEN(Facts[Sales])>0)) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,-1.5
+West,-1.5
+East,0
+We`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Sales]),LEN(Facts[Sales])>0)) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,-1.5
+West,-1.5
+North,-1.`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Sales]),LEN(Facts[Sales])>0)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,-1.5
+West,-1.5
+North,-1.`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Region],'Facts'[Note]
+East,
+West,
+East,Paid
+West,Pai`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]<>"Late",Facts[Region]<>"East")` (Power BI: `'Facts'[Region],'Facts'[Note]
+West,
+West,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Region],'Facts'[Note]
+East,
+West,
+North,
+East,Paid
+W`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Region],'Facts'[Note]
+West,
+North,
+West,Paid
+North,P`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Region],'Facts'[Note]
+East,
+West,
+East,Paid
+West,Pai`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,2
+West,2
+North,2
+East`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Region],'Facts'[Sales]
+West,
+North,
+West,0
+North,0
+W`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Region]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Region],'Facts'[Sales]
+West,0
+West,20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Note]),LEN(Facts[Note])>0)) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Note]
+-1.5,Paid
+0,Paid
+2.5,Paid
+10.5,`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Note]),LEN(Facts[Note])>0)) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Note]
+0,Paid
+20,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Sales]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Note]
+-1.5,
+0,
+2.5,
+10.5,
+20,
+-1.5,Pa`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Sales]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Note]
+,
+2.5,
+10.5,
+20,
+,Paid
+2.5,Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Sales]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+,0
+0,0
+20,0
+,3
+0,3
+20,3
+,4
+`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Sales]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Sales],'Facts'[Region]
+,East
+2.5,East
+10.5,East
+20,E`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=GENERATE(VALUES(Facts[Sales]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Region]
+,West
+0,West
+20,West
+,North
+0`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(ALL(Facts),ALL(Facts)) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(ALL(Facts),ALL(Facts),ALL(Facts)) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]>=3),Facts) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts)) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]="West")) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(ALL(Facts),Facts[Quantity]>5),CALCULATETABLE(ALL(Facts),Facts[Region]="East")) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<2),ALL(Facts),Facts) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<=2),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>0)) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),Facts,ALL(Facts)) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>2),CALCULATETABLE(ALL(Facts),Facts[Region]="East")) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>3),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>4),FILTER(Facts,Facts[Sales]>100),FILTER(ALL(Facts),Facts[Quantity]<3)) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>5),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>=4),CALCULATETABLE(ALL(Facts),Facts[Region]="West")) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Region]="West",Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts)),Facts) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(ALL(Facts),Facts[Region]="West")) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>100),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>100),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>50),FILTER(ALL(Facts),Facts[Quantity]>1)) RETURN TOCSV(T,100),Facts[Quantity]<10,Facts[Note]="Paid")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>50),FILTER(ALL(Facts),Facts[Quantity]>=3),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>50),Facts,TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Sales]>0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="West")) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(Facts,FILTER(Facts,Facts[Sales]>0),FILTER(Facts,Facts[Sales]>50)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="East")) RETURN TOCSV(T,100),Facts[Quantity]>1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>0)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="West")) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="West"),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]="East")) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>4)) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>0),Facts) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Note]
+Paid
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]>=0)` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]<>"East",Facts[Note]<>"Late")` (Power BI: `'Facts'[Note]
+
+Paid
+
+Paid`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+5
+0
+1
+2
+3
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]<>"Late",Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+0
+1
+2`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]="Paid")` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+0
+1
+2`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Quantity]
+2
+3
+4
+5
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]<>"East")` (Power BI: `'Facts'[Quantity]
+0
+3
+4
+0
+3
+4`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]="West",Facts[Sales]>0)` (Power BI: `'Facts'[Quantity]
+3
+3`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Quantity]
+2
+3
+5
+2
+3
+5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Region]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Region]
+East
+West
+East
+West`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Region]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]<>3)` (Power BI: `'Facts'[Region]
+East
+West
+North
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Region]),VALUES(Facts[Region])) RETURN TOCSV(T,100),Facts[Quantity]>=2)` (Power BI: `'Facts'[Region]
+East
+West
+North
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Note]<>"Late")` (Power BI: `'Facts'[Sales]
+-1.5
+0
+2.5
+10.5
+20
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Note]<>"Late",Facts[Quantity]<>3)` (Power BI: `'Facts'[Sales]
+-1.5
+0
+2.5
+10.5
+-1.5
+0
+2.5
+10.5`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Note]<>"Late",Facts[Quantity]>=0)` (Power BI: `'Facts'[Sales]
+-1.5
+0
+2.5
+10.5
+20
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]<10)` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20
+
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Region]="West")` (Power BI: `'Facts'[Sales]
+0
+20
+0
+20`) [dax_battery_orderaudit56_extra]
+- `CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Sales]>0)` (Power BI: `'Facts'[Sales]
+2.5
+10.5
+20
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),ALL(Facts)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),ALL(Facts)),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(ALL(Facts),Facts[Region]="East")))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<1)),0)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<1),ALL(Facts)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]>5),FILTER(ALL(Facts),Facts[Quantity]<4)),3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>100),FILTER(ALL(Facts),Facts[Quantity]<=4)),3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(ALL(Facts),Facts))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>50),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),ALL(Facts),ALL(Facts)),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="East")),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(ALL(Facts),Facts[Region]="West")))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),FILTER(ALL(Facts),Facts[Quantity]>=3),FILTER(ALL(Facts),Facts[Quantity]>3)),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),Facts),3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>0)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),Facts,Facts))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales])))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]),Facts))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<1),FILTER(Facts,Facts[Sales]>0),Facts),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<5),FILTER(ALL(Facts),Facts[Quantity]<2)),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=3),Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="East")))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>4),FILTER(ALL(Facts),Facts[Quantity]>=1),FILTER(ALL(Facts),Facts[Quantity]>1)),3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>=5),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(ALL(Facts),Facts[Region]="East")))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(ALL(Facts),Facts[Region]="West")))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>50)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),FILTER(Facts,Facts[Sales]>50)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts)),3)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,ALL(Facts)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,ALL(Facts),CALCULATETABLE(Facts,ALL(Facts))),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,ALL(Facts),Facts),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,CALCULATETABLE(Facts,ALL(Facts)),Facts))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]<3),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,Facts,FILTER(Facts,Facts[Sales]>100)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales])))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<3)),-1)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<1)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<=5)))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),Facts,Facts),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])))` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])),1)` (Power BI: `'Facts'[Note]
+`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])))` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5
+0
+1
+2
+3`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),-1)` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5
+0
+1
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),100)` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5
+0
+1
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])))` (Power BI: `'Facts'[Region]
+East
+West
+North
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),1)` (Power BI: `'Facts'[Region]
+East`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),3)` (Power BI: `'Facts'[Region]
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])))` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20
+
+-1.5
+0
+2.5`) [dax_battery_orderaudit56_extra]
+- `TOCSV(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])),100)` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20
+
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(ALL(Facts),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),ALL(Facts)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(ALL(Facts),CALCULATETABLE(Facts,ALL(Facts)),ALL(Facts)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]>=3)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(ALL(Facts),Facts[Region]="East")))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(Facts,ALL(Facts)),FILTER(Facts,Facts[Sales]>100)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(ALL(Facts),Facts[Quantity]>3),ALL(Facts)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(ALL(Facts),Facts[Region]="West")))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),Facts))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>4)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]>2),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]>=2),FILTER(Facts,Facts[Sales]>50),FILTER(Facts,Facts[Sales]>0)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]>=4),ALL(Facts)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(FILTER(Facts,Facts[Sales]>100),ALL(Facts),Facts))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(FILTER(Facts,Facts[Sales]>50),FILTER(ALL(Facts),Facts[Quantity]<=1)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]="West"),Facts))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts)))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]="West"),CALCULATETABLE(Facts,ALL(Facts))))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),Facts))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])))` (Power BI: `{
+	"header": ["'Facts'[Note]"],
+	"rowCount": 6,
+	"data": [
+	`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])))` (Power BI: `{
+	"header": ["'Facts'[Quantity]"],
+	"rowCount": 12,
+	"data"`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])))` (Power BI: `{
+	"header": ["'Facts'[Region]"],
+	"rowCount": 6,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `TOJSON(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])))` (Power BI: `{
+	"header": ["'Facts'[Sales]"],
+	"rowCount": 12,
+	"data": [`) [dax_battery_orderaudit56_extra]
+- `VAR T=ALLSELECTED(Facts) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=ALLSELECTED(Facts[Note]) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note]
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `VAR T=ALLSELECTED(Facts[Quantity]) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `VAR T=ALLSELECTED(Facts[Region]) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region]
+East
+West
+North`) [dax_battery_orderaudit56_extra]
+- `VAR T=ALLSELECTED(Facts[Sales]) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales]
+
+-1.5
+0
+2.5
+10.5
+20`) [dax_battery_orderaudit56_extra]
+- `VAR T=CROSSJOIN(VALUES(Facts[Note]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,0
+Paid,0
+Late,0
+,1
+Paid,1
+L`) [dax_battery_orderaudit56_extra]
+- `VAR T=CROSSJOIN(VALUES(Facts[Note]),VALUES(Facts[Region])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+Late,East
+,Wes`) [dax_battery_orderaudit56_extra]
+- `VAR T=CROSSJOIN(VALUES(Facts[Quantity]),VALUES(Facts[Sales])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Quantity],'Facts'[Sales]
+0,
+1,
+2,
+3,
+4,
+5,
+0,-1.5
+1,`) [dax_battery_orderaudit56_extra]
+- `VAR T=CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,0
+West,0
+North,0
+East`) [dax_battery_orderaudit56_extra]
+- `VAR T=CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Sales])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,
+West,
+North,
+East,-1.5
+`) [dax_battery_orderaudit56_extra]
+- `VAR T=CROSSJOIN(VALUES(Facts[Sales]),VALUES(Facts[Note])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Note]
+,
+-1.5,
+0,
+2.5,
+10.5,
+20,
+,Paid`) [dax_battery_orderaudit56_extra]
+- `VAR T=CROSSJOIN(VALUES(Facts[Sales]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+,0
+-1.5,0
+0,0
+2.5,0
+10.5,0
+`) [dax_battery_orderaudit56_extra]
+- `VAR T=FILTER(ALLSELECTED(Facts),Facts[Quantity]>1) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(ALL(Facts[Quantity]),ALL(Facts[Region])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,East
+1,East
+2,East
+3,Eas`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(ALL(Facts[Region]),ALL(Facts[Quantity])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,0
+West,0
+North,0
+East`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(ALL(Facts[Sales]),ALL(Facts[Quantity])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity]
+,0
+-1.5,0
+0,0
+2.5,0
+10.5,0
+`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(DISTINCT(Facts[Note]),VALUES(Facts[Sales])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,
+Paid,
+Late,
+,-1.5
+Paid,-1.5
+L`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(DISTINCT(Facts[Region]),VALUES(Facts[Note])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region],'Facts'[Note]
+East,
+West,
+North,
+East,Paid
+W`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(DISTINCT(Facts[Region]),VALUES(Facts[Sales])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region],'Facts'[Sales]
+East,
+West,
+North,
+East,-1.5
+`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Quantity]),LEN(Facts[Quantity])>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note],'Facts'[Quantity]
+,0
+Paid,0
+Late,0
+,1
+Paid,1
+L`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Region]),LEN(Facts[Region])>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+Late,East
+,Wes`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Note]),FILTER(VALUES(Facts[Sales]),LEN(Facts[Sales])>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note],'Facts'[Sales]
+,-1.5
+Paid,-1.5
+Late,-1.5
+,0
+Pa`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Note]),VALUES(Facts[Region])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note],'Facts'[Region]
+,East
+Paid,East
+Late,East
+,Wes`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Region]),LEN(Facts[Region])>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Quantity],'Facts'[Region]
+0,East
+1,East
+2,East
+3,Eas`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Quantity]),VALUES(Facts[Note])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Quantity],'Facts'[Note]
+0,
+1,
+2,
+3,
+4,
+5,
+0,Paid
+1,P`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Quantity]),LEN(Facts[Quantity])>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region],'Facts'[Quantity]
+East,0
+West,0
+North,0
+East`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Note]),LEN(Facts[Note])>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Note]
+,Paid
+-1.5,Paid
+0,Paid
+2.5,Paid`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Region]),LEN(Facts[Region])>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Region]
+,East
+-1.5,East
+0,East
+2.5,Ea`) [dax_battery_orderaudit56_extra]
+- `VAR T=GENERATE(VALUES(Facts[Sales]),VALUES(Facts[Region])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Region]
+,East
+-1.5,East
+0,East
+2.5,Ea`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<=5)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]>=3),FILTER(Facts,Facts[Sales]>0)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>50)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]),Facts) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(ALL(Facts),Facts[Quantity]<2),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]="East"),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]="East"),FILTER(Facts,Facts[Sales]>50)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<5),CALCULATETABLE(ALL(Facts),Facts[Region]="East")) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<=4),FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<=4),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(ALL(Facts),Facts[Region]="West"),Facts) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(FILTER(Facts,Facts[Sales]>0),Facts,FILTER(ALL(Facts),Facts[Quantity]<=3)) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(Facts,FILTER(Facts,Facts[Sales]>100),Facts) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Note]
+
+Paid
+Late
+
+Paid
+Late`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Quantity]
+0
+1
+2
+3
+4
+5
+0
+1
+2
+3
+4
+5`) [dax_battery_orderaudit56_extra]
+- `VAR T=UNION(VALUES(Facts[Region]),VALUES(Facts[Region])) RETURN TOCSV(T,100)` (Power BI: `'Facts'[Region]
+East
+West
+North
+East
+West
+North`) [dax_battery_orderaudit56_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 
