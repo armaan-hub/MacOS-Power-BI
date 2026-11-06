@@ -23,6 +23,21 @@ MEASURED = (
     (f'CONCATENATEX({UNION},Facts[Sales],",")', "-1.5,0,10.5,,2.5"),
     (f'CALCULATE(CONCATENATEX({UNION},Facts[Region],","),Facts[Note]="Paid")', "East,East,West,East,North"),
     (f'CALCULATE(CONCATENATEX({UNION},Facts[Note],","),Facts[Quantity]<>3)', "Paid,Paid,Paid,,Late"),
+    # second grid (1500 probes): lists of ALL / DISTINCT / FILTER(VALUES), numeric columns, three-arm unions, TOPN arms, FILTER(ALLSELECTED)
+    ('CALCULATE(CONCATENATEX(GENERATE(ALL(Facts[Quantity]),ALL(Facts[Region])),Facts[Region],","),Facts[Quantity]<>3)', "East,East,East,East,East,East,West,West,West,West,West,West,North,North,North,North,North,North"),
+    ('CALCULATE(CONCATENATEX(GENERATE(DISTINCT(Facts[Note]),VALUES(Facts[Sales])),Facts[Sales],"|"),Facts[Quantity]>=2,Facts[Quantity]<>3)', "|||2.5|2.5|2.5|10.5|10.5|10.5"),
+    ('CONCATENATEX(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])),Facts[Region],",")', "East,East,East,West,West,North,East,West"),
+    ('CALCULATE(CONCATENATEX(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales])),Facts[Sales],","),Facts[Quantity]<>3)', ",-1.5,0,2.5,10.5,10.5,20"),
+    ('CALCULATE(CONCATENATEX(UNION(FILTER(ALL(Facts),Facts[Quantity]>2),TOPN(2,ALL(Facts),Facts[Sales]),Facts),Facts[Quantity],","),Facts[Sales]>0)', "3,4,5,2,3,2,3,5"),
+    (
+        "TOCSV(FILTER(ALLSELECTED(Facts),Facts[Quantity]>1))",
+        "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2.5,5,East,\n,4,North,Late\n20,3,West,\n10.5,2,East,Paid",
+    ),
+    (
+        'CALCULATE(TOCSV(FILTER(ALLSELECTED(Facts),Facts[Quantity]>1),3),Facts[Quantity]<>3)',
+        "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2.5,5,East,\n,4,North,Late\n10.5,2,East,Paid",
+    ),
+    ('CALCULATE(TOCSV(ALLSELECTED(Facts),1),Facts[Quantity]>1)', None),
     (f'CONCATENATEX({GEN},Facts[Region],",")', "East,West,North,East,West,North,East,West,North"),
     (f'CALCULATE(CONCATENATEX({GEN},Facts[Region],","),Facts[Region]<>"East")', "West,North,West,North,West,North"),
     (f'CALCULATE(CONCATENATEX({GEN},Facts[Note],","),Facts[Region]<>"East")', ",,Paid,Paid,Late,Late"),
@@ -39,10 +54,9 @@ MEASURED = (
 
 # not measured: refused (a rejection is allowed, a wrong answer is not)
 REFUSED = (
-    'CALCULATE(TOCSV(ALLSELECTED(Facts),2),Facts[Quantity]>=2)',  # the cut-off of a reversed walk
-    'CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Quantity]>=2)',
+    'CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Quantity]>=2)',  # every row asked for under a reversed walk
     'CALCULATE(TOCSV(ALLSELECTED(Facts)),Facts[Quantity]>=0)',  # a filter that keeps every row
-    'CALCULATE(CONCATENATEX(UNION(FILTER(Facts,Facts[Quantity]<3),FILTER(Facts,Facts[Quantity]>3)),Facts[Region],","),Facts[Quantity]<>3)',  # arms a filter reaches
+    'CALCULATE(CONCATENATEX(GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Note]),Facts[Region]="East")),Facts[Note],","),Facts[Quantity]<>3)',  # a right list that reads the left row
 )
 
 
@@ -58,7 +72,10 @@ class MeasuredShapes(unittest.TestCase):
     def test_measured_answers(self):
         for expression, expected in MEASURED:
             with self.subTest(expression=expression):
-                self.assertEqual(dax.local(expression), expected)
+                if expected is None:  # answered with the first row of the storage order (7 grid shapes matched main)
+                    self.assertTrue(dax.local(expression).startswith("'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid"))
+                else:
+                    self.assertEqual(dax.local(expression), expected)
 
     def test_refused_shapes_are_not_answered(self):
         for expression in REFUSED:

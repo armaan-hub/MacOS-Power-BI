@@ -4026,6 +4026,35 @@ _CONCATENATE_FILTERED_UNMODELLED_WALKS = frozenset({"TOPN", "ALLSELECTED"})  # T
 _CONCATENATE_MEASURED_WALKS = frozenset({"VALUES", "ALL", "ALLSELECTED", "FILTER", "CALCULATETABLE", "DISTINCT", "SUMMARIZE", "ADDCOLUMNS", "TOPN"})  # Task 65: the table walks whose row order the local engine reproduces; a folded body is answered only over a bare table or these (ALLEXCEPT, GENERATE, SUMMARIZECOLUMNS, UNION, ALLNOBLANKROW, SELECTCOLUMNS are not)
 
 
+def _independent_column_list(node: tuple[Any, ...]) -> bool:
+    """Task 66: the distinct values of ONE column (VALUES / DISTINCT / ALL of a column, or a FILTER of them whose condition reads only that
+    column), a list that cannot read the row of the table it is paired with."""
+    if node[0] == "table_call" and node[1] in {"VALUES", "DISTINCT"}:
+        return node[2][0] == "reference"
+    if node[0] == "call" and node[1] == "ALL" and len(node[2]) == 1:
+        return node[2][0][0] == "reference"
+    if node[0] == "call" and node[1] == "FILTER" and len(node[2]) == 2 and _independent_column_list(node[2][0]):
+        source = node[2][0][2] if node[2][0][0] == "table_call" else node[2][0][2][0]
+        names: set[tuple[str, str]] = set()
+        ok = [True]
+
+        def walk(part: Any) -> None:
+            if isinstance(part, tuple):
+                if part and part[0] == "reference":
+                    names.add((str(part[1] or "").casefold(), str(part[2]).casefold()))
+                elif part and (part[0] == "var" or (part[0] == "call" and part[1] in {"EARLIER", "EARLIEST", "CALCULATE", "CALCULATETABLE", "SELECTEDVALUE"})):
+                    ok[0] = False
+                for child in part:
+                    walk(child)
+            elif isinstance(part, list):
+                for child in part:
+                    walk(child)
+
+        walk(node[2][1])
+        return ok[0] and names <= {(str(source[1] or "").casefold(), str(source[2]).casefold())}
+    return False
+
+
 def _is_plain_fold_result(node: Any) -> bool:
     """Task 65: a column reference or a literal, the only branches a constant IF / COALESCE fold keeps as they are."""
     return isinstance(node, tuple) and bool(node) and node[0] in {"reference", "string", "number"}
@@ -4290,8 +4319,8 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                 raise MeasureError("The row order of a table of several columns is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # Power BI lists their combinations like SUMMARIZE
             return "dictionary"
         if function in {"FILTER", "CALCULATETABLE"} and arguments:
-            if arguments[0][0] == "call" and arguments[0][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[0][2]) == 1 and arguments[0][2][0][0] == "table":
-                return "scan"  # live Power BI: FILTER(ALL(table), condition) comes back in reverse storage order like FILTER(table, condition)
+            if arguments[0][0] == "call" and arguments[0][1] in {"ALL", "ALLNOBLANKROW", "ALLSELECTED"} and len(arguments[0][2]) == 1 and arguments[0][2][0][0] == "table":
+                return "scan"  # live Power BI: FILTER(ALL(table), condition) comes back in reverse storage order like FILTER(table, condition); Task 66: so does FILTER(ALLSELECTED(table), condition) (21 of 21 grid shapes)
             base = _tocsv_row_order(arguments[0])
             if base in {"scan", "constant", "dictionary", "grouped"}:
                 return base
@@ -4343,6 +4372,8 @@ def _tocsv_scan_table_node(node: tuple[Any, ...]) -> tuple[tuple[Any, ...], bool
         node = node[2][0]
     if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW"}:
         node, via_all = node[2][0], True
+    elif node[0] == "call" and node[1] == "ALLSELECTED" and len(node[2]) == 1 and node[2][0][0] == "table":
+        node = node[2][0]  # the rows an outer filter leaves visible: not via ALL
     if node[0] == "table_call" and node[1] == "VALUES":
         node = node[2]
     return node, via_all
@@ -9860,37 +9891,40 @@ def _evaluate_measures_once(
             return rows
 
     def union_walked_rows(
-        union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]]
-    ) -> tuple[list[dict[str, Any]], bool]:
-        """Task 66 (live Power BI, audit grid: 37 of 37 shapes, and UNION(Facts, Facts) of Task 65): UNION lists its tables one after the other and
-        walks each of them on its own, in the dictionary order of the columns `nodes` read. Only unions of whole-table arms (a table, ALL(table),
-        FILTER / CALCULATETABLE of them) are walked; (rows, whether the walk is NOT measured). Under an outer filter only ALL-rooted arms are measured."""
+        union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], topn_walked: bool = True
+    ) -> list[dict[str, Any]]:
+        """Task 66 (live Power BI, audit grids: 37 of 37 and 38 of 38 shapes, two and three arms, bare and under a CALCULATE filter, and
+        UNION(Facts, Facts) of Task 65): UNION lists its tables one after the other and walks each of them on its own, in the dictionary order of
+        the columns `nodes` read; a TOPN arm is walked by the heap as a TOPN read by this CONCATENATEX is. Only unions of whole-table arms (a
+        table, ALL(table), FILTER / CALCULATETABLE of them) and TOPN arms are walked; any other union keeps its rows as they come."""
         def whole_table(node: Any) -> bool:
+            if node[0] == "call" and node[1] == "TOPN":
+                return topn_walked  # walked by the heap as a TOPN read by this CONCATENATEX is (Task 62 / 65)
             arm_plan = dax_iteration_order.plan(node, variable_nodes.get)
             return arm_plan is not None and not (arm_plan.dedup or arm_plan.computed or arm_plan.projects or arm_plan.eager)
 
-        def all_rooted(node: Any) -> bool:
-            while node[0] == "call" and node[1] in {"FILTER", "CALCULATETABLE"} and node[2]:
-                node = node[2][0]
-            return node[0] == "call" and node[1] == "ALL" and len(node[2]) == 1 and node[2][0][0] == "table"
-
         arms = union_node[2]
         if len(arms) < 2 or not all(whole_table(arm) for arm in arms):
-            return rows, False
-        if evaluation_filter_ids and not all(all_rooted(arm) for arm in arms):
-            return rows, True  # the rows under a filter that reaches into an arm were not measured
+            return rows
         first_headers = list(context["headers"])
         output: list[dict[str, Any]] = []
         for arm in arms:
-            arm_context, arm_rows = table_argument_value(arm)
+            is_topn = arm[0] == "call" and arm[1] == "TOPN"
+            if is_topn:
+                topn_walk_nodes[id(arm)] = nodes
+                topn_walk_under_filter.add(id(arm))
+            try:
+                arm_context, arm_rows = table_argument_value(arm)
+            finally:
+                if is_topn:
+                    topn_walk_nodes.pop(id(arm), None)
+                    topn_walk_under_filter.discard(id(arm))
             if len(arm_context["headers"]) != len(first_headers):
-                return rows, False
-            walked = dictionary_ordered_rows(arm, arm_context, arm_rows, nodes)
+                return rows
+            walked = arm_rows if is_topn else dictionary_ordered_rows(arm, arm_context, arm_rows, nodes)
             for row in (typed_row(arm_context, r) for r in walked):
                 output.append({h: row[o] for h, o in zip(first_headers, arm_context["headers"])})
-        if len(output) != len(rows):
-            return rows, False
-        return output, False
+        return output if len(output) == len(rows) else rows
 
     def summarize_related_group(
         context: dict[str, Any], reference: tuple[Any, ...], own_header: str | None
@@ -11358,14 +11392,11 @@ def _evaluate_measures_once(
             right_headers = list(right_context["headers"])
             right_types = dict(right_context.get("column_types", {}))
             right_lineage = base_lineage(right_context)
-        def values_of_column(node: tuple[Any, ...]) -> bool:
-            return node[0] == "table_call" and node[1] == "VALUES" and node[2][0] == "reference"
-
         if (
-            values_of_column(arguments[0]) and values_of_column(arguments[1]) and len(pending) > 1
+            _independent_column_list(arguments[0]) and _independent_column_list(arguments[1]) and len(pending) > 1
             and all(len(matches) > 1 and matches == pending[0][1] for _left, matches in pending)
         ):
-            # Task 66 (live Power BI, audit grid: 26 of 26 shapes over two VALUES(column) arguments, bare and under a CALCULATE filter): the two
+            # Task 66 (live Power BI, audit grids: 26 of 26 and 239 of 239 shapes over two lists of one column each, bare and under a CALCULATE filter): the two
             # lists do not depend on each other, so Power BI walks the RIGHT list as the major key and the left one fastest
             for position in range(len(pending[0][1])):
                 for left, matches in pending:
@@ -21235,7 +21266,7 @@ def _evaluate_measures_once(
                 allselected_source = table_node[2][0]
                 removed = total_row_count < full_row_count(allselected_source)
                 filtered_here = has_column_filter(allselected_source)
-                if (removed or filtered_here) and (arguments[0][0] == "let" or (removed and (max_rows < 0 or max_rows < total_row_count)) or not removed):
+                if (removed or filtered_here) and (arguments[0][0] == "let" or (removed and max_rows < 0) or not removed):
                     raise MeasureError("The row order of ALLSELECTED(table) under an outer filter is not modelled in the local engine for this shape.")
                 reverse = removed
             elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
@@ -21570,9 +21601,8 @@ def _evaluate_measures_once(
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
-            union_walk_unmeasured = False
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
-                iteration_rows, union_walk_unmeasured = union_walked_rows(walked_table, context, iteration_rows, read_nodes)
+                iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)
             if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
                 iteration_rows = context["swi_walk_rows"]  # Task 49: SUBSTITUTEWITHINDEX result, walked as its left table is
             def order_value(expression: tuple[Any, ...], inner: tuple[Any, ...]) -> Any:
@@ -21591,8 +21621,6 @@ def _evaluate_measures_once(
                     raise MeasureError("A CONCATENATEX of dates on 9999-12-31 or later is not modelled by the local engine.")
                 text = dax_typed.to_text(double_as_text(arguments[1], body_value, inner))
                 entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
-            if union_walk_unmeasured and not order_spec and len({text for _key, text in entries}) > 1:
-                raise MeasureError("CONCATENATEX over a UNION of tables an outer filter reaches is walked in an order the local engine does not model.")
             if allselected_walk_unmeasured and len({text for _key, text in entries}) > 1:
                 raise MeasureError("CONCATENATEX over ALLSELECTED(table) under an outer filter, reading several columns, is walked in an order the local engine does not model.")
             if walk_refusal is not None and (not entries or len({text for _key, text in entries}) > 1 or not _order_free_text_body(arguments[1])):
