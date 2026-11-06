@@ -1,0 +1,232 @@
+{
+ "items": [
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(ADDCOLUMNS(Facts,\"r\",RANKX(ALL(Facts),Facts[Sales])),Facts[Sales],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": ",0,20",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(ADDCOLUMNS(Facts,\"r\",RANKX(ALL(Facts),Facts[Sales])),Facts[Sales],\",\"),Facts[Region]=\"West\")",
+   "powerbi": "0,20",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(ALLEXCEPT(Facts,Facts[Quantity]),Facts[Sales],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "2.5,20,-1.5,10.5,0,",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(ALLEXCEPT(Facts,Facts[Sales]),Facts[Note],\",\"),Facts[Sales]>0)",
+   "powerbi": ",,Paid,Paid,Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(ALLEXCEPT(Facts,Facts[Sales]),Facts[Quantity],\",\"),Facts[Quantity]<>3)",
+   "powerbi": "5,3,1,2,0,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(GROUPBY(Facts,Facts[Note],\"m\",MAXX(CURRENTGROUP(),Facts[Sales])),Facts[Note],\",\"),Facts[Note]<>\"Late\")",
+   "powerbi": ",Paid",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(GROUPBY(Facts,Facts[Quantity],\"m\",MAXX(CURRENTGROUP(),Facts[Sales])),Facts[Quantity],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": "0,3,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZECOLUMNS(Facts[Note],Facts[Region]),Facts[Region],\",\"),Facts[Quantity]>1)",
+   "powerbi": "East,West,East,North",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZECOLUMNS(Facts[Sales],Facts[Note]),Facts[Note],\",\"),Facts[Quantity]>1)",
+   "powerbi": ",,Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(SUMMARIZECOLUMNS(Facts[Sales],Facts[Quantity]),Facts[Sales],\",\"),Facts[Note]<>\"Late\")",
+   "powerbi": "0,-1.5,10.5,20,2.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(3,ADDCOLUMNS(Facts,\"r\",RANKX(ALL(Facts),Facts[Sales])),Facts[Sales]),Facts[Sales],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": ",0,20",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(3,GROUPBY(Facts,Facts[Note],\"m\",MAXX(CURRENTGROUP(),Facts[Sales])),Facts[Note]),Facts[Note],\",\"),Facts[Region]<>\"East\")",
+   "powerbi": ",Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(3,GROUPBY(Facts,Facts[Sales],\"m\",MAXX(CURRENTGROUP(),Facts[Sales])),Facts[Sales]),Facts[Sales],\",\"),Facts[Region]=\"West\")",
+   "powerbi": "0,20",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(3,SUMMARIZECOLUMNS(Facts[Region],Facts[Quantity]),Facts[Region]),Facts[Region],\",\"),Facts[Quantity]>1)",
+   "powerbi": "East,East,West,North",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(4,ALLEXCEPT(Facts,Facts[Sales]),Facts[Quantity]),Facts[Quantity],\",\"),Facts[Quantity]>1)",
+   "powerbi": "2,4,3,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(CONCATENATEX(TOPN(4,SUMMARIZECOLUMNS(Facts[Region],Facts[Sales]),Facts[Sales]),Facts[Sales],\",\"),Facts[Quantity]>1)",
+   "powerbi": "2.5,10.5,20,",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOCSV(ALLEXCEPT(Facts,Facts[Quantity]),100),Facts[Note]<>\"Late\")",
+   "powerbi": "'Facts'[Sales],'Facts'[Region],'Facts'[Note]\n2.5,East,\n20,West,\n-1.5,East,Paid\n10.5,East,Paid\n0,West,Paid\n,North,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOCSV(ALLEXCEPT(Facts,Facts[Quantity]),100),Facts[Region]<>\"East\")",
+   "powerbi": "'Facts'[Sales],'Facts'[Region],'Facts'[Note]\n2.5,East,\n20,West,\n-1.5,East,Paid\n10.5,East,Paid\n0,West,Paid\n,North,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOCSV(ALLEXCEPT(Facts,Facts[Sales]),100),Facts[Quantity]>=2)",
+   "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n1,East,Paid\n2,East,Paid\n0,West,Paid\n4,North,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOCSV(ALLEXCEPT(Facts,Facts[Sales]),100),Facts[Region]<>\"East\",Facts[Sales]>0)",
+   "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n1,East,Paid\n2,East,Paid\n0,West,Paid\n4,North,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOCSV(ALLEXCEPT(Facts,Facts[Sales]),100),Facts[Region]=\"West\")",
+   "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n1,East,Paid\n2,East,Paid\n0,West,Paid\n4,North,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOJSON(ALLEXCEPT(Facts,Facts[Quantity])),Facts[Note]<>\"Late\")",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[2.5, \"East\", null],\n\t\t[20.0, \"West\", null],\n\t\t[-1.5, \"East\", \"Paid\"],\n\t\t[10.5, \"East\", \"Paid\"],\n\t\t[0.0, \"West\", \"Paid\"],\n\t\t[null, \"North\", \"Late\"]\n\t]\n}",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOJSON(ALLEXCEPT(Facts,Facts[Quantity])),Facts[Sales]>0)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[2.5, \"East\", null],\n\t\t[20.0, \"West\", null],\n\t\t[-1.5, \"East\", \"Paid\"],\n\t\t[10.5, \"East\", \"Paid\"],\n\t\t[0.0, \"West\", \"Paid\"],\n\t\t[null, \"North\", \"Late\"]\n\t]\n}",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOJSON(ALLEXCEPT(Facts,Facts[Sales])),Facts[Note]=\"Paid\")",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[5, \"East\", null],\n\t\t[3, \"West\", null],\n\t\t[1, \"East\", \"Paid\"],\n\t\t[2, \"East\", \"Paid\"],\n\t\t[0, \"West\", \"Paid\"],\n\t\t[4, \"North\", \"Late\"]\n\t]\n}",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOJSON(ALLEXCEPT(Facts,Facts[Sales])),Facts[Quantity]>1)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[5, \"East\", null],\n\t\t[3, \"West\", null],\n\t\t[1, \"East\", \"Paid\"],\n\t\t[2, \"East\", \"Paid\"],\n\t\t[0, \"West\", \"Paid\"],\n\t\t[4, \"North\", \"Late\"]\n\t]\n}",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(TOJSON(ALLEXCEPT(Facts,Facts[Sales])),Facts[Region]<>\"East\")",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[5, \"East\", null],\n\t\t[3, \"West\", null],\n\t\t[1, \"East\", \"Paid\"],\n\t\t[2, \"East\", \"Paid\"],\n\t\t[0, \"West\", \"Paid\"],\n\t\t[4, \"North\", \"Late\"]\n\t]\n}",
+   "now": "DIFF"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"r\",RANKX(ALL(Facts),Facts[Sales])),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALLEXCEPT(Facts,Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "East,West,East,East,West,North",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALLEXCEPT(Facts,Facts[Sales]),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(GROUPBY(Facts,Facts[Note],\"m\",MAXX(CURRENTGROUP(),Facts[Sales])),Facts[Note],\",\")",
+   "powerbi": ",Paid,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(GROUPBY(Facts,Facts[Quantity],\"m\",MAXX(CURRENTGROUP(),Facts[Sales])),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Note],Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": "2.5,20,-1.5,0,10.5,",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Region],Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5,0,3,4",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,ALLEXCEPT(Facts,Facts[Sales]),Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "2,4,3,5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(TOPN(4,GROUPBY(Facts,Facts[Sales],\"m\",MAXX(CURRENTGROUP(),Facts[Sales])),Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": "0,2.5,20,10.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(ALLEXCEPT(Facts,Facts[Quantity]),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Region],'Facts'[Note]\n2.5,East,\n20,West,\n-1.5,East,Paid\n10.5,East,Paid\n0,West,Paid\n,North,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(ALLEXCEPT(Facts,Facts[Sales]),100)",
+   "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n1,East,Paid\n2,East,Paid\n0,West,Paid\n4,North,Late",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "TOJSON(ALLEXCEPT(Facts,Facts[Quantity]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[2.5, \"East\", null],\n\t\t[20.0, \"West\", null],\n\t\t[-1.5, \"East\", \"Paid\"],\n\t\t[10.5, \"East\", \"Paid\"],\n\t\t[0.0, \"West\", \"Paid\"],\n\t\t[null, \"North\", \"Late\"]\n\t]\n}",
+   "now": "DIFF"
+  }
+ ]
+}

@@ -82,6 +82,10 @@ class _LogicalBlankText(str):
     """The empty text a logical operator's BLANK becomes beside a text in a table constructor: it reads as "" everywhere found, but FORMAT of it is an error in live Power BI (Task 27)."""
 
 
+class _KeySpaceUndecided(Exception):
+    """ALLEXCEPT over a key space whose order was not measured."""
+
+
 class MeasureError(ValueError):
     """A measure definition is invalid or cannot be evaluated for this table."""
 
@@ -9791,7 +9795,8 @@ def _evaluate_measures_once(
         return profile_cache[key]
 
     def dictionary_ordered_rows(
-        table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False
+        table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False,
+        scan_filters: bool = False, keep_undecided: bool = False,
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
@@ -9838,6 +9843,10 @@ def _evaluate_measures_once(
 
         def take_expression(expression: tuple[Any, ...]) -> bool:
             sources = dax_iteration_order.columns_read([expression], lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS)
+            if sources is None and expression[0] == "call" and expression[1] == "RANKX" and len(expression[2]) >= 2 and _is_all_table_value_argument(expression[2][0]):
+                # Task 67 (live Power BI, audit2 grid): RANKX(ALL(table), expression) walks the table's rows for the expression; the columns the
+                # expression reads are the ones the added column pulls into the walk, the table itself reads none
+                sources = dax_iteration_order.columns_read([expression[2][1]], lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS)
             if sources is None:
                 return False
             for _table, name in sources:
@@ -9878,17 +9887,57 @@ def _evaluate_measures_once(
         if len({key[0] for key in combination}) != 1:
             return rows
         source = next(iter(combination.values()))[0]
+        scan_extras: list[str] = []  # SUMMARIZE of a table under an outer filter: the filtered columns that are not group columns
+        if plan.scanned and scan_filters:  # only the iterator that reads the groups (ADDMISSINGITEMS and the others read them by the group columns alone)
+            filtered = evaluation_contexts_by_id.get(source["id"], source).get("filter_column_rows") or {}
+            scan_extras = [column for column in source["headers"] if column in filtered and column not in {key[1] for key in combination}]
+            if not (table_node[0] == "call" and table_node[1] == "SUMMARIZE" and table_node[2][0][0] == "table"):
+                scan_extras = []  # a SUMMARIZE inside FILTER / CALCULATETABLE / ADDMISSINGITEMS: not measured, the group columns alone order it as before
         try:
-            profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
-            in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
-            major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
+            try:
+                profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
+                in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+                if plan.measured_space and not any(profile.is_date for profile in profiles.values()):  # dictionary order only inside the measured key space
+                    decided = dax_iteration_order.multi_column_order(len(source["rows"]), list(profiles.values()))
+                    if plan.scanned:  # SUMMARIZE of a table: a measured sorted space lifts the older budget (Facts of 12 rows, Sales up to 999), nothing else changes
+                        if decided:
+                            in_dictionary_order = True
+                    elif decided is None and len(profiles) > 1:
+                        raise _KeySpaceUndecided()
+                    elif decided is not None:  # one column with a space no measured point covers keeps the older budget test
+                        in_dictionary_order = decided
+                major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
-            def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
-                return tuple(profiles[key].key(combination[key][2](row)) for key in major_first)
+                def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
+                    return tuple(profiles[key].key(combination[key][2](row)) for key in major_first)
 
-            return sorted(rows, key=walk_key) if in_dictionary_order else rows
-        except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
-            return rows
+                if scan_extras:
+                    # Task 67 (live Power BI, held-out grid, 7 of 7 shapes of SUMMARIZE(Facts, column, "s", SUM(...)) under filters on other columns): the
+                    # scan groups by the group columns AND the filtered columns in dictionary order (the last table column the major key) and the groups
+                    # come out in the order their first scanned combination has
+                    extra_profiles = {column: source_profile(source, column) for column in scan_extras}
+                    if not in_dictionary_order or not dax_iteration_order.grouped(len(source["rows"]), [*profiles.values(), *extra_profiles.values()], True, beside_doubles):
+                        return rows
+                    scan_order = sorted([*combination, *((source["id"], column) for column in scan_extras)], key=lambda key: -source["headers"].index(key[1]))
+                    scan_profiles = {**profiles, **{(source["id"], column): profile for column, profile in extra_profiles.items()}}
+                    group_keys = list(major_first)
+                    _filtered_context, scanned_rows = table_argument_value(table_node[2][0])
+                    first_seen: dict[tuple[Any, ...], tuple[Any, ...]] = {}
+                    for scanned in scanned_rows:
+                        values = {(source["id"], column): typed_cell(source, column, scanned.get(column)) for column in source["headers"]}
+                        group = tuple(scan_profiles[key].key(values[key]) for key in group_keys)
+                        walk = tuple(scan_profiles[key].key(values[key]) for key in scan_order)
+                        if group not in first_seen or walk < first_seen[group]:
+                            first_seen[group] = walk
+                    return sorted(rows, key=lambda row: first_seen[tuple(profiles[key].key(combination[key][2](row)) for key in group_keys)])
+                return sorted(rows, key=walk_key) if in_dictionary_order else rows
+            except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
+                return rows
+        except _KeySpaceUndecided:
+            if keep_undecided:  # a table that may be read in order by a later TOCSV / TOJSON: the rows stay as they come, the context says so
+                context["order_undecided"] = True
+                return rows
+            raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.") from None
 
     def union_walked_rows(
         union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], topn_walked: bool = True
@@ -12304,7 +12353,7 @@ def _evaluate_measures_once(
         walk = dax_iteration_order.plan(argument)
         if walk is not None and walk.dedup and len(rows) > 1:
             lineage = base_lineage(context)
-            rows = dictionary_ordered_rows(argument, context, rows, [("reference", "", h) for h in context["headers"] if h in lineage])
+            rows = dictionary_ordered_rows(argument, context, rows, [("reference", "", h) for h in context["headers"] if h in lineage], keep_undecided=True)
         return context, rows
 
     def cell_to_date(context: dict[str, Any], header: str, value: Any) -> date | None:
@@ -13217,10 +13266,14 @@ def _evaluate_measures_once(
                 if key not in seen_tuples:
                     seen_tuples.add(key)
                     distinct_rows.append(values)
-            return derived_table(
+            allexcept_context, allexcept_rows = derived_table(
                 remaining, distinct_rows, {header: (kept_context, header) for header in remaining},
                 {header: kept_context.get("column_types", {}).get(header, "text") for header in remaining},
             )
+            walk = dax_iteration_order.plan(argument)  # Task 67: the kept columns walk in dictionary order (TOCSV / TOJSON read this table too)
+            if walk is not None and walk.dedup and len(allexcept_rows) > 1:
+                allexcept_rows = dictionary_ordered_rows(argument, allexcept_context, allexcept_rows, [("reference", "", h) for h in remaining], keep_undecided=True)
+            return allexcept_context, allexcept_rows
         if argument[0] == "call" and argument[1] in {
             "ALL", "ALLNOBLANKROW", "ALLSELECTED"
         }:
@@ -21227,6 +21280,8 @@ def _evaluate_measures_once(
             if len({h.casefold() for h in headers}) != len(headers):
                 raise MeasureError(f"{function} table contains duplicate column names.")
             total_row_count = len(iteration_rows)
+            if context.get("order_undecided") and total_row_count > 1:
+                raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
 
             def full_row_count(source: tuple[Any, ...]) -> int:
                 base = resolve_table_context(str(source[1]))
@@ -21600,7 +21655,7 @@ def _evaluate_measures_once(
                         raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
-            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
+            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True)
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
                 iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)
             if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
