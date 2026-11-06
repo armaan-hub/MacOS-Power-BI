@@ -163,6 +163,18 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
     return None
 
 
+def _order_expressions(arguments: Sequence[Any]) -> tuple[Any, ...]:
+    """The expressions of an ORDERBY argument list, without the ASC / DESC (or 0 / 1) token that follows each one."""
+    kept: list[Any] = []
+    position = 0
+    while position < len(arguments):
+        kept.append(arguments[position])
+        position += 1
+        if position < len(arguments) and (arguments[position][0] == "table" and str(arguments[position][1]).upper() in {"ASC", "DESC"} or arguments[position][0] in {"number", "boolean"}):
+            position += 1
+    return tuple(kept)
+
+
 def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[Any]]:
     """Task 70 (live Power BI, rankx audit grid t70a): for every RANKX in `nodes` that ranks the rows of `table_name` through ALL / ALLSELECTED /
     VALUES / DISTINCT of its columns (or the table itself), returns the nodes with that table argument replaced by a number (the table is not
@@ -188,9 +200,19 @@ def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[A
         # by the columns of their ORDERBY (and PARTITIONBY) arguments, as the RANKX body does; the relation is replaced by a number as above
         if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2]:
             index = 1 if node[1] == "RANK" and node[2][0][0] == "table" and str(node[2][0][1]).upper() in {"DENSE", "SKIP"} else 0
-            if len(node[2]) > index and ranks_walked_table(node[2][index]):
-                arguments = tuple(("number", 0) if position == index else argument for position, argument in enumerate(node[2]))
-                return ("call", node[1], arguments, *node[3:])
+            relation = node[2][index] if len(node[2]) > index else None
+            whole_table = isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table"
+            # measured on one column only (live Power BI, rank audit grid t71a): a relation of several columns is walked in an order the ORDERBY columns do not give
+            one_column = isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and len({str(a[2]).casefold() for a in relation[2] if a[0] == "reference"}) == 1
+            if relation is not None and not whole_table and one_column and ranks_walked_table(relation):
+                # only the ORDERBY and PARTITIONBY expressions are read by the walk: the relation, the ties and blanks keywords and the ASC / DESC tokens are not
+                kept = []
+                for argument in node[2]:
+                    if isinstance(argument, tuple) and argument[:2] == ("call", "ORDERBY") and isinstance(argument[2], tuple):
+                        kept.append(("call", "ORDERBY", _order_expressions(argument[2])))
+                    elif isinstance(argument, tuple) and argument[:2] == ("call", "PARTITIONBY"):
+                        kept.append(argument)
+                return ("call", node[1], tuple(kept))
         return tuple(rebuild(child) if isinstance(child, tuple) else child for child in node)
 
     rebuilt = [rebuild(node) for node in nodes]
