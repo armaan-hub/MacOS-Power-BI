@@ -9882,16 +9882,44 @@ def _evaluate_measures_once(
         if len({key[0] for key in combination}) != 1:
             return rows
         source = next(iter(combination.values()))[0]
-        if any(name not in {h.casefold() for h in source["headers"]} or not source_profile(source, next(h for h in source["headers"] if h.casefold() == name)).is_numeric for name in plan.excepted):
-            return rows  # Task 67: an ALLEXCEPT that keeps filters on a text column walks in source order (measured on Facts)
+        scan_extras: list[str] = []  # SUMMARIZE of a table under an outer filter: the filtered columns that are not group columns
+        if plan.scanned:
+            filtered = evaluation_contexts_by_id.get(source["id"], source).get("filter_column_rows") or {}
+            scan_extras = [column for column in source["headers"] if column in filtered and column not in {key[1] for key in combination}]
+            if scan_extras and not (table_node[0] == "call" and table_node[1] == "SUMMARIZE" and table_node[2][0][0] == "table"):
+                raise MeasureError("The group order of SUMMARIZE under a filter on another column is not modelled in the local engine.")
         try:
             profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
             in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+            if plan.key_space_limit is not None:  # ALLEXCEPT: only a small key space was measured in dictionary order
+                key_space = 1
+                for profile in profiles.values():
+                    key_space *= profile.distinct
+                in_dictionary_order = in_dictionary_order and key_space <= plan.key_space_limit
             major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
             def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
                 return tuple(profiles[key].key(combination[key][2](row)) for key in major_first)
 
+            if scan_extras:
+                # Task 67 (live Power BI, held-out grid, 7 of 7 shapes of SUMMARIZE(Facts, column, "s", SUM(...)) under filters on other columns): the
+                # scan groups by the group columns AND the filtered columns in dictionary order (the last table column the major key) and the groups
+                # come out in the order their first scanned combination has
+                extra_profiles = {column: source_profile(source, column) for column in scan_extras}
+                if not in_dictionary_order or not dax_iteration_order.grouped(len(source["rows"]), [*profiles.values(), *extra_profiles.values()], True, beside_doubles):
+                    return rows
+                scan_order = sorted([*combination, *((source["id"], column) for column in scan_extras)], key=lambda key: -source["headers"].index(key[1]))
+                scan_profiles = {**profiles, **{(source["id"], column): profile for column, profile in extra_profiles.items()}}
+                group_keys = list(major_first)
+                _filtered_context, scanned_rows = table_argument_value(table_node[2][0])
+                first_seen: dict[tuple[Any, ...], tuple[Any, ...]] = {}
+                for scanned in scanned_rows:
+                    values = {(source["id"], column): typed_cell(source, column, scanned.get(column)) for column in source["headers"]}
+                    group = tuple(scan_profiles[key].key(values[key]) for key in group_keys)
+                    walk = tuple(scan_profiles[key].key(values[key]) for key in scan_order)
+                    if group not in first_seen or walk < first_seen[group]:
+                        first_seen[group] = walk
+                return sorted(rows, key=lambda row: first_seen[tuple(profiles[key].key(combination[key][2](row)) for key in group_keys)])
             return sorted(rows, key=walk_key) if in_dictionary_order else rows
         except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
             return rows

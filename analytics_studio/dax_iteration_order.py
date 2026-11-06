@@ -29,6 +29,7 @@ CROSS_TABLE_CALLS = frozenset({"RELATED", "RELATEDTABLE", "EARLIER", "EARLIEST",
 _SINGLE_COLUMN_BUDGET = 8200
 # Several columns are walked in dictionary order while (product of their distinct counts) x (rows) stays under this; a date
 # counts by its range in days, and a set with a date stays under the tighter limit (probed on date spans of 30 to 365 days).
+ALLEXCEPT_KEY_SPACE = 54  # largest measured product of distinct counts of the columns an ALLEXCEPT lists that still came out in dictionary order
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -45,7 +46,8 @@ class Plan:
     computed: dict[str, Any] = field(default_factory=dict)
     eager: list[Any] = field(default_factory=list)
     projects: bool = False  # SELECTCOLUMNS: the columns it reads are resolved in the table it selects from
-    excepted: tuple[str, ...] = ()  # ALLEXCEPT: the columns it keeps filters on (casefolded); when one of them is text the rows keep the storage order
+    scanned: bool = False  # SUMMARIZE of a table: an outer filter on another column joins the sort key of the groups (measured), which is not modelled
+    key_space_limit: int | None = None  # ALLEXCEPT: the largest product of distinct counts of its columns still walked in dictionary order (ALLEXCEPT_KEY_SPACE)
 
 
 def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | None:
@@ -99,7 +101,7 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
     if name == "SUMMARIZE":
         if any(isinstance(arg, tuple) and arg[0] == "call" and arg[1] in {"ROLLUP", "ROLLUPGROUP"} for arg in arguments[1:]):
             return None
-        return Plan(dedup=True) if plan(arguments[0], bound) is not None else None
+        return Plan(dedup=True, scanned=arguments[0][0] == "table") if plan(arguments[0], bound) is not None else None
     if name in {"VALUES", "ALL", "DISTINCT"}:
         if all(argument[0] == "reference" for argument in arguments):
             return Plan(dedup=True)
@@ -113,10 +115,20 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
             groups.append(argument)
         if groups:
             return Plan(dedup=True)  # Task 67 (live Power BI, audit2 grid): GROUPBY lists its groups in the dictionary order of the group columns, like SUMMARIZE
-    if name == "SUMMARIZECOLUMNS" and arguments and all(argument[0] == "reference" for argument in arguments):
-        return Plan(dedup=True)  # Task 67 (live Power BI, audit2 grid): SUMMARIZECOLUMNS of plain columns walks its combinations in dictionary order
+    if name == "SUMMARIZECOLUMNS" and arguments and arguments[0][0] == "reference":
+        groups = 0
+        while groups < len(arguments) and arguments[groups][0] == "reference":
+            groups += 1
+        rest = arguments[groups:]  # then name / measure pairs
+        if len(rest) % 2 == 0 and all(rest[i][0] == "string" for i in range(0, len(rest), 2)):
+            # Task 67 (live Power BI, audit2 + held-out grids): SUMMARIZECOLUMNS walks its combinations in dictionary order of the group columns, the
+            # last table column the major key, with or without measure columns; an outer filter on another column does not join the key
+            return Plan(dedup=True)
     if name == "ALLEXCEPT" and len(arguments) >= 2 and arguments[0][0] == "table" and all(argument[0] == "reference" for argument in arguments[1:]):
-        return Plan(dedup=True, excepted=tuple(str(argument[2]).casefold() for argument in arguments[1:]))  # Task 67 (live Power BI, audit2 grid): ALLEXCEPT is walked over its kept columns in dictionary order when the excepted column is numeric
+        # Task 67 (live Power BI, audit2 + held-out grids): ALLEXCEPT lists the other columns of the table in the dictionary order of those columns
+        # (last table column the major key) while the product of their distinct counts is small: measured sorted at 54 and below (Facts, 10 shapes),
+        # measured in storage order at 108 (2 shapes). Between and above the rows stay as they come.
+        return Plan(dedup=True, key_space_limit=ALLEXCEPT_KEY_SPACE)
     if name == "ALLSELECTED" and len(arguments) == 1 and arguments[0][0] == "table":
         return Plan()  # Task 51 (live Power BI 2026-11-05): ALLSELECTED(table) is walked as ALL(table) is
     return None
