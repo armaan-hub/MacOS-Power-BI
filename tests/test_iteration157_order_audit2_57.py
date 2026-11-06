@@ -3,8 +3,8 @@
 Power BI answers below are recorded values of tools/parity/task67_order_audit2_spec.json (38 shapes that main answered wrong),
 plus two measured matches of the 1,500-shape grid (one D row and the text-column guard):
   A. ALLEXCEPT(table, columns): the columns it lists walk in dictionary order (later table column is the major key, text first-seen with
-     BLANK first, numbers sorted) while the dense key space (product of the value-range sizes) is at most 567 (and space x (rows + 3) at most
-     6,804); at 792 (standard Facts, Sales x Quantity x Region or Note) Power BI keeps the storage order; in between the engine refuses.
+     BLANK first, numbers sorted) while the dense key space (product of the value-range sizes) is small for the number of rows, and in storage
+     order when it is large (792 over 6 rows, 8,982 over 12 rows); the engine uses the measured (space, rows) points and refuses between them.
   B. GROUPBY(table, group column, ...): the groups come out in the dictionary order of the group column.
   C. SUMMARIZECOLUMNS of plain columns: the combinations walk in dictionary order of their columns.
   C2. The same with measure columns ("s", SUM(...)) after the group columns.
@@ -74,7 +74,16 @@ DATASET_3 = [("4", "1", "West", ""), ("2", "6", "North", "Paid"), ("9", "4", "Ea
              ("7", "8", "North", "Late"), ("1", "3", "East", ""), ("6", "5", "West", "Late"), ("3", "7", "North", "Paid")]
 DATASET_2 = [("5", "7", "North", "Late"), ("", "2", "East", ""), ("5", "3", "West", "Paid"), ("-2", "7", "East", "Paid"), ("8", "1", "North", ""),
              ("1.5", "2", "West", "Late"), ("8", "9", "East", "Paid"), ("0", "3", "North", "Paid"), ("3", "5", "West", "")]
+DATASET_4 = [("500","40","West",""),("12","3","North","Paid"),("999","77","East","Late"),("","12","West","Paid"),("7","81","North","Late"),("250","5","East",""),("61","60","West","Late"),("3","22","North","Paid"),("800","9","East","Paid"),("45","33","West",""),("130","18","North","Late"),("2","70","East","Paid")]
 OTHER_ROWS = (
+    (DATASET_4, 'TOCSV(ALLEXCEPT(Facts,Facts[Quantity],Facts[Region]),100)',
+     "'Facts'[Sales],'Facts'[Note]\n45,\n250,\n500,\n,Paid\n2,Paid\n3,Paid\n12,Paid\n800,Paid\n7,Late\n61,Late\n130,Late\n999,Late"),
+    (DATASET_4, 'TOCSV(ALLEXCEPT(Facts,Facts[Quantity]),100)',
+     "'Facts'[Sales],'Facts'[Region],'Facts'[Note]\n500,West,\n12,North,Paid\n999,East,Late\n,West,Paid\n7,North,Late\n250,East,\n61,West,Late\n3,North,Paid\n800,East,Paid\n45,West,\n130,North,Late\n2,East,Paid"),
+    (DATASET_4, 'TOCSV(ALLEXCEPT(Facts,Facts[Note]),100)',
+     "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region]\n500,40,West\n12,3,North\n999,77,East\n,12,West\n7,81,North\n250,5,East\n61,60,West\n3,22,North\n800,9,East\n45,33,West\n130,18,North\n2,70,East"),
+    (DATASET_4, 'TOCSV(SUMMARIZE(Facts,Facts[Sales],"s",SUM(Facts[Quantity])),100)',
+     "'Facts'[Sales],[s]\n,12\n2,70\n3,22\n7,81\n12,3\n45,33\n61,60\n130,18\n250,5\n500,40\n800,9\n999,77"),
     (DATASET_3, 'TOCSV(ALLEXCEPT(Facts,Facts[Quantity]),100)',
      "'Facts'[Sales],'Facts'[Region],'Facts'[Note]\n4,West,\n1,East,\n,West,Paid\n2,North,Paid\n3,North,Paid\n6,West,Late\n7,North,Late\n9,East,Late"),
     (DATASET_3, 'TOCSV(ALLEXCEPT(Facts,Facts[Note]),100)',

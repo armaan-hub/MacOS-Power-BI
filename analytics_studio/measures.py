@@ -9897,11 +9897,15 @@ def _evaluate_measures_once(
             try:
                 profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
-                if plan.allexcept and in_dictionary_order:  # ALLEXCEPT: dictionary order only inside the measured key space
-                    decided = dax_iteration_order.allexcept_in_dictionary_order(len(source["rows"]), list(profiles.values()))
-                    if decided is None:
+                if plan.measured_space and not any(profile.is_date for profile in profiles.values()):  # dictionary order only inside the measured key space
+                    decided = dax_iteration_order.multi_column_order(len(source["rows"]), list(profiles.values()))
+                    if plan.scanned:  # SUMMARIZE of a table: a measured sorted space lifts the older budget (Facts of 12 rows, Sales up to 999), nothing else changes
+                        if decided:
+                            in_dictionary_order = True
+                    elif decided is None and len(profiles) > 1:
                         raise _KeySpaceUndecided()
-                    in_dictionary_order = decided
+                    elif decided is not None:  # one column with a space no measured point covers keeps the older budget test
+                        in_dictionary_order = decided
                 major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
                 def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
@@ -9930,7 +9934,7 @@ def _evaluate_measures_once(
             except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
                 return rows
         except _KeySpaceUndecided:
-            raise MeasureError("The row order of ALLEXCEPT for a key space between the measured sizes is not modelled in the local engine.") from None
+            raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.") from None
 
     def union_walked_rows(
         union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], topn_walked: bool = True

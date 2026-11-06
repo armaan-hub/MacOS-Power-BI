@@ -29,11 +29,13 @@ CROSS_TABLE_CALLS = frozenset({"RELATED", "RELATEDTABLE", "EARLIER", "EARLIEST",
 _SINGLE_COLUMN_BUDGET = 8200
 # Several columns are walked in dictionary order while (product of their distinct counts) x (rows) stays under this; a date
 # counts by its range in days, and a set with a date stays under the tighter limit (probed on date spans of 30 to 365 days).
-# ALLEXCEPT (Task 67, live Power BI, Facts of 6, 9 and 8 rows): the columns it lists come out in dictionary order while the dense key space (product of
-# the value-range sizes of the columns) stays small. Measured sorted up to a space of 567 (9 rows, space x (rows + 3) = 6,804) and in storage order at 792
-# (6 rows, space x (rows + 3) = 7,128); in between nothing was measured.
-_ALLEXCEPT_SORTED_SPACE, _ALLEXCEPT_SORTED_BUDGET = 567, 6804
-_ALLEXCEPT_STORAGE_SPACE, _ALLEXCEPT_STORAGE_BUDGET = 792, 7128
+# Task 67 (live Power BI, six Facts row sets of 6 to 12 rows, 1 to 3 listed columns, ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS): a table of listed columns
+# comes out in dictionary order (last table column the major key) while its dense key space (product of the value-range sizes of the columns) is small
+# for the number of rows, and in storage order when the space is large. The measured boundary is not one number: a space of 792 over 6 rows is storage
+# order, 2,994 over 12 rows is still sorted. Only the measured points are used, as (space, rows): a space no larger than a measured sorted one over no
+# more rows is sorted; a space no smaller than a measured storage-order one over no more rows is storage order; anything else is not decided.
+_MEASURED_SORTED = ((396, 6), (429, 7), (567, 9), (2994, 12))
+_MEASURED_STORAGE = ((792, 6), (8982, 12))
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -51,7 +53,7 @@ class Plan:
     eager: list[Any] = field(default_factory=list)
     projects: bool = False  # SELECTCOLUMNS: the columns it reads are resolved in the table it selects from
     scanned: bool = False  # SUMMARIZE of a table: an outer filter on another column joins the sort key of the groups (measured), which is not modelled
-    allexcept: bool = False  # ALLEXCEPT: dictionary order only inside the measured key space (allexcept_in_dictionary_order)
+    measured_space: bool = False  # ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS: dictionary order only inside the measured key space (multi_column_order)
 
 
 def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | None:
@@ -105,7 +107,7 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
     if name == "SUMMARIZE":
         if any(isinstance(arg, tuple) and arg[0] == "call" and arg[1] in {"ROLLUP", "ROLLUPGROUP"} for arg in arguments[1:]):
             return None
-        return Plan(dedup=True, scanned=arguments[0][0] == "table") if plan(arguments[0], bound) is not None else None
+        return Plan(dedup=True, scanned=arguments[0][0] == "table", measured_space=arguments[0][0] == "table") if plan(arguments[0], bound) is not None else None
     if name in {"VALUES", "ALL", "DISTINCT"}:
         if all(argument[0] == "reference" for argument in arguments):
             return Plan(dedup=True)
@@ -118,7 +120,7 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
                 break
             groups.append(argument)
         if groups:
-            return Plan(dedup=True)  # Task 67 (live Power BI, audit2 grid): GROUPBY lists its groups in the dictionary order of the group columns, like SUMMARIZE
+            return Plan(dedup=True, measured_space=True)  # Task 67 (live Power BI, audit2 grid): GROUPBY lists its groups in the dictionary order of the group columns, like SUMMARIZE
     if name == "SUMMARIZECOLUMNS" and arguments and arguments[0][0] == "reference":
         groups = 0
         while groups < len(arguments) and arguments[groups][0] == "reference":
@@ -127,11 +129,11 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         if len(rest) % 2 == 0 and all(rest[i][0] == "string" for i in range(0, len(rest), 2)):
             # Task 67 (live Power BI, audit2 + held-out grids): SUMMARIZECOLUMNS walks its combinations in dictionary order of the group columns, the
             # last table column the major key, with or without measure columns; an outer filter on another column does not join the key
-            return Plan(dedup=True)
+            return Plan(dedup=True, measured_space=True)
     if name == "ALLEXCEPT" and len(arguments) >= 2 and arguments[0][0] == "table" and all(argument[0] == "reference" for argument in arguments[1:]):
         # Task 67 (live Power BI, three Facts datasets): ALLEXCEPT lists the other columns of the table in the dictionary order of those columns
         # (last table column the major key, BLANK first, text first-seen, numbers sorted) inside the measured key space; see allexcept_in_dictionary_order
-        return Plan(dedup=True, allexcept=True)
+        return Plan(dedup=True, measured_space=True)
     if name == "ALLSELECTED" and len(arguments) == 1 and arguments[0][0] == "table":
         return Plan()  # Task 51 (live Power BI 2026-11-05): ALLSELECTED(table) is walked as ALL(table) is
     return None
@@ -359,18 +361,17 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, be
     return combinations * row_count <= budget
 
 
-def allexcept_in_dictionary_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
-    """True when the columns an ALLEXCEPT lists are walked in dictionary order, False when they keep the storage order, None when the key space lies
-    between the measured sorted and the measured storage-order spaces (not decided)."""
+def multi_column_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True when the columns of an ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS table are walked in dictionary order, False when they keep the storage
+    order, None when the key space is not covered by a measured point. Dates are not covered: they keep the older `grouped` test."""
     space = 1
     for profile in profiles:
         if profile.size is None:
             return False  # a column with no regular range: the order the app always used
         space *= profile.size
-    budget = space * (row_count + 3)
-    if space <= _ALLEXCEPT_SORTED_SPACE and budget <= _ALLEXCEPT_SORTED_BUDGET:
+    if any(space <= measured and row_count >= rows for measured, rows in _MEASURED_SORTED):
         return True
-    if space >= _ALLEXCEPT_STORAGE_SPACE and budget >= _ALLEXCEPT_STORAGE_BUDGET:
+    if any(space >= measured and row_count <= rows for measured, rows in _MEASURED_STORAGE):
         return False
     return None
 
