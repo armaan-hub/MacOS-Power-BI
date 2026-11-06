@@ -11910,15 +11910,6 @@ def _evaluate_measures_once(
             context, ordered = sorted_table(arguments[1], tuple(arguments[2:]))
             if size == 0 or not ordered:
                 return context, []
-            if len(arguments) in {3, 4} and arguments[2][0] == "reference":
-                key_header = next((h for h in ordered[0] if h.casefold() == str(arguments[2][2]).casefold()), None)
-                if key_header is not None and any(isinstance(typed_cell(context, key_header, row.get(key_header)), str) for row in ordered):
-                    # Task 68 (live Power BI, order audit 3 grid): SAMPLE over a text column walks the table in dictionary order whatever the direction
-                    # (blank, then first-seen text: ,Paid,Late for ASC and DESC); with fewer rows than it holds the picks are not measured
-                    if size < len(ordered):
-                        raise MeasureError("The sample of a text column with fewer rows than it holds is not modelled in the local engine.")
-                    table_context, table_rows = table_argument_value(arguments[1])
-                    return table_context, dictionary_ordered_rows(arguments[1], table_context, table_rows, [arguments[2]])
             if size >= len(ordered):
                 return context, list(ordered)
             if size == 1:
@@ -21730,6 +21721,15 @@ def _evaluate_measures_once(
                         raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
+            if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] == "SAMPLE" and len(walked_table[2]) in {3, 4} and walked_table[2][2][0] == "reference":
+                # Task 68 (live Power BI, order audit 3 grid): SAMPLE over a text column walks the table in dictionary order whatever the direction (blank, then
+                # first-seen text: ,Paid,Late for ASC and DESC) when it keeps every row; a sample that drops text rows is not measured. Numeric samples keep their picks
+                sample_context, sample_rows = table_argument_value(walked_table[2][1])
+                sample_key = next((h for h in sample_context["headers"] if h.casefold() == str(walked_table[2][2][2]).casefold()), None)
+                if sample_key is not None and any(isinstance(typed_cell(sample_context, sample_key, row.get(sample_key)), str) for row in sample_rows):
+                    if len(iteration_rows) < len(sample_rows):
+                        raise MeasureError("The row order of a SAMPLE of a text column that drops rows is not modelled in the local engine.")
+                    iteration_rows = dictionary_ordered_rows(walked_table[2][1], sample_context, sample_rows, read_nodes)
             if len(iteration_rows) > 1 and walked_table[0] == "call" and walked_table[1] in {"WINDOW", "OFFSET"}:
                 # Task 68 (live Power BI, order audit 3 grid): a relative WINDOW over DESC, or an OFFSET over DESC of a numeric column, comes back in an order
                 # the ORDERBY does not explain; refused rather than walked in the ORDERBY order
