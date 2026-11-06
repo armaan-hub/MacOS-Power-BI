@@ -4,8 +4,9 @@ Covers (live Power BI evidence in tools/parity/task68_order_audit3_spec.json and
 - Part A: a relative WINDOW over ORDERBY(column, DESC), and an OFFSET over DESC of a numeric column, are refused (no order the ORDERBY explains);
   ASC windows and text OFFSET windows keep the answers that already match.
 - Part B: SAMPLE over a text column walks the table in dictionary order (blank, then first-seen text) whatever the direction; numeric SAMPLE is unchanged.
-- Part C: SUMMARIZE with ROLLUP walked by a fractional group column over two or more values is refused; the one-value shape keeps its answer.
-- Part D: ADDMISSINGITEMS under filters on two other columns is refused in TOCSV / TOJSON; one-filter shapes keep their answers.
+- Part C: the groups of every level of a SUMMARIZE ... ROLLUP / ROLLUPGROUP come out in the order of the scan over the level's kept columns plus the
+  columns an outer filter restricts to two or more values: dictionary order inside the measured key space, storage order of the first row at 792 over 6 rows.
+- Part D: the same scan decides the group order of ADDMISSINGITEMS(SUMMARIZE ...) in TOCSV / TOJSON (storage order at 792 over 6 rows).
 """
 from __future__ import annotations
 
@@ -45,17 +46,39 @@ class TestIteration158OrderAudit3(unittest.TestCase):
     def test_part_b_sample_over_numbers_is_unchanged(self) -> None:
         self.assertEqual(str(dax.local('CONCATENATEX(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],",")')), "0,3,5")
 
-    def test_part_c_rollup_by_fractional_group_column_is_refused(self) -> None:
-        expr = 'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Quantity]<>3)'
-        self.assertTrue(str(dax.local(expr)).startswith("LOCAL-REJECT:"))
+    def test_part_c_rollup_groups_follow_the_scan_key_space(self) -> None:
+        cases = {
+            'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Quantity]<>3)': "10.5,-1.5,,0,2.5,0,-1.5,10.5,,2.5",
+            'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Region]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Quantity]>=2,Facts[Region]<>"East")': "20,,20,",
+            'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Quantity]),"s",SUM(Facts[Quantity])),Facts[Quantity],","),Facts[Region]<>"East")': "3,4,0,,,",
+            'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Sales]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Region]<>"East")': "20,,0,,,,",
+            'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Sales]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Quantity]>1)': "10.5,20,,2.5,,,,",
+            'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Region]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Quantity]>=2)': "10.5,20,,2.5,10.5,20,,2.5,",
+        }
+        for expr, expected in cases.items():
+            with self.subTest(expr=expr):
+                self.assertEqual(str(dax.local(expr)), expected)
+
+    def test_part_c_sorted_key_space_keeps_dictionary_order(self) -> None:
+        # a filter on the group column itself adds no scan column: 44 x 6 = 264 stays inside the measured sorted space
+        self.assertEqual(
+            str(dax.local('CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Quantity]),"s",SUM(Facts[Quantity])),Facts[Quantity],","),Facts[Quantity]<>3)')),
+            "0,1,2,4,5,,,,,",
+        )
+        # an equality filter leaves one value: it does not join the scan
+        self.assertEqual(
+            str(dax.local('CALCULATE(CONCATENATEX(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Sales]),"s",SUM(Facts[Quantity])),Facts[Quantity],","),Facts[Region]="West")')),
+            "0,3,0,3,",
+        )
 
     def test_part_c_single_value_rollup_keeps_its_answer(self) -> None:
         expr = 'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Sales]>0,Facts[Region]="West")'
         self.assertEqual(str(dax.local(expr)), "20,20")
 
-    def test_part_d_addmissingitems_two_outer_filters_refused_in_tojson(self) -> None:
+    def test_part_d_addmissingitems_two_outer_filters_storage_order(self) -> None:
         expr = 'CALCULATE(TOJSON(ADDMISSINGITEMS(Facts[Note],SUMMARIZE(Facts,Facts[Note],"s",SUM(Facts[Sales])),Facts[Note])),Facts[Quantity]>1,Facts[Sales]>0)'
-        self.assertTrue(str(dax.local(expr)).startswith("LOCAL-REJECT:"))
+        expected = '{\n\t"header": ["\'Facts\'[Note]", "[s]"],\n\t"rowCount": 2,\n\t"data": [\n\t\t["Paid", 10.5],\n\t\t[null, 22.5]\n\t]\n}'
+        self.assertEqual(status(expected, str(dax.local(expr))), "match")
 
     def test_part_d_addmissingitems_one_outer_filter_keeps_its_answer(self) -> None:
         expr = 'CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZE(Facts,Facts[Note],"s",SUM(Facts[Sales])),Facts[Note]),100),Facts[Sales]>0)'
