@@ -29,7 +29,11 @@ CROSS_TABLE_CALLS = frozenset({"RELATED", "RELATEDTABLE", "EARLIER", "EARLIEST",
 _SINGLE_COLUMN_BUDGET = 8200
 # Several columns are walked in dictionary order while (product of their distinct counts) x (rows) stays under this; a date
 # counts by its range in days, and a set with a date stays under the tighter limit (probed on date spans of 30 to 365 days).
-ALLEXCEPT_KEY_SPACE = 54  # largest measured product of distinct counts of the columns an ALLEXCEPT lists that still came out in dictionary order
+# ALLEXCEPT (Task 67, live Power BI, Facts of 6, 9 and 8 rows): the columns it lists come out in dictionary order while the dense key space (product of
+# the value-range sizes of the columns) stays small. Measured sorted up to a space of 567 (9 rows, space x (rows + 3) = 6,804) and in storage order at 792
+# (6 rows, space x (rows + 3) = 7,128); in between nothing was measured.
+_ALLEXCEPT_SORTED_SPACE, _ALLEXCEPT_SORTED_BUDGET = 567, 6804
+_ALLEXCEPT_STORAGE_SPACE, _ALLEXCEPT_STORAGE_BUDGET = 792, 7128
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -47,7 +51,7 @@ class Plan:
     eager: list[Any] = field(default_factory=list)
     projects: bool = False  # SELECTCOLUMNS: the columns it reads are resolved in the table it selects from
     scanned: bool = False  # SUMMARIZE of a table: an outer filter on another column joins the sort key of the groups (measured), which is not modelled
-    key_space_limit: int | None = None  # ALLEXCEPT: the largest product of distinct counts of its columns still walked in dictionary order (ALLEXCEPT_KEY_SPACE)
+    allexcept: bool = False  # ALLEXCEPT: dictionary order only inside the measured key space (allexcept_in_dictionary_order)
 
 
 def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | None:
@@ -125,10 +129,9 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
             # last table column the major key, with or without measure columns; an outer filter on another column does not join the key
             return Plan(dedup=True)
     if name == "ALLEXCEPT" and len(arguments) >= 2 and arguments[0][0] == "table" and all(argument[0] == "reference" for argument in arguments[1:]):
-        # Task 67 (live Power BI, audit2 + held-out grids): ALLEXCEPT lists the other columns of the table in the dictionary order of those columns
-        # (last table column the major key) while the product of their distinct counts is small: measured sorted at 54 and below (Facts, 10 shapes),
-        # measured in storage order at 108 (2 shapes). Between and above the rows stay as they come.
-        return Plan(dedup=True, key_space_limit=ALLEXCEPT_KEY_SPACE)
+        # Task 67 (live Power BI, three Facts datasets): ALLEXCEPT lists the other columns of the table in the dictionary order of those columns
+        # (last table column the major key, BLANK first, text first-seen, numbers sorted) inside the measured key space; see allexcept_in_dictionary_order
+        return Plan(dedup=True, allexcept=True)
     if name == "ALLSELECTED" and len(arguments) == 1 and arguments[0][0] == "table":
         return Plan()  # Task 51 (live Power BI 2026-11-05): ALLSELECTED(table) is walked as ALL(table) is
     return None
@@ -354,6 +357,22 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, be
         combinations *= profile.size if profile.is_date else profile.distinct
     budget = _DATE_COMBINATION_BUDGET if any(profile.is_date for profile in profiles) else _COMBINATION_BUDGET
     return combinations * row_count <= budget
+
+
+def allexcept_in_dictionary_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True when the columns an ALLEXCEPT lists are walked in dictionary order, False when they keep the storage order, None when the key space lies
+    between the measured sorted and the measured storage-order spaces (not decided)."""
+    space = 1
+    for profile in profiles:
+        if profile.size is None:
+            return False  # a column with no regular range: the order the app always used
+        space *= profile.size
+    budget = space * (row_count + 3)
+    if space <= _ALLEXCEPT_SORTED_SPACE and budget <= _ALLEXCEPT_SORTED_BUDGET:
+        return True
+    if space >= _ALLEXCEPT_STORAGE_SPACE and budget >= _ALLEXCEPT_STORAGE_BUDGET:
+        return False
+    return None
 
 
 class AmbiguousTieOrder(Exception):

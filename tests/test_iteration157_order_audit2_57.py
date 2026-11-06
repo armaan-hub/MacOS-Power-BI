@@ -3,8 +3,8 @@
 Power BI answers below are recorded values of tools/parity/task67_order_audit2_spec.json (38 shapes that main answered wrong),
 plus two measured matches of the 1,500-shape grid (one D row and the text-column guard):
   A. ALLEXCEPT(table, columns): the columns it lists walk in dictionary order (later table column is the major key, text first-seen with
-     BLANK first, numbers sorted) while the product of their distinct counts is at most 54; at 108 (Facts, Sales x Quantity x Region or Note)
-     Power BI keeps the storage order, which is what the engine does above the measured size.
+     BLANK first, numbers sorted) while the dense key space (product of the value-range sizes) is at most 567 (and space x (rows + 3) at most
+     6,804); at 792 (standard Facts, Sales x Quantity x Region or Note) Power BI keeps the storage order; in between the engine refuses.
   B. GROUPBY(table, group column, ...): the groups come out in the dictionary order of the group column.
   C. SUMMARIZECOLUMNS of plain columns: the combinations walk in dictionary order of their columns.
   C2. The same with measure columns ("s", SUM(...)) after the group columns.
@@ -67,6 +67,36 @@ class Iteration157OrderAudit2Test(unittest.TestCase):
         for part, expression, powerbi in ROWS:
             with self.subTest(part=part, expression=expression):
                 self.assertEqual(status(powerbi, dax.local(expression)), "match")
+
+
+# ALLEXCEPT on two other row sets (Power BI answers of the d2 / d3 probes): sorted at a space of 567 (9 rows) and 216 (8 rows)
+DATASET_3 = [("4", "1", "West", ""), ("2", "6", "North", "Paid"), ("9", "4", "East", "Late"), ("", "2", "West", "Paid"),
+             ("7", "8", "North", "Late"), ("1", "3", "East", ""), ("6", "5", "West", "Late"), ("3", "7", "North", "Paid")]
+DATASET_2 = [("5", "7", "North", "Late"), ("", "2", "East", ""), ("5", "3", "West", "Paid"), ("-2", "7", "East", "Paid"), ("8", "1", "North", ""),
+             ("1.5", "2", "West", "Late"), ("8", "9", "East", "Paid"), ("0", "3", "North", "Paid"), ("3", "5", "West", "")]
+OTHER_ROWS = (
+    (DATASET_3, 'TOCSV(ALLEXCEPT(Facts,Facts[Quantity]),100)',
+     "'Facts'[Sales],'Facts'[Region],'Facts'[Note]\n4,West,\n1,East,\n,West,Paid\n2,North,Paid\n3,North,Paid\n6,West,Late\n7,North,Late\n9,East,Late"),
+    (DATASET_3, 'TOCSV(ALLEXCEPT(Facts,Facts[Note]),100)',
+     "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region]\n4,1,West\n,2,West\n6,5,West\n2,6,North\n3,7,North\n7,8,North\n1,3,East\n9,4,East"),
+    (DATASET_3, 'TOCSV(ALLEXCEPT(Facts,Facts[Note],Facts[Region]),100)',
+     "'Facts'[Sales],'Facts'[Quantity]\n4,1\n,2\n1,3\n9,4\n6,5\n2,6\n3,7\n7,8"),
+    (DATASET_2, 'TOCSV(ALLEXCEPT(Facts,Facts[Note]),100)',
+     "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region]\n8,1,North\n0,3,North\n5,7,North\n,2,East\n-2,7,East\n8,9,East\n1.5,2,West\n5,3,West\n3,5,West"),
+)
+
+
+class Iteration157OtherRowsTest(unittest.TestCase):
+    def test_allexcept_on_other_row_sets(self) -> None:
+        for rows, expression, powerbi in OTHER_ROWS:
+            with self.subTest(expression=expression, rows=len(rows)):
+                saved = (dax.ROWS, dax.LOCAL_ROWS)
+                dax.ROWS = rows
+                dax.LOCAL_ROWS = [{h: (v if v != "" else None) for h, v in zip(dax.HEADERS, row)} for row in rows]
+                try:
+                    self.assertEqual(status(powerbi, dax.local(expression)), "match")
+                finally:
+                    dax.ROWS, dax.LOCAL_ROWS = saved
 
 
 if __name__ == "__main__":

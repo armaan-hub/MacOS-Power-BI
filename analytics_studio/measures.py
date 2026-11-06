@@ -82,6 +82,10 @@ class _LogicalBlankText(str):
     """The empty text a logical operator's BLANK becomes beside a text in a table constructor: it reads as "" everywhere found, but FORMAT of it is an error in live Power BI (Task 27)."""
 
 
+class _KeySpaceUndecided(Exception):
+    """ALLEXCEPT over a key space whose order was not measured."""
+
+
 class MeasureError(ValueError):
     """A measure definition is invalid or cannot be evaluated for this table."""
 
@@ -9890,40 +9894,43 @@ def _evaluate_measures_once(
             if not (table_node[0] == "call" and table_node[1] == "SUMMARIZE" and table_node[2][0][0] == "table"):
                 scan_extras = []  # a SUMMARIZE inside FILTER / CALCULATETABLE / ADDMISSINGITEMS: not measured, the group columns alone order it as before
         try:
-            profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
-            in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
-            if plan.key_space_limit is not None:  # ALLEXCEPT: only a small key space was measured in dictionary order
-                key_space = 1
-                for profile in profiles.values():
-                    key_space *= profile.distinct
-                in_dictionary_order = in_dictionary_order and key_space <= plan.key_space_limit
-            major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
+            try:
+                profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
+                in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+                if plan.allexcept and in_dictionary_order:  # ALLEXCEPT: dictionary order only inside the measured key space
+                    decided = dax_iteration_order.allexcept_in_dictionary_order(len(source["rows"]), list(profiles.values()))
+                    if decided is None:
+                        raise _KeySpaceUndecided()
+                    in_dictionary_order = decided
+                major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
-            def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
-                return tuple(profiles[key].key(combination[key][2](row)) for key in major_first)
+                def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
+                    return tuple(profiles[key].key(combination[key][2](row)) for key in major_first)
 
-            if scan_extras:
-                # Task 67 (live Power BI, held-out grid, 7 of 7 shapes of SUMMARIZE(Facts, column, "s", SUM(...)) under filters on other columns): the
-                # scan groups by the group columns AND the filtered columns in dictionary order (the last table column the major key) and the groups
-                # come out in the order their first scanned combination has
-                extra_profiles = {column: source_profile(source, column) for column in scan_extras}
-                if not in_dictionary_order or not dax_iteration_order.grouped(len(source["rows"]), [*profiles.values(), *extra_profiles.values()], True, beside_doubles):
-                    return rows
-                scan_order = sorted([*combination, *((source["id"], column) for column in scan_extras)], key=lambda key: -source["headers"].index(key[1]))
-                scan_profiles = {**profiles, **{(source["id"], column): profile for column, profile in extra_profiles.items()}}
-                group_keys = list(major_first)
-                _filtered_context, scanned_rows = table_argument_value(table_node[2][0])
-                first_seen: dict[tuple[Any, ...], tuple[Any, ...]] = {}
-                for scanned in scanned_rows:
-                    values = {(source["id"], column): typed_cell(source, column, scanned.get(column)) for column in source["headers"]}
-                    group = tuple(scan_profiles[key].key(values[key]) for key in group_keys)
-                    walk = tuple(scan_profiles[key].key(values[key]) for key in scan_order)
-                    if group not in first_seen or walk < first_seen[group]:
-                        first_seen[group] = walk
-                return sorted(rows, key=lambda row: first_seen[tuple(profiles[key].key(combination[key][2](row)) for key in group_keys)])
-            return sorted(rows, key=walk_key) if in_dictionary_order else rows
-        except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
-            return rows
+                if scan_extras:
+                    # Task 67 (live Power BI, held-out grid, 7 of 7 shapes of SUMMARIZE(Facts, column, "s", SUM(...)) under filters on other columns): the
+                    # scan groups by the group columns AND the filtered columns in dictionary order (the last table column the major key) and the groups
+                    # come out in the order their first scanned combination has
+                    extra_profiles = {column: source_profile(source, column) for column in scan_extras}
+                    if not in_dictionary_order or not dax_iteration_order.grouped(len(source["rows"]), [*profiles.values(), *extra_profiles.values()], True, beside_doubles):
+                        return rows
+                    scan_order = sorted([*combination, *((source["id"], column) for column in scan_extras)], key=lambda key: -source["headers"].index(key[1]))
+                    scan_profiles = {**profiles, **{(source["id"], column): profile for column, profile in extra_profiles.items()}}
+                    group_keys = list(major_first)
+                    _filtered_context, scanned_rows = table_argument_value(table_node[2][0])
+                    first_seen: dict[tuple[Any, ...], tuple[Any, ...]] = {}
+                    for scanned in scanned_rows:
+                        values = {(source["id"], column): typed_cell(source, column, scanned.get(column)) for column in source["headers"]}
+                        group = tuple(scan_profiles[key].key(values[key]) for key in group_keys)
+                        walk = tuple(scan_profiles[key].key(values[key]) for key in scan_order)
+                        if group not in first_seen or walk < first_seen[group]:
+                            first_seen[group] = walk
+                    return sorted(rows, key=lambda row: first_seen[tuple(profiles[key].key(combination[key][2](row)) for key in group_keys)])
+                return sorted(rows, key=walk_key) if in_dictionary_order else rows
+            except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
+                return rows
+        except _KeySpaceUndecided:
+            raise MeasureError("The row order of ALLEXCEPT for a key space between the measured sizes is not modelled in the local engine.") from None
 
     def union_walked_rows(
         union_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], topn_walked: bool = True
