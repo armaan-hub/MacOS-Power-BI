@@ -10557,6 +10557,8 @@ def _evaluate_measures_once(
                 if id(row) in source_positions:
                     detail_members.setdefault(key, []).append(source_positions[id(row)])
             detail_keys = list(detail_groups)
+            order_undecided_levels: list[bool] = []
+
             def rollup_level_order(
                 keys: list[tuple[Any, ...]], groups: dict[tuple[Any, ...], dict[str, Any]], members: dict[tuple[Any, ...], list[int]], kept_columns: list[str]
             ) -> list[tuple[Any, ...]]:
@@ -10581,6 +10583,11 @@ def _evaluate_measures_once(
                     decided = dax_iteration_order.multi_column_order(len(source_base["rows"]), [scan_profiles[c] for c in scan], True)
                     major_first = sorted(scan, key=lambda c: -source_base["headers"].index(c))
                     if decided is False and all(p.size is not None for p in scan_profiles.values()):
+                        return keys
+                    if decided is None and extras:
+                        # datasets d12 and d14: beyond the measured sorted points the scan with filtered columns is not decided by a measured point; the groups
+                        # stay as they come and the table says so, so an iterator that reads the rows in order refuses
+                        order_undecided_levels.append(True)
                         return keys
                     if decided and extras:
                         def first_scanned(key: tuple[Any, ...]) -> tuple[Any, ...]:
@@ -10661,6 +10668,8 @@ def _evaluate_measures_once(
             summarized = derived_table(list(group_columns) + names, out_rows, lineage, group_types, certain_types=static_extension_names)
             if has_rollup and not names:
                 summarized[0]["rollup_level_count"] = rollup_level_count if out_rows else 0
+            if order_undecided_levels:
+                summarized[0]["order_undecided"] = True
             return summarized
         if function == "TOPN":
             count = Decimal(dax_typed.whole(in_row_expression(lambda: evaluate(arguments[0])), "TOPN"))
@@ -21712,6 +21721,8 @@ def _evaluate_measures_once(
             finally:
                 topn_walk_nodes.pop(id(walked_table), None)
                 topn_walk_under_filter.discard(id(walked_table))
+            if context.get("order_undecided") and len(iteration_rows) > 1 and not order_spec:
+                raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
             entries = []
             if len(iteration_rows) > 1 and walked_table[:2] != ("call", "TABLEOF") and _contains_function_call(walked_table, "TABLEOF"):
                 if walked_table[0] in {"call", "table_call"} and walked_table[1] in {"UNION", "DISTINCT"}:

@@ -114,5 +114,30 @@ class TestIteration158OrderAudit3(unittest.TestCase):
             dax.ROWS, dax.LOCAL_ROWS, dax.FACTS_DAX = saved
 
 
+    def test_round3_scan_points_on_d12_and_d14(self) -> None:
+        """Live Power BI answers on the held-out row sets d12 (11 rows, sorted scan at 2,250) and d14 (14 rows, storage-order detail scan at 7,600)."""
+        d12 = [("-2", "8", "North", "Late"), ("", "9", "North", "Late"), ("10", "4", "South", "Late"), ("32", "8", "West", "Paid"), ("36", "15", "North", "Late"),
+               ("34", "13", "North", "Late"), ("37", "14", "North", ""), ("32", "2", "West", ""), ("39", "1", "South", "Paid"), ("47", "11", "South", "Late"),
+               ("0", "15", "South", "Paid")]
+        d14 = [("29", "9", "South", "Paid"), ("81", "10", "North", "Paid"), ("0", "22", "West", ""), ("94", "7", "South", "Late"), ("2", "12", "East", "Late"),
+               ("42", "9", "West", "Paid"), ("28", "12", "South", ""), ("4", "3", "West", "Late"), ("24", "8", "West", ""), ("", "5", "West", ""),
+               ("73", "21", "East", "Paid"), ("29", "8", "North", ""), ("23", "14", "East", "Paid"), ("76", "4", "North", "Late")]
+        saved = (dax.ROWS, dax.LOCAL_ROWS, dax.FACTS_DAX)
+        cases = [
+            (d12, 'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Region]),"s",SUM(Facts[Quantity])),Facts[Region],","),Facts[Quantity]>2)',
+             "North,North,North,North,North,South,South,South,West,,,,,,,,,"),
+            (d14, 'CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Quantity]),"s",SUM(Facts[Quantity])),Facts[Sales],","),Facts[Region]<>"East")',
+             "29,81,0,94,42,28,4,24,,29,76,28,29,94,76,81,,0,4,24,42"),
+        ]
+        try:
+            for rows, expr, expected in cases:
+                dax.ROWS = rows
+                dax.LOCAL_ROWS = [{h: (v if v != "" else None) for h, v in zip(dax.HEADERS, r)} for r in rows]
+                with self.subTest(expr=expr):
+                    self.assertEqual(str(dax.local(expr)), expected)
+        finally:
+            dax.ROWS, dax.LOCAL_ROWS, dax.FACTS_DAX = saved
+
+
 if __name__ == "__main__":
     unittest.main()

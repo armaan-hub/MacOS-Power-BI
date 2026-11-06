@@ -37,8 +37,10 @@ _SINGLE_COLUMN_BUDGET = 8200
 _MEASURED_SORTED = ((396, 6), (429, 7), (567, 9), (2994, 12))
 _MEASURED_STORAGE = ((792, 6), (8982, 12))
 # Task 68 (live Power BI, SUMMARIZE ... ROLLUP / ADDMISSINGITEMS(SUMMARIZE) under an outer filter, datasets d7 and d9): the scan over the group columns plus the
-# filtered columns was still sorted at a space of 840 over 8 rows, 1,596 over 10 rows and (dataset d10) 36 over 5 rows; these points apply to that scan only
-_MEASURED_SORTED_SCAN = _MEASURED_SORTED + ((840, 8), (1596, 10), (36, 5))
+# filtered columns was still sorted at a space of 840 over 8 rows, 1,596 over 10 rows and (dataset d10) 36 over 5 rows, and (round 3, datasets d12 and d14) 2,250 over 11 rows (sorted); 7,600 over 14 rows was storage order. These points apply to that scan only.
+# Beyond them the scan has no storage point of its own: the groups of a filtered scan are then refused where they are read in order (never the (8982, 12) storage point)
+_MEASURED_SORTED_SCAN = _MEASURED_SORTED + ((840, 8), (1596, 10), (36, 5), (2250, 11))
+_MEASURED_STORAGE_SCAN = ((792, 6), (7600, 14))  # the detail scan of d14 (Sales x Quantity x Region = 7,600 over 14 rows) came back in storage order
 _COMBINATION_BUDGET = 3100
 _DATE_COMBINATION_BUDGET = 2500
 # Fractional digits a double may carry and still be treated as a regular range.
@@ -374,7 +376,7 @@ def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool =
         space *= profile.size
     if any(space <= measured and row_count >= rows for measured, rows in (_MEASURED_SORTED_SCAN if scan else _MEASURED_SORTED)):
         return True
-    if any(space >= measured and row_count <= rows for measured, rows in _MEASURED_STORAGE):
+    if any(space >= measured and row_count <= rows for measured, rows in (_MEASURED_STORAGE_SCAN if scan else _MEASURED_STORAGE)):
         return False
     return None
 
