@@ -12133,6 +12133,9 @@ def _evaluate_measures_once(
         window.context, window.rows = table_argument_value(relation)
         window.typed = [typed_row(window.context, row) for row in window.rows]
         window.keywords = keywords
+        # Task 71 (live Power BI, rank audit grid t71a, Part B): RANK's blanks argument FIRST / LAST puts every BLANK ahead of / behind the other values
+        # of each ORDERBY column whatever its direction (RANK(DENSE, ALL(Facts), ORDERBY(Sales, DESC), FIRST) ranks BLANK 1); KEEP and no argument keep the default
+        window.blank_mode = next((k for k in keywords if k in {"FIRST", "LAST"}), None) if function == "RANK" else None
         headers = list(window.context["headers"])
         header_by_key = {h.casefold(): h for h in headers}
 
@@ -12371,6 +12374,10 @@ def _evaluate_measures_once(
         """Whether `other` ranks strictly before `row` on the ORDERBY keys alone."""
         for position, descending in enumerate(window.order_desc[: len(window.order_keys[row])]):
             ka, kb = window.sort_keys[position][other], window.sort_keys[position][row]
+            if window.blank_mode and (ka[-1] == 0 or kb[-1] == 0):  # a blank key ends in 0, a value in 1 (blank_aware_keys)
+                if ka[-1] == 0 and kb[-1] == 0:
+                    continue
+                return (ka[-1] == 0) == (window.blank_mode == "FIRST")
             if ka == kb:
                 continue
             return (ka > kb) if descending else (ka < kb)

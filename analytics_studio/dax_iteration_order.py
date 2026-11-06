@@ -184,6 +184,13 @@ def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[A
         if node[0] == "call" and node[1] == "RANKX" and isinstance(node[2], tuple) and len(node[2]) >= 2 and ranks_walked_table(node[2][0]):
             bodies.append(node[2][1])
             return ("call", "RANKX", (("number", 0), *node[2][1:]), *node[3:])
+        # Task 71 (live Power BI, rank audit grid t71a, Part C): RANK and ROWNUMBER over ALL / ALLSELECTED / VALUES of the walked table walk the rows
+        # by the columns of their ORDERBY (and PARTITIONBY) arguments, as the RANKX body does; the relation is replaced by a number as above
+        if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2]:
+            index = 1 if node[1] == "RANK" and node[2][0][0] == "table" and str(node[2][0][1]).upper() in {"DENSE", "SKIP"} else 0
+            if len(node[2]) > index and ranks_walked_table(node[2][index]):
+                arguments = tuple(("number", 0) if position == index else argument for position, argument in enumerate(node[2]))
+                return ("call", node[1], arguments, *node[3:])
         return tuple(rebuild(child) if isinstance(child, tuple) else child for child in node)
 
     rebuilt = [rebuild(node) for node in nodes]
