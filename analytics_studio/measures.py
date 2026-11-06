@@ -9791,7 +9791,8 @@ def _evaluate_measures_once(
         return profile_cache[key]
 
     def dictionary_ordered_rows(
-        table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False
+        table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False,
+        scan_filters: bool = False,
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
@@ -9883,11 +9884,11 @@ def _evaluate_measures_once(
             return rows
         source = next(iter(combination.values()))[0]
         scan_extras: list[str] = []  # SUMMARIZE of a table under an outer filter: the filtered columns that are not group columns
-        if plan.scanned:
+        if plan.scanned and scan_filters:  # only the iterator that reads the groups (ADDMISSINGITEMS and the others read them by the group columns alone)
             filtered = evaluation_contexts_by_id.get(source["id"], source).get("filter_column_rows") or {}
             scan_extras = [column for column in source["headers"] if column in filtered and column not in {key[1] for key in combination}]
-            if scan_extras and not (table_node[0] == "call" and table_node[1] == "SUMMARIZE" and table_node[2][0][0] == "table"):
-                raise MeasureError("The group order of SUMMARIZE under a filter on another column is not modelled in the local engine.")
+            if not (table_node[0] == "call" and table_node[1] == "SUMMARIZE" and table_node[2][0][0] == "table"):
+                scan_extras = []  # a SUMMARIZE inside FILTER / CALCULATETABLE / ADDMISSINGITEMS: not measured, the group columns alone order it as before
         try:
             profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
             in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
@@ -21638,7 +21639,7 @@ def _evaluate_measures_once(
                         raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
-            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
+            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True)
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
                 iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)
             if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
