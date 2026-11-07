@@ -14342,6 +14342,20 @@ def _evaluate_measures_once(
                 return iterator_model_reference_category(source, row_context)
             if function == "RELATED":
                 return iterator_type_category(related_column_details(expression[2][0], row_context)[3])
+            if function == "PATH" and len(expression[2]) == 2:
+                for argument in expression[2]:
+                    iterator_expression_category(argument, row_context)
+                return "text"  # Task 80: PATH is a text id path (the evaluator checks its columns)
+            if function in {"PATHITEM", "PATHITEMREVERSE"} and len(expression[2]) in {2, 3}:
+                for argument in expression[2]:
+                    iterator_expression_category(argument, row_context)
+                # Task 80: an INTEGER or 1 type argument reads the item as a number; any other type gives text
+                if len(expression[2]) == 3 and (
+                    (expression[2][2][0] == "table" and str(expression[2][2][1]).upper() == "INTEGER")
+                    or (expression[2][2][0] == "number" and expression[2][2][1] == 1)
+                ):
+                    return "numeric"
+                return "text"
             if function in _TYPED_ARITY:
                 for argument in expression[2]:
                     iterator_expression_category(argument, row_context)

@@ -89,6 +89,10 @@ def cal_rows():
     return out
 
 SPEC['ZT']={'tables':SPEC['ZS']['tables'],'rels':[(r[0],r[1],r[2],r[3],r[4],r[5],False if r[0]=='ZS_r4' else r[6],r[7],r[8]) for r in SPEC['ZS']['rels']]}
+ZP_ROWS=[(1,None,'Ann',10.0),(2,1,'Bob',20.0),(3,1,'Cid',None),(4,2,'Dee',40.0),(5,2,'Eve',50.0),(6,4,'Fay',60.0),(7,6,'Gus',5.0),(8,None,'Hal',7.0),(9,8,'Ivy',9.0),(10,3,'Jo',1.5)]
+ZQ_ROWS=[('a',None,1.0,'X'),('b','a',2.0,'X'),('c','b',3.0,'Y'),('d','c',4.0,'Y'),('e','d',None,'X'),('f','a',6.0,'Y'),('g','f',7.0,'X'),('h','',8.0,'Y'),('i','h',9.0,'Y')]
+SPEC['ZP']={'tables':{'ZP_Emp':([('Id','int64'),('Parent','int64'),('Name','string'),('Amt','double')],ZP_ROWS)},'rels':[]}
+SPEC['ZQ']={'tables':{'ZQ_Org':([('Code','string'),('Boss','string'),('Amt','double'),('Grp','string')],ZQ_ROWS)},'rels':[]}
 
 
 _TYPES = {"string": "text", "int64": "whole_number", "double": "decimal_number", "dateTime": "date"}
