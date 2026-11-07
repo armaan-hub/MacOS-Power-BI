@@ -163,6 +163,30 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
     return None
 
 
+def _order_expressions(arguments: Sequence[Any]) -> tuple[Any, ...]:
+    """The expressions of an ORDERBY argument list, without the ASC / DESC (or 0 / 1) token that follows each one."""
+    kept: list[Any] = []
+    position = 0
+    while position < len(arguments):
+        kept.append(arguments[position])
+        position += 1
+        if position < len(arguments) and (arguments[position][0] == "table" and str(arguments[position][1]).upper() in {"ASC", "DESC"} or arguments[position][0] in {"number", "boolean"}):
+            position += 1
+    return tuple(kept)
+
+
+def filtered_whole_table(node: Any, table_name: str) -> bool:
+    """FILTER(ALL(table), predicate) or FILTER(table, predicate) of the walked table, whose predicate reaches no outer row."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] == "FILTER" and isinstance(node[2], tuple) and len(node[2]) == 2):
+        return False
+    source, predicate = node[2]
+    if _mentions_outer_row(predicate):
+        return False
+    if isinstance(source, tuple) and source[:1] == ("table",):
+        return str(source[1]).casefold() == str(table_name).casefold()
+    return isinstance(source, tuple) and len(source) == 3 and source[0] == "call" and source[1] == "ALL" and len(source[2]) == 1 and source[2][0][:1] == ("table",) and str(source[2][0][1]).casefold() == str(table_name).casefold()
+
+
 def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[Any]]:
     """Task 70 (live Power BI, rankx audit grid t70a): for every RANKX in `nodes` that ranks the rows of `table_name` through ALL / ALLSELECTED /
     VALUES / DISTINCT of its columns (or the table itself), returns the nodes with that table argument replaced by a number (the table is not
@@ -184,6 +208,30 @@ def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[A
         if node[0] == "call" and node[1] == "RANKX" and isinstance(node[2], tuple) and len(node[2]) >= 2 and ranks_walked_table(node[2][0]):
             bodies.append(node[2][1])
             return ("call", "RANKX", (("number", 0), *node[2][1:]), *node[3:])
+        # Task 71 (live Power BI, rank audit grid t71a, Part C): RANKX over FILTER(ALL(table), predicate) walks the rows by the columns its expression and its
+        # explicit value argument read (RANKX(FILTER(ALL(Facts), Quantity > 1), Sales, Sales, ASC) walks by Sales); the ORDER token is not read
+        if node[0] == "call" and node[1] == "RANKX" and isinstance(node[2], tuple) and len(node[2]) >= 3 and filtered_whole_table(node[2][0], table_name):
+            bodies.extend(argument for argument in node[2][1:3] if isinstance(argument, tuple) and argument[0] != "table")
+            return ("call", "RANKX", (("number", 0),), *node[3:])
+        # Task 71 (live Power BI, rank audit grid t71a, Part C): RANK and ROWNUMBER over ALL / ALLSELECTED / VALUES of the walked table walk the rows
+        # by the columns of their ORDERBY (and PARTITIONBY) arguments, as the RANKX body does; the relation is replaced by a number as above
+        if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2]:
+            index = 1 if node[1] == "RANK" and node[2][0][0] == "table" and str(node[2][0][1]).upper() in {"DENSE", "SKIP"} else 0
+            relation = node[2][index] if len(node[2]) > index else None
+            whole_table = isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table"
+            # measured for relations of one or two columns (rank audit grid t71a); a relation of three columns or more keeps the walk it had
+            narrow = isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and len({str(a[2]).casefold() for a in relation[2] if a[0] == "reference"}) <= 2
+            if relation is not None and not whole_table and narrow and ranks_walked_table(relation):
+                # the walk reads the columns of the relation (the current row is found in it by them) and the ORDERBY and PARTITIONBY expressions; the ties and
+                # blanks keywords and the ASC / DESC tokens are not read
+                bodies.extend(a for a in relation[2] if isinstance(a, tuple) and a[0] == "reference")
+                kept = []
+                for argument in node[2]:
+                    if isinstance(argument, tuple) and argument[:2] == ("call", "ORDERBY") and isinstance(argument[2], tuple):
+                        kept.append(("call", "ORDERBY", _order_expressions(argument[2])))
+                    elif isinstance(argument, tuple) and argument[:2] == ("call", "PARTITIONBY"):
+                        kept.append(argument)
+                return ("call", node[1], tuple(kept))
         return tuple(rebuild(child) if isinstance(child, tuple) else child for child in node)
 
     rebuilt = [rebuild(node) for node in nodes]
@@ -424,6 +472,39 @@ def projection_order(row_count: int, profiles: Sequence[Profile]) -> bool | None
     if any(space >= measured and row_count <= rows for measured, rows in _PROJECTION_STORAGE):
         return False
     return None
+
+
+# Task 71 (live Power BI, rank audit grids t71a / t71b on Facts and t71d on datasets d2, d5, d7, d10, d13, d16: CONCATENATEX over RANK / ROWNUMBER of ALL(column,
+# column), 120 shapes): the rows are walked by the projection's columns in dictionary order (the later table column the major key) while the dense key space (product of
+# the value-range sizes) is small for the rows, and in source order when it is large: sorted at (space, rows) = (24, 6), (12, 5), (140, 8) and the smaller ones they cover (a
+# fractional double included: 63 over 9 rows); source order at (132, 6), (264, 6), (292, 13). A space between the two is not decided.
+_RANK_WALK_SORTED = ((24, 6), (12, 5), (140, 8))
+_RANK_WALK_STORAGE = ((132, 6), (292, 13))
+
+
+def rank_walk_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True / False / None (not decided) for the walk of the columns a RANK / ROWNUMBER relation reads (see _RANK_WALK_SORTED); None also when a column has no regular range."""
+    space = 1
+    for profile in profiles:
+        if profile.size is None:
+            return None
+        space *= profile.size
+    if any(space <= measured and row_count >= rows for measured, rows in _RANK_WALK_SORTED):
+        return True
+    if any(space >= measured and row_count <= rows for measured, rows in _RANK_WALK_STORAGE):
+        return False
+    return None
+
+
+def rank_windows(nodes: Iterable[Any]) -> bool:
+    """Whether `rankx_walk` rewrote a RANK / ROWNUMBER of `nodes` (one left with only its ORDERBY / PARTITIONBY arguments): the walk reads that window's columns."""
+    def found(node: Any) -> bool:
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2] and all(isinstance(a, tuple) and a[:2] in {("call", "ORDERBY"), ("call", "PARTITIONBY")} for a in node[2]):
+            return True
+        return any(found(child) for child in node if isinstance(child, tuple))
+    return any(found(node) for node in nodes)
 
 
 def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool = False) -> bool | None:

@@ -9796,7 +9796,7 @@ def _evaluate_measures_once(
 
     def dictionary_ordered_rows(
         table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False,
-        scan_filters: bool = False, keep_undecided: bool = False, unmodelled: list[bool] | None = None,
+        scan_filters: bool = False, keep_undecided: bool = False, unmodelled: list[bool] | None = None, collapsed: list[bool] | None = None,
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
@@ -9913,6 +9913,11 @@ def _evaluate_measures_once(
                     return sorted(rows, key=lambda row: min(only_profile.key(reader(member)) for member in origin_rows[("group", id(row))]))
                 if unmodelled is not None and not plan.dedup and len(profiles) > 1 and not beside_doubles and any(profile.fractional for profile in profiles.values()):
                     unmodelled.append(True)  # Task 70: a fractional double beside another column walks in an order not measured (grouped refuses it)
+                    others = [key for key, profile in profiles.items() if not profile.fractional]
+                    if collapsed is not None and ranked_bodies and others and len(others) == len(profiles) - 1 and all(len({row_key([combination[key][2](row)]) for row in rows}) == 1 for key in others):
+                        # Task 71 (live Power BI, rank audit grid t71a, Part C): a rank window walked by a fractional double beside columns that hold one value over
+                        # the rows filtered in (RANK(SKIP, ALL(Sales, Note), ..) under Note = "Paid") comes out sorted by the double; the storage order does not give it
+                        collapsed.append(True)
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
                 if plan.projects and plan.eager and in_dictionary_order and len(profiles) > 1:
                     in_dictionary_order = dax_iteration_order.projection_order(len(source["rows"]), list(profiles.values()))  # Task 69
@@ -9927,6 +9932,13 @@ def _evaluate_measures_once(
                         raise _KeySpaceUndecided()
                     elif decided is not None:  # one column with a space no measured point covers keeps the older budget test
                         in_dictionary_order = decided
+                if len(profiles) > 1 and not plan.dedup and dax_iteration_order.rank_windows(walk_nodes):
+                    # Task 71: the key-space rule of a RANK / ROWNUMBER window over several columns decides between dictionary and source order
+                    window_order = dax_iteration_order.rank_walk_order(len(source["rows"]), list(profiles.values()))
+                    if window_order is None and all(profile.size is not None for profile in profiles.values()):
+                        raise _KeySpaceUndecided()
+                    if window_order is not None:
+                        in_dictionary_order = window_order
                 major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
                 def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
@@ -12133,6 +12145,9 @@ def _evaluate_measures_once(
         window.context, window.rows = table_argument_value(relation)
         window.typed = [typed_row(window.context, row) for row in window.rows]
         window.keywords = keywords
+        # Task 71 (live Power BI, rank audit grid t71a, Part B): RANK's blanks argument FIRST / LAST puts every BLANK ahead of / behind the other values
+        # of each ORDERBY column whatever its direction (RANK(DENSE, ALL(Facts), ORDERBY(Sales, DESC), FIRST) ranks BLANK 1); KEEP and no argument keep the default
+        window.blank_mode = next((k for k in keywords if k in {"FIRST", "LAST"}), None) if function == "RANK" else None
         headers = list(window.context["headers"])
         header_by_key = {h.casefold(): h for h in headers}
 
@@ -12148,6 +12163,14 @@ def _evaluate_measures_once(
             keys.append([evaluate(expression, frame, allow_text=True) for expression, _desc in order_spec])
         window.order_keys = keys
         window.order_desc = [desc for _expression, desc in order_spec]
+        # Task 71 (live Power BI, rank audit grid t71a, 1,500 probes, 260 ROWNUMBER answers and 54 errors): ROWNUMBER over ALL(table) or ALLSELECTED(table)
+        # (the whole rows of a table, filtered only by ALLSELECTED's outer context) raises "Tied rows detected" when two of those rows agree on the
+        # PARTITIONBY columns and the ORDERBY keys. ROWNUMBER over a column list or no relation is answered (no tie error in the measured shapes).
+        if function == "ROWNUMBER" and order_spec and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table":
+            members = list(range(len(window.rows)))
+            identities = [row_key([*(window.typed[i][c] for c in window.partition_columns), *keys[i]]) for i in members]
+            if len(set(identities)) < len(identities):
+                raise MeasureRuntimeError(f"Tied rows detected in the relation parameter for {function} function.")
         tie_columns = [h for h in headers if h not in window.partition_columns]
         window.tie_columns = tie_columns
         total = list(range(len(window.rows)))
@@ -12360,6 +12383,10 @@ def _evaluate_measures_once(
         """Whether `other` ranks strictly before `row` on the ORDERBY keys alone."""
         for position, descending in enumerate(window.order_desc[: len(window.order_keys[row])]):
             ka, kb = window.sort_keys[position][other], window.sort_keys[position][row]
+            if window.blank_mode and (ka[-1] == 0 or kb[-1] == 0):  # a blank key ends in 0, a value in 1 (blank_aware_keys)
+                if ka[-1] == 0 and kb[-1] == 0:
+                    continue
+                return (ka[-1] == 0) == (window.blank_mode == "FIRST")
             if ka == kb:
                 continue
             return (ka > kb) if descending else (ka < kb)
@@ -21829,7 +21856,8 @@ def _evaluate_measures_once(
                 if dax_iteration_order.window_walk_undecided(walked_table, len(iteration_rows), key_numeric):
                     raise MeasureError("The row order of a relative WINDOW / OFFSET over ORDERBY(..., DESC) is not modelled in the local engine.")
             walk_unmodelled: list[bool] = []  # Task 70: set when the walk of the rows is an order the engine does not model
-            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True, unmodelled=walk_unmodelled)
+            walk_collapsed: list[bool] = []  # Task 71: set when a rank window is walked by one fractional double beside columns that hold one value
+            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True, unmodelled=walk_unmodelled, collapsed=walk_collapsed)
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
                 iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)
             if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
@@ -21850,6 +21878,8 @@ def _evaluate_measures_once(
                     raise MeasureError("A CONCATENATEX of dates on 9999-12-31 or later is not modelled by the local engine.")
                 text = dax_typed.to_text(double_as_text(arguments[1], body_value, inner))
                 entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
+            if walk_collapsed and len({text for _key, text in entries}) > 1:
+                raise MeasureError("The order of CONCATENATEX rows walked by a fractional column beside columns that hold one value, in a RANK / ROWNUMBER / RANKX over it, is not modelled in the local engine.")
             if allselected_walk_unmeasured and len({text for _key, text in entries}) > 1:
                 raise MeasureError("CONCATENATEX over ALLSELECTED(table) under an outer filter, reading several columns, is walked in an order the local engine does not model.")
             if walk_refusal is not None and (not entries or len({text for _key, text in entries}) > 1 or not _order_free_text_body(arguments[1])):
