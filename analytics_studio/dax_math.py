@@ -51,6 +51,8 @@ def rounding_function(function: str, args: list[object]) -> Decimal | None:
             dax_typed.whole(args[1], function)  # Task 20 F4: a BLANK number still reads its digits; an Infinity, a NaN or a text there is the error
         return None
     number = dax_typed.to_number(args[0], dates=True)
+    if function == "ROUND":
+        number = dax_typed.int64_through_double(number)  # Task 74 Part B: ROUND of 9223372036854775807 is the conversion error (measured)
     digits = dax_typed.whole(args[1], function)
     mode = {"ROUND": ROUND_HALF_UP, "ROUNDUP": ROUND_UP, "ROUNDDOWN": ROUND_DOWN}[function]
     if not number.is_finite():
@@ -161,6 +163,14 @@ def math_function(function: str, args: list[object]) -> object:
             raise _fail(function)  # ISEVEN / ISODD of an Infinity or a NaN
     if function in {"ISEVEN", "ISODD"}:
         number = dax_typed.to_number(args[0])
+        if number < 0 and float(number) == -float(dax_typed._INT64_LIMIT):
+            # Task 74 Part B: ISEVEN and ISODD of -9223372036854775808 are the conversion error (measured). The literal reads as the Double
+            # -9.223372036854776E+18; the exact Int64 -9223372036854775807 has the same Double but is not measured, so it is refused.
+            if Decimal(repr(float(number))) == number:
+                raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
+            raise dax_typed.refusal("ISEVEN and ISODD of a negative Int64 at the Double minimum are not modelled by the local engine.")
+        if dax_typed.is_int64_form(number) and 2 ** 53 <= abs(number) < dax_typed._INT64_LIMIT:
+            number = Decimal(float(number))  # ISEVEN(9223372036854775807) is True: its double 2^63 is even (measured), so no range error here
         remainder = int(number.quantize(Decimal(1), rounding=ROUND_HALF_UP)) % 2  # to the nearest whole number first: ISEVEN(2.5) is False, ISEVEN(TIME(6,0,0)) True (live Power BI)
         return (remainder == 0) if function == "ISEVEN" else (remainder != 0)
     if args[0] is None and function in {"EVEN", "ODD"}:

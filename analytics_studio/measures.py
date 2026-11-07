@@ -3549,7 +3549,7 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return Decimal(0)  # Task 20 F3: CEILING(0, Infinity) is 0, as CEILING(0, x) is
     if function != "POWER" and any(value is not None and not value.is_finite() for value in values):  # POWER: see the branch below
         if function == "TRUNC" and first is not None and not first.is_finite() and all(value is None or value.is_finite() for value in values[1:]):
-            return Decimal("NaN") if first == Decimal("Infinity") else first  # Part E: TRUNC of +Infinity is NaN (measured); -Infinity stays as it was
+            return Decimal("NaN")  # Part E: TRUNC of +Infinity is NaN (measured); Task 74 Part C: TRUNC(-1/0) is NaN too (measured)
         raise MeasureRuntimeError(
             f"An argument of function '{function}' has the wrong data type or the result is too large or too small."
         )
@@ -3654,6 +3654,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return remainder
     if first is None:
         return None
+    if function in {"INT", "TRUNC"}:
+        first = dax_typed.int64_through_double(first)  # Task 74 Part B: INT and TRUNC of 9223372036854775807 are the conversion error (measured)
     if function == "INT":
         return first.to_integral_value(rounding=ROUND_FLOOR)
     if function == "SIGN":  # Part B: SIGN of a negative zero is -1 (measured)
@@ -17505,6 +17507,8 @@ def _evaluate_measures_once(
                     try:
                         return dax_typed.to_number(value) != 0  # Task 19 Part A: a number text is True unless it is zero
                     except MeasureRuntimeError:
+                        if dax_typed.beyond_double(value):  # Task 74 Part A: a number text beyond the Double range is the logical range error (measured)
+                            raise MeasureRuntimeError("The following system error occurred: Out of present range.") from None
                         raise MeasureRuntimeError(f"Cannot convert value '{value.strip()}' of type Text to type True/False.") from None
                 return lowered == "true"
             return dax_typed.to_boolean(value)
@@ -18509,7 +18513,7 @@ def _evaluate_measures_once(
             shown_value = values[0]
             if isinstance(shown_value, Decimal) and shown_value.is_finite() and shown_value != shown_value.to_integral_value() and left_static_type(arguments[0], row_context) == "double":
                 shown_value = Decimal(format(shown_value, ".14e"))  # Part A: FORMAT reads a Double as its 15 significant digits (FORMAT(MIN(x)/MAX(x),"0.00") is -0.08, measured)
-            return dax_format.format_value(shown_value, values[1])
+            return dax_format.format_value(shown_value, values[1], exact=left_static_type(arguments[0], row_context) == "int64")  # Task 74 Part B: an Int64 is shown exactly
         return dax_typed.text_function(function, values)
 
     static_type_of_nodes: dict[int, str | None] = {}
@@ -19764,6 +19768,11 @@ def _evaluate_measures_once(
                     right = dax_dates.DaxDateTime(Decimal(0))
             for text_value in (left, right):
                 if isinstance(text_value, str):
+                    if dax_typed.beyond_double(text_value):  # Task 74 Part A: as before, + - * answer a type test by its type; / shows the error
+                        text_message = f"Cannot convert value '{text_value}' of type Text to type Number."
+                        if node[1] == "/":
+                            raise MeasureRuntimeError(text_message)
+                        raise _TextRangeFailure(text_message)
                     try:
                         spelled = as_number(text_value)
                     except MeasureRuntimeError as error:
