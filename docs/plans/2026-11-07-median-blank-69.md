@@ -20,3 +20,6 @@ Rules:
 - Locked batteries must stay green.
 - The standard grid t72a (statistics, 1,500 rows) must not regress. Rebuild it with SP/t38f/local.py, then run cmp.py.
 - New test file: tests/test_iteration168_median_blank_69.py.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 169. Locked 531486.
