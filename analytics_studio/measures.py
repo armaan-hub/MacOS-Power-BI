@@ -9832,6 +9832,7 @@ def _evaluate_measures_once(
         header_by_key = {h.casefold(): h for h in context["headers"]}
         # Task 70: a RANKX over ALL / ALLSELECTED of the walked table reads its expression's columns in the walk (live Power BI, rankx audit grid)
         walk_nodes, ranked_bodies = dax_iteration_order.rankx_walk(nodes, table_node[1]) if table_node[0] == "table" else (list(nodes), [])
+        ranked_whole = dax_iteration_order.rankx_over_whole_table(nodes, table_node[1]) if table_node[0] == "table" else False  # Task 78 Part B
         read = dax_iteration_order.columns_read(
             [*walk_nodes, *ranked_bodies],
             lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS,
@@ -9946,6 +9947,22 @@ def _evaluate_measures_once(
                         # the rows filtered in (RANK(SKIP, ALL(Sales, Note), ..) under Note = "Paid") comes out sorted by the double; the storage order does not give it
                         collapsed.append(True)
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+                if plan.whole_distinct:
+                    # Task 78 Part C (live Power BI, walk-data-68 grid t78e): the distinct rows of DISTINCT(Facts) / DISTINCT(ALL(Facts)) walk in dictionary order of
+                    # all the table's columns inside the measured key space (distinct_walk_order); refused in the gap between the measured points
+                    if len(profiles) != len(source["headers"]):
+                        return rows
+                    decided = dax_iteration_order.distinct_walk_order(len(source["rows"]), list(profiles.values()))
+                    if decided is None:
+                        raise _KeySpaceUndecided()
+                    in_dictionary_order = decided
+                elif ranked_whole and len(profiles) == 2 and not any(profile.is_date for profile in profiles.values()):
+                    # Task 78 Part B (live Power BI, walk-data-68 grid t78e): CONCATENATEX of a RANKX over the whole table walks the two columns the rank reads by
+                    # the key space of both (rankx_walk_order); refused in the gap between the measured points
+                    decided = dax_iteration_order.rankx_walk_order(len(source["rows"]), list(profiles.values()))
+                    if decided is None:
+                        raise _KeySpaceUndecided()
+                    in_dictionary_order = decided
                 topn_decided: bool | None = None
                 if topn_walk and not plan.dedup and any(profile.fractional for profile in profiles.values()):
                     # Task 77 (live Power BI, topn-data-67 grid): the heap walk of a TOPN over a fractional double is decided by dax_iteration_order only where the
@@ -22056,6 +22073,17 @@ def _evaluate_measures_once(
                 # The walk of a fractional column beside another one is not measured (grouped refuses it), and the measured case (a filter that
                 # leaves one Note value, ORDER BY Note DESC twice) comes out sorted by the fractional column, which the storage order does not give
                 raise MeasureError("The order of CONCATENATEX rows whose ORDER BY keys tie on every row, over a walk of a fractional column beside another column, is not modelled in the local engine.")
+            if len(order_spec) >= 2 and len(entries) > 1:
+                # Task 78 (live Power BI, walk-data-68 grid t78e, Part A, 23 row sets of 5 to 16 rows): rows that tie on every ORDER BY key of a CONCATENATEX with
+                # two keys come out in the walk order (a stable sort) in the 7 sets of 8 rows or fewer, and in an order that no walk, scan order or sort algorithm
+                # fitted in the 16 sets of 9 rows or more (storage, reversed, dictionary order, stable / selection / quick sorts: at most a quarter of 312 tied
+                # cases). Where the table is larger than 8 rows (or is not a loaded table) and the order of tied rows can change the text, the text is refused
+                loaded_rows = len(evaluation_contexts_by_id.get(context.get("id"), context).get("rows") or ()) if not context.get("derived") and context.get("id") else None
+                if loaded_rows is None or loaded_rows > 8:
+                    tied_texts: dict[tuple[Any, ...], str] = {}
+                    for item in entries:
+                        if tied_texts.setdefault(row_key(item[0]), item[1]) != item[1]:
+                            raise MeasureError("The order of CONCATENATEX rows that tie on every ORDER BY key, with different text, is not modelled in the local engine.")
             for key_index in range(len(order_spec) - 1, -1, -1):
                 column_keys = blank_aware_keys([item[0][key_index] for item in entries])
                 try:
