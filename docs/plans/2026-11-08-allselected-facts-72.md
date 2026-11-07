@@ -16,3 +16,6 @@ New `tests/test_iteration170_allselected_facts_72.py`: ZY model data as literals
 
 ## Score / gate
 0 wrong on the spec, no item changes from match; Opus probes an unseen held-out model and runs the gate.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 171. Locked 531486.
