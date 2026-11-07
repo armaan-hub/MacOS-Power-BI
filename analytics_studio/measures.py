@@ -9823,7 +9823,7 @@ def _evaluate_measures_once(
     def dictionary_ordered_rows(
         table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False,
         scan_filters: bool = False, keep_undecided: bool = False, unmodelled: list[bool] | None = None, collapsed: list[bool] | None = None,
-        topn_walk: bool = False,
+        topn_walk: bool = False, fractional_walk: list[bool] | None = None, force_dictionary: bool | None = None,
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
@@ -9946,6 +9946,13 @@ def _evaluate_measures_once(
                         # the rows filtered in (RANK(SKIP, ALL(Sales, Note), ..) under Note = "Paid") comes out sorted by the double; the storage order does not give it
                         collapsed.append(True)
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+                topn_decided: bool | None = None
+                if topn_walk and not plan.dedup and any(profile.fractional for profile in profiles.values()):
+                    # Task 77 (live Power BI, topn-data-67 grid): the heap walk of a TOPN over a fractional double is decided by dax_iteration_order only where the
+                    # measurements are unambiguous; elsewhere the caller compares the two orders and refuses when they differ
+                    topn_decided = dax_iteration_order.topn_fractional_order(len(source.get("profile_rows", source["rows"])), list(profiles.values()))
+                    if topn_decided is None and fractional_walk is not None:
+                        fractional_walk.append(True)
                 if topn_walk and dax_iteration_order.topn_pair_applies(list(profiles.values())):
                     # Task 77: the heap of a TOPN read by CONCATENATEX walks two columns by the key space of both (see dax_iteration_order)
                     in_dictionary_order = dax_iteration_order.topn_pair_order(len(source["rows"]), list(profiles.values()))
@@ -9995,6 +10002,10 @@ def _evaluate_measures_once(
                         if group not in first_seen or walk < first_seen[group]:
                             first_seen[group] = walk
                     return sorted(rows, key=lambda row: first_seen[tuple(profiles[key].key(combination[key][2](row)) for key in group_keys)])
+                if topn_decided is not None:
+                    in_dictionary_order = topn_decided
+                if force_dictionary is not None:
+                    in_dictionary_order = force_dictionary  # Task 77: the caller asks for one of the two orders, to see whether they differ
                 return sorted(rows, key=walk_key) if in_dictionary_order else rows
             except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
                 return rows
@@ -10818,27 +10829,40 @@ def _evaluate_measures_once(
                     constant_headers = {name.casefold() for _table, name in constant_sources} if constant_sources is not None else set()
                     if any(header.casefold() in constant_headers and len({row.get(header) for row in rows}) == 1 for header in context["headers"]):
                         raise dax_typed.refusal("The walk order of a TOPN over a column an outer filter holds to one value is not settled by the local engine.")
-                walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)], topn_walk=True)
-                scored = score_rows(walked)
+                topn_nodes = [*walk_nodes, *(expression for expression, _d in keys_spec)]
                 window_relation = arguments[1][0] == "call" and arguments[1][1] == "OFFSET"
-                if limit > len(scored) or (limit == len(scored) and not window_relation):
-                    # nothing is cut: the table comes back in walk order. Task 69: a window relation of exactly `limit` rows goes through the heap
-                    # (measured: TOPN(2, OFFSET(-1, ...)) and TOPN(2, WINDOW(... DESC ...)) come back ascending), other tables keep the walk order
-                    return dict(context), [item[1] for item in scored]
-                column_keys = [blank_aware_keys([item[0][p] for item in scored]) for p in range(len(keys_spec))]
 
-                def beats(a: int, b: int) -> bool:
-                    for position, (_expression, descending) in enumerate(keys_spec):
-                        left, right = column_keys[position][a], column_keys[position][b]
-                        if left != right:
-                            return (left > right) == descending
-                    return False
+                def heap_rows(walked: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                    scored = score_rows(walked)
+                    if limit > len(scored) or (limit == len(scored) and not window_relation):
+                        # nothing is cut: the table comes back in walk order. Task 69: a window relation of exactly `limit` rows goes through the heap
+                        # (measured: TOPN(2, OFFSET(-1, ...)) and TOPN(2, WINDOW(... DESC ...)) come back ascending), other tables keep the walk order
+                        return [item[1] for item in scored]
+                    column_keys = [blank_aware_keys([item[0][p] for item in scored]) for p in range(len(keys_spec))]
 
-                try:
-                    kept_indices = dax_iteration_order.heap_top(limit, range(len(scored)), beats)
-                except dax_iteration_order.AmbiguousTieOrder:
-                    raise dax_typed.refusal("The walk order of a TOPN whose tied rows are dropped by a better row is not settled by the local engine.") from None
-                return dict(context), [scored[index][1] for index in kept_indices]
+                    def beats(a: int, b: int) -> bool:
+                        for position, (_expression, descending) in enumerate(keys_spec):
+                            left, right = column_keys[position][a], column_keys[position][b]
+                            if left != right:
+                                return (left > right) == descending
+                        return False
+
+                    try:
+                        kept_indices = dax_iteration_order.heap_top(limit, range(len(scored)), beats)
+                    except dax_iteration_order.AmbiguousTieOrder:
+                        raise dax_typed.refusal("The walk order of a TOPN whose tied rows are dropped by a better row is not settled by the local engine.") from None
+                    return [scored[index][1] for index in kept_indices]
+
+                fractional_walk: list[bool] = []
+                result = heap_rows(dictionary_ordered_rows(arguments[1], context, rows, topn_nodes, topn_walk=True, fractional_walk=fractional_walk))
+                if fractional_walk:
+                    # Task 77: a fractional double beside another column walks in neither measured order reliably; the answer stands only when the source order
+                    # and the dictionary order of the columns read give the very same rows in the very same order
+                    in_source_order = heap_rows(dictionary_ordered_rows(arguments[1], context, rows, topn_nodes, topn_walk=True, force_dictionary=False))
+                    in_value_order = heap_rows(dictionary_ordered_rows(arguments[1], context, rows, topn_nodes, topn_walk=True, force_dictionary=True))
+                    if [id(row) for row in in_source_order] != [id(row) for row in in_value_order]:
+                        raise dax_typed.refusal("The walk order of a TOPN over a fractional column beside another column is not settled by the local engine.")
+                return dict(context), result
             kept = ordered[:limit]
             if kept and len(ordered) > limit:
                 boundary = row_key(v for v in ordered[limit - 1][0])

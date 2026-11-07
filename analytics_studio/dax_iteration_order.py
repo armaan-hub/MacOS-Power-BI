@@ -370,6 +370,12 @@ class Profile:
         self.distinct = len({None if v is None else ascii_fold(v) if self.is_text else v for v in values})
         self.fractional = any(isinstance(v, Decimal) and v.is_finite() and v != v.to_integral_value() for v in present)
         self.size: int | None = self.distinct if self.is_text or self.is_bool else _dense_range(present, self.is_date)
+        # Task 77: a fractional double counts its range in units of its smallest decimal place (1.5 .. 20 with one place is 216, not the 44 of the gcd step)
+        self.scaled_span: int | None = None
+        if self.fractional and not self.is_date and all(isinstance(v, Decimal) and v.is_finite() for v in present):
+            places = max(max(0, -v.normalize().as_tuple().exponent) for v in present)
+            if places <= _MAX_DECIMALS:
+                self.scaled_span = int((max(present) - min(present)).scaleb(places)) + 1
         # a datetime with a time of day has no regular range of days; VALUES/ALL of it still walks by its steps of time
         self.timed = self.is_date and self.size is None
         self.time_steps = _time_steps(present) if self.timed else None
@@ -548,6 +554,29 @@ def topn_pair_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
     if space >= _TOPN_PAIR_STORAGE_SPACE:
         return False
     return None
+
+
+# Task 77 (live Power BI, topn-data-67 grid on 11 row sets with a fractional Sales column, and the standard Facts table): the heap walk of a TOPN over
+# a fractional double is in storage order for every measured space from 3,888 up (the smallest on Facts) and in dictionary order for the measured
+# spaces below, but the two overlap (a sorted walk at 3,264 on d19, a storage walk at 3,222 on d29), so below 3,796 nothing is decided here: the caller
+# answers only when both orders give the very same rows. One column alone is sorted while its range x (rows + 3) is within the single-column
+# budget (measured sorted at 7,884; a storage walk at 11,340), and refused above it. The range counts in units of the smallest decimal place.
+_TOPN_FRACTIONAL_SINGLE_BUDGET = _SINGLE_COLUMN_BUDGET
+
+
+def topn_fractional_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True (dictionary order) / False (storage order) for a TOPN walk over columns of which one is fractional, None when not decided (see above)."""
+    if any(profile.is_date for profile in profiles):
+        return None
+    sizes = [profile.scaled_span if profile.fractional else profile.size for profile in profiles]
+    if any(size is None for size in sizes):
+        return None
+    if len(profiles) == 1:
+        return True if sizes[0] * (row_count + 3) <= _TOPN_FRACTIONAL_SINGLE_BUDGET else None  # type: ignore[operator]
+    space = row_count
+    for size in sizes:
+        space *= size  # type: ignore[operator]
+    return False if space >= _TOPN_PAIR_STORAGE_SPACE else None
 
 
 def descending_orderby(table_node: Any) -> tuple[Any, bool] | None:
