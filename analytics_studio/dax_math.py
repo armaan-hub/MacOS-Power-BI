@@ -389,8 +389,77 @@ def double_statistic(function: str, values: list[Decimal]) -> Decimal:
     return Decimal(repr(variance))
 
 
-def statistic(function: str, values: list[Decimal], k: Decimal | None = None) -> Decimal | None:
-    """Statistic over the non-blank numbers of a column or iterator; None when there is nothing to compute."""
+def _blank_order(values: list[Decimal], blanks: list[bool], blank_first: bool) -> tuple[list[int], bool]:
+    """Positions of the values in sorted order for MEDIANX / PERCENTILEX where a BLANK result counts as zero (live Power BI, Task 79): a BLANK
+    sorts among the numbers at zero.  Over a column reference (blank_first) a BLANK sorts before a real zero, as measured on the two reference
+    bodies with a BLANK and a 0 tied on the pick.  Otherwise the tie is not settled (an expression body measured both ways), so zero_mixed says
+    the pick is refused when it lands on such a zero."""
+    if blank_first:
+        return sorted(range(len(values)), key=lambda index: (values[index], not blanks[index])), False
+    order = sorted(range(len(values)), key=lambda index: values[index])
+    zeros = [index for index in range(len(values)) if values[index] == 0]
+    zero_mixed = any(blanks[index] for index in zeros) and any(not blanks[index] for index in zeros)
+    return order, zero_mixed
+
+
+def _blank_read(position: int, values: list[Decimal], blanks: list[bool], order: list[int]) -> tuple[bool, Decimal | None]:
+    """(the sorted value is zero, the value or None for a BLANK) at a sorted position."""
+    index = order[position]
+    return values[index] == 0, None if blanks[index] else values[index]
+
+
+_BLANK_ZERO_REFUSAL = "MEDIANX / PERCENTILEX landing on a zero that is both a BLANK and a number is not modelled by the local engine."
+
+
+def _blank_median(values: list[Decimal], blanks: list[bool], blank_first: bool) -> Decimal | None:
+    """MEDIAN with BLANK results among the values (live Power BI, Task 79): the middle value is BLANK when it lands on a BLANK; the average of two
+    middle values is BLANK only when both are, otherwise a BLANK counts as zero (BLANK + x is x in DAX)."""
+    count = len(values)
+    order, zero_mixed = _blank_order(values, blanks, blank_first)
+    middle = count // 2
+    if count % 2:
+        zero, picked = _blank_read(middle, values, blanks, order)
+        if zero_mixed and zero:
+            raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
+        return picked
+    low_zero, low = _blank_read(middle - 1, values, blanks, order)
+    high_zero, high = _blank_read(middle, values, blanks, order)
+    if zero_mixed and low_zero and high_zero:
+        raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)  # BLANK + BLANK is BLANK, BLANK + 0 is 0: the two picks decide it
+    if low is None and high is None:
+        return None
+    return _interpolate(Decimal(0) if low is None else low, Decimal(0) if high is None else high, Decimal("0.5"))
+
+
+def _blank_percentile(name: str, values: list[Decimal], blanks: list[bool], k: Decimal, blank_first: bool) -> Decimal | None:
+    """PERCENTILEX with BLANK results among the values (live Power BI, Task 79): the same position rule as the numbers, with the BLANK rules of
+    _blank_median for the two values the position falls between."""
+    count = len(values)
+    order, zero_mixed = _blank_order(values, blanks, blank_first)
+    position = k * (count - 1) if name == "PERCENTILE.INC" else k * (count + 1) - 1
+    low = int(position.to_integral_value(rounding=ROUND_FLOOR))
+    fraction = position - low
+    if low + 1 >= count:
+        zero, picked = _blank_read(count - 1 if low >= count - 1 else low, values, blanks, order)
+        if zero_mixed and zero:
+            raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
+        return picked
+    first_zero, first = _blank_read(low, values, blanks, order)
+    if fraction == 0:
+        if zero_mixed and first_zero:
+            raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
+        return first
+    second_zero, second = _blank_read(low + 1, values, blanks, order)
+    if zero_mixed and first_zero and second_zero:
+        raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
+    if first is None and second is None:
+        return None
+    return _interpolate(Decimal(0) if first is None else first, Decimal(0) if second is None else second, fraction)
+
+
+def statistic(function: str, values: list[Decimal], k: Decimal | None = None, blanks: list[bool] | None = None, blank_first: bool = False) -> Decimal | None:
+    """Statistic over the non-blank numbers of a column or iterator; None when there is nothing to compute.  blanks (MEDIANX / PERCENTILEX only)
+    marks the values that were BLANK results, which are zero here; blank_first says the values are a column reference (BLANK before a zero)."""
     name = {"PERCENTILEX.INC": "PERCENTILE.INC", "PERCENTILEX.EXC": "PERCENTILE.EXC", "STDEVX.S": "STDEV.S",
             "STDEVX.P": "STDEV.P", "VARX.S": "VAR.S", "VARX.P": "VAR.P", "GEOMEANX": "GEOMEAN", "MEDIANX": "MEDIAN",
             "PRODUCTX": "PRODUCT"}.get(function, function)
@@ -423,6 +492,8 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
             return Decimal("Infinity") if product > 0 else Decimal("-Infinity")  # Part B: beyond the double range is Infinity
         return product
     if name == "MEDIAN":
+        if blanks is not None and any(blanks) and all(value.is_finite() for value in values):
+            return _blank_median(values, blanks, blank_first)
         nans = [value for value in values if value.is_nan()]
         if nans:
             if len(nans) == count:
@@ -486,6 +557,8 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
             if len(nans) == count:
                 return nans[0]
             raise dax_typed.refusal(f"{function} with NaN beside other numbers depends on the order the engine sorts them in, which the local engine does not model.")
+        if blanks is not None and any(blanks) and all(value.is_finite() for value in values):
+            return _blank_percentile(name, values, blanks, k, blank_first)
         ordered = sorted(values)
         position = k * (count - 1) if name == "PERCENTILE.INC" else k * (count + 1) - 1
         low = int(position.to_integral_value(rounding=ROUND_FLOOR))
