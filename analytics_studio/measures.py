@@ -9823,6 +9823,7 @@ def _evaluate_measures_once(
     def dictionary_ordered_rows(
         table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]], beside_doubles: bool = False,
         scan_filters: bool = False, keep_undecided: bool = False, unmodelled: list[bool] | None = None, collapsed: list[bool] | None = None,
+        topn_walk: bool = False,
     ) -> list[dict[str, Any]]:
         """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
 
@@ -9945,6 +9946,11 @@ def _evaluate_measures_once(
                         # the rows filtered in (RANK(SKIP, ALL(Sales, Note), ..) under Note = "Paid") comes out sorted by the double; the storage order does not give it
                         collapsed.append(True)
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+                if topn_walk and dax_iteration_order.topn_pair_applies(list(profiles.values())):
+                    # Task 77: the heap of a TOPN read by CONCATENATEX walks two columns by the key space of both (see dax_iteration_order)
+                    in_dictionary_order = dax_iteration_order.topn_pair_order(len(source["rows"]), list(profiles.values()))
+                    if in_dictionary_order is None:
+                        raise _KeySpaceUndecided()
                 if plan.projects and plan.eager and in_dictionary_order and len(profiles) > 1:
                     in_dictionary_order = dax_iteration_order.projection_order(len(source["rows"]), list(profiles.values()))  # Task 69
                     if in_dictionary_order is None:
@@ -10812,7 +10818,7 @@ def _evaluate_measures_once(
                     constant_headers = {name.casefold() for _table, name in constant_sources} if constant_sources is not None else set()
                     if any(header.casefold() in constant_headers and len({row.get(header) for row in rows}) == 1 for header in context["headers"]):
                         raise dax_typed.refusal("The walk order of a TOPN over a column an outer filter holds to one value is not settled by the local engine.")
-                walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)])
+                walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)], topn_walk=True)
                 scored = score_rows(walked)
                 window_relation = arguments[1][0] == "call" and arguments[1][1] == "OFFSET"
                 if limit > len(scored) or (limit == len(scored) and not window_relation):
