@@ -9715,6 +9715,8 @@ def _evaluate_measures_once(
 
     derived_count = 0
     row_stack: list[tuple[dict[str, Any], dict[str, Any], int]] = []
+    transitioned_frames: list[list[tuple[dict[str, Any], dict[str, Any], int]]] = []  # Task 83: the row contexts of each CALCULATE being evaluated
+    group_scope_stack: list[frozenset[tuple[str, str]]] = []  # Task 83: the group-by columns (table id, column) of the SUMMARIZECOLUMNS row being evaluated
     selected_iteration_depth = 0  # how many iterations over a SELECTCOLUMNS table are running
 
     def derived_table(
@@ -10856,6 +10858,7 @@ def _evaluate_measures_once(
                 pop_shadow(saved_shadow)
                 eff_touched = saved_touched
             summarized = derived_table(list(group_columns) + names, out_rows, lineage, group_types, certain_types=static_extension_names)
+            summarized[0]["summarize_groups"] = tuple(group_columns)  # Task 83: a CALCULATE on one of its rows sees these columns in scope
             if has_rollup and not names:
                 summarized[0]["rollup_level_count"] = rollup_level_count if out_rows else 0
             if order_undecided_levels:
@@ -11469,10 +11472,15 @@ def _evaluate_measures_once(
                     raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
                 group_context, group_rows = derived_table(list(headers), combos, lineage, types)
                 output = []
+                group_scope = frozenset((context["id"], column.casefold()) for context, column in resolved)  # Task 83: ISINSCOPE is TRUE for these
                 for group_row in group_rows:
                     row = dict(group_row)
-                    for name, expression in zip(names, stripped):
-                        row[name] = evaluate_with_context_transition(expression, group_context, group_row)
+                    group_scope_stack.append(group_scope)
+                    try:
+                        for name, expression in zip(names, stripped):
+                            row[name] = evaluate_with_context_transition(expression, group_context, group_row)
+                    finally:
+                        group_scope_stack.pop()
                     counted = [row[name] for name, skip in zip(names, ignored) if not skip]
                     if names and not all(skip for skip in ignored) and all(value is None for value in counted):
                         continue  # a row whose expressions are all blank is dropped
@@ -12602,6 +12610,24 @@ def _evaluate_measures_once(
             value_rows,
             key=lambda row: -1 if row[column] is None else first_seen.get(cell_key(ascii_fold(row[column]) if isinstance(row[column], str) else row[column]), 0),
         )
+
+    def unknown_member_walked_last(context: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Task 83 (live Power BI, ZO probe): the unknown (virtual blank) member of a dimension comes last in the walk of VALUES / ALL of its columns,
+        although a blank stored in the column is the first entry of the dictionary.  Rows come back unchanged when the member cannot be told from a stored blank."""
+        lineage = context.get("lineage") or {}
+        headers = list(context.get("headers", ()))
+        if not headers or any(header not in lineage for header in headers):
+            return rows
+        base_ids = {lineage[header][0]["id"] for header in headers}
+        if len(base_ids) != 1 or next(iter(base_ids)) not in unknown_member_ids:
+            return rows
+        base = contexts_by_id.get(next(iter(base_ids)))
+        if base is None or any(all(stored.get(lineage[header][1]) is None for header in headers) for stored in base["rows"]):
+            return rows
+        unknown = [row for row in rows if all(row.get(header) is None for header in headers)]
+        if not unknown:
+            return rows
+        return [row for row in rows if not any(row is member for member in unknown)] + unknown
 
     iterator_depth = 0
     variable_nodes: dict[str, Any] = {}  # VAR name -> the expression it was declared with (to walk a table held in a VAR)
@@ -16850,9 +16876,11 @@ def _evaluate_measures_once(
         """CALCULATE evaluates its expression with the row contexts it transitioned removed."""
         saved = list(row_stack)
         del row_stack[:]
+        transitioned_frames.append(saved)  # Task 83: the rows the CALCULATE transitioned (ISINSCOPE reads their SUMMARIZE group-by columns)
         try:
             return thunk()
         finally:
+            transitioned_frames.pop()
             row_stack[:] = saved
 
     def evaluate_with_context_transition(
@@ -17897,7 +17925,22 @@ def _evaluate_measures_once(
             and axis.column.casefold() == column.casefold()
         )
         if function == "ISINSCOPE":
-            return on_axis
+            # Task 83 (live Power BI, scope-fns-73): a column grouped by the SUMMARIZECOLUMNS row being evaluated is in scope on that row
+            if on_axis or (column is not None and bool(group_scope_stack) and (context["id"], column.casefold()) in group_scope_stack[-1]):
+                return True
+            # Task 83 (live Power BI, ZO probe): after the context transition (a CALCULATE) of a SUMMARIZE row, its group-by columns are in scope;
+            # a plain ISINSCOPE in the row context, and a column the SUMMARIZE does not group by, are not
+            tagged = eff_transition.get(context["id"], {}).get(column.casefold()) if column is not None else None
+            if tagged is not None and current_filter(context["id"], column.casefold()) is tagged[0]:
+                for frame in (transitioned_frames[-1] if transitioned_frames else ()):
+                    groups = frame[0].get("summarize_groups")
+                    if groups and any(
+                        header in frame[0].get("lineage", {}) and frame[0]["lineage"][header][0]["id"] == context["id"]
+                        and frame[0]["lineage"][header][1].casefold() == column.casefold()
+                        for header in groups
+                    ):
+                        return True
+            return False
         if function == "ISFILTERED" and column is not None and any(
             mark_table == context["id"] and (mark_column == column.casefold() or (mark_column is None and column.casefold() not in mark_excluded))
             for mark_table, mark_column, mark_excluded in nonblank_mark_stack
@@ -17915,11 +17958,14 @@ def _evaluate_measures_once(
                 raise MeasureError("HASONEFILTER over a column filtered by a FILTER table is not supported in the local engine.")
             if column is None or filtered_rows is None:
                 return False
-            return len({
+            kept_values = {
                 cell_key(ascii_fold(v) if isinstance(v, str) else v)
                 for index, row in enumerate(context["rows"]) if index in filtered_rows
                 for v in [row.get(column)]
-            }) == 1
+            }
+            if getattr(filtered_rows, "blank", False):
+                kept_values.add(cell_key(None))  # Task 83 (live Power BI, ZO probe): a filter that admits the unknown member holds that BLANK as one value
+            return len(kept_values) == 1
         if function == "ISCROSSFILTERED":
             crossfiltered = bool(current.get("filter_column_rows")) or len(rows_by_table_id[context["id"]]) < len(context["rows"])
             if not crossfiltered:
@@ -22146,6 +22192,8 @@ def _evaluate_measures_once(
             walk_unmodelled: list[bool] = []  # Task 70: set when the walk of the rows is an order the engine does not model
             walk_collapsed: list[bool] = []  # Task 71: set when a rank window is walked by one fractional double beside columns that hold one value
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes, scan_filters=True, unmodelled=walk_unmodelled, collapsed=walk_collapsed)
+            if not order_spec and walked_table[0] in {"call", "table_call"} and walked_table[1] in {"VALUES", "ALL", "ALLSELECTED"} and len(iteration_rows) > 1:
+                iteration_rows = unknown_member_walked_last(context, iteration_rows)
             if walked_table[0] == "call" and walked_table[1] == "UNION" and len(iteration_rows) > 1:
                 iteration_rows = union_walked_rows(walked_table, context, iteration_rows, read_nodes, not folded_on_filter_context)
             if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
@@ -22218,6 +22266,15 @@ def _evaluate_measures_once(
                 value = source_row.get(value_column)
                 _reject_power_query_error(value, value_column, row_index)
                 seen_values.setdefault(cell_key(ascii_fold(value) if isinstance(value, str) else value), value)
+            if (  # Task 83 (live Power BI, scope-fns-73): the visible blank member of the table is one BLANK value, as VALUES lists it
+                value_context["id"] in unknown_member_ids
+                and not unknown_member_hidden(value_context["id"])
+                and cell_key(None) not in seen_values
+                and unknown_member_passes_remaining_filters(
+                    evaluation_contexts_by_id.get(value_context["id"], value_context), evaluation_contexts_by_id, evaluation_filter_ids,
+                )
+            ):
+                seen_values[cell_key(None)] = None
             if function == "HASONEVALUE":
                 return len(seen_values) == 1
             if len(seen_values) != 1:
