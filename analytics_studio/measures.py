@@ -9034,6 +9034,11 @@ def _evaluate_measures_once(
     def eff_active() -> bool:
         return not eff_blocked and (bool(eff_layers) or any(eff_transition.values()) or any(eff_suppressed.values()) or any(eff_group_keys.values()))
 
+    def shapes_drop_blank(context: dict[str, Any]) -> bool:
+        """A whole-row filter set (FILTER table, TREATAS, ..) that does not list the one-side blank member. One built from ALL(col) / VALUES
+        lists it when its predicate is true for the blank (Task 82), and then it keeps the blank member like a column filter does."""
+        return any(not getattr(shape["rows"], "blank", False) for shape in _context_shapes(context))
+
     def allselected_rows_for(source_context: dict[str, Any], columns: list[str]) -> list[dict[str, Any]] | None:
         """ALLSELECTED(columns) inside an iterator: the table rows that satisfy every filter touching those columns, where
         the filters are the iterator shadows, the explicit CALCULATE filters and the outer filters the shadows did not
@@ -9077,7 +9082,11 @@ def _evaluate_measures_once(
             rows = [row for position, row in enumerate(full) if position in keep_positions and id(row) in visible]
         allowed = {id(row) for row in rows}
         result = [row for row in full if id(row) in allowed] if len(allowed) != len(full) or any(id(r) not in allowed for r in full) else list(full)
-        child_row_in_force = False  # a row of a many-side table that points at this table is the iterator's row
+        child_relevant = False  # a many-side row or a many-side iterator over a child table of this table is in force
+        child_unmatched = False  # the child rows that stay visible hold a blank key or a key with no row here
+        reached_rows: set[int] = set()  # Task 82: rows of this table that the visible rows of a whole-table iterator reach
+        table_level_child = False  # SUMX(Fact, ..) / FILTER(Fact, ..) over a child table is in force
+        narrowed_off_unmatched = False  # a column iterator over a child key whose visible rows hold no unmatched key although the child table does
         for relationship in relationship_definitions:
             if not isinstance(relationship, dict) or not relationship.get("is_active"):
                 continue
@@ -9086,17 +9095,85 @@ def _evaluate_measures_once(
             child_id = ends[1] if cardinality == "one_to_many" and ends[0] == table_id else ends[0] if cardinality == "many_to_one" and ends[1] == table_id else None
             if child_id is None:
                 continue
-            if any(current_filter(child_id, folded) is set_by_transition for folded, (set_by_transition, _outer) in eff_transition.get(child_id, {}).items()):
-                child_row_in_force = True  # live Power BI: SUMX(Fact, CALCULATE(COUNTROWS(ALLSELECTED(Dim)))) never gains the blank member, orphan row or not
+            transition_here = any(current_filter(child_id, folded) is set_by_transition for folded, (set_by_transition, _outer) in eff_transition.get(child_id, {}).items())
+            child_layers = [layer for layer in eff_layers if layer.table == child_id]
+            if not transition_here and not child_layers:
+                continue
+            child_context = contexts_after_clear.get(child_id)
+            if child_context is None:
+                return None
+            child_headers = {header.casefold() for header in child_context["headers"]}
+            table_layers = [layer for layer in child_layers if {column.casefold() for column in layer.columns} >= child_headers]
+            table_level = bool(table_layers)
+            if table_level:  # Task 82: a whole-table iterator's shadow holds the fact rows the restored outer context selects
+                visible_child = [
+                    row for row in child_context["rows"]
+                    if any(row_key(typed_cell(child_context, column, row.get(column)) for column in layer.columns) in layer.tuples for layer in table_layers)
+                ]
+            else:  # a column iterator (VALUES(Fact[col])) does not narrow the child rows for the blank test
+                try:
+                    visible_child = propagate_relationship_filters(list(contexts_after_clear.values()), relationship_definitions, filter_roots_after_clear)[child_id]
+                except (RelationshipError, MeasureError):
+                    return None
+            if child_id == ends[0]:  # many-side table is the relationship's from side
+                child_column, own_column = str(relationship.get("from_column", "")), str(relationship.get("to_column", ""))
+            else:
+                child_column, own_column = str(relationship.get("to_column", "")), str(relationship.get("from_column", ""))
+            child_actual = {header.casefold(): header for header in child_context["headers"]}
+            own_actual = {header.casefold(): header for header in source_context["headers"]}
+            if child_column.casefold() not in child_actual or own_column.casefold() not in own_actual:
+                return None
+            child_column, own_column = child_actual[child_column.casefold()], own_actual[own_column.casefold()]
+            own_keys: dict[Any, set[int]] = {}
+            for row in full:
+                key = typed_cell(source_context, own_column, row.get(own_column))
+                if key is not None:
+                    own_keys.setdefault(key, set()).add(id(row))
+            reached_here: set[int] = set()
+            unmatched_here = False
+            for child_row in visible_child:
+                key = typed_cell(child_context, child_column, child_row.get(child_column))
+                if key is None or key not in own_keys:
+                    unmatched_here = True  # a blank or orphan key: the one-side blank member is selected
+                else:
+                    reached_here |= own_keys[key]
+            if not table_level and not unmatched_here and any(  # Task 82: the iterated key values narrowed the facts away from every unmatched key
+                typed_cell(child_context, child_column, child_row.get(child_column)) is None
+                or typed_cell(child_context, child_column, child_row.get(child_column)) not in own_keys
+                for child_row in child_context["rows"]
+            ):
+                narrowed_off_unmatched = True
+            child_relevant = True
+            child_unmatched = child_unmatched or unmatched_here
+            if table_level:
+                table_level_child = True
+                reached_rows |= reached_here
+        if table_level_child:  # live Power BI: ALLSELECTED(Dim) inside SUMX(Fact, ..) keeps only the Dim rows the selected facts reach
+            result = [row for row in result if id(row) in reached_rows]
         if (  # live Power BI: ALLSELECTED(col) keeps the one-side blank member as ALL does (same condition as the unshadowed path)
             table_id in unknown_member_ids
             and not unknown_member_hidden(table_id)
-            and not _context_shapes(contexts_after_clear.get(table_id, source_context))  # shapes on columns this ALLSELECTED drops do not count
-            and not child_row_in_force
+            and not shapes_drop_blank(contexts_after_clear.get(table_id, source_context))  # shapes on columns this ALLSELECTED drops do not count
+            and (child_unmatched if child_relevant else True)  # Task 82: the blank member only when the selected facts hold an unmatched key
             and all(getattr(outer, "blank", False) for outer in replaced_outer)  # an outer filter on a column asked for must itself select the blank
             and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
         ):
             result.append({header: None for header in source_context["headers"]})
+        elif (  # Task 82: a column iterator over a child key (VALUES(Fact[key])) under an outer filter on this table, ALLSELECTED of a column:
+            # the outer filter narrowed the iterated keys away from every unmatched key. Power BI (live, KEEPFILTERS(Dim[Tier]>=2)) still lists the
+            # blank member there, as the plain ALLSELECTED(column) rule does, so the iterator does not narrow the blank test.
+            narrowed_off_unmatched
+            and not child_unmatched
+            and table_id in evaluation_filter_ids
+            and table_id in unknown_member_ids
+            and not unknown_member_hidden(table_id)
+            and not shapes_drop_blank(contexts_after_clear.get(table_id, source_context))
+            and all(getattr(outer, "blank", False) for outer in replaced_outer)
+            and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
+        ):
+            if shapes_drop_blank(evaluation_contexts_by_id.get(table_id, source_context)):  # the plain rule drops the blank for a shaped filter (TREATAS): not verified, refused
+                raise MeasureError("ALLSELECTED of a column inside an iterator over a related table's key cannot tell the blank member under a shaped outer filter.")
+            return None  # the plain ALLSELECTED(column) answer
         for layer in eff_layers:
             if layer.table != table_id:
                 continue
@@ -15287,7 +15364,7 @@ def _evaluate_measures_once(
         targets_by_key: dict[
             tuple[str, str], tuple[dict[str, Any], str]
         ] = {}
-        explicit_here: list[tuple[str, str, bool, Any, dict[str, Any]]] = []
+        explicit_here: list[tuple[str, str, bool, Any, dict[str, Any], bool]] = []
         for key, (target_context, target_column, allowed_rows) in (extra_date_filters or {}).items():
             filters_by_column.setdefault(key, []).append((allowed_rows, False, False))
             targets_by_key[key] = (target_context, target_column)
@@ -15413,7 +15490,7 @@ def _evaluate_measures_once(
             if existing_key is not None:
                 del column_filters[existing_key]
             column_filters[actual_column] = new_rows
-            explicit_here.append((table_id, actual_column, keep, new_rows, target_context))
+            explicit_here.append((table_id, actual_column, keep, new_rows, target_context, new_blank_allowed))
 
             blank_column_filters = dict(
                 updated.get("filter_column_blank_allowed", {})
@@ -15466,13 +15543,14 @@ def _evaluate_measures_once(
         evaluation_filter_ids = updated_filter_roots
         rows_by_table_id = filtered_rows_by_id
         saved_layers, saved_touched = eff_layers, eff_touched
-        eff_touched = eff_touched | {(table_id, column.casefold()) for table_id, column, _keep, _rows, _ctx in explicit_here}
-        for table_id, column, keep, rows_allowed, filter_context in explicit_here:  # an explicit filter replaces the shadow on its column
+        eff_touched = eff_touched | {(table_id, column.casefold()) for table_id, column, _keep, _rows, _ctx, _blank in explicit_here}
+        for table_id, column, keep, rows_allowed, filter_context, blank_selected in explicit_here:  # an explicit filter replaces the shadow on its column
             if not keep:
                 eff_layers = project_layers(eff_layers, table_id, [column])
-            else:
-                eff_layers = (*eff_layers, _Shadow(table_id, (column,), lambda column=column, rows_allowed=rows_allowed, filter_context=filter_context: frozenset(
-                    row_key([typed_cell(filter_context, column, filter_context["rows"][index].get(column))]) for index in rows_allowed)))
+            else:  # Task 82: a filter whose predicate is true for the blank (Fam<>"F3") also selects the one-side blank member
+                eff_layers = (*eff_layers, _Shadow(table_id, (column,), lambda column=column, rows_allowed=rows_allowed, filter_context=filter_context, blank_selected=blank_selected: frozenset(
+                    [row_key([typed_cell(filter_context, column, filter_context["rows"][index].get(column))]) for index in rows_allowed]
+                    + ([row_key([None])] if blank_selected else []))))
         try:
             return evaluate(expression)
         finally:

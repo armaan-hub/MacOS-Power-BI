@@ -1,0 +1,2164 @@
+{
+ "items": [
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim))))",
+   "powerbi": "240",
+   "now": "270"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Cal[Year]=2024)",
+   "powerbi": "133",
+   "now": "171"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Fact[Units]<5)",
+   "powerbi": "128",
+   "now": "144"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "48",
+   "now": "60"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim))))",
+   "powerbi": "8",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Fact[Units]<5)",
+   "powerbi": "8",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "5"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim))))",
+   "powerbi": "119",
+   "now": "153"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Cal[Year]=2024)",
+   "powerbi": "35",
+   "now": "63"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Fact[Units]<5)",
+   "powerbi": "9",
+   "now": "27"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "20"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim))))",
+   "powerbi": "110",
+   "now": "99"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Cal[Year]=2024)",
+   "powerbi": "100",
+   "now": "90"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Fact[Units]<5)",
+   "powerbi": "90",
+   "now": "81"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "20",
+   "now": "20"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim))))",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Cal[Year]=2024)",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Fact[Units]<5)",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "25",
+   "now": "25"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Cal[Year]=2024)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),ZY_Fact[Units]<5)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "23"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "14"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "17",
+   "now": "11"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "23"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "14"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "300",
+   "now": "300"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "190",
+   "now": "190"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "160",
+   "now": "160"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "60",
+   "now": "60"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "90",
+   "now": "90"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "57",
+   "now": "57"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "48",
+   "now": "48"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "24",
+   "now": "24"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "17",
+   "now": "17"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "7"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "11",
+   "now": "11"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "9",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "54",
+   "now": "54"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "51",
+   "now": "51"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "50",
+   "now": "50"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "15",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "7",
+   "now": "7"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item]))))",
+   "powerbi": "240",
+   "now": "270"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "133",
+   "now": "171"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "128",
+   "now": "144"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "48",
+   "now": "108"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item]))))",
+   "powerbi": "8",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "8",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item]))))",
+   "powerbi": "119",
+   "now": "153"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "35",
+   "now": "63"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "9",
+   "now": "27"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "36"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item]))))",
+   "powerbi": "110",
+   "now": "99"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "100",
+   "now": "90"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "90",
+   "now": "81"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "40",
+   "now": "36"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item]))))",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "25",
+   "now": "25"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item]))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "20",
+   "now": "20"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "23"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "14"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "17",
+   "now": "11"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "23"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "14"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "300",
+   "now": "300"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "190",
+   "now": "190"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "160",
+   "now": "160"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "60",
+   "now": "60"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "17",
+   "now": "17"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "7"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "11",
+   "now": "11"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "9",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "54",
+   "now": "54"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "51",
+   "now": "51"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "50",
+   "now": "50"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "15",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam]))))",
+   "powerbi": "90",
+   "now": "60"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Cal[Year]=2024)",
+   "powerbi": "57",
+   "now": "38"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Fact[Units]<5)",
+   "powerbi": "48",
+   "now": "32"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "24",
+   "now": "24"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam]))))",
+   "powerbi": "3",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Cal[Year]=2024)",
+   "powerbi": "3",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam]))))",
+   "powerbi": "51",
+   "now": "34"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Cal[Year]=2024)",
+   "powerbi": "21",
+   "now": "14"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Fact[Units]<5)",
+   "powerbi": "6",
+   "now": "6"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "8",
+   "now": "8"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam]))))",
+   "powerbi": "33",
+   "now": "22"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Cal[Year]=2024)",
+   "powerbi": "30",
+   "now": "20"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Fact[Units]<5)",
+   "powerbi": "27",
+   "now": "18"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "8"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam]))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Cal[Year]=2024)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Fact[Units]<5)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "15",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam]))))",
+   "powerbi": "9",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Cal[Year]=2024)",
+   "powerbi": "9",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),ZY_Fact[Units]<5)",
+   "powerbi": "9",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "23"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "14"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "17",
+   "now": "11"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "2"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "23"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "14"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "90",
+   "now": "90"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "57",
+   "now": "57"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "48",
+   "now": "48"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "24",
+   "now": "24"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "17",
+   "now": "17"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "7"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "11",
+   "now": "11"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "9",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "5",
+   "now": "5"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "6",
+   "now": "6"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "6",
+   "now": "6"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "6",
+   "now": "6"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALLSELECTED(ZY_Dim[Fam]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item]))))",
+   "powerbi": "300",
+   "now": "300"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "190",
+   "now": "190"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "160",
+   "now": "160"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "120",
+   "now": "120"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item]))))",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item]))))",
+   "powerbi": "170",
+   "now": "170"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "70",
+   "now": "70"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "40",
+   "now": "40"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item]))))",
+   "powerbi": "110",
+   "now": "110"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "90",
+   "now": "90"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "40",
+   "now": "40"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item]))))",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "100",
+   "now": "100"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "50",
+   "now": "50"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item]))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Cal[Year]=2024)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),ZY_Fact[Units]<5)",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(COUNTROWS(ALL(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "20",
+   "now": "20"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "17",
+   "now": "17"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "7"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "300",
+   "now": "300"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "190",
+   "now": "190"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "160",
+   "now": "160"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "60",
+   "now": "60"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact)))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),CALCULATE(SUMX(ALL(ZY_Dim[Item]),CALCULATE(COUNTROWS(ZY_Fact))))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "30",
+   "now": "30"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "19",
+   "now": "19"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "16",
+   "now": "16"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "12",
+   "now": "12"
+  },
+  {
+   "model": "ZY",
+   "expr": "MAXX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(MAXX(ZY_Fact,RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "17",
+   "now": "17"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "7",
+   "now": "7"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(FILTER(ZY_Fact,ZY_Fact[Units]>3),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Fact[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "11",
+   "now": "11"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "10",
+   "now": "10"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "9",
+   "now": "9"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Fact[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(VALUES(ZY_Dim[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "54",
+   "now": "54"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "51",
+   "now": "51"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "50",
+   "now": "50"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(VALUES(ZY_Dim[Item]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "15",
+   "now": "15"
+  },
+  {
+   "model": "ZY",
+   "expr": "SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units]))))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Cal[Year]=2024)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Dim[Fam]=\"F1\")",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),ZY_Fact[Units]<5)",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZY",
+   "expr": "CALCULATE(SUMX(SUMMARIZE(ZY_Fact,ZY_Dim[Fam]),RANKX(ALL(ZY_Dim[Item]),CALCULATE(SUM(ZY_Fact[Units])))),KEEPFILTERS(ZY_Dim[Tier]>=2))",
+   "powerbi": "2",
+   "now": "2"
+  }
+ ]
+}
