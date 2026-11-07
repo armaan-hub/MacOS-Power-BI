@@ -155,3 +155,9 @@ def _same(ours, expected):
 @pytest.mark.parametrize("expression, expected", CASES, ids=[f"zx{index}" for index in range(len(CASES))])
 def test_allselected_blank_under_dimension_filter(expression, expected):
     assert _same(m.ours_for("ZX", expression), expected)
+
+
+def test_allselected_dimension_in_many_side_iterator_never_gains_the_blank_member():
+    # live Power BI (saved iteration-82 answer): 9 fact rows x the 5 stored Dim rows, no blank member, orphan row included
+    expression = "CALCULATE(SUMX(ZO_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZO_Dim)))),ZO_Cal[Date]<=DATE(2024,2,10))"
+    assert _same(m.ours_for("ZO", expression), "45")
