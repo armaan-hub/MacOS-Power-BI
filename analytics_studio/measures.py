@@ -8831,6 +8831,7 @@ def _evaluate_measures_once(
     eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
     eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
     eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
+    eff_sc_args: dict[str, dict[str, tuple[Any, Any]]] = {}  # SUMMARIZECOLUMNS TREATAS filter arguments: table -> casefolded column -> (filter object it set, outer filter it replaced)
     eff_blocked = False
     eff_rank_table = False  # evaluating the table argument of RANKX: ALLSELECTED(col) still sees a SUMMARIZE key on its own column
 
@@ -9070,6 +9071,15 @@ def _evaluate_measures_once(
                 continue
             for folded, (set_by_transition, outer) in tagged_columns.items():
                 if current_filter(other_id, folded) is set_by_transition:  # still only the row's transition: ALLSELECTED sees the outer filter it covered
+                    marked = eff_sc_args.get(other_id, {}).get(folded)
+                    if marked is not None and marked[0] is outer and len(wanted) < len(source_context["headers"]):
+                        outer = marked[1]  # a TREATAS argument on another table is no outer filter of ALLSELECTED(column) (see below)
+                    other_tables.setdefault(other_id, {})[folded] = outer
+        for other_id, marked_columns in eff_sc_args.items():  # a TREATAS argument of the enclosing SUMMARIZECOLUMNS on another table
+            if other_id == table_id or len(wanted) >= len(source_context["headers"]):  # a whole table (ALLSELECTED(W)) stays narrowed
+                continue
+            for folded, (set_by_argument, outer) in marked_columns.items():
+                if current_filter(other_id, folded) is set_by_argument and folded not in other_tables.get(other_id, {}):
                     other_tables.setdefault(other_id, {})[folded] = outer
         try:
             rows, contexts_after_clear, filter_roots_after_clear = rows_after_clearing_columns(source_context, cleared, other_tables=other_tables)
@@ -9080,6 +9090,28 @@ def _evaluate_measures_once(
             keep_positions = set.intersection(*(set(outer) for outer in replaced_outer))
             visible = {id(row) for row in rows}
             rows = [row for position, row in enumerate(full) if position in keep_positions and id(row) in visible]
+        if eff_sc_args and len(wanted) >= len(source_context["headers"]) and any(
+            isinstance(item, dict) and item.get("is_active") and item.get("cross_filter_direction") == "both" and item.get("cardinality") == "many_to_one"
+            for item in relationship_definitions
+        ):
+            # live Power BI (rankx-sets-75): a TREATAS argument of the enclosing SUMMARIZECOLUMNS that reaches this table only through a table on
+            # its many side (a bidirectional relationship) did not narrow ALLSELECTED(table) (ALLSELECTED(Dim) under TREATAS onto Cal[Year] lists every
+            # Dim row), while a direct route does; a shape that needs the detour is not modelled
+            one_way = [
+                {**item, "filter_direction_override": "to_from"}
+                if isinstance(item, dict) and item.get("cross_filter_direction") == "both" and item.get("cardinality") == "many_to_one" else item
+                for item in relationship_definitions
+            ]
+            marked_roots = {other_id for other_id in eff_sc_args if other_id != table_id and other_id in filter_roots_after_clear}
+            try:
+                direct_ids = {id(row) for row in propagate_relationship_filters(list(contexts_after_clear.values()), one_way, marked_roots)[table_id]}
+                if filter_roots_after_clear - marked_roots:  # the other filters keep every route
+                    direct_ids &= {id(row) for row in propagate_relationship_filters(
+                        list(contexts_after_clear.values()), relationship_definitions, filter_roots_after_clear - marked_roots)[table_id]}
+            except (RelationshipError, MeasureError):
+                raise MeasureError("ALLSELECTED of a table that a TREATAS argument reaches through a bidirectional relationship is not supported in the local engine.")
+            if marked_roots:
+                rows = [row for row in full if id(row) in direct_ids]
         allowed = {id(row) for row in rows}
         result = [row for row in full if id(row) in allowed] if len(allowed) != len(full) or any(id(r) not in allowed for r in full) else list(full)
         child_relevant = False  # a many-side row or a many-side iterator over a child table of this table is in force
@@ -9470,7 +9502,11 @@ def _evaluate_measures_once(
                 if (
                     partner is not None and partner_id in independent_filter_roots
                     and direction in relationship_filter_directions(relationship)
-                    and not eff_transition.get(partner_id)  # a row of an iterator over the partner does show it (SUMX(W, CALCULATE(COUNTROWS(VALUES(U[K])))))
+                    and (not eff_transition.get(partner_id) or (  # a row of an iterator over the partner does show it (SUMX(W, CALCULATE(COUNTROWS(VALUES(U[K])))))
+                        partner.get("filter_column_rows") and all(  # a group / row that is the partner's own blank member selects it (live Power BI, rankx-sets-75)
+                            getattr(rows, "blank", False) and not rows for rows in partner["filter_column_rows"].values()
+                        )
+                    ))
                 ):
                     if own_unknown_member_selected(partner):
                         partner_selects_blank = True
@@ -11434,8 +11470,11 @@ def _evaluate_measures_once(
         if len({context["id"] for context, _column in resolved}) > 1 and not names:
             raise MeasureError("SUMMARIZECOLUMNS over columns of several tables needs at least one expression in the local engine.")
         added: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]] = {}
+        treatas_columns: set[tuple[str, str]] = set()
         for node in filter_nodes:  # filter tables are evaluated in the outer filter context
             for table_id, (context, column_rows, shapes) in general_table_filter_sets(node).items():
+                if isinstance(node, tuple) and len(node) > 2 and node[0] == "call" and str(node[1]).upper() == "TREATAS":
+                    treatas_columns.update((table_id, column) for column in column_rows)
                 _context, target, target_shapes = added.setdefault(table_id, (context, {}, []))
                 overlap = {column for column in column_rows if column in target}
                 for column, allowed in column_rows.items():
@@ -11598,7 +11637,26 @@ def _evaluate_measures_once(
                         emit({**level_row, **level_flags}, kept_headers)
             return derived_table(all_headers + names, output, lineage, types)
 
-        return with_column_filters(added, compute) if added else compute()
+        if not added:
+            return compute()
+        outer_filters = {(table_id, column): current_filter(table_id, column.casefold()) for table_id, column in treatas_columns}
+
+        def compute_marked() -> Any:
+            # live Power BI (rankx-sets-75): ALLSELECTED(column) in a column of this SUMMARIZECOLUMNS is not narrowed, on other tables, by a TREATAS
+            # filter argument (ALLSELECTED(W[Y]) under TREATAS onto the partner's key lists every Y value, and so does ALLSELECTED(Dim[Prod])
+            # under TREATAS onto Sup[Sup]); the measure itself still sees the filter
+            nonlocal eff_sc_args
+            saved_marks = eff_sc_args
+            marks = {table_id: dict(columns) for table_id, columns in eff_sc_args.items()}
+            for table_id, column in treatas_columns:
+                marks.setdefault(table_id, {})[column.casefold()] = (current_filter(table_id, column.casefold()), outer_filters[(table_id, column)])
+            eff_sc_args = marks
+            try:
+                return compute()
+            finally:
+                eff_sc_args = saved_marks
+
+        return with_column_filters(added, compute_marked)
 
     def group_by(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         context, rows = table_argument_value(arguments[0])
@@ -16886,7 +16944,14 @@ def _evaluate_measures_once(
                     and {str(item.get("from_table_id")), str(item.get("to_table_id"))} == {table_id, one_id}
                     for item in relationship_definitions
                 )
-                transitioned[one_id] = (one_context, {header: BlankSet((), True, peer, not peer) for header in one_context["headers"]})
+                whole_blank = False
+                if peer and all(row.get(header) is None for header in many_context["headers"]) and any(
+                    isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "many_to_one" and str(item.get("to_table_id")) == one_id
+                    for item in relationship_definitions
+                ):
+                    peer = False  # the table's own blank member (not an orphan row) meets the whole blank member of a partner that has many-side orphans
+                    whole_blank = True
+                transitioned[one_id] = (one_context, {header: BlankSet((), True, peer, not peer and not whole_blank) for header in one_context["headers"]})
                 continue
             related_row = one_context["rows"][min(matches)]
             transitioned[one_id] = (one_context, {

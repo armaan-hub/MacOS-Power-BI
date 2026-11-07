@@ -54,3 +54,73 @@ CASES = [
 @pytest.mark.parametrize("model, expression, powerbi", CASES)
 def test_matching_ranking_set_answer(model: str, expression: str, powerbi: str) -> None:
     assert m.ours_for(model, expression) == powerbi
+
+
+# Spec items that were wrong before the fix (blank member of one-to-one tables in ranking sets, SUMMARIZECOLUMNS TREATAS and ALLSELECTED,
+# deterministic order of blank-member propagation); Power BI answers from the Task 85 spec.
+FIXED_CASES = [
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],"v",RANKX(ALLSELECTED(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,ASC,Dense)),ZM_B[N]&"="&[v],";",ZM_B[N])', 'n1=6;n1b=6;n2=6;n5=6'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({"k1","k2"},ZM_U[K]),"v",RANKX(ALL(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,DESC)),ZM_B[N]&"="&[v],";",ZM_B[N])', 'n1=3;n1b=3;n2=3;n5=3'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({"k1","k2"},ZM_U[K]),"v",RANKX(ALL(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,DESC,Dense)),ZM_B[N]&"="&[v],";",ZM_B[N])', 'n1=3;n1b=3;n2=3;n5=3'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],"v",RANKX(ALLSELECTED(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,ASC)),ZM_U[X]&"="&[v],";",ZM_U[X])', '=5;x1=2;x2=3;x3=4;x4=5'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],"v",RANKX(ALLSELECTED(ZM_W[Y]),CALCULATE(COUNTROWS(ZM_F)),,ASC)),ZM_U[X]&"="&[v],";",ZM_U[X])', '=5;x1=5;x2=5;x3=5;x4=5'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],"v",RANKX(ALLSELECTED(ZM_W[Y]),CALCULATE(SUM(ZM_F[Amt])),,ASC)),ZM_U[X]&"="&[v],";",ZM_U[X])', '=5;x1=5;x2=5;x3=5;x4=5'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({"k1","k2"},ZM_U[K]),"v",RANKX(ALL(ZM_W),CALCULATE(SUM(ZM_F[Amt])))),ZM_U[X]&"="&[v],";",ZM_U[X])', 'x1=4;x2=3'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALL(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,DESC)),ZM_U[X]&"="&[v],";",ZM_U[X])', '=1;x1=4;x2=3;x3=2;x4=2'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALLSELECTED(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,DESC)),ZM_U[X]&"="&[v],";",ZM_U[X])', '=1;x1=4;x2=3;x3=2;x4=2'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALLSELECTED(ZM_W[Y]),CALCULATE(SUM(ZM_F[Amt])),,ASC)),ZM_U[X]&"="&[v],";",ZM_U[X])', '=5;x1=5;x2=5;x3=5;x4=5'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],"v",RANKX(ALLSELECTED(ZM_U[X]),CALCULATE(COUNTROWS(ZM_F)))),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],"v",RANKX(ALLSELECTED(ZM_U[X]),CALCULATE(COUNTROWS(ZM_F)),,DESC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],"v",RANKX(ALLSELECTED(ZM_U[X]),CALCULATE(SUM(ZM_F[Amt])),,DESC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],"v",RANKX(ALLSELECTED(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,ASC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=6;y1=2;y2=3;y3=4;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],"v",RANKX(VALUES(ZM_U[X]),CALCULATE(COUNTROWS(ZM_F)),,DESC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],"v",RANKX(VALUES(ZM_U[X]),CALCULATE(SUM(ZM_F[Amt])))),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALL(ZM_U[X]),CALCULATE(COUNTROWS(ZM_F)),,DESC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALLSELECTED(ZM_U[X]),CALCULATE(COUNTROWS(ZM_F)))),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALLSELECTED(ZM_U[X]),CALCULATE(SUM(ZM_F[Amt])),,DESC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALLSELECTED(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,ASC)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=6;y1=2;y2=3;y3=4;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALLSELECTED(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,DESC)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=4;y2=3;y3=2;y5=5'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(ALLSELECTED(ZM_W),CALCULATE(SUM(ZM_F[Amt])),,DESC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=4;y2=3;y3=2;y5=5'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(VALUES(ZM_U[X]),CALCULATE(COUNTROWS(ZM_F)),,DESC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=1;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(VALUES(ZM_U[X]),CALCULATE(SUM(ZM_F2[Amt])),,ASC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=2;y1=1;y2=1;y3=1;y5=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({"n1","n5"},ZM_B[N]),"v",RANKX(VALUES(ZM_U[X]),CALCULATE(SUM(ZM_F[Amt])),,ASC,Dense)),ZM_W[Y]&"="&[v],";",ZM_W[Y])', '=3;y1=1;y2=1;y3=1;y5=1'),
+    ('ZS', 'CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),"v",RANKX(ALLSELECTED(ZS_Dim[Prod]),CALCULATE(SUM(ZS_Fact[Amt])),,DESC)),ZS_Dim[Prod]&"="&[v],";",ZS_Dim[Prod])', 'P1=3;P2=2;P3=1;P4=5;P5=4'),
+    ('ZS', 'CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({"S1"},ZS_Sup[Sup]),"v",RANKX(ALLSELECTED(ZS_Dim[Prod]),CALCULATE(COUNTROWS(ZS_Fact)),,ASC)),ZS_Sup[Sup]&"="&[v],";",ZS_Sup[Sup])', 'S1=6'),
+    ('ZS', 'CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),"v",RANKX(ALLSELECTED(ZS_Dim),CALCULATE(SUM(ZS_Fact[Amt])),,ASC)),ZS_Sup[Sup]&"="&[v],";",ZS_Sup[Sup])', 'S1=6;S2=2'),
+    ('ZS', 'CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),"v",RANKX(ALLSELECTED(ZS_Dim[Cat]),CALCULATE(COUNTROWS(ZS_Fact)),,ASC,Dense)),ZS_Sup[Sup]&"="&[v],";",ZS_Sup[Sup])', 'S1=4;S2=2'),
+    ('ZS', 'CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),"v",RANKX(ALLSELECTED(ZS_Dim[Cat]),CALCULATE(SUM(ZS_Fact[Amt])),,ASC)),ZS_Sup[Sup]&"="&[v],";",ZS_Sup[Sup])', 'S1=4;S2=3'),
+    ('ZS', 'CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),"v",RANKX(ALLSELECTED(ZS_Dim[Prod]),CALCULATE(SUM(ZS_Fact[Amt])),,ASC)),ZS_Sup[Sup]&"="&[v],";",ZS_Sup[Sup])', 'S1=6;S2=5'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,ASC,Dense)),ZJ_B[N]&"="&[v],";",ZJ_B[N])', 'n1=5;n2=5;n3=5;n6=5'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=2;x2=2;x3=4;x4=2;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,ASC,Dense)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=2;x1=4;x2=3;x3=1;x4=4;x5=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,DESC,Dense)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=2;x2=2;x3=4;x4=2;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",RANKX(ALL(ZJ_W[Y]),CALCULATE(SUM(ZJ_F[Amt])),,ASC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=5;x1=5;x2=5;x3=1;x4=5;x5=5'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,ASC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=5;x2=4;x3=1;x4=5;x5=5'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"j2","j3"},ZJ_U[K]),"v",RANKX(ALL(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', 'x2=1;x3=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"j2","j3"},ZJ_U[K]),"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,DESC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', 'x2=2;x3=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"j2","j3"},ZJ_U[K]),"v",RANKX(ALLSELECTED(ZJ_W[Y]),CALCULATE(SUM(ZJ_F[Amt])),,ASC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', 'x2=5;x3=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALL(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=1;x2=1;x3=4;x4=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,ASC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=5;x2=4;x3=1;x4=5;x5=5'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=1;x2=1;x3=4;x4=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,ASC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=5;x2=4;x3=1;x4=5;x5=5'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,DESC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=3;x1=2;x2=2;x3=4;x4=2;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALLSELECTED(ZJ_W[Y]),CALCULATE(COUNTROWS(ZJ_F)),,ASC)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=5;x1=5;x2=5;x3=1;x4=5;x5=5'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(VALUES(ZJ_W[Y]),CALCULATE(SUM(ZJ_F[Amt])),,ASC,Dense)),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=2;x1=1;x2=1;x3=1;x4=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,DESC)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=2;y3=4;y5=1;y7=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,DESC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=2;y3=4;y5=1;y7=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)),,ASC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=4;y2=3;y3=1;y5=3;y7=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)),,DESC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=1;y3=3;y5=1;y7=3'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,DESC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=2;y3=4;y5=1;y7=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",RANKX(VALUES(ZJ_U[X]),CALCULATE(COUNTROWS(ZJ_F)),,DESC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=1;y3=1;y5=1;y7=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"j2","j3"},ZJ_U[K]),"v",RANKX(ALL(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)),,ASC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=3;y3=1;y5=1;y7=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"j2","j3"},ZJ_U[K]),"v",RANKX(ALL(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,ASC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=3;y3=1;y5=1;y7=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALL(ZJ_U[X]),CALCULATE(COUNTROWS(ZJ_F)))),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=1;y3=1;y5=1;y7=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALL(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)),,DESC)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=1;y3=4;y5=1;y7=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(COUNTROWS(ZJ_F)),,DESC)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=1;y3=4;y5=1;y7=4'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"n1","n6"},ZJ_B[N]),"v",RANKX(ALLSELECTED(ZJ_W),CALCULATE(SUM(ZJ_F[Amt])),,DESC,Dense)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=2;y3=4;y5=1;y7=4'),
+]
+
+
+@pytest.mark.parametrize("model, expression, powerbi", FIXED_CASES)
+def test_fixed_ranking_set_answer(model: str, expression: str, powerbi: str) -> None:
+    assert m.ours_for(model, expression) == powerbi

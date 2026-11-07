@@ -239,7 +239,9 @@ def propagate_relationship_filters(
             ) else list(table["rows"])
         return merged
 
-    constrained = deque(filter_roots)
+    # The queue order decides how mutually dependent blank members of one-to-one partners settle, so it must not depend on set order:
+    # a table that fans out to many-side tables (a hub) pushes after its partners have pushed into it (live Power BI, rankx-sets-75).
+    constrained = deque(sorted(filter_roots, key=lambda root_id: (any(edge[5] == "one" for edge in edges_by_source.get(root_id, [])), root_id)))
     constrained_ids = set(constrained)
     # does the virtual blank member of a constrained table survive the constraints so far?
     unknown_state: dict[str, bool] = {
@@ -254,6 +256,7 @@ def propagate_relationship_filters(
             all_key_cache[(table_id, column)] = cached
         return cached
 
+    peer_kept: set[str] = set()
     narrowed_by: dict[str, set[str]] = defaultdict(set)  # which tables narrowed a table (a filter never echoes back to its origin)
     while constrained:
         source_id = constrained.popleft()
@@ -269,7 +272,7 @@ def propagate_relationship_filters(
             }
             current_target_rows = rows_by_id[target_id]
             source_unknown = unknown_state.get(source_id, True) and not (
-                (source_role == "one" and source_id in (peer_blank or ())) or (source_role == "peer1" and source_id in (many_blank or ()))
+                (source_role == "one" and (source_id in (peer_blank or ()) or source_id in peer_kept)) or (source_role == "peer1" and source_id in (many_blank or ()))
             )
             if source_role in {"one", "peer1"} and source_unknown:
                 known = all_keys(source_id, source_column, source_type)
@@ -295,6 +298,8 @@ def propagate_relationship_filters(
                     after = any(
                         _relationship_value_key(row.get(source_column), source_type) not in known for row in rows_by_id[source_id]
                     )
+                    if after:
+                        peer_kept.add(target_id)  # kept only as the partner of an orphan row: no many-side orphans
                 if after != before or target_id not in unknown_state:
                     unknown_state[target_id] = after
                     changed = changed or after != before
