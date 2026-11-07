@@ -12045,10 +12045,21 @@ def _evaluate_measures_once(
                 raise MeasureError("FILTERS needs a column.")
             context, actual = resolve_table(reference[1], reference[2])
             allowed = evaluation_contexts_by_id.get(context["id"], context).get("filter_column_rows", {}).get(actual)
+            # Task 75 Part B: under a FILTER(T, ...) table filter only the rows that filter leaves count
+            survivors = (
+                {id(row) for row in rows_by_table_id.get(context["id"], [])}
+                if context["id"] in filter_table_stack
+                and not evaluation_contexts_by_id.get(context["id"], context).get("filter_column_rows")
+                else None  # column filters on the table are not combined with the table filter's rows yet (live Power BI differs)
+            )
+            if survivors is not None and not survivors:
+                survivors = None  # no row left: the earlier count (not modelled here) is kept rather than a guessed one
             seen_values: set[Any] = set()
             value_rows = []
             for row_index, row in enumerate(context["rows"]):
                 if allowed is not None and row_index not in allowed:
+                    continue
+                if survivors is not None and id(row) not in survivors:
                     continue
                 key = cell_key(ascii_fold(row.get(actual)) if isinstance(row.get(actual), str) else row.get(actual))
                 if key not in seen_values:
@@ -17267,6 +17278,7 @@ def _evaluate_measures_once(
             row_stack.append(row_context)  # type: ignore[arg-type]
         try:
             clearing: list[tuple[Any, ...]] = []
+            nonblank_marks: list[tuple[Any, ...]] = []  # Task 75 Part A: ALLNOBLANKROW(T[c]) is a table filter in Power BI (ISFILTERED and ISCROSSFILTERED see it)
             additions: list[tuple[bool, dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]]] = []
             table_filters_present = False
             late_sets: list[tuple[bool, tuple[Any, ...]]] = []
@@ -17333,6 +17345,8 @@ def _evaluate_measures_once(
                     continue  # live Power BI (iteration 84, critic): KEEPFILTERS(ALL(x)) intersects with every value, so it keeps the filters as they are
                 if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED", "ALLCROSSFILTERED"}:
                     clearing.append(node)
+                    if node[1] == "ALLNOBLANKROW" and node[2] and node[2][0][0] == "reference":
+                        nonblank_marks.append(node)  # Task 75 Part A: the column form still clears values, the mark only feeds the flags
                 elif _is_late_time_set(node):
                     if row_context is not None and _late_chain_reads_data_expression(node):
                         raise MeasureError("A FIRSTNONBLANK inside a date set under a row context is not supported in the local engine.")
@@ -17342,6 +17356,8 @@ def _evaluate_measures_once(
                     late_nonblank.append((keep, node))
                     table_filters_present = True
                 elif _is_general_table_filter(node):
+                    if node[1] == "FILTER" and node[2] and node[2][0][0] == "table":
+                        nonblank_marks.append(node)  # Task 75 Part B: a FILTER(T, ...) table filter leaves the rows FILTERS counts
                     additions.append((keep, general_table_filter_sets(node)))
                     table_filters_present = True
                 else:
@@ -17446,7 +17462,7 @@ def _evaluate_measures_once(
             def read_late_sets() -> Any:
                 for keep, node in late_sets:  # a date column handed to a time function is read after the transition
                     additions.append((keep, general_table_filter_sets(node)))
-                return clear_then_apply(0)
+                return with_nonblank_marks(nonblank_marks, lambda: clear_then_apply(0))
 
             if transition:
                 return with_column_filters(transition, read_late_sets, True)
@@ -17456,6 +17472,31 @@ def _evaluate_measures_once(
                 row_stack.pop()
 
     variables: dict[str, Any] = {}
+    nonblank_mark_stack: list[tuple[str, str]] = []  # Task 75 Part A: (table id, column casefold) of the ALLNOBLANKROW(T[c]) filters in force
+    filter_table_stack: list[str] = []  # Task 75 Part B: ids of the tables a FILTER(T, ...) table filter is in force on
+
+    def with_nonblank_marks(modifiers: Iterable[Any], thunk: Callable[[], Any]) -> Any:
+        """Task 75 Part A: ALLNOBLANKROW(T[c]) among a CALCULATE's filter arguments is a table filter in Power BI, so ISFILTERED
+        of c and ISCROSSFILTERED of T see it while thunk runs. The column form still clears the values as before."""
+        marks: list[tuple[str, str]] = []
+        table_marks: list[str] = []
+        for modifier in modifiers:
+            if modifier[0] == "call" and modifier[1] == "ALLNOBLANKROW" and modifier[2] and modifier[2][0][0] == "reference":
+                reference = modifier[2][0]
+                table_state, actual = resolve_table(reference[1], reference[2])
+                marks.append((table_state["id"], actual.casefold()))
+            elif modifier[0] == "call" and modifier[1] == "FILTER" and modifier[2] and modifier[2][0][0] == "table":
+                table_marks.append(resolve_table_context(str(modifier[2][0][1]))["id"])  # Task 75 Part B
+        nonblank_mark_stack.extend(marks)
+        filter_table_stack.extend(table_marks)
+        try:
+            return thunk()
+        finally:
+            if marks:
+                del nonblank_mark_stack[-len(marks):]
+            if table_marks:
+                del filter_table_stack[-len(table_marks):]
+
     full_table_filters = [0]  # CALCULATE table filters that keep every row of their table (see ISCROSSFILTERED)
     variable_kinds: dict[str, str] = {}  # static kind of each VAR in scope (see branch_kind)
 
@@ -17675,6 +17716,12 @@ def _evaluate_measures_once(
         )
         if function == "ISINSCOPE":
             return on_axis
+        if function == "ISFILTERED" and column is not None and any(
+            mark_table == context["id"] and mark_column == column.casefold() for mark_table, mark_column in nonblank_mark_stack
+        ):
+            return True  # Task 75 Part A: ALLNOBLANKROW(T[c]) is a table filter on c
+        if function == "ISCROSSFILTERED" and any(mark_table == context["id"] for mark_table, _mark_column in nonblank_mark_stack):
+            return True  # Task 75 Part A: a table filter on T crossfilters every column of T
         in_shape = any(column in shape["active"] for shape in _context_shapes(current)) if column is not None else bool(_context_shapes(current))
         if function == "ISFILTERED":
             if column is None:
@@ -20562,7 +20609,7 @@ def _evaluate_measures_once(
                                     and argument[1] == "FILTER"
                                 )
                             )
-                        return evaluate_with_filter_clear(
+                        return with_nonblank_marks(table_filter_arguments, lambda: evaluate_with_filter_clear(
                             arguments[0], modifier, modifier[1],
                             filter_arguments=filter_arguments,
                             table_filter_argument=(
@@ -20570,16 +20617,16 @@ def _evaluate_measures_once(
                                 if table_filter_arguments
                                 else None
                             ),
-                        )
+                        ))
                 if (
                     len(arguments) == 2
                     and arguments[1][0] == "call"
                     and arguments[1][1]
                     in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLCROSSFILTERED"}
                 ):
-                    return evaluate_with_filter_clear(
+                    return with_nonblank_marks(arguments[1:], lambda: evaluate_with_filter_clear(
                         arguments[0], arguments[1], arguments[1][1]
-                    )
+                    ))
                 if (
                     len(arguments) == 2
                     and arguments[1][0] == "call"
