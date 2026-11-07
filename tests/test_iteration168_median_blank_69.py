@@ -67,6 +67,19 @@ ROWS_D16 = [
     ('34', '9', 'East', 'Late'),
 ]
 
+# d38 and d40: eleven values under Region <> "East", a BLANK and real zeros tied on the pick; Power BI gives BLANK, no order of the tie is known
+ROWS_D38 = [
+    ('21', '2', 'West', 'Paid'), ('', '5', 'West', 'Late'), ('47', '3', 'South', ''), ('0', '0', 'West', ''), ('0', '6', 'West', 'Paid'),
+    ('0', '0', 'South', 'Late'), ('37', '1', 'North', ''), ('33', '3', 'South', 'Paid'), ('0', '7', 'South', ''), ('35', '3', 'East', 'Paid'),
+    ('0', '7', 'North', 'Paid'), ('29', '2', 'South', 'Paid'),
+]
+
+ROWS_D40 = [
+    ('9', '4', 'North', 'Paid'), ('24', '9', 'South', 'Paid'), ('', '4', 'West', ''), ('7', '3', 'North', 'Paid'), ('0', '0', 'West', 'Paid'),
+    ('18', '8', 'East', ''), ('', '9', 'South', ''), ('', '4', 'North', 'Paid'), ('', '8', 'East', ''), ('30', '3', 'East', ''),
+    ('28', '7', 'West', ''), ('', '10', 'West', 'Late'), ('', '5', 'South', 'Late'), ('15', '2', 'West', 'Late'),
+]
+
 
 def _answers(rows: list, expressions: list[str]) -> list[str]:
     """Answers of the expressions with `rows` as the Facts table; the grid's rows are restored afterwards."""
@@ -104,10 +117,22 @@ class TestIteration168MedianBlank69(unittest.TestCase):
             dax_math.statistic("MEDIANX", [Decimal("32"), Decimal("0"), Decimal("0")], None, blanks=[False, True, False])
         self.assertIn("both a BLANK and a number", str(caught.exception))
 
-    def test_reference_body_blank_before_zero_gives_zero_on_the_pick(self) -> None:
-        # live Power BI (t72a): MEDIANX(Facts,Facts[Sales]) under Quantity <> 3 over the sorted set -1.5, BLANK, 0, 2.5, 10.5 is 0
+    def test_one_blank_and_one_real_zero_run_gives_the_second_as_zero(self) -> None:
+        # live Power BI (t72a, d46): MEDIANX(Facts,Facts[Sales]) under Quantity <> 3 over -1.5, BLANK, 0, 2.5, 10.5 is 0; the run of one BLANK and one real
+        # zero is the only mixed run measured the same every time
         values = [Decimal("10.5"), Decimal("-1.5"), Decimal("0"), Decimal("0"), Decimal("2.5")]
         self.assertEqual(dax_math.statistic("MEDIANX", values, None, blanks=[False, False, True, False, False], blank_first=True), Decimal("0"))
+        # the first of the two, the BLANK, was not measured: refused
+        with self.assertRaises(Exception) as caught:
+            dax_math.statistic("MEDIANX", [Decimal("-3"), Decimal("-2"), Decimal("0"), Decimal("0"), Decimal("9")], None, blanks=[False, False, True, False, False], blank_first=True)
+        self.assertIn("both a BLANK and a number", str(caught.exception))
+
+    def test_larger_mixed_runs_are_refused_for_a_column_reference_too(self) -> None:
+        # d38 and d40 give BLANK, d37 and d39 give the zero, for runs of 6, 4 and 5: the order is not known
+        values = [Decimal(x) for x in ("0", "0", "0", "0", "0", "0", "21", "29", "33", "37", "47")]
+        with self.assertRaises(Exception) as caught:
+            dax_math.statistic("MEDIANX", values, None, blanks=[True, False, False, False, False, False] + [False] * 5, blank_first=True)
+        self.assertIn("both a BLANK and a number", str(caught.exception))
 
     def test_d8_reference_body_blank_results_are_blank_where_power_bi_says_so(self) -> None:
         cases = [
@@ -137,6 +162,38 @@ class TestIteration168MedianBlank69(unittest.TestCase):
             ('PERCENTILEX.INC(Facts,Facts[Sales],0.25)', "0"),
         ]
         self.assertEqual([str(dax.local(expression)) for expression, _expected in pairs], [expected for _expression, expected in pairs])
+
+    def test_d38_d40_blank_and_zero_tie_over_eleven_values_is_refused(self) -> None:
+        expressions = [
+            'CALCULATE(MEDIANX(Facts,Facts[Sales]),Facts[Region]<>"East")',
+            'CALCULATE(PERCENTILEX.INC(ALLSELECTED(Facts),Facts[Sales],0.5),Facts[Region]<>"East")',
+            'CALCULATE(PERCENTILEX.EXC(Facts,Facts[Sales],0.5),Facts[Region]<>"East")',
+        ]
+        for rows in (ROWS_D38, ROWS_D40):
+            for answer in _answers(rows, expressions):
+                self.assertTrue(answer.startswith("LOCAL-REJECT"), answer)
+
+    def test_single_pick_in_a_run_with_a_blank_and_a_real_zero_is_refused_at_any_size(self) -> None:
+        for count in (5, 9, 11, 15):
+            values = [Decimal(0)] * 4 + [Decimal(10 + i) for i in range(count - 4)]
+            flags = [True, False, False, False] + [False] * (count - 4)
+            if count % 2 == 0:
+                continue
+            values = [Decimal(-1) * (i + 1) for i in range(count // 2 - 1)] + values
+            flags = [False] * (count // 2 - 1) + flags
+            with self.assertRaises(Exception, msg=str(count)) as caught:
+                dax_math.statistic("MEDIANX", values[:count] if len(values) > count else values, None, blanks=flags[:count] if len(flags) > count else flags, blank_first=True)
+            self.assertIn("both a BLANK and a number", str(caught.exception))
+
+    def test_average_of_two_picks_is_refused_only_when_both_can_be_blank(self) -> None:
+        # run of zeros: one BLANK and one real zero; both middle values in it: BLANK + 0 is 0 whichever order the run has
+        self.assertEqual(dax_math.statistic("MEDIANX", [Decimal(x) for x in ("-1.5", "0", "0", "2.5")], None, blanks=[False, True, False, False]), Decimal("0"))
+        # one middle value in the run, the other a number: the BLANK counts as zero beside it
+        self.assertEqual(dax_math.statistic("MEDIANX", [Decimal(x) for x in ("0", "0", "4", "9")], None, blanks=[True, False, False, False]), Decimal("2"))
+        # two BLANKs and a real zero, both middle values in the run: BLANK + BLANK is BLANK, BLANK + 0 is 0
+        with self.assertRaises(Exception) as caught:
+            dax_math.statistic("MEDIANX", [Decimal(x) for x in ("-5", "0", "0", "0", "7")] + [Decimal("8")], None, blanks=[False, True, True, False, False, False])
+        self.assertIn("both a BLANK and a number", str(caught.exception))
 
 
 if __name__ == "__main__":

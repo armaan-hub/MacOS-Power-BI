@@ -389,17 +389,30 @@ def double_statistic(function: str, values: list[Decimal]) -> Decimal:
     return Decimal(repr(variance))
 
 
-def _blank_order(values: list[Decimal], blanks: list[bool], blank_first: bool) -> tuple[list[int], bool]:
+def _blank_order(values: list[Decimal], blanks: list[bool], blank_first: bool) -> tuple[list[int], int, int]:
     """Positions of the values in sorted order for MEDIANX / PERCENTILEX where a BLANK result counts as zero (live Power BI, Task 79): a BLANK
-    sorts among the numbers at zero.  Over a column reference (blank_first) a BLANK sorts before a real zero, as measured on the two reference
-    bodies with a BLANK and a 0 tied on the pick.  Otherwise the tie is not settled (an expression body measured both ways), so zero_mixed says
-    the pick is refused when it lands on such a zero."""
-    if blank_first:
-        return sorted(range(len(values)), key=lambda index: (values[index], not blanks[index])), False
-    order = sorted(range(len(values)), key=lambda index: values[index])
+    sorts among the numbers at zero, and also returns the number of BLANKs in the run of zeros when it holds a real zero too (0 otherwise) and
+    the length of that run.  How a BLANK and a real zero order between themselves is not settled: the same mix on the pick gave the zero in some
+    row sets (the standard Facts under Quantity <> 3, d37, d39, d45) and the BLANK in others (d38, d40, d44, d48, d50), and no order by position,
+    count, size or storage fits both (blank-first, blank-last, either stable order, libstdc++ nth_element, a size limit each miss held-out sets).
+    So a pick that lands in a run of zeros holding both a BLANK and a real zero is refused, for every body and size, except the one run that was
+    measured the same way every time: one BLANK and one real zero (the standard Facts, d46), where the second of the two is the zero
+    (_blank_unsettled).  Two picks that average are refused only when both can be BLANKs (two or more in the run); with one BLANK in the run, or
+    one pick a number, the average is the same whichever order the run has.  blank_first is kept for callers and does not change the order."""
     zeros = [index for index in range(len(values)) if values[index] == 0]
-    zero_mixed = any(blanks[index] for index in zeros) and any(not blanks[index] for index in zeros)
-    return order, zero_mixed
+    blank_run = sum(1 for index in zeros if blanks[index])
+    mixed_zero = blank_run > 0 and blank_run < len(zeros)
+    order = sorted(range(len(values)), key=lambda index: (values[index], not blanks[index]))
+    return order, blank_run if mixed_zero else 0, len(zeros)
+
+
+def _blank_unsettled(blank_run: int, run_length: int, zero: bool, picked: Decimal | None, column: bool) -> bool:
+    """True when a single pick lands in a mixed run of zeros whose order is not known: any run but one BLANK with one real zero, whose second
+    value (the real zero) is the measured answer over a column reference; the first, the BLANK, was not measured and is refused, and an expression
+    body measured both ways (d12) is refused whole."""
+    if not (blank_run and zero):
+        return False
+    return not (column and blank_run == 1 and run_length == 2 and picked is not None)
 
 
 def _blank_read(position: int, values: list[Decimal], blanks: list[bool], order: list[int]) -> tuple[bool, Decimal | None]:
@@ -415,16 +428,16 @@ def _blank_median(values: list[Decimal], blanks: list[bool], blank_first: bool) 
     """MEDIAN with BLANK results among the values (live Power BI, Task 79): the middle value is BLANK when it lands on a BLANK; the average of two
     middle values is BLANK only when both are, otherwise a BLANK counts as zero (BLANK + x is x in DAX)."""
     count = len(values)
-    order, zero_mixed = _blank_order(values, blanks, blank_first)
+    order, zero_mixed, run_length = _blank_order(values, blanks, blank_first)
     middle = count // 2
     if count % 2:
         zero, picked = _blank_read(middle, values, blanks, order)
-        if zero_mixed and zero:
+        if _blank_unsettled(zero_mixed, run_length, zero, picked, blank_first):
             raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
         return picked
     low_zero, low = _blank_read(middle - 1, values, blanks, order)
     high_zero, high = _blank_read(middle, values, blanks, order)
-    if zero_mixed and low_zero and high_zero:
+    if zero_mixed > 1 and low_zero and high_zero:
         raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)  # BLANK + BLANK is BLANK, BLANK + 0 is 0: the two picks decide it
     if low is None and high is None:
         return None
@@ -435,22 +448,22 @@ def _blank_percentile(name: str, values: list[Decimal], blanks: list[bool], k: D
     """PERCENTILEX with BLANK results among the values (live Power BI, Task 79): the same position rule as the numbers, with the BLANK rules of
     _blank_median for the two values the position falls between."""
     count = len(values)
-    order, zero_mixed = _blank_order(values, blanks, blank_first)
+    order, zero_mixed, run_length = _blank_order(values, blanks, blank_first)
     position = k * (count - 1) if name == "PERCENTILE.INC" else k * (count + 1) - 1
     low = int(position.to_integral_value(rounding=ROUND_FLOOR))
     fraction = position - low
     if low + 1 >= count:
         zero, picked = _blank_read(count - 1 if low >= count - 1 else low, values, blanks, order)
-        if zero_mixed and zero:
+        if _blank_unsettled(zero_mixed, run_length, zero, picked, blank_first):
             raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
         return picked
     first_zero, first = _blank_read(low, values, blanks, order)
     if fraction == 0:
-        if zero_mixed and first_zero:
+        if _blank_unsettled(zero_mixed, run_length, first_zero, first, blank_first):
             raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
         return first
     second_zero, second = _blank_read(low + 1, values, blanks, order)
-    if zero_mixed and first_zero and second_zero:
+    if zero_mixed > 1 and first_zero and second_zero:
         raise dax_typed.refusal(_BLANK_ZERO_REFUSAL)
     if first is None and second is None:
         return None
