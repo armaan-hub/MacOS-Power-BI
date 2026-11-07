@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Opus (Task 75: next broad audit; Task 74 shipped as Iteration 163)
+**Active agent:** Opus (Task 76: next broad audit; Task 75 shipped as Iteration 164)
 **Branch in use:** none
 **Working tree clean:** main yes
 

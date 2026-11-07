@@ -6,3 +6,6 @@ A broad grid of 1,500 CALCULATE expressions with mixed modifiers (filters, KEEPF
 - B: FILTERS(Facts[Region]) under a FILTER(Facts, …) table filter or TREATAS (6 rows). Power BI counts the Region values that the table filter leaves, for example 1 when the filter keeps only East rows; we return all 3.
 
 Check the rules against all 1,500 rows in pb.json, since most already match. Compute; never key on expressions. No row that matches on main may change. New test file: tests/test_iteration165_filter_audit_65.py.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 164. Locked 527949.
