@@ -90,3 +90,40 @@ PARAMS = [pytest.param(expr, pb, id=f"case{index}") for index, (expr, pb) in enu
 @pytest.mark.parametrize("expression, powerbi", PARAMS)
 def test_scope_and_one_value_functions_in_summarizecolumns_match_power_bi(expression: str, powerbi: str) -> None:
     assert _same(m.ours_for("ZX", expression), powerbi)
+
+
+# Task 83 (live Power BI, model ZO of tests.critic3_models): CALCULATE(ISINSCOPE) in a SUMMARIZE row, HASONEFILTER on the blank group row,
+# and the unknown member last in VALUES. Each pair is (expression, Power BI answer).
+ZO_CASES = [
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Prod]),"v",CALCULATE(ISINSCOPE(ZO_Dim[Prod]))+0),ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Prod])', '=1;P1=1;P2=1;P3=1;P4=1;P5=1'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Cat],ZO_Dim[Prod]),"v",CALCULATE(ISINSCOPE(ZO_Dim[Prod]))+0),ZO_Dim[Cat]&"|"&ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Cat]&"|"&ZO_Dim[Prod])', '|=1;A|P1=1;A|P2=1;B|P3=1;B|P4=1;C|P5=1'),
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZO_Dim[Prod],"v",HASONEFILTER(ZO_Dim[Prod])+0,"s",COUNTROWS(ZO_Fact)),ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Prod])', '=1;P1=1;P2=1;P3=1;P4=1;P5=1'),
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZO_Dim[Cat],ZO_Dim[Prod],"v",HASONEFILTER(ZO_Dim[Prod])+0,"s",COUNTROWS(ZO_Fact)),ZO_Dim[Cat]&"|"&ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Cat]&"|"&ZO_Dim[Prod])', '|=1;A|P1=1;A|P2=1;B|P3=1;B|P4=1;C|P5=1'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Prod]),"v",CONCATENATEX(VALUES(ZO_Dim[Cat]),ZO_Dim[Cat]&"",",")),ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Prod])', '=A,B,C,;P1=A,B,C,;P2=A,B,C,;P3=A,B,C,;P4=A,B,C,;P5=A,B,C,'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Cat]),"v",CONCATENATEX(VALUES(ZO_Dim[Cat]),ZO_Dim[Cat]&"",",")),ZO_Dim[Cat]&"="&[v],";",ZO_Dim[Cat])', '=A,B,C,;A=A,B,C,;B=A,B,C,;C=A,B,C,'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Cat],ZO_Dim[Prod]),"v",CONCATENATEX(VALUES(ZO_Dim[Cat]),ZO_Dim[Cat]&"",",")),ZO_Dim[Cat]&"|"&ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Cat]&"|"&ZO_Dim[Prod])', '|=A,B,C,;A|P1=A,B,C,;A|P2=A,B,C,;B|P3=A,B,C,;B|P4=A,B,C,;C|P5=A,B,C,'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Cat],ZO_Cal[Year]),"v",CONCATENATEX(VALUES(ZO_Dim[Cat]),ZO_Dim[Cat]&"",",")),ZO_Dim[Cat]&"|"&ZO_Cal[Year]&"="&[v],";",ZO_Dim[Cat]&"|"&ZO_Cal[Year])', '|2024=A,B,C,;A|=A,B,C,;A|2023=A,B,C,;A|2024=A,B,C,;B|=A,B,C,;B|2024=A,B,C,;C|2024=A,B,C,'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Prod]),"v",ISINSCOPE(ZO_Dim[Prod])+0),ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Prod])', '=0;P1=0;P2=0;P3=0;P4=0;P5=0'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Cat],ZO_Dim[Prod]),"v",ISINSCOPE(ZO_Dim[Prod])+0),ZO_Dim[Cat]&"|"&ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Cat]&"|"&ZO_Dim[Prod])', '|=0;A|P1=0;A|P2=0;B|P3=0;B|P4=0;C|P5=0'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Prod]),"v",HASONEFILTER(ZO_Dim[Prod])+0),ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Prod])', '=0;P1=0;P2=0;P3=0;P4=0;P5=0'),
+    ('CONCATENATEX(ADDCOLUMNS(SUMMARIZE(ZO_Fact,ZO_Dim[Cat],ZO_Dim[Prod]),"v",HASONEFILTER(ZO_Dim[Prod])+0),ZO_Dim[Cat]&"|"&ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Cat]&"|"&ZO_Dim[Prod])', '|=0;A|P1=0;A|P2=0;B|P3=0;B|P4=0;C|P5=0'),
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZO_Dim[Prod],"v",CALCULATE(ISINSCOPE(ZO_Dim[Prod]))+0,"s",COUNTROWS(ZO_Fact)),ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Prod])', '=1;P1=1;P2=1;P3=1;P4=1;P5=1'),
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZO_Dim[Cat],ZO_Dim[Prod],"v",CALCULATE(ISINSCOPE(ZO_Dim[Prod]))+0,"s",COUNTROWS(ZO_Fact)),ZO_Dim[Cat]&"|"&ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Cat]&"|"&ZO_Dim[Prod])', '|=1;A|P1=1;A|P2=1;B|P3=1;B|P4=1;C|P5=1'),
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZO_Dim[Prod],"v",ISINSCOPE(ZO_Dim[Prod])+0,"s",COUNTROWS(ZO_Fact)),ZO_Dim[Prod]&"="&[v],";",ZO_Dim[Prod])', '=1;P1=1;P2=1;P3=1;P4=1;P5=1'),
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZO_Dim[Cat],"v",HASONEFILTER(ZO_Dim[Prod])+0,"s",COUNTROWS(ZO_Fact)),ZO_Dim[Cat]&"="&[v],";",ZO_Dim[Cat])', '=0;A=0;B=0;C=0'),
+]
+
+
+ZO_PARAMS = [pytest.param(expr, pb, id=f"zo{index}") for index, (expr, pb) in enumerate(ZO_CASES)]
+
+
+@pytest.mark.parametrize("expression, powerbi", ZO_PARAMS)
+def test_scope_functions_and_unknown_member_order_on_model_zo(expression: str, powerbi: str) -> None:
+    assert _same(m.ours_for("ZO", expression), powerbi)
+
+@pytest.mark.parametrize("expression, powerbi", [
+ ('CONCATENATEX(VALUES(ZO_Dim[Cat]),ZO_Dim[Cat]&"",",")', 'A,B,C,'),
+ ('CONCATENATEX(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]&"",",")', 'A,B,C,'),
+])
+def test_unknown_member_comes_last_in_unordered_values_and_all(expression: str, powerbi: str) -> None:
+    assert m.ours_for("ZO", expression) == powerbi
