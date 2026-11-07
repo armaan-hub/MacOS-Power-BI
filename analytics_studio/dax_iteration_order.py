@@ -219,10 +219,12 @@ def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[A
             index = 1 if node[1] == "RANK" and node[2][0][0] == "table" and str(node[2][0][1]).upper() in {"DENSE", "SKIP"} else 0
             relation = node[2][index] if len(node[2]) > index else None
             whole_table = isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table"
-            # measured on one column only (live Power BI, rank audit grid t71a): a relation of several columns is walked in an order the ORDERBY columns do not give
-            one_column = isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and len({str(a[2]).casefold() for a in relation[2] if a[0] == "reference"}) == 1
-            if relation is not None and not whole_table and one_column and ranks_walked_table(relation):
-                # only the ORDERBY and PARTITIONBY expressions are read by the walk: the relation, the ties and blanks keywords and the ASC / DESC tokens are not
+            # measured for relations of one or two columns (rank audit grid t71a); a relation of three columns or more keeps the walk it had
+            narrow = isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and len({str(a[2]).casefold() for a in relation[2] if a[0] == "reference"}) <= 2
+            if relation is not None and not whole_table and narrow and ranks_walked_table(relation):
+                # the walk reads the columns of the relation (the current row is found in it by them) and the ORDERBY and PARTITIONBY expressions; the ties and
+                # blanks keywords and the ASC / DESC tokens are not read
+                bodies.extend(a for a in relation[2] if isinstance(a, tuple) and a[0] == "reference")
                 kept = []
                 for argument in node[2]:
                     if isinstance(argument, tuple) and argument[:2] == ("call", "ORDERBY") and isinstance(argument[2], tuple):

@@ -6,8 +6,10 @@ Covers (live Power BI evidence in tools/parity/task71_rank_audit_spec.json and t
   A column-list relation or a relation whose ORDERBY keys identify every row is answered.
 - Part B: RANK's blanks argument. FIRST puts every BLANK ahead of the other values of an ORDERBY column and LAST behind them, whatever the direction; KEEP and no
   argument keep the default position. ALLSELECTED's rows are the ones the outer filter leaves visible.
-- Part C: CONCATENATEX over RANK / ROWNUMBER of a one-column projection walks the rows in dictionary order of that column, and RANKX over FILTER(ALL(table), p)
-  walks by its body and its explicit value argument. Several-column projections are not reproduced by a rule and keep their earlier answers.
+- Part C: CONCATENATEX over RANK / ROWNUMBER of a projection of one or two columns walks the rows by the projection's columns (and the ORDERBY columns) in the
+  walk order of those columns (dictionary order inside the measured key space, source order beside a fractional column), and RANKX over FILTER(ALL(table), p)
+  walks by its body and its explicit value argument. A fractional column beside columns that hold one value over the filtered rows comes out sorted: refused.
+  ROWNUMBER is the only function with the tie error (54 errors in 260 ROWNUMBER answers; no RANK or column-list ROWNUMBER of 400 raised it).
 """
 from __future__ import annotations
 
@@ -72,7 +74,23 @@ class TestIteration161RankAudit61(unittest.TestCase):
                                    ("call", "ORDERBY", (("reference", "Facts", "Quantity"), ("table", "DESC")))))]
         rebuilt, bodies = dax_iteration_order.rankx_walk(nodes, "Facts")
         self.assertEqual(rebuilt[0][2][0], ("call", "ORDERBY", (("reference", "Facts", "Quantity"),)))
-        self.assertEqual(bodies, [])
+        self.assertEqual(bodies, [("reference", "Facts", "Quantity"), ("reference", "Facts", "Quantity")])  # the relation's columns are read by the walk
+
+    def test_part_c_two_column_projection_walks_by_its_columns(self) -> None:
+        self.assertLocal('CONCATENATEX(Facts,ROWNUMBER(ALL(Facts[Quantity],Facts[Note]),ORDERBY(Facts[Note],DESC,Facts[Quantity],DESC)),",")', "6,5,3,2,1,4")
+        self.assertLocal('CONCATENATEX(Facts,RANK(SKIP,ALL(Facts[Region],Facts[Note]),ORDERBY(Facts[Region],DESC)),",")', "4,1,4,4,1,3")
+        self.assertLocal('CALCULATE(CONCATENATEX(Facts,RANK(DENSE,ALL(Facts[Region],Facts[Note]),ORDERBY(Facts[Note],ASC),FIRST),","),Facts[Quantity]<>3)', "1,3,3,3,2")
+
+    def test_part_c_two_column_projection_beside_a_fractional_column_keeps_source_order(self) -> None:
+        self.assertLocal('CONCATENATEX(Facts,ROWNUMBER(ALL(Facts[Sales],Facts[Region]),ORDERBY(Facts[Sales],ASC,Facts[Region],ASC)),",")', "5,6,1,2,3,4")
+
+    def test_part_c_fractional_column_beside_a_constant_column_is_refused(self) -> None:
+        result = str(dax.local('CALCULATE(CONCATENATEX(Facts,RANK(SKIP,ALL(Facts[Sales],Facts[Note]),ORDERBY(Facts[Note],ASC,Facts[Sales],DESC)),","),Facts[Note]="Paid")'))
+        self.assertTrue(result.startswith("LOCAL-REJECT"), result)
+
+    def test_part_a_rank_and_column_list_rownumber_are_never_tie_errors(self) -> None:
+        self.assertFalse(str(dax.local('CONCATENATEX(Facts,RANK(DENSE,ALL(Facts),ORDERBY(Facts[Note],ASC)),",")')).startswith("LOCAL-REJECT"))
+        self.assertFalse(str(dax.local('CONCATENATEX(Facts,ROWNUMBER(ALL(Facts[Region],Facts[Note]),ORDERBY(Facts[Region],ASC)),",")')).startswith("LOCAL-REJECT"))
 
     def test_walk_keys_leave_whole_table_relations_alone(self) -> None:
         nodes = [("call", "ROWNUMBER", (("call", "ALL", (("table", "Facts"),)), ("call", "ORDERBY", (("reference", "Facts", "Sales"), ("table", "ASC")))))]
