@@ -1,0 +1,448 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRINGEXACT(\"e\u0301\",\"e\u0301\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"-1.5\")",
+   "powerbi": "-1.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"Strasse\",\"stra\u00dfe\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"\u0130\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRING(\"D\u017e\",\"\u01c5\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRING(\"\u01c5\",\"D\u017e\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRINGEXACT(\"D\u017e\",\"\u01c5\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRINGEXACT(\"E\u0301\",\"E\u0301\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRINGEXACT(\"a\u0308\",\"a\u0308\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRINGEXACT(\"e\u0301\",\"e\u0301\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONTAINSSTRINGEXACT(\"stra\u00dfe\",\"ss\")",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"ss\",\"stra\u00dfe\",1,-1)",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"\u00c9\",\"E\u0301\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"\u00df\",\"Strasse\",1,-1)",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"\u00df\",\"ss\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"\u00e6\",\"ae\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"\u00e9\",\"e\u0301\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"\u01c5\",\"D\u017e\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIND(\"\ufb01\",\"fi\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"-1.5\")",
+   "powerbi": "-1.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"SS\")",
+   "powerbi": "SS",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"STRASSE\")",
+   "powerbi": "STRASSE",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"Strasse\")",
+   "powerbi": "Strasse",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"ss\")",
+   "powerbi": "ss",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"stra\u00dfe\")",
+   "powerbi": "stra\u00dfe",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"x\")",
+   "powerbi": "x",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),1,0,\"\u00df\")",
+   "powerbi": "\u00df",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"-1.5\")",
+   "powerbi": "-1.5",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"SS\")",
+   "powerbi": "SS",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"STRASSE\")",
+   "powerbi": "STRASSE",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"Strasse\")",
+   "powerbi": "Strasse",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"ss\")",
+   "powerbi": "ss",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"stra\u00dfe\")",
+   "powerbi": "stra\u00dfe",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"x\")",
+   "powerbi": "x",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "REPLACE(BLANK(),2,1,\"\u00df\")",
+   "powerbi": "\u00df",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"D\u017e\",\"\u01c5\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"E\u0301\",\"\u00c9\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"E\u0301\",\"\u00e9\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"SS\",\"stra\u00dfe\",1,-1)",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"SS\",\"\u00df\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"STRASSE\",\"stra\u00dfe\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"Strasse\",\"stra\u00dfe\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"ae\",\"\u00e6\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"a\u0308\",\"\u00c4\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"e\u0301\",\"\u00c9\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"e\u0301\",\"\u00e9\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"fi\",\"\ufb01\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"ss\",\"stra\u00dfe\",1,-1)",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"ss\",\"\u00df\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"stra\u00dfe\",\"STRASSE\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"stra\u00dfe\",\"Strasse\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00c4\",\"a\u0308\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00c9\",\"E\u0301\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00c9\",\"e\u0301\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00df\",\"SS\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00df\",\"STRASSE\",1,-1)",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00df\",\"Strasse\",1,-1)",
+   "powerbi": "5",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00df\",\"ss\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00e6\",\"ae\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00e9\",\"E\u0301\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u00e9\",\"e\u0301\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\u01c5\",\"D\u017e\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SEARCH(\"\ufb01\",\"fi\",1,-1)",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"-1.5\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"SS\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"STRASSE\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"Strasse\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"ss\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"stra\u00dfe\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"x\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"\",\"\u00df\",BLANK())",
+   "powerbi": "",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"Strasse\",\"\u00df\",BLANK())",
+   "powerbi": "Strase",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"ss\",\"\u00df\",BLANK())",
+   "powerbi": "s",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "SUBSTITUTE(\"stra\u00dfe\",\"ss\",BLANK())",
+   "powerbi": "stra",
+   "now": "DIFF"
+  }
+ ]
+}
