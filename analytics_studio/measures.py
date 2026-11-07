@@ -9932,6 +9932,13 @@ def _evaluate_measures_once(
                         raise _KeySpaceUndecided()
                     elif decided is not None:  # one column with a space no measured point covers keeps the older budget test
                         in_dictionary_order = decided
+                if len(profiles) > 1 and not plan.dedup and dax_iteration_order.rank_windows(walk_nodes):
+                    # Task 71: the key-space rule of a RANK / ROWNUMBER window over several columns decides between dictionary and source order
+                    window_order = dax_iteration_order.rank_walk_order(len(source["rows"]), list(profiles.values()))
+                    if window_order is None and all(profile.size is not None for profile in profiles.values()):
+                        raise _KeySpaceUndecided()
+                    if window_order is not None:
+                        in_dictionary_order = window_order
                 major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
                 def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
@@ -12161,9 +12168,6 @@ def _evaluate_measures_once(
         # PARTITIONBY columns and the ORDERBY keys. ROWNUMBER over a column list or no relation is answered (no tie error in the measured shapes).
         if function == "ROWNUMBER" and order_spec and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table":
             members = list(range(len(window.rows)))
-            if relation[1] == "ALLSELECTED":  # the rows the outer filters leave visible (the iterator's own row does not narrow ALLSELECTED)
-                live = {row_key(typed_row(window.context, row)[h] for h in headers) for row in rows_by_table_id.get(window.context["id"], window.rows)}
-                members = [i for i in members if row_key(window.typed[i][h] for h in headers) in live]
             identities = [row_key([*(window.typed[i][c] for c in window.partition_columns), *keys[i]]) for i in members]
             if len(set(identities)) < len(identities):
                 raise MeasureRuntimeError(f"Tied rows detected in the relation parameter for {function} function.")

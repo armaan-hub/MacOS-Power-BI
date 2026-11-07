@@ -474,6 +474,39 @@ def projection_order(row_count: int, profiles: Sequence[Profile]) -> bool | None
     return None
 
 
+# Task 71 (live Power BI, rank audit grids t71a / t71b on Facts and t71d on datasets d2, d5, d7, d10, d13, d16: CONCATENATEX over RANK / ROWNUMBER of ALL(column,
+# column), 120 shapes): the rows are walked by the projection's columns in dictionary order (the later table column the major key) while the dense key space (product of
+# the value-range sizes) is small for the rows, and in source order when it is large: sorted at (space, rows) = (24, 6), (12, 5), (140, 8) and the smaller ones they cover (a
+# fractional double included: 63 over 9 rows); source order at (132, 6), (264, 6), (292, 13). A space between the two is not decided.
+_RANK_WALK_SORTED = ((24, 6), (12, 5), (140, 8))
+_RANK_WALK_STORAGE = ((132, 6), (292, 13))
+
+
+def rank_walk_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True / False / None (not decided) for the walk of the columns a RANK / ROWNUMBER relation reads (see _RANK_WALK_SORTED); None also when a column has no regular range."""
+    space = 1
+    for profile in profiles:
+        if profile.size is None:
+            return None
+        space *= profile.size
+    if any(space <= measured and row_count >= rows for measured, rows in _RANK_WALK_SORTED):
+        return True
+    if any(space >= measured and row_count <= rows for measured, rows in _RANK_WALK_STORAGE):
+        return False
+    return None
+
+
+def rank_windows(nodes: Iterable[Any]) -> bool:
+    """Whether `rankx_walk` rewrote a RANK / ROWNUMBER of `nodes` (one left with only its ORDERBY / PARTITIONBY arguments): the walk reads that window's columns."""
+    def found(node: Any) -> bool:
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2] and all(isinstance(a, tuple) and a[:2] in {("call", "ORDERBY"), ("call", "PARTITIONBY")} for a in node[2]):
+            return True
+        return any(found(child) for child in node if isinstance(child, tuple))
+    return any(found(node) for node in nodes)
+
+
 def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool = False) -> bool | None:
     """True when the columns of an ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS table are walked in dictionary order, False when they keep the storage
     order, None when the key space is not covered by a measured point. Dates are not covered: they keep the older `grouped` test."""

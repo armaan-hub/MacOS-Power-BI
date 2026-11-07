@@ -9,6 +9,8 @@ Covers (live Power BI evidence in tools/parity/task71_rank_audit_spec.json and t
 - Part C: CONCATENATEX over RANK / ROWNUMBER of a projection of one or two columns walks the rows by the projection's columns (and the ORDERBY columns) in the
   walk order of those columns (dictionary order inside the measured key space, source order beside a fractional column), and RANKX over FILTER(ALL(table), p)
   walks by its body and its explicit value argument. A fractional column beside columns that hold one value over the filtered rows comes out sorted: refused.
+  ALLSELECTED's tie is judged on the rows ALLSELECTED returns inside the iterator (CONCATENATEX: the whole table, SUMX / MAXX / TOCSV: the filtered rows).
+  A relation of several columns is walked in dictionary order inside a measured key space and in source order outside it (rank_walk_order); between: refused.
   ROWNUMBER is the only function with the tie error (54 errors in 260 ROWNUMBER answers; no RANK or column-list ROWNUMBER of 400 raised it).
 """
 from __future__ import annotations
@@ -47,6 +49,23 @@ class TestIteration161RankAudit61(unittest.TestCase):
             'CALCULATE(CONCATENATEX(Facts,ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Note],DESC)),","),Facts[Sales]>0)',
             "Tied rows detected in the relation parameter for ROWNUMBER function.",
         )
+
+    def test_part_a_allselected_tie_is_judged_on_the_rows_allselected_returns(self) -> None:
+        tied = "Tied rows detected in the relation parameter for ROWNUMBER function."
+        # CONCATENATEX clears the outer filter on its own columns, so ALLSELECTED(Facts) is the whole table: tied on Note although the visible rows are not (t71b)
+        self.assertRefused('CALCULATE(CONCATENATEX(Facts,ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Note],ASC)),","),Facts[Region]<>"East")', tied)
+        self.assertRefused('CALCULATE(CONCATENATEX(Facts,ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Note],DESC,Facts[Region],DESC)),","),Facts[Region]="West")', tied)
+        # SUMX keeps the outer filter: the three visible rows are not tied on Note (t71a, Power BI answered 3)
+        self.assertLocal('CALCULATE(SUMX(Facts,ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Note],DESC))),Facts[Region]="West")', "3")
+
+    def test_rank_walk_order_follows_the_measured_key_spaces(self) -> None:
+        from decimal import Decimal
+        profile = lambda values: dax_iteration_order.Profile([Decimal(v) if v is not None else None for v in values])
+        small = [profile(["1", "2", "3"]), profile(["1", "2"])]
+        self.assertTrue(dax_iteration_order.rank_walk_order(6, small))
+        self.assertTrue(dax_iteration_order.rank_walk_order(9, [profile([str(n) for n in range(1, 22)]), profile(["1", "2", "3"])]))  # 63 over 9 rows (d2)
+        self.assertFalse(dax_iteration_order.rank_walk_order(13, [profile([str(n) for n in range(1, 74)]), profile(["1", "2", "3", "4"])]))  # 292 over 13 rows (d16)
+        self.assertIsNone(dax_iteration_order.rank_walk_order(6, [profile([str(n) for n in range(1, 51)]), profile(["1", "2"])]))  # 100 over 6 rows: between the measured points
 
     def test_part_b_rank_blanks_first_puts_blank_ahead_in_either_direction(self) -> None:
         self.assertLocal('CALCULATE(CONCATENATEX(Facts,RANK(DENSE,ALL(Facts),ORDERBY(Facts[Note],DESC),FIRST),","),Facts[Note]="Paid")', "2,2,2")
