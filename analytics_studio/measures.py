@@ -9067,7 +9067,7 @@ def _evaluate_measures_once(
                 if current_filter(other_id, folded) is set_by_transition:  # still only the row's transition: ALLSELECTED sees the outer filter it covered
                     other_tables.setdefault(other_id, {})[folded] = outer
         try:
-            rows, _contexts, _roots = rows_after_clearing_columns(source_context, cleared, other_tables=other_tables)
+            rows, contexts_after_clear, filter_roots_after_clear = rows_after_clearing_columns(source_context, cleared, other_tables=other_tables)
         except MeasureError:
             return None
         full = source_context["rows"]
@@ -9077,6 +9077,13 @@ def _evaluate_measures_once(
             rows = [row for position, row in enumerate(full) if position in keep_positions and id(row) in visible]
         allowed = {id(row) for row in rows}
         result = [row for row in full if id(row) in allowed] if len(allowed) != len(full) or any(id(r) not in allowed for r in full) else list(full)
+        if (  # live Power BI: ALLSELECTED(col) keeps the one-side blank member as ALL does (same condition as the unshadowed path)
+            table_id in unknown_member_ids
+            and not unknown_member_hidden(table_id)
+            and not _context_shapes(evaluation_contexts_by_id.get(table_id, source_context))
+            and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
+        ):
+            result.append({header: None for header in source_context["headers"]})
         for layer in eff_layers:
             if layer.table != table_id:
                 continue
