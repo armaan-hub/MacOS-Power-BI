@@ -21,3 +21,6 @@ Rules:
 - Compute the answer. Never key on literal text.
 - No row that matches on main may change.
 - The new tests go in `tests/test_iteration164_convert_audit_64.py`.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 163. Locked 524911.
