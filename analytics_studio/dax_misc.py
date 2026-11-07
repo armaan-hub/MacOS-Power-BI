@@ -12,6 +12,7 @@ Scalar functions take already-evaluated arguments (``None`` is BLANK).  Compared
 
 from __future__ import annotations
 
+import bisect
 from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 import math
 import re
@@ -211,15 +212,21 @@ def _fold(text: str) -> str:
     return unicodedata.normalize("NFC", unicodedata.normalize("NFC", "".join(out)).casefold())
 
 
-def _found(text: str, needle: str) -> bool:
-    """Substring search that never ends inside a character (a following combining mark belongs to the match)."""
-    start = text.find(needle)
-    while start >= 0:
-        end = start + len(needle)
-        if needle == "" or end >= len(text) or not unicodedata.category(text[end]).startswith("M"):
-            return True
-        start = text.find(needle, start + 1)
-    return False
+def _decomposed(char: str, ci: bool) -> str:
+    """NFKD of one character, but only the decompositions Power BI matches on (Task 73): the canonical ones (é is e and an accent),
+    the compatibility ones that spell letters (ǅ is Dž) and, when the case is ignored, the width forms (ｱ is ア). The saved Power BI
+    answers keep ① apart from 1, ² from 2, a no-break or em space from a space, and a half-width kana from a full-width one when
+    the case counts."""
+    decomposition = unicodedata.decomposition(char)
+    full = unicodedata.normalize("NFKD", char)
+    if decomposition[:1] != "<" or full == char:
+        return full
+    kind = decomposition.split(" ", 1)[0]
+    if ci and kind in ("<narrow>", "<wide>"):
+        return full
+    if kind == "<compat>" and all(unicodedata.category(c)[0] in "LM" for c in full):
+        return full
+    return char
 
 
 def _char_keys(char: str, ci: bool) -> list[str]:
@@ -227,7 +234,7 @@ def _char_keys(char: str, ci: bool) -> list[str]:
     and its case when the search ignores case. A precomposed letter gives its base and its marks, as a combining sequence does."""
     if char in _IGNORABLE_CHARS:
         return []
-    text = _EXPANSIONS[char] if char in _EXPANSIONS else unicodedata.normalize("NFKD", char)
+    text = _EXPANSIONS[char] if char in _EXPANSIONS else _decomposed(char, ci)
     if ci:
         text = "".join(chr(ord(c) - 0x60) if 0x30A1 <= ord(c) <= 0x30F6 else c for c in text.casefold())  # katakana reads as hiragana
     return list(text)
@@ -241,16 +248,13 @@ def _keyed(text: str, ci: bool) -> tuple[list[tuple[str, int, bool]], list[int]]
     return units, list(range(len(text)))
 
 
-def _first_match(units: list[tuple[str, int, bool]], starts: list[int], keys: list[str], start: int) -> tuple[int, int] | None:
-    """The first run of units, starting at UTF-16 position ``start`` or later, whose keys equal the needle keys (Task 73).
+def _first_match(texts: list[str], units: list[tuple[str, int, bool]], keys: list[str], low: int) -> tuple[int, int] | None:
+    """The first run of units, starting at unit ``low`` or later, whose keys equal the needle keys (Task 73).
     A match never begins or ends inside a character (a 's' is no match of ß), and a combining mark right after it means
-    the accent differs, so that is no match either."""
-    count = len(keys)
-    for i in range(len(units) - count + 1):
-        index = units[i][1]
-        if starts[index] < start or (i and units[i - 1][1] == index):
-            continue
-        if [unit[0] for unit in units[i:i + count]] != keys:
+    the accent differs, so that is no match either. ``texts`` is the key of each unit, built once by the caller."""
+    count, first = len(keys), keys[0] if keys else ""
+    for i in range(low, len(texts) - count + 1):
+        if (keys and texts[i] != first) or (i and units[i - 1][1] == units[i][1]) or texts[i:i + count] != keys:
             continue
         j = i + count
         if j < len(units) and (units[j][2] or units[j][1] == units[j - 1][1]):
@@ -270,39 +274,51 @@ def plain_text(text: str) -> bool:
     return all(c.isascii() or (c not in _EXPANSIONS and unicodedata.category(c) != "Mn" and unicodedata.normalize("NFKD", c) == c) for c in text)
 
 
-def _search_length(text: str, ci: bool) -> int:
-    """The length a search compares (Task 73): UTF-16 units when the case counts, comparison keys (ß is two, æ is two) when it
-    does not. A search text longer than the searched text is no match: Power BI finds "ss" inside "straße" but not inside "ß"."""
-    return len(_keyed(text, True)[0]) if ci else len(text)
-
-
 def linguistic_position(haystack: str, needle: str, start: int, ci: bool) -> int:
     """UTF-16 position where needle first matches haystack at or after ``start``, or -1 (Task 73: linguistic matching)."""
-    units, starts = _keyed(haystack, ci)
+    if haystack.isascii() and needle.isascii():  # plain ASCII matches only itself, so the ordinary find gives the same answer
+        if not needle:
+            return start
+        return haystack.lower().find(needle.lower(), start) if ci else haystack.find(needle, start)
+    units, _ = _keyed(haystack, ci)
     keys = [unit[0] for unit in _keyed(needle, ci)[0]]
     if not keys:
         return start
     _combining_start(keys)
-    if _search_length(needle, ci) > _search_length(haystack, ci):
+    # A search text longer than the searched text is no match: Power BI finds "ss" inside "straße" but not inside "ß".
+    # The length compared is UTF-16 units when the case counts, comparison keys (ß is two, æ is two) when it does not.
+    if (len(keys) > len(units)) if ci else (len(needle) > len(haystack)):
         return -1
-    found = _first_match(units, starts, keys, start)
-    return -1 if found is None else starts[units[found[0]][1]]
+    texts, chars = [unit[0] for unit in units], [unit[1] for unit in units]
+    found = _first_match(texts, units, keys, bisect.bisect_left(chars, start))
+    return -1 if found is None else chars[found[0]]
 
 
 def linguistic_spans(text: str, old: str, instance: int | None) -> list[tuple[int, int]]:
     """UTF-16 spans that SUBSTITUTE replaces, case-sensitive (Task 73). A match starts at its linguistic position and
     removes len(old) units from there: SUBSTITUTE("straße","ss",BLANK()) is "stra". A span that runs past the end of
     the text is not replaced: SUBSTITUTE("ß","ss",BLANK()) is "ß". A span that would end inside a character is refused."""
+    spans: list[tuple[int, int]] = []
+    if old and text.isascii() and old.isascii():  # plain ASCII: the ordinary find, one match after the other
+        position, seen = text.find(old), 0
+        while position >= 0:
+            seen += 1
+            if instance is None or seen == instance:
+                spans.append((position, position + len(old)))
+                if instance is not None:
+                    break
+            position = text.find(old, position + len(old))
+        return spans
     units, starts = _keyed(text, False)
     keys = [unit[0] for unit in _keyed(old, False)[0]]
     _combining_start(keys)
     boundaries = set(starts) | {len(text)}
-    spans: list[tuple[int, int]] = []
-    if _search_length(old, False) > _search_length(text, False):
+    if len(old) > len(text):
         return spans
+    texts, chars = [unit[0] for unit in units], [unit[1] for unit in units]
     position, seen = 0, 0
     while True:
-        found = _first_match(units, starts, keys, position)
+        found = _first_match(texts, units, keys, bisect.bisect_left(chars, position))
         if found is None:
             break
         begin = starts[units[found[0]][1]]
