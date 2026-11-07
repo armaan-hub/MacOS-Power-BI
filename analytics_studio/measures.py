@@ -9034,6 +9034,11 @@ def _evaluate_measures_once(
     def eff_active() -> bool:
         return not eff_blocked and (bool(eff_layers) or any(eff_transition.values()) or any(eff_suppressed.values()) or any(eff_group_keys.values()))
 
+    def shapes_drop_blank(context: dict[str, Any]) -> bool:
+        """A whole-row filter set (FILTER table, TREATAS, ..) that does not list the one-side blank member. One built from ALL(col) / VALUES
+        lists it when its predicate is true for the blank (Task 82), and then it keeps the blank member like a column filter does."""
+        return any(not getattr(shape["rows"], "blank", False) for shape in _context_shapes(context))
+
     def allselected_rows_for(source_context: dict[str, Any], columns: list[str]) -> list[dict[str, Any]] | None:
         """ALLSELECTED(columns) inside an iterator: the table rows that satisfy every filter touching those columns, where
         the filters are the iterator shadows, the explicit CALCULATE filters and the outer filters the shadows did not
@@ -9148,7 +9153,7 @@ def _evaluate_measures_once(
         if (  # live Power BI: ALLSELECTED(col) keeps the one-side blank member as ALL does (same condition as the unshadowed path)
             table_id in unknown_member_ids
             and not unknown_member_hidden(table_id)
-            and not _context_shapes(contexts_after_clear.get(table_id, source_context))  # shapes on columns this ALLSELECTED drops do not count
+            and not shapes_drop_blank(contexts_after_clear.get(table_id, source_context))  # shapes on columns this ALLSELECTED drops do not count
             and (child_unmatched if child_relevant else True)  # Task 82: the blank member only when the selected facts hold an unmatched key
             and all(getattr(outer, "blank", False) for outer in replaced_outer)  # an outer filter on a column asked for must itself select the blank
             and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
@@ -9162,11 +9167,11 @@ def _evaluate_measures_once(
             and table_id in evaluation_filter_ids
             and table_id in unknown_member_ids
             and not unknown_member_hidden(table_id)
-            and not _context_shapes(contexts_after_clear.get(table_id, source_context))
+            and not shapes_drop_blank(contexts_after_clear.get(table_id, source_context))
             and all(getattr(outer, "blank", False) for outer in replaced_outer)
             and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
         ):
-            if _context_shapes(evaluation_contexts_by_id.get(table_id, source_context)):  # the plain rule drops the blank for a shaped filter (TREATAS): not verified, refused
+            if shapes_drop_blank(evaluation_contexts_by_id.get(table_id, source_context)):  # the plain rule drops the blank for a shaped filter (TREATAS): not verified, refused
                 raise MeasureError("ALLSELECTED of a column inside an iterator over a related table's key cannot tell the blank member under a shaped outer filter.")
             return None  # the plain ALLSELECTED(column) answer
         for layer in eff_layers:
@@ -15359,7 +15364,7 @@ def _evaluate_measures_once(
         targets_by_key: dict[
             tuple[str, str], tuple[dict[str, Any], str]
         ] = {}
-        explicit_here: list[tuple[str, str, bool, Any, dict[str, Any]]] = []
+        explicit_here: list[tuple[str, str, bool, Any, dict[str, Any], bool]] = []
         for key, (target_context, target_column, allowed_rows) in (extra_date_filters or {}).items():
             filters_by_column.setdefault(key, []).append((allowed_rows, False, False))
             targets_by_key[key] = (target_context, target_column)
@@ -15485,7 +15490,7 @@ def _evaluate_measures_once(
             if existing_key is not None:
                 del column_filters[existing_key]
             column_filters[actual_column] = new_rows
-            explicit_here.append((table_id, actual_column, keep, new_rows, target_context))
+            explicit_here.append((table_id, actual_column, keep, new_rows, target_context, new_blank_allowed))
 
             blank_column_filters = dict(
                 updated.get("filter_column_blank_allowed", {})
@@ -15538,13 +15543,14 @@ def _evaluate_measures_once(
         evaluation_filter_ids = updated_filter_roots
         rows_by_table_id = filtered_rows_by_id
         saved_layers, saved_touched = eff_layers, eff_touched
-        eff_touched = eff_touched | {(table_id, column.casefold()) for table_id, column, _keep, _rows, _ctx in explicit_here}
-        for table_id, column, keep, rows_allowed, filter_context in explicit_here:  # an explicit filter replaces the shadow on its column
+        eff_touched = eff_touched | {(table_id, column.casefold()) for table_id, column, _keep, _rows, _ctx, _blank in explicit_here}
+        for table_id, column, keep, rows_allowed, filter_context, blank_selected in explicit_here:  # an explicit filter replaces the shadow on its column
             if not keep:
                 eff_layers = project_layers(eff_layers, table_id, [column])
-            else:
-                eff_layers = (*eff_layers, _Shadow(table_id, (column,), lambda column=column, rows_allowed=rows_allowed, filter_context=filter_context: frozenset(
-                    row_key([typed_cell(filter_context, column, filter_context["rows"][index].get(column))]) for index in rows_allowed)))
+            else:  # Task 82: a filter whose predicate is true for the blank (Fam<>"F3") also selects the one-side blank member
+                eff_layers = (*eff_layers, _Shadow(table_id, (column,), lambda column=column, rows_allowed=rows_allowed, filter_context=filter_context, blank_selected=blank_selected: frozenset(
+                    [row_key([typed_cell(filter_context, column, filter_context["rows"][index].get(column))]) for index in rows_allowed]
+                    + ([row_key([None])] if blank_selected else []))))
         try:
             return evaluate(expression)
         finally:

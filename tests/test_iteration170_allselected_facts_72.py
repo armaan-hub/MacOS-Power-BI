@@ -168,3 +168,46 @@ REFUSED = [
 @pytest.mark.parametrize("expression", REFUSED)
 def test_allselected_column_in_key_iterator_under_shaped_outer_filter_is_refused(expression: str) -> None:
     assert m.ours_for("ZY", expression).startswith("LOCAL-REJECT")
+
+
+# Task 82 follow-up: an outer filter on the dimension column that admits BLANK (Fam<>"F1", KEEPFILTERS(Fam<>"F3")) keeps the one-side blank
+# member for ALLSELECTED(Dim[col]) / ALLSELECTED(Dim) inside a VALUES(Fact[key]) iterator's context transition (live Power BI, model ZY).
+BLANK_ADMITTING_FILTER_CASES = [
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '33'),
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '33'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '3'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '3'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '33'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '33'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '30'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '30'),
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '110'),
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '110'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '10'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '10'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '110'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '110'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '100'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),FILTER(ALL(ZY_Dim[Fam]),ZY_Dim[Fam]<>"F1"))', '100'),
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '14'),
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '14'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '2'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '2'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '14'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '14'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '12'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(SUMX(ALLSELECTED(ZY_Dim[Fam]),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '12'),
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '28'),
+    ('CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '28'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '4'),
+    ('CALCULATE(MAXX(VALUES(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '4'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '28'),
+    ('CALCULATE(SUMX(DISTINCT(ZY_Fact[Item]),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '28'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim)))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '24'),
+    ('CALCULATE(SUMX(FILTER(VALUES(ZY_Fact[Item]),NOT ISBLANK(ZY_Fact[Item])),CALCULATE(SUMX(ALLSELECTED(ZY_Dim),1))),KEEPFILTERS(ZY_Dim[Fam]<>"F3"))', '24'),
+]
+
+
+@pytest.mark.parametrize("expression, powerbi", BLANK_ADMITTING_FILTER_CASES, ids=[f"blankfilter{i}" for i in range(len(BLANK_ADMITTING_FILTER_CASES))])
+def test_allselected_keeps_blank_member_under_blank_admitting_outer_filter(expression: str, powerbi: str) -> None:
+    assert _same(m.ours_for("ZY", expression), powerbi)
