@@ -9715,6 +9715,7 @@ def _evaluate_measures_once(
 
     derived_count = 0
     row_stack: list[tuple[dict[str, Any], dict[str, Any], int]] = []
+    group_scope_stack: list[frozenset[tuple[str, str]]] = []  # Task 83: the group-by columns (table id, column) of the SUMMARIZECOLUMNS row being evaluated
     selected_iteration_depth = 0  # how many iterations over a SELECTCOLUMNS table are running
 
     def derived_table(
@@ -11469,10 +11470,15 @@ def _evaluate_measures_once(
                     raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
                 group_context, group_rows = derived_table(list(headers), combos, lineage, types)
                 output = []
+                group_scope = frozenset((context["id"], column.casefold()) for context, column in resolved)  # Task 83: ISINSCOPE is TRUE for these
                 for group_row in group_rows:
                     row = dict(group_row)
-                    for name, expression in zip(names, stripped):
-                        row[name] = evaluate_with_context_transition(expression, group_context, group_row)
+                    group_scope_stack.append(group_scope)
+                    try:
+                        for name, expression in zip(names, stripped):
+                            row[name] = evaluate_with_context_transition(expression, group_context, group_row)
+                    finally:
+                        group_scope_stack.pop()
                     counted = [row[name] for name, skip in zip(names, ignored) if not skip]
                     if names and not all(skip for skip in ignored) and all(value is None for value in counted):
                         continue  # a row whose expressions are all blank is dropped
@@ -17897,7 +17903,8 @@ def _evaluate_measures_once(
             and axis.column.casefold() == column.casefold()
         )
         if function == "ISINSCOPE":
-            return on_axis
+            # Task 83 (live Power BI, scope-fns-73): a column grouped by the SUMMARIZECOLUMNS row being evaluated is in scope on that row
+            return on_axis or (column is not None and bool(group_scope_stack) and (context["id"], column.casefold()) in group_scope_stack[-1])
         if function == "ISFILTERED" and column is not None and any(
             mark_table == context["id"] and (mark_column == column.casefold() or (mark_column is None and column.casefold() not in mark_excluded))
             for mark_table, mark_column, mark_excluded in nonblank_mark_stack
@@ -22218,6 +22225,15 @@ def _evaluate_measures_once(
                 value = source_row.get(value_column)
                 _reject_power_query_error(value, value_column, row_index)
                 seen_values.setdefault(cell_key(ascii_fold(value) if isinstance(value, str) else value), value)
+            if (  # Task 83 (live Power BI, scope-fns-73): the visible blank member of the table is one BLANK value, as VALUES lists it
+                value_context["id"] in unknown_member_ids
+                and not unknown_member_hidden(value_context["id"])
+                and cell_key(None) not in seen_values
+                and unknown_member_passes_remaining_filters(
+                    evaluation_contexts_by_id.get(value_context["id"], value_context), evaluation_contexts_by_id, evaluation_filter_ids,
+                )
+            ):
+                seen_values[cell_key(None)] = None
             if function == "HASONEVALUE":
                 return len(seen_values) == 1
             if len(seen_values) != 1:
