@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Opus (Task 79: next alternate-row-set audit; Task 78 shipped as Iteration 167)
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 168 (Task 80 path-types-70) shipped; Task 79 median-blank-69 in rework.
 **Branch in use:** none
 **Working tree clean:** main yes
 
