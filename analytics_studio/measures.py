@@ -9081,6 +9081,7 @@ def _evaluate_measures_once(
         child_unmatched = False  # the child rows that stay visible hold a blank key or a key with no row here
         reached_rows: set[int] = set()  # Task 82: rows of this table that the visible rows of a whole-table iterator reach
         table_level_child = False  # SUMX(Fact, ..) / FILTER(Fact, ..) over a child table is in force
+        narrowed_off_unmatched = False  # a column iterator over a child key whose visible rows hold no unmatched key although the child table does
         for relationship in relationship_definitions:
             if not isinstance(relationship, dict) or not relationship.get("is_active"):
                 continue
@@ -9131,6 +9132,12 @@ def _evaluate_measures_once(
                     unmatched_here = True  # a blank or orphan key: the one-side blank member is selected
                 else:
                     reached_here |= own_keys[key]
+            if not table_level and not unmatched_here and any(  # Task 82: the iterated key values narrowed the facts away from every unmatched key
+                typed_cell(child_context, child_column, child_row.get(child_column)) is None
+                or typed_cell(child_context, child_column, child_row.get(child_column)) not in own_keys
+                for child_row in child_context["rows"]
+            ):
+                narrowed_off_unmatched = True
             child_relevant = True
             child_unmatched = child_unmatched or unmatched_here
             if table_level:
@@ -9147,6 +9154,21 @@ def _evaluate_measures_once(
             and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
         ):
             result.append({header: None for header in source_context["headers"]})
+        elif (  # Task 82: a column iterator over a child key (VALUES(Fact[key])) under an outer filter on this table, ALLSELECTED of a column:
+            # the outer filter narrowed the iterated keys away from every unmatched key. Power BI (live, KEEPFILTERS(Dim[Tier]>=2)) still lists the
+            # blank member there, as the plain ALLSELECTED(column) rule does, so the iterator does not narrow the blank test.
+            narrowed_off_unmatched
+            and not child_unmatched
+            and table_id in evaluation_filter_ids
+            and table_id in unknown_member_ids
+            and not unknown_member_hidden(table_id)
+            and not _context_shapes(contexts_after_clear.get(table_id, source_context))
+            and all(getattr(outer, "blank", False) for outer in replaced_outer)
+            and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
+        ):
+            if _context_shapes(evaluation_contexts_by_id.get(table_id, source_context)):  # the plain rule drops the blank for a shaped filter (TREATAS): not verified, refused
+                raise MeasureError("ALLSELECTED of a column inside an iterator over a related table's key cannot tell the blank member under a shaped outer filter.")
+            return None  # the plain ALLSELECTED(column) answer
         for layer in eff_layers:
             if layer.table != table_id:
                 continue

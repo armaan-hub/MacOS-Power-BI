@@ -22,7 +22,6 @@ RELS = [('ZY_r1', 'ZY_Fact', 'Item', 'ZY_Dim', 'Item', True, False, 'many', 'one
 
 m.SPEC['ZY'] = {'tables': {'ZY_Dim': (DIM_COLS, DIM_ROWS), 'ZY_Fact': (FACT_COLS, FACT_ROWS), 'ZY_Cal': (m.CAL_COLS, None)}, 'rels': RELS}
 
-XFAIL = {'CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),KEEPFILTERS(ZY_Dim[Tier]>=2))', 'CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),KEEPFILTERS(ZY_Dim[Tier]>=2))'}
 
 CASES = [
     ('SUMX(ZY_Fact,CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim))))', '240'),
@@ -148,7 +147,7 @@ def _same(ours: str, powerbi: str) -> bool:
 
 
 PARAMS = [
-    pytest.param(expr, pb, id=f"case{index}", marks=pytest.mark.xfail(strict=True, reason="Task 82: still differs from Power BI (see report)") if expr in XFAIL else ())
+    pytest.param(expr, pb, id=f"case{index}")
     for index, (expr, pb) in enumerate(CASES)
 ]
 
@@ -156,3 +155,16 @@ PARAMS = [
 @pytest.mark.parametrize("expression, powerbi", PARAMS)
 def test_allselected_dimension_in_fact_iterator_matches_power_bi(expression: str, powerbi: str) -> None:
     assert _same(m.ours_for("ZY", expression), powerbi)
+
+
+# A column iterator over the many-side key under an outer filter on a column of the dimension that ALLSELECTED drops: Power BI keeps
+# the blank member (verified for a predicate filter above). Under a shaped outer filter (TREATAS) the answer is not verified: refused.
+REFUSED = [
+    'CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Item])))),TREATAS({2,3},ZY_Dim[Tier]))',
+    'CALCULATE(SUMX(VALUES(ZY_Fact[Item]),CALCULATE(COUNTROWS(ALLSELECTED(ZY_Dim[Fam])))),TREATAS({"I2","I4"},ZY_Dim[Item]))',
+]
+
+
+@pytest.mark.parametrize("expression", REFUSED)
+def test_allselected_column_in_key_iterator_under_shaped_outer_filter_is_refused(expression: str) -> None:
+    assert m.ours_for("ZY", expression).startswith("LOCAL-REJECT")
