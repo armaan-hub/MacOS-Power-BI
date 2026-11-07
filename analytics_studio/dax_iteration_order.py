@@ -71,6 +71,7 @@ class Plan:
     projects: bool = False  # SELECTCOLUMNS: the columns it reads are resolved in the table it selects from
     scanned: bool = False  # SUMMARIZE of a table: an outer filter on another column joins the sort key of the groups (measured), which is not modelled
     measured_space: bool = False  # ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS: dictionary order only inside the measured key space (multi_column_order)
+    whole_distinct: bool = False  # DISTINCT(table) / DISTINCT(ALL(table)): all the table's columns, inside the measured key space (distinct_walk_order)
 
 
 def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | None:
@@ -136,6 +137,10 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         if any(isinstance(arg, tuple) and arg[0] == "call" and arg[1] in {"ROLLUP", "ROLLUPGROUP"} for arg in arguments[1:]):
             return None
         return Plan(dedup=True, scanned=arguments[0][0] == "table", measured_space=arguments[0][0] == "table") if plan(arguments[0], bound) is not None else None
+    if name == "DISTINCT" and len(arguments) == 1 and _whole_table_argument(arguments[0]):
+        # Task 78 (live Power BI, walk-data-68 grid t78e, Part C): DISTINCT(Facts) and DISTINCT(ALL(Facts)) list the distinct rows in the dictionary order of
+        # all the table's columns inside a measured key space (see distinct_walk_order); storage order beyond it
+        return Plan(dedup=True, whole_distinct=True)
     if name in {"VALUES", "ALL", "DISTINCT"}:
         if all(argument[0] == "reference" for argument in arguments):
             return Plan(dedup=True)
@@ -189,6 +194,32 @@ def filtered_whole_table(node: Any, table_name: str) -> bool:
     if isinstance(source, tuple) and source[:1] == ("table",):
         return str(source[1]).casefold() == str(table_name).casefold()
     return isinstance(source, tuple) and len(source) == 3 and source[0] == "call" and source[1] == "ALL" and len(source[2]) == 1 and source[2][0][:1] == ("table",) and str(source[2][0][1]).casefold() == str(table_name).casefold()
+
+
+def _whole_table_argument(argument: Any) -> bool:
+    """A bare table, or ALL of one bare table (the argument of DISTINCT in Task 78)."""
+    if not isinstance(argument, tuple) or not argument:
+        return False
+    if argument[0] == "table":
+        return True
+    return argument[0] == "call" and argument[1] == "ALL" and isinstance(argument[2], tuple) and len(argument[2]) == 1 and argument[2][0][:1] == ("table",)
+
+
+def rankx_over_whole_table(nodes: Iterable[Any], table_name: str) -> bool:
+    """Task 78 (live Power BI, walk-data-68 grid t78e, Part B): whether one of `nodes` holds a RANKX that ranks the rows of `table_name` through
+    the table itself, ALL(table) or ALLSELECTED(table). Looked for in the nodes as written (rankx_walk replaces the table argument)."""
+    def found(node: Any) -> bool:
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and node[1] == "RANKX" and isinstance(node[2], tuple) and node[2]:
+            ranked = node[2][0]
+            if isinstance(ranked, tuple) and len(ranked) == 2 and ranked[0] == "table" and str(ranked[1]).casefold() == str(table_name).casefold():
+                return True
+            if isinstance(ranked, tuple) and len(ranked) == 3 and ranked[0] == "call" and ranked[1] in {"ALL", "ALLSELECTED"} and isinstance(ranked[2], tuple) and len(ranked[2]) == 1:
+                if isinstance(ranked[2][0], tuple) and ranked[2][0][:1] == ("table",) and str(ranked[2][0][1]).casefold() == str(table_name).casefold():
+                    return True
+        return any(found(child) for child in node if isinstance(child, tuple))
+    return any(found(node) for node in nodes)
 
 
 def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[Any]]:
@@ -503,6 +534,63 @@ def rank_walk_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
     if any(space <= measured and row_count >= rows for measured, rows in _RANK_WALK_SORTED):
         return True
     if any(space >= measured and row_count <= rows for measured, rows in _RANK_WALK_STORAGE):
+        return False
+    return None
+
+
+# Task 78 (live Power BI, walk-data-68 grid t78e, Part C: CONCATENATEX of DISTINCT(ALL(Facts)) and DISTINCT(Facts) over the 4-column Facts table, 23 row sets
+# of 5 to 16 rows): the distinct rows come out in the dictionary order of all four columns (the last column major, BLANK first, text first-seen) while the key
+# space (product of the four value-range sizes) is at most 1,485 (sorted at 72, 81, 360, 648, 924, 966, 1,287 and 1,485); storage order from 2,520 (7 sets
+# at 2,520 and beyond). A fractional column keeps storage order (5 of 5 sets). Between the two points nothing is measured: the walk is refused.
+_DISTINCT_WALK_SORTED_SPACE = 1485
+_DISTINCT_WALK_STORAGE_SPACE = 2520
+
+
+def _key_space(profiles: Sequence[Profile]) -> int | None:
+    space = 1
+    for profile in profiles:
+        if profile.size is None:
+            return None
+        space *= profile.size
+    return space
+
+
+def distinct_walk_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True / False / None (not decided) for the distinct rows of a whole table (see _DISTINCT_WALK_SORTED_SPACE). Dates are not measured."""
+    if any(profile.fractional for profile in profiles):
+        return False
+    if any(profile.is_date for profile in profiles):
+        return None
+    space = _key_space(profiles)
+    if space is None:
+        return False
+    if space <= _DISTINCT_WALK_SORTED_SPACE:
+        return True
+    if space >= _DISTINCT_WALK_STORAGE_SPACE:
+        return False
+    return None
+
+
+# Task 78 (live Power BI, walk-data-68 grid t78e, Part B: CONCATENATEX(Facts, RANKX(ALL / ALLSELECTED / Facts, expression)) over the 4-column Facts table):
+# the rows are walked by the two columns the rank expression reads (the later table column the major key) while the product of their value-range sizes is
+# at most 341 (sorted at 8, 9, 40, 72, 77, 143, 161, 165, 210 and 341; the Note x Quantity shapes sorted at 237 and below); storage order from 432 (storage
+# at 432, 730, 750, 936, 1,900, 4,416, 4,921 and 78,842). A fractional column keeps storage order. Between 341 and 432 the walk is refused.
+_RANKX_WALK_SORTED_SPACE = 341
+_RANKX_WALK_STORAGE_SPACE = 432
+
+
+def rankx_walk_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True / False / None (not decided) for the two columns a RANKX over the whole table reads (see _RANKX_WALK_SORTED_SPACE)."""
+    if any(profile.fractional for profile in profiles):
+        return False
+    if any(profile.is_date for profile in profiles):
+        return None
+    space = _key_space(profiles)
+    if space is None:
+        return False
+    if space <= _RANKX_WALK_SORTED_SPACE:
+        return True
+    if space >= _RANKX_WALK_STORAGE_SPACE:
         return False
     return None
 

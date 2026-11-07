@@ -9832,6 +9832,7 @@ def _evaluate_measures_once(
         header_by_key = {h.casefold(): h for h in context["headers"]}
         # Task 70: a RANKX over ALL / ALLSELECTED of the walked table reads its expression's columns in the walk (live Power BI, rankx audit grid)
         walk_nodes, ranked_bodies = dax_iteration_order.rankx_walk(nodes, table_node[1]) if table_node[0] == "table" else (list(nodes), [])
+        ranked_whole = dax_iteration_order.rankx_over_whole_table(nodes, table_node[1]) if table_node[0] == "table" else False  # Task 78 Part B
         read = dax_iteration_order.columns_read(
             [*walk_nodes, *ranked_bodies],
             lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS,
@@ -9946,6 +9947,22 @@ def _evaluate_measures_once(
                         # the rows filtered in (RANK(SKIP, ALL(Sales, Note), ..) under Note = "Paid") comes out sorted by the double; the storage order does not give it
                         collapsed.append(True)
                 in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup, beside_doubles)
+                if plan.whole_distinct:
+                    # Task 78 Part C (live Power BI, walk-data-68 grid t78e): the distinct rows of DISTINCT(Facts) / DISTINCT(ALL(Facts)) walk in dictionary order of
+                    # all the table's columns inside the measured key space (distinct_walk_order); refused in the gap between the measured points
+                    if len(profiles) != len(source["headers"]):
+                        return rows
+                    decided = dax_iteration_order.distinct_walk_order(len(source["rows"]), list(profiles.values()))
+                    if decided is None:
+                        raise _KeySpaceUndecided()
+                    in_dictionary_order = decided
+                elif ranked_whole and len(profiles) == 2 and not any(profile.is_date for profile in profiles.values()):
+                    # Task 78 Part B (live Power BI, walk-data-68 grid t78e): CONCATENATEX of a RANKX over the whole table walks the two columns the rank reads by
+                    # the key space of both (rankx_walk_order); refused in the gap between the measured points
+                    decided = dax_iteration_order.rankx_walk_order(len(source["rows"]), list(profiles.values()))
+                    if decided is None:
+                        raise _KeySpaceUndecided()
+                    in_dictionary_order = decided
                 topn_decided: bool | None = None
                 if topn_walk and not plan.dedup and any(profile.fractional for profile in profiles.values()):
                     # Task 77 (live Power BI, topn-data-67 grid): the heap walk of a TOPN over a fractional double is decided by dax_iteration_order only where the
