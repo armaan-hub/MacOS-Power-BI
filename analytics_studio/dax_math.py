@@ -51,6 +51,10 @@ def rounding_function(function: str, args: list[object]) -> Decimal | None:
             dax_typed.whole(args[1], function)  # Task 20 F4: a BLANK number still reads its digits; an Infinity, a NaN or a text there is the error
         return None
     number = dax_typed.to_number(args[0], dates=True)
+    if number.is_finite() and abs(number) > Decimal("1.7E308"):
+        raise dax_typed.refusal(f"{function} of a number within 5% of the Double maximum is not modelled by the local engine (ROUND(1.7976931348623157E308,1) is NaN, measured).")
+    if function == "ROUND":
+        number = dax_typed.int64_through_double(number)  # Task 74 Part B: ROUND of 9223372036854775807 is the conversion error (measured)
     digits = dax_typed.whole(args[1], function)
     mode = {"ROUND": ROUND_HALF_UP, "ROUNDUP": ROUND_UP, "ROUNDDOWN": ROUND_DOWN}[function]
     if not number.is_finite():
@@ -161,7 +165,20 @@ def math_function(function: str, args: list[object]) -> object:
             raise _fail(function)  # ISEVEN / ISODD of an Infinity or a NaN
     if function in {"ISEVEN", "ISODD"}:
         number = dax_typed.to_number(args[0])
-        remainder = int(number.quantize(Decimal(1), rounding=ROUND_HALF_UP)) % 2  # to the nearest whole number first: ISEVEN(2.5) is False, ISEVEN(TIME(6,0,0)) True (live Power BI)
+        if isinstance(args[0], str) and abs(number) >= dax_typed._INT64_LIMIT:
+            # Task 74 Part B: a number text is a Double and ISEVEN / ISODD read it as an Int64: 2^63 or more is a range error (measured for
+            # "9223372036854775808", "1e400", "1.8e308"; the text of -2^63 itself is not measured and is refused)
+            if number < 0 and float(number) == -float(dax_typed._INT64_LIMIT):
+                raise dax_typed.refusal("ISEVEN and ISODD of the text -9223372036854775808 are not modelled by the local engine.")
+            raise dax_typed._error("The following system error occurred: Out of present range.")
+        if not dax_typed.is_int64_form(number) and number < 0 and float(number) == -float(dax_typed._INT64_LIMIT):
+            # the literal -9223372036854775808 reads as the Double -9.223372036854776E+18: the conversion error (measured)
+            raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
+        if dax_typed.is_int64_form(number) and 2 ** 53 <= abs(number) <= dax_typed._INT64_LIMIT:
+            number = Decimal(float(number))  # an Int64 from 2^53 up reads as its Double, always even: ISEVEN(9223372036854775807), ISEVEN(-9223372036854775807)
+            # and ISEVEN of the wrapped -2^63 are True (measured)
+        currency_text = isinstance(args[0], str) and "$" in args[0]  # Task 74 (t74d, t74e): a currency text goes to the whole number half to even (ISEVEN("$12.5") is True, ISEVEN("$0.5") True)
+        remainder = int(number.quantize(Decimal(1), rounding=ROUND_HALF_EVEN if currency_text else ROUND_HALF_UP)) % 2  # to the nearest whole number first: ISEVEN(2.5) is False, ISEVEN(TIME(6,0,0)) True (live Power BI)
         return (remainder == 0) if function == "ISEVEN" else (remainder != 0)
     if args[0] is None and function in {"EVEN", "ODD"}:
         return Decimal(0) if function == "EVEN" else Decimal(1)

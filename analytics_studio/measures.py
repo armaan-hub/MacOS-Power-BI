@@ -33,6 +33,8 @@ The module parses into a tiny AST and never evaluates user text as Python.
 from __future__ import annotations
 
 from calendar import monthrange
+import contextlib
+import sys
 import json
 import math
 import getpass
@@ -3549,7 +3551,7 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return Decimal(0)  # Task 20 F3: CEILING(0, Infinity) is 0, as CEILING(0, x) is
     if function != "POWER" and any(value is not None and not value.is_finite() for value in values):  # POWER: see the branch below
         if function == "TRUNC" and first is not None and not first.is_finite() and all(value is None or value.is_finite() for value in values[1:]):
-            return Decimal("NaN") if first == Decimal("Infinity") else first  # Part E: TRUNC of +Infinity is NaN (measured); -Infinity stays as it was
+            return Decimal("NaN")  # Part E: TRUNC of +Infinity is NaN (measured); Task 74 Part C: TRUNC(-1/0) is NaN too (measured)
         raise MeasureRuntimeError(
             f"An argument of function '{function}' has the wrong data type or the result is too large or too small."
         )
@@ -3654,6 +3656,10 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return remainder
     if first is None:
         return None
+    if function == "TRUNC" and first.is_finite() and abs(first) > Decimal("1.7E308"):
+        raise dax_typed.refusal("TRUNC of a number within 5% of the Double maximum is not modelled by the local engine (TRUNC(1.7976931348623157E308) is NaN, measured).")
+    if function in {"INT", "TRUNC"}:
+        first = dax_typed.int64_through_double(first)  # Task 74 Part B: INT and TRUNC of 9223372036854775807 are the conversion error (measured)
     if function == "INT":
         return first.to_integral_value(rounding=ROUND_FLOOR)
     if function == "SIGN":  # Part B: SIGN of a negative zero is -1 (measured)
@@ -5410,6 +5416,26 @@ def _double_rounding_result(function: str, result: Any, argument_type: str | Non
     if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "MROUND", "MOD"} and argument_type == "double" and isinstance(result, Decimal) and result.is_finite():
         return Decimal(float(result))
     return result
+
+
+def _subnormal_text_as_number(value: Any, as_number: Any) -> Any:
+    """Task 74: a text that reads as a subnormal Double becomes that number (the caller allows it); any other value is returned as it was."""
+    if isinstance(value, str):
+        try:
+            number = as_number(value)
+        except MeasureError:
+            return value
+        if number.is_finite() and number != 0 and abs(number) < Decimal(dax_typed._TINY_TEXT):
+            return number
+    return value
+
+
+def _text_is_int64_minimum(text: str) -> bool:
+    """Task 74: True when the number text reads as exactly -2^63 (a text is a Double there, which is not an Int64)."""
+    try:
+        return dax_typed.text_to_number(text) == -_INT64_RANGE
+    except MeasureError:
+        return False
 
 
 def _int64_wrap(operator: str, left: Decimal, right: Decimal) -> Decimal:
@@ -17505,6 +17531,8 @@ def _evaluate_measures_once(
                     try:
                         return dax_typed.to_number(value) != 0  # Task 19 Part A: a number text is True unless it is zero
                     except MeasureRuntimeError:
+                        if dax_typed.beyond_double(value):  # Task 74 Part A: a number text beyond the Double range is the logical range error (measured)
+                            raise MeasureRuntimeError("The following system error occurred: Out of present range.") from None
                         raise MeasureRuntimeError(f"Cannot convert value '{value.strip()}' of type Text to type True/False.") from None
                 return lowered == "true"
             return dax_typed.to_boolean(value)
@@ -17516,7 +17544,7 @@ def _evaluate_measures_once(
                 raise MeasureRuntimeError("An argument of function 'CONVERT' has the wrong data type or the result is too large or too small.")
             if abs(number) >= _INT64_RANGE:
                 raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: an Integer beyond the 64-bit range is the error
-            rounded = number.quantize(Decimal(1), rounding=ROUND_HALF_UP)
+            rounded = number.quantize(Decimal(1), rounding=ROUND_HALF_EVEN if isinstance(value, str) and "$" in value else ROUND_HALF_UP)  # Task 74 (t74e): a currency text rounds half to even (CONVERT("$0.5",INTEGER) is 0)
             if abs(rounded) >= _INT64_RANGE:
                 raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")
             return rounded
@@ -18408,6 +18436,16 @@ def _evaluate_measures_once(
             values = [_read_double_as_integer_source(values[0]), values[1]]  # Part D: QUOTIENT by a whole number reads a Double as INT does
         if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and len(values) == 2 and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
             values = [_read_double_as_integer_source(values[0]), values[1]]  # Task 22 fix: a Double is read at 15 significant digits before it is rounded with digits (TRUNC(66.6 as a product, 1.6) is 66.6, measured)
+        if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "INT", "TRUNC", "ISEVEN", "ISODD"} and values and not dax_dates.is_date(values[0]) and (
+            values[0] == -_INT64_RANGE if isinstance(values[0], Decimal) else isinstance(values[0], str) and _text_is_int64_minimum(values[0])
+        ):
+            # Task 74 Part B: -2^63 is a wrapped Int64 (ROUND is the conversion error, ISEVEN is True) or the Double of the literal -9223372036854775808
+            # (ROUND is fine, ISEVEN the error); only the static type tells them apart, and an unknown type is refused
+            minimum_type = left_static_type(arguments[0], row_context)
+            if minimum_type == "double":
+                values = [Decimal(repr(float(values[0])))] + list(values[1:])
+            elif minimum_type != "int64":
+                raise dax_typed.refusal(f"{function} of -9223372036854775808 of an unknown type is not modelled by the local engine.")
         if function in dax_math.MATH_ARITY or function == "ROUND":
             try:
                 return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
@@ -18509,7 +18547,7 @@ def _evaluate_measures_once(
             shown_value = values[0]
             if isinstance(shown_value, Decimal) and shown_value.is_finite() and shown_value != shown_value.to_integral_value() and left_static_type(arguments[0], row_context) == "double":
                 shown_value = Decimal(format(shown_value, ".14e"))  # Part A: FORMAT reads a Double as its 15 significant digits (FORMAT(MIN(x)/MAX(x),"0.00") is -0.08, measured)
-            return dax_format.format_value(shown_value, values[1])
+            return dax_format.format_value(shown_value, values[1], exact=left_static_type(arguments[0], row_context) == "int64")  # Task 74 Part B: an Int64 is shown exactly
         return dax_typed.text_function(function, values)
 
     static_type_of_nodes: dict[int, str | None] = {}
@@ -19764,8 +19802,14 @@ def _evaluate_measures_once(
                     right = dax_dates.DaxDateTime(Decimal(0))
             for text_value in (left, right):
                 if isinstance(text_value, str):
+                    if dax_typed.beyond_double(text_value):  # Task 74 Part A: as before, + - * answer a type test by its type; / shows the error
+                        text_message = f"Cannot convert value '{text_value}' of type Text to type Number."
+                        if node[1] == "/":
+                            raise MeasureRuntimeError(text_message)
+                        raise _TextRangeFailure(text_message)
                     try:
-                        spelled = as_number(text_value)
+                        with dax_typed.subnormal_text_allowed() if node[1] in {"+", "-", "*"} else contextlib.nullcontext():
+                            spelled = as_number(text_value)
                     except MeasureRuntimeError as error:
                         if "Cannot convert value" in str(error) and node[1] != "/" and _reads_no_data(node, variable_nodes.get):
                             raise _TextConversionFailure(str(error)) from error
@@ -19777,6 +19821,11 @@ def _evaluate_measures_once(
                         if node[1] == "/":
                             raise MeasureRuntimeError(text_message)
                         raise _TextRangeFailure(text_message)
+            if node[1] in {"+", "-", "*"}:
+                # Task 74: + - * answer a subnormal text (the four held-out grids agree with the double), so it becomes its number here; every other
+                # conversion of a subnormal text is refused
+                with dax_typed.subnormal_text_allowed():
+                    left, right = (_subnormal_text_as_number(side, as_number) for side in (left, right))
             try:
                 result = _binary_value(
                     node[1],
@@ -21107,7 +21156,8 @@ def _evaluate_measures_once(
             if value is None:
                 return None
             try:
-                value = as_number(value)
+                with dax_typed.subnormal_text_allowed():  # Task 74: ABS answers a subnormal text (measured)
+                    value = as_number(value)
             except MeasureRuntimeError as error:
                 if "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
                     raise _TextConversionFailure(str(error)) from error
@@ -21120,7 +21170,9 @@ def _evaluate_measures_once(
         if function in _SCALAR_MATH_ARITY:
             try:
                 try:
-                    values = [None if value is None else as_number(value) for value in (evaluate(argument, row_context) for argument in arguments)]
+                    raw_values = [evaluate(argument, row_context) for argument in arguments]
+                    with dax_typed.subnormal_text_allowed() if function == "LN" else contextlib.nullcontext():  # Task 74: LN answers a subnormal text (measured)
+                        values = [None if value is None else as_number(value) for value in raw_values]
                 except MeasureRuntimeError as error:
                     if function in {"INT", "EXP", "ROUND", "ABS", "ROUNDUP", "ROUNDDOWN", "TRUNC", "SIGN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
                         raise _TextConversionFailure(str(error)) from error

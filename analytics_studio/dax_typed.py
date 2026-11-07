@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from typing import Callable
 from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_EVEN, ROUND_HALF_UP
+import contextlib
+import math
 import re
+import sys
 import unicodedata
 
 # Decimal arithmetic that yields NaN/Infinity instead of raising, like IEEE doubles.
@@ -153,6 +156,22 @@ def currency_text(value: Decimal) -> str:
     return text.rstrip("0").rstrip(".") if "." in text else text
 
 
+_SUBNORMAL_OK = False
+_TINY_TEXT = 1e-300  # a text whose double is smaller than this (and not zero) is the tiny text of Task 74
+
+
+@contextlib.contextmanager
+def subnormal_text_allowed():
+    """Task 74: the operators + - * and the functions ABS, VALUE and LN answer a subnormal text (all four held-out grids agree with the double);
+    every other function and operator refuses it (SIGN, DIVIDE, POWER, MOD, INT ... treat it as a zero or not, by no rule found)."""
+    global _SUBNORMAL_OK
+    before, _SUBNORMAL_OK = _SUBNORMAL_OK, True
+    try:
+        yield
+    finally:
+        _SUBNORMAL_OK = before
+
+
 def text_to_number(text: str, dates: bool = False) -> Decimal:
     """VALUE / implicit text-to-number conversion: spaces, commas, a currency sign, (5) and 5- are accepted. With ``dates`` (arithmetic,
     VALUE, CONVERT to DOUBLE) a text that is not a number is read as a date or a time, as DATEVALUE and TIMEVALUE read it (Task 19 Part E)."""
@@ -174,8 +193,60 @@ def text_to_number(text: str, dates: bool = False) -> Decimal:
             if dax_dates.date_shaped_text(text):  # a date shape no reader models ("1 1/2"): refused, never guessed
                 raise refusal(f"The local engine does not model the text '{text.strip()}' as a number.")
         raise _error(f"Cannot convert value '{text}' of type Text to type Number.")
+    as_double = float(cleaned)
+    if math.isinf(as_double):  # Task 74 Part A: a text beyond the Double range is not a number (1e400 raises, measured)
+        raise _error(f"Cannot convert value '{text}' of type Text to type Number.")
     number = Decimal(cleaned)
-    return -number if negative else number
+    if negative:
+        number = -number
+    if abs(as_double) < _TINY_TEXT and number != 0:
+        # Task 74 Part A: the text is read as a Double. One that underflows to zero ("1e-400") is 0 (SIGN, NOT, LN and POWER see a zero, measured);
+        # a tiny one (under 1E-300: the subnormals and the smallest normal double 2.2250738585072014E-308, measured) is refused: Power BI treats it as zero in some functions (SIGN, DIVIDE, POWER, MOD) and not in others (ABS, VALUE, LN), by
+        # no rule found in four held-out grids.
+        if as_double == 0:
+            if number < 0:
+                raise refusal(f"The local engine does not model the text '{text.strip()}' (a negative underflow is a negative zero).")
+            return Decimal(0)
+        if not _SUBNORMAL_OK:
+            raise refusal(f"The local engine does not model the subnormal text conversion of '{text.strip()}'.")
+        return Decimal(f"{as_double:.17g}")  # the double to 17 digits (it reads back exactly): LN("4.9e-324") is -744.440071921381, measured
+    return number
+
+
+_DOUBLE_EXACT_LIMIT = 2 ** 53
+
+
+def beyond_double(text: str) -> bool:
+    """Task 74 Part A: True when the text is a plain number (digits, a point, an exponent) beyond the Double range, such as 1e400."""
+    spelled = text.strip(" ").replace(",", "")
+    return bool(_BOOLEAN_NUMBER_TEXT.fullmatch(spelled)) and math.isinf(float(spelled))
+
+
+def is_int64_form(number: Decimal) -> bool:
+    """An exact whole number (exponent 0). The engine keeps a Double as a Decimal with an exponent, so those are not Int64s here."""
+    return number.is_finite() and number == number.to_integral_value() and number.as_tuple().exponent == 0
+
+
+def int64_through_double(number: Decimal) -> Decimal:
+    """Task 74 Part B: an Int64 from 2^53 up is read as a Double by INT, TRUNC and ROUND (measured: INT, TRUNC and ROUND of 9223372036854775807
+    are the conversion error, since its double is 2^63; so are INT and TRUNC of -9223372036854775807 and ROUND of the wrapped -2^63). A double of
+    2^63 or more in size is the error. The literal -9223372036854775808 is a Double (not an exact whole Decimal): INT is the error there, ROUND
+    and TRUNC are not, and that is left to the callers.
+    """
+    if not is_int64_form(number) or not (_DOUBLE_EXACT_LIMIT <= number < _INT64_LIMIT or -_INT64_LIMIT <= number <= -_DOUBLE_EXACT_LIMIT):
+        return number
+    as_double = Decimal(float(number))
+    if abs(as_double) >= _INT64_LIMIT:
+        raise _error("The result of a conversion or arithmetic operation is either too large or too small.")
+    return as_double  # a negative one reads as its Double too (TRUNC(-(2^63-1024)) is -9.22337203685477E+18, measured)
+
+
+def int64_fifteen_digits(number: Decimal) -> Decimal:
+    """Task 74 Part B: FIXED reads an Int64 from 2^53 up through a double, shown to 15 significant digits (FIXED(9223372036854775807,0)
+    is 9,223,372,036,854,780,000, measured)."""
+    if not number.is_finite() or not _DOUBLE_EXACT_LIMIT <= abs(float(number)) <= _INT64_LIMIT:
+        return number  # the literal -9223372036854775808 reads as the Double -2^63 (FIXED of it is -9,223,372,036,854,780,000.0, measured)
+    return Decimal(f"{float(number):.15g}")
 
 
 def to_number(value: object, dates: bool = False) -> Decimal:
@@ -205,8 +276,12 @@ def to_boolean(value: object) -> bool:
         if folded in {"true", "false"}:
             return folded == "true"
         spelled = value.strip(" ")
+        if spelled.startswith("$") and _BOOLEAN_NUMBER_TEXT.fullmatch(spelled[1:].lstrip(" ")):
+            spelled = spelled[1:].lstrip(" ")  # Task 74 (t74c, measured): a currency sign is read, AND("$5","TRUE") is True and AND("$5","") BLANK
         if _BOOLEAN_NUMBER_TEXT.fullmatch(spelled):
-            return Decimal(spelled.replace(",", "")) != 0
+            if beyond_double(spelled):  # Task 74 Part A: a logical read of a text beyond the Double range (measured)
+                raise _error("The following system error occurred: Out of present range.")
+            return float(spelled.replace(",", "")) != 0  # a Double read: "1e-400" underflows to zero, so it is FALSE (Task 74, measured)
         raise _error(f"Cannot convert value '{value}' of type Text to type True/False.")
     return value != 0  # type: ignore[operator]
 
@@ -545,7 +620,8 @@ def text_function(function: str, args: list[object]) -> object:
             if not first.is_finite():  # live Power BI (Task 12 review): VALUE of Infinity or NaN cannot read the text it prints
                 raise _error(f"Cannot convert value of type Number to type Number: {first} is not a number VALUE can read.")
             return Decimal(first)
-        return text_to_number(to_text(first), dates=True)  # Task 19 Part E: VALUE reads a date or a time text too
+        with subnormal_text_allowed():
+            return text_to_number(to_text(first), dates=True)  # Task 19 Part E: VALUE reads a date or a time text too
     if first is None and function == "REPLACE":
         # Task 73 Part B: a BLANK text is "", so REPLACE returns the inserted text (REPLACE(BLANK(),2,1,"-1.5") is "-1.5")
         whole(args[1], function, minimum=1)
@@ -660,7 +736,19 @@ def _fixed(args: list[object]) -> str:
     decimals = whole(args[1], "FIXED") if len(args) > 1 and args[1] is not None else 2
     no_commas = to_boolean(args[2]) if len(args) > 2 else False
     if not number.is_finite():
+        if decimals < 0:  # Task 74 Part C: FIXED of a NaN with negative decimals is the conversion error (FIXED(0/0,-1)); other cases are not measured
+            if number.is_nan():
+                raise _error("The result of a conversion or arithmetic operation is either too large or too small.")
+            raise refusal("FIXED of an Infinity with negative decimals is not modelled by the local engine.")
         return number_to_text(number)
+    if abs(number) >= Decimal(10) ** 60:
+        # Task 74 (t74d): a Double this big shows its 15 significant digits and zeros (FIXED(1.7976931348623157E308,0) is 179,769,313,486,232,000...);
+        # more decimals or fewer are not measured except the conversion error of -1 at the Double maximum, so they are refused
+        if decimals != 0:
+            raise refusal("FIXED of a number from 1E60 up with decimals other than 0 is not modelled by the local engine.")
+        digits = Context(prec=15, rounding=ROUND_HALF_UP, traps=[]).plus(number)
+        return f"{Decimal(digits).quantize(Decimal(1), context=Context(prec=400, traps=[])):{'' if no_commas else ','}.0f}"
+    number = int64_fifteen_digits(number)
     quantum = Decimal(1).scaleb(-decimals)
     with_context = Context(prec=60, rounding=ROUND_HALF_UP, traps=[])
     rounded = with_context.quantize(number, quantum) if decimals >= 0 else (

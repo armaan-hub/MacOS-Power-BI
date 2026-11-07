@@ -29,7 +29,7 @@ _EXACT = Context(prec=60, rounding=ROUND_HALF_UP, traps=[])
 _WIDE = Context(prec=400, rounding=ROUND_HALF_UP, traps=[])  # a number of 1E60 or more has more digits than _EXACT holds
 
 
-def format_value(value: object, pattern: object) -> str:
+def format_value(value: object, pattern: object, *, exact: bool = False) -> str:
     """FORMAT(value, pattern): the value as text; blank gives an empty string."""
     if value is None:
         return ""
@@ -67,11 +67,11 @@ def format_value(value: object, pattern: object) -> str:
     if key == "":
         return dax_typed.number_to_text(number)
     if re.search(r"[@&<>]", fmt) and not re.search(r"[0#]", fmt):
-        return _text_placeholders(fmt, dax_typed.number_to_text(number))
+        return _text_placeholders(fmt, dax_typed.to_text(number))  # Task 74 Part C: a date under "@" is its date text (FORMAT(DATE(2024,1,1),"@") is 1/1/2024)
     named = _NAMED.get(key)
     if named == "general":
         return dax_typed.number_to_text(number)
-    return _custom(number, named or fmt)
+    return _custom(number, named or fmt, exact)
 
 
 def _text_placeholders(pattern: str, text: str) -> str:
@@ -154,7 +154,7 @@ def _tokens(section: str) -> list[tuple[str, str]]:
     return tokens
 
 
-def _custom(number: Decimal, pattern: str) -> str:
+def _custom(number: Decimal, pattern: str, exact: bool = False) -> str:
     sections = _split_sections(pattern)
     negative = number < 0
     magnitude = abs(number)
@@ -175,7 +175,7 @@ def _custom(number: Decimal, pattern: str) -> str:
     if not tokens:
         return ""
     shown = Decimal(0) if index == 2 else magnitude  # the zero section always shows zero
-    text = _render(_scale(shown, tokens), tokens)
+    text = _render(_scale(shown, tokens), tokens, exact)
     # a single section shows the minus sign itself; with several sections the negative one carries its own
     return ("-" if negative and index == 0 else "") + text
 
@@ -223,7 +223,7 @@ def _round(value: Decimal, places: int, tokens: list[tuple[str, str]]) -> Decima
     return _EXACT.quantize(value, Decimal(1).scaleb(-places))
 
 
-def _render(scaled: Decimal, tokens: list[tuple[str, str]]) -> str:
+def _render(scaled: Decimal, tokens: list[tuple[str, str]], exact: bool = False) -> str:
     exp_index = _exp_token(tokens)
     exponent_text = ""
     body = tokens
@@ -234,7 +234,7 @@ def _render(scaled: Decimal, tokens: list[tuple[str, str]]) -> str:
     integer_tokens = body if point_index is None else body[:point_index]
     fraction_tokens = [] if point_index is None else body[point_index + 1:]
     places = sum(1 for kind, _ in fraction_tokens if kind == "digit")
-    if scaled >= Decimal(10) ** 15:
+    if scaled >= Decimal(10) ** 15 and not exact:  # Task 74 Part B: an Int64 is shown exactly, a Double with 15 significant digits
         scaled = Context(prec=15, rounding=ROUND_HALF_UP, traps=[]).plus(scaled)  # Part E: 15 significant digits, then zeros
     rounded = _WIDE.quantize(scaled, Decimal(1).scaleb(-places))
     digits = f"{rounded:f}"
