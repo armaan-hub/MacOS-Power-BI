@@ -131,13 +131,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_orderaudit59_extra | 2069 | 0 | 1186 | 0 | 0 |
 | dax_battery_rankx60_extra | 2312 | 0 | 197 | 0 | 0 |
 | dax_battery_rank61_extra | 2478 | 0 | 903 | 0 | 0 |
+| dax_battery_stats62_extra | 1744 | 0 | 26 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (8464): Power BI answers, the app refuses
+## Pending work (8490): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -19000,6 +19001,32 @@ East`) [dax_battery_orderaudit59_extra]
 - `TOCSV(ADDCOLUMNS(Facts,"r",ROWNUMBER(ORDERBY(Facts[Sales],DESC))),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_rank61_extra]
 - `TOCSV(ADDCOLUMNS(Facts,"r",ROWNUMBER(ORDERBY(Facts[Sales],DESC,Facts[Quantity],DESC))),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_rank61_extra]
 - `TOCSV(ADDCOLUMNS(Facts,"r",ROWNUMBER(ORDERBY(Facts[Sales],DESC,Facts[Region],ASC))),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_rank61_extra]
+- `CALCULATE(MEDIANX(ALL(Facts),IF(Facts[Quantity]>2,Facts[Sales])),Facts[Quantity]>=2)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(MEDIANX(ALL(Facts),IF(Facts[Quantity]>2,Facts[Sales])),Facts[Region]<>"East")` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(MEDIANX(ALL(Facts),IF(Facts[Quantity]>2,Facts[Sales])),Facts[Region]="West")` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(MEDIANX(ALLSELECTED(Facts),LEN(Facts[Note])),Facts[Sales]>0)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(MEDIANX(Facts,Facts[Sales]/3),Facts[Quantity]<>3)` (Power BI: `0`) [dax_battery_stats62_extra]
+- `CALCULATE(MEDIANX(TOPN(4,Facts,Facts[Quantity]),Facts[Sales]*Facts[Quantity]),Facts[Region]<>"East")` (Power BI: `0`) [dax_battery_stats62_extra]
+- `CALCULATE(MEDIANX(TOPN(4,Facts,Facts[Quantity]),Facts[Sales]*Facts[Quantity]),Facts[Region]<>"East",Facts[Region]<>"East")` (Power BI: `0`) [dax_battery_stats62_extra]
+- `CALCULATE(PERCENTILEX.EXC(ALLSELECTED(Facts),Facts[Sales]/3,0.25),Facts[Region]<>"East")` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(PERCENTILEX.INC(ALLSELECTED(Facts),Facts[Sales]*Facts[Quantity],0),Facts[Quantity]>=2)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(PERCENTILEX.INC(ALLSELECTED(Facts),Facts[Sales]*Facts[Quantity],0),Facts[Region]<>"East")` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(PERCENTILEX.INC(ALLSELECTED(Facts),IF(Facts[Quantity]>2,Facts[Sales]),0),Facts[Region]="West")` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(PERCENTILEX.INC(ALLSELECTED(Facts),IF(Facts[Quantity]>2,Facts[Sales]),0.1),Facts[Quantity]>=2)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>0),LEN(Facts[Note]),0.1),Facts[Quantity]>=2)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(PERCENTILEX.INC(Facts,LEN(Facts[Note]),0.5),Facts[Sales]>0)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `CALCULATE(XIRR(ADDCOLUMNS(Facts,"d",DATE(2024,1,1)+Facts[Quantity]*30),Facts[Sales]-5,[d]),Facts[Quantity]>=2)` (Power BI: `-0.999475799088032`) [dax_battery_stats62_extra]
+- `CALCULATE(XIRR(ADDCOLUMNS(Facts,"d",DATE(2024,1,1)+Facts[Quantity]*30),Facts[Sales]-5,[d]),Facts[Quantity]>=2,Facts[Quantity]>=2)` (Power BI: `-0.999475799088032`) [dax_battery_stats62_extra]
+- `CALCULATE(XIRR(ADDCOLUMNS(Facts,"d",DATE(2024,1,1)+Facts[Quantity]*30),Facts[Sales]-5,[d]),Facts[Quantity]>=2,Facts[Sales]>0)` (Power BI: `-0.999991689215409`) [dax_battery_stats62_extra]
+- `CALCULATE(XIRR(ADDCOLUMNS(Facts,"d",DATE(2024,1,1)+Facts[Quantity]*30),Facts[Sales]-5,[d]),Facts[Region]<>"East",Facts[Quantity]>=2)` (Power BI: `-0.999998433159863`) [dax_battery_stats62_extra]
+- `CALCULATE(XIRR(ADDCOLUMNS(Facts,"d",DATE(2024,1,1)+Facts[Quantity]*30),Facts[Sales]-5,[d]),Facts[Sales]>0)` (Power BI: `-0.999991689215409`) [dax_battery_stats62_extra]
+- `CALCULATE(XIRR(ADDCOLUMNS(Facts,"d",DATE(2024,1,1)+Facts[Quantity]*30),Facts[Sales]-5,[d]),Facts[Sales]>0,Facts[Sales]>0)` (Power BI: `-0.999991689215409`) [dax_battery_stats62_extra]
+- `MEDIANX(ALLSELECTED(Facts),IF(Facts[Quantity]>2,Facts[Sales]))` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `MEDIANX(Facts,IF(Facts[Quantity]>2,Facts[Sales]))` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `PERCENTILEX.EXC(ALL(Facts),IF(Facts[Quantity]>2,Facts[Sales]),0.25)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>0),IF(Facts[Quantity]>2,Facts[Sales]),0.25)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>0),Facts[Sales]*Facts[Quantity],0.25)` (Power BI: `BLANK`) [dax_battery_stats62_extra]
+- `PERCENTILEX.INC(Facts,Facts[Sales]/3,0.25)` (Power BI: `0`) [dax_battery_stats62_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 

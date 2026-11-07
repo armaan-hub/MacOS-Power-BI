@@ -1,0 +1,22 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "CALCULATE(GEOMEANX(ALLSELECTED(Facts),Facts[Quantity]-2.5),Facts[Region]=\"West\")",
+   "powerbi": "NaN",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(GEOMEANX(TOPN(4,Facts,Facts[Quantity]),Facts[Quantity]-2.5),Facts[Region]=\"West\")",
+   "powerbi": "NaN",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(ALLSELECTED(Facts),Facts[Quantity]-2.5)",
+   "powerbi": "NaN",
+   "now": "DIFF"
+  }
+ ]
+}

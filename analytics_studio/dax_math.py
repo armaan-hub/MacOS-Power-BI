@@ -428,9 +428,12 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
             if negatives % 2 and count % 2 == 0:
                 return Decimal("NaN")  # live Power BI (Task 39 review): an even root of a negative product is NaN, printed nan (GEOMEANX({-1,2,5,0},1/[Value]) is nan)
             return Decimal("-Infinity") if negatives % 2 else Decimal("Infinity")
+        negatives = sum(1 for value in values if value < 0)
         magnitude = _double(math.exp(sum(math.log(abs(float(value))) for value in values) / count), function)
+        if negatives % 2 and count % 2 == 0:
+            return Decimal("NaN")  # live Power BI (Task 72 review): an even root of a negative product is NaN, as in the Infinity branch above
         # live Power BI (Task 11 review): the geometric mean of the absolute values, negative when the product is (an odd number of negative values)
-        return -magnitude if sum(1 for value in values if value < 0) % 2 else magnitude
+        return -magnitude if negatives % 2 else magnitude
     if name in {"VAR.S", "VAR.P", "STDEV.S", "STDEV.P"}:
         sample = name.endswith(".S")
         if sample and count < 2:
