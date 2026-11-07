@@ -20211,6 +20211,7 @@ def _evaluate_measures_once(
                 if body_category == "date/time" and function in _EMPTY_BODY_NOT_DATE:
                     raise MeasureError(f"{function} does not support expressions of type date.")
             values: list[Decimal] = []
+            blank_flags: list[bool] = []  # Task 79: which values are BLANK results (counted as zero in values), in row order
             value_positions: list[int] = []  # Task 51 Part C: the position in iteration_rows each value came from
             value_frames: list[Any] = []  # Task 61: the row each value came from, kept for a VARX / STDEVX date body with a division
             keep_frames = function[:4] in {"VARX", "STDE"} and _has_division(arguments[1])
@@ -20236,11 +20237,13 @@ def _evaluate_measures_once(
                     raise MeasureError(f"{function} over a Variant that returns text is not modelled by the local engine.")  # live Power BI (Task 12 review): BLANK, the text never read as the number it spells
                 if result is not None:
                     values.append(result if text_extreme and isinstance(result, str) else as_number(result))
+                    blank_flags.append(False)
                     value_positions.append(position)
                     if keep_frames:
                         value_frames.append(frame)
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
-                    values.append(Decimal(0))  # these three count a blank result as zero
+                    values.append(Decimal(0))  # these three count a blank result as zero, and Task 79 places it by the rule in dax_math
+                    blank_flags.append(True)
                     blank_results += 1
             if function not in {"MAXX", "MINX"} and _risky_zero_product(arguments[1], arguments[0][0] == "tableconstructor") and any(value.is_nan() for value in values if isinstance(value, Decimal)):
                 raise MeasureError(f"{function} over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0).")
@@ -20298,12 +20301,17 @@ def _evaluate_measures_once(
                 currency_body = function in {"STDEVX.S", "VARX.S"} and _static_numeric_type(arguments[1]) == "currency"
                 if currency_body and len(values) == 1:
                     raise MeasureRuntimeError("A division by zero has been encountered.")  # Task 19 Part A: one Currency row has no sample spread
+                blank_rule = function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"} and blank_results > 0 and not double_dates
                 try:
-                    answer = dax_math.double_statistic(function, values) if double_dates else dax_math.statistic(function, values, percentile)
+                    answer = dax_math.double_statistic(function, values) if double_dates else dax_math.statistic(
+                        function, values, percentile, blanks=blank_flags if blank_rule else None, blank_first=arguments[1][0] == "reference")
                 except MeasureRuntimeError as error:
                     if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and "percentile value should be" in str(error):
                         raise _HardError(str(error)) from error  # live Power BI (Task 39 review): an out-of-range PERCENTILEX is thrown, IFERROR does not catch it
                     raise
+                if blank_rule and arguments[1][0] != "reference" and (answer is None or answer == 0):
+                    # live Power BI (Task 13 review): BLANK where blank-as-zero gives 0; the BLANK rule (Task 79) is measured over column references only
+                    raise MeasureError(f"{function} landing on a BLANK row is not modelled by the local engine.")
                 if function == "PRODUCTX" and product_has_dates and id(node) in text_context_products and isinstance(answer, Decimal) and answer.is_finite() and _product_depends_on_multiplication_order([v for v in values if v.is_finite()]):
                     # live Power BI (Task 40 review): the product of a date body is neither the exact product nor the row-order double product; the digits past the 14th
                     # follow no rule the local engine reproduces, and arithmetic or IF around the product can hide it from a text conversion, so it is refused outright
@@ -20314,8 +20322,6 @@ def _evaluate_measures_once(
                     # live Power BI (Task 43 review): when the body can build a Currency value, a statistic with more than four decimals is sometimes rounded to four
                     # (GEOMEANX over CURRENCY, STDEVX over a COALESCE or IF.EAGER holding one) and sometimes not (IF.EAGER(1,CURRENCY(x),2.5)); no structural rule separates them
                     raise MeasureError(f"{function} over a body that can build a Currency, with a result of more than four decimals, is not modelled by the local engine.")
-                if blank_results and function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"} and answer == 0 and arguments[1][0] != "reference":
-                    raise MeasureError(f"{function} landing on a BLANK row is not modelled by the local engine.")  # live Power BI (Task 13 review): BLANK where blank-as-zero gives 0
                 return answer
             if text_extreme:  # the largest or smallest text, compared without regard to case
                 if not values:
