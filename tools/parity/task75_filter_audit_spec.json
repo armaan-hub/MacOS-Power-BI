@@ -1,0 +1,118 @@
+{
+ "items": [
+  {
+   "part": "B",
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(FILTERS(Facts[Region])),ALL(Facts[Note]),FILTER(Facts,Facts[Region]=\"East\")),KEEPFILTERS(Facts[Region]=\"East\"))",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(FILTERS(Facts[Region])),FILTER(Facts,Facts[Note]=BLANK()),REMOVEFILTERS(Facts[Sales])),KEEPFILTERS(Facts[Region] IN {\"East\",BLANK()}))",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(FILTERS(Facts[Region])),FILTER(Facts,Facts[Quantity]=BLANK()),ALLSELECTED()),TREATAS({\"East\",\"West\"},Facts[Region]))",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(FILTERS(Facts[Region])),FILTER(Facts,Facts[Region]=\"East\")),TREATAS({2,3},Facts[Quantity]))",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(FILTERS(Facts[Region])),FILTER(Facts,Facts[Sales]<>0)),ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "2",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLNOBLANKROW(Facts[Note])),ALLNOBLANKROW(Facts[Quantity]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(CALCULATE(ISFILTERED(Facts[Region]),ALLNOBLANKROW(Facts[Region])),ALLNOBLANKROW(Facts[Sales]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(COUNTROWS(FILTERS(Facts[Region])),ALLNOBLANKROW(Facts[Quantity]),FILTER(Facts,Facts[Quantity]=BLANK()))",
+   "powerbi": "1",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALL(Facts[Region]),ALLNOBLANKROW(Facts[Quantity]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLNOBLANKROW(Facts[Note]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLNOBLANKROW(Facts[Note]),REMOVEFILTERS())",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLNOBLANKROW(Facts[Quantity]),ALLNOBLANKROW(Facts[Note]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLNOBLANKROW(Facts[Quantity]),ALLSELECTED(Facts[Region]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLNOBLANKROW(Facts[Region]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLNOBLANKROW(Facts[Sales]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),ALLSELECTED(),ALLNOBLANKROW(Facts[Region]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISFILTERED(Facts[Region]),ALLNOBLANKROW(Facts[Note]),ALLEXCEPT(Facts,Facts[Region]),ALLNOBLANKROW(Facts[Region]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISFILTERED(Facts[Region]),ALLNOBLANKROW(Facts[Note]),ALLNOBLANKROW(Facts[Region]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(ISFILTERED(Facts[Region]),ALLNOBLANKROW(Facts[Region]))",
+   "powerbi": "True",
+   "now": "DIFF"
+  }
+ ]
+}
