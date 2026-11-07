@@ -27,6 +27,10 @@ CROSS_TABLE_CALLS = frozenset({"RELATED", "RELATEDTABLE", "EARLIER", "EARLIEST",
 # A numeric or date column is walked in value order while (dense range) x (rows + 3) stays under this; fitted on probes.
 # The range of whole numbers is divided by their gcd; the range of dates (in days) is not.
 _SINGLE_COLUMN_BUDGET = 8200
+# Task 77 (live Power BI, topn-data-67 grid, dataset d4): VALUES / DISTINCT / UNION(VALUES) of one whole-number column walk in value order up to a
+# range of 998 over 12 rows (space 14,970), while a TOPN read of the same column keeps the storage order at that size (the 8,200 budget above).
+# 14,970 is the largest measured sorted space for a deduplicated single column; no larger size is measured, so none is assumed.
+_DEDUP_SINGLE_COLUMN_BUDGET = 14970
 # Several columns are walked in dictionary order while (product of their distinct counts) x (rows) stays under this; a date
 # counts by its range in days, and a set with a date stays under the tighter limit (probed on date spans of 30 to 365 days).
 # Task 67 (live Power BI, six Facts row sets of 6 to 12 rows, 1 to 3 listed columns, ALLEXCEPT / GROUPBY / SUMMARIZECOLUMNS): a table of listed columns
@@ -366,6 +370,12 @@ class Profile:
         self.distinct = len({None if v is None else ascii_fold(v) if self.is_text else v for v in values})
         self.fractional = any(isinstance(v, Decimal) and v.is_finite() and v != v.to_integral_value() for v in present)
         self.size: int | None = self.distinct if self.is_text or self.is_bool else _dense_range(present, self.is_date)
+        # Task 77: a fractional double counts its range in units of its smallest decimal place (1.5 .. 20 with one place is 216, not the 44 of the gcd step)
+        self.scaled_span: int | None = None
+        if self.fractional and not self.is_date and all(isinstance(v, Decimal) and v.is_finite() for v in present):
+            places = max(max(0, -v.normalize().as_tuple().exponent) for v in present)
+            if places <= _MAX_DECIMALS:
+                self.scaled_span = int((max(present) - min(present)).scaleb(places)) + 1
         # a datetime with a time of day has no regular range of days; VALUES/ALL of it still walks by its steps of time
         self.timed = self.is_date and self.size is None
         self.time_steps = _time_steps(present) if self.timed else None
@@ -445,7 +455,8 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False, be
             continue
         if dedup and profile.is_date and len(profiles) == 1:  # VALUES/ALL of one date column always ascend; with others the range counts
             continue
-        if profile.size is None or (profile.is_numeric and profile.size * (row_count + 3) > _SINGLE_COLUMN_BUDGET):
+        budget = _DEDUP_SINGLE_COLUMN_BUDGET if dedup and len(profiles) == 1 else _SINGLE_COLUMN_BUDGET
+        if profile.size is None or (profile.is_numeric and profile.size * (row_count + 3) > budget):
             return False
     if len(profiles) == 1 or dedup:
         return True
@@ -520,6 +531,52 @@ def multi_column_order(row_count: int, profiles: Sequence[Profile], scan: bool =
     if any(space >= measured and row_count <= rows for measured, rows in (_MEASURED_STORAGE_SCAN if scan else _MEASURED_STORAGE)):
         return False
     return None
+
+
+# Task 77 (live Power BI, topn-data-67 grid on datasets d2 to d18): the rows a CONCATENATEX walks through TOPN(n, table, key) come out of the
+# heap in dictionary order of the two columns it reads while (space) x (rows) is small, and in storage order when it is large. The space is the
+# product of the two columns' value ranges (dense range for numbers, distinct count for text). Measured on 900 TOPN rows of 17 row sets: sorted at
+# 3,410 (10 rows), storage at 3,796 (13 rows); no measured row lies between. A fractional column or a date keeps the older grouped test.
+_TOPN_PAIR_SORTED_SPACE = 3410
+_TOPN_PAIR_STORAGE_SPACE = 3796
+
+
+def topn_pair_applies(profiles: Sequence[Profile]) -> bool:
+    """True when the two-column TOPN walk rule is measured for these columns (whole numbers or text, no date, no fractional double)."""
+    return len(profiles) == 2 and all(profile.size is not None and not profile.is_date and not profile.fractional for profile in profiles)
+
+
+def topn_pair_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True when the TOPN walk is in dictionary order, False when in storage order, None when the space is between the measured points (refuse)."""
+    space = profiles[0].size * profiles[1].size * row_count  # type: ignore[operator]
+    if space <= _TOPN_PAIR_SORTED_SPACE:
+        return True
+    if space >= _TOPN_PAIR_STORAGE_SPACE:
+        return False
+    return None
+
+
+# Task 77 (live Power BI, topn-data-67 grid on 11 row sets with a fractional Sales column, and the standard Facts table): the heap walk of a TOPN over
+# a fractional double is in storage order for every measured space from 3,888 up (the smallest on Facts) and in dictionary order for the measured
+# spaces below, but the two overlap (a sorted walk at 3,264 on d19, a storage walk at 3,222 on d29), so below 3,796 nothing is decided here: the caller
+# answers only when both orders give the very same rows. One column alone is sorted while its range x (rows + 3) is within the single-column
+# budget (measured sorted at 7,884; a storage walk at 11,340), and refused above it. The range counts in units of the smallest decimal place.
+_TOPN_FRACTIONAL_SINGLE_BUDGET = _SINGLE_COLUMN_BUDGET
+
+
+def topn_fractional_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
+    """True (dictionary order) / False (storage order) for a TOPN walk over columns of which one is fractional, None when not decided (see above)."""
+    if any(profile.is_date for profile in profiles):
+        return None
+    sizes = [profile.scaled_span if profile.fractional else profile.size for profile in profiles]
+    if any(size is None for size in sizes):
+        return None
+    if len(profiles) == 1:
+        return True if sizes[0] * (row_count + 3) <= _TOPN_FRACTIONAL_SINGLE_BUDGET else None  # type: ignore[operator]
+    space = row_count
+    for size in sizes:
+        space *= size  # type: ignore[operator]
+    return False if space >= _TOPN_PAIR_STORAGE_SPACE else None
 
 
 def descending_orderby(table_node: Any) -> tuple[Any, bool] | None:
