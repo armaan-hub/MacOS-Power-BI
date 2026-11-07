@@ -574,15 +574,26 @@ def distinct_walk_order(row_count: int, profiles: Sequence[Profile]) -> bool | N
 # Task 78 (live Power BI, walk-data-68 grid t78e, Part B: CONCATENATEX(Facts, RANKX(ALL / ALLSELECTED / Facts, expression)) over the 4-column Facts table):
 # the rows are walked by the two columns the rank expression reads (the later table column the major key) while the product of their value-range sizes is
 # at most 341 (sorted at 8, 9, 40, 72, 77, 143, 161, 165, 210 and 341; the Note x Quantity shapes sorted at 237 and below); storage order from 432 (storage
-# at 432, 730, 750, 936, 1,900, 4,416, 4,921 and 78,842). A fractional column keeps storage order. Between 341 and 432 the walk is refused.
+# at 432, 730, 750, 936, 1,900, 4,416, 4,921 and 78,842). A fractional column counts its scaled range and has its own points (below). Between 341 and 432 the walk is refused.
 _RANKX_WALK_SORTED_SPACE = 341
 _RANKX_WALK_STORAGE_SPACE = 432
+# Task 78 (live Power BI, walk-data-68 grid t78e, Part B, the 5 row sets with a fractional double beside a whole-number column): the range of the fractional column counts in
+# units of its smallest decimal place (Profile.scaled_span). Sorted at 212 (d23, 7 rows); storage order at 544, 909, 1,480 and 3,913 (d19, d2, d21, d24). Between the two: refused.
+_RANKX_FRACTIONAL_SORTED_SPACE = 212
+_RANKX_FRACTIONAL_STORAGE_SPACE = 544
 
 
 def rankx_walk_order(row_count: int, profiles: Sequence[Profile]) -> bool | None:
     """True / False / None (not decided) for the two columns a RANKX over the whole table reads (see _RANKX_WALK_SORTED_SPACE)."""
     if any(profile.fractional for profile in profiles):
-        return False
+        if any(profile.is_date for profile in profiles) or any((profile.scaled_span if profile.fractional else profile.size) is None for profile in profiles):
+            return None
+        space = 1
+        for profile in profiles:
+            space *= profile.scaled_span if profile.fractional else profile.size  # type: ignore[operator]
+        if space <= _RANKX_FRACTIONAL_SORTED_SPACE:
+            return True
+        return False if space >= _RANKX_FRACTIONAL_STORAGE_SPACE else None
     if any(profile.is_date for profile in profiles):
         return None
     space = _key_space(profiles)
