@@ -10560,6 +10560,11 @@ def _evaluate_measures_once(
                 taken_names.add(new_name.casefold())
             if not rows:
                 refuse_foreign_columns_of_empty_iteration(context, *expressions)
+            if add and arguments[0][0] == "table_call" and arguments[0][1] == "VALUES" and arguments[0][2][0] == "reference":
+                # Task 84 (live Power BI, sc-rows-74): each row of ADDCOLUMNS over VALUES(Dim[col]) is a group of that column, so
+                # CALCULATE(ISINSCOPE(Dim[col])) on the row is TRUE (the same tag a SUMMARIZE row carries, read by ISINSCOPE)
+                grouped_column = arguments[0][2][2].casefold()
+                context = {**context, "summarize_groups": tuple(h for h in context["headers"] if h.casefold() == grouped_column)}
             lineage = base_lineage(context) if add else {}
             headers = (list(context["headers"]) if add else []) + names
             out_rows: list[dict[str, Any]] = []
@@ -11441,6 +11446,15 @@ def _evaluate_measures_once(
                             shape["dirty"] = True
                 target_shapes.extend(shapes)
 
+        def group_source_rows(table_id: str) -> list[dict[str, Any]]:
+            """Task 84: the group rows of a SUMMARIZECOLUMNS table come from that table's own filters only (auto-exist).
+            Filters that reach the table through relationships (a TREATAS on another table, a fact's filter) do not narrow
+            its group values; the measure sees them, and rows whose measures are all BLANK are dropped."""
+            own = evaluation_contexts_by_id.get(table_id)
+            if own is None or ("filter_rows" not in own and "rows" not in own):
+                return rows_by_table_id[table_id]
+            return list(own["filter_rows"]) if "filter_rows" in own else list(own["rows"])
+
         def compute() -> tuple[dict[str, Any], list[dict[str, Any]]]:
             lineage = {column: (context, column) for context, column in resolved}
             types = {column: context.get("column_types", {}).get(column, "text") for context, column in resolved}
@@ -11453,13 +11467,13 @@ def _evaluate_measures_once(
                 combos: list[dict[str, Any]] = [{}]
                 for table_id, (context, columns) in by_table.items():
                     seen: dict[tuple[Any, ...], dict[str, Any]] = {}
-                    for raw in rows_by_table_id[table_id]:
+                    for raw in group_source_rows(table_id):
                         values = {column: typed_cell(context, column, raw.get(column)) for column in columns}
                         seen.setdefault(row_key(values[column] for column in columns), values)
                     if (  # the blank member is a group of its own while it is visible
                         table_id in unknown_member_ids and not unknown_member_hidden(table_id)
                         and unknown_member_passes_remaining_filters(
-                            evaluation_contexts_by_id.get(table_id, context), evaluation_contexts_by_id, evaluation_filter_ids)
+                            evaluation_contexts_by_id.get(table_id, context), evaluation_contexts_by_id, {table_id})
                     ):
                         seen.setdefault(row_key([None] * len(columns)), {column: None for column in columns})
                     combos = [{**left, **right} for left in combos for right in seen.values()]
@@ -12213,6 +12227,17 @@ def _evaluate_measures_once(
                 if key not in seen_values:
                     seen_values.add(key)
                     value_rows.append({actual: row.get(actual)})
+            if (  # Task 84 (live Power BI, sc-rows-74): the virtual blank member is one of the values the filters leave on its column
+                context["id"] in unknown_member_ids and not unknown_member_hidden(context["id"]) and cell_key(None) not in seen_values
+            ):
+                # only the filters on this column decide it: a filter on another column of the table does not remove its blank value
+                own_state = dict(evaluation_contexts_by_id.get(context["id"], context))
+                own_state["filter_column_rows"] = {c: r for c, r in own_state.get("filter_column_rows", {}).items() if c == actual}
+                own_state["filter_column_blank_allowed"] = {
+                    c: b for c, b in own_state.get("filter_column_blank_allowed", {}).items() if c == actual}
+                if unknown_member_passes_remaining_filters(
+                        own_state, {**evaluation_contexts_by_id, context["id"]: own_state}, {context["id"]}):
+                    value_rows.append({actual: None})
             single = dict(context)
             single["headers"] = [actual]
             single["lineage"] = {actual: (context, actual)}
@@ -12614,8 +12639,9 @@ def _evaluate_measures_once(
     def unknown_member_walked_last(context: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Task 83 (live Power BI, ZO probe): the unknown (virtual blank) member of a dimension comes last in the walk of VALUES / ALL of its columns,
         although a blank stored in the column is the first entry of the dictionary.  Rows come back unchanged when the member cannot be told from a stored blank."""
-        lineage = context.get("lineage") or {}
         headers = list(context.get("headers", ()))
+        # Task 84 (live Power BI, sc-rows-74): a whole base table (ALL(Dim)) carries no lineage; each of its columns is its own
+        lineage = context.get("lineage") or ({header: (context, header) for header in headers} if "derived" not in context else {})
         if not headers or any(header not in lineage for header in headers):
             return rows
         base_ids = {lineage[header][0]["id"] for header in headers}
