@@ -1,0 +1,310 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "ABS(\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 23) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "AND(\"1e400\",TRUE())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Out of present range. \"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONVERT(\"1e400\",BOOLEAN)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Out of present range. \"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "CONVERT(\"1e400\",DOUBLE)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1,5\",\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1e400\",\" 3 \")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1e400\",\"$5\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1e400\",\"1\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1e400\",-9223372036854775808)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1e400\",0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1e400\",1/0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"1e400\",1E308*10)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(\"2024-01-01\",\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(-1/0,\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(-9223372036854775808,\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 47) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "DIVIDE(DATE(2024,1,1),\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIXED(\"1e400\",-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Numeric.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIXED(\"1e400\",0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Numeric.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIXED(\"1e400\",1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Numeric.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIXED(\"1e400\",2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Numeric.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "FIXED(\"1e400\",3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Numeric.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "FIXED(-9223372036854775808,1)",
+   "powerbi": "-9,223,372,036,854,780,000.0",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "FIXED(0/0,-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "FIXED(9223372036854775807,-1)",
+   "powerbi": "9,223,372,036,854,780,000",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "FIXED(9223372036854775807,0)",
+   "powerbi": "9,223,372,036,854,780,000",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "FIXED(9223372036854775807,2)",
+   "powerbi": "9,223,372,036,854,780,000.00",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(9223372036854775807,\"Standard\")",
+   "powerbi": "9,223,372,036,854,775,807.00",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(2024,1,1),\"@\")",
+   "powerbi": "1/1/2024",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "INT(9223372036854775807)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "INT(9223372036854775807)&\"\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "ISEVEN(-9223372036854775808)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "ISEVEN(9223372036854775807)",
+   "powerbi": "True",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "ISODD(-9223372036854775808)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "ISODD(9223372036854775807)",
+   "powerbi": "False",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "LN(\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 22) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "NOT(\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Out of present range. \"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "OR(\"1e400\",\"\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Out of present range. \"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "OR(\"1e400\",BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Out of present range. \"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "OR(\"abc\",\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 22) Cannot convert value 'abc' of type Text to type True/False.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "POWER(\"1e400\",-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "POWER(\"1e400\",0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "POWER(\"1e400\",0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "ROUND(\"1e400\",0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(9223372036854775807,-2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(9223372036854775807,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(9223372036854775807,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SIGN(\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 24) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "SQRT(\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 24) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "C",
+   "expr": "TRUNC(-1/0)",
+   "powerbi": "NaN",
+   "now": "DIFF"
+  },
+  {
+   "part": "B",
+   "expr": "TRUNC(9223372036854775807)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\"",
+   "now": "DIFF"
+  },
+  {
+   "part": "A",
+   "expr": "VALUE(\"1e400\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '1e400' of type Text to type Number.\"",
+   "now": "DIFF"
+  }
+ ]
+}
