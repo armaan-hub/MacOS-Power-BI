@@ -213,6 +213,7 @@ def to_boolean(value: object) -> bool:
 
 _ASTRAL = re.compile("[\U00010000-\U0010ffff]")
 _WIDTH_FORMS = re.compile("[\uff00-\uffef]")
+_WILDCARD_CHARS = re.compile(r"[*?~]")
 
 
 def text_key(text: str) -> str:
@@ -530,6 +531,7 @@ def text_function(function: str, args: list[object]) -> object:
     if function == "FIXED":
         return _fixed(args)
     if function in {"FIND", "SEARCH"}:
+        from . import dax_misc  # late import: dax_misc imports this module
         if len(args) > 2 and args[2] is None:
             raise _error(f"An argument of function '{function}' has the wrong data type or the result is too large or too small.")
         if function == "SEARCH" and args[0] is None and args[1] is None:
@@ -544,6 +546,13 @@ def text_function(function: str, args: list[object]) -> object:
                 raise _error(f"Cannot convert value of type Number to type Number: {first} is not a number VALUE can read.")
             return Decimal(first)
         return text_to_number(to_text(first), dates=True)  # Task 19 Part E: VALUE reads a date or a time text too
+    if first is None and function == "REPLACE":
+        # Task 73 Part B: a BLANK text is "", so REPLACE returns the inserted text (REPLACE(BLANK(),2,1,"-1.5") is "-1.5")
+        whole(args[1], function, minimum=1)
+        whole(args[2], function, minimum=0)
+        if args[3] is None:
+            raise refusal("The local engine does not model REPLACE of a BLANK text with a BLANK new_text.")
+        return _from_units(_units(to_text(args[3])))
     if first is None:
         if function in {"LEFT", "RIGHT"} and len(args) > 1 and args[1] is not None:
             whole(args[1], function, minimum=0)  # Task 20 F4: a BLANK text still reads the count (a negative one, an Infinity, a NaN or a text is the error)
@@ -576,16 +585,16 @@ def text_function(function: str, args: list[object]) -> object:
         old, new = _units(to_text(args[1])), _units(to_text(args[2]))
         if not old:
             return _from_units(text)
-        if len(args) < 4 or args[3] is None:
-            replaced = text.replace(old, new)
-            return None if args[2] is None and not replaced else _from_units(replaced)
-        instance = whole(args[3], function, minimum=1)
-        position = -1
-        for _ in range(instance):
-            position = text.find(old, position + 1)
-            if position < 0:
-                return _from_units(text)
-        return _from_units(text[:position] + new + text[position + len(old):])
+        instance = whole(args[3], function, minimum=1) if len(args) > 3 and args[3] is not None else None
+        from . import dax_misc  # late import: dax_misc imports this module
+        pieces, last = [], 0
+        for begin, finish in dax_misc.linguistic_spans(text, old, instance):  # Task 73: linguistic matching, case-sensitive
+            pieces.extend((text[last:begin], new))
+            last = finish
+        replaced = "".join(pieces) + text[last:]
+        if args[2] is None and not replaced:
+            return None if text else ""  # Task 73 Part B: SUBSTITUTE of an empty text is "", never BLANK
+        return _from_units(replaced)
     if function == "REPLACE":
         start = whole(args[1], function, minimum=1)
         count = whole(args[2], function, minimum=0)
@@ -597,6 +606,7 @@ def text_function(function: str, args: list[object]) -> object:
 
 def _find(function: str, args: list[object], within_text: str) -> object:
     """FIND(find, within[, start[, notfound]]) and SEARCH (case-insensitive, ? * ~ wildcards), in UTF-16 code units."""
+    from . import dax_misc  # late import: dax_misc imports this module
     needle = _units(to_text(args[0]))
     haystack = _units(to_text(args[1])) if len(args) > 1 else ""
     start = whole(args[2], function, minimum=1) if len(args) > 2 and args[2] is not None else 1
@@ -610,8 +620,10 @@ def _find(function: str, args: list[object], within_text: str) -> object:
             return Decimal(1)
     elif start > len(haystack):
         found = -1
-    elif function == "FIND":
-        found = haystack.find(needle, start - 1)
+    elif function == "FIND" or not _WILDCARD_CHARS.search(needle):
+        found = dax_misc.linguistic_position(haystack, needle, start - 1, ci=function == "SEARCH")  # Task 73: linguistic matching
+    elif not (dax_misc.plain_text(needle) and dax_misc.plain_text(haystack)):
+        raise refusal(f"The local engine does not model wildcards in {function} with accented or expanded text.")
     else:
         found = _wildcard_find(needle, haystack, start - 1)
     if found < 0:
