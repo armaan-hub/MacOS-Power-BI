@@ -18,3 +18,6 @@ Script over the whole spec: before/after counts of match / wrong / refused. Requ
 
 ## Gate (Opus runs)
 PARITY GATE PASSED with DIFF 0, CRASH 0, REAL APP 0 wrong; fresh held-out orphan models probed by Opus.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 170. Locked 531486.
