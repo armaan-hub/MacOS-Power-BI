@@ -8881,7 +8881,7 @@ def _evaluate_measures_once(
             one_to_one_unmatched_cache[table_id] = (frozenset(own), other_has)
         return one_to_one_unmatched_cache[table_id]
 
-    def refuse_one_to_one_blank_reader(table_id: str, what: str, any_filter: bool = False) -> None:
+    def refuse_one_to_one_blank_reader(table_id: str, what: str, any_filter: bool = False, sc_treatas_partner_ok: bool = False) -> None:
         """Live Power BI (iteration 84, critic; 6 of 1,033 fresh ZM probes): reading the values of a table of a one-to-one relationship that has
         unmatched rows, while the pair is filtered, lists the blank members of both ends in a way not modelled here
         (CALCULATE(SELECTEDVALUE(U[K],"x"), NOT(U[X]="x1"), W[K]=BLANK()) is "x", ours "k4")."""
@@ -8895,6 +8895,8 @@ def _evaluate_measures_once(
                 end in evaluation_filter_ids and not eff_transition.get(end) and not eff_group_keys.get(end) and end in evaluation_contexts_by_id
                 and (any_filter or own_unknown_member_selected(evaluation_contexts_by_id[end]))
                 and not (any_filter and end == table_id)  # ALLSELECTED: only the partner's filter is out of reach (the table's own filter stays)
+                and not (sc_treatas_partner_ok and end in eff_sc_args)  # Task 86 (live Power BI): ALLSELECTED(column) of a one-to-one table under
+                # a TREATAS argument of the enclosing SUMMARIZECOLUMNS on its partner lists every value and the blank member, whatever the partner keeps
                 for end in ends
             ) and any(one_to_one_unmatched(end)[0] for end in ends):
                 raise MeasureError(f"{what} over a table of a one-to-one relationship with unmatched rows is not supported while it is filtered in the local engine.")
@@ -9182,11 +9184,42 @@ def _evaluate_measures_once(
                 reached_rows |= reached_here
         if table_level_child:  # live Power BI: ALLSELECTED(Dim) inside SUMX(Fact, ..) keeps only the Dim rows the selected facts reach
             result = [row for row in result if id(row) in reached_rows]
+        partner_orphan_only = False  # Task 86 (live Power BI, allsel-onetoone-76): a filtered one-to-one partner whose visible rows are all
+        # matched or orphans (no blank key) reaches this table's blank member only as the partner of an orphan row. ALLSELECTED(U) does not list
+        # that member: SUMX(ALLSELECTED(U), CALCULATE(SUM(F[Amt]))) under TREATAS on W[Y] {"y2","y7"} is 46, not 46 + the orphan facts (80)
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                continue
+            ends = (str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", "")))
+            if table_id not in ends or ends[0] == ends[1]:
+                continue
+            partner_id = ends[1] if ends[0] == table_id else ends[0]
+            partner_context = contexts_after_clear.get(partner_id)
+            if partner_context is None or partner_id not in filter_roots_after_clear:
+                continue
+            own_column = str(relationship.get("from_column" if ends[0] == table_id else "to_column", ""))
+            partner_column = str(relationship.get("to_column" if ends[0] == table_id else "from_column", ""))
+            own_actual = {header.casefold(): header for header in source_context["headers"]}
+            partner_actual = {header.casefold(): header for header in partner_context["headers"]}
+            if own_column.casefold() not in own_actual or partner_column.casefold() not in partner_actual:
+                continue
+            own_column, partner_column = own_actual[own_column.casefold()], partner_actual[partner_column.casefold()]
+            try:
+                visible_partner = propagate_relationship_filters(list(contexts_after_clear.values()), relationship_definitions, filter_roots_after_clear)[partner_id]
+            except (RelationshipError, MeasureError):
+                return None
+            own_keys = {typed_cell(source_context, own_column, row.get(own_column)) for row in full} - {None}
+            partner_keys = [typed_cell(partner_context, partner_column, row.get(partner_column)) for row in visible_partner]
+            if any(key is None for key in partner_keys):
+                continue  # the partner's own blank row is visible: that row selects this table's blank member
+            if any(key not in own_keys for key in partner_keys):
+                partner_orphan_only = True
         if (  # live Power BI: ALLSELECTED(col) keeps the one-side blank member as ALL does (same condition as the unshadowed path)
             table_id in unknown_member_ids
             and not unknown_member_hidden(table_id)
             and not shapes_drop_blank(contexts_after_clear.get(table_id, source_context))  # shapes on columns this ALLSELECTED drops do not count
             and (child_unmatched if child_relevant else True)  # Task 82: the blank member only when the selected facts hold an unmatched key
+            and not partner_orphan_only  # Task 86: a one-to-one partner's orphan rows alone do not list this table's blank member
             and all(getattr(outer, "blank", False) for outer in replaced_outer)  # an outer filter on a column asked for must itself select the blank
             and unknown_member_passes_remaining_filters(source_context, contexts_after_clear, filter_roots_after_clear, cleared)
         ):
@@ -9641,7 +9674,7 @@ def _evaluate_measures_once(
                 )
             output_headers = [column for _context, column in resolved_columns]
             if function == "ALLSELECTED":
-                refuse_one_to_one_blank_reader(source_context["id"], "ALLSELECTED", True)
+                refuse_one_to_one_blank_reader(source_context["id"], "ALLSELECTED", True, sc_treatas_partner_ok=True)
             allselected_rows = None
             shadowed_rows = (
                 allselected_rows_for(source_context, output_headers) if function == "ALLSELECTED" and eff_active() else None
@@ -9743,6 +9776,8 @@ def _evaluate_measures_once(
         value_context = dict(source_context)
         value_context["headers"] = output_headers
         value_context["rows"] = output_rows
+        if len(arguments) == 1 and arguments[0][0] == "table" and function in {"ALL", "ALLSELECTED"}:
+            value_context["table_all_call"] = True  # Task 86: an iterator over ALL / ALLSELECTED of a whole table (not a plain table reference)
         if len(arguments) == 1 and arguments[0][0] == "table" and function == "ALLSELECTED":
             value_context["profile_rows"] = source_context["rows"]  # Task 65 Part C (live Power BI): the visible rows of ALLSELECTED(table) are walked by the dictionary of the whole column
         if not (len(arguments) == 1 and arguments[0][0] == "table"):
@@ -19723,7 +19758,18 @@ def _evaluate_measures_once(
                 read = set(unsafe)
                 break
             read |= ids
-        if read & unsafe:
+        def many_side_of_both_way(table_id: str) -> bool:
+            """The table is the many side of an active both-way many-to-one link (Task 86: its rows pin the one side through both directions)."""
+            return any(
+                isinstance(link, dict) and link.get("is_active") and link.get("cross_filter_direction") == "both"
+                and link.get("cardinality") == "many_to_one" and str(link.get("from_table_id", "")) == table_id
+                for link in relationship_definitions
+            )
+        if read & unsafe and iterated.get("table_all_call") and read and all(many_side_of_both_way(table_id) for table_id in read):
+            # Task 86 (live Power BI, 85 ZS answers): an iterator over ALL / ALLSELECTED of a dimension, reading only the many side of a both-way
+            # link (CALCULATE(SUM(Fact2[Amt])) per Dim / Sup row under TREATAS on Cal) is answered by the propagation; the read of the one side is still refused
+            pass
+        elif read & unsafe:
             raise MeasureError(
                 "A row of a table with two routes to the same table (a both-way link) filters that table in a way "
                 "not supported in the local engine."
