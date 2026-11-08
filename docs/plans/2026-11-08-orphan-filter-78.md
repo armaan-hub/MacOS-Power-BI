@@ -12,3 +12,6 @@
 ## Part 1 (Haiku): A then B in `analytics_studio/measures.py` / `relationships.py`. Refuse what cannot be explained.
 ## Part 2: `tests/test_iteration177_orphan_filter_78.py`: every fixed item plus 30 already matching, assert ours_for == powerbi (ZH via the model file).
 ## Score / gate: spec 0 wrong (refusals allowed), nothing changes from match; Opus checks a fresh unseen model and runs the gate.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 177. Locked 531486.

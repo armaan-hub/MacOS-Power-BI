@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-05, after Iteration 176 / Task 87 table-filter-77, A fact table as a CALCULATE / CALCULATETABLE filter argument: expanded-table tuples, one-to-one blank members, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 3776 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: Task 88: orphan rows of a filtering fact table vs the blank member (ZH fitting, ZE held out)
+**Latest status (2026-11-05, after Iteration 177 / Task 88 orphan-filter-78, Fact table filters with orphan keys: shared one-side tuple keys, real-row narrowing of the one side, and user-written clears ending the narrowing, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 3914 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: Task 89: the remaining ALLNOBLANKROW / ALLSELECTED nested shapes, then further audit rounds
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
