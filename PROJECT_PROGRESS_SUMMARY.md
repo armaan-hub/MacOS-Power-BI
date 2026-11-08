@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-05, after Iteration 182 / Task 93 week-functions-83, the six week time-intelligence functions, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4069 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: DAX Step C: the 14 visual-calculation functions (RUNNINGSUM, MOVINGAVERAGE, FIRST, LAST, NEXT, PREVIOUS, RANGE, LOOKUP, LOOKUPWITHTOTALS, EXPAND, EXPANDALL, COLLAPSE, COLLAPSEALL, ISATLEVEL)
+**Latest status (2026-11-05, after Iteration 183 / Task 94 visual-calc-names-84, the 14 visual-calculation functions outside a visual calculation, Haiku coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4075 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: DAX close-out: full test pass over all DAX functions against Power BI, then Power Query M (list from #shared in the guest)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

@@ -34,3 +34,6 @@ Bare keywords such as ROWS / COLUMNS in these arguments must not crash the parse
   `tests/test_iteration182_week_functions_83.py`, `tests/test_dax_intellisense.py`, every test that greps `DAX_FUNCTION_NAMES`,
   `dax_function_catalog` or `dax_contract`, and every `tests/test_*dax*.py` and `tests/test_measure*.py` — all pass.
 - [ ] Step 5: leave the change uncommitted and report (Opus commits).
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 183. Locked 531486.
