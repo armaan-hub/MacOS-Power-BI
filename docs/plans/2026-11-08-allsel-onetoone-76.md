@@ -14,3 +14,6 @@
 ## Part 1 (Haiku): A, then B, then C in `analytics_studio/measures.py` / `relationships.py`. No guessing.
 ## Part 2: `tests/test_iteration175_allsel_onetoone_76.py`: every fixed item plus 30 already matching, assert ours_for == powerbi (ZJ via the model file).
 ## Score / gate: spec 0 wrong, nothing changes from match; Opus checks fresh unseen models (never shown to agents) and runs the gate.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 175. Locked 531486.
