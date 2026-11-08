@@ -750,11 +750,13 @@ _INFO_UNAVAILABLE_FUNCTIONS = frozenset({
 
 _INFO_EMPTY_TABLE_HEADERS: dict[str, list[str]] = {
     "INFO.ALTERNATEOFDEFINITIONS": ["ID", "ColumnID", "BaseColumnID", "BaseTableID", "Summarization"],
+    "INFO.ANNOTATIONS": ["ID", "ObjectID", "ObjectType", "Name", "Value", "ModifiedTime"],
     "INFO.CALCDEPENDENCY": ["DATABASE_NAME", "OBJECT_TYPE", "TABLE", "OBJECT", "EXPRESSION", "REFERENCED_OBJECT_TYPE", "REFERENCED_TABLE", "REFERENCED_OBJECT", "REFERENCED_EXPRESSION", "QUERY"],
     "INFO.CALCULATIONGROUPS": ["ID", "TableID", "Description", "ModifiedTime", "Precedence"],
     "INFO.CALCULATIONITEMS": ["ID", "CalculationGroupID", "FormatStringDefinitionID", "Name", "Description", "ModifiedTime", "State", "ErrorMessage", "Expression", "Ordinal"],
     "INFO.CHANGEDPROPERTIES": ["ID", "ObjectID", "ObjectType", "Property"],
     "INFO.COLUMNPERMISSIONS": ["ID", "TablePermissionID", "ColumnID", "ModifiedTime", "MetadataPermission"],
+    "INFO.CULTURES": ["ID", "ModelID", "Name", "LinguisticMetadataID", "ModifiedTime", "StructureModifiedTime"],
     "INFO.DATACOVERAGEDEFINITIONS": ["ID", "PartitionID", "Description", "Expression", "ModifiedTime", "State", "ErrorMessage"],
     "INFO.DATASOURCES": ["ID", "ModelID", "Name", "Description", "Type", "ConnectionString", "ImpersonationMode", "Account", "Password", "MaxConnections", "Isolation", "Timeout", "Provider", "ModifiedTime", "ConnectionDetails", "Options", "Credential", "ContextExpression"],
     "INFO.DELTATABLEMETADATASTORAGES": ["ID", "PartitionStorageID", "DataSourceReference", "TableName", "RootLocation", "CurrentVersion", "TableObjectID", "DatamartObjectID", "FramedSchemaName", "FallbackReason", "DeltaColumnMappingMode", "DeltaLogETag", "ArtifactObjectId", "ArtifactSecurityVersion"],
@@ -795,6 +797,10 @@ _INFO_EMPTY_COLUMN_TYPES: dict[str, dict[str, str]] = {
         "ID": "int64", "ColumnID": "int64", "BaseColumnID": "int64", "BaseTableID": "int64",
         "Summarization": "int64",
     },
+    "INFO.ANNOTATIONS": {
+        "ID": "int64", "ObjectID": "int64", "ObjectType": "int64", "Name": "text", "Value": "text",
+        "ModifiedTime": "datetime",
+    },
     "INFO.CALCDEPENDENCY": {
         "DATABASE_NAME": "text", "OBJECT_TYPE": "text", "TABLE": "text", "OBJECT": "text",
         "EXPRESSION": "text", "REFERENCED_OBJECT_TYPE": "text", "REFERENCED_TABLE": "text",
@@ -815,6 +821,10 @@ _INFO_EMPTY_COLUMN_TYPES: dict[str, dict[str, str]] = {
     "INFO.COLUMNPERMISSIONS": {
         "ID": "int64", "TablePermissionID": "int64", "ColumnID": "int64", "ModifiedTime": "datetime",
         "MetadataPermission": "int64",
+    },
+    "INFO.CULTURES": {
+        "ID": "int64", "ModelID": "int64", "Name": "text", "LinguisticMetadataID": "int64",
+        "ModifiedTime": "datetime", "StructureModifiedTime": "datetime",
     },
     "INFO.DATACOVERAGEDEFINITIONS": {
         "ID": "int64", "PartitionID": "int64", "Description": "text", "Expression": "text",
@@ -958,12 +968,157 @@ _INFO_EMPTY_SCHEMAS: dict[str, tuple[list[str], dict[str, str]]] = {
     for fn, cols in _INFO_EMPTY_TABLE_HEADERS.items()
 }
 
+# Task 92 (info-storage-82): more INFO functions Power BI has. Names and column types are Power BI's own.
+# One row in Power BI (INFO.MODEL, INFO.CATALOGS, INFO.CSDLMETADATA): every value is unmodelled by the local engine.
+_INFO_SINGLE_ROW_COLUMNS: dict[str, tuple[tuple[str, str], ...]] = {
+    "INFO.CATALOGS": (
+        ("CATALOG_NAME", "text"), ("DESCRIPTION", "text"), ("ROLES", "text"), ("DATE_MODIFIED", "datetime"),
+        ("COMPATIBILITY_LEVEL", "int64"), ("TYPE", "int64"), ("VERSION", "int64"), ("DATABASE_ID", "text"),
+        ("DATABASE_GUID", "text"), ("DATE_QUERIED", "datetime"), ("CURRENTLY_USED", "boolean"),
+        ("POPULARITY", "double"), ("WEIGHTEDPOPULARITY", "double"), ("CLIENTCACHEREFRESHPOLICY", "int64"),
+        ("ENCRYPTION_LEVEL", "text"), ("CRYPTOKEY_UPDATED", "datetime"),
+    ),
+    "INFO.CSDLMETADATA": (
+        ("METADATA", "text"),
+    ),
+    "INFO.MODEL": (
+        ("ID", "int64"), ("Name", "text"), ("Description", "text"), ("StorageLocation", "text"),
+        ("DefaultMode", "int64"), ("DefaultDataView", "int64"), ("Culture", "text"), ("Collation", "text"),
+        ("ModifiedTime", "datetime"), ("StructureModifiedTime", "datetime"), ("Version", "int64"),
+        ("DataAccessOptions", "text"), ("DefaultMeasureID", "int64"), ("DefaultPowerBIDataSourceVersion", "int64"),
+        ("ForceUniqueNames", "boolean"), ("DiscourageImplicitMeasures", "boolean"),
+        ("DataSourceVariablesOverrideBehavior", "int64"), ("DataSourceDefaultMaxConnections", "int64"),
+        ("SourceQueryCulture", "text"), ("MAttributes", "text"), ("DiscourageCompositeModels", "boolean"),
+        ("AutomaticAggregationOptions", "text"), ("DisableAutoExists", "int64"),
+        ("MaxParallelismPerRefresh", "int64"), ("MaxParallelismPerQuery", "int64"), ("DirectLakeBehavior", "int64"),
+        ("ValueFilterBehavior", "int64"), ("SelectionExpressionBehavior", "int64"), ("VersionMarker", "text"),
+    ),
+}
+
+# Storage and engine metadata: Power BI has rows whose count depends on the engine's storage, so any rows are refused.
+_INFO_STORAGE_COLUMNS: dict[str, tuple[tuple[str, str], ...]] = {
+    "INFO.ATTRIBUTEHIERARCHIES": (
+        ("ID", "int64"), ("ColumnID", "int64"), ("State", "int64"), ("AttributeHierarchyStorageID", "int64"),
+        ("ModifiedTime", "datetime"), ("RefreshedTime", "datetime"),
+    ),
+    "INFO.ATTRIBUTEHIERARCHYSTORAGES": (
+        ("ID", "int64"), ("AttributeHierarchyID", "int64"), ("SortOrder", "int64"), ("OptimizationLevel", "int64"),
+        ("MaterializationType", "int64"), ("ColumnPositionToData", "int64"), ("ColumnDataToPosition", "int64"),
+        ("DistinctDataCount", "int64"), ("DataVersion", "int64"), ("StorageFileID", "int64"),
+        ("SystemTableID", "int64"), ("HasStatistics", "boolean"), ("MinValue", "text"), ("MaxValue", "text"),
+        ("StringValueMaxLength", "int64"),
+    ),
+    "INFO.COLUMNPARTITIONSTORAGES": (
+        ("ID", "int64"), ("ColumnStorageID", "int64"), ("PartitionStorageID", "int64"), ("DataVersion", "int64"),
+        ("State", "int64"), ("SegmentStorageID", "int64"), ("StorageFileID", "int64"),
+    ),
+    "INFO.COLUMNSTORAGES": (
+        ("ID", "int64"), ("ColumnID", "int64"), ("Name", "text"), ("StoragePosition", "int64"),
+        ("DictionaryStorageID", "int64"), ("Settings", "int64"), ("ColumnFlags", "int64"), ("Collation", "text"),
+        ("OrderByColumn", "text"), ("Locale", "int64"), ("BinaryCharacters", "int64"),
+        ("Statistics_DistinctStates", "int64"), ("Statistics_MinDataID", "int64"), ("Statistics_MaxDataID", "int64"),
+        ("Statistics_OriginalMinSegmentDataID", "int64"), ("Statistics_RLESortOrder", "int64"),
+        ("Statistics_RowCount", "int64"), ("Statistics_HasNulls", "boolean"), ("Statistics_RLERuns", "int64"),
+        ("Statistics_OthersRLERuns", "int64"), ("Statistics_Usage", "int64"), ("Statistics_DBType", "int64"),
+        ("Statistics_XMType", "int64"), ("Statistics_CompressionType", "int64"),
+        ("Statistics_CompressionParam", "int64"), ("Statistics_EncodingHint", "int64"),
+        ("IsDeltaPartitionColumn", "boolean"), ("DeltaColumnMappingPhysicalName", "text"),
+        ("DeltaColumnMappingId", "int64"), ("FramedSourceColumn", "text"), ("DeltaColumnPrimitiveType", "int64"),
+        ("DeltaTableColumnStorageID", "int64"), ("StringIndexStorageID", "int64"), ("ColumnIndexStorageID", "int64"),
+        ("FullTextIndexStorageID", "int64"),
+    ),
+    "INFO.DICTIONARYSTORAGES": (
+        ("ID", "int64"), ("ColumnStorageID", "int64"), ("Type", "int64"), ("DataType", "int64"),
+        ("DataVersion", "int64"), ("BaseId", "int64"), ("Magnitude", "double"), ("LastId", "int64"),
+        ("IsNullable", "boolean"), ("IsUnique", "boolean"), ("IsOperatingOn32", "boolean"),
+        ("DictionaryFlags", "int64"), ("StorageFileID", "int64"), ("Size", "int64"),
+    ),
+    "INFO.FUNCTIONS": (
+        ("FUNCTION_NAME", "text"), ("DESCRIPTION", "text"), ("PARAMETER_LIST", "text"), ("RETURN_TYPE", "int64"),
+        ("ORIGIN", "int64"), ("INTERFACE_NAME", "text"), ("LIBRARY_NAME", "text"), ("DLL_NAME", "text"),
+        ("HELP_FILE", "text"), ("HELP_CONTEXT", "int64"), ("OBJECT", "text"), ("CAPTION", "text"),
+        ("PARAMETERINFO", "int64"), ("DIRECTQUERY_PUSHABLE", "int64"), ("VISUAL_CALCULATIONS_INFO", "int64"),
+    ),
+    "INFO.PARTITIONS": (
+        ("ID", "int64"), ("TableID", "int64"), ("Name", "text"), ("Description", "text"), ("DataSourceID", "int64"),
+        ("QueryDefinition", "text"), ("State", "int64"), ("Type", "int64"), ("PartitionStorageID", "int64"),
+        ("Mode", "int64"), ("DataView", "int64"), ("ModifiedTime", "datetime"), ("RefreshedTime", "datetime"),
+        ("SystemFlags", "int64"), ("ErrorMessage", "text"), ("RetainDataTillForceCalculate", "boolean"),
+        ("RangeStart", "datetime"), ("RangeEnd", "datetime"), ("RangeGranularity", "int64"),
+        ("RefreshBookmark", "text"), ("QueryGroupID", "int64"), ("ExpressionSourceID", "int64"),
+        ("MAttributes", "text"), ("DataCoverageDefinitionID", "int64"), ("SchemaName", "text"),
+    ),
+    "INFO.PARTITIONSTORAGES": (
+        ("ID", "int64"), ("PartitionID", "int64"), ("Name", "text"), ("StoragePosition", "int64"),
+        ("SegmentMapStorageID", "int64"), ("DataObjectId", "int64"), ("StorageFolderID", "int64"),
+        ("DeltaTableMetadataStorageID", "int64"),
+    ),
+    "INFO.PROPERTIES": (
+        ("PropertyName", "text"), ("PropertyDescription", "text"), ("PropertyType", "text"),
+        ("PropertyAccessType", "text"), ("IsRequired", "boolean"), ("Value", "variant"),
+    ),
+    "INFO.SEGMENTMAPSTORAGES": (
+        ("ID", "int64"), ("PartitionStorageID", "int64"), ("Type", "int64"), ("RecordCount", "int64"),
+        ("SegmentCount", "int64"), ("RecordsPerSegment", "int64"),
+    ),
+    "INFO.SEGMENTSTORAGES": (
+        ("ID", "int64"), ("ColumnPartitionStorageID", "int64"), ("SegmentCount", "int64"),
+        ("StorageFileID", "int64"),
+    ),
+    "INFO.STORAGEFILES": (
+        ("ID", "int64"), ("OwnerID", "int64"), ("OwnerType", "int64"), ("StorageFolderID", "int64"),
+        ("FileName", "text"),
+    ),
+    "INFO.STORAGEFOLDERS": (
+        ("ID", "int64"), ("OwnerID", "int64"), ("OwnerType", "int64"), ("Path", "text"),
+    ),
+    "INFO.STORAGETABLECOLUMNS": (
+        ("DATABASE_NAME", "text"), ("CUBE_NAME", "text"), ("MEASURE_GROUP_NAME", "text"), ("DIMENSION_NAME", "text"),
+        ("ATTRIBUTE_NAME", "text"), ("TABLE_ID", "text"), ("COLUMN_ID", "text"), ("COLUMN_TYPE", "text"),
+        ("COLUMN_ENCODING", "int64"), ("DATATYPE", "text"), ("ISKEY", "boolean"), ("ISUNIQUE", "boolean"),
+        ("ISNULLABLE", "boolean"), ("ISROWNUMBER", "boolean"), ("DICTIONARY_SIZE", "int64"),
+        ("DICTIONARY_ISPAGEABLE", "boolean"), ("DICTIONARY_ISRESIDENT", "boolean"),
+        ("DICTIONARY_TEMPERATURE", "double"), ("DICTIONARY_LAST_ACCESSED", "datetime"),
+        ("STRING_INDEX_SIZE", "int64"), ("FULLTEXT_INDEX_SIZE", "int64"),
+    ),
+    "INFO.STORAGETABLECOLUMNSEGMENTS": (
+        ("DATABASE_NAME", "text"), ("CUBE_NAME", "text"), ("MEASURE_GROUP_NAME", "text"), ("PARTITION_NAME", "text"),
+        ("DIMENSION_NAME", "text"), ("TABLE_ID", "text"), ("COLUMN_ID", "text"), ("SEGMENT_NUMBER", "int64"),
+        ("TABLE_PARTITION_NUMBER", "int64"), ("RECORDS_COUNT", "int64"), ("ALLOCATED_SIZE", "int64"),
+        ("USED_SIZE", "int64"), ("COMPRESSION_TYPE", "text"), ("BITS_COUNT", "int64"),
+        ("BOOKMARK_BITS_COUNT", "int64"), ("VERTIPAQ_STATE", "text"), ("ISPAGEABLE", "boolean"),
+        ("ISRESIDENT", "boolean"), ("TEMPERATURE", "double"), ("LAST_ACCESSED", "datetime"),
+    ),
+    "INFO.STORAGETABLES": (
+        ("DATABASE_NAME", "text"), ("CUBE_NAME", "text"), ("MEASURE_GROUP_NAME", "text"), ("DIMENSION_NAME", "text"),
+        ("TABLE_ID", "text"), ("TABLE_PARTITIONS_COUNT", "int64"), ("HINT_TABLE_TYPE", "text"),
+        ("ROWS_COUNT", "int64"), ("RIVIOLATION_COUNT", "int64"),
+    ),
+    "INFO.TABLESTORAGES": (
+        ("ID", "int64"), ("TableID", "int64"), ("Name", "text"), ("Version", "int64"), ("Settings", "int64"),
+        ("RIViolationCount", "int64"), ("StorageFolderID", "int64"),
+    ),
+}
+
+_INFO_SINGLE_ROW_SCHEMAS: dict[str, tuple[list[str], dict[str, str]]] = {
+    fn: ([name for name, _ in cols], dict(cols)) for fn, cols in _INFO_SINGLE_ROW_COLUMNS.items()
+}
+_INFO_STORAGE_SCHEMAS: dict[str, tuple[list[str], dict[str, str]]] = {
+    fn: ([name for name, _ in cols], dict(cols)) for fn, cols in _INFO_STORAGE_COLUMNS.items()
+}
+# Every INFO table function with a known schema (Group A, B and C)
+_INFO_ALL_SCHEMAS: dict[str, tuple[list[str], dict[str, str]]] = {
+    **_INFO_EMPTY_SCHEMAS, **_INFO_SINGLE_ROW_SCHEMAS, **_INFO_STORAGE_SCHEMAS,
+}
+
 # Functions whose rows come from Power Query objects the app can hold (parameters, functions, folders, load-off queries)
 _INFO_MODEL_EXPRESSION_FUNCTIONS = frozenset({"INFO.EXPRESSIONS", "INFO.QUERYGROUPS"})
 
 _INFO_RESTRICTION_FUNCTIONS = frozenset({
     "INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS",
     *_INFO_EMPTY_TABLE_HEADERS,
+    *_INFO_SINGLE_ROW_SCHEMAS,
+    *_INFO_STORAGE_SCHEMAS,
 })
 
 _INFO_FUNCTIONS = frozenset({
@@ -7777,8 +7932,8 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
         from . import dax_linest
         return {h.casefold(): "double" for h in dax_linest.headers_for(16, True)}
     if fn in _INFO_FUNCTIONS:
-        if fn in _INFO_EMPTY_SCHEMAS:
-            hdrs, typs = _INFO_EMPTY_SCHEMAS[fn]
+        if fn in _INFO_ALL_SCHEMAS:
+            hdrs, typs = _INFO_ALL_SCHEMAS[fn]
             return {h.casefold(): typs.get(h, "") for h in hdrs}
         types_map = {
             "INFO.VIEW.TABLES": (_INFO_VIEW_TABLES_HEADERS, _INFO_VIEW_TABLES_TYPES),
@@ -11461,6 +11616,12 @@ def _evaluate_measures_once(
             elif function in _INFO_EMPTY_SCHEMAS:
                 headers, types = _INFO_EMPTY_SCHEMAS[function]
                 rows = []
+            elif function in _INFO_SINGLE_ROW_SCHEMAS:
+                # Power BI holds exactly one row here; each value is a field the local engine does not model
+                headers, types = _INFO_SINGLE_ROW_SCHEMAS[function]
+                rows = [{header: _UnmodelledField(header) for header in headers}]
+            elif function in _INFO_STORAGE_SCHEMAS:
+                raise dax_typed.refusal(f"{function} rows are engine storage metadata, not modelled by the local engine.")
             else:
                 raise MeasureError(f"{function} is not supported by the local DAX engine.")
 
