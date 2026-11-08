@@ -84,6 +84,44 @@ CASES = [
      '=4;y1=1;y10=1;y3=1;y6=1;y9=1'),  # matching
     ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],TREATAS({"m2","m4"},ZH_B[N]),"v",RANKX(ALL(ZH_W[Y]),CALCULATE(SUM(ZH_A[V])),,ASC,Dense)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
      '=1;y1=1;y10=1;y3=1;y6=1;y9=1'),  # matching
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(COUNTROWS(ZH_U),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=4;m2=4;m2b=4;m4=4;m7=4'),  # fixed (Task 88 part B, spec item 5)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(COUNTROWS(ZH_U),ZH_F)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=5;m2=5;m2b=5;m4=5;m7=5'),  # fixed (Task 88 part B, spec item 7)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),FILTER(ZH_F,ZH_F[Amt]>10)))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=5;m2=5;m2b=5;m4=5;m7=5'),  # fixed (Task 88 part B, spec item 34)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),ZH_F))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # fixed (Task 88 part B, spec item 35)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),ZH_F2))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=4;m2=4;m2b=4;m4=4;m7=4'),  # fixed (Task 88 part B, spec item 36)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],TREATAS({"m2","m4"},ZH_B[N]),"v",CALCULATE(COUNTROWS(ZH_U),ZH_F)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm2=5;m4=5'),  # fixed (Task 88 part B, spec item 47)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],TREATAS({"m2","m4"},ZH_B[N]),"v",CALCULATE(COUNTROWS(ZH_U),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm2=3;m4=3'),  # fixed (Task 88 part B, spec item 48)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],TREATAS({"m2","m4"},ZH_B[N]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),FILTER(ZH_F,ZH_F[Amt]>10)))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm2=5;m4=5'),  # fixed (Task 88 part B, spec item 71)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],TREATAS({"m2","m4"},ZH_B[N]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),ZH_F2))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm2=4;m4=4'),  # fixed (Task 88 part B, spec item 72)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(COUNTROWS(ZH_U),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=2;y1=1;y6=1'),  # fixed (Task 88 part B, spec item 167)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(COUNTROWS(ZH_U),ZH_F)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=2;y1=1;y3=1;y6=1'),  # fixed (Task 88 part B, spec item 169)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),ZH_F))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=3;y1=1;y3=1;y6=1'),  # fixed (Task 88 part B, spec item 195)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),ZH_F2))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=1;y1=1;y3=1;y6=1'),  # fixed (Task 88 part B, spec item 196)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],TREATAS({"m2","m4"},ZH_B[N]),"v",CALCULATE(COUNTROWS(ZH_U),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=2;y1=1;y6=1'),  # fixed (Task 88 part B, spec item 206)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],TREATAS({"m2","m4"},ZH_B[N]),"v",CALCULATE(COUNTROWS(ZH_U),ZH_F)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=2;y1=1;y3=1;y6=1'),  # fixed (Task 88 part B, spec item 207)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],TREATAS({"m2","m4"},ZH_B[N]),"v",CALCULATE(COUNTROWS(ZH_U),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     'y1=1;y3=1;y6=1'),  # fixed (Task 88 part B, spec item 208)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],TREATAS({"m2","m4"},ZH_B[N]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),FILTER(ZH_F,ZH_F[Amt]>10)))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=3;y1=1;y6=1'),  # fixed (Task 88 part B, spec item 231)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],TREATAS({"m2","m4"},ZH_B[N]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),ZH_F))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=3;y1=1;y3=1;y6=1'),  # fixed (Task 88 part B, spec item 232)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],TREATAS({"m2","m4"},ZH_B[N]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZH_U[X]),ZH_F2))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=1;y1=1;y3=1;y6=1'),  # fixed (Task 88 part B, spec item 233)
 ]
 
 
