@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 187 / Task 98 m-oracle-case-88, Power Query oracle answers survive case-insensitive storage, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4113 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: Power Query track: the M engine core (values, let/each/if/try, operators) against the saved battery
+**Latest status (2026-11-05, after Iteration 188 / Task 99 m-core-89, Power Query M lexer and parser (engine Part A), Haiku coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4322 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: Power Query engine Part B: values, evaluator and canonical serializer scored against the 174 Power BI answers
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
