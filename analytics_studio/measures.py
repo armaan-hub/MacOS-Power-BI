@@ -17108,12 +17108,20 @@ def _evaluate_measures_once(
                 [{"columns": columns, "rows": allowed, "active": columns, "dirty": False}],
             )
             if {column.casefold() for column in columns} == {header.casefold() for header in base_context["headers"]}:
+                # Task 87: the set of whole rows of a table filter argument; relationships.py filters the other tables by its expanded rows
+                filters[table_id][2][0]["whole_row"] = True
                 # a filter over every column of a table is a filter of the table with the tables on its one side
                 for one_id, one_rows in referenced_one_side_rows(table_id, allowed).items():
                     one_context = contexts_by_id[one_id]
                     one_columns = tuple(one_context["headers"])
-                    if one_rows is None:  # the unknown member stays: the table is left unfiltered (no column filters = cleared, see apply_additions)
-                        filters.setdefault(one_id, (one_context, {}, []))
+                    if one_rows is None:
+                        # Task 87: an unrestricted one-side table keeps a blank-member-only filter it already has (live Power BI: a
+                        # SUMMARIZECOLUMNS group on the blank member survives a table filter on the fact table); any other filter is replaced
+                        outer = evaluation_contexts_by_id.get(one_id, one_context)
+                        outer_columns = outer.get("filter_column_rows", {})
+                        if outer_columns and all(getattr(rows, "blank", False) and not rows for rows in outer_columns.values()):
+                            continue
+                        filters.setdefault(one_id, (one_context, {}, []))  # the unknown member stays: the table is left unfiltered (no column filters = cleared, see apply_additions)
                         continue
                     filters.setdefault(one_id, (
                         one_context, {column: one_rows for column in one_columns},
