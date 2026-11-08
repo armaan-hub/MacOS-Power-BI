@@ -30,6 +30,7 @@ NATURAL_JOIN_USAGE = "'NATURALJOINUSAGE' function can only be used as a value fi
 SELECTED_FORMAT_MISUSED = "SELECTEDMEASUREFORMATSTRING misused. There is no measure reference in the current context."
 CARTESIAN_POSITIVE = "The SampleCartesianPointsByCover function expects a positive numeric parameter value to be specified for argument 1."
 CARTESIAN_COORDINATE = "The SampleCartesianPointsByCover function requires coordinate parameter (at argument number {position}) to be a numeric scalar expression."
+CARTESIAN_RADIUS = "The SampleCartesianPointsByCover function requires radius parameter (at argument number 5) to be a numeric scalar expression."
 CARTESIAN_MAX_MIN = "The SampleCartesianPointsByCover function expects MaxMinRatio as argument 6, since you specified a radius column."
 CARTESIAN_MAX_BLANK = "The SampleCartesianPointsByCover function expects MaxBlankRatio as argument 7, since you specified a radius column."
 AXIS_RESOLUTION = "The SampleAxisWithLocalMinMax function requires a Minimum-Resolution parameter to be specified at argument number {position}."
@@ -117,14 +118,20 @@ def cartesian_points(
     max_points = _max_points(scalar(arguments[0], None))
     context, rows = table_rows_of(arguments[1])
     if rows:
-        for position in (2, 3):  # coordinate arguments 3 and 4 must be numeric in every row
+        # coordinate arguments 3 and 4, and the radius (argument 5 of the 7-argument form), must be numeric in every row
+        for position in (2, 3, 4) if len(arguments) == 7 else (2, 3):
             for index, row in enumerate(rows):
-                value = scalar(arguments[position], (context, row, index))
+                try:
+                    value = scalar(arguments[position], (context, row, index))
+                except measure_error as error:
+                    if "non-numeric value" not in str(error):  # a text column read as a number: Power BI's own wording
+                        raise
+                    raise measure_error(CARTESIAN_RADIUS if position == 4 else CARTESIAN_COORDINATE.format(position=position + 1)) from error
                 if value is None or (isinstance(value, (int, Decimal)) and not isinstance(value, bool)):
                     continue
                 if isinstance(value, str):
-                    raise measure_error(CARTESIAN_COORDINATE.format(position=position + 1))
-                raise dax_typed.refusal("SAMPLECARTESIANPOINTSBYCOVER with a non-numeric coordinate is not modelled by the local engine.")
+                    raise measure_error(CARTESIAN_RADIUS if position == 4 else CARTESIAN_COORDINATE.format(position=position + 1))
+                raise dax_typed.refusal("SAMPLECARTESIANPOINTSBYCOVER with a non-numeric coordinate or radius is not modelled by the local engine.")
     if max_points >= len(rows):
         return context, list(rows)
     raise dax_typed.refusal("SAMPLECARTESIANPOINTSBYCOVER that drops rows (MaxPoints below the row count) is not modelled by the local engine.")

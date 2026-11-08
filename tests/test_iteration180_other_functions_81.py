@@ -35,6 +35,24 @@ class OtherFunctions81Test(unittest.TestCase):
                 failures.append((expression, power_bi[:80], local[:120]))
         self.assertEqual(failures, [])
 
+    def test_radius_must_be_numeric(self):
+        """Power BI live answers: argument 5 (Radius) is validated like the coordinates; arguments 6 and 7 are not."""
+        base = "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales],{radius},{ratios}))"
+        reject = base.format(radius="Facts[Region]", ratios="2,3")
+        self.assertEqual(
+            oracle.local(reject),
+            "LOCAL-REJECT:The SampleCartesianPointsByCover function requires radius parameter (at argument number 5) to be a numeric scalar expression.",
+        )
+        accepted = [
+            base.format(radius="1", ratios="2,3"),
+            base.format(radius="Facts[Sales]", ratios='"a",3'),
+            base.format(radius="Facts[Sales]", ratios='"a","b"'),
+            base.format(radius="Facts[Sales]", ratios="-1,3"),
+            base.format(radius="Facts[Sales]", ratios="BLANK(),3"),
+        ]
+        for expression in accepted:
+            self.assertTrue(oracle.same("6", oracle.local(expression)), (expression, oracle.local(expression)))
+
     def test_names_are_supported(self):
         for name in NEW_NAMES:
             self.assertIn(name, measures.DAX_FUNCTION_NAMES, name)
