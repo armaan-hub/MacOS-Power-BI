@@ -26,18 +26,26 @@ DATESWTD_PARAMETER = "DATESWTD's parameter 1 must be a calendar reference."
 TOTALWTD_PARAMETER = "TOTALWTD's parameter 2 must be a calendar reference."
 DETAILROWS_MEASURE = "The input parameter for the DETAILROWS function is not a valid measure reference."
 CALENDARAUTO_MISSING = "CALENDARAUTO function can not find a base column of DateTime type in the model."
+KEYWORD_LAST = "The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
 PATH_TYPES = (
     "The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text."
 )
 
+# Task 93 (iteration 182): the six week functions; every answer is an error (no calendar objects in the guest model)
+WEEK_CALENDAR = frozenset({"STARTOFWEEK", "ENDOFWEEK", "NEXTWEEK", "PREVIOUSWEEK"})
+WEEK_KEYWORD = frozenset({"OPENINGBALANCEWEEK", "CLOSINGBALANCEWEEK"})
+WEEK_NAMES = WEEK_CALENDAR | WEEK_KEYWORD
+
 NAMES = frozenset({
     "APPROXIMATEDISTINCTCOUNT", "CALENDARAUTO", "DATESWTD", "TOTALWTD", "DETAILROWS", "PATH",
     "SELECTEDMEASURE", "SELECTEDMEASURENAME", "ISSELECTEDMEASURE", "USEROBJECTID",
-})
+}) | WEEK_NAMES
 ARITY: dict[str, tuple[int, int | None]] = {
     "APPROXIMATEDISTINCTCOUNT": (1, 1), "CALENDARAUTO": (0, 1), "DATESWTD": (1, 2), "TOTALWTD": (2, 4),
     "DETAILROWS": (1, 1), "PATH": (2, 2), "SELECTEDMEASURE": (0, 0), "SELECTEDMEASURENAME": (0, 0),
     "ISSELECTEDMEASURE": (1, None), "USEROBJECTID": (0, 0),
+    "STARTOFWEEK": (1, 1), "ENDOFWEEK": (1, 1), "NEXTWEEK": (1, 1), "PREVIOUSWEEK": (1, 1),
+    "OPENINGBALANCEWEEK": (2, 3), "CLOSINGBALANCEWEEK": (2, 3),
 }
 # Evaluated by evaluate_lookup_function (added to its arity table in measures.py).
 LOOKUP_ARITY: dict[str, tuple[int, int | None]] = {"PATH": (2, 2), "USEROBJECTID": (0, 0)}
@@ -59,6 +67,9 @@ def _errors() -> tuple[type, type]:
 def check_syntax(function: str, arguments: tuple[tuple[Any, ...], ...]) -> None:
     """Parse-time checks: the measured argument errors; any other shape of these functions is refused."""
     measure_error, _ = _errors()
+    if function in WEEK_NAMES:
+        _check_week(function, arguments)
+        return
     low, high = ARITY[function]
     if len(arguments) < low or (high is not None and len(arguments) > high) or any(argument[0] == "omitted" for argument in arguments):
         raise dax_typed.refusal(f"A {function} call with this number of arguments is not modelled by the local engine.")
@@ -87,6 +98,23 @@ def check_syntax(function: str, arguments: tuple[tuple[Any, ...], ...]) -> None:
             if argument[0] != "reference":
                 raise measure_error(f"Function Path expects a column reference as argument number {position}.")
     # CALENDARAUTO and USEROBJECTID depend on the model or the environment: checked at evaluation.
+
+
+def _check_week(function: str, arguments: tuple[tuple[Any, ...], ...]) -> None:
+    """Task 93: Power BI's parse-time messages for the week functions (arity, then the argument kind)."""
+    measure_error, _ = _errors()
+    low, high = ARITY[function]
+    if len(arguments) < low:
+        raise measure_error(
+            f"Too few arguments were passed to the {function} function. The minimum argument count for the function is {low}.")
+    if high is not None and len(arguments) > high:
+        raise measure_error(
+            f"Too many arguments were passed to the {function} function. The maximum argument count for the function is {high}.")
+    if any(argument[0] == "omitted" for argument in arguments):
+        raise dax_typed.refusal(f"A {function} call with an omitted argument is not modelled by the local engine.")
+    if function in WEEK_CALENDAR:
+        raise measure_error(f"{function}'s parameter 1 must be a calendar reference.")
+    raise measure_error(KEYWORD_LAST)
 
 
 def date_columns(tables: Iterable[dict[str, Any]]) -> list[dict[str, str]]:

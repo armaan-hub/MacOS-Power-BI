@@ -557,6 +557,12 @@ def _add_generated_templates() -> None:
         "APPROXIMATEDISTINCTCOUNT": ("APPROXIMATEDISTINCTCOUNT('Table'[Column])", "'Table'[Column]"),
         "DATESWTD": ("DATESWTD('Calendar'[Date])", "'Calendar'[Date]"),
         "TOTALWTD": ("TOTALWTD(expression, 'Calendar'[Date])", "expression"),
+        "STARTOFWEEK": ("STARTOFWEEK('Calendar'[Date])", "'Calendar'[Date]"),  # Task 93: week functions
+        "ENDOFWEEK": ("ENDOFWEEK('Calendar'[Date])", "'Calendar'[Date]"),
+        "NEXTWEEK": ("NEXTWEEK('Calendar'[Date])", "'Calendar'[Date]"),
+        "PREVIOUSWEEK": ("PREVIOUSWEEK('Calendar'[Date])", "'Calendar'[Date]"),
+        "OPENINGBALANCEWEEK": ("OPENINGBALANCEWEEK(expression, 'Calendar'[Date])", "expression"),
+        "CLOSINGBALANCEWEEK": ("CLOSINGBALANCEWEEK(expression, 'Calendar'[Date])", "expression"),
         "DETAILROWS": ("DETAILROWS([Measure])", "[Measure]"),
         "SELECTEDMEASURE": ("SELECTEDMEASURE()", None),
         "SELECTEDMEASURENAME": ("SELECTEDMEASURENAME()", None),
