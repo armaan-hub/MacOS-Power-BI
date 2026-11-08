@@ -1,0 +1,701 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-08",
+ "cases": [
+  {
+   "expression": "1",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "-1",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "1.5",
+   "power_bi": "V:number:1.5"
+  },
+  {
+   "expression": "1e3",
+   "power_bi": "V:number:1000"
+  },
+  {
+   "expression": "0x1F",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "#infinity",
+   "power_bi": "V:number:+Infinity"
+  },
+  {
+   "expression": "-#infinity",
+   "power_bi": "V:number:-Infinity"
+  },
+  {
+   "expression": "#nan",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "\"a\"",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "\"\"",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "\"a\"\"b\"",
+   "power_bi": "V:text:\"a\\\"b\""
+  },
+  {
+   "expression": "\"#(tab)x\"",
+   "power_bi": "V:text:\"\\tx\""
+  },
+  {
+   "expression": "\"#(0041)\"",
+   "power_bi": "V:text:\"A\""
+  },
+  {
+   "expression": "true",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "false",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "#date(2024,1,31)",
+   "power_bi": "V:date:2024-01-31"
+  },
+  {
+   "expression": "#time(23,59,59.5)",
+   "power_bi": "V:time:23:59:59.5000000"
+  },
+  {
+   "expression": "#datetime(2024,1,1,0,0,0)",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "#datetimezone(2024,1,1,0,0,0,-5,0)",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000-05:00"
+  },
+  {
+   "expression": "#duration(0,0,0,1.5)",
+   "power_bi": "V:duration:00:00:01.5000000"
+  },
+  {
+   "expression": "#binary({1,2,255})",
+   "power_bi": "V:binary:AQL/"
+  },
+  {
+   "expression": "{}",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "[]",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "{1..5}",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "{1,2}&{3}",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "[a=1]&[b=2]",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=number:2]"
+  },
+  {
+   "expression": "[a=1]&[a=2]",
+   "power_bi": "V:record:[\"a\"=number:2]"
+  },
+  {
+   "expression": "1 + 2",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "1 - 2",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "1 * 2",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "1 / 2",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "7 + 2",
+   "power_bi": "V:number:9"
+  },
+  {
+   "expression": "7 - 2",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "7 * 2",
+   "power_bi": "V:number:14"
+  },
+  {
+   "expression": "7 / 2",
+   "power_bi": "V:number:3.5"
+  },
+  {
+   "expression": "-7 + 2",
+   "power_bi": "V:number:-5"
+  },
+  {
+   "expression": "-7 - 2",
+   "power_bi": "V:number:-9"
+  },
+  {
+   "expression": "-7 * 2",
+   "power_bi": "V:number:-14"
+  },
+  {
+   "expression": "-7 / 2",
+   "power_bi": "V:number:-3.5"
+  },
+  {
+   "expression": "1 + 0",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "1 - 0",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "1 * 0",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "1 / 0",
+   "power_bi": "V:number:+Infinity"
+  },
+  {
+   "expression": "0 + 0",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "0 - 0",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "0 * 0",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "0 / 0",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "null + 1",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "null - 1",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "null * 1",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "null / 1",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "\"a\" + 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Text and Number."
+  },
+  {
+   "expression": "\"a\" - 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Number."
+  },
+  {
+   "expression": "\"a\" * 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Text and Number."
+  },
+  {
+   "expression": "\"a\" / 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Text and Number."
+  },
+  {
+   "expression": "true + 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Logical and Number."
+  },
+  {
+   "expression": "true - 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Logical and Number."
+  },
+  {
+   "expression": "true * 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Logical and Number."
+  },
+  {
+   "expression": "true / 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Logical and Number."
+  },
+  {
+   "expression": "#date(2024,1,1) + #duration(1,0,0,0)",
+   "power_bi": "V:date:2024-01-02"
+  },
+  {
+   "expression": "#date(2024,1,1) - #duration(1,0,0,0)",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "#date(2024,1,1) * #duration(1,0,0,0)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Date and Duration."
+  },
+  {
+   "expression": "#date(2024,1,1) / #duration(1,0,0,0)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Date and Duration."
+  },
+  {
+   "expression": "#date(2024,3,1) + #date(2024,1,1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Date and Date."
+  },
+  {
+   "expression": "#date(2024,3,1) - #date(2024,1,1)",
+   "power_bi": "V:duration:60.00:00:00"
+  },
+  {
+   "expression": "#date(2024,3,1) * #date(2024,1,1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Date and Date."
+  },
+  {
+   "expression": "#date(2024,3,1) / #date(2024,1,1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Date and Date."
+  },
+  {
+   "expression": "#time(1,0,0) + #duration(0,2,0,0)",
+   "power_bi": "V:time:03:00:00.0000000"
+  },
+  {
+   "expression": "#time(1,0,0) - #duration(0,2,0,0)",
+   "power_bi": "V:time:23:00:00.0000000"
+  },
+  {
+   "expression": "#time(1,0,0) * #duration(0,2,0,0)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Time and Duration."
+  },
+  {
+   "expression": "#time(1,0,0) / #duration(0,2,0,0)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Time and Duration."
+  },
+  {
+   "expression": "0.1 + 0.2",
+   "power_bi": "V:number:0.30000000000000004"
+  },
+  {
+   "expression": "0.1 - 0.2",
+   "power_bi": "V:number:-0.1"
+  },
+  {
+   "expression": "0.1 * 0.2",
+   "power_bi": "V:number:0.020000000000000004"
+  },
+  {
+   "expression": "0.1 / 0.2",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "1e308 + 1e308",
+   "power_bi": "V:number:+Infinity"
+  },
+  {
+   "expression": "1e308 - 1e308",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "1e308 * 1e308",
+   "power_bi": "V:number:+Infinity"
+  },
+  {
+   "expression": "1e308 / 1e308",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "#duration(1,0,0,0) + 2",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Duration and Number."
+  },
+  {
+   "expression": "#duration(1,0,0,0) - 2",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Duration and Number."
+  },
+  {
+   "expression": "#duration(1,0,0,0) * 2",
+   "power_bi": "V:duration:2.00:00:00"
+  },
+  {
+   "expression": "#duration(1,0,0,0) / 2",
+   "power_bi": "V:duration:12:00:00"
+  },
+  {
+   "expression": "1 = 1.0",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "1 <> 1.0",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "1 < 1.0",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "1 >= 1.0",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"a\" = \"A\"",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "\"a\" <> \"A\"",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"a\" < \"A\"",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "\"a\" >= \"A\"",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "null = null",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "null <> null",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null < null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "null >= null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "null = 0",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null <> 0",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "null < 0",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "null >= 0",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "{1,2} = {1,2}",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "{1,2} <> {1,2}",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "{1,2} < {1,2}",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types List and List."
+  },
+  {
+   "expression": "{1,2} >= {1,2}",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator >= to types List and List."
+  },
+  {
+   "expression": "[a=1,b=2] = [b=2,a=1]",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "[a=1,b=2] <> [b=2,a=1]",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "[a=1,b=2] < [b=2,a=1]",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Record and Record."
+  },
+  {
+   "expression": "[a=1,b=2] >= [b=2,a=1]",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator >= to types Record and Record."
+  },
+  {
+   "expression": "#date(2024,1,1) = #datetime(2024,1,1,0,0,0)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "#date(2024,1,1) <> #datetime(2024,1,1,0,0,0)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "#date(2024,1,1) < #datetime(2024,1,1,0,0,0)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types DateTime and Date."
+  },
+  {
+   "expression": "#date(2024,1,1) >= #datetime(2024,1,1,0,0,0)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types DateTime and Date."
+  },
+  {
+   "expression": "1 = \"1\"",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "1 <> \"1\"",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "1 < \"1\"",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Text and Number."
+  },
+  {
+   "expression": "1 >= \"1\"",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Text and Number."
+  },
+  {
+   "expression": "#nan = #nan",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "#nan <> #nan",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "#nan < #nan",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "#nan >= #nan",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "true = 1",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "true <> 1",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "true < 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Number and Logical."
+  },
+  {
+   "expression": "true >= 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Number and Logical."
+  },
+  {
+   "expression": "true and null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "false and null",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null or true",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "not null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "not 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator not to the type Number."
+  },
+  {
+   "expression": "true or error \"x\"",
+   "power_bi": "ERR:PARTITION: Exception calling \"ExecuteNonQuery\" with \"0\" argument(s): \"M Engine error: 'Microsoft.Data.Mashup.Preview; Token Literal expected.'.\""
+  },
+  {
+   "expression": "false and error \"x\"",
+   "power_bi": "ERR:PARTITION: Exception calling \"ExecuteNonQuery\" with \"0\" argument(s): \"M Engine error: 'Microsoft.Data.Mashup.Preview; Token Literal expected.'.\""
+  },
+  {
+   "expression": "if null then 1 else 2",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Logical."
+  },
+  {
+   "expression": "if 1 then 1 else 2",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "if true then 1 else error \"no\"",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "let a=1, b=a+1 in b*2",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "let f=(x)=>x*2 in f(3)",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "let f=(x, optional y)=>if y=null then x else x+y in {f(1),f(1,2)}",
+   "power_bi": "V:list:[number:1,number:3]"
+  },
+  {
+   "expression": "let f=(x as number)=>x in f(\"a\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "(each _*2)(4)",
+   "power_bi": "V:number:8"
+  },
+  {
+   "expression": "let r=[a=1,b=a+1] in r[b]",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "[a=1][b]",
+   "power_bi": "ERR:Expression.Error: The field 'b' of the record wasn't found."
+  },
+  {
+   "expression": "[a=1][b]?",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "{1,2,3}{1}",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "{1,2,3}{5}",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "{1,2,3}{5}?",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "{1,2,3}{-1}",
+   "power_bi": "ERR:Expression.Error: The index cannot be negative."
+  },
+  {
+   "expression": "[a=[b=2]][a][b]",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "let x = 1, x = 2 in x",
+   "power_bi": "ERR:Expression.Error: Duplicate initializer named 'x'."
+  },
+  {
+   "expression": "let rec = (n)=> if n=0 then 1 else n*@rec(n-1) in rec(5)",
+   "power_bi": "V:number:120"
+  },
+  {
+   "expression": "try 1/0",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=number:+Infinity]"
+  },
+  {
+   "expression": "try error \"x\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"x\",\"Detail\"=null,\"Message.Format\"=text:\"x\",\"Message.Parameters\"=null,\"ErrorCode\"=null]]"
+  },
+  {
+   "expression": "try error \"x\" otherwise 5",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "(try error [Reason=\"R\",Message=\"M\"])[Error][Reason]",
+   "power_bi": "V:text:\"R\""
+  },
+  {
+   "expression": "try error Error.Record(\"R\",\"M\",\"D\")",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"R\",\"Message\"=text:\"M\",\"Detail\"=text:\"D\",\"Message.Format\"=null,\"Message.Parameters\"=null,\"ErrorCode\"=null]]"
+  },
+  {
+   "expression": "(try Text.Length(1))[HasError]",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "try {1}{3}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Detail\"=list:[number:1],\"Message.Format\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10063\"]]"
+  },
+  {
+   "expression": "error \"a\" & \"b\"",
+   "power_bi": "ERR:Expression.Error: ab"
+  },
+  {
+   "expression": "try (try error \"x\")[Value]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'Value' of the record wasn't found.\",\"Detail\"=record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"x\",\"Detail\"=null,\"Message.Format\"=text:\"x\",\"Message.Parameters\"=null,\"ErrorCode\"=null]],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"Value\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "1 is number",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"a\" is text",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "null is null",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "null is number",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "1 as text",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "null as nullable number",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Value.Type(1)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "type {number}",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "1 meta [a=1]",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Metadata(1 meta [a=1])",
+   "power_bi": "V:record:[\"a\"=number:1]"
+  },
+  {
+   "expression": "type table [a=number]",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "\"a\" & 1",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator & to types Text and Number."
+  },
+  {
+   "expression": "\"a\" & null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "null & null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "{1} & null",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator & to types List and Null."
+  },
+  {
+   "expression": "#date(2024,1,1) & #time(1,0,0)",
+   "power_bi": "V:datetime:2024-01-01T01:00:00.0000000"
+  }
+ ]
+}

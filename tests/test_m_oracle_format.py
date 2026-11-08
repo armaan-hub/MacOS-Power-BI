@@ -17,6 +17,10 @@ def _b64(text: str) -> str:
     return base64.b64encode(text.encode("utf-8")).decode("ascii")
 
 
+def _hex(text: str) -> str:
+    return text.encode("utf-8").hex().upper()
+
+
 @pytest.fixture
 def no_guest(monkeypatch):
     def refuse(script):
@@ -37,7 +41,8 @@ def test_m_partition_indexes_each_expression_and_keeps_it_verbatim():
     for index, expr in enumerate(exprs):
         assert f"[I = {index}, A = (" in m
         assert f"r = try (\n{expr}\n    )" in m
-    assert "T = Table.FromRecords(Rows, type table [I = Int64.Type, A = text])" in m
+    assert "Raw = Table.FromRecords(Rows, type table [I = Int64.Type, A = text])" in m
+    assert 'T = Table.TransformColumns(Raw, {{"A", H, type text}})' in m
     assert m.startswith("let\n") and m.endswith("in\n    T")
 
 
@@ -46,6 +51,26 @@ def test_m_partition_answer_text_covers_error_value_and_unrepresentable_cases():
     assert '"ERR:" & r[Error][Reason] & ": " & (r[Error][Message] ?? "")' in m
     assert 'try ("V:" & S(r[Value])) otherwise "UNREPRESENTABLE"' in m
     assert "Json.FromValue" not in m and "V?:" not in m
+
+
+def test_partition_stores_every_answer_as_hex_so_case_cannot_collapse_it():
+    m = mo.m_partition(["1"])
+    assert m.count(mo.M_ENCODER) == 1
+    assert "Binary.ToText(Text.ToBinary(a, TextEncoding.Utf8), BinaryEncoding.Hex)" in m
+    assert m.index(mo.M_ENCODER) < m.index("Rows = {")
+
+
+@pytest.mark.parametrize("answer", ['V:text:"a"', 'V:text:"A"', 'V:text:"ß"', "V:text:\"e\u0301\"", 'V:text:"\\t"', "ERR:x: \n", ""])
+def test_decode_answer_inverts_utf8_hex_in_either_case(answer):
+    hexed = answer.encode("utf-8").hex()
+    assert mo.decode_answer(hexed) == answer
+    assert mo.decode_answer(hexed.upper() + "\r\n") == answer
+
+
+def test_hex_of_case_variants_never_collides_ignoring_case():
+    answers = ['V:text:"a"', 'V:text:"A"', 'V:text:"aB"', 'V:text:"Ab"', 'V:text:"AB"']
+    stored = [a.encode("utf-8").hex().upper() for a in answers]
+    assert len({x.casefold() for x in stored}) == len(answers)
 
 
 @pytest.mark.parametrize("count", [1, 2, 5])
@@ -140,7 +165,7 @@ def test_delete_is_judged_by_whether_the_table_is_still_there():
 
 
 def test_run_batch_warns_only_when_the_guest_reports_a_leftover_table(monkeypatch, capsys):
-    clean = "R|0|" + _b64("V:number:1") + "\nDROPPED"
+    clean = "R|0|" + _hex("V:number:1") + "\nDROPPED"
     monkeypatch.setattr(mo, "guest", lambda script: clean)
     assert mo._run_batch(["1"], "51234") == (["V:number:1"], None)
     assert "WARNING" not in capsys.readouterr().out
@@ -148,7 +173,7 @@ def test_run_batch_warns_only_when_the_guest_reports_a_leftover_table(monkeypatc
     monkeypatch.setattr(mo, "guest", lambda script: failed_create)
     assert mo._run_batch(["1 +"], "51234") == (None, "syntax")
     assert "WARNING" not in capsys.readouterr().out
-    leftover = "R|0|" + _b64("V:number:1") + "\nDROP_ERR table still present: locked"
+    leftover = "R|0|" + _hex("V:number:1") + "\nDROP_ERR table still present: locked"
     monkeypatch.setattr(mo, "guest", lambda script: leftover)
     assert mo._run_batch(["1"], "51234") == (["V:number:1"], None)
     assert "WARNING: could not delete scratch table MOracle__" in capsys.readouterr().out
@@ -157,21 +182,21 @@ def test_run_batch_warns_only_when_the_guest_reports_a_leftover_table(monkeypatc
 def test_parse_output_decodes_multiline_answers_in_index_order():
     output = "\n".join([
         "DROPPED",
-        "R|1|" + _b64('V:"line one\nline two"'),
-        "R|0|" + _b64("ERR:Expression.Error: boom"),
+        "R|1|" + _hex('V:"line one\nline two"'),
+        "R|0|" + _hex("ERR:Expression.Error: boom"),
     ])
     assert mo.parse_output(output, 2) == (['ERR:Expression.Error: boom', 'V:"line one\nline two"'], None)
 
 
-def test_parse_output_unicode_answers_survive_base64():
-    output = "R|0|" + _b64("V:\"café ✓\"") + "\nDROPPED"
+def test_parse_output_unicode_answers_survive_hex():
+    output = "R|0|" + _hex("V:\"café ✓\"") + "\nDROPPED"
     assert mo.parse_output(output, 1) == (['V:"café ✓"'], None)
 
 
 def test_parse_output_short_or_empty_output_asks_again():
     assert mo.parse_output("", 2) == (None, None)
-    assert mo.parse_output("R|0|" + _b64("V:1") + "\nDROPPED", 2) == (None, None)
-    assert mo.parse_output("R|0|" + _b64("V:1") + "\nR|0|" + _b64("V:1") + "\n", 2) == (None, None)
+    assert mo.parse_output("R|0|" + _hex("V:1") + "\nDROPPED", 2) == (None, None)
+    assert mo.parse_output("R|0|" + _hex("V:1") + "\nR|0|" + _hex("V:1") + "\n", 2) == (None, None)
 
 
 def test_parse_output_reports_partition_failure_message():
@@ -181,7 +206,7 @@ def test_parse_output_reports_partition_failure_message():
 
 def test_run_batch_retries_short_output_then_accepts(monkeypatch):
     calls = []
-    outputs = ["", "R|0|" + _b64("V:1") + "\nR|1|" + _b64("V:2") + "\nDROPPED"]
+    outputs = ["", "R|0|" + _hex("V:1") + "\nR|1|" + _hex("V:2") + "\nDROPPED"]
 
     def fake_guest(script):
         calls.append(script)
