@@ -10361,6 +10361,41 @@ def _evaluate_measures_once(
             return typed_cell(one_context, target_column, row.get(target_column)) if row is not None else None
 
         read.key_column = hops[0][1] if len(hops) == 1 and target_column.casefold() == hops[0][3].casefold() else None  # type: ignore[attr-defined]
+        # the blank group of a one-to-one last hop (U -> W, the U row has no W partner): the blank member of W is the partner of those U
+        # rows, so a group filter on them reaches the many side below U (live Power BI, ZM/ZJ: SUMMARIZE(F2, W[Y]) blank = F rows of U k4 / j4)
+        read.partner_node_id = None  # type: ignore[attr-defined]
+        read.partner_position = None  # type: ignore[attr-defined]
+        if len(hops) >= 2 and any(
+            isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"
+            and {str(item.get("from_table_id")), str(item.get("to_table_id"))} == {hops[-1][0], hops[-1][2]}
+            for item in relationship_definitions
+        ):
+            last_node, last_here, last_one, last_there = hops[-1]
+            partner_index = one_side_value_index(contexts_by_id[last_one], last_there)
+
+            def partner_position(typed: dict[str, Any]) -> int | None:
+                """What this input row reaches in the last hop's start table when its partner there is the blank member: the position of
+                the row that has no partner, or -1 when the input row's key has no row there (an orphan key reaches that table's own
+                blank member, which belongs to the blank group as well). None when the row has a partner."""
+                key = typed[first_header]
+                position: int | None = None
+                for step, (_node, _here, one_id, there) in enumerate(hops[:-1]):
+                    one_context = contexts_by_id[one_id]
+                    matches = one_side_value_index(one_context, there).get(cell_key(key))
+                    if not matches:
+                        if len(hops) > 2:  # an orphan key further down a chain reaches the unknown member of a table that is not the start
+                            raise MeasureError("SUMMARIZE blank group of a one-to-one table reached through an orphan key of a longer chain is not supported in the local engine.")
+                        return -1
+                    position = min(matches)
+                    next_here = hops[step + 1][1]
+                    key = typed_cell(one_context, next_here, one_context["rows"][position].get(next_here))
+                node_context = contexts_by_id[last_node]
+                if position is None or partner_index.get(cell_key(typed_cell(node_context, last_here, node_context["rows"][position].get(last_here)))):
+                    return None
+                return position
+
+            read.partner_node_id = last_node  # type: ignore[attr-defined]
+            read.partner_position = partner_position  # type: ignore[attr-defined]
         return target, target_column, read
 
     def loaded_table_ids(name: str) -> list[str]:
@@ -10416,6 +10451,7 @@ def _evaluate_measures_once(
     def summarize_group_value(
         expression: tuple[Any, ...], group_context: dict[str, Any], group_row: dict[str, Any], source: dict[str, Any], members: list[int],
         key_columns: dict[str, str], unknown_tables: frozenset[str] = frozenset(),
+        blank_partners: list[tuple[dict[str, Any], frozenset[int]]] = [],
     ) -> Any:
         """An extension column of SUMMARIZE: the group is the set of rows of the summarized table it holds, which also filter the
         tables on that table's one side to the rows they reach (live Power BI: SUMMARIZE(Fact, Fact[Qty], "x", CALCULATE(SUM(Cal[Year])))
@@ -10430,11 +10466,18 @@ def _evaluate_measures_once(
             if one_rows is not None and (read is None or one_id in read):
                 one_context = contexts_by_id[one_id]
                 extra[one_id] = (one_context, {column: one_rows for column in one_context["headers"]})
+        for partner_context, partner_rows in blank_partners:  # the rows whose one-to-one partner is the blank member of the group
+            extra[partner_context["id"]] = (partner_context, {column: partner_rows for column in partner_context["headers"]})
         merged: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] = {}
         for table_id, (base_context, column_rows) in extra.items():
             held = by_column.get(table_id, (base_context, {}))[1]
+            def intersect(rows: frozenset[int], other: frozenset[int]) -> frozenset[int]:
+                both = rows & other
+                if isinstance(rows, BlankSet) and rows.blank:  # the blank member stays only while the other filter selects it too
+                    return BlankSet(both, blank=isinstance(other, BlankSet) and other.blank)
+                return both
             merged[table_id] = (base_context, {
-                column: (rows & held[column] if column in held else rows) for column, rows in column_rows.items()
+                column: (intersect(rows, held[column]) if column in held else rows) for column, rows in column_rows.items()
             })
         # a group on the key column of the relationship (Dim[Prod] for Fact[Prod]) is the same key as the summarized table's own column;
         # any other column of a table on the one side only reaches the summarized table by the context transition
@@ -10923,6 +10966,26 @@ def _evaluate_measures_once(
             out_rows = []
             saved_shadow, saved_touched = push_shadow(context, rows, "install"), eff_touched  # SUMMARIZE's input table is the shadow
             try:
+                def blank_partner_rows(group_row: dict[str, Any]) -> list[tuple[dict[str, Any], frozenset[int]]]:
+                    """Per blank related column of a group: the rows of the one-to-one start that the group's input rows reach without a partner."""
+                    if has_rollup:
+                        return []
+                    key = row_key(group_row[c] for c in group_columns)
+                    found_partners = []
+                    for c, group in related_groups.items():
+                        position_of = group[2].partner_position  # type: ignore[attr-defined]
+                        if position_of is None or group_row.get(c) is not None:
+                            continue
+                        reached = [
+                            p for typed in typed_rows if row_key(typed[k] for k in group_columns) == key
+                            for p in [position_of(typed)] if p is not None
+                        ]
+                        # the filter the blank group puts on the one-to-one start table: the rows with no partner that its input rows carry,
+                        # plus the table's own blank member when an input row has an orphan key (the facts with an orphan key then count too)
+                        positions = BlankSet((p for p in reached if p >= 0), blank=any(p < 0 for p in reached))
+                        found_partners.append((contexts_by_id[group[2].partner_node_id], positions))  # type: ignore[attr-defined]
+                    return found_partners
+
                 for group_position, group_row in enumerate(all_group_rows):
                     row = dict(group_row)
                     eff_touched = frozenset()
@@ -10942,6 +11005,7 @@ def _evaluate_measures_once(
                                     expression, row_ctx, group_row, source_base, members,
                                     {c: g[2].key_column for c, g in related_groups.items() if g[2].key_column and c not in rolled_up},
                                     frozenset(g[0]["id"] for c, g in related_groups.items() if group_row.get(c) is None),
+                                    blank_partner_rows(group_row),
                                 )
                             else:
                                 row[name] = evaluate_with_context_transition(expression, row_ctx, group_row, keys=True)
@@ -11448,6 +11512,43 @@ def _evaluate_measures_once(
             actual_columns.append(actual)
         return actual_columns
 
+    def plan_time_summarize_check(node: Any) -> None:
+        """SUMMARIZE(Table, Other[Col]) where Other is not on the one side of Table (a many-to-many partner, say) is an error in Power BI
+        whatever the rows are: SUMMARIZECOLUMNS(U[X], TREATAS({"m1"}, U[K]), "v", COUNTROWS(SUMMARIZE(A, B[N]))) is ERR (live Power BI, ZM),
+        and the local engine would only meet the error when a group reached the expression."""
+        stack = [node]
+        while stack:
+            item = stack.pop()
+            if not isinstance(item, tuple) or not item:
+                continue
+            stack.extend(child for child in item if isinstance(child, (tuple, list)))
+            if not (item[0] == "call" and item[1] == "SUMMARIZE" and len(item[2]) >= 2 and item[2][0][0] == "table"):
+                continue
+            try:
+                source = resolve_table_context(str(item[2][0][1]))
+            except MeasureError:
+                continue
+            reachable = {source["id"]}
+            queue = [source["id"]]
+            while queue:
+                for one_id, _here, _there in one_side_links(queue.pop()):
+                    if one_id in contexts_by_id and one_id not in reachable:
+                        reachable.add(one_id)
+                        queue.append(one_id)
+            for argument in item[2][1:]:
+                if argument[0] == "string":
+                    break
+                if argument[0] != "reference" or not argument[1]:
+                    continue
+                try:
+                    target = resolve_table_context(str(argument[1]))
+                except MeasureError:
+                    continue
+                if target["id"] in reachable or any(h.casefold() == str(argument[2]).casefold() for h in source["headers"]):
+                    continue
+                if any(h.casefold() == str(argument[2]).casefold() for h in target["headers"]):
+                    raise MeasureError(f"Column {argument[2]!r} does not exist in the SUMMARIZE table.")
+
     def summarize_columns(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         references: list[tuple[Any, ...]] = []
         rollup_pairs: list[tuple[list[tuple[Any, ...]], str]] = []
@@ -11520,6 +11621,8 @@ def _evaluate_measures_once(
             stripped.append(expression[2][0] if wrapper else expression)
         if not headers and not names:
             raise MeasureError("SUMMARIZECOLUMNS needs a group-by column or a name and expression.")
+        for expression in stripped:  # live Power BI: a bad SUMMARIZE is an error at plan time, even when no group reaches it
+            plan_time_summarize_check(expression)
         if len({context["id"] for context, _column in resolved}) > 1 and not names:
             raise MeasureError("SUMMARIZECOLUMNS over columns of several tables needs at least one expression in the local engine.")
         added: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]] = {}
@@ -11717,7 +11820,24 @@ def _evaluate_measures_once(
         references = list(arguments[1:split])
         if any(reference[0] != "reference" for reference in references):
             raise MeasureError("GROUPBY groups by column references.")
-        columns = group_columns_of(context, references, "GROUPBY")
+        readers: dict[str, Callable[[dict[str, Any]], Any]] = {}  # output column -> reader of a column of a table on the one side (RELATED)
+        reader_types: dict[str, str] = {}
+        reader_lineage: dict[str, tuple[dict[str, Any], str]] = {}
+        try:
+            columns = group_columns_of(context, references, "GROUPBY")
+        except MeasureError as original:
+            # live Power BI: GROUPBY(Fact, Dim[Col]) groups the rows by the related value (the unknown member of a key with no partner is
+            # BLANK), the same reader SUMMARIZE uses; a column that cannot be reached keeps the refusal
+            columns = []
+            for reference in references:
+                own = next((h for h in context["headers"] if h.casefold() == str(reference[2]).casefold()), None)
+                related = summarize_related_group(context, reference, own)
+                if related is None:
+                    raise original from None
+                readers[related[1]] = related[2]
+                reader_types[related[1]] = related[0].get("column_types", {}).get(related[1], "text")
+                reader_lineage[related[1]] = (related[0], related[1])
+                columns.append(related[1])
         if (len(arguments) - split) % 2:
             raise MeasureError("GROUPBY needs an expression after each column name.")
         names = [str(arguments[i][1]) for i in range(split, len(arguments), 2)]
@@ -11734,10 +11854,12 @@ def _evaluate_measures_once(
         groups: dict[tuple[Any, ...], tuple[dict[str, Any], list[dict[str, Any]]]] = {}
         for row in rows:
             typed = typed_row(context, row)
-            key = row_key(typed[column] for column in columns)
-            groups.setdefault(key, ({column: typed[column] for column in columns}, []))[1].append(row)
+            values = {column: (readers[column](typed) if column in readers else typed[column]) for column in columns}
+            key = row_key(values[column] for column in columns)
+            groups.setdefault(key, (values, []))[1].append(row)
         lineage_all = base_lineage(context)
-        lineage = {column: lineage_all[column] for column in columns if column in lineage_all}
+        lineage = {column: lineage_all[column] for column in columns if column in lineage_all and column not in readers}
+        lineage.update(reader_lineage)  # a related column is the column of the table it reads (as SUMMARIZE's related groups are)
         output = []
         for values, group_rows in groups.values():
             row = dict(values)
@@ -11749,6 +11871,7 @@ def _evaluate_measures_once(
                 group_stack.pop()
             output.append(row)
         gb_types = {c: context.get("column_types", {}).get(c, "text") for c in columns}
+        gb_types.update(reader_types)  # a related column takes the type of the column it reads
         gb_certain = set()
         for name, expression in zip(names, expressions):
             st = _static_numeric_type(expression, table_context, variable_kinds)
