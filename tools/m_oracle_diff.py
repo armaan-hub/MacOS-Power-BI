@@ -72,6 +72,21 @@ M_SERIALIZER = r'''S = (v as any) as text =>
 '''.rstrip()
 
 
+# Power BI's column dictionary keeps ONE spelling for strings that differ only in letter case, so a stored answer
+# "A" can come back as an earlier "a". Every final answer is therefore stored as the hex of its UTF-8 bytes
+# (digits 0-9 and upper-case A-F only, so no two different answers are equal ignoring case) and decoded in Python.
+# The hex is plain ASCII, so the PowerShell transport prints it as is (no base64 for answers; FAIL messages still use base64).
+M_ENCODER = (
+    'H = (a as text) as text => try Binary.ToText(Text.ToBinary(a, TextEncoding.Utf8), BinaryEncoding.Hex) '
+    'otherwise Binary.ToText(Text.ToBinary("UNREPRESENTABLE", TextEncoding.Utf8), BinaryEncoding.Hex)'
+)
+
+
+def decode_answer(stored: str) -> str:
+    """Invert the partition's hex encoding (accepts either letter case)."""
+    return bytes.fromhex(stored.strip()).decode("utf-8")
+
+
 def chunks(expressions: list[str], size: int) -> list[list[str]]:
     if size < 1:
         raise ValueError("chunk size must be at least 1")
@@ -99,8 +114,10 @@ def m_partition(expressions: list[str]) -> str:
     return (
         "let\n"
         "    " + M_SERIALIZER + ",\n"
+        "    " + M_ENCODER + ",\n"
         "    Rows = {\n" + items + "\n    },\n"
-        "    T = Table.FromRecords(Rows, type table [I = Int64.Type, A = text])\n"
+        "    Raw = Table.FromRecords(Rows, type table [I = Int64.Type, A = text]),\n"
+        '    T = Table.TransformColumns(Raw, {{"A", H, type text}})\n'
         "in\n"
         "    T"
     )
@@ -117,7 +134,7 @@ def tmsl(expressions: list[str]) -> str:
 
 
 # PowerShell after the shared head (connection open). Create, refresh and read inside try; delete always in finally.
-# Output: R|<index>|<base64 answer> per row, or FAIL|<base64 message> when create/refresh/read threw, then DROPPED or DROP_ERR.
+# Output: R|<index>|<hex answer> per row, or FAIL|<base64 message> when create/refresh/read threw, then DROPPED or DROP_ERR.
 _BODY = r"""
 $t=$t.Replace('"__DB__"', '"'+$c.Database+'"')
 $rows=New-Object System.Collections.ArrayList
@@ -140,7 +157,7 @@ finally{
   }catch{ 'DROP_ERR could not check: '+($_.Exception.Message -replace '\s+',' ')+' '+$dropMsg }
 }
 if($failed){ 'FAIL|'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($fail)) }
-else{ foreach($row in ($rows | Sort-Object I)){ 'R|'+$row.I+'|'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($row.A)) } }
+else{ foreach($row in ($rows | Sort-Object I)){ 'R|'+$row.I+'|'+$row.A } }
 $c.Close()"""
 
 
@@ -159,7 +176,7 @@ def parse_output(output: str, count: int) -> tuple[list[str] | None, str | None]
     for line in lines:
         if line.startswith("R|"):
             index, _, payload = line[2:].partition("|")
-            answers[int(index)] = base64.b64decode(payload.strip()).decode("utf-8")
+            answers[int(index)] = decode_answer(payload)
     if sorted(answers) == list(range(count)):
         return [answers[index] for index in range(count)], None
     return None, None
