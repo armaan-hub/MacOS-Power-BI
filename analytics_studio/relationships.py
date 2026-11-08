@@ -444,7 +444,7 @@ def _apply_expanded_table_filters(
                 else:
                     reached_rows.setdefault(table_id, set()).add(position)
         for table_id in root_paths:
-            if table_id == root_id or table_id in filter_roots or table_id not in blank_reached:
+            if table_id == root_id or table_id in filter_roots or table_id not in blank_reached or root_id in (tables_by_id[table_id].get("expanded_filter_cleared") or ()):
                 # a one-side table with a filter of its own: what a filter on its key column replaces is settled by the caller; when every
                 # key of the filter rows has a match the caller narrows the table itself (and settles what a later ALL() clears)
                 continue
@@ -456,12 +456,12 @@ def _apply_expanded_table_filters(
         if by_filter_function and not _is_whole_row_table_filter(root):
             continue  # the other tables a FILTER(T, ..) reaches through its one side are left to the caller (not modelled here)
         for target_id, target in tables_by_id.items():
-            if target_id == root_id or target_id in root_paths:
-                continue
+            if target_id == root_id or target_id in root_paths or root_id in (target.get("expanded_filter_cleared") or ()):
+                continue  # Task 88: a table the user cleared (ALL / REMOVEFILTERS ..) after this table filter was applied is no longer narrowed by it
             target_paths = one_side_paths(target_id)
             common = sorted((set(root_paths) & set(target_paths)) - {root_id, target_id})
-            if not common:
-                continue
+            if not common or any(root_id in (tables_by_id[common_id].get("expanded_filter_cleared") or ()) for common_id in common):
+                continue  # (a link table cleared after the filter no longer carries it from one fact table to the other)
             # Task 88: with one common one-side table the blank member is a value of that table (a row with no match in it is
             # the blank member, live Power BI: CALCULATE(COUNTROWS(F), F2) keeps the F rows of U's blank member, selected by F2's orphans);
             # with two or more common tables a key with no match is still refused

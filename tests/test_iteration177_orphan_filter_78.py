@@ -128,3 +128,190 @@ CASES = [
 @pytest.mark.parametrize(("expression", "expected"), CASES)
 def test_orphan_filter_78_matches_power_bi(expression, expected):
     assert m.ours_for("ZH", expression) == expected
+
+
+SPEC3_CASES = [  # Task 88 (nested clears, spec3): CALCULATE(CALCULATE(inner, clear), table filter); expected = live Power BI
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_U)),ZH_F)',
+     '7'),  # restored (right on main, wrong before this step) (spec3 item 0)
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_W)),ZH_F2)',
+     '7'),  # restored (right on main, wrong before this step) (spec3 item 1)
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLSELECTED(ZH_U)),FILTER(ZH_F,ZH_F[Amt]>10))',
+     '5'),  # fixed vs main (spec3 item 5)
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLSELECTED(ZH_U)),ZH_F)',
+     '6'),  # fixed vs main (spec3 item 6)
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLSELECTED(ZH_U)),ZH_F2)',
+     '4'),  # fixed vs main (spec3 item 7)
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),REMOVEFILTERS(ZH_U[X])),ZH_F2)',
+     '4'),  # fixed vs main (spec3 item 10)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALL(ZH_F)),ZH_F2)',
+     '12'),  # restored (right on main, wrong before this step) (spec3 item 20)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),FILTER(ZH_F,ZH_F[Amt]>10))',
+     '6'),  # restored (right on main, wrong before this step) (spec3 item 24)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))',
+     '6'),  # restored (right on main, wrong before this step) (spec3 item 25)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),ZH_F)',
+     '6'),  # restored (right on main, wrong before this step) (spec3 item 26)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_W)),ZH_F)',
+     '6'),  # restored (right on main, wrong before this step) (spec3 item 27)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))',
+     '3'),  # fixed vs main (spec3 item 30)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLSELECTED(ZH_U)),ZH_F)',
+     '5'),  # fixed vs main (spec3 item 31)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLSELECTED(ZH_U)),ZH_F2)',
+     '3'),  # fixed vs main (spec3 item 32)
+    ('CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_F)),FILTER(ZH_F2,ZH_F2[Amt]>10))',
+     '6'),  # restored (right on main, wrong before this step) (spec3 item 43)
+    ('CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_W)),ZH_F)',
+     '6'),  # restored (right on main, wrong before this step) (spec3 item 45)
+    ('CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALLSELECTED(ZH_U)),FILTER(ZH_F,ZH_F[Amt]>10))',
+     '4'),  # fixed vs main (spec3 item 46)
+    ('CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))',
+     '3'),  # fixed vs main (spec3 item 47)
+    ('CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),REMOVEFILTERS(ZH_U[X])),FILTER(ZH_F,ZH_F[Amt]>10))',
+     '4'),  # fixed vs main (spec3 item 49)
+    ('CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLSELECTED(ZH_U)),ZH_F2)',
+     '176'),  # fixed vs main (spec3 item 62)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_F)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=7;m2=7;m2b=7;m4=7;m7=7'),  # restored (right on main, wrong before this step) (spec3 item 65)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=7;m2=7;m2b=7;m4=7;m7=7'),  # restored (right on main, wrong before this step) (spec3 item 66)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_U)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=7;m2=7;m2b=7;m4=7;m7=7'),  # restored (right on main, wrong before this step) (spec3 item 67)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_W)),ZH_F)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=7;m2=7;m2b=7;m4=7;m7=7'),  # restored (right on main, wrong before this step) (spec3 item 68)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALLSELECTED(ZH_U)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=9;m2=9;m2b=9;m4=9;m7=9'),  # fixed vs main (spec3 item 83)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),ZH_F)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # restored (right on main, wrong before this step) (spec3 item 86)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # restored (right on main, wrong before this step) (spec3 item 87)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_W)),ZH_F)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # restored (right on main, wrong before this step) (spec3 item 88)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_W)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # restored (right on main, wrong before this step) (spec3 item 89)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=3;m2=3;m2b=3;m4=3;m7=3'),  # fixed vs main (spec3 item 92)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLSELECTED(ZH_U)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=3;m2=3;m2b=3;m4=3;m7=3'),  # fixed vs main (spec3 item 93)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),REMOVEFILTERS(ZH_U[X])),ZH_F)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=5;m2=5;m2b=5;m4=5;m7=5'),  # fixed vs main (spec3 item 95)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # restored (right on main, wrong before this step) (spec3 item 104)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_U)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # restored (right on main, wrong before this step) (spec3 item 105)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_W)),ZH_F)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=6;m2=6;m2b=6;m4=6;m7=6'),  # restored (right on main, wrong before this step) (spec3 item 106)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=3;m2=3;m2b=3;m4=3;m7=3'),  # fixed vs main (spec3 item 108)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALLSELECTED(ZH_U)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=3;m2=3;m2b=3;m4=3;m7=3'),  # fixed vs main (spec3 item 109)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLSELECTED(ZH_U)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=176;m2=176;m2b=176;m4=176;m7=176'),  # fixed vs main (spec3 item 126)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_F)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=7;x1=7;x2=7;x3=7;x4=7;x6=7;x8=7'),  # restored (right on main, wrong before this step) (spec3 item 127)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_U)),ZH_F)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=7;x1=7;x2=7;x3=7;x4=7;x6=7;x8=7'),  # restored (right on main, wrong before this step) (spec3 item 128)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_U)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=7;x1=7;x2=7;x3=7;x4=7;x6=7;x8=7'),  # restored (right on main, wrong before this step) (spec3 item 129)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_W)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=7;x1=7;x2=7;x3=7;x4=7;x6=7;x8=7'),  # restored (right on main, wrong before this step) (spec3 item 130)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLSELECTED(ZH_U)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=1;x1=1;x2=1;x4=1;x6=1'),  # fixed vs main (spec3 item 132)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLSELECTED(ZH_U)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=1;x1=1;x3=1;x6=1'),  # fixed vs main (spec3 item 133)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALL(ZH_F)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=12;x1=12;x2=12;x3=12;x4=12;x6=12;x8=12'),  # restored (right on main, wrong before this step) (spec3 item 142)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_F)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 149)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),ZH_F)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 150)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 151)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_W)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 152)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_W)),ZH_F)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 153)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_W)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 154)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLSELECTED(ZH_U)),ZH_F)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     'x1=1;x2=1;x3=1;x4=1;x6=1'),  # fixed vs main (spec3 item 158)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),REMOVEFILTERS(ZH_U[X])),ZH_F)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     'x1=1;x2=1;x3=1;x4=1;x6=1'),  # fixed vs main (spec3 item 159)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),REMOVEFILTERS(ZH_U[X])),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     'x1=1;x3=1;x6=1'),  # fixed vs main (spec3 item 160)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_F)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 174)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_F)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 176)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=6;x1=6;x2=6;x3=6;x4=6;x6=6;x8=6'),  # restored (right on main, wrong before this step) (spec3 item 177)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),REMOVEFILTERS(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     'x1=1;x3=1;x6=1'),  # fixed vs main (spec3 item 179)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),REMOVEFILTERS(ZH_U[X])),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     'x1=1;x3=1;x6=1'),  # fixed vs main (spec3 item 180)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(SUM(ZH_F2[Amt]),ALL(ZH_W)),ZH_F)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=147;x1=147;x2=147;x3=147;x4=147;x6=147;x8=147'),  # restored (right on main, wrong before this step) (spec3 item 183)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLSELECTED(ZH_U)),ZH_F2)),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=113;x1=18;x3=9;x6=36'),  # fixed vs main (spec3 item 188)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=7;y1=7;y10=7;y3=7;y6=7;y9=7'),  # restored (right on main, wrong before this step) (spec3 item 191)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_U)),ZH_F)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=7;y1=7;y10=7;y3=7;y6=7;y9=7'),  # restored (right on main, wrong before this step) (spec3 item 192)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_W)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=7;y1=7;y10=7;y3=7;y6=7;y9=7'),  # restored (right on main, wrong before this step) (spec3 item 193)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALL(ZH_W)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=7;y1=7;y10=7;y3=7;y6=7;y9=7'),  # restored (right on main, wrong before this step) (spec3 item 194)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLSELECTED(ZH_U)),ZH_F)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=3;y1=1;y3=1;y6=1'),  # fixed vs main (spec3 item 197)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),REMOVEFILTERS(ZH_U[X])),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=1;y1=1;y3=1;y6=1'),  # fixed vs main (spec3 item 198)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALL(ZH_F)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=12;y1=12;y10=12;y3=12;y6=12;y9=12'),  # restored (right on main, wrong before this step) (spec3 item 211)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALL(ZH_U)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=12;y1=12;y10=12;y3=12;y6=12;y9=12'),  # restored (right on main, wrong before this step) (spec3 item 214)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALLSELECTED(ZH_U)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=4;y1=2;y3=1;y6=2'),  # fixed vs main (spec3 item 217)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_F)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 219)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 221)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_U)),ZH_F)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 222)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALL(ZH_W)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 223)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLSELECTED(ZH_U)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=2;y1=1;y6=1'),  # fixed vs main (spec3 item 227)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_F)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 239)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 240)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_W)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 241)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_W)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 242)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALL(ZH_W)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=6;y1=6;y10=6;y3=6;y6=6;y9=6'),  # restored (right on main, wrong before this step) (spec3 item 243)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(DISTINCTCOUNT(ZH_U[K]),ALLSELECTED(ZH_U)),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=2;y1=1;y6=1'),  # fixed vs main (spec3 item 244)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(SUM(ZH_F2[Amt]),ALLNOBLANKROW(ZH_U)),ZH_F)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=78;y1=78;y10=78;y3=78;y6=78;y9=78'),  # restored (right on main, wrong before this step) (spec3 item 248)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALL(ZH_F)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=268;y1=268;y10=268;y3=268;y6=268;y9=268'),  # restored (right on main, wrong before this step) (spec3 item 256)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALL(ZH_W)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=268;y1=268;y10=268;y3=268;y6=268;y9=268'),  # restored (right on main, wrong before this step) (spec3 item 258)
+]
+
+
+def _same_answer(ours, expected):
+    if ours == expected:
+        return True
+    try:
+        return float(ours) == float(expected)
+    except ValueError:
+        return False
+
+
+@pytest.mark.parametrize(("expression", "expected"), SPEC3_CASES)
+def test_nested_clear_under_table_filter_matches_power_bi(expression, expected):
+    assert _same_answer(m.ours_for("ZH", expression), expected)
+
