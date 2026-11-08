@@ -11,3 +11,6 @@ Known wrong examples: COUNTROWS(VALUES(W[Y])) under ALLNOBLANKROW(U) + an orphan
 ## Part 1 (Haiku): fix in `analytics_studio/measures.py` / `relationships.py`. Refuse narrowly what cannot be explained.
 ## Part 2: `tests/test_iteration178_nested_clear_79.py`: every fixed item plus 30 already matching, assert ours_for == powerbi (numeric-tolerant compare like tests/test_iteration177_orphan_filter_78.py).
 ## Score / gate: spec 0 wrong, spec3 / spec of Task 88 lose nothing; Opus checks a fresh unseen model and runs the gate.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 178. Locked 531486.
