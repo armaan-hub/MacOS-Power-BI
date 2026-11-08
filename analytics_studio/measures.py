@@ -22543,8 +22543,6 @@ def _evaluate_measures_once(
                 lines = [delimiter.join(csv_cell(cell_value(row, h), h) for h in headers) for row in shown_rows]
                 header_line = delimiter.join(csv_field(header_text(h)) for h in headers)
                 if not lines:
-                    if context.get("info_function"):
-                        return header_line if include_headers else None
                     return (header_line + "\n") if include_headers else None  # no header and no row is BLANK
                 return header_line + "\n" + "\n".join(lines) if include_headers else "\n".join(lines)
 
