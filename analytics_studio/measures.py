@@ -16352,10 +16352,6 @@ def _evaluate_measures_once(
                 )
             relationship_index = matches[0]
             relationship = relationship_definitions[relationship_index]
-            if not relationship.get("is_active"):
-                raise MeasureError(
-                    "CROSSFILTER needs an active relationship in this local subset."
-                )
             pair = tuple(sorted((left_context["id"], right_context["id"])))
             previous_index = table_pair_relationships.get(pair)
             if previous_index is not None:
@@ -16381,11 +16377,25 @@ def _evaluate_measures_once(
             elif direction in {
                 "ONEWAY_LEFTFILTERSRIGHT", "ONEWAY_RIGHTFILTERSLEFT"
             }:
-                if cardinality in {"one_to_one", "many_to_one"}:
+                if cardinality == "one_to_one":
                     raise MeasureError(
                         f"CROSSFILTER {direction.title()} is not supported for a {cardinality.replace('_', '-')} relationship."
                     )
-                if cardinality == "one_to_many":
+                if cardinality == "many_to_one":
+                    # live Power BI: only the one side may filter the many side; the many side cannot filter the one side (also when inactive)
+                    filtering_endpoint = (
+                        right_endpoint if direction == "ONEWAY_RIGHTFILTERSLEFT" else left_endpoint
+                    )
+                    one_endpoint = (
+                        str(relationship.get("to_table_id", "")),
+                        str(relationship.get("to_column", "")).casefold(),
+                    )
+                    if filtering_endpoint != one_endpoint:
+                        raise MeasureError(
+                            "The CROSSFILTER function cannot be used to enable only the many-side of a many-to-one relationship to filter the one-side."
+                        )
+                    filter_direction = "to_from"
+                elif cardinality == "one_to_many":
                     # Microsoft normalizes reversed endpoint arguments so the
                     # first endpoint is the many side and the second is the
                     # lookup side for this direction pair.
@@ -16402,6 +16412,8 @@ def _evaluate_measures_once(
                     filter_direction = "from_to" if goes_from_to else "to_from"
             else:
                 raise MeasureError("CROSSFILTER direction is not supported.")
+            if not relationship.get("is_active"):
+                continue  # live Power BI: CROSSFILTER on a link that is inactive here (no USERELATIONSHIP activates it) has no effect
 
             previous_direction = selected_directions.get(relationship_index)
             if previous_direction is not None and previous_direction != filter_direction:
@@ -17995,6 +18007,44 @@ def _evaluate_measures_once(
             # live Power BI (iteration 84, fix agent; fresh probe): COUNTROWS(DATESYTD(ALLSELECTED(Fact[Dt]))) under ALL(Cal) and two KEEPFILTERS on
             # Cal[Year] is 4, ours BLANK: what ALLSELECTED keeps of stacked KEEPFILTERS is not modelled
             raise MeasureError("ALLSELECTED over a date column beside several KEEPFILTERS is not supported in the local engine.")
+        def link_modifiers_settled(userelationships: tuple[Any, ...], crossfilters: tuple[Any, ...]) -> tuple[Any, ...]:
+            """Settle USERELATIONSHIP beside CROSSFILTER in one CALCULATE (live Power BI).
+
+            USERELATIONSHIP(r) with CROSSFILTER(r, NONE) on the same link is an error. A BOTH CROSSFILTER on a link that a USERELATIONSHIP
+            deactivates between two tables makes the link that USERELATIONSHIP activates between those tables bidirectional:
+            CROSSFILTER(Fact[Dt], Cal[Date], BOTH) beside USERELATIONSHIP(Fact[Ship], Cal[Date]) = CROSSFILTER(Fact[Ship], Cal[Date], BOTH).
+            NONE and the ONEWAY directions on such a link leave the activated link as it is (measured on models ZO and ZB)."""
+            def endpoints(argument: tuple[Any, ...]) -> list[tuple[str, str]]:
+                pairs = []
+                for reference in argument[2][:2]:
+                    context, column = resolve_table(reference[1], reference[2])
+                    pairs.append((context["id"], column.casefold()))
+                return pairs
+
+            activated = [(endpoints(argument), argument) for argument in userelationships]
+            settled = []
+            for crossfilter in crossfilters:
+                own = endpoints(crossfilter)
+                if str(crossfilter[2][2][1]).upper() == "NONE" and any(frozenset(own) == frozenset(pairs) for pairs, _ in activated):
+                    raise MeasureError(
+                        "USERELATIONSHIP and CROSSFILTER functions have been used within a single CALCULATE function to specify incompatible settings."
+                    )
+                if (
+                    any(frozenset(own) == frozenset(pairs) for pairs, _ in activated)
+                    or len({table for table, _ in own}) != 2
+                    or str(crossfilter[2][2][1]).upper() != "BOTH"
+                ):
+                    settled.append(crossfilter)
+                    continue
+                for pairs, argument in activated:
+                    if {table for table, _ in pairs} == {table for table, _ in own}:
+                        by_table = {table: argument[2][index] for index, (table, _) in enumerate(pairs)}
+                        refs = tuple(by_table[table] for table, _ in own)
+                        crossfilter = (*crossfilter[:2], (*refs, *crossfilter[2][2:]))
+                        break
+                settled.append(crossfilter)
+            return tuple(settled)
+
         relationship_modifiers = tuple(
             argument for argument in filter_arguments if argument[0] == "call" and argument[1] in _RELATIONSHIP_MODIFIERS
         )
@@ -18002,6 +18052,8 @@ def _evaluate_measures_once(
             filter_arguments = tuple(argument for argument in filter_arguments if argument not in relationship_modifiers)
             userelationships = tuple(argument for argument in relationship_modifiers if argument[1] == "USERELATIONSHIP")
             crossfilters = tuple(argument for argument in relationship_modifiers if argument[1] == "CROSSFILTER")
+            if userelationships and crossfilters:
+                crossfilters = link_modifiers_settled(userelationships, crossfilters)
             original_expression = expression_node
 
             def with_relationships() -> Any:
