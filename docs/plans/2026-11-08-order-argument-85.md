@@ -28,3 +28,6 @@ DAX close-out finding (2026-11-08): the app accepts ORDER values Power BI reject
 - [ ] Step 4: run the new test plus every test file mentioning CONCATENATEX, RANKX, ORDERBY, WINDOW, OFFSET, INDEX, TOPN
   (`grep -l` in tests/), all pass.
 - [ ] Step 5: leave uncommitted and report (Opus commits).
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 184. Locked 531486.
