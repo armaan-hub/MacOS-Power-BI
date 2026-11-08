@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 178 (Task 89 nested-clear-79) shipped; Task 90 next.
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 179 (Task 90 summarize-groups-80) shipped; Task 91 (DAX Step A: 5 other functions + missing INFO.*) next.
 **Branch in use:** none
 **Working tree clean:** main yes
 
@@ -10,6 +10,16 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
 
 ## Task queue
+
+**Standing two-track process (set by the user 2026-11-08):** work on both DAX and Power Query (M) functions.
+1. DAX: finish the functions Power BI has and the app lacks. Status 2026-11-08: 423 of 470 built. Missing: 25 regular functions, plus about 22 `INFO.*` functions.
+   - First: the 5 "other" functions (`EXTERNALMEASURE`, `NATURALJOINUSAGE`, `SAMPLEAXISWITHLOCALMINMAX`, `SAMPLECARTESIANPOINTSBYCOVER`, `SELECTEDMEASUREFORMATSTRING`) and the missing `INFO.*` functions.
+   - Then the 6 week time-intelligence functions, which need calendar model objects.
+   - Then the 14 visual-calculation functions, which need visual calculations.
+2. Power Query (M): the local M engine knows about 76 standard-library names. Power Query has several hundred.
+   - Take the exact list from Power BI's own `#shared` in the guest, never from memory.
+   - Each function follows the parity rule: Power BI answers saved, gate passed, locked.
+3. Order (user, 2026-11-08, second instruction): strictly sequential, no alternating. First finish every missing DAX function, then run a full test pass over ALL DAX functions (every function compared with Power BI, gate passed, locked). Only after that DAX close-out passes, start Power Query M code and its functions.
 
 | # | Task | Plan file | Status | Owner now |
 |---|------|-----------|--------|-----------|
@@ -35,29 +45,29 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
 | 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
 | 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
-| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 438,077, merged 2026-11-03) | Claude |
-| 24 | topn-ties-14: the row order of TOPN when sort values tie (120 measured answers, 42 wrong) | `docs/plans/2026-11-02-topn-ties-14.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 438,490, merged 2026-11-03) | Claude |
-| 25 | trig-limits-15: SIN/COS/TAN/COT limit at 2^27, ASINH/ACOSH overflow, a BLANK date plus a number (333 spec answers) | `docs/plans/2026-11-03-trig-limits-15.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 438,977, merged 2026-11-03) | Claude |
+| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 438,077, merged 2026-11-03) | Claude |
+| 24 | topn-ties-14: the row order of TOPN when sort values tie (120 measured answers, 42 wrong) | `docs/plans/2026-11-02-topn-ties-14.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 438,490, merged 2026-11-03) | Claude |
+| 25 | trig-limits-15: SIN/COS/TAN/COT limit at 2^27, ASINH/ACOSH overflow, a BLANK date plus a number (333 spec answers) | `docs/plans/2026-11-03-trig-limits-15.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 438,977, merged 2026-11-03) | Claude |
 | 26 | transcendental-16 (research): last digits of EXP, POWER, LN, SIN, COS, TAN | worktree only | DONE (no formula fits every row; code unchanged, recorded in Open questions) | Claude |
-| 27 | logical-blank-17: a logical operator's BLANK beside other values (2,763 saved answers the engine refuses) | `docs/plans/2026-11-03-logical-blank-17.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 440,890, merged 2026-11-03) | Claude |
-| 28 | text-collation-18: ordering and comparing text with non-ASCII characters (1,657 saved answers the engine refuses) | `docs/plans/2026-11-03-text-collation-18.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 442,933, merged 2026-11-03) | Claude |
-| 29 | text-number-19: text-to-number conversions, iterator conditions, COALESCE order, text columns in arithmetic (2,044 saved answers the engine refuses) | `docs/plans/2026-11-03-text-number-19.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 444,122, merged 2026-11-03) | Claude |
-| 30 | static-types-20: static types the engine cannot establish (type tests, ==, COALESCE branches; 1,070 saved answers the engine refuses) | `docs/plans/2026-11-03-static-types-20.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 445,260, merged 2026-11-03) | Claude |
-| 31 | linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (677 saved answers the engine refuses) | `docs/plans/2026-11-03-linest-edge-21.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,021, merged 2026-11-03) | Claude |
+| 27 | logical-blank-17: a logical operator's BLANK beside other values (2,763 saved answers the engine refuses) | `docs/plans/2026-11-03-logical-blank-17.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 440,890, merged 2026-11-03) | Claude |
+| 28 | text-collation-18: ordering and comparing text with non-ASCII characters (1,657 saved answers the engine refuses) | `docs/plans/2026-11-03-text-collation-18.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 442,933, merged 2026-11-03) | Claude |
+| 29 | text-number-19: text-to-number conversions, iterator conditions, COALESCE order, text columns in arithmetic (2,044 saved answers the engine refuses) | `docs/plans/2026-11-03-text-number-19.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 444,122, merged 2026-11-03) | Claude |
+| 30 | static-types-20: static types the engine cannot establish (type tests, ==, COALESCE branches; 1,070 saved answers the engine refuses) | `docs/plans/2026-11-03-static-types-20.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 445,260, merged 2026-11-03) | Claude |
+| 31 | linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (677 saved answers the engine refuses) | `docs/plans/2026-11-03-linest-edge-21.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 446,021, merged 2026-11-03) | Claude |
 | 32 | swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (685 saved answers the engine refuses) | `docs/plans/2026-11-03-swi-order-22.md` | DONE (coded by Antigravity, reviewed, locked 446,481, merged 2026-11-03) | Claude |
-| 33 | xirr-oddfyield-23: new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument (392 measured answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,981, merged 2026-11-03) | Claude |
-| 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,094, merged 2026-11-03) | Claude |
-| 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,265, merged 2026-11-03) | Claude |
-| 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 448,774, merged 2026-11-03) | Claude |
-| 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
-| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 456,084, merged 2026-11-03) | Claude |
-| 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 457,448, merged 2026-11-03) | Claude |
-| 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 459,999, merged 2026-11-03) | Claude |
-| 41 | type-tests-errors-31: type tests and errors Power BI does not raise (893 saved answers the engine refuses) | `docs/plans/2026-11-03-type-tests-errors-31.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 462,852, merged 2026-11-04) | Claude |
-| 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 463,719, merged 2026-11-04) | Claude |
-| 43 | mixed-bodies-tables-33: mixed-type iterator bodies and table-valued results (557 saved answers) | `docs/plans/2026-11-04-mixed-bodies-tables-33.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 467,289, merged 2026-11-04) | Claude |
-| 44 | count-text-compare-34: COUNTX of True/False, date/time text, strict comparisons | `docs/plans/2026-11-04-count-text-compare-34.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 467,289, merged 2026-11-04) | Claude |
-| 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 468,717, merged 2026-11-04) | Claude |
+| 33 | xirr-oddfyield-23: new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument (392 measured answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 446,981, merged 2026-11-03) | Claude |
+| 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 447,094, merged 2026-11-03) | Claude |
+| 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 447,265, merged 2026-11-03) | Claude |
+| 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 448,774, merged 2026-11-03) | Claude |
+| 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 452,125, merged 2026-11-03) | Claude |
+| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 456,084, merged 2026-11-03) | Claude |
+| 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 457,448, merged 2026-11-03) | Claude |
+| 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 459,999, merged 2026-11-03) | Claude |
+| 41 | type-tests-errors-31: type tests and errors Power BI does not raise (893 saved answers the engine refuses) | `docs/plans/2026-11-03-type-tests-errors-31.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 462,852, merged 2026-11-04) | Claude |
+| 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 463,719, merged 2026-11-04) | Claude |
+| 43 | mixed-bodies-tables-33: mixed-type iterator bodies and table-valued results (557 saved answers) | `docs/plans/2026-11-04-mixed-bodies-tables-33.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 467,289, merged 2026-11-04) | Claude |
+| 44 | count-text-compare-34: COUNTX of True/False, date/time text, strict comparisons | `docs/plans/2026-11-04-count-text-compare-34.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 467,289, merged 2026-11-04) | Claude |
+| 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.

@@ -13,3 +13,6 @@
 ## Part 1 (Haiku): A then B in `analytics_studio/` (find the SUMMARIZE / GROUPBY code). Refuse what cannot be explained.
 ## Part 2: `tests/test_iteration179_summarize_groups_80.py`: every fixed item plus 20 already matching (numeric-tolerant compare).
 ## Score / gate: spec 0 wrong, nothing changes from match; Opus checks unseen models (snowflake GROUPBY over Dim[Cat], one-to-one model ZE) and runs the gate.
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 179. Locked 531486.
