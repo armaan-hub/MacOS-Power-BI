@@ -1,0 +1,1093 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "Text.Length(\"Hello World\")",
+   "power_bi": "V:number:11"
+  },
+  {
+   "expression": "Text.Upper(\"Hello World\")",
+   "power_bi": "V:text:\"HELLO WORLD\""
+  },
+  {
+   "expression": "Text.Lower(\"Hello World\")",
+   "power_bi": "V:text:\"hello world\""
+  },
+  {
+   "expression": "Text.Proper(\"Hello World\")",
+   "power_bi": "V:text:\"Hello World\""
+  },
+  {
+   "expression": "Text.Trim(\"Hello World\")",
+   "power_bi": "V:text:\"Hello World\""
+  },
+  {
+   "expression": "Text.TrimEnd(\"Hello World\")",
+   "power_bi": "V:text:\"Hello World\""
+  },
+  {
+   "expression": "Text.Clean(\"Hello World\")",
+   "power_bi": "V:text:\"Hello World\""
+  },
+  {
+   "expression": "Text.Reverse(\"Hello World\")",
+   "power_bi": "V:text:\"dlroW olleH\""
+  },
+  {
+   "expression": "Text.ToList(\"Hello World\")",
+   "power_bi": "V:list:[text:\"H\",text:\"e\",text:\"l\",text:\"l\",text:\"o\",text:\" \",text:\"W\",text:\"o\",text:\"r\",text:\"l\",text:\"d\"]"
+  },
+  {
+   "expression": "Text.Start(\"Hello World\",3)",
+   "power_bi": "V:text:\"Hel\""
+  },
+  {
+   "expression": "Text.End(\"Hello World\",3)",
+   "power_bi": "V:text:\"rld\""
+  },
+  {
+   "expression": "Text.Middle(\"Hello World\",2,3)",
+   "power_bi": "V:text:\"llo\""
+  },
+  {
+   "expression": "Text.Range(\"Hello World\",1,2)",
+   "power_bi": "V:text:\"el\""
+  },
+  {
+   "expression": "Text.PadStart(\"Hello World\",14)",
+   "power_bi": "V:text:\"   Hello World\""
+  },
+  {
+   "expression": "Text.PadEnd(\"Hello World\",14,\"*\")",
+   "power_bi": "V:text:\"Hello World***\""
+  },
+  {
+   "expression": "Text.Repeat(\"Hello World\",2)",
+   "power_bi": "V:text:\"Hello WorldHello World\""
+  },
+  {
+   "expression": "Text.Contains(\"Hello World\",\"o\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.EndsWith(\"Hello World\",\"d\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.PositionOf(\"Hello World\",\"o\")",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Text.Split(\"Hello World\",\",\")",
+   "power_bi": "V:list:[text:\"Hello World\"]"
+  },
+  {
+   "expression": "Text.Replace(\"Hello World\",\"o\",\"0\")",
+   "power_bi": "V:text:\"Hell0 W0rld\""
+  },
+  {
+   "expression": "Text.Remove(\"Hello World\",{\"l\",\"o\"})",
+   "power_bi": "V:text:\"He Wrd\""
+  },
+  {
+   "expression": "Text.Select(\"Hello World\",{\"a\"..\"z\"})",
+   "power_bi": "V:text:\"elloorld\""
+  },
+  {
+   "expression": "Text.Length(\"\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Text.Upper(\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Lower(\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Proper(\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.TrimStart(\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Clean(\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Reverse(\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.ToList(\"\")",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.End(\"\",3)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Middle(\"\",2,3)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Range(\"\",1,2)",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.At(\"\",1)",
+   "power_bi": "ERR:Expression.Error: The index is outside the bounds of the text value."
+  },
+  {
+   "expression": "Text.Repeat(\"\",2)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Contains(\"\",\"o\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.StartsWith(\"\",\"H\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.EndsWith(\"\",\"d\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.PositionOf(\"\",\"o\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.Split(\"\",\",\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Text.Replace(\"\",\"o\",\"0\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Remove(\"\",{\"l\",\"o\"})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Select(\"\",{\"a\"..\"z\"})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Length(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Upper(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Lower(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Proper(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Trim(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.TrimStart(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.TrimEnd(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Clean(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Reverse(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Start(null,3)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.End(null,3)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Middle(null,2,3)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Range(null,1,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.At(null,1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadEnd(null,14,\"*\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Repeat(null,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.StartsWith(null,\"H\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.EndsWith(null,\"d\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PositionOf(null,\"o\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Replace(null,\"o\",\"0\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Remove(null,{\"l\",\"o\"})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Select(null,{\"a\"..\"z\"})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Length(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "Text.Upper(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00c4BC \u01c4 \u00df\""
+  },
+  {
+   "expression": "Text.Lower(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00e4bc \u01c6 \u00df\""
+  },
+  {
+   "expression": "Text.Proper(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00c4bc \u01c4 \u00df\""
+  },
+  {
+   "expression": "Text.Trim(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00c4bC \u01c5 \u00df\""
+  },
+  {
+   "expression": "Text.TrimStart(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00c4bC \u01c5 \u00df\""
+  },
+  {
+   "expression": "Text.TrimEnd(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00c4bC \u01c5 \u00df\""
+  },
+  {
+   "expression": "Text.Clean(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00c4bC \u01c5 \u00df\""
+  },
+  {
+   "expression": "Text.Reverse(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:text:\"\u00df \u01c5 Cb\u00c4\""
+  },
+  {
+   "expression": "Text.ToList(\"\u00c4bC \u01c5 \u00df\")",
+   "power_bi": "V:list:[text:\"\u00c4\",text:\"b\",text:\"C\",text:\" \",text:\"\u01c5\",text:\" \",text:\"\u00df\"]"
+  },
+  {
+   "expression": "Text.Middle(\"\u00c4bC \u01c5 \u00df\",2,3)",
+   "power_bi": "V:text:\"C \u01c5\""
+  },
+  {
+   "expression": "Text.Range(\"\u00c4bC \u01c5 \u00df\",1,2)",
+   "power_bi": "V:text:\"bC\""
+  },
+  {
+   "expression": "Text.At(\"\u00c4bC \u01c5 \u00df\",1)",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.PadStart(\"\u00c4bC \u01c5 \u00df\",14)",
+   "power_bi": "V:text:\"       \u00c4bC \u01c5 \u00df\""
+  },
+  {
+   "expression": "Text.PadEnd(\"\u00c4bC \u01c5 \u00df\",14,\"*\")",
+   "power_bi": "V:text:\"\u00c4bC \u01c5 \u00df*******\""
+  },
+  {
+   "expression": "Text.Repeat(\"\u00c4bC \u01c5 \u00df\",2)",
+   "power_bi": "V:text:\"\u00c4bC \u01c5 \u00df\u00c4bC \u01c5 \u00df\""
+  },
+  {
+   "expression": "Text.Contains(\"\u00c4bC \u01c5 \u00df\",\"o\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.EndsWith(\"\u00c4bC \u01c5 \u00df\",\"d\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.PositionOf(\"\u00c4bC \u01c5 \u00df\",\"o\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.Split(\"\u00c4bC \u01c5 \u00df\",\",\")",
+   "power_bi": "V:list:[text:\"\u00c4bC \u01c5 \u00df\"]"
+  },
+  {
+   "expression": "Text.Remove(\"\u00c4bC \u01c5 \u00df\",{\"l\",\"o\"})",
+   "power_bi": "V:text:\"\u00c4bC \u01c5 \u00df\""
+  },
+  {
+   "expression": "Text.Select(\"\u00c4bC \u01c5 \u00df\",{\"a\"..\"z\"})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.Length(\"a,b,,c\")",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Text.Lower(\"a,b,,c\")",
+   "power_bi": "V:text:\"a,b,,c\""
+  },
+  {
+   "expression": "Text.Proper(\"a,b,,c\")",
+   "power_bi": "V:text:\"A,B,,C\""
+  },
+  {
+   "expression": "Text.Trim(\"a,b,,c\")",
+   "power_bi": "V:text:\"a,b,,c\""
+  },
+  {
+   "expression": "Text.TrimStart(\"a,b,,c\")",
+   "power_bi": "V:text:\"a,b,,c\""
+  },
+  {
+   "expression": "Text.Clean(\"a,b,,c\")",
+   "power_bi": "V:text:\"a,b,,c\""
+  },
+  {
+   "expression": "Text.Reverse(\"a,b,,c\")",
+   "power_bi": "V:text:\"c,,b,a\""
+  },
+  {
+   "expression": "Text.End(\"a,b,,c\",3)",
+   "power_bi": "V:text:\",,c\""
+  },
+  {
+   "expression": "Text.Middle(\"a,b,,c\",2,3)",
+   "power_bi": "V:text:\"b,,\""
+  },
+  {
+   "expression": "Text.Range(\"a,b,,c\",1,2)",
+   "power_bi": "V:text:\",b\""
+  },
+  {
+   "expression": "Text.At(\"a,b,,c\",1)",
+   "power_bi": "V:text:\",\""
+  },
+  {
+   "expression": "Text.PadStart(\"a,b,,c\",14)",
+   "power_bi": "V:text:\"        a,b,,c\""
+  },
+  {
+   "expression": "Text.PadEnd(\"a,b,,c\",14,\"*\")",
+   "power_bi": "V:text:\"a,b,,c********\""
+  },
+  {
+   "expression": "Text.EndsWith(\"a,b,,c\",\"d\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.PositionOf(\"a,b,,c\",\"o\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.Split(\"a,b,,c\",\",\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"\",text:\"c\"]"
+  },
+  {
+   "expression": "Text.Select(\"a,b,,c\",{\"a\"..\"z\"})",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Length(\"  pad me  \")",
+   "power_bi": "V:number:10"
+  },
+  {
+   "expression": "Text.Proper(\"  pad me  \")",
+   "power_bi": "V:text:\"  Pad Me  \""
+  },
+  {
+   "expression": "Text.TrimStart(\"  pad me  \")",
+   "power_bi": "V:text:\"pad me  \""
+  },
+  {
+   "expression": "Text.TrimEnd(\"  pad me  \")",
+   "power_bi": "V:text:\"  pad me\""
+  },
+  {
+   "expression": "Text.Clean(\"  pad me  \")",
+   "power_bi": "V:text:\"  pad me  \""
+  },
+  {
+   "expression": "Text.Reverse(\"  pad me  \")",
+   "power_bi": "V:text:\"  em dap  \""
+  },
+  {
+   "expression": "Text.ToList(\"  pad me  \")",
+   "power_bi": "V:list:[text:\" \",text:\" \",text:\"p\",text:\"a\",text:\"d\",text:\" \",text:\"m\",text:\"e\",text:\" \",text:\" \"]"
+  },
+  {
+   "expression": "Text.Start(\"  pad me  \",3)",
+   "power_bi": "V:text:\"  p\""
+  },
+  {
+   "expression": "Text.Range(\"  pad me  \",1,2)",
+   "power_bi": "V:text:\" p\""
+  },
+  {
+   "expression": "Text.At(\"  pad me  \",1)",
+   "power_bi": "V:text:\" \""
+  },
+  {
+   "expression": "Text.PadStart(\"  pad me  \",14)",
+   "power_bi": "V:text:\"      pad me  \""
+  },
+  {
+   "expression": "Text.PadEnd(\"  pad me  \",14,\"*\")",
+   "power_bi": "V:text:\"  pad me  ****\""
+  },
+  {
+   "expression": "Text.Contains(\"  pad me  \",\"o\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.StartsWith(\"  pad me  \",\"H\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.EndsWith(\"  pad me  \",\"d\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.PositionOf(\"  pad me  \",\"o\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.Split(\"  pad me  \",\",\")",
+   "power_bi": "V:list:[text:\"  pad me  \"]"
+  },
+  {
+   "expression": "Text.Select(\"  pad me  \",{\"a\"..\"z\"})",
+   "power_bi": "V:text:\"padme\""
+  },
+  {
+   "expression": "Text.Length(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Text.Upper(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:text:\"\\tX\\nY\\r\""
+  },
+  {
+   "expression": "Text.Lower(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:text:\"\\tx\\ny\\r\""
+  },
+  {
+   "expression": "Text.Proper(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:text:\"\\tX\\nY\\r\""
+  },
+  {
+   "expression": "Text.TrimStart(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:text:\"x\\ny\\r\""
+  },
+  {
+   "expression": "Text.TrimEnd(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:text:\"\\tx\\ny\""
+  },
+  {
+   "expression": "Text.Clean(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:text:\"xy\""
+  },
+  {
+   "expression": "Text.Reverse(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:text:\"\\ry\\nx\\t\""
+  },
+  {
+   "expression": "Text.ToList(\"#(tab)x#(lf)y#(cr)\")",
+   "power_bi": "V:list:[text:\"\\t\",text:\"x\",text:\"\\n\",text:\"y\",text:\"\\r\"]"
+  },
+  {
+   "expression": "Text.Start(\"#(tab)x#(lf)y#(cr)\",3)",
+   "power_bi": "V:text:\"\\tx\\n\""
+  },
+  {
+   "expression": "Text.End(\"#(tab)x#(lf)y#(cr)\",3)",
+   "power_bi": "V:text:\"\\ny\\r\""
+  },
+  {
+   "expression": "Text.Middle(\"#(tab)x#(lf)y#(cr)\",2,3)",
+   "power_bi": "V:text:\"\\ny\\r\""
+  },
+  {
+   "expression": "Text.Range(\"#(tab)x#(lf)y#(cr)\",1,2)",
+   "power_bi": "V:text:\"x\\n\""
+  },
+  {
+   "expression": "Text.At(\"#(tab)x#(lf)y#(cr)\",1)",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.PadStart(\"#(tab)x#(lf)y#(cr)\",14)",
+   "power_bi": "V:text:\"         \\tx\\ny\\r\""
+  },
+  {
+   "expression": "Text.PadEnd(\"#(tab)x#(lf)y#(cr)\",14,\"*\")",
+   "power_bi": "V:text:\"\\tx\\ny\\r*********\""
+  },
+  {
+   "expression": "Text.Repeat(\"#(tab)x#(lf)y#(cr)\",2)",
+   "power_bi": "V:text:\"\\tx\\ny\\r\\tx\\ny\\r\""
+  },
+  {
+   "expression": "Text.Contains(\"#(tab)x#(lf)y#(cr)\",\"o\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.EndsWith(\"#(tab)x#(lf)y#(cr)\",\"d\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.PositionOf(\"#(tab)x#(lf)y#(cr)\",\"o\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.Split(\"#(tab)x#(lf)y#(cr)\",\",\")",
+   "power_bi": "V:list:[text:\"\\tx\\ny\\r\"]"
+  },
+  {
+   "expression": "Text.Replace(\"#(tab)x#(lf)y#(cr)\",\"o\",\"0\")",
+   "power_bi": "V:text:\"\\tx\\ny\\r\""
+  },
+  {
+   "expression": "Text.Remove(\"#(tab)x#(lf)y#(cr)\",{\"l\",\"o\"})",
+   "power_bi": "V:text:\"\\tx\\ny\\r\""
+  },
+  {
+   "expression": "Text.Select(\"#(tab)x#(lf)y#(cr)\",{\"a\"..\"z\"})",
+   "power_bi": "V:text:\"xy\""
+  },
+  {
+   "expression": "Text.Length(\"\ud835\udd18nicode\")",
+   "power_bi": "V:number:8"
+  },
+  {
+   "expression": "Text.Upper(\"\ud835\udd18nicode\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.Lower(\"\ud835\udd18nicode\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.Proper(\"\ud835\udd18nicode\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.TrimStart(\"\ud835\udd18nicode\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.Reverse(\"\ud835\udd18nicode\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.ToList(\"\ud835\udd18nicode\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.Start(\"\ud835\udd18nicode\",3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.Middle(\"\ud835\udd18nicode\",2,3)",
+   "power_bi": "V:text:\"nic\""
+  },
+  {
+   "expression": "Text.Range(\"\ud835\udd18nicode\",1,2)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.At(\"\ud835\udd18nicode\",1)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.PadStart(\"\ud835\udd18nicode\",14)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.PadEnd(\"\ud835\udd18nicode\",14,\"*\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.StartsWith(\"\ud835\udd18nicode\",\"H\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.EndsWith(\"\ud835\udd18nicode\",\"d\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.PositionOf(\"\ud835\udd18nicode\",\"o\")",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Text.Split(\"\ud835\udd18nicode\",\",\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.Replace(\"\ud835\udd18nicode\",\"o\",\"0\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.Select(\"\ud835\udd18nicode\",{\"a\"..\"z\"})",
+   "power_bi": "V:text:\"nicode\""
+  },
+  {
+   "expression": "Text.Start(\"abc\",10)",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Start(\"abc\",0)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Middle(\"abc\",5)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Middle(\"abc\",1)",
+   "power_bi": "V:text:\"bc\""
+  },
+  {
+   "expression": "Text.Middle(\"abc\",-1,1)",
+   "power_bi": "ERR:Expression.Error: The 'start' argument is out of range."
+  },
+  {
+   "expression": "Text.Range(\"abc\",3)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Range(\"abc\",-1)",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.At(\"abc\",3)",
+   "power_bi": "ERR:Expression.Error: The index is outside the bounds of the text value."
+  },
+  {
+   "expression": "Text.At(\"abc\",-1)",
+   "power_bi": "ERR:Expression.Error: The index is outside the bounds of the text value."
+  },
+  {
+   "expression": "Text.At(\"\",0)",
+   "power_bi": "ERR:Expression.Error: The index is outside the bounds of the text value."
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",2)",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",5,\"xy\")",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",5,\"\")",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Repeat(\"ab\",0)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Repeat(\"ab\",-1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.Repeat(null,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Contains(\"Hello\",\"hel\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.Contains(\"Hello\",\"hel\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Contains(\"Hello\",\"\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Contains(\"\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Contains(null,\"a\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.StartsWith(\"Hello\",\"hE\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.EndsWith(\"Hello\",\"\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.PositionOf(\"banana\",\"an\")",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOf(\"banana\",\"an\",Occurrence.Last)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Text.PositionOf(\"banana\",\"an\",Occurrence.All)",
+   "power_bi": "V:list:[number:1,number:3]"
+  },
+  {
+   "expression": "Text.PositionOf(\"banana\",\"x\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.PositionOf(\"banana\",\"x\",Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.PositionOf(\"banana\",\"AN\",Occurrence.First,Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOf(\"banana\",\"\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"banana\",{\"n\"},Occurrence.All)",
+   "power_bi": "V:list:[number:2,number:4]"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"banana\",{\"x\"})",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"banana\",{\"na\"})",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Split(\"a b  c\",\" \")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"\",text:\"c\"]"
+  },
+  {
+   "expression": "Text.Split(\"abc\",\"\")",
+   "power_bi": "V:list:[text:\"abc\"]"
+  },
+  {
+   "expression": "Text.Split(\"\",\"x\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Text.Split(\"a--b--c\",\"--\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "Text.SplitAny(\"a,b;c\",\",;\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "Text.SplitAny(\"abc\",\"\")",
+   "power_bi": "V:list:[text:\"abc\"]"
+  },
+  {
+   "expression": "Text.SplitAny(\"a,,b\",\",\")",
+   "power_bi": "V:list:[text:\"a\",text:\"\",text:\"b\"]"
+  },
+  {
+   "expression": "Text.Combine({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Combine({\"a\",\"b\",\"c\"},\", \")",
+   "power_bi": "V:text:\"a, b, c\""
+  },
+  {
+   "expression": "Text.Combine({})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Combine({1,2})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Text.Combine({\"a\"},null)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.Replace(\"aaa\",\"aa\",\"b\")",
+   "power_bi": "V:text:\"ba\""
+  },
+  {
+   "expression": "Text.Replace(\"abc\",\"b\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abcdef\",2,2,\"XY\")",
+   "power_bi": "V:text:\"abXYef\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",3,0,\"!\")",
+   "power_bi": "V:text:\"abc!\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",1,9,\"!\")",
+   "power_bi": "V:text:\"a!\""
+  },
+  {
+   "expression": "Text.Insert(\"abc\",1,\"X\")",
+   "power_bi": "V:text:\"aXbc\""
+  },
+  {
+   "expression": "Text.Insert(\"abc\",4,\"X\")",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.Insert(\"abc\",-1,\"X\")",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.RemoveRange(\"abcdef\",1,2)",
+   "power_bi": "V:text:\"adef\""
+  },
+  {
+   "expression": "Text.RemoveRange(\"abc\",1)",
+   "power_bi": "V:text:\"ac\""
+  },
+  {
+   "expression": "Text.RemoveRange(\"abc\",3)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.RemoveRange(\"abc\",1,5)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.Remove(\"a1b2c3\",{\"0\"..\"9\"})",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Remove(\"abc\",\"b\")",
+   "power_bi": "V:text:\"ac\""
+  },
+  {
+   "expression": "Text.Select(\"a1b2c3\",{\"0\"..\"9\"})",
+   "power_bi": "V:text:\"123\""
+  },
+  {
+   "expression": "Text.Select(\"abc\",\"b\")",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\")",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",1)",
+   "power_bi": "V:text:\"a-b\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a-b\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",1)",
+   "power_bi": "V:text:\"c\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"c\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"abc\",\"-\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",5)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\")",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"[\",\"]\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Format(\"#{0} and #{1}\",{\"a\",2})",
+   "power_bi": "V:text:\"a and 2\""
+  },
+  {
+   "expression": "Text.Format(\"#[x]-#[y]\",[x=\"p\",y=1.5])",
+   "power_bi": "V:text:\"p-1.5\""
+  },
+  {
+   "expression": "Text.Format(\"#{2}\",{\"a\"})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"de-DE\")",
+   "power_bi": "V:text:\"1,5\""
+  },
+  {
+   "expression": "Text.From(1234.5)",
+   "power_bi": "V:text:\"1234.5\""
+  },
+  {
+   "expression": "Text.From(#date(2024,3,4),\"en-GB\")",
+   "power_bi": "V:text:\"04/03/2024\""
+  },
+  {
+   "expression": "Text.From(-1e-20)",
+   "power_bi": "V:text:\"-0.00000000000000000001\""
+  },
+  {
+   "expression": "Text.From(#binary({65}))",
+   "power_bi": "V:text:\"QQ==\""
+  },
+  {
+   "expression": "Text.ToBinary(\"A\u00e9\",TextEncoding.Utf16)",
+   "power_bi": "V:binary:QQDpAA=="
+  },
+  {
+   "expression": "Text.ToBinary(\"A\u00e9\",TextEncoding.Ascii)",
+   "power_bi": "V:binary:QT8="
+  },
+  {
+   "expression": "Text.FromBinary(#binary({72,105}))",
+   "power_bi": "V:text:\"Hi\""
+  },
+  {
+   "expression": "Text.FromBinary(Text.ToBinary(\"A\u00e9\",TextEncoding.Utf16),TextEncoding.Utf16)",
+   "power_bi": "V:text:\"A\u00e9\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({}))",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"abc\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'abc' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.Lower(\"\u00c0\u00c9\u00ce\")",
+   "power_bi": "V:text:\"\u00e0\u00e9\u00ee\""
+  },
+  {
+   "expression": "Text.Lower(\"\u0130\")",
+   "power_bi": "V:text:\"i\""
+  },
+  {
+   "expression": "Text.Proper(\"123abc\")",
+   "power_bi": "V:text:\"123Abc\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0007)b#(00A0)c\")",
+   "power_bi": "V:text:\"ab\u00a0c\""
+  },
+  {
+   "expression": "Text.Trim(\"xxaxx\",\"x\")",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.Trim(\"abcba\",{\"a\",\"b\"})",
+   "power_bi": "V:text:\"c\""
+  },
+  {
+   "expression": "Text.TrimEnd(\"a#(tab)\")",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.Trim(\"#(00A0)a#(2003)\")",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.Length(1)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Text.Upper(1)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Text.Start(null,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Start(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Split(null,\",\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Combine(null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type List."
+  },
+  {
+   "expression": "Text.Contains(\"a\",1)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Text.Repeat(\"a\",1.5)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Value.Type(Text.NewGuid()) = type text",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Length(Text.NewGuid())",
+   "power_bi": "V:number:36"
+  }
+ ]
+}
