@@ -2196,3 +2196,9 @@ The DAX track is closed (all 470 functions known, close-out fixes in 184-185). P
 The M oracle stored answers in a text column; Power BI's storage keeps one spelling per case-insensitively-equal string, so answers differing only by case collapsed (live: "#(0041)" returned "a"). Answers are now upper-case UTF-8 hex, decoded in Python; verified live on 18 case-sensitive values. Saved the 174-expression Power BI answer battery for the M language core.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4113 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 188 (Task 99 m-core-89: Power Query M lexer and parser (engine Part A))
+
+New package analytics_studio/m_engine/ (lexer, AST, parser) for the M language: literals and text escapes, #intrinsics, quoted and @ identifiers, let/if/each/function literals with optional and as, try/otherwise/catch, error, records, lists and ranges, field/item/projection access with ?, invocation, is/as/meta, all operators at the spec's precedence, type expressions. All 172 battery expressions Power BI accepts parse; the 2 Power BI rejects as syntax errors raise MSyntaxError. No existing module changed.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4322 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

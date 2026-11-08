@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 187 (Task 98 m-oracle-case-88) shipped: DAX track closed; Power Query M track started (oracle tool). Next: the M engine core.
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 188 (Task 99 m-core-89, M parser) shipped: DAX track closed; Power Query M track started (oracle tool). Next: the M engine core.
 **Branch in use:** none
 **Working tree clean:** main yes
 
