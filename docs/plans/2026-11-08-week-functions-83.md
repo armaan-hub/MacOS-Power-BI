@@ -28,3 +28,6 @@ Power BI's exact parse-time messages, the same pattern as DATESWTD / TOTALWTD in
   `tests/test_iteration180_other_functions_81.py`, `tests/test_iteration181_info_storage_82.py` and every test that greps
   `DAX_FUNCTION_NAMES`, `dax_function_catalog` or `dax_contract` — all pass.
 - [ ] Step 5: commit "Task 93: the six week time-intelligence functions (week-functions-83)".
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 182. Locked 531486.

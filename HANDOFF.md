@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 181 (Task 92 info-storage-82) shipped; Task 93 (DAX Step B: the 6 week time-intelligence functions) next.
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 182 (Task 93 week-functions-83) shipped; Task 94 (DAX Step C: the 14 visual-calculation functions) next.
 **Branch in use:** none
 **Working tree clean:** main yes
 
@@ -12,7 +12,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 ## Task queue
 
 **Standing two-track process (set by the user 2026-11-08):** work on both DAX and Power Query (M) functions.
-1. DAX: finish the functions Power BI has and the app lacks. Status after Iteration 181: 450 of 470 built (Power BI INFO.FUNCTIONS list). Missing: 20 regular functions (6 week time intelligence, 14 visual calculations); all INFO.* known.
+1. DAX: finish the functions Power BI has and the app lacks. Status after Iteration 182: 456 of 470 built (Power BI INFO.FUNCTIONS list). Missing: the 14 visual-calculation functions.
    - First: the 5 "other" functions (`EXTERNALMEASURE`, `NATURALJOINUSAGE`, `SAMPLEAXISWITHLOCALMINMAX`, `SAMPLECARTESIANPOINTSBYCOVER`, `SELECTEDMEASUREFORMATSTRING`) and the missing `INFO.*` functions.
    - Then the 6 week time-intelligence functions, which need calendar model objects.
    - Then the 14 visual-calculation functions, which need visual calculations.
