@@ -1,0 +1,760 @@
+{
+ "items": [
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(GROUPBY(ZM_F2,ZM_W[Y]),ZM_W[Y],\",\",ZM_W[Y])",
+   "powerbi": ",y1,y2",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZE(ZM_F,ZM_U[X]),ZM_U[X],\",\",ZM_U[X])",
+   "powerbi": ",x1,x2,x3,x4",
+   "now": ",x1,x2,x3,x4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CONCATENATEX(GROUPBY(ZM_F2,ZM_W[Y]),ZM_W[Y],\",\",ZM_W[Y])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=,y1,y2;n1b=,y1,y2;n2=,y1,y2;n5=,y1,y2",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CONCATENATEX(SUMMARIZE(ZM_F,ZM_U[X]),ZM_U[X],\",\",ZM_U[X])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=,x1,x2,x3,x4;n1b=,x1,x2,x3,x4;n2=,x1,x2,x3,x4;n5=,x1,x2,x3,x4",
+   "now": "n1=,x1,x2,x3,x4;n1b=,x1,x2,x3,x4;n2=,x1,x2,x3,x4;n5=,x1,x2,x3,x4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",COUNTROWS(GROUPBY(ZM_F,ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=5;n1b=5;n2=5;n5=5",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",COUNTROWS(SUMMARIZE(ZM_A,ZM_B[N]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",COUNTROWS(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X],ZM_W[Y])))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=3;n1b=3;n2=3;n5=3",
+   "now": "n1=3;n1b=3;n2=3;n5=3"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",COUNTROWS(SUMMARIZE(ZM_F,ZM_U[X],ZM_W[Y]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=5;n1b=5;n2=5;n5=5",
+   "now": "n1=5;n1b=5;n2=5;n5=5"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",SUMX(GROUPBY(ZM_F,ZM_W[Y],\"s\",SUMX(CURRENTGROUP(),ZM_F[Amt])),[s])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n1b=63;n2=63;n5=63",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",SUMX(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X]),\"s\",SUM(ZM_F[Amt])),[s])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=126;n1b=126;n2=126;n5=126",
+   "now": "n1=126;n1b=126;n2=126;n5=126"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",SUMX(SUMMARIZE(ZM_F2,ZM_W[Y],\"s\",SUM(ZM_F[Amt])),[s])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=23;n1b=23;n2=23;n5=23",
+   "now": "n1=70;n1b=70;n2=70;n5=70"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",CONCATENATEX(GROUPBY(ZM_F2,ZM_W[Y]),ZM_W[Y],\",\",ZM_W[Y])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",CONCATENATEX(SUMMARIZE(ZM_F,ZM_U[X]),ZM_U[X],\",\",ZM_U[X])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(GROUPBY(ZM_F,ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_A,ZM_B[N]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X],ZM_W[Y])))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_F,ZM_U[X],ZM_W[Y]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(GROUPBY(ZM_F,ZM_W[Y],\"s\",SUMX(CURRENTGROUP(),ZM_F[Amt])),[s])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X]),\"s\",SUM(ZM_F[Amt])),[s])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(SUMMARIZE(ZM_F2,ZM_W[Y],\"s\",SUM(ZM_F[Amt])),[s])),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CONCATENATEX(GROUPBY(ZM_F2,ZM_W[Y]),ZM_W[Y],\",\",ZM_W[Y])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=y1;x2=y2;x4=",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CONCATENATEX(SUMMARIZE(ZM_F,ZM_U[X]),ZM_U[X],\",\",ZM_U[X])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=;x1=x1;x2=x2;x3=x3;x4=x4",
+   "now": "=;x1=x1;x2=x2;x3=x3;x4=x4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",COUNTROWS(GROUPBY(ZM_F,ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",COUNTROWS(SUMMARIZE(ZM_A,ZM_B[N]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",COUNTROWS(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X],ZM_W[Y])))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=3;x1=3;x2=3;x3=3;x4=3",
+   "now": "=3;x1=3;x2=3;x3=3;x4=3"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",COUNTROWS(SUMMARIZE(ZM_F,ZM_U[X],ZM_W[Y]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",SUMX(GROUPBY(ZM_F,ZM_W[Y],\"s\",SUMX(CURRENTGROUP(),ZM_F[Amt])),[s])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=32;x1=3;x2=4;x3=8;x4=16",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",SUMX(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X]),\"s\",SUM(ZM_F[Amt])),[s])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=64;x1=6;x2=8;x3=16;x4=32",
+   "now": "=64;x1=6;x2=8;x3=16;x4=32"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",SUMX(SUMMARIZE(ZM_F2,ZM_W[Y],\"s\",SUM(ZM_F[Amt])),[s])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=3;x2=4;x4=16",
+   "now": "x1=3;x2=4;x4=16"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",CONCATENATEX(GROUPBY(ZM_F2,ZM_W[Y]),ZM_W[Y],\",\",ZM_W[Y])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",CONCATENATEX(SUMMARIZE(ZM_F,ZM_U[X]),ZM_U[X],\",\",ZM_U[X])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(GROUPBY(ZM_F,ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_A,ZM_B[N]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X],ZM_W[Y])))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_F,ZM_U[X],ZM_W[Y]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(GROUPBY(ZM_F,ZM_W[Y],\"s\",SUMX(CURRENTGROUP(),ZM_F[Amt])),[s])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X]),\"s\",SUM(ZM_F[Amt])),[s])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(SUMMARIZE(ZM_F2,ZM_W[Y],\"s\",SUM(ZM_F[Amt])),[s])),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CONCATENATEX(GROUPBY(ZM_F2,ZM_W[Y]),ZM_W[Y],\",\",ZM_W[Y])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=;y1=y1;y2=y2",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CONCATENATEX(SUMMARIZE(ZM_F,ZM_U[X]),ZM_U[X],\",\",ZM_U[X])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=,x4;y1=x1;y2=x2;y3=x3",
+   "now": "=,x4;y1=x1;y2=x2;y3=x3"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",COUNTROWS(GROUPBY(ZM_F,ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=2;y1=1;y2=1;y3=1",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",COUNTROWS(SUMMARIZE(ZM_A,ZM_B[N]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",COUNTROWS(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X],ZM_W[Y])))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=3;y1=3;y2=3;y3=3",
+   "now": "=3;y1=3;y2=3;y3=3"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",COUNTROWS(SUMMARIZE(ZM_F,ZM_U[X],ZM_W[Y]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=2;y1=1;y2=1;y3=1",
+   "now": "=2;y1=1;y2=1;y3=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",SUMX(GROUPBY(ZM_F,ZM_W[Y],\"s\",SUMX(CURRENTGROUP(),ZM_F[Amt])),[s])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=3;y2=4;y3=8",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",SUMX(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X]),\"s\",SUM(ZM_F[Amt])),[s])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=96;y1=6;y2=8;y3=16",
+   "now": "=96;y1=6;y2=8;y3=16"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",SUMX(SUMMARIZE(ZM_F2,ZM_W[Y],\"s\",SUM(ZM_F[Amt])),[s])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=16;y1=3;y2=4",
+   "now": "=48;y1=3;y2=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",CONCATENATEX(GROUPBY(ZM_F2,ZM_W[Y]),ZM_W[Y],\",\",ZM_W[Y])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",CONCATENATEX(SUMMARIZE(ZM_F,ZM_U[X]),ZM_U[X],\",\",ZM_U[X])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(GROUPBY(ZM_F,ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_A,ZM_B[N]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X],ZM_W[Y])))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZM_F,ZM_U[X],ZM_W[Y]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(GROUPBY(ZM_F,ZM_W[Y],\"s\",SUMX(CURRENTGROUP(),ZM_F[Amt])),[s])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X]),\"s\",SUM(ZM_F[Amt])),[s])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"m1\"},ZM_U[K]),\"v\",SUMX(SUMMARIZE(ZM_F2,ZM_W[Y],\"s\",SUM(ZM_F[Amt])),[s])),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZM",
+   "expr": "COUNTROWS(GROUPBY(ZM_F,ZM_U[X]))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "COUNTROWS(SUMMARIZE(ZM_A,ZM_B[N]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZM",
+   "expr": "COUNTROWS(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X],ZM_W[Y])))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZM",
+   "expr": "COUNTROWS(SUMMARIZE(ZM_F,ZM_U[X],ZM_W[Y]))",
+   "powerbi": "5",
+   "now": "5"
+  },
+  {
+   "model": "ZM",
+   "expr": "SUMX(GROUPBY(ZM_F,ZM_W[Y],\"s\",SUMX(CURRENTGROUP(),ZM_F[Amt])),[s])",
+   "powerbi": "63",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZM",
+   "expr": "SUMX(SUMMARIZE(ZM_F,ROLLUP(ZM_U[X]),\"s\",SUM(ZM_F[Amt])),[s])",
+   "powerbi": "126",
+   "now": "126"
+  },
+  {
+   "model": "ZM",
+   "expr": "SUMX(SUMMARIZE(ZM_F2,ZM_W[Y],\"s\",SUM(ZM_F[Amt])),[s])",
+   "powerbi": "23",
+   "now": "70"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(GROUPBY(ZJ_F2,ZJ_W[Y]),ZJ_W[Y],\",\",ZJ_W[Y])",
+   "powerbi": ",y2",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZE(ZJ_F,ZJ_U[X]),ZJ_U[X],\",\",ZJ_U[X])",
+   "powerbi": ",x1,x2,x4,x5",
+   "now": ",x1,x2,x4,x5"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CONCATENATEX(GROUPBY(ZJ_F2,ZJ_W[Y]),ZJ_W[Y],\",\",ZJ_W[Y])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=,y2;n2=,y2;n3=,y2;n6=,y2",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CONCATENATEX(SUMMARIZE(ZJ_F,ZJ_U[X]),ZJ_U[X],\",\",ZJ_U[X])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=,x1,x2,x4,x5;n2=,x1,x2,x4,x5;n3=,x1,x2,x4,x5;n6=,x1,x2,x4,x5",
+   "now": "n1=,x1,x2,x4,x5;n2=,x1,x2,x4,x5;n3=,x1,x2,x4,x5;n6=,x1,x2,x4,x5"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",COUNTROWS(GROUPBY(ZJ_F,ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=5;n2=5;n3=5;n6=5",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",COUNTROWS(SUMMARIZE(ZJ_A,ZJ_B[N]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X],ZJ_W[Y])))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=3;n2=3;n3=3;n6=3",
+   "now": "n1=3;n2=3;n3=3;n6=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ZJ_U[X],ZJ_W[Y]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=5;n2=5;n3=5;n6=5",
+   "now": "n1=5;n2=5;n3=5;n6=5"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",SUMX(GROUPBY(ZJ_F,ZJ_W[Y],\"s\",SUMX(CURRENTGROUP(),ZJ_F[Amt])),[s])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n2=255;n3=255;n6=255",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",SUMX(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X]),\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=510;n2=510;n3=510;n6=510",
+   "now": "n1=510;n2=510;n3=510;n6=510"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",SUMX(SUMMARIZE(ZJ_F2,ZJ_W[Y],\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=107;n2=107;n3=107;n6=107",
+   "now": "n1=301;n2=301;n3=301;n6=301"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",CONCATENATEX(GROUPBY(ZJ_F2,ZJ_W[Y]),ZJ_W[Y],\",\",ZJ_W[Y])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",CONCATENATEX(SUMMARIZE(ZJ_F,ZJ_U[X]),ZJ_U[X],\",\",ZJ_U[X])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=x1;n2=x1;n3=x1;n6=x1",
+   "now": "n1=x1;n2=x1;n3=x1;n6=x1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(GROUPBY(ZJ_F,ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_A,ZJ_B[N]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X],ZJ_W[Y])))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=3;n2=3;n3=3;n6=3",
+   "now": "n1=3;n2=3;n3=3;n6=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ZJ_U[X],ZJ_W[Y]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(GROUPBY(ZJ_F,ZJ_W[Y],\"s\",SUMX(CURRENTGROUP(),ZJ_F[Amt])),[s])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=47;n2=47;n3=47;n6=47",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X]),\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=94;n2=94;n3=94;n6=94",
+   "now": "n1=94;n2=94;n3=94;n6=94"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(SUMMARIZE(ZJ_F2,ZJ_W[Y],\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CONCATENATEX(GROUPBY(ZJ_F2,ZJ_W[Y]),ZJ_W[Y],\",\",ZJ_W[Y])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=y2;x4=",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CONCATENATEX(SUMMARIZE(ZJ_F,ZJ_U[X]),ZJ_U[X],\",\",ZJ_U[X])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=;x1=x1;x2=x2;x4=x4;x5=x5",
+   "now": "=;x1=x1;x2=x2;x4=x4;x5=x5"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",COUNTROWS(GROUPBY(ZJ_F,ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x4=1;x5=1",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",COUNTROWS(SUMMARIZE(ZJ_A,ZJ_B[N]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X],ZJ_W[Y])))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=3;x1=3;x2=3;x4=3;x5=3",
+   "now": "=3;x1=3;x2=3;x4=3;x5=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ZJ_U[X],ZJ_W[Y]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",SUMX(GROUPBY(ZJ_F,ZJ_W[Y],\"s\",SUMX(CURRENTGROUP(),ZJ_F[Amt])),[s])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=34;x1=47;x2=46;x4=61;x5=67",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",SUMX(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X]),\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=68;x1=94;x2=92;x4=122;x5=134",
+   "now": "=68;x1=94;x2=92;x4=122;x5=134"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",SUMX(SUMMARIZE(ZJ_F2,ZJ_W[Y],\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=46;x4=61",
+   "now": "x2=46;x4=61"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",CONCATENATEX(GROUPBY(ZJ_F2,ZJ_W[Y]),ZJ_W[Y],\",\",ZJ_W[Y])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",CONCATENATEX(SUMMARIZE(ZJ_F,ZJ_U[X]),ZJ_U[X],\",\",ZJ_U[X])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x1=x1",
+   "now": "x1=x1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(GROUPBY(ZJ_F,ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x1=1",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_A,ZJ_B[N]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X],ZJ_W[Y])))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x1=3",
+   "now": "x1=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ZJ_U[X],ZJ_W[Y]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x1=1",
+   "now": "x1=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(GROUPBY(ZJ_F,ZJ_W[Y],\"s\",SUMX(CURRENTGROUP(),ZJ_F[Amt])),[s])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x1=47",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X]),\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x1=94",
+   "now": "x1=94"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(SUMMARIZE(ZJ_F2,ZJ_W[Y],\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CONCATENATEX(GROUPBY(ZJ_F2,ZJ_W[Y]),ZJ_W[Y],\",\",ZJ_W[Y])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=;y2=y2",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CONCATENATEX(SUMMARIZE(ZJ_F,ZJ_U[X]),ZJ_U[X],\",\",ZJ_U[X])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=,x1,x4;y2=x2;y5=x5",
+   "now": "=,x1,x4;y2=x2;y5=x5"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",COUNTROWS(GROUPBY(ZJ_F,ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=3;y2=1;y5=1",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",COUNTROWS(SUMMARIZE(ZJ_A,ZJ_B[N]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X],ZJ_W[Y])))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=3;y2=3;y5=3",
+   "now": "=3;y2=3;y5=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ZJ_U[X],ZJ_W[Y]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=3;y2=1;y5=1",
+   "now": "=3;y2=1;y5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",SUMX(GROUPBY(ZJ_F,ZJ_W[Y],\"s\",SUMX(CURRENTGROUP(),ZJ_F[Amt])),[s])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=142;y2=46;y5=67",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",SUMX(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X]),\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=284;y2=92;y5=134",
+   "now": "=284;y2=92;y5=134"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",SUMX(SUMMARIZE(ZJ_F2,ZJ_W[Y],\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=61;y2=46",
+   "now": "=142;y2=46"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",CONCATENATEX(GROUPBY(ZJ_F2,ZJ_W[Y]),ZJ_W[Y],\",\",ZJ_W[Y])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",CONCATENATEX(SUMMARIZE(ZJ_F,ZJ_U[X]),ZJ_U[X],\",\",ZJ_U[X])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=x1",
+   "now": "=x1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(GROUPBY(ZJ_F,ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_A,ZJ_B[N]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X],ZJ_W[Y])))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=3",
+   "now": "=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",COUNTROWS(SUMMARIZE(ZJ_F,ZJ_U[X],ZJ_W[Y]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1",
+   "now": "=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(GROUPBY(ZJ_F,ZJ_W[Y],\"s\",SUMX(CURRENTGROUP(),ZJ_F[Amt])),[s])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=47",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X]),\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=94",
+   "now": "=94"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j1\"},ZJ_U[K]),\"v\",SUMX(SUMMARIZE(ZJ_F2,ZJ_W[Y],\"s\",SUM(ZJ_F[Amt])),[s])),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "model": "ZJ",
+   "expr": "COUNTROWS(GROUPBY(ZJ_F,ZJ_U[X]))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Column 'X' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "COUNTROWS(SUMMARIZE(ZJ_A,ZJ_B[N]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) The column 'N' specified in the 'SUMMARIZE' function was not found in the input table.\"",
+   "now": "LOCAL-REJECT:Column 'N' does not exist in the SUMMARIZE table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "COUNTROWS(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X],ZJ_W[Y])))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "COUNTROWS(SUMMARIZE(ZJ_F,ZJ_U[X],ZJ_W[Y]))",
+   "powerbi": "5",
+   "now": "5"
+  },
+  {
+   "model": "ZJ",
+   "expr": "SUMX(GROUPBY(ZJ_F,ZJ_W[Y],\"s\",SUMX(CURRENTGROUP(),ZJ_F[Amt])),[s])",
+   "powerbi": "255",
+   "now": "LOCAL-REJECT:Column 'Y' does not exist in the GROUPBY table."
+  },
+  {
+   "model": "ZJ",
+   "expr": "SUMX(SUMMARIZE(ZJ_F,ROLLUP(ZJ_U[X]),\"s\",SUM(ZJ_F[Amt])),[s])",
+   "powerbi": "510",
+   "now": "510"
+  },
+  {
+   "model": "ZJ",
+   "expr": "SUMX(SUMMARIZE(ZJ_F2,ZJ_W[Y],\"s\",SUM(ZJ_F[Amt])),[s])",
+   "powerbi": "107",
+   "now": "301"
+  }
+ ]
+}
