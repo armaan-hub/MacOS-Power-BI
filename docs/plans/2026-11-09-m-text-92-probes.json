@@ -1,0 +1,3773 @@
+{
+ "source": "Power BI Desktop live answers via tools/m_oracle_diff.py, 2026-11-09 (Task 102 probes: null first argument for all Text functions, delimiter index/RelativePosition forms, overlapping occurrences, range/argument errors, argument-order errors, TextEncoding values, Clean set, InferNumberType forms, Text.Format placeholders; every case here is matched by the evaluator)",
+ "cases": [
+  {
+   "expression": "Text.AfterDelimiter(null,\"-\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.At(null,0)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.BeforeDelimiter(null,\"-\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(null,\"[\",\"]\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Combine({null,null})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.End(null,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.EndsWith(null,\"a\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Format(null,{1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.From(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.FromBinary(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.InferNumberType(null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Insert(null,0,\"x\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Middle(null,0,1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadEnd(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadStart(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PositionOf(null,\"a\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.PositionOfAny(null,{\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Range(null,0,1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Remove(null,\"a\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.RemoveRange(null,0,1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Replace(null,\"a\",\"b\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.ReplaceRange(null,0,1,\"x\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Select(null,\"a\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Split(null,\"-\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.SplitAny(null,\"-\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.StartsWith(null,\"a\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.ToBinary(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",-1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.Middle(\"abc\",1,-1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.Middle(\"abc\",5,1)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Range(\"abc\",-1,1)",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.Range(\"abc\",4,0)",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.Range(\"abc\",3,0)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Range(\"abc\",1,-1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.Range(\"abc\",2,2)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.Range(\"abc\",5)",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.Insert(\"abc\",4,\"x\")",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.Insert(\"abc\",-1,\"x\")",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",-1,1,\"x\")",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",1,-1,\"x\")",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",1,5,\"x\")",
+   "power_bi": "V:text:\"ax\""
+  },
+  {
+   "expression": "Text.RemoveRange(\"abc\",-1,1)",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.RemoveRange(\"abc\",1,-1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.RemoveRange(\"abc\",4,0)",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.RemoveRange(\"abc\",3,0)",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Repeat(\"\",5)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Replace(\"\",\"\",\"x\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",0)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",2)",
+   "power_bi": "V:text:\"a-b-c\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",-1)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{2,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{1,RelativePosition.FromStart})",
+   "power_bi": "V:text:\"a-b\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{-1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a-b-c\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{1})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{1,0,0})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"-\",{1,2})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",\"\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"\",\"\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"aaa\",\"aa\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"aaa\",\"aa\",1)",
+   "power_bi": "V:text:\"aaa\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"aaa\",\"aa\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",0)",
+   "power_bi": "V:text:\"b-c\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",2)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",-1)",
+   "power_bi": "V:text:\"a-b-c\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"b-c\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",{2,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a-b-c\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"aaa\",\"aa\")",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"aaa\",\"aa\",1)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"aaa\",\"aa\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",{1})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",{1,2})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",null)",
+   "power_bi": "V:text:\"b-c\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b-c\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",1.5)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b-c\",\"-\",\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type List."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",1,0)",
+   "power_bi": "V:text:\"d\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",0,0)",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",0,2)",
+   "power_bi": "V:text:\"b]c[d]\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",2)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",-1)",
+   "power_bi": "V:text:\"a[b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",0,-1)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"d\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",0,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",0,{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",{0,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"c\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",{1,RelativePosition.FromEnd},{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",0,{5,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",5)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c[d]\",\"[\",\"]\",0,5)",
+   "power_bi": "V:text:\"b]c[d]\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b\",\"[\",\"]\")",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"ab]\",\"[\",\"]\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a]b[c\",\"[\",\"]\")",
+   "power_bi": "V:text:\"c\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[]b\",\"[\",\"]\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]\",\"\",\"]\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]\",\"[\",\"\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"aXXb\",\"X\",\"X\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"aXbXcXd\",\"X\",\"X\",0,1)",
+   "power_bi": "V:text:\"bXc\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"aXbXcXd\",\"X\",\"X\",1,0)",
+   "power_bi": "V:text:\"c\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abcabc\",\"ab\",\"bc\")",
+   "power_bi": "V:text:\"ca\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"aaa\",\"aa\",\"a\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]\",\"[\",\"]\",{1},0)",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]\",\"[\",\"]\",0,{1,2})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c\",null,\"]\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a[b]c\",\"[\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(null,\"[\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(null,\"\",\"]\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",0,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"r\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",0,{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"q]r\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",0,{2,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"p]q]r\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",0,{-1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",0,{0,RelativePosition.FromStart})",
+   "power_bi": "V:text:\"s\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",0,1)",
+   "power_bi": "V:text:\"s]t\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",0,2)",
+   "power_bi": "V:text:\"s]t]u\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",-1,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",5,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"u\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",{-1,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"u\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",{0,RelativePosition.FromEnd},3)",
+   "power_bi": "V:text:\"s]t]u\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",-1,-1)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",-1,0)",
+   "power_bi": "V:text:\"p\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",-1,1)",
+   "power_bi": "V:text:\"p]q\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",-1,2)",
+   "power_bi": "V:text:\"p]q]r[s\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p]q]r[s]t]u\",\"[\",\"]\",-1,5)",
+   "power_bi": "V:text:\"p]q]r[s]t]u\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p[q[r[s]t]u\",\"[\",\"]\",{1,RelativePosition.FromEnd},0)",
+   "power_bi": "V:text:\"r[s\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p[q[r[s]t]u\",\"[\",\"]\",{1,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"p[q\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p[q[r[s]t]u\",\"[\",\"]\",{1,RelativePosition.FromEnd},{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"p[q\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"p[q[r[s]t]u\",\"[\",\"]\",{2,RelativePosition.FromEnd},{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"p\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"x\",\"y\",0,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"x\",\"y\",-1,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"x\",\"y\",-1)",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"x\",\"y\",-1,-1)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"a\",\"y\",0,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"a\",\"y\")",
+   "power_bi": "V:text:\"bc\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"a\",\"c\",0,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"a\",\"c\",{0,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abc\",\"c\",\"a\",{0,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abcabc\",\"c\",\"a\",{0,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abcabc\",\"c\",\"a\",{1,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abcabc\",\"c\",\"a\",{1,RelativePosition.FromEnd},{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abcabc\",\"c\",\"a\",{1,RelativePosition.FromEnd},{2,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"aaaaa\",\"aa\",\"a\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"aaaaa\",\"aa\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"aa\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"aaaaa\",\"aa\",{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{\"a\",0})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{null,0})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{0,null})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{0,\"x\"})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{0,1.5})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{1.5,0})",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{0,-1})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",true)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type List."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{0,true})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",2147483648)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",-2147483648)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",\"-\",{2147483647,1})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(null,\"-\",{1,2})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(null,\"\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(null,\"-\",{1})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(null,\"-\",\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type List."
+  },
+  {
+   "expression": "Text.AfterDelimiter(null,\"-\",{1,0})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(5,\"-\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a-b\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(5,\"-\",\"-\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a-b\",\"-\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a-b\",\"-\",\"-\",\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type List."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a-b\",\"-\",\"-\",0,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type List."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a-b\",\"-\",\"-\",null,null)",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a-b-c\",\"-\",\"-\",null,0)",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a-b-c\",\"-\",\"-\",0,null)",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(null,\"-\",\"-\",{1,2})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(null,\"-\",\"-\",0,{1,2})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a-b\",\"-\",\"-\",0,{1})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"abab\",\"ab\",\"ab\",{0,RelativePosition.FromEnd},{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"aab\",\"a\",\"ab\",0,{0,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"xaab\",\"aa\",\"ab\",0,0)",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"xaab\",\"aa\",\"ab\",0,1)",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a-b\",\"-\",{0,1.5})",
+   "power_bi": "ERR:Expression.Error: The specified index parameter is invalid."
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"\",\"-\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"ab\",\"ab\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",5,0,\"!\")",
+   "power_bi": "V:text:\"abc!\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",10,3,\"!\")",
+   "power_bi": "V:text:\"abc!\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",4,-1,\"!\")",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",-1,-1,\"!\")",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",4,1,\"!\")",
+   "power_bi": "V:text:\"abc!\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"\",0,0,\"!\")",
+   "power_bi": "V:text:\"!\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"\",1,0,\"!\")",
+   "power_bi": "V:text:\"!\""
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",1,1,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",1,null,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.ReplaceRange(\"abc\",null,1,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Replace(\"abc\",null,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Replace(null,null,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Replace(null,\"\",\"x\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Replace(\"abc\",\"\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Replace(\"abc\",\"B\",\"x\")",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Replace(\"abc\",\"b\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Insert(\"abc\",1,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Insert(\"abc\",null,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Insert(null,null,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Insert(null,0,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Insert(null,-1,\"x\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Start(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Start(\"abc\",1.5)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Text.Start(\"abc\",\"1\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"1\" to type Number."
+  },
+  {
+   "expression": "Text.Start(null,-1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Repeat(null,-1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadStart(null,-1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadStart(null,5,\"ab\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",5,null)",
+   "power_bi": "V:text:\"  abc\""
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.PadEnd(\"abc\",2)",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.PadEnd(\"abc\",5,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Range(null,5,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Range(\"abc\",null,1)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Range(\"abc\",0,null)",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.PadStart(null,5,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PadStart(null,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type Number."
+  },
+  {
+   "expression": "Text.PadStart(null,5,\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",-1,\"ab\")",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "Text.PadStart(\"abc\",-1,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PositionOf(\"aaa\",\"aa\",Occurrence.All)",
+   "power_bi": "V:list:[number:0]"
+  },
+  {
+   "expression": "Text.PositionOf(\"aaa\",\"aa\",Occurrence.Last)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOf(\"aaa\",\"aa\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Text.PositionOf(\"aaaa\",\"aa\",Occurrence.All)",
+   "power_bi": "V:list:[number:0,number:2]"
+  },
+  {
+   "expression": "Text.PositionOf(\"aaaa\",\"aa\",Occurrence.Last)",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Text.PositionOf(\"abab\",\"aba\",Occurrence.All)",
+   "power_bi": "V:list:[number:0]"
+  },
+  {
+   "expression": "Text.PositionOf(\"abcabc\",\"\",Occurrence.All)",
+   "power_bi": "V:list:[number:0,number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "Text.PositionOf(\"abcabc\",\"\",Occurrence.Last)",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Text.PositionOf(\"abcabc\",\"\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Text.PositionOf(\"\",\"\",Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.PositionOf(\"\",\"\",Occurrence.Last)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",3)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",-1)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",null)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",1.5)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type Number."
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",0,null)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",0,Comparer.Ordinal)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOf(\"aBc\",\"b\",0,Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",0,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Function."
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",0,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type Function."
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",0,each true)",
+   "power_bi": "ERR:Expression.Error: The specified comparer does not support culture sensitive comparisons."
+  },
+  {
+   "expression": "Text.Contains(\"abc\",\"\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Contains(\"\",\"\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.StartsWith(\"abc\",\"\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.EndsWith(\"abc\",\"\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Contains(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.StartsWith(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Contains(null,null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Contains(\"abc\",\"b\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Function."
+  },
+  {
+   "expression": "Text.Contains(\"abc\",\"b\",null)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Contains(\"abc\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Contains(5,\"a\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",0.5)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",true)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Number."
+  },
+  {
+   "expression": "Text.PositionOf(\"abc\",\"b\",0,(x,y)=>0)",
+   "power_bi": "ERR:Expression.Error: The specified comparer does not support culture sensitive comparisons."
+  },
+  {
+   "expression": "Text.Contains(\"abc\",\"b\",(x,y)=>0)",
+   "power_bi": "ERR:Expression.Error: The specified comparer does not support culture sensitive comparisons."
+  },
+  {
+   "expression": "Text.Contains(null,\"b\",5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Contains(\"abc\",null,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.StartsWith(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.EndsWith(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Remove(null,null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Select(null,null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Remove(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: The argument value isn't valid."
+  },
+  {
+   "expression": "Text.Select(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: The argument value isn't valid."
+  },
+  {
+   "expression": "Text.RemoveRange(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.RemoveRange(null,0,null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Range(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Middle(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.End(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Repeat(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.PadEnd(null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Lower(null,\"zz\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Upper(null,\"zz\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Proper(null,\"zz\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.From(null,\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.FromBinary(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.ToBinary(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",5)",
+   "power_bi": "ERR:Expression.Error: The text encoding is invalid."
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",null)",
+   "power_bi": "V:binary:YQ=="
+  },
+  {
+   "expression": "Text.Trim(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Trim(\"abc\",5)",
+   "power_bi": "ERR:Expression.Error: The argument value isn't valid."
+  },
+  {
+   "expression": "Text.Trim(\"abc\",null)",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Select(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Remove(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.SplitAny(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Split(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Combine({\"a\",\"b\"},5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Combine({\"a\",1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Text.Combine(\"abc\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"abc\" to type List."
+  },
+  {
+   "expression": "Text.StartsWith(null,\"a\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Function."
+  },
+  {
+   "expression": "Text.StartsWith(\"abc\",\"a\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Function."
+  },
+  {
+   "expression": "Text.StartsWith(null,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Contains(null,5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.EndsWith(null,\"a\",(x,y)=>0)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.SplitAny(\"a-b\",{\"-\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type List to type Text."
+  },
+  {
+   "expression": "Text.SplitAny(\"a-b\",\"\")",
+   "power_bi": "V:list:[text:\"a-b\"]"
+  },
+  {
+   "expression": "Text.SplitAny(\"a-b\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.SplitAny(\"\",\"-\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Text.SplitAny(\"a-b\",\"-b\")",
+   "power_bi": "V:list:[text:\"a\",text:\"\",text:\"\"]"
+  },
+  {
+   "expression": "Text.Remove(\"abc\",{\"ab\"})",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Remove(\"abc\",{\"a\",null})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Remove(\"abc\",{\"a\",1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Text.Remove(\"abc\",{})",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Remove(\"abc\",\"\")",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Remove(\"abc\",\"ab\")",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Select(\"abc\",{})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Select(\"abc\",{\"\"})",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Trim(\"abc\",{\"\"})",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Trim(\"abc\",{\"ab\"})",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Trim(\"abc\",\"\")",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.Trim(\"abc\",{\"a\",5})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type List."
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type List."
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",\"bc\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"bc\" to type List."
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"bc\"})",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{})",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"b\"},Occurrence.All)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abcb\",{\"b\",\"c\"},Occurrence.All)",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abcb\",{\"b\",\"c\"},Occurrence.Last)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"x\"},Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"b\"},3)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"b\"},-1)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"b\"},null)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"b\"},\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type Number."
+  },
+  {
+   "expression": "Text.PositionOfAny(\"\",{\"b\"})",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"\",{\"b\"},Occurrence.Last)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"abc\",{\"b\",null})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.PositionOfAny(5,{\"b\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "TextEncoding.Utf8",
+   "power_bi": "V:number:65001"
+  },
+  {
+   "expression": "TextEncoding.Utf16",
+   "power_bi": "V:number:1200"
+  },
+  {
+   "expression": "TextEncoding.Unicode",
+   "power_bi": "V:number:1200"
+  },
+  {
+   "expression": "TextEncoding.BigEndianUnicode",
+   "power_bi": "V:number:1201"
+  },
+  {
+   "expression": "TextEncoding.Ascii",
+   "power_bi": "V:number:20127"
+  },
+  {
+   "expression": "TextEncoding.Windows",
+   "power_bi": "V:number:1252"
+  },
+  {
+   "expression": "TextEncoding.Utf7",
+   "power_bi": "ERR:Expression.Error: The import TextEncoding.Utf7 matches no exports. Did you miss a module reference?"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",0)",
+   "power_bi": "V:binary:Yek="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",1252)",
+   "power_bi": "V:binary:Yek="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",65001)",
+   "power_bi": "V:binary:YcOp"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",1200)",
+   "power_bi": "V:binary:YQDpAA=="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",1201)",
+   "power_bi": "V:binary:AGEA6Q=="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",20127)",
+   "power_bi": "V:binary:YT8="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",12000)",
+   "power_bi": "V:binary://4AAGEAAADpAAAA"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",12001)",
+   "power_bi": "V:binary:AAD+/wAAAGEAAADp"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",28591)",
+   "power_bi": "V:binary:Yek="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",437)",
+   "power_bi": "V:binary:YYI="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",-1)",
+   "power_bi": "ERR:Expression.Error: The text encoding is invalid."
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",1.5)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type Number."
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u20ac\",1252)",
+   "power_bi": "V:binary:YYA="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u20ac\",20127)",
+   "power_bi": "V:binary:YT8="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00ff\",20127)",
+   "power_bi": "V:binary:YT8="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\ude00\",65001)",
+   "power_bi": "V:binary:8J+YgA=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\ude00\",1200)",
+   "power_bi": "V:binary:PdgA3g=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\ude00\",20127)",
+   "power_bi": "V:binary:Pz8="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\ude00\",1252)",
+   "power_bi": "V:binary:Pz8="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\",65001)",
+   "power_bi": "V:binary:77+9"
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\",1200)",
+   "power_bi": "V:binary:/f8="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\",1252)",
+   "power_bi": "V:binary:Pw=="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\ud83dz\",65001)",
+   "power_bi": "V:binary:Ye+/vXo="
+  },
+  {
+   "expression": "Text.ToBinary(\"\",65001)",
+   "power_bi": "V:binary:"
+  },
+  {
+   "expression": "Text.ToBinary(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.FromBinary(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Binary."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({195,169}),0)",
+   "power_bi": "V:text:\"\u00c3\u00a9\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({195,169}),1252)",
+   "power_bi": "V:text:\"\u00c3\u00a9\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({195,169}),20127)",
+   "power_bi": "V:text:\"??\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({195,169}),-1)",
+   "power_bi": "ERR:Expression.Error: The text encoding is invalid."
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",1)",
+   "power_bi": "ERR:Expression.Error: The text encoding is invalid."
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",99999)",
+   "power_bi": "ERR:Expression.Error: The text encoding is invalid."
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",65002)",
+   "power_bi": "ERR:Expression.Error: The text encoding is invalid."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,97}))",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,97}),65001)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,97,0}),1200)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,97,0}))",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({254,255,0,97}),1201)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255}))",
+   "power_bi": "V:text:\"\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97,255,98}),65001)",
+   "power_bi": "V:text:\"a\ufffdb\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97,0,98}),1200)",
+   "power_bi": "V:text:\"a\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({61,216,97,0}),1200)",
+   "power_bi": "V:text:\"\ufffda\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({128}),1252)",
+   "power_bi": "V:text:\"\u20ac\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({233}),28591)",
+   "power_bi": "V:text:\"\u00e9\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({128}),20127)",
+   "power_bi": "V:text:\"?\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97,0,0,0}),12000)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97}),null)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97}),\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"x\" to type Number."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97}),1.5)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Text.FromBinary(\"a\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Binary."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({0}))",
+   "power_bi": "V:text:\"\\u0000\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97,0}),65001)",
+   "power_bi": "V:text:\"a\\u0000\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({226,130}),65001)",
+   "power_bi": "V:text:\"\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({237,160,128}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({240,159,152,128}),65001)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.FromBinary(#binary({240,159,152,128}),1252)",
+   "power_bi": "V:text:\"\u00f0\u0178\u02dc\u20ac\""
+  },
+  {
+   "expression": "Text.ToBinary(\"\u00e9\",65001)",
+   "power_bi": "V:binary:w6k="
+  },
+  {
+   "expression": "Text.FromBinary(Text.ToBinary(\"x\"))",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.ToBinary(\"abc\",null)",
+   "power_bi": "V:binary:YWJj"
+  },
+  {
+   "expression": "Text.ToBinary(\"abc\",12000)",
+   "power_bi": "V:binary://4AAGEAAABiAAAAYwAAAA=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\",12000)",
+   "power_bi": "V:binary://4AAA=="
+  },
+  {
+   "expression": "Text.FromBinary(#binary({237,160,128,97}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffda\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({192,128}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({224,128,128}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({240,128,128,128}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffd\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({244,144,128,128}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffd\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({226,130,97}),65001)",
+   "power_bi": "V:text:\"\ufffda\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({226,97}),65001)",
+   "power_bi": "V:text:\"\ufffda\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({128,128}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({240,159,97}),65001)",
+   "power_bi": "V:text:\"\ufffda\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({240,159,152,97}),65001)",
+   "power_bi": "V:text:\"\ufffda\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({248,128,128,128,128}),65001)",
+   "power_bi": "V:text:\"\ufffd\ufffd\ufffd\ufffd\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({226,130,172,226,130}),65001)",
+   "power_bi": "V:text:\"\u20ac\ufffd\""
+  },
+  {
+   "expression": "Text.ToBinary(\"\u0100\u0107\u0141\u03b1\u4f60\u2122\u00bd\u00a9\uff21\",20127)",
+   "power_bi": "V:binary:Pz8/Pz8/Pz8/"
+  },
+  {
+   "expression": "Text.ToBinary(\"\u00e9\",437)",
+   "power_bi": "V:binary:gg=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\u0081\",1252)",
+   "power_bi": "V:binary:gQ=="
+  },
+  {
+   "expression": "Text.FromBinary(#binary({129,141,143,144,157}),1252)",
+   "power_bi": "V:text:\"\u0081\u008d\u008f\u0090\u009d\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({128,130}),437)",
+   "power_bi": "V:text:\"\u00c7\u00e9\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({1,127}),20127)",
+   "power_bi": "V:text:\"\\u0001\\u007F\""
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\ude00\",12000)",
+   "power_bi": "V:binary://4AAAD2AQA="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\",12000)",
+   "power_bi": "V:binary://4AAP3/AAA="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\",1201)",
+   "power_bi": "V:binary://0="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\",20127)",
+   "power_bi": "V:binary:Pw=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\",28591)",
+   "power_bi": "V:binary:Pw=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\ud83d\ude00\",28591)",
+   "power_bi": "V:binary:Pz8="
+  },
+  {
+   "expression": "Text.FromBinary(#binary({0,0,254,255,0,0,0,97}),12001)",
+   "power_bi": "V:text:\"\ufeffa\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,0,0,97,0,0,0}),12000)",
+   "power_bi": "V:text:\"\ufeffa\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97,0,0,0,98}),12000)",
+   "power_bi": "V:text:\"a\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({0,0,17,0}),12000)",
+   "power_bi": "V:text:\"\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({97,0,0,0}),12001)",
+   "power_bi": "V:text:\"\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({254,255,0,97}),1200)",
+   "power_bi": "ERR:DataFormat.Error: The unicode byte order marks didn't match the specified encoding."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,97,0}),1201)",
+   "power_bi": "ERR:DataFormat.Error: The unicode byte order marks didn't match the specified encoding."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,97}),1200)",
+   "power_bi": "ERR:DataFormat.Error: The unicode byte order marks didn't match the specified encoding."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,97}),1252)",
+   "power_bi": "V:text:\"\u00ef\u00bb\u00bfa\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,97,0}),65001)",
+   "power_bi": "ERR:DataFormat.Error: The unicode byte order marks didn't match the specified encoding."
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,97,0}),1252)",
+   "power_bi": "V:text:\"\u00ff\u00fea\\u0000\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,0,0,97,0,0,0}))",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({254,255,0,97}))",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({0,0,254,255,0,0,0,97}))",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191}))",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,239,187,191,97}))",
+   "power_bi": "V:text:\"\ufeffa\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,97}),20127)",
+   "power_bi": "V:text:\"???a\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,97}),0)",
+   "power_bi": "V:text:\"\u00ef\u00bb\u00bfa\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({239,187,191,97}),28591)",
+   "power_bi": "V:text:\"\u00ef\u00bb\u00bfa\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,97,0}),0)",
+   "power_bi": "V:text:\"\u00ff\u00fea\\u0000\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({255,254,97,0}),12000)",
+   "power_bi": "V:text:\"\ufffd\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({0,0,0,0}),12000)",
+   "power_bi": "V:text:\"\\u0000\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({128}),437)",
+   "power_bi": "V:text:\"\u00c7\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({128}),28591)",
+   "power_bi": "V:text:\"\u0080\""
+  },
+  {
+   "expression": "Text.FromBinary(#binary({200,255}),1252)",
+   "power_bi": "V:text:\"\u00c8\u00ff\""
+  },
+  {
+   "expression": "Text.ToBinary(\"\u00e9\",0)",
+   "power_bi": "V:binary:6Q=="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",1200)",
+   "power_bi": "V:binary:YQA="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",1201)",
+   "power_bi": "V:binary:AGE="
+  },
+  {
+   "expression": "Text.ToBinary(\"\",1200)",
+   "power_bi": "V:binary:"
+  },
+  {
+   "expression": "Text.ToBinary(\"\",1201)",
+   "power_bi": "V:binary:"
+  },
+  {
+   "expression": "Text.ToBinary(\"\u00e9\",20127)",
+   "power_bi": "V:binary:Pw=="
+  },
+  {
+   "expression": "Text.Format(\"#{0} #{0}\",{1})",
+   "power_bi": "V:text:\"1 1\""
+  },
+  {
+   "expression": "Text.Format(\"#{-1}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The index cannot be negative."
+  },
+  {
+   "expression": "Text.Format(\"#{a}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#[a]\",[b=1])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The field 'a' of the record wasn't found."
+  },
+  {
+   "expression": "Text.Format(\"#[a]\",[a=null])",
+   "power_bi": "V:text:\"null\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",[a=1])",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"##{0}\",{1})",
+   "power_bi": "V:text:\"#1\""
+  },
+  {
+   "expression": "Text.Format(\"#\",{1})",
+   "power_bi": "V:text:\"#\""
+  },
+  {
+   "expression": "Text.Format(\"#{\",{1})",
+   "power_bi": "ERR:DataFormat.Error: Text format placeholders must be closed."
+  },
+  {
+   "expression": "Text.Format(\"#{0\",{1})",
+   "power_bi": "ERR:DataFormat.Error: Text format placeholders must be closed."
+  },
+  {
+   "expression": "Text.Format(\"#{ 0 }\",{1})",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#{00}\",{1,2})",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#[A]\",[a=1])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The field 'A' of the record wasn't found."
+  },
+  {
+   "expression": "Text.Format(\"#[a]\",[A=1])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The field 'a' of the record wasn't found."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",\"x\")",
+   "power_bi": "ERR:Expression.Error: We expect Text.Format arguments to be of type Record or type List."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",5)",
+   "power_bi": "ERR:Expression.Error: We expect Text.Format arguments to be of type Record or type List."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",null)",
+   "power_bi": "ERR:Expression.Error: We expect Text.Format arguments to be of type Record or type List."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{true})",
+   "power_bi": "V:text:\"true\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{{1}})",
+   "power_bi": "V:text:\"list\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{[a=1]})",
+   "power_bi": "V:text:\"record\""
+  },
+  {
+   "expression": "Text.Format(\"\",{})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Format(\"abc\",{})",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},null)",
+   "power_bi": "V:text:\"1.5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#date(2020,1,2)})",
+   "power_bi": "V:text:\"1/2/2020\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1},5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Format(\"#[a b]\",[#\"a b\"=1])",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#[]\",[a=1])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The field '' of the record wasn't found."
+  },
+  {
+   "expression": "Text.Format(\"#{0}#{1}\",{\"x\"})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.Format(\"#{}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#{1.5}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#[a]#[b]\",[a=1])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The field 'b' of the record wasn't found."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#binary({1})})",
+   "power_bi": "V:text:\"AQ==\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{each 1})",
+   "power_bi": "V:text:\"function\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#duration(1,0,0,0)})",
+   "power_bi": "V:text:\"1.00:00:00\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{-0.0})",
+   "power_bi": "V:text:\"0\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1e20})",
+   "power_bi": "V:text:\"100000000000000000000\""
+  },
+  {
+   "expression": "Text.Format(\"#[a\",[a=1])",
+   "power_bi": "ERR:DataFormat.Error: Text format placeholders must be closed."
+  },
+  {
+   "expression": "Text.Format(\"#[\",[a=1])",
+   "power_bi": "ERR:DataFormat.Error: Text format placeholders must be closed."
+  },
+  {
+   "expression": "Text.Format(\"#[a]\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We cannot apply field access to the type List."
+  },
+  {
+   "expression": "Text.Format(\"#{1}\",[a=1])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The index is outside the bounds of the record."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",[])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The index is outside the bounds of the record."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Text.Format(\"#{+1}\",{1,2})",
+   "power_bi": "V:text:\"2\""
+  },
+  {
+   "expression": "Text.Format(\"#{ }\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#{1 2}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#{0x1}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#{2147483648}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#{-0}\",{1})",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#{ -1 }\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The index cannot be negative."
+  },
+  {
+   "expression": "Text.Format(\"#{1e0}\",{1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: We expected an integer value."
+  },
+  {
+   "expression": "Text.Format(\"#[ a ]\",[a=1])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: The field ' a ' of the record wasn't found."
+  },
+  {
+   "expression": "Text.Format(\"#[a]]\",[a=1])",
+   "power_bi": "V:text:\"1]\""
+  },
+  {
+   "expression": "Text.Format(\"#[a[b]\",[#\"a[b\"=1])",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}}\",{1})",
+   "power_bi": "V:text:\"1}\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{type text})",
+   "power_bi": "V:text:\"type\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#time(1,2,3)})",
+   "power_bi": "V:text:\"1:02 AM\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#datetime(2020,1,2,3,4,5)})",
+   "power_bi": "V:text:\"1/2/2020 3:04:05 AM\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#datetimezone(2020,1,2,3,4,5,1,0)})",
+   "power_bi": "V:text:\"1/2/2020 3:04:05 AM +01:00\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{\"a\"})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1,2})",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"a#{0}b#{1}c\",{1,2})",
+   "power_bi": "V:text:\"a1b2c\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{0.1+0.2})",
+   "power_bi": "V:text:\"0.30000000000000004\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1/3})",
+   "power_bi": "V:text:\"0.33333333333333331\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{123456789.123})",
+   "power_bi": "V:text:\"123456789.123\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#date(2020,1,2)},\"en-GB\")",
+   "power_bi": "V:text:\"02/01/2020\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{null},\"zz\")",
+   "power_bi": "V:text:\"null\""
+  },
+  {
+   "expression": "Text.Format(\"\",{},\"zz\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1},\"\")",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",[a=error \"x\"])",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: x"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{\"a\"},\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{true},\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{{1}},\"zz\")",
+   "power_bi": "V:text:\"list\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{[a=1]},\"zz\")",
+   "power_bi": "V:text:\"record\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#binary({1})},\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#duration(1,0,0,0)},\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{each 1},\"zz\")",
+   "power_bi": "V:text:\"function\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{type text},\"zz\")",
+   "power_bi": "V:text:\"type\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1},\"de-DE\")",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{-1.5},\"de-DE\")",
+   "power_bi": "V:text:\"-1,5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1234.5},\"de-DE\")",
+   "power_bi": "V:text:\"1234,5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1e20},\"de-DE\")",
+   "power_bi": "V:text:\"100000000000000000000\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"EN-us\")",
+   "power_bi": "V:text:\"1.5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"en-US\")",
+   "power_bi": "V:text:\"1.5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\" \")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"de-de\")",
+   "power_bi": "V:text:\"1,5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1,2},\"de-DE\")",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Text.Format(\"#{1}\",{1,1.5},\"de-DE\")",
+   "power_bi": "V:text:\"1,5\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0000)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0001)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0002)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0003)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0004)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0005)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0006)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0007)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0008)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0009)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(000A)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(000B)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(000C)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(000D)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(000E)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(000F)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0010)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0011)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0012)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0013)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0014)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0015)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0016)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0017)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0018)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0019)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(001A)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(001B)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(001C)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(001D)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(001E)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(001F)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(007F)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0080)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0085)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(008D)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(009F)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(00A0)b\")",
+   "power_bi": "V:text:\"a\u00a0b\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(00AD)b\")",
+   "power_bi": "V:text:\"a\u00adb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(061C)b\")",
+   "power_bi": "V:text:\"a\u061cb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(180E)b\")",
+   "power_bi": "V:text:\"a\u180eb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(200B)b\")",
+   "power_bi": "V:text:\"a\u200bb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(200C)b\")",
+   "power_bi": "V:text:\"a\u200cb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(200D)b\")",
+   "power_bi": "V:text:\"a\u200db\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(200E)b\")",
+   "power_bi": "V:text:\"a\u200eb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(2028)b\")",
+   "power_bi": "V:text:\"a\u2028b\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(2029)b\")",
+   "power_bi": "V:text:\"a\u2029b\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(202F)b\")",
+   "power_bi": "V:text:\"a\u202fb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(2060)b\")",
+   "power_bi": "V:text:\"a\u2060b\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(2061)b\")",
+   "power_bi": "V:text:\"a\u2061b\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(FEFF)b\")",
+   "power_bi": "V:text:\"a\ufeffb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(E000)b\")",
+   "power_bi": "V:text:\"a\ue000b\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(FFFE)b\")",
+   "power_bi": "V:text:\"a\ufffeb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(FFF9)b\")",
+   "power_bi": "V:text:\"a\ufff9b\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(D7FF)b\")",
+   "power_bi": "V:text:\"a\ud7ffb\""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0001)#(0002)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\" a b \")",
+   "power_bi": "V:text:\" a b \""
+  },
+  {
+   "expression": "Text.Clean(\"a#(0009)#(000A)#(000D)b\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Text.Clean(\"\ud83d\ude00#(0001)\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"+1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\".5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"5.\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\" 1 \")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,000\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"0x10\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '0x10' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"Infinity\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'Infinity' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1E+5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 2\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1 2' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"(1)\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1-\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"--1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '--1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"00\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.2.3\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1.2.3' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-.5e-3\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,5\",\"en-US\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\",\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\",null)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.InferNumberType(\"99999999999999999999\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e400\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u0661\u0662\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u0661\u0662' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\u00a0\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"\t1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+.5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e-400\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$-1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-$1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$ 1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"- 1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '- 1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 -\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 +\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"+-1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+-1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"($1)\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"(-1)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(-1)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(1)-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(1)-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-1-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-1-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$1$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$$1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$$1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,,2\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\",1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ',1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\".,1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '.,1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.,2\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1.,2' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,.2\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.2,3\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1.2,3' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\". \")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '. ' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e5.5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1e5.5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1e+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1E-5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e5 \")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e 5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1e 5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u20ac1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u20ac1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a31\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a31' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a51\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a51' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a41\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a41' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"%1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 000\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1 000' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,000.5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,00\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.000,5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1.000,5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"e5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'e5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\".\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '.' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"( 1 )\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '( 1 )' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u22121\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u22121' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\u2212\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1\u2212' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221e1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-\u221e\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"+\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"nan\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'nan' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NAN\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NAN' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"Nan\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'Nan' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-NaN\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-NaN' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221e\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1#(000A)\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"#(000A)1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u20281\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\u2003\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\u200b\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1\u200b' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\ufeff1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\ufeff1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$ -1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$ +1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"% 1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"%-1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-%1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$%1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$%1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%$1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 %\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1% \")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 $\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1$-\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1-$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 - $\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 -$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-1%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"($ 1)\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"( $1)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '( $1)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"($1) \")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"($-1)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '($-1)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"($1)-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '($1)-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1%-\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1.5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$.5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1,000\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1e5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e5$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e5%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e5-\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e-5-\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-$1,000.50\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"+$1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$+1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1+$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1$+\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1% %\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1% %' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%1%\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '%1%' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1%$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1%$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+1 \")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"  -1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-  \")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-  ' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1-\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$-1-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$-1-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+1+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+1+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"($1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '($1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$1)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$(1)\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"(1$)\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"($1$)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '($1$)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1 e5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1 e5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e5e5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1e5e5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"    %1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"$+%+1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$+%+1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$+12)-e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$+12)-e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$.%512\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$.%512' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$512(.1,000\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$512(.1,000' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%+%12 \")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '%+%12 ' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%,(121,000.\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '%,(121,000.' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%12\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\")%12\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ')%12' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\").+,55\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ').+,55' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+1.12 5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+1.12 5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"+5-e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+5-e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\",%1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ',%1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\",..e$1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ',..e$1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-12%),$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-12%),$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-5)-1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-5)-1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\".,.1,000\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '.,.1,000' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1%%1,000\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1%%1,000' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1)e1(,\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1)e1(,' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,000+\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,000,\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,0001%-1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1,0001%-1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,00012\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,1)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1,1)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,51%1,000\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1,51%1,000' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"11,000\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"11,000e-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '11,000e-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"111(%\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '111(%' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"12(-1,000 \")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '12(-1,000 ' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"12)-)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '12)-)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"12+\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"121,000\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"12125\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"5+1,000\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '5+1,000' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"51,000))e)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '51,000))e)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"e1,000\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'e1,000' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"e5++12\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'e5++12' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\" $.\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ' $.' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\" E1e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ' E1e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$5,\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"%++%NaN\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '%++%NaN' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%\u00a0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '%\u00a0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(%$\u221e.0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(%$\u221e.0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(\u00a0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(\u00a0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\")(0  \")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ')(0  ' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\")0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ')0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\")E+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ')E+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+( +$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+( +$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"--\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '--' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-0,$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-0,(-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-0,(-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"-x%\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-x%' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"0$-+E+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '0$-+E+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1$,0E\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1$,0E' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1ex-1, \")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1ex-1, ' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"5(\u221e(\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '5(\u221e(' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"5,NaN\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '5,NaN' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"50\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"5\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '5\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"E-$$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'E-$$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"E5)$NaN-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'E5)$NaN-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"Ee-\u00a01\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'Ee-\u00a01' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN(-.\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NaN(-.' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN\u221e)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NaN\u221e)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"e5 %\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'e5 %' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"x55NaN\u00a0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'x55NaN\u00a0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"x\u00a05\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'x\u00a05' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a0$10$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a0$10$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a0%\u221e\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a0(eE+E\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a0(eE+E' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a0)x\u00a0E\u221e-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a0)x\u00a0E\u221e-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a0NaN 0\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a0NaN 0\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u00a0\u00a0$-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u00a0\u00a0$-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e0NaN)-(\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221e0NaN)-(' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221ex-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221ex-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e%\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN%\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-\u221e%\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(\u221e)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(\u221e)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221e-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\" \u221e\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e \")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN \")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e400%\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e300%\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e29%\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e28%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e-30%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e-400%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"%1e29\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"7.9e28%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"7.9e27%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e29\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e29$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e400$\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NaN$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+NaN\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+NaN' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(NaN)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(NaN)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-\u221e-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-\u221e-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1e29(\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1e29(' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%\u221e\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%NaN\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%-\u221e\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"1\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '1\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NaN1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"0.00000000000000000000000000001%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"12345678901234567890123456789%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"123456789012345678901234567890%\")",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+  },
+  {
+   "expression": "Text.InferNumberType(\"79228162514264337593543950335%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\" +-+5%\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ' +-+5%' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$)\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$)\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"$1\u221e$+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '$1\u221e$+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%9\u221e\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '%9\u221e' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"%NaNe\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '%NaNe' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(,NaN\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(,NaN' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"(3e28E+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '(3e28E+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\")$\u221e.5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ')$\u221e.5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\")3e289,0-\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ')3e289,0-' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\")9910+\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ')9910+' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+19NaN\u221e0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+19NaN\u221e0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+1NaN%\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+1NaN%' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"+9\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"+e)\u221e%%\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '+e)\u221e%%' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\",.-NaN)NaN\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ',.-NaN)NaN' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\",55,99\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ',55,99' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\",\u221e9 0(\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match ',\u221e9 0(' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-$,5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-$,5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-)3e28eE,\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-)3e28eE,' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-0 E(\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-0 E(' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"-50NaN9\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '-50NaN9' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\".5E,\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '.5E,' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\".9(\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '.9(' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"00.+E,\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '00.+E,' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"3e285\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"3e28E( 0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '3e28E( 0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"5-1\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '5-1' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"5.1\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"51)-.9\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '51)-.9' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"5E919,\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '5E919,' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"9 \u221e, \")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '9 \u221e, ' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN %-0\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NaN %-0' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NaN5' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"NaN9090\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'NaN9090' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"e$)1$\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'e$)1$' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"eE 9)\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match 'eE 9)' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e)))9.\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221e)))9.' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e+0\u221e$%\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221e+0\u221e$%' with any known number pattern."
+  },
+  {
+   "expression": "Text.InferNumberType(\"\u221e5\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '\u221e5' with any known number pattern."
+  },
+  {
+   "expression": "Text.Split(5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Split(null,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.SplitAny(5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.SplitAny(null,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Text.Replace(5,null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Replace(null,5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Replace(\"a\",5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Insert(5,null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.ReplaceRange(5,null,null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Range(5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PadStart(5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PadStart(null,null,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Text.Start(5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Middle(5,null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PositionOf(5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.PositionOf(\"a\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(5,\"\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a\",\"\",\"x\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a\",\"\",{1,2})",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a\",5,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BeforeDelimiter(5,\"-\",{1,2})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a\",\"\",\"\",\"x\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a\",\"-\",5,\"x\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Contains(5,null,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Combine(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type List."
+  },
+  {
+   "expression": "Text.Combine({1},5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Combine({\"a\"},\"\")",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.Remove(5,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Trim(5,5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Lower(5,\"zz\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Lower(\"a\",\"zz\")",
+   "power_bi": "ERR:DataFormat.Error: The specified culture is not supported."
+  },
+  {
+   "expression": "Text.Lower(\"a\",5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.RemoveRange(5,null,null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Reverse(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Proper(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Length(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Upper(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.Clean(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Text.ToList(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  }
+ ]
+}

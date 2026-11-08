@@ -6,12 +6,15 @@ Each native receives its arguments forced (a missing optional argument is null).
 
 from __future__ import annotations
 
+import base64
 import datetime as _dt
 import math
+import re
 from typing import Callable
 
 from . import values as V
 from .canonical import duration_text, number_text_of
+from .text import TEXT_GLOBALS
 from .values import MError, MValue, ParamSpec
 
 
@@ -170,11 +173,12 @@ def _upper_unit(ch: str, turkic: bool) -> str:
 
 
 def _text_upper(value: MValue, culture: MValue = V.Null()) -> MValue:
+    if isinstance(value, V.Null):
+        return V.Null()  # measured: a null text wins over an unsupported culture
+    _text(value)  # measured: a non-text value is refused before the culture is looked at
     name = _culture_name(culture)
     if name not in _EN_US and not name.startswith(("tr", "az")):
         raise _unsupported_culture(name)
-    if isinstance(value, V.Null):
-        return V.Null()
     turkic = name.startswith(("tr", "az"))
     return V.Text("".join(_upper_unit(ch, turkic) for ch in _text(value)))
 
@@ -197,13 +201,24 @@ def _twelve_hour(ticks: int) -> tuple:
     return (hours % 12 or 12), minutes, seconds, ("AM" if hours < 12 else "PM")
 
 
+_PLAIN_DECIMAL = re.compile(r"-?[0-9]+(\.[0-9]+)?")
+
+
 def _text_from(value: MValue, culture: MValue = V.Null()) -> MValue:
     """en-US text of a value, as Power BI's Text.From writes it (measured live)."""
     name = _culture_name(culture)
-    if name not in ("", "en-us"):  # other English cultures format dates differently (measured: en-GB)
+    if name not in ("", "en-us"):  # other cultures: only the measured cases below, anything else is an ERR
+        if name == "en-gb" and isinstance(value, V.Date):  # measured: dd/MM/yyyy
+            return V.Text(f"{value.value.day:02d}/{value.value.month:02d}/{value.value.year:04d}")
+        if name == "de-de" and isinstance(value, V.Number):  # measured: 1,5; plain decimals only
+            plain = _text_from(value).value
+            if _PLAIN_DECIMAL.fullmatch(plain):
+                return V.Text(plain.replace(".", ","))
         raise _unsupported_culture(name)
     if isinstance(value, (V.Null, V.Text)):
         return value
+    if isinstance(value, V.Binary):  # measured: base64 text
+        return V.Text(base64.b64encode(value.value).decode("ascii"))
     if isinstance(value, V.Number):
         x = value.value
         if math.isnan(x):
@@ -348,4 +363,5 @@ GLOBALS: dict = {
     "Table.FromRecords": _native((("records", False), ("columns", True), ("missingField", True)),
                                  _table_from_records),
     "List.Sum": _native((("list", False), ("precision", True)), _list_sum),
+    **TEXT_GLOBALS,
 }
