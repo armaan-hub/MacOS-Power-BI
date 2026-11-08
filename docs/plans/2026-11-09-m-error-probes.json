@@ -1,0 +1,1237 @@
+{
+ "source": "Power BI Desktop live answers (tools/m_oracle_diff.py), 2026-11-09, task 101: try of built-in errors (error record Detail, Message.Format, Message.Parameters, ErrorCode)",
+ "cases": [
+  {
+   "expression": "try [a=1][b]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'b' of the record wasn't found.\",\"Detail\"=record:[\"a\"=number:1],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"b\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "try [a=1][b]?",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try {1,2}{5}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Detail\"=list:[number:1,number:2],\"Message.Format\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10063\"]]"
+  },
+  {
+   "expression": "try {}{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Detail\"=list:[],\"Message.Format\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10063\"]]"
+  },
+  {
+   "expression": "try {1}{-1}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The index cannot be negative.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Index\"=number:-1],\"Message.Format\"=text:\"The index cannot be negative.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10038\"]]"
+  },
+  {
+   "expression": "try {1,2,3}{-7}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The index cannot be negative.\",\"Detail\"=record:[\"Value\"=list:[number:1,number:2,number:3],\"Index\"=number:-7],\"Message.Format\"=text:\"The index cannot be negative.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10038\"]]"
+  },
+  {
+   "expression": "try null{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value null to type List.\",\"Detail\"=record:[\"Value\"=null,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"null\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 5{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 5 to type List.\",\"Detail\"=record:[\"Value\"=number:5,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"5\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try \"abc\"{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"abc\\\" to type List.\",\"Detail\"=record:[\"Value\"=text:\"abc\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"abc\\\"\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try (each 1){0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Function to type List.\",\"Detail\"=record:[\"Value\"=function,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Function\",text:\"List\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try 1[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Number.\",\"Detail\"=record:[\"Value\"=number:1,\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Number\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try null[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Null.\",\"Detail\"=record:[\"Value\"=null,\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Null\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try \"x\"[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Text.\",\"Detail\"=record:[\"Value\"=text:\"x\",\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Text\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try {1}[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type List.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"List\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try 1 + \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=number:1,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\" + 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=text:\"a\",\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1} + 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types List and Number.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=list:[number:1],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"List\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try [a=1] + 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Record and Number.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=record:[\"a\"=number:1],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Record\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) + #date(2020,1,2)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Date and Date.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=date:2020-01-01,\"Right\"=date:2020-01-02],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Date\",text:\"Date\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try true + 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Logical and Number.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=true,\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Logical\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null + {}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 - \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=number:1,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\" * 2",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=text:\"a\",\"Right\"=number:2],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 / \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator / to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"/\",\"Left\"=number:1,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"/\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try -\"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to the type Text.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Value\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Text\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try not 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator not to the type Number.\",\"Detail\"=record:[\"Operator\"=text:\"not\",\"Value\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"not\",text:\"Number\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try 1 & 2",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Number and Number.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=number:1,\"Right\"=number:2],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Number\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1} & 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types List and Number.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=list:[number:1],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"List\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 = {1} and 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=false]"
+  },
+  {
+   "expression": "try 1 and true",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Logical.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Logical\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try if 1 then 2 else 3",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Logical.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Logical\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1/0",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=number:+Infinity]"
+  },
+  {
+   "expression": "try 0/0",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=number:NaN]"
+  },
+  {
+   "expression": "try #date(2020,13,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10019\"]]"
+  },
+  {
+   "expression": "try #date(2020,2,30)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10019\"]]"
+  },
+  {
+   "expression": "try #time(25,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10023\"]]"
+  },
+  {
+   "expression": "try #datetime(2020,1,1,25,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try 1 < \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=text:\"a\",\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\" < 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=number:1,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 >= \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=text:\"a\",\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 > \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=text:\"a\",\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\" <= 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=number:1,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1} < {2}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and List.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[number:1],\"Right\"=list:[number:2]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try [a=1] < [a=2]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Record and Record.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=record:[\"a\"=number:1],\"Right\"=record:[\"a\"=number:2]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Record\",text:\"Record\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try true < 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Number and Logical.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=number:1,\"Right\"=true],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Number\",text:\"Logical\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) < 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Number and Date.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=number:1,\"Right\"=date:2020-01-01],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Number\",text:\"Date\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #datetimezone(2020,1,1,0,0,0,25,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTimeZone operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTimeZone operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10031\"]]"
+  },
+  {
+   "expression": "try #datetimezone(2020,13,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try #date(10000,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10019\"]]"
+  },
+  {
+   "expression": "try #date(0,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10019\"]]"
+  },
+  {
+   "expression": "try #time(0,60,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10023\"]]"
+  },
+  {
+   "expression": "try \"a\" as number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"a\\\" to type Number.\",\"Detail\"=record:[\"Value\"=text:\"a\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"a\\\"\",text:\"Number\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1 as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Text.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Text\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try {1} as number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type List to type Number.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"List\",text:\"Number\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try [a=1] as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Record to type Text.\",\"Detail\"=record:[\"Value\"=record:[\"a\"=number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Record\",text:\"Text\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try (each 1) as number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Function to type Number.\",\"Detail\"=record:[\"Value\"=function,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Function\",text:\"Number\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try 1 as list",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type List.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1 as record",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Record.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Record\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try null as number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value null to type Number.\",\"Detail\"=record:[\"Value\"=null,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"null\",text:\"Number\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try true as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value true to type Text.\",\"Detail\"=record:[\"Value\"=true,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"true\",text:\"Text\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try \"a\" as logical",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"a\\\" to type Logical.\",\"Detail\"=record:[\"Value\"=text:\"a\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"a\\\"\",text:\"Logical\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1 as function",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Function.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Function\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) as number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value #date(2020, 1, 1) to type Number.\",\"Detail\"=record:[\"Value\"=date:2020-01-01,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"#date(2020, 1, 1)\",text:\"Number\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value #date(2020, 1, 1) to type Text.\",\"Detail\"=record:[\"Value\"=date:2020-01-01,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"#date(2020, 1, 1)\",text:\"Text\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try {1} as record",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type List to type Record.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"List\",text:\"Record\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try {1} as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type List to type Text.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"List\",text:\"Text\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try 1 as date",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Date.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Date\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1 as nullable list",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type List.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1 as any",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=number:1]"
+  },
+  {
+   "expression": "try (1 as nullable text)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Text.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Text\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1 as table",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Table.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Table\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1 as type",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Type.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Type\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try {} + null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & {}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {} & null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null + \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Text and Null.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=text:\"a\",\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Text\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null + [a=1]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Record and Null.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=record:[\"a\"=number:1],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Record\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null + true",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Logical and Null.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=true,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Logical\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null + #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null - {}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * {}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null / \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator / to types Text and Null.\",\"Detail\"=record:[\"Operator\"=text:\"/\",\"Left\"=text:\"a\",\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"/\",text:\"Text\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\" - null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types Text and Null.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=text:\"a\",\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Text\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try [a=1] - null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types Record and Null.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=record:[\"a\"=number:1],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Record\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null < {}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {null} = {null}",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=true]"
+  },
+  {
+   "expression": "try {1.. \"a\"}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator .. to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"..\",\"Left\"=number:1,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"..\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {\"a\"..2}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator .. to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"..\",\"Left\"=text:\"a\",\"Right\"=number:2],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"..\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {[a=1]..[a=2]}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator .. to types Record and Record.\",\"Detail\"=record:[\"Operator\"=text:\"..\",\"Left\"=record:[\"a\"=number:1],\"Right\"=record:[\"a\"=number:2]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"..\",text:\"Record\",text:\"Record\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #datetimezone(2020,1,1,25,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try #datetimezone(2020,1,1,0,0,0,0,60)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=datetimezone:2020-01-01T00:00:00.0000000+01:00]"
+  },
+  {
+   "expression": "try #datetimezone(2020,1,1,0,0,0,15,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTimeZone operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTimeZone operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10031\"]]"
+  },
+  {
+   "expression": "try #datetimezone(10000,1,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try #datetime(10000,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try #datetime(2020,1,1,0,60,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try #datetime(2020,2,30,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try #time(-1,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10023\"]]"
+  },
+  {
+   "expression": "try #duration(1,0,0,0) / 0",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Duration operation failed because the resulting duration falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Duration operation failed because the resulting duration falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10033\"]]"
+  },
+  {
+   "expression": "try #duration(1,0,0,0) * 1e30",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Duration operation failed because the resulting duration falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Duration operation failed because the resulting duration falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10033\"]]"
+  },
+  {
+   "expression": "try #duration(1,0,0,0) + 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Duration and Number.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=duration:1.00:00:00,\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Duration\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 + #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Number and Duration.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=number:1,\"Right\"=duration:1.00:00:00],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Number\",text:\"Duration\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) - \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types Date and Text.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=date:2020-01-01,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Date\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) + #duration(9999999,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10019\"]]"
+  },
+  {
+   "expression": "try 1[a]?",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type List.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try \"x\"[a]?",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"x\\\" to type List.\",\"Detail\"=record:[\"Value\"=text:\"x\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"x\\\"\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try [a=1][[b]]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'b' of the record wasn't found.\",\"Detail\"=record:[\"a\"=number:1],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"b\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "try {1,2}{1.5}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The number is out of range of a 32 bit integer value.\",\"Detail\"=number:1.5,\"Message.Format\"=text:\"The number is out of range of a 32 bit integer value.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10108\"]]"
+  },
+  {
+   "expression": "try {1}{\"a\"}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply an index of type Text.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Index\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply an index of type #{0}.\",\"Message.Parameters\"=list:[text:\"Text\"],\"ErrorCode\"=text:\"10058\"]]"
+  },
+  {
+   "expression": "try {1}{null}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply an index of type Null.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Index\"=null],\"Message.Format\"=text:\"We cannot apply an index of type #{0}.\",\"Message.Parameters\"=list:[text:\"Null\"],\"ErrorCode\"=text:\"10058\"]]"
+  },
+  {
+   "expression": "try {1}{2147483648}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The number is out of range of a 32 bit integer value.\",\"Detail\"=number:2147483648,\"Message.Format\"=text:\"The number is out of range of a 32 bit integer value.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10108\"]]"
+  },
+  {
+   "expression": "try {1}{-2147483649}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The number is out of range of a 32 bit integer value.\",\"Detail\"=number:-2147483649,\"Message.Format\"=text:\"The number is out of range of a 32 bit integer value.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10108\"]]"
+  },
+  {
+   "expression": "try null + 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null + #time(1,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null + #datetime(2020,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null + #datetimezone(2020,1,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null + #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null + (each 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Function and Null.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=function,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Function\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null + type number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Type and Null.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=type,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Type\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Number and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=number:1,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Number\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & \"a\"",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null & true",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Logical and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=true,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Logical\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & [a=1]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Record and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=record:[\"a\"=number:1],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Record\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null & #time(1,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null & #datetime(2020,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types DateTime and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=datetime:2020-01-01T00:00:00.0000000,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"DateTime\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & #datetimezone(2020,1,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types DateTimeZone and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=datetimezone:2020-01-01T00:00:00.0000000+00:00,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"DateTimeZone\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Duration and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=duration:1.00:00:00,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Duration\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & (each 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Function and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=function,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Function\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null & type number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Type and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=type,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Type\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null < 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < \"a\"",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < true",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < [a=1]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types Record and Null.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=record:[\"a\"=number:1],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"Record\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null < #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < #time(1,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < #datetime(2020,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < #datetimezone(2020,1,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < (each 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types Function and Null.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=function,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"Function\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null < type number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types Type and Null.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=type,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"Type\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null * \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Text and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=text:\"a\",\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Text\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * true",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Logical and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=true,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Logical\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * [a=1]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Record and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=record:[\"a\"=number:1],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Record\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Date and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=date:2020-01-01,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Date\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * #time(1,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Time and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=time:01:00:00.0000000,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Time\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * #datetime(2020,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types DateTime and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=datetime:2020-01-01T00:00:00.0000000,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"DateTime\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * #datetimezone(2020,1,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types DateTimeZone and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=datetimezone:2020-01-01T00:00:00.0000000+00:00,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"DateTimeZone\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null * #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null * (each 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Function and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=function,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Function\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null >= 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= \"a\"",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= true",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= {}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator <= to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"<=\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<=\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null >= [a=1]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator <= to types Record and Null.\",\"Detail\"=record:[\"Operator\"=text:\"<=\",\"Left\"=record:[\"a\"=number:1],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<=\",text:\"Record\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try null >= #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= #time(1,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= #datetime(2020,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= #datetimezone(2020,1,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null >= (each 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator <= to types Function and Null.\",\"Detail\"=record:[\"Operator\"=text:\"<=\",\"Left\"=function,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<=\",text:\"Function\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1}>{2}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types List and List.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=list:[number:1],\"Right\"=list:[number:2]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"List\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1}<={2}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator <= to types List and List.\",\"Detail\"=record:[\"Operator\"=text:\"<=\",\"Left\"=list:[number:1],\"Right\"=list:[number:2]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<=\",text:\"List\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1}>={2}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator >= to types List and List.\",\"Detail\"=record:[\"Operator\"=text:\">=\",\"Left\"=list:[number:1],\"Right\"=list:[number:2]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">=\",text:\"List\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try [a=1]>[a=1]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types Record and Record.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=record:[\"a\"=number:1],\"Right\"=record:[\"a\"=number:1]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"Record\",text:\"Record\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1}-{2}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types List and List.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=list:[number:1],\"Right\"=list:[number:2]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"List\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\"-\"b\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types Text and Text.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=text:\"a\",\"Right\"=text:\"b\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Text\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try true and null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null - 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null - #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null - #time(1,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null - #datetime(2020,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null - #datetimezone(2020,1,1,0,0,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null - #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null / 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null / #duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null / #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator / to types Date and Null.\",\"Detail\"=record:[\"Operator\"=text:\"/\",\"Left\"=date:2020-01-01,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"/\",text:\"Date\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) - null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try #duration(1,0,0,0) - null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try #date(2020,1,1) * null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Date and Null.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=date:2020-01-01,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Date\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {} < null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {} <= null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator <= to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\"<=\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<=\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {} > null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {} >= null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator >= to types List and Null.\",\"Detail\"=record:[\"Operator\"=text:\">=\",\"Left\"=list:[],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">=\",text:\"List\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try [a=1] < null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Record and Null.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=record:[\"a\"=number:1],\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Record\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 & null",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Number and Null.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=number:1,\"Right\"=null],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Number\",text:\"Null\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) & null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null & null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null + null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null < null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try null = {}",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=false]"
+  },
+  {
+   "expression": "try null <> {}",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=true]"
+  },
+  {
+   "expression": "try (each 1) = null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=false]"
+  },
+  {
+   "expression": "try type number = null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=false]"
+  },
+  {
+   "expression": "try -null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try not null",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try -{}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to the type List.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Value\"=list:[]],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"List\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try -true",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to the type Logical.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Value\"=true],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Logical\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try -#date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to the type Date.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Value\"=date:2020-01-01],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Date\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try +\"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to the type Text.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Value\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Text\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try +{}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to the type List.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Value\"=list:[]],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"List\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try +#date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to the type Date.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Value\"=date:2020-01-01],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Date\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try -#duration(1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=duration:-1.00:00:00]"
+  },
+  {
+   "expression": "try not \"a\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator not to the type Text.\",\"Detail\"=record:[\"Operator\"=text:\"not\",\"Value\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"not\",text:\"Text\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try #date(2024.5,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The number is out of range of a 32 bit integer value.\",\"Detail\"=number:2024.5,\"Message.Format\"=text:\"The number is out of range of a 32 bit integer value.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10108\"]]"
+  },
+  {
+   "expression": "try #time(1.5,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The number is out of range of a 32 bit integer value.\",\"Detail\"=number:1.5,\"Message.Format\"=text:\"The number is out of range of a 32 bit integer value.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10108\"]]"
+  },
+  {
+   "expression": "try #date(\"a\",1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"a\\\" to type Number.\",\"Detail\"=record:[\"Value\"=text:\"a\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"a\\\"\",text:\"Number\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try #date(null,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value null to type Number.\",\"Detail\"=record:[\"Value\"=null,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"null\",text:\"Number\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try (each 1)[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Function.\",\"Detail\"=record:[\"Value\"=function,\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Function\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try [x={1,2}]{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Record to type List.\",\"Detail\"=record:[\"Value\"=record:[\"x\"=list:[number:1,number:2]],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Record\",text:\"List\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try {[a=1]}{0}[b]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'b' of the record wasn't found.\",\"Detail\"=record:[\"a\"=number:1],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"b\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "try ([a=1][b])",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'b' of the record wasn't found.\",\"Detail\"=record:[\"a\"=number:1],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"b\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "try {1,2}{-1}[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The index cannot be negative.\",\"Detail\"=record:[\"Value\"=list:[number:1,number:2],\"Index\"=number:-1],\"Message.Format\"=text:\"The index cannot be negative.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10038\"]]"
+  },
+  {
+   "expression": "try {{1}}{0}{3}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Detail\"=list:[number:1],\"Message.Format\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10063\"]]"
+  },
+  {
+   "expression": "try null{-1}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value null to type List.\",\"Detail\"=record:[\"Value\"=null,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"null\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 5{-1}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 5 to type List.\",\"Detail\"=record:[\"Value\"=number:5,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"5\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try \"ab\"{9}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"ab\\\" to type List.\",\"Detail\"=record:[\"Value\"=text:\"ab\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"ab\\\"\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1)[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Date.\",\"Detail\"=record:[\"Value\"=date:2020-01-01,\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Date\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try #duration(1,0,0,0)[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Duration.\",\"Detail\"=record:[\"Value\"=duration:1.00:00:00,\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Duration\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try (type number)[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Type.\",\"Detail\"=record:[\"Value\"=type,\"Key\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Type\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try [a=null][a]{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value null to type List.\",\"Detail\"=record:[\"Value\"=null,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"null\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try {null} + 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types List and Number.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=list:[null],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"List\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1} - {1}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types List and List.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=list:[number:1],\"Right\"=list:[number:1]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"List\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try [a=1] & 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Record and Number.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=record:[\"a\"=number:1],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Record\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\" & 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=text:\"a\",\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"a\" & {1}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Text and List.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=text:\"a\",\"Right\"=list:[number:1]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Text\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) & 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Date and Number.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=date:2020-01-01,\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Date\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #time(1,0,0) - #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to types Time and Date.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Left\"=time:01:00:00.0000000,\"Right\"=date:2020-01-01],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Time\",text:\"Date\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #datetime(2020,1,1,0,0,0) + #datetime(2020,1,1,0,0,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types DateTime and DateTime.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=datetime:2020-01-01T00:00:00.0000000,\"Right\"=datetime:2020-01-01T00:00:00.0000000],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"DateTime\",text:\"DateTime\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #duration(1,0,0,0) & 1",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Duration and Number.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=duration:1.00:00:00,\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Duration\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try -{1}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to the type List.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Value\"=list:[number:1]],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"List\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try -(each 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to the type Function.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Value\"=function],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Function\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try not {}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator not to the type List.\",\"Detail\"=record:[\"Operator\"=text:\"not\",\"Value\"=list:[]],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"not\",text:\"List\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try +[a=1]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to the type Record.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Value\"=record:[\"a\"=number:1]],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Record\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try (\"a\" < {})",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (#date(2020,1,1) <= \"x\")",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Text and Date.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=text:\"x\",\"Right\"=date:2020-01-01],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Text\",text:\"Date\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (true > \"a\")",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Text and Logical.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=text:\"a\",\"Right\"=true],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Text\",text:\"Logical\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {null}{0} < 1",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=null]"
+  },
+  {
+   "expression": "try 1 as nullable text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Text.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Text\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try {1} as nullable number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type List to type Number.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"List\",text:\"Number\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try [a=1] as nullable list",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Record to type List.\",\"Detail\"=record:[\"Value\"=record:[\"a\"=number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Record\",text:\"List\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try (each 1) as nullable record",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Function to type Record.\",\"Detail\"=record:[\"Value\"=function,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Function\",text:\"Record\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) as nullable number",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value #date(2020, 1, 1) to type Number.\",\"Detail\"=record:[\"Value\"=date:2020-01-01,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"#date(2020, 1, 1)\",text:\"Number\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try #duration(1,0,0,0) as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value #duration(1, 0, 0, 0) to type Text.\",\"Detail\"=record:[\"Value\"=duration:1.00:00:00,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"#duration(1, 0, 0, 0)\",text:\"Text\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try (type number) as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert Type to Text type.\",\"Detail\"=record:[\"Value\"=type,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert Type to #{0} type.\",\"Message.Parameters\"=list:[text:\"Text\"],\"ErrorCode\"=text:\"10278\"]]"
+  },
+  {
+   "expression": "try \"a\" as nullable logical",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"a\\\" to type Logical.\",\"Detail\"=record:[\"Value\"=text:\"a\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"a\\\"\",text:\"Logical\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try ({} < \"a\")",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ({} > \"a\")",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator > to types List and Text.\",\"Detail\"=record:[\"Operator\"=text:\">\",\"Left\"=list:[],\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">\",text:\"List\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ({} >= 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator >= to types List and Number.\",\"Detail\"=record:[\"Operator\"=text:\">=\",\"Left\"=list:[],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">=\",text:\"List\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ([a=1] < 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Record and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=record:[\"a\"=number:1],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Record\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (1 < [a=1])",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Record and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=record:[\"a\"=number:1],\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Record\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ({} < [a=1])",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Record.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=record:[\"a\"=number:1]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Record\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ([a=1] <= {})",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator <= to types Record and List.\",\"Detail\"=record:[\"Operator\"=text:\"<=\",\"Left\"=record:[\"a\"=number:1],\"Right\"=list:[]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<=\",text:\"Record\",text:\"List\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ({} >= [a=1])",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator >= to types List and Record.\",\"Detail\"=record:[\"Operator\"=text:\">=\",\"Left\"=list:[],\"Right\"=record:[\"a\"=number:1]],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\">=\",text:\"List\",text:\"Record\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ((each 1) < 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Function and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=function,\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Function\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (1 < (each 1))",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Function and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=function,\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Function\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (\"a\" > {})",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (\"a\" >= {})",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (\"a\" <= [a=1])",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Record and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=record:[\"a\"=number:1],\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Record\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (true < {})",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Logical.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=true],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Logical\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try (#date(2020,1,1) > {})",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Date.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=date:2020-01-01],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Date\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ((type number) < 1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Type and Number.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=type,\"Right\"=number:1],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Type\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ((each 1) < (each 2))",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Function and Function.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=function,\"Right\"=function],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Function\",text:\"Function\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ({} < (each 1))",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types List and Function.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=list:[],\"Right\"=function],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"List\",text:\"Function\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try ((type number) as number)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert Type to Number type.\",\"Detail\"=record:[\"Value\"=type,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert Type to #{0} type.\",\"Message.Parameters\"=list:[text:\"Number\"],\"ErrorCode\"=text:\"10278\"]]"
+  },
+  {
+   "expression": "try ((type number) as record)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert Type to Record type.\",\"Detail\"=record:[\"Value\"=type,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert Type to #{0} type.\",\"Message.Parameters\"=list:[text:\"Record\"],\"ErrorCode\"=text:\"10278\"]]"
+  },
+  {
+   "expression": "try ((type number) as list)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert Type to List type.\",\"Detail\"=record:[\"Value\"=type,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert Type to #{0} type.\",\"Message.Parameters\"=list:[text:\"List\"],\"ErrorCode\"=text:\"10278\"]]"
+  },
+  {
+   "expression": "try ((type number) as date)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert Type to Date type.\",\"Detail\"=record:[\"Value\"=type,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert Type to #{0} type.\",\"Message.Parameters\"=list:[text:\"Date\"],\"ErrorCode\"=text:\"10278\"]]"
+  },
+  {
+   "expression": "try ((type text) as nullable number)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert Type to Number type.\",\"Detail\"=record:[\"Value\"=type,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert Type to #{0} type.\",\"Message.Parameters\"=list:[text:\"Number\"],\"ErrorCode\"=text:\"10278\"]]"
+  },
+  {
+   "expression": "try [a=1,b=2][c]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'c' of the record wasn't found.\",\"Detail\"=record:[\"a\"=number:1,\"b\"=number:2],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"c\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "try [a=1][a][b]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply field access to the type Number.\",\"Detail\"=record:[\"Value\"=number:1,\"Key\"=text:\"b\"],\"Message.Format\"=text:\"We cannot apply field access to the type #{0}.\",\"Message.Parameters\"=list:[text:\"Number\"],\"ErrorCode\"=text:\"10335\"]]"
+  },
+  {
+   "expression": "try {1,2,3}{3}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Detail\"=list:[number:1,number:2,number:3],\"Message.Format\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10063\"]]"
+  },
+  {
+   "expression": "try {{1,2}}{0}{2}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Detail\"=list:[number:1,number:2],\"Message.Format\"=text:\"There weren't enough elements in the enumeration to complete the operation.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10063\"]]"
+  },
+  {
+   "expression": "try [r=[x=1]][r][y]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'y' of the record wasn't found.\",\"Detail\"=record:[\"x\"=number:1],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"y\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "try let a = 5 in a{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 5 to type List.\",\"Detail\"=record:[\"Value\"=number:5,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"5\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try let a = {1} in a{-3}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The index cannot be negative.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Index\"=number:-3],\"Message.Format\"=text:\"The index cannot be negative.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10038\"]]"
+  },
+  {
+   "expression": "try let r = [q=1] in r[z]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The field 'z' of the record wasn't found.\",\"Detail\"=record:[\"q\"=number:1],\"Message.Format\"=text:\"The field '#{0}' of the record wasn't found.\",\"Message.Parameters\"=list:[text:\"z\"],\"ErrorCode\"=text:\"10071\"]]"
+  },
+  {
+   "expression": "try null{0}[a]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value null to type List.\",\"Detail\"=record:[\"Value\"=null,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"null\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try #date(2021,2,29)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10019\"]]"
+  },
+  {
+   "expression": "try #date(2021,0,5)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Date operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10019\"]]"
+  },
+  {
+   "expression": "try #time(12,30,61)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Time operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10023\"]]"
+  },
+  {
+   "expression": "try #datetime(2021,6,31,1,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTime operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10027\"]]"
+  },
+  {
+   "expression": "try #datetimezone(1,1,1,0,0,0,-15,0)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The DateTimeZone operation failed because the resulting value falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The DateTimeZone operation failed because the resulting value falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10031\"]]"
+  },
+  {
+   "expression": "try #duration(0,0,0,1e300)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The Duration operation failed because the resulting duration falls outside the range of allowed values.\",\"Detail\"=null,\"Message.Format\"=text:\"The Duration operation failed because the resulting duration falls outside the range of allowed values.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10033\"]]"
+  },
+  {
+   "expression": "try 2 * #date(2020,1,1)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types Number and Date.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=number:2,\"Right\"=date:2020-01-01],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"Number\",text:\"Date\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1) / 2",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator / to types Date and Number.\",\"Detail\"=record:[\"Operator\"=text:\"/\",\"Left\"=date:2020-01-01,\"Right\"=number:2],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"/\",text:\"Date\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try {1,2} * 2",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator * to types List and Number.\",\"Detail\"=record:[\"Operator\"=text:\"*\",\"Left\"=list:[number:1,number:2],\"Right\"=number:2],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"*\",text:\"List\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try \"5\" + 5",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Text and Number.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=text:\"5\",\"Right\"=number:5],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Text\",text:\"Number\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 5 + \"5\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=number:5,\"Right\"=text:\"5\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try [a=1] = 1 + \"x\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Left\"=number:1,\"Right\"=text:\"x\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try true & false",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator & to types Logical and Logical.\",\"Detail\"=record:[\"Operator\"=text:\"&\",\"Left\"=true,\"Right\"=false],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"&\",text:\"Logical\",text:\"Logical\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try 1 > null and \"a\" < 2",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator < to types Number and Text.\",\"Detail\"=record:[\"Operator\"=text:\"<\",\"Left\"=number:2,\"Right\"=text:\"a\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to types #{1} and #{2}.\",\"Message.Parameters\"=list:[text:\"<\",text:\"Number\",text:\"Text\"],\"ErrorCode\"=text:\"10051\"]]"
+  },
+  {
+   "expression": "try -\"5\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator - to the type Text.\",\"Detail\"=record:[\"Operator\"=text:\"-\",\"Value\"=text:\"5\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"-\",text:\"Text\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try not \"true\"",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator not to the type Text.\",\"Detail\"=record:[\"Operator\"=text:\"not\",\"Value\"=text:\"true\"],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"not\",text:\"Text\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try +true",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot apply operator + to the type Logical.\",\"Detail\"=record:[\"Operator\"=text:\"+\",\"Value\"=true],\"Message.Format\"=text:\"We cannot apply operator #{0} to the type #{1}.\",\"Message.Parameters\"=list:[text:\"+\",text:\"Logical\"],\"ErrorCode\"=text:\"10078\"]]"
+  },
+  {
+   "expression": "try \"a\" as date",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value \\\"a\\\" to type Date.\",\"Detail\"=record:[\"Value\"=text:\"a\",\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"\\\"a\\\"\",text:\"Date\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try 1.5 as logical",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1.5 to type Logical.\",\"Detail\"=record:[\"Value\"=number:1.5,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1.5\",text:\"Logical\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try {\"a\"} as list",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=list:[text:\"a\"]]"
+  },
+  {
+   "expression": "try [a=1] as record",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=record:[\"a\"=number:1]]"
+  },
+  {
+   "expression": "try (1 as text)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value 1 to type Text.\",\"Detail\"=record:[\"Value\"=number:1,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"1\",text:\"Text\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try ([a=1] as number)",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Record to type Number.\",\"Detail\"=record:[\"Value\"=record:[\"a\"=number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Record\",text:\"Number\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try (each 1) as text",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Function to type Text.\",\"Detail\"=record:[\"Value\"=function,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Function\",text:\"Text\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try {1,2}{0.5}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The number is out of range of a 32 bit integer value.\",\"Detail\"=number:0.5,\"Message.Format\"=text:\"The number is out of range of a 32 bit integer value.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10108\"]]"
+  },
+  {
+   "expression": "try {1}{1e10}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The number is out of range of a 32 bit integer value.\",\"Detail\"=number:10000000000,\"Message.Format\"=text:\"The number is out of range of a 32 bit integer value.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10108\"]]"
+  },
+  {
+   "expression": "try #date(2020,1,1){0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value #date(2020, 1, 1) to type List.\",\"Detail\"=record:[\"Value\"=date:2020-01-01,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"#date(2020, 1, 1)\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try true{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert the value true to type List.\",\"Detail\"=record:[\"Value\"=true,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert the value #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"true\",text:\"List\"],\"ErrorCode\"=text:\"10277\"]]"
+  },
+  {
+   "expression": "try [a=1]{0}{0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Record to type List.\",\"Detail\"=record:[\"Value\"=record:[\"a\"=number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Record\",text:\"List\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try (type text){0}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert Type to List type.\",\"Detail\"=record:[\"Value\"=type,\"Type\"=type],\"Message.Format\"=text:\"We cannot convert Type to #{0} type.\",\"Message.Parameters\"=list:[text:\"List\"],\"ErrorCode\"=text:\"10278\"]]"
+  }
+ ]
+}

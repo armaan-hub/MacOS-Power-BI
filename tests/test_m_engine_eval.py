@@ -18,6 +18,8 @@ PLANS = Path(__file__).resolve().parent.parent / "docs" / "plans"
 BATTERY = PLANS / "2026-11-08-m-core-battery.json"
 HELDOUT = PLANS / "2026-11-09-m-core-heldout.json"
 PROBES = PLANS / "2026-11-09-m-eval-probes.json"
+HELDOUT2 = PLANS / "2026-11-09-m-core-heldout2.json"
+ERROR_PROBES = PLANS / "2026-11-09-m-error-probes.json"
 PARTITION_PREFIX = "ERR:PARTITION"
 SYNTAX_PREFIX = "ERR:SYNTAX"
 
@@ -58,6 +60,22 @@ class BatteryTests(unittest.TestCase):
         """124 further live answers, written after the first battery and never used while writing the code."""
         cases = _cases(HELDOUT)
         self.assertEqual(len(cases), 124)
+        failures = _differences(cases)
+        self.assertEqual(failures, [], "\n".join(failures))
+
+
+class HeldOut2Tests(unittest.TestCase):
+    def test_second_held_out_cases_match_power_bi(self):
+        """110 further live answers, never used while writing the code (escape #(#), error detail records)."""
+        cases = _cases(HELDOUT2)
+        self.assertEqual(len(cases), 110)
+        failures = _differences(cases)
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_error_record_probes_match_power_bi(self):
+        """Live answers for ``try`` of built-in errors: Detail, Message.Format, Message.Parameters, ErrorCode."""
+        cases = _cases(ERROR_PROBES)
+        self.assertGreater(len(cases), 250)
         failures = _differences(cases)
         self.assertEqual(failures, [], "\n".join(failures))
 

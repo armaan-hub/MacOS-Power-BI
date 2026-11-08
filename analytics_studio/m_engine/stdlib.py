@@ -86,7 +86,7 @@ def _datetime(*parts: MValue) -> MValue:
 
 
 def _datetimezone(*parts: MValue) -> MValue:
-    local = _local_ticks(parts, "DateTimeZone")
+    local = _local_ticks(parts, "DateTime")  # measured: bad date or clock parts report the DateTime range
     off_hours, off_minutes = _integer(parts[6]), _integer(parts[7])
     return V.make_datetimezone(local, off_hours * 60 + off_minutes)
 

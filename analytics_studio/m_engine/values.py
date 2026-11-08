@@ -304,10 +304,16 @@ def describe_value(value: MValue) -> str:
 def convert_error(value: MValue, t: TypeValue) -> MError:
     target = DISPLAY.get(t.name, t.name)
     if isinstance(value, (List, Record, Binary, Table, Function)):
-        message = f"We cannot convert a value of type {type_display(value)} to type {target}."
-        return MError("Expression.Error", message)
+        shown_type = type_display(value)
+        message = f"We cannot convert a value of type {shown_type} to type {target}."
+        return MError("Expression.Error", message,
+                      detail=Record((("Value", value), ("Type", TypeValue(t.name)))),
+                      fmt="We cannot convert a value of type #{0} to type #{1}.",
+                      params=(Text(shown_type), Text(target)), code="10276")
     if isinstance(value, TypeValue):
-        return MError("Expression.Error", f"We cannot convert Type to {target} type.")
+        return MError("Expression.Error", f"We cannot convert Type to {target} type.",
+                      detail=Record((("Value", value), ("Type", value))),
+                      fmt="We cannot convert Type to #{0} type.", params=(Text(target),), code="10278")
     shown = describe_value(value)
     return MError("Expression.Error", f"We cannot convert the value {shown} to type {target}.",
                   detail=Record((("Value", value), ("Type", TypeValue(t.name)))),
@@ -323,8 +329,26 @@ def check_type(value: MValue, t: TypeValue) -> MValue:
 
 
 def operator_error(op: str, left: MValue, right: MValue) -> MError:
-    return MError("Expression.Error", f"We cannot apply operator {op} to types "
-                  f"{type_display(left)} and {type_display(right)}.")
+    left_type, right_type = type_display(left), type_display(right)
+    return MError("Expression.Error", f"We cannot apply operator {op} to types {left_type} and {right_type}.",
+                  detail=Record((("Operator", Text(op)), ("Left", left), ("Right", right))),
+                  fmt="We cannot apply operator #{0} to types #{1} and #{2}.",
+                  params=(Text(op), Text(left_type), Text(right_type)), code="10051")
+
+
+def unary_error(op: str, value: MValue) -> MError:
+    shown = type_display(value)
+    return MError("Expression.Error", f"We cannot apply operator {op} to the type {shown}.",
+                  detail=Record((("Operator", Text(op)), ("Value", value))),
+                  fmt="We cannot apply operator #{0} to the type #{1}.",
+                  params=(Text(op), Text(shown)), code="10078")
+
+
+def field_access_error(target: MValue, name: str) -> MError:
+    shown = type_display(target)
+    return MError("Expression.Error", f"We cannot apply field access to the type {shown}.",
+                  detail=Record((("Value", target), ("Key", Text(name)))),
+                  fmt="We cannot apply field access to the type #{0}.", params=(Text(shown),), code="10335")
 
 
 def generic_error(message: str) -> MError:
@@ -345,6 +369,7 @@ def time_ticks(hour: int, minute: int, second: float) -> int:
     return hour * TICKS_PER_HOUR + minute * TICKS_PER_MINUTE + round(second * TICKS_PER_SECOND)
 
 
+_RANGE_CODES = {"Date": "10019", "Time": "10023", "DateTime": "10027", "DateTimeZone": "10031"}
 _RANGE_TEXT = "The {} operation failed because the resulting value falls outside the range of allowed values."
 INT64_MIN, INT64_MAX = -(2 ** 63), 2 ** 63 - 1
 MAX_DATETIME_TICKS = 3652059 * TICKS_PER_DAY - 1  # 9999-12-31T23:59:59.9999999
@@ -353,12 +378,14 @@ INT32_MIN, INT32_MAX = -(2 ** 31), 2 ** 31 - 1
 
 def range_error(kind: str) -> MError:
     """The error for a Date/Time/DateTime/DateTimeZone result outside its range."""
-    return MError("Expression.Error", _RANGE_TEXT.format(kind))
+    message = _RANGE_TEXT.format(kind)
+    return MError("Expression.Error", message, fmt=message, code=_RANGE_CODES.get(kind))
 
 
 def duration_range_error() -> MError:
-    return MError("Expression.Error",
-                  "The Duration operation failed because the resulting duration falls outside the range of allowed values.")
+    message = ("The Duration operation failed because the resulting duration falls outside the range of "
+               "allowed values.")
+    return MError("Expression.Error", message, fmt=message, code="10033")
 
 
 def make_duration(ticks: int) -> Duration:
@@ -399,7 +426,8 @@ def to_int32(value: "MValue") -> int:
         raise convert_error(value, TypeValue("number"))
     x = value.value
     if x != x or x in (float("inf"), float("-inf")) or x != int(x) or not INT32_MIN <= x <= INT32_MAX:
-        raise MError("Expression.Error", "The number is out of range of a 32 bit integer value.")
+        message = "The number is out of range of a 32 bit integer value."
+        raise MError("Expression.Error", message, detail=value, fmt=message, code="10108")
     return int(x)
 
 
