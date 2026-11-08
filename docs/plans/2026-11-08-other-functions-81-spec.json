@@ -1,0 +1,270 @@
+{
+ "model": "Facts (tools/dax_oracle_diff.py ROWS: 6 rows Sales/Quantity/Region/Note)",
+ "source": "Power BI Desktop 2.157 guest, 2026-11-08",
+ "cases": [
+  {
+   "expression": "SELECTEDMEASUREFORMATSTRING()",
+   "power_bi": "ERR:Query (1, 19) SELECTEDMEASUREFORMATSTRING misused. There is no measure reference in the current context."
+  },
+  {
+   "expression": "SELECTEDMEASUREFORMATSTRING(1)",
+   "power_bi": "ERR:Query (1, 47) Too many arguments were passed to the SELECTEDMEASUREFORMATSTRING function. The maximum argument count for the function is 0."
+  },
+  {
+   "expression": "CALCULATE(SELECTEDMEASUREFORMATSTRING())",
+   "power_bi": "ERR:Query (1, 29) SELECTEDMEASUREFORMATSTRING misused. There is no measure reference in the current context."
+  },
+  {
+   "expression": "IF(FALSE(),SELECTEDMEASUREFORMATSTRING(),1)",
+   "power_bi": "1"
+  },
+  {
+   "expression": "ISBLANK(SELECTEDMEASUREFORMATSTRING())",
+   "power_bi": "ERR:Query (1, 27) SELECTEDMEASUREFORMATSTRING misused. There is no measure reference in the current context."
+  },
+  {
+   "expression": "SUMX(Facts, LEN(SELECTEDMEASUREFORMATSTRING()))",
+   "power_bi": "ERR:Query (1, 35) SELECTEDMEASUREFORMATSTRING misused. There is no measure reference in the current context."
+  },
+  {
+   "expression": "EXTERNALMEASURE()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the EXTERNALMEASURE function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "EXTERNALMEASURE(\"m\")",
+   "power_bi": "ERR:Query (1, 19) Failed to resolve name 'EXTERNALMEASURE'. It is not a valid table, variable, or function name."
+  },
+  {
+   "expression": "EXTERNALMEASURE(\"m\",\"db\")",
+   "power_bi": "ERR:Query (1, 19) Failed to resolve name 'EXTERNALMEASURE'. It is not a valid table, variable, or function name."
+  },
+  {
+   "expression": "EXTERNALMEASURE(\"m\",INTEGER,\"db\")",
+   "power_bi": "ERR:Query (1, 19) Failed to resolve name 'EXTERNALMEASURE'. It is not a valid table, variable, or function name."
+  },
+  {
+   "expression": "EXTERNALMEASURE(\"a\",\"b\",\"c\",\"d\")",
+   "power_bi": "ERR:Query (1, 47) Too many arguments were passed to the EXTERNALMEASURE function. The maximum argument count for the function is 3."
+  },
+  {
+   "expression": "IF(FALSE(),EXTERNALMEASURE(\"m\"),1)",
+   "power_bi": "ERR:Query (1, 30) Failed to resolve name 'EXTERNALMEASURE'. It is not a valid table, variable, or function name."
+  },
+  {
+   "expression": "EXTERNALMEASURE(1)",
+   "power_bi": "ERR:Query (1, 19) Failed to resolve name 'EXTERNALMEASURE'. It is not a valid table, variable, or function name."
+  },
+  {
+   "expression": "NATURALJOINUSAGE()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the NATURALJOINUSAGE function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "NATURALJOINUSAGE(Facts)",
+   "power_bi": "ERR:Query (1, 19) 'NATURALJOINUSAGE' function can only be used as a value filter of SUMMARIZECOLUMNS."
+  },
+  {
+   "expression": "NATURALJOINUSAGE(Facts,Facts)",
+   "power_bi": "ERR:Query (1, 42) Too many arguments were passed to the NATURALJOINUSAGE function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "CALCULATE(SUM(Facts[Sales]),NATURALJOINUSAGE(Facts))",
+   "power_bi": "ERR:Query (1, 47) 'NATURALJOINUSAGE' function can only be used as a value filter of SUMMARIZECOLUMNS."
+  },
+  {
+   "expression": "COUNTROWS(NATURALJOINUSAGE(Facts))",
+   "power_bi": "ERR:Query (1, 29) 'NATURALJOINUSAGE' function can only be used as a value filter of SUMMARIZECOLUMNS."
+  },
+  {
+   "expression": "COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],NATURALJOINUSAGE(Facts),\"s\",SUM(Facts[Sales])))",
+   "power_bi": "ERR:Query (1, 60) 'NATURALJOINUSAGE' function can only be used as a value filter of SUMMARIZECOLUMNS."
+  },
+  {
+   "expression": "IF(FALSE(),COUNTROWS(NATURALJOINUSAGE(Facts)),1)",
+   "power_bi": "ERR:Query (1, 40) 'NATURALJOINUSAGE' function can only be used as a value filter of SUMMARIZECOLUMNS."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "SUMX(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales]),Facts[Quantity])",
+   "power_bi": "15"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(7,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "SUMX(SAMPLECARTESIANPOINTSBYCOVER(7,Facts,Facts[Quantity],Facts[Sales]),Facts[Quantity])",
+   "power_bi": "15"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(100,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "SUMX(SAMPLECARTESIANPOINTSBYCOVER(100,Facts,Facts[Quantity],Facts[Sales]),Facts[Quantity])",
+   "power_bi": "15"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6.0,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "SUMX(SAMPLECARTESIANPOINTSBYCOVER(6.0,Facts,Facts[Quantity],Facts[Sales]),Facts[Quantity])",
+   "power_bi": "15"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(\"6\",Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "SUMX(SAMPLECARTESIANPOINTSBYCOVER(\"6\",Facts,Facts[Quantity],Facts[Sales]),Facts[Quantity])",
+   "power_bi": "15"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(5+1,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "SUMX(SAMPLECARTESIANPOINTSBYCOVER(5+1,Facts,Facts[Quantity],Facts[Sales]),Facts[Quantity])",
+   "power_bi": "15"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales]),Facts[Region]&Facts[Quantity],\",\")",
+   "power_bi": "East2,West3,East1,North4,West0,East5"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(4,FILTER(Facts,Facts[Quantity]>1),Facts[Quantity],Facts[Sales]))",
+   "power_bi": "4"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(3,FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],Facts[Sales]))",
+   "power_bi": "3"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(1,FILTER(Facts,Facts[Quantity]>4),Facts[Quantity],Facts[Sales]))",
+   "power_bi": "1"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(1,FILTER(Facts,Facts[Quantity]>9),Facts[Quantity],Facts[Sales]))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,1,2))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity]*2,Facts[Sales]+1))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,VALUES(Facts[Region]),1,2))",
+   "power_bi": "3"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,ALL(Facts[Region],Facts[Quantity]),Facts[Quantity],1))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(3,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "3"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(5,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "5"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(0,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function expects a positive numeric parameter value to be specified for argument 1."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(-1,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function expects a positive numeric parameter value to be specified for argument 1."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(\"a\",Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 58) Cannot convert value 'a' of type Text to type Integer."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Region],Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function requires coordinate parameter (at argument number 3) to be a numeric scalar expression."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Note]))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function requires coordinate parameter (at argument number 4) to be a numeric scalar expression."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function expects MaxMinRatio as argument 6, since you specified a radius column."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales],Facts[Quantity],2))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function expects MaxBlankRatio as argument 7, since you specified a radius column."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales],Facts[Quantity],2,3))",
+   "power_bi": "6"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales],Facts[Quantity],2,3,4))",
+   "power_bi": "ERR:Query (1, 115) Too many arguments were passed to the SAMPLECARTESIANPOINTSBYCOVER function. The maximum argument count for the function is 7."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the SAMPLECARTESIANPOINTSBYCOVER function. The minimum argument count for the function is 4."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts[Sales],Facts[Quantity],Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 60) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(BLANK(),Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function expects a positive numeric parameter value to be specified for argument 1."
+  },
+  {
+   "expression": "COUNTROWS(CALCULATETABLE(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales]),Facts[Region]=\"East\"))",
+   "power_bi": "3"
+  },
+  {
+   "expression": "COUNTROWS(SAMPLECARTESIANPOINTSBYCOVER(6,Facts,Facts[Quantity],Facts[Sales],1))",
+   "power_bi": "ERR:Query (1, 29) The SampleCartesianPointsByCover function expects MaxMinRatio as argument 6, since you specified a radius column."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX())",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the SAMPLEAXISWITHLOCALMINMAX function. The minimum argument count for the function is 5."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(2,Facts,Facts[Quantity],Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the SAMPLEAXISWITHLOCALMINMAX function. The minimum argument count for the function is 5."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(10,Facts,Facts[Quantity],Facts[Sales],Facts[Region]))",
+   "power_bi": "ERR:Query (1, 29) The SampleAxisWithLocalMinMax function requires a Minimum-Resolution parameter to be specified at argument number 6."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(10,Facts,Facts[Quantity],Facts[Sales],Facts[Region],1))",
+   "power_bi": "ERR:Query (1, 29) The SampleAxisWithLocalMinMax function requires Measure parameter (at argument number 6) to be a numeric column reference from the specified table."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(10,Facts,Facts[Quantity],Facts[Sales],Facts[Region],Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 29) The SampleAxisWithLocalMinMax function requires a Minimum-Resolution parameter to be specified at argument number 7."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(10,Facts,Facts[Quantity],Facts[Sales],Facts[Region],1,Facts[Region]))",
+   "power_bi": "ERR:Query (1, 29) The SampleAxisWithLocalMinMax function requires Measure parameter (at argument number 6) to be a numeric column reference from the specified table."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(10,Facts,Facts[Quantity],Facts[Sales],Facts[Region],Facts[Sales],Facts[Region]))",
+   "power_bi": "ERR:Query (1, 29) The SampleAxisWithLocalMinMax function requires a Minimum-Resolution parameter to be specified at argument number 8."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(10,Facts,Facts[Quantity],Facts[Sales],Facts[Region],Facts[Sales],Facts[Region],1))",
+   "power_bi": "ERR:Query (1, 29) The SampleAxisWithLocalMinMax function requires Measure parameter (at argument number 6) to be a numeric column reference from the specified table."
+  },
+  {
+   "expression": "COUNTROWS(SAMPLEAXISWITHLOCALMINMAX(10,Facts,Facts[Quantity],Facts[Sales],Facts[Region],1,2,3,4,5,6,7,8,9))",
+   "power_bi": "ERR:Query (1, 29) The SampleAxisWithLocalMinMax function requires Dynamic-Series parameter(at argument number 7) to be a column reference from the specified table."
+  }
+ ]
+}
