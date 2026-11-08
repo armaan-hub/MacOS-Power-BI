@@ -146,7 +146,8 @@ class InfoViewTests(unittest.TestCase):
     def test_tocsv_header_only(self) -> None:
         csv = self.evaluate('TOCSV(FILTER(INFO.VIEW.TABLES(), FALSE()), 3, ",", TRUE)')
         self.assertTrue(csv.startswith("[ID],[Name],[Model]"))
-        self.assertFalse(csv.endswith("\n"))
+        # live Power BI 2026-11-08: TOCSV ends with a newline even for an empty table
+        self.assertTrue(csv.endswith("\n"))
 
 
 class InfoViewReviewFixTests(unittest.TestCase):

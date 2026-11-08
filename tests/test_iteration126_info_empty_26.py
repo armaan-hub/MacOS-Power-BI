@@ -21,10 +21,11 @@ class TestIteration126InfoEmpty26(unittest.TestCase):
 
     def test_part_a_tocsv_headers(self):
         headers_alt = local('TOCSV(FILTER(INFO.ALTERNATEOFDEFINITIONS(), FALSE()), 3, ",", TRUE)')
-        self.assertEqual(headers_alt, "[ID],[ColumnID],[BaseColumnID],[BaseTableID],[Summarization]")
+        # live Power BI 2026-11-08: TOCSV ends with a newline even for an empty table
+        self.assertEqual(headers_alt, "[ID],[ColumnID],[BaseColumnID],[BaseTableID],[Summarization]\n")
 
         headers_roles = local('TOCSV(FILTER(INFO.ROLES(), FALSE()), 3, ",", TRUE)')
-        self.assertEqual(headers_roles, "[ID],[ModelID],[Name],[Description],[ModelPermission],[ModifiedTime]")
+        self.assertEqual(headers_roles, "[ID],[ModelID],[Name],[Description],[ModelPermission],[ModifiedTime]\n")
 
     def test_part_a_restriction_argument_validation(self):
         # Non-string argument errors with expected message

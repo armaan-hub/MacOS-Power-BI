@@ -160,24 +160,34 @@ IFERROR(<value>, <value_if_error>) ;; Returns a value if the expression is an er
 IGNORE(<expression>) ;; Omits a measure from a SUMMARIZECOLUMNS blank-row check.
 INDEX(<position>, [<relation>], [<orderBy>], [<blanks>], [<partitionBy>], [<matchBy>], [<reset>]) ;; Returns a row at an absolute position within a partition.
 INFO.ALTERNATEOFDEFINITIONS([<restriction>]) ;; Internal metadata for alternateofdefinitions in the tabular model.
+INFO.ANNOTATIONS([<restriction>]) ;; Internal metadata for annotations in the tabular model.
+INFO.ATTRIBUTEHIERARCHIES([<restriction>]) ;; Internal metadata for attributehierarchies in the tabular model.
+INFO.ATTRIBUTEHIERARCHYSTORAGES([<restriction>]) ;; Internal metadata for attributehierarchystorages in the tabular model.
 INFO.CALCDEPENDENCY([<restriction>]) ;; Internal metadata for calcdependency in the tabular model.
 INFO.CALCULATIONGROUPS([<restriction>]) ;; Internal metadata for calculationgroups in the tabular model.
 INFO.CALCULATIONITEMS([<restriction>]) ;; Internal metadata for calculationitems in the tabular model.
 INFO.CALENDARCOLUMNGROUPS() ;; Metadata for calendarcolumngroups in the tabular model.
 INFO.CALENDARCOLUMNREFERENCES() ;; Metadata for calendarcolumnreferences in the tabular model.
 INFO.CALENDARS() ;; Metadata for calendars in the tabular model.
+INFO.CATALOGS([<restriction>]) ;; Internal metadata for catalogs in the tabular model.
 INFO.CHANGEDPROPERTIES([<restriction>]) ;; Internal metadata for changedproperties in the tabular model.
+INFO.COLUMNPARTITIONSTORAGES([<restriction>]) ;; Internal metadata for columnpartitionstorages in the tabular model.
 INFO.COLUMNPERMISSIONS([<restriction>]) ;; Internal metadata for columnpermissions in the tabular model.
 INFO.COLUMNS([<restriction>]) ;; Internal metadata for columns in the tabular model.
+INFO.COLUMNSTORAGES([<restriction>]) ;; Internal metadata for columnstorages in the tabular model.
+INFO.CSDLMETADATA([<restriction>]) ;; Internal metadata for csdlmetadata in the tabular model.
+INFO.CULTURES([<restriction>]) ;; Internal metadata for cultures in the tabular model.
 INFO.DATACOVERAGEDEFINITIONS([<restriction>]) ;; Internal metadata for datacoveragedefinitions in the tabular model.
 INFO.DATASOURCES([<restriction>]) ;; Internal metadata for datasources in the tabular model.
 INFO.DELTATABLEMETADATASTORAGES([<restriction>]) ;; Internal metadata for deltatablemetadatastorages in the tabular model.
 INFO.DEPENDENCIES([<restriction>]) ;; Internal metadata for dependencies in the tabular model.
 INFO.DETAILROWSDEFINITIONS([<restriction>]) ;; Internal metadata for detailrowsdefinitions in the tabular model.
+INFO.DICTIONARYSTORAGES([<restriction>]) ;; Internal metadata for dictionarystorages in the tabular model.
 INFO.EXCLUDEDARTIFACTS() ;; Metadata for excludedartifacts in the tabular model.
 INFO.EXPRESSIONS([<restriction>]) ;; Internal metadata for expressions in the tabular model.
 INFO.EXTENDEDPROPERTIES([<restriction>]) ;; Internal metadata for extendedproperties in the tabular model.
 INFO.FORMATSTRINGDEFINITIONS([<restriction>]) ;; Internal metadata for formatstringdefinitions in the tabular model.
+INFO.FUNCTIONS([<restriction>]) ;; Internal metadata for functions in the tabular model.
 INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES([<restriction>]) ;; Internal metadata for generalsegmentmapsegmentmetadatastorages in the tabular model.
 INFO.GROUPBYCOLUMNS([<restriction>]) ;; Internal metadata for groupbycolumns in the tabular model.
 INFO.HIERARCHIES([<restriction>]) ;; Internal metadata for hierarchies in the tabular model.
@@ -186,13 +196,17 @@ INFO.KPIS([<restriction>]) ;; Internal metadata for kpis in the tabular model.
 INFO.LEVELS([<restriction>]) ;; Internal metadata for levels in the tabular model.
 INFO.LINGUISTICMETADATA([<restriction>]) ;; Internal metadata for linguisticmetadata in the tabular model.
 INFO.MEASURES([<restriction>]) ;; Internal metadata for measures in the tabular model.
+INFO.MODEL([<restriction>]) ;; Internal metadata for model in the tabular model.
 INFO.OBJECTTRANSLATIONS([<restriction>]) ;; Internal metadata for objecttranslations in the tabular model.
 INFO.PARQUETFILESTORAGES([<restriction>]) ;; Internal metadata for parquetfilestorages in the tabular model.
+INFO.PARTITIONS([<restriction>]) ;; Internal metadata for partitions in the tabular model.
+INFO.PARTITIONSTORAGES([<restriction>]) ;; Internal metadata for partitionstorages in the tabular model.
 INFO.PERSPECTIVECOLUMNS([<restriction>]) ;; Internal metadata for perspectivecolumns in the tabular model.
 INFO.PERSPECTIVEHIERARCHIES([<restriction>]) ;; Internal metadata for perspectivehierarchies in the tabular model.
 INFO.PERSPECTIVEMEASURES([<restriction>]) ;; Internal metadata for perspectivemeasures in the tabular model.
 INFO.PERSPECTIVES([<restriction>]) ;; Internal metadata for perspectives in the tabular model.
 INFO.PERSPECTIVETABLES([<restriction>]) ;; Internal metadata for perspectivetables in the tabular model.
+INFO.PROPERTIES([<restriction>]) ;; Internal metadata for properties in the tabular model.
 INFO.QUERYGROUPS([<restriction>]) ;; Internal metadata for querygroups in the tabular model.
 INFO.REFRESHPOLICIES([<restriction>]) ;; Internal metadata for refreshpolicies in the tabular model.
 INFO.RELATEDCOLUMNDETAILS([<restriction>]) ;; Internal metadata for relatedcolumndetails in the tabular model.
@@ -201,8 +215,16 @@ INFO.RELATIONSHIPS([<restriction>]) ;; Internal metadata for relationships in th
 INFO.RELATIONSHIPSTORAGES([<restriction>]) ;; Internal metadata for relationshipstorages in the tabular model.
 INFO.ROLEMEMBERSHIPS([<restriction>]) ;; Internal metadata for rolememberships in the tabular model.
 INFO.ROLES([<restriction>]) ;; Internal metadata for roles in the tabular model.
+INFO.SEGMENTMAPSTORAGES([<restriction>]) ;; Internal metadata for segmentmapstorages in the tabular model.
+INFO.SEGMENTSTORAGES([<restriction>]) ;; Internal metadata for segmentstorages in the tabular model.
+INFO.STORAGEFILES([<restriction>]) ;; Internal metadata for storagefiles in the tabular model.
+INFO.STORAGEFOLDERS([<restriction>]) ;; Internal metadata for storagefolders in the tabular model.
+INFO.STORAGETABLECOLUMNS([<restriction>]) ;; Internal metadata for storagetablecolumns in the tabular model.
+INFO.STORAGETABLECOLUMNSEGMENTS([<restriction>]) ;; Internal metadata for storagetablecolumnsegments in the tabular model.
+INFO.STORAGETABLES([<restriction>]) ;; Internal metadata for storagetables in the tabular model.
 INFO.TABLEPERMISSIONS([<restriction>]) ;; Internal metadata for tablepermissions in the tabular model.
 INFO.TABLES([<restriction>]) ;; Internal metadata for tables in the tabular model.
+INFO.TABLESTORAGES([<restriction>]) ;; Internal metadata for tablestorages in the tabular model.
 INFO.USERDEFINEDFUNCTIONS() ;; Metadata for userdefinedfunctions in the tabular model.
 INFO.VARIATIONS([<restriction>]) ;; Internal metadata for variations in the tabular model.
 INFO.VIEW.COLUMNS() ;; Metadata for columns in the tabular model.
