@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 176 (Task 87 table-filter-77) shipped; Task 88 next.
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 177 (Task 88 orphan-filter-78) shipped; Task 89 next.
 **Branch in use:** none
 **Working tree clean:** main yes
 

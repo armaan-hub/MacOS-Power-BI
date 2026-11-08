@@ -322,8 +322,14 @@ def propagate_relationship_filters(
                 constrained_ids.add(target_id)
                 constrained.append(target_id)
 
-    _apply_expanded_table_filters(tables_by_id, rows_by_id, relationships, filter_roots)
+    _apply_expanded_table_filters(tables_by_id, rows_by_id, relationships, filter_roots, unknown_state)
     return rows_by_id
+
+
+class _RowsWithBlankMember(list):
+    """Rows kept in a table by the expanded table of a table filter; blank_member: the filter's rows also point at its blank member."""
+
+    blank_member = False
 
 
 def _is_whole_row_table_filter(table: dict[str, Any]) -> bool:
@@ -332,7 +338,12 @@ def _is_whole_row_table_filter(table: dict[str, Any]) -> bool:
         isinstance(shape, dict) and shape.get("whole_row") and not shape.get("dirty")
         and tuple(shape.get("active", ())) == tuple(shape.get("columns", ()))
         for shape in (table.get("filter_shapes") or ())
-    )
+)
+
+
+def _is_filter_function_table_filter(table: dict[str, Any]) -> bool:
+    """The rows FILTER(T, ..) keeps, used as a table filter argument of CALCULATE (Task 88)."""
+    return table.get("filter_table_by_filter") is not None and table.get("filter_table_by_filter") is table.get("filter_table_rows")
 
 
 def _apply_expanded_table_filters(
@@ -340,6 +351,7 @@ def _apply_expanded_table_filters(
     rows_by_id: dict[str, list[dict[str, Any]]],
     relationships: list[dict[str, Any]],
     filter_roots: set[str],
+    unknown_state: dict[str, bool] | None = None,
 ) -> None:
     """Task 87 (table-filter-77): a table used as a filter argument filters the other tables by its EXPANDED table, row by row.
 
@@ -412,25 +424,55 @@ def _apply_expanded_table_filters(
 
     for root_id in sorted(filter_roots):
         root = tables_by_id[root_id]
-        if not _is_whole_row_table_filter(root):
+        by_filter_function = _is_filter_function_table_filter(root)
+        if not _is_whole_row_table_filter(root) and not by_filter_function:
             continue
         root_paths = one_side_paths(root_id)
         root_position = {id(row): position for position, row in enumerate(root["rows"])}
         root_tuples_by_common: dict[tuple[str, ...], set[tuple[int | None, ...]]] = {}
-        for target_id, target in tables_by_id.items():
-            if target_id == root_id or target_id in root_paths:
+        # Task 88B: the expanded table of the filter also carries the columns of its one-side tables, so each of them keeps only the rows
+        # a visible filter row points at
+        # (a visible filter row whose key has no match there points at that table's blank member, which stays selected)
+        reached_rows: dict[str, set[int]] = {}
+        blank_reached: set[str] = set()
+        for row in rows_by_id[root_id]:
+            for table_id, position in reached_positions(root_id, root_position[id(row)], root_paths).items():
+                if table_id == root_id:
+                    continue
+                if position is None:
+                    blank_reached.add(table_id)
+                else:
+                    reached_rows.setdefault(table_id, set()).add(position)
+        for table_id in root_paths:
+            if table_id == root_id or table_id in filter_roots or table_id not in blank_reached or root_id in (tables_by_id[table_id].get("expanded_filter_cleared") or ()):
+                # a one-side table with a filter of its own: what a filter on its key column replaces is settled by the caller; when every
+                # key of the filter rows has a match the caller narrows the table itself (and settles what a later ALL() clears)
                 continue
+            keep = reached_rows.get(table_id, set())
+            position_of = {id(row): position for position, row in enumerate(tables_by_id[table_id]["rows"])}
+            narrowed = _RowsWithBlankMember(row for row in rows_by_id[table_id] if position_of[id(row)] in keep)
+            narrowed.blank_member = table_id in blank_reached and (unknown_state or {}).get(table_id, True)
+            rows_by_id[table_id] = narrowed
+        if by_filter_function and not _is_whole_row_table_filter(root):
+            continue  # the other tables a FILTER(T, ..) reaches through its one side are left to the caller (not modelled here)
+        for target_id, target in tables_by_id.items():
+            if target_id == root_id or target_id in root_paths or root_id in (target.get("expanded_filter_cleared") or ()):
+                continue  # Task 88: a table the user cleared (ALL / REMOVEFILTERS ..) after this table filter was applied is no longer narrowed by it
             target_paths = one_side_paths(target_id)
             common = sorted((set(root_paths) & set(target_paths)) - {root_id, target_id})
-            if len(common) < 2:
-                continue
+            if not common or any(root_id in (tables_by_id[common_id].get("expanded_filter_cleared") or ()) for common_id in common):
+                continue  # (a link table cleared after the filter no longer carries it from one fact table to the other)
+            # Task 88: with one common one-side table the blank member is a value of that table (a row with no match in it is
+            # the blank member, live Power BI: CALCULATE(COUNTROWS(F), F2) keeps the F rows of U's blank member, selected by F2's orphans);
+            # with two or more common tables a key with no match is still refused
+            blank_allowed = len(common) == 1
             root_tuples = root_tuples_by_common.get(tuple(common))
             if root_tuples is None:
                 root_tuples = root_tuples_by_common[tuple(common)] = set()
                 for row in rows_by_id[root_id]:
                     reached = reached_positions(root_id, root_position[id(row)], root_paths)
                     values = tuple(reached.get(table_id) for table_id in common)
-                    if None in values:
+                    if None in values and not blank_allowed:
                         raise RelationshipError(
                             f"A table filter on {root.get('name', root_id)!r} points at a key with no match in the expanded table; "
                             "this shape is not supported yet."
@@ -441,7 +483,7 @@ def _apply_expanded_table_filters(
             for row in rows_by_id[target_id]:
                 reached = reached_positions(target_id, target_position[id(row)], target_paths)
                 values = tuple(reached.get(table_id) for table_id in common)
-                if None in values:
+                if None in values and not blank_allowed:
                     raise RelationshipError(
                         f"A table filter reaches {target.get('name', target_id)!r} through a key with no match in the expanded table; "
                         "this shape is not supported yet."
@@ -594,6 +636,12 @@ def unknown_member_table_ids(
             if visible_from_keys - all_to_keys and from_id not in (no_orphan_blank_from or ()):
                 unknown_tables.add(to_id)
             if visible_to_keys - all_from_keys and to_id not in (no_orphan_blank_from or ()):
+                unknown_tables.add(from_id)
+            # Task 88: a table filter whose rows point at the blank member of one end selects the blank member of its one-to-one partner
+            # (live Power BI: VALUES(W[Y]) under a fact table filter with orphan keys lists the blank, whatever U's visible rows are)
+            if from_can_filter_to and getattr(visible_rows_by_id.get(from_id), "blank_member", False):
+                unknown_tables.add(to_id)
+            if to_can_filter_from and getattr(visible_rows_by_id.get(to_id), "blank_member", False):
                 unknown_tables.add(from_id)
             continue
         else:

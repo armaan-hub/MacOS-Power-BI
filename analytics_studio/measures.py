@@ -16246,6 +16246,13 @@ def _evaluate_measures_once(
                     queue.append((one_id, None if unmatched else frozenset(found), frozenset(found), unmatched))
         return reached
 
+    def forget_expanded_filter_cleared(updated_by_id: dict[str, dict[str, Any]], root_id: str) -> None:
+        """A table filter applied (again) after a clear narrows the tables that clear emptied, like any new table filter (Task 88)."""
+        for context in updated_by_id.values():
+            cleared_roots = context.get("expanded_filter_cleared")
+            if cleared_roots and root_id in cleared_roots:
+                context["expanded_filter_cleared"] = frozenset(cleared_roots) - {root_id}
+
     def narrow_one_side_tables(
         updated_by_id: dict[str, dict[str, Any]], updated_filter_roots: set[str], table_id: str, matching_indexes: Iterable[int]
     ) -> None:
@@ -16496,6 +16503,10 @@ def _evaluate_measures_once(
             if function == "ALLEXCEPT" and not table_columns:
                 continue
             if clear_all or (clear_plan.get(updated["id"], _NOTHING) is None):
+                # Task 88: the expanded table of the table filters in force no longer narrows a table cleared whole after them
+                # (ALLSELECTED restores the filters of the enclosing context, so the narrowing stays: live Power BI)
+                if function != "ALLSELECTED":
+                    updated["expanded_filter_cleared"] = frozenset(evaluation_filter_ids) | frozenset(updated.get("expanded_filter_cleared") or ())
                 updated.pop("filter_rows", None)
                 updated.pop("filter_table_rows", None)
                 updated.pop("filter_shapes", None)
@@ -16565,6 +16576,7 @@ def _evaluate_measures_once(
             updated["filter_column_blank_allowed"] = {}
             updated["filter_context_complete"] = False
             updated_filter_roots.add(table_id)
+            forget_expanded_filter_cleared(updated_by_id, table_id)
             narrow_one_side_tables(updated_by_id, updated_filter_roots, table_id, matching_indexes)
         elif function == "ALLNOBLANKROW" and target_context is not None and modifier_arguments[0][0] == "table":
             # the table without its blank row is the expanded table of the rows that exist: only the one-side rows they point at
@@ -16681,6 +16693,7 @@ def _evaluate_measures_once(
         updated["filter_context_complete"] = False
         updated_filter_roots = set(evaluation_filter_ids)
         updated_filter_roots.add(table_id)
+        forget_expanded_filter_cleared(updated_by_id, table_id)
         narrow_one_side_tables(updated_by_id, updated_filter_roots, table_id, matching_indexes)
 
         try:
@@ -16888,6 +16901,7 @@ def _evaluate_measures_once(
                 if all(row_index in indexes for indexes in updated_column_rows.values())
             ]
             updated_filter_roots.add(table_id)
+            forget_expanded_filter_cleared(updated_by_id, table_id)
         try:
             filtered_rows_by_id = propagate_relationship_filters(
                 list(updated_by_id.values()), relationship_definitions, frozenset(updated_filter_roots),
