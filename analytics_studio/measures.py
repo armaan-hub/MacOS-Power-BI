@@ -56,7 +56,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_swi_ties, dax_time_sets, dax_typed
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_swi_ties, dax_time_sets, dax_typed, dax_visual_calc_fns
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -1177,6 +1177,7 @@ _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets 
 _FUNCTIONS.add("RELATEDTABLE")
 _FUNCTIONS |= dax_model_fns.NAMES  # Task 58: the ten model and selection functions
 _FUNCTIONS |= dax_sampling_fns.NAMES  # Task 91: the five sampling, join and format functions
+_FUNCTIONS |= dax_visual_calc_fns.NAMES  # Task 94: the 14 visual-calculation functions (errors outside a visual calculation)
 _TABLE_FUNCTION_ARITY |= dax_sampling_fns.TABLE_ARITY  # Task 91: table functions with a table argument
 _NEW_TABLE_FUNCTIONS |= set(dax_sampling_fns.TABLE_ARITY)  # Task 91: evaluated by new_table_function
 _TABLE_FUNCTION_ARITY |= dax_model_fns.TABLE_ARITY  # Task 58: CALENDARAUTO is a table function like CALENDAR
@@ -6373,6 +6374,8 @@ class _Parser:
             self._expect(")")
             if function in dax_model_fns.NAMES:
                 dax_model_fns.check_syntax(function, tuple(arguments))  # Task 58: measured argument errors at parse time
+            if function in dax_visual_calc_fns.NAMES:
+                dax_visual_calc_fns.check_syntax(function, tuple(arguments))  # Task 94: measured argument errors at parse time
             if function in dax_sampling_fns.NAMES:
                 dax_sampling_fns.check_syntax(function, tuple(arguments))  # Task 91: measured argument errors at parse time
             if function in dax_math.STAT_PERCENTILE_COLUMN and len(arguments) == 2 and arguments[1][0] == "blank":
