@@ -322,7 +322,133 @@ def propagate_relationship_filters(
                 constrained_ids.add(target_id)
                 constrained.append(target_id)
 
+    _apply_expanded_table_filters(tables_by_id, rows_by_id, relationships, filter_roots)
     return rows_by_id
+
+
+def _is_whole_row_table_filter(table: dict[str, Any]) -> bool:
+    """A table filter argument of CALCULATE (a set of whole rows of this table, not narrowed by a later column filter)."""
+    return any(
+        isinstance(shape, dict) and shape.get("whole_row") and not shape.get("dirty")
+        and tuple(shape.get("active", ())) == tuple(shape.get("columns", ()))
+        for shape in (table.get("filter_shapes") or ())
+    )
+
+
+def _apply_expanded_table_filters(
+    tables_by_id: dict[str, dict[str, Any]],
+    rows_by_id: dict[str, list[dict[str, Any]]],
+    relationships: list[dict[str, Any]],
+    filter_roots: set[str],
+) -> None:
+    """Task 87 (table-filter-77): a table used as a filter argument filters the other tables by its EXPANDED table, row by row.
+
+    The expanded table of a filter table is its rows plus the rows of every table on its one side. A row of another table (the
+    target) that reaches two or more of the same one-side tables survives only when a visible filter row points at the same row
+    of each of those tables together (live Power BI: CALCULATE(SUM(Fact[Qty]), Fact2) keeps a Fact row only when its Dim row and its
+    Calendar row come from one Fact2 row). Filtering each one-side table on its own would keep the Fact rows whose Dim row and
+    whose Calendar row are each visible separately. A key with no match in a common one-side table is refused, not guessed."""
+
+    # the one side of every table: its active many-to-one relationships, whatever their filter direction (live Power BI: the
+    # expanded table of a table filter argument is not limited by the direction a single-direction relationship filters in)
+    one_side_edges: dict[str, list[tuple[str, str, str, str, str]]] = defaultdict(list)
+    for relationship in relationships:
+        if (
+            not isinstance(relationship, dict)
+            or type(relationship.get("relationship_version")) is not int
+            or relationship.get("relationship_version") != RELATIONSHIP_VERSION
+            or not relationship.get("is_active")
+            or relationship.get("cardinality") != "many_to_one"
+        ):
+            continue
+        from_id, to_id = str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))
+        if from_id not in tables_by_id or to_id not in tables_by_id:
+            continue
+        from_column, to_column = str(relationship.get("from_column", "")), str(relationship.get("to_column", ""))
+        one_side_edges[from_id].append((
+            to_id, from_column, to_column,
+            str(tables_by_id[from_id].get("column_types", {}).get(from_column, "text")),
+            str(tables_by_id[to_id].get("column_types", {}).get(to_column, "text")),
+        ))
+
+    def one_side_paths(start_id: str) -> dict[str, list[tuple[str, str, str, str, str, str]]]:
+        """Shortest many-to-one route from start_id to each table on its one side (the route's steps, in order)."""
+        paths: dict[str, list[tuple[str, str, str, str, str, str]]] = {start_id: []}
+        queue: deque[str] = deque([start_id])
+        while queue:
+            current = queue.popleft()
+            for target_id, source_column, target_column, source_type, target_type in one_side_edges.get(current, []):
+                if target_id in paths:
+                    continue
+                paths[target_id] = [*paths[current], (current, source_column, target_id, target_column, source_type, target_type)]
+                queue.append(target_id)
+        return paths
+
+    index_cache: dict[tuple[str, str], dict[Any, int]] = {}
+
+    def row_index_for(table_id: str, column: str, column_type: str) -> dict[Any, int]:
+        cached = index_cache.get((table_id, column))
+        if cached is None:
+            cached = {}
+            for position, row in enumerate(tables_by_id[table_id]["rows"]):
+                cached.setdefault(_relationship_value_key(row.get(column), column_type), position)
+            index_cache[(table_id, column)] = cached
+        return cached
+
+    def reached_positions(start_id: str, position: int, paths: dict[str, list[tuple[str, str, str, str, str, str]]]) -> dict[str, int | None]:
+        """The row position reached on each table of the routes from start_id (None where a key has no match)."""
+        reached: dict[str, int | None] = {start_id: position}
+        for table_id in sorted(paths, key=lambda item: len(paths[item])):
+            if table_id == start_id:
+                continue
+            source_id, source_column, _target, target_column, source_type, target_type = paths[table_id][-1]
+            here = reached.get(source_id)
+            if here is None:
+                reached[table_id] = None
+                continue
+            key = _relationship_value_key(tables_by_id[source_id]["rows"][here].get(source_column), source_type)
+            reached[table_id] = row_index_for(table_id, target_column, target_type).get(key)
+        return reached
+
+    for root_id in sorted(filter_roots):
+        root = tables_by_id[root_id]
+        if not _is_whole_row_table_filter(root):
+            continue
+        root_paths = one_side_paths(root_id)
+        root_position = {id(row): position for position, row in enumerate(root["rows"])}
+        root_tuples_by_common: dict[tuple[str, ...], set[tuple[int | None, ...]]] = {}
+        for target_id, target in tables_by_id.items():
+            if target_id == root_id or target_id in root_paths:
+                continue
+            target_paths = one_side_paths(target_id)
+            common = sorted((set(root_paths) & set(target_paths)) - {root_id, target_id})
+            if len(common) < 2:
+                continue
+            root_tuples = root_tuples_by_common.get(tuple(common))
+            if root_tuples is None:
+                root_tuples = root_tuples_by_common[tuple(common)] = set()
+                for row in rows_by_id[root_id]:
+                    reached = reached_positions(root_id, root_position[id(row)], root_paths)
+                    values = tuple(reached.get(table_id) for table_id in common)
+                    if None in values:
+                        raise RelationshipError(
+                            f"A table filter on {root.get('name', root_id)!r} points at a key with no match in the expanded table; "
+                            "this shape is not supported yet."
+                        )
+                    root_tuples.add(values)
+            target_position = {id(row): position for position, row in enumerate(target["rows"])}
+            kept: list[dict[str, Any]] = []
+            for row in rows_by_id[target_id]:
+                reached = reached_positions(target_id, target_position[id(row)], target_paths)
+                values = tuple(reached.get(table_id) for table_id in common)
+                if None in values:
+                    raise RelationshipError(
+                        f"A table filter reaches {target.get('name', target_id)!r} through a key with no match in the expanded table; "
+                        "this shape is not supported yet."
+                    )
+                if values in root_tuples:
+                    kept.append(row)
+            rows_by_id[target_id] = kept
 
 
 def _relationship_value_key(value: Any, column_type: str) -> tuple[str, Any]:
@@ -385,8 +511,12 @@ def unknown_member_table_ids(
     tables: list[dict[str, Any]],
     relationships: list[dict[str, Any]],
     visible_rows_by_id: dict[str, list[dict[str, Any]]] | None = None,
+    no_orphan_blank_from: set[str] | None = None,
 ) -> set[str]:
-    """Return tables with a visible relationship-generated blank member."""
+    """Return tables with a visible relationship-generated blank member.
+
+    no_orphan_blank_from: one-to-one partners whose visible rows without a match give the other end no blank member (live Power BI: a
+    row of U picked by the filter context under a table filter argument of CALCULATE leaves VALUES(W[Y]) empty, not the blank member)."""
     tables_by_id = {str(table.get("id", "")): table for table in tables}
     visible_rows_by_id = visible_rows_by_id or {}
     unknown_tables: set[str] = set()
@@ -461,9 +591,9 @@ def unknown_member_table_ids(
                     else to_table["rows"]
                 )
             }
-            if visible_from_keys - all_to_keys:
+            if visible_from_keys - all_to_keys and from_id not in (no_orphan_blank_from or ()):
                 unknown_tables.add(to_id)
-            if visible_to_keys - all_from_keys:
+            if visible_to_keys - all_from_keys and to_id not in (no_orphan_blank_from or ()):
                 unknown_tables.add(from_id)
             continue
         else:

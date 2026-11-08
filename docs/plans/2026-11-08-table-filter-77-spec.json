@@ -1,0 +1,3700 @@
+{
+ "items": [
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=365;2024=366",
+   "now": "2023=365;2024=366"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=3;2024=5",
+   "now": "2023=3;2024=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=130;2024=165",
+   "now": "2023=130;2024=165"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",CALCULATE(SUM(ZS_Fact[Qty]),ZS_Fact2)),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=2",
+   "now": "2024=6"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Cal[Year]),ZS_Fact2))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Fact))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Fact2))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Fact2[Amt]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Fact[Amt]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISCROSSFILTERED(ZS_Reg[Zone]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=0;2024=0",
+   "now": "2023=0;2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=0;2024=0",
+   "now": "2023=0;2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=3;2024=5",
+   "now": "2023=3;2024=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),ALLEXCEPT(ZS_Fact2,ZS_Dim[Cat]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=31;2024=31",
+   "now": "2023=31;2024=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],ONEWAY))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=130;2024=165",
+   "now": "2023=130;2024=165"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=130;2024=165",
+   "now": "LOCAL-REJECT:Could not apply CROSSFILTER: Ambiguous active relationship paths from 'ZS_Cal' to 'ZS_Dim': ZS_Cal \u2192 ZS_Fact \u2192 ZS_Dim; ZS_Cal \u2192 ZS_Fact2 \u2192 ZS_Dim. Remove or deactivate one relationship path."
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=130;2024=165",
+   "now": "2023=130;2024=165"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Cal[Year]),ZS_Fact2))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Sup[Sup]),ZS_Fact2))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(RELATEDTABLE(ZS_Fact))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=4;2024=5",
+   "now": "2023=4;2024=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Fact2[Amt]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=0;2024=0",
+   "now": "2023=0;2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Reg[Zone]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=0;2024=0",
+   "now": "2023=0;2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Sup))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISFILTERED(ZS_Reg[Zone]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=0;2024=0",
+   "now": "2023=0;2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=1;2024=1",
+   "now": "2023=1;2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",SUMX(TOPN(2,ALL(ZS_Dim),CALCULATE(SUM(ZS_Fact[Amt]))),CALCULATE(SUM(ZS_Fact[Amt])))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2023=130;2024=150",
+   "now": "2023=130;2024=150"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),ALLEXCEPT(ZS_Fact2,ZS_Dim[Cat]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=31",
+   "now": "2024=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=19",
+   "now": "2024=19"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=19",
+   "now": "2024=19"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=165",
+   "now": "2024=165"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),REMOVEFILTERS(ZS_Dim[Cat]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=170",
+   "now": "2024=170"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Qty]),ZS_Fact2)),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=2",
+   "now": "2024=6"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=1",
+   "now": "2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Cal[Year]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=1",
+   "now": "2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=1",
+   "now": "2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=1",
+   "now": "2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact2))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=1",
+   "now": "2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact[Amt]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=1",
+   "now": "2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=0",
+   "now": "2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Sup))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=0",
+   "now": "2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=1",
+   "now": "2024=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Dim[Prod]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=0",
+   "now": "2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Cal[Year],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Cal[Year]&\"=\"&[v],\";\",ZS_Cal[Year])",
+   "powerbi": "2024=0",
+   "now": "2024=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),ALLEXCEPT(ZS_Fact2,ZS_Dim[Cat]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=7;B=16;C=8",
+   "now": "A=7;B=16;C=8"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=31;B=31;C=31",
+   "now": "A=31;B=31;C=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=115;B=180",
+   "now": "A=115;B=180"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),REMOVEFILTERS(ZS_Dim[Cat]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=300;B=300;C=300",
+   "now": "A=300;B=300;C=300"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Cal[Year]),ZS_Fact2))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=2;B=1;C=1",
+   "now": "A=2;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Cal[Year]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Fact))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Fact2))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Fact2[Amt]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Sup))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISCROSSFILTERED(ZS_Sup[Sup]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",INT(ISFILTERED(ZS_Dim[Prod]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],\"v\",SUMX(TOPN(2,ALL(ZS_Dim),CALCULATE(SUM(ZS_Fact[Amt]))),CALCULATE(SUM(ZS_Fact[Amt])))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=250;B=250;C=250",
+   "now": "A=250;B=250;C=250"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=3;B=3",
+   "now": "A=3;B=3"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=2;B=2;C=1",
+   "now": "A=2;B=2;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=31;B=31;C=31",
+   "now": "A=31;B=31;C=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=7;B=16;C=8",
+   "now": "A=7;B=16;C=8"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=115;B=180",
+   "now": "A=115;B=180"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),REMOVEFILTERS(ZS_Dim[Cat]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=295;B=295;C=295",
+   "now": "A=295;B=295;C=295"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Qty]),ZS_Fact2)),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=2",
+   "now": "A=6"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Sup[Sup]),ZS_Fact2))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1",
+   "now": "A=1;B=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Sup))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",SUMX(TOPN(2,ALL(ZS_Dim),CALCULATE(SUM(ZS_Fact[Amt]))),CALCULATE(SUM(ZS_Fact[Amt])))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=250;B=250;C=250",
+   "now": "A=250;B=250;C=250"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=2;B=2;C=1",
+   "now": "A=2;B=2;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=3;B=16",
+   "now": "A=3;B=16"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],ONEWAY))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=55;B=110;C=5",
+   "now": "A=55;B=110;C=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Sup[Sup]),ZS_Fact2))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1",
+   "now": "A=1;B=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Cal[Year]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact2))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Sup))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Sup[Sup]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=1;B=1;C=1",
+   "now": "A=1;B=1;C=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Reg[Zone]))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=0;B=0;C=0",
+   "now": "A=0;B=0;C=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Cat],TREATAS({2024},ZS_Cal[Year]),\"v\",SUMX(TOPN(2,ALL(ZS_Dim),CALCULATE(SUM(ZS_Fact[Amt]))),CALCULATE(SUM(ZS_Fact[Amt])))),ZS_Dim[Cat]&\"=\"&[v],\";\",ZS_Dim[Cat])",
+   "powerbi": "A=150;B=150;C=150",
+   "now": "A=150;B=150;C=150"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=5;P2=5;P3=5;P4=5;P5=5",
+   "now": "P1=5;P2=5;P3=5;P4=5;P5=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),ALLEXCEPT(ZS_Fact2,ZS_Dim[Cat]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=31;P2=31;P3=31;P4=31;P5=31",
+   "now": "P1=31;P2=31;P3=31;P4=31;P5=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=31;P2=31;P3=31;P4=31;P5=31",
+   "now": "P1=31;P2=31;P3=31;P4=31;P5=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=6;P3=16;P5=8",
+   "now": "P1=1;P2=6;P3=16;P5=8"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],ONEWAY))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=45;P2=70;P3=110;P4=70;P5=5",
+   "now": "P1=45;P2=70;P3=110;P4=70;P5=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Cal[Year]),ZS_Fact2))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=2;P3=1;P5=1",
+   "now": "P1=1;P2=2;P3=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Sup[Sup]),ZS_Fact2))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",COUNTROWS(RELATEDTABLE(ZS_Fact))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=3;P2=2;P3=2;P4=2;P5=1",
+   "now": "P1=3;P2=2;P3=2;P4=2;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISCROSSFILTERED(ZS_Cal[Year]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISCROSSFILTERED(ZS_Fact[Amt]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISFILTERED(ZS_Dim[Prod]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISFILTERED(ZS_Reg[Zone]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=3;P2=2;P3=2;P4=2",
+   "now": "P1=3;P2=2;P3=2;P4=2"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=5;P2=5;P3=5;P4=5;P5=5",
+   "now": "P1=5;P2=5;P3=5;P4=5;P5=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=31;P2=31;P3=31;P4=31;P5=31",
+   "now": "P1=31;P2=31;P3=31;P4=31;P5=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=6;P3=16;P5=8",
+   "now": "P1=1;P2=6;P3=16;P5=8"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),REMOVEFILTERS(ZS_Dim[Cat]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=45;P2=70;P3=110;P4=70",
+   "now": "P1=45;P2=70;P3=110;P4=70"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Cal[Year]),ZS_Fact2))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=2;P3=1",
+   "now": "P1=1;P2=2;P3=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Sup[Sup]),ZS_Fact2))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1",
+   "now": "P1=1;P2=1;P3=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(RELATEDTABLE(ZS_Fact))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=3;P2=2;P3=2;P4=2",
+   "now": "P1=3;P2=2;P3=2;P4=2"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Cal[Year]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Fact2))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Fact2[Amt]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Sup[Sup]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=2;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=2;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=5;P2=5;P3=5;P4=5;P5=5",
+   "now": "P1=5;P2=5;P3=5;P4=5;P5=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),ALLEXCEPT(ZS_Fact2,ZS_Dim[Cat]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=31;P2=31;P3=31;P4=31;P5=31",
+   "now": "P1=31;P2=31;P3=31;P4=31;P5=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=19;P2=19;P3=19;P4=19;P5=19",
+   "now": "P1=19;P2=19;P3=19;P4=19;P5=19"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=2;P3=16",
+   "now": "P1=1;P2=2;P3=16"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],ONEWAY))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=15;P2=40;P3=110;P5=5",
+   "now": "P1=15;P2=40;P3=110;P5=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=15;P2=40;P3=110",
+   "now": "P1=15;P2=40;P3=110"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Reg[Zone]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Sup[Sup]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=1;P2=1;P3=1;P4=1;P5=1",
+   "now": "P1=1;P2=1;P3=1;P4=1;P5=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Dim[Prod],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Dim[Prod]&\"=\"&[v],\";\",ZS_Dim[Prod])",
+   "powerbi": "P1=0;P2=0;P3=0;P4=0;P5=0",
+   "now": "P1=0;P2=0;P3=0;P4=0;P5=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=5;Z2=1",
+   "now": "Z1=5;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=5;Z2=5",
+   "now": "Z1=5;Z2=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=31;Z2=31",
+   "now": "Z1=31;Z2=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=295;Z2=5",
+   "now": "Z1=295;Z2=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=295",
+   "now": "Z1=295"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",CALCULATE(SUM(ZS_Fact[Qty]),ZS_Fact2)),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=2",
+   "now": "Z1=6"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=0;Z2=0",
+   "now": "Z1=0;Z2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",INT(ISCROSSFILTERED(ZS_Fact2))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",INT(ISCROSSFILTERED(ZS_Fact[Amt]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",INT(ISCROSSFILTERED(ZS_Reg[Zone]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=0;Z2=0",
+   "now": "Z1=0;Z2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],\"v\",SUMX(TOPN(2,ALL(ZS_Dim),CALCULATE(SUM(ZS_Fact[Amt]))),CALCULATE(SUM(ZS_Fact[Amt])))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=250;Z2=250",
+   "now": "Z1=250;Z2=250"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],NONE))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=31;Z2=31",
+   "now": "Z1=31;Z2=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=31;Z2=31",
+   "now": "Z1=31;Z2=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=295",
+   "now": "Z1=295"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=295",
+   "now": "Z1=295"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),REMOVEFILTERS(ZS_Dim[Cat]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=295",
+   "now": "Z1=295"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Sup[Sup]),ZS_Fact2))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1",
+   "now": "Z1=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Fact))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Fact2[Amt]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Reg[Zone]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=0;Z2=0",
+   "now": "Z1=0;Z2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISFILTERED(ZS_Reg[Zone]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=3;Z2=1",
+   "now": "Z1=3;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),ALLEXCEPT(ZS_Fact2,ZS_Dim[Cat]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=31;Z2=31",
+   "now": "Z1=31;Z2=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=165",
+   "now": "Z1=165"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Cal[Year]),ZS_Fact2))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1",
+   "now": "Z1=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Sup[Sup]),ZS_Fact2))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1",
+   "now": "Z1=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",COUNTROWS(RELATEDTABLE(ZS_Fact))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=5;Z2=1",
+   "now": "Z1=5;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Cal))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact[Amt]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Reg[Zone]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Dim[Prod]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=0;Z2=0",
+   "now": "Z1=0;Z2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Reg[Zone]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=1;Z2=1",
+   "now": "Z1=1;Z2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Reg[Zone],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Reg[Zone]&\"=\"&[v],\";\",ZS_Reg[Zone])",
+   "powerbi": "Z1=0;Z2=0",
+   "now": "Z1=0;Z2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=5;S2=1",
+   "now": "S1=5;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),ALLEXCEPT(ZS_Fact2,ZS_Dim[Cat]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=31;S2=31",
+   "now": "S1=31;S2=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=31;S2=31",
+   "now": "S1=31;S2=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=295;S2=5",
+   "now": "S1=295;S2=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=295",
+   "now": "S1=295"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",CALCULATE(SUM(ZS_Fact[Qty]),ZS_Fact2)),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=2",
+   "now": "S1=6"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZS_Cal[Year]),ZS_Fact2))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=2;S2=1",
+   "now": "S1=2;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",COUNTROWS(RELATEDTABLE(ZS_Fact))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=9;S2=1",
+   "now": "S1=9;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",INT(ISCROSSFILTERED(ZS_Cal[Year]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0;S2=0",
+   "now": "S1=0;S2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0;S2=0",
+   "now": "S1=0;S2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",INT(ISFILTERED(ZS_Dim[Prod]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0;S2=0",
+   "now": "S1=0;S2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",INT(ISFILTERED(ZS_Reg[Zone]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0;S2=0",
+   "now": "S1=0;S2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",INT(ISFILTERED(ZS_Sup[Sup]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1;S2=1",
+   "now": "S1=1;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],\"v\",SUMX(TOPN(2,ALL(ZS_Dim),CALCULATE(SUM(ZS_Fact[Amt]))),CALCULATE(SUM(ZS_Fact[Amt])))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=250;S2=250",
+   "now": "S1=250;S2=250"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=5",
+   "now": "S1=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(DISTINCTCOUNT(ZS_Fact[Prod]),ALLEXCEPT(ZS_Dim,ZS_Dim[Cat]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=5",
+   "now": "S1=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact2[Amt]),REMOVEFILTERS(ZS_Sup))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=31",
+   "now": "S1=31"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=295",
+   "now": "S1=295"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",CALCULATE(SUM(ZS_Fact[Qty]),ZS_Fact2)),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=2",
+   "now": "S1=6"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",COUNTROWS(RELATEDTABLE(ZS_Fact))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=9",
+   "now": "S1=9"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Cal[Year]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0",
+   "now": "S1=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Dim))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1",
+   "now": "S1=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Dim[Prod]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1",
+   "now": "S1=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Fact[Amt]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1",
+   "now": "S1=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISCROSSFILTERED(ZS_Sup[Sup]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1",
+   "now": "S1=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({\"S1\"},ZS_Sup[Sup]),\"v\",INT(ISFILTERED(ZS_Dim[Prod]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0",
+   "now": "S1=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(COUNTROWS(ZS_Cal),CROSSFILTER(ZS_Fact[Dt],ZS_Cal[Date],BOTH))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=3;S2=1",
+   "now": "S1=3;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact2[Prod],ZS_Dim[Prod],ONEWAY))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=165;S2=5",
+   "now": "S1=165;S2=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=165;S2=5",
+   "now": "LOCAL-REJECT:Could not apply CROSSFILTER: Ambiguous active relationship paths from 'ZS_Cal' to 'ZS_Dim': ZS_Cal \u2192 ZS_Fact \u2192 ZS_Dim; ZS_Cal \u2192 ZS_Fact2 \u2192 ZS_Dim. Remove or deactivate one relationship path."
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),KEEPFILTERS(ZS_Sup[Sup]=\"S1\"))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=165",
+   "now": "S1=165"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Amt]),REMOVEFILTERS(ZS_Dim[Cat]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=165;S2=5",
+   "now": "S1=165;S2=5"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",CALCULATE(SUM(ZS_Fact[Qty]),ZS_Fact2)),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=2",
+   "now": "S1=6"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",COUNTROWS(RELATEDTABLE(ZS_Fact))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=5;S2=1",
+   "now": "S1=5;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1;S2=1",
+   "now": "S1=1;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Fact[Amt]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1;S2=1",
+   "now": "S1=1;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Reg))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0;S2=0",
+   "now": "S1=0;S2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Reg[Zone]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0;S2=0",
+   "now": "S1=0;S2=0"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISCROSSFILTERED(ZS_Sup[Sup]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1;S2=1",
+   "now": "S1=1;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Cal[Year]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=1;S2=1",
+   "now": "S1=1;S2=1"
+  },
+  {
+   "model": "ZS",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZS_Sup[Sup],TREATAS({2024},ZS_Cal[Year]),\"v\",INT(ISFILTERED(ZS_Dim[Prod]))),ZS_Sup[Sup]&\"=\"&[v],\";\",ZS_Sup[Sup])",
+   "powerbi": "S1=0;S2=0",
+   "now": "S1=0;S2=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=210;n1b=210;n2=210;n5=210",
+   "now": "n1=210;n1b=210;n2=210;n5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=210;n1b=210;n2=210;n5=210",
+   "now": "n1=210;n1b=210;n2=210;n5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1000;n1b=1000;n2=1000;n5=1000",
+   "now": "n1=1000;n1b=1000;n2=1000;n5=1000"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n1b=63;n2=63;n5=63",
+   "now": "n1=63;n1b=63;n2=63;n5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n1b=63;n2=63;n5=63",
+   "now": "n1=63;n1b=63;n2=63;n5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n1b=63;n2=63;n5=63",
+   "now": "n1=63;n1b=63;n2=63;n5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=4;n1b=4;n2=4;n5=4",
+   "now": "n1=4;n1b=4;n2=4;n5=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=6;n1b=6;n2=6;n5=6",
+   "now": "n1=6;n1b=6;n2=6;n5=6"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n1b=0;n2=0;n5=0",
+   "now": "n1=0;n1b=0;n2=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n1b=0;n2=0;n5=0",
+   "now": "n1=0;n1b=0;n2=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n1b=0;n2=0;n5=0",
+   "now": "n1=0;n1b=0;n2=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n1b=0;n2=0;n5=0",
+   "now": "n1=0;n1b=0;n2=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n1b=0;n2=0;n5=0",
+   "now": "n1=0;n1b=0;n2=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n1b=0;n2=0;n5=0",
+   "now": "n1=0;n1b=0;n2=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n1b=0;n2=0;n5=0",
+   "now": "n1=0;n1b=0;n2=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=48;n1b=48;n2=48;n5=48",
+   "now": "n1=48;n1b=48;n2=48;n5=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=210;n1b=210;n2=210;n5=210",
+   "now": "n1=210;n1b=210;n2=210;n5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=210;n1b=210;n2=210;n5=210",
+   "now": "n1=210;n1b=210;n2=210;n5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=600;n1b=600;n2=600;n5=600",
+   "now": "n1=600;n1b=600;n2=600;n5=600"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=7;n1b=7;n2=7;n5=7",
+   "now": "n1=7;n1b=7;n2=7;n5=7"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=7;n1b=7;n2=7;n5=7",
+   "now": "n1=7;n1b=7;n2=7;n5=7"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n1b=63;n2=63;n5=63",
+   "now": "n1=63;n1b=63;n2=63;n5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=2;n1b=2;n2=2;n5=2",
+   "now": "n1=2;n1b=2;n2=2;n5=2"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=3;n1b=3;n2=3;n5=3",
+   "now": "n1=3;n1b=3;n2=3;n5=3"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n1b=1;n2=1;n5=1",
+   "now": "n1=1;n1b=1;n2=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=48;n1b=48;n2=48;n5=48",
+   "now": "n1=48;n1b=48;n2=48;n5=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=210;n5=210",
+   "now": "n1=210;n5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=210;n5=210",
+   "now": "n1=210;n5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1000;n5=1000",
+   "now": "n1=1000;n5=1000"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n5=63",
+   "now": "n1=63;n5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n5=63",
+   "now": "n1=63;n5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=63;n5=63",
+   "now": "n1=63;n5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n5=1",
+   "now": "n1=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=4;n5=4",
+   "now": "n1=4;n5=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=6;n5=6",
+   "now": "n1=6;n5=6"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n5=1",
+   "now": "n1=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n5=1",
+   "now": "n1=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n5=1",
+   "now": "n1=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=1;n5=1",
+   "now": "n1=1;n5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n5=0",
+   "now": "n1=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n5=0",
+   "now": "n1=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n5=0",
+   "now": "n1=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n5=0",
+   "now": "n1=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n5=0",
+   "now": "n1=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n5=0",
+   "now": "n1=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=0;n5=0",
+   "now": "n1=0;n5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_B[N],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_B[N]&\"=\"&[v],\";\",ZM_B[N])",
+   "powerbi": "n1=48;n5=48",
+   "now": "n1=48;n5=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=210;x1=210;x2=210;x3=210;x4=210",
+   "now": "=210;x1=210;x2=210;x3=210;x4=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=210;x1=210;x2=210;x3=210;x4=210",
+   "now": "=210;x1=210;x2=210;x3=210;x4=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=100;x2=500;x4=400",
+   "now": "=400;x1=100;x2=500;x4=400"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=32;x1=3;x2=4;x3=8;x4=16",
+   "now": "=32;x1=3;x2=4;x3=8;x4=16"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=63;x1=63;x2=63;x3=63;x4=63",
+   "now": "=63;x1=63;x2=63;x3=63;x4=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=63;x1=63;x2=63;x3=63;x4=63",
+   "now": "=63;x1=63;x2=63;x3=63;x4=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=4;x1=4;x2=4;x3=4;x4=4",
+   "now": "=4;x1=4;x2=4;x3=4;x4=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=2;x2=1;x3=1;x4=1",
+   "now": "=1;x1=2;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=48;x1=48;x2=48;x3=48;x4=48",
+   "now": "=48;x1=48;x2=48;x3=48;x4=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=210;x2=210",
+   "now": "x1=210;x2=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=210;x2=210",
+   "now": "x1=210;x2=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=100;x2=500",
+   "now": "x1=100;x2=500"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=3;x2=4",
+   "now": "x1=3;x2=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=7;x2=7",
+   "now": "x1=7;x2=7"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=63;x2=63",
+   "now": "x1=63;x2=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=4;x2=4",
+   "now": "x1=4;x2=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=2;x2=1",
+   "now": "x1=2;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=0;x2=0",
+   "now": "x1=0;x2=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=0;x2=0",
+   "now": "x1=0;x2=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=0;x2=0",
+   "now": "x1=0;x2=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=0;x2=0",
+   "now": "x1=0;x2=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=1;x2=1",
+   "now": "x1=1;x2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=48;x2=48",
+   "now": "x1=48;x2=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=210;x1=210;x2=210;x3=210;x4=210",
+   "now": "=210;x1=210;x2=210;x3=210;x4=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=210;x1=210;x2=210;x3=210;x4=210",
+   "now": "=210;x1=210;x2=210;x3=210;x4=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "x1=100;x2=500;x4=400",
+   "now": "=400;x1=100;x2=500;x4=400"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=32;x1=3;x2=4;x3=8;x4=16",
+   "now": "=32;x1=3;x2=4;x3=8;x4=16"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=63;x1=63;x2=63;x3=63;x4=63",
+   "now": "=63;x1=63;x2=63;x3=63;x4=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=63;x1=63;x2=63;x3=63;x4=63",
+   "now": "=63;x1=63;x2=63;x3=63;x4=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=2;x1=2;x2=2;x3=2;x4=2",
+   "now": "=2;x1=2;x2=2;x3=2;x4=2"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=2;x2=1;x3=1;x4=1",
+   "now": "=1;x1=2;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_U[X]&\"=\"&[v],\";\",ZM_U[X])",
+   "powerbi": "=48;x1=48;x2=48;x3=48;x4=48",
+   "now": "=48;x1=48;x2=48;x3=48;x4=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=210;y1=210;y2=210;y3=210;y5=210",
+   "now": "=210;y1=210;y2=210;y3=210;y5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=210;y1=210;y2=210;y3=210;y5=210",
+   "now": "=210;y1=210;y2=210;y3=210;y5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=400;y1=100;y2=500",
+   "now": "=400;y1=100;y2=500"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=3;y2=4;y3=8",
+   "now": "=48;y1=3;y2=4;y3=8"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=3;y2=4;y3=8",
+   "now": "=48;y1=3;y2=4;y3=8"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=63;y1=63;y2=63;y3=63;y5=63",
+   "now": "=63;y1=63;y2=63;y3=63;y5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=4;y1=4;y2=4;y3=4;y5=4",
+   "now": "=4;y1=4;y2=4;y3=4;y5=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1",
+   "now": "=1;y1=1;y2=1;y3=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=2;y1=2;y2=1;y3=1",
+   "now": "=2;y1=2;y2=1;y3=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=48;y2=48;y3=48;y5=48",
+   "now": "=48;y1=48;y2=48;y3=48;y5=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=210;y1=210;y2=210;y3=210;y5=210",
+   "now": "=210;y1=210;y2=210;y3=210;y5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=210;y1=210;y2=210;y3=210;y5=210",
+   "now": "=210;y1=210;y2=210;y3=210;y5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "y1=100;y2=500",
+   "now": "y1=100;y2=500"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "y1=3;y2=4",
+   "now": "y1=3;y2=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "y1=3;y2=4",
+   "now": "y1=3;y2=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=63;y1=63;y2=63;y3=63;y5=63",
+   "now": "=63;y1=63;y2=63;y3=63;y5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=4;y1=4;y2=4;y3=4;y5=4",
+   "now": "=4;y1=4;y2=4;y3=4;y5=4"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "y1=1;y2=1",
+   "now": "y1=1;y2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "y1=2;y2=1",
+   "now": "y1=2;y2=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=0;y1=0;y2=0;y3=0;y5=0",
+   "now": "=0;y1=0;y2=0;y3=0;y5=0"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"k1\",\"k2\"},ZM_U[K]),\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=48;y2=48;y3=48;y5=48",
+   "now": "=48;y1=48;y2=48;y3=48;y5=48"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_A[V]),CROSSFILTER(ZM_A[K],ZM_B[K],NONE))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=210;y1=210;y2=210;y3=210;y5=210",
+   "now": "=210;y1=210;y2=210;y3=210;y5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_A[V]),REMOVEFILTERS(ZM_B))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=210;y1=210;y2=210;y3=210;y5=210",
+   "now": "=210;y1=210;y2=210;y3=210;y5=210"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F2[Amt]),ZM_F)),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=400;y1=100;y2=500",
+   "now": "=400;y1=100;y2=500"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_F[K],ZM_U[K],BOTH))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=3;y2=4;y3=8",
+   "now": "=48;y1=3;y2=4;y3=8"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),CROSSFILTER(ZM_U[K],ZM_W[K],ONEWAY))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=3;y2=4;y3=8",
+   "now": "=48;y1=3;y2=4;y3=8"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",CALCULATE(SUM(ZM_F[Amt]),REMOVEFILTERS(ZM_W))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=63;y1=63;y2=63;y3=63;y5=63",
+   "now": "=63;y1=63;y2=63;y3=63;y5=63"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_B[N]),ZM_A))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=2;y1=2;y2=2;y3=2;y5=2",
+   "now": "=2;y1=2;y2=2;y3=2;y5=2"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1",
+   "now": "=1;y1=1;y2=1;y3=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",COUNTROWS(RELATEDTABLE(ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=2;y1=2;y2=1;y3=1",
+   "now": "=2;y1=2;y2=1;y3=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_A))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_A[K]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_B))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_B[N]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F2))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_F[Amt]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_U))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_U[X]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_W))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",INT(ISCROSSFILTERED(ZM_W[Y]))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=1;y1=1;y2=1;y3=1;y5=1",
+   "now": "=1;y1=1;y2=1;y3=1;y5=1"
+  },
+  {
+   "model": "ZM",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZM_W[Y],TREATAS({\"n1\",\"n5\"},ZM_B[N]),\"v\",SUMX(TOPN(2,ALL(ZM_U),CALCULATE(SUM(ZM_F[Amt]))),CALCULATE(SUM(ZM_F[Amt])))),ZM_W[Y]&\"=\"&[v],\";\",ZM_W[Y])",
+   "powerbi": "=48;y1=48;y2=48;y3=48;y5=48",
+   "now": "=48;y1=48;y2=48;y3=48;y5=48"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=158;n2=158;n3=158;n6=158",
+   "now": "n1=158;n2=158;n3=158;n6=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=158;n2=158;n3=158;n6=158",
+   "now": "n1=158;n2=158;n3=158;n6=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=92;n2=92;n3=92;n6=92",
+   "now": "n1=92;n2=92;n3=92;n6=92"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n2=255;n3=255;n6=255",
+   "now": "n1=255;n2=255;n3=255;n6=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n2=255;n3=255;n6=255",
+   "now": "n1=255;n2=255;n3=255;n6=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n2=255;n3=255;n6=255",
+   "now": "n1=255;n2=255;n3=255;n6=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=3;n2=3;n3=3;n6=3",
+   "now": "n1=3;n2=3;n3=3;n6=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=9;n2=9;n3=9;n6=9",
+   "now": "n1=9;n2=9;n3=9;n6=9"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n2=0;n3=0;n6=0",
+   "now": "n1=0;n2=0;n3=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n2=0;n3=0;n6=0",
+   "now": "n1=0;n2=0;n3=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n2=0;n3=0;n6=0",
+   "now": "n1=0;n2=0;n3=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n2=0;n3=0;n6=0",
+   "now": "n1=0;n2=0;n3=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n2=0;n3=0;n6=0",
+   "now": "n1=0;n2=0;n3=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n2=0;n3=0;n6=0",
+   "now": "n1=0;n2=0;n3=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n2=0;n3=0;n6=0",
+   "now": "n1=0;n2=0;n3=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=128;n2=128;n3=128;n6=128",
+   "now": "n1=128;n2=128;n3=128;n6=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=158;n2=158;n3=158;n6=158",
+   "now": "n1=158;n2=158;n3=158;n6=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=158;n2=158;n3=158;n6=158",
+   "now": "n1=158;n2=158;n3=158;n6=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=67;n2=67;n3=67;n6=67",
+   "now": "n1=67;n2=67;n3=67;n6=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=46;n2=46;n3=46;n6=46",
+   "now": "n1=46;n2=46;n3=46;n6=46"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=46;n2=46;n3=46;n6=46",
+   "now": "n1=46;n2=46;n3=46;n6=46"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n2=255;n3=255;n6=255",
+   "now": "n1=255;n2=255;n3=255;n6=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=2;n2=2;n3=2;n6=2",
+   "now": "n1=2;n2=2;n3=2;n6=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n2=1;n3=1;n6=1",
+   "now": "n1=1;n2=1;n3=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=128;n2=128;n3=128;n6=128",
+   "now": "n1=128;n2=128;n3=128;n6=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=158;n6=158",
+   "now": "n1=158;n6=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=158;n6=158",
+   "now": "n1=158;n6=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=92;n6=92",
+   "now": "n1=92;n6=92"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n6=255",
+   "now": "n1=255;n6=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n6=255",
+   "now": "n1=255;n6=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=255;n6=255",
+   "now": "n1=255;n6=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n6=1",
+   "now": "n1=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=3;n6=3",
+   "now": "n1=3;n6=3"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=9;n6=9",
+   "now": "n1=9;n6=9"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n6=1",
+   "now": "n1=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n6=1",
+   "now": "n1=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n6=1",
+   "now": "n1=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=1;n6=1",
+   "now": "n1=1;n6=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n6=0",
+   "now": "n1=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n6=0",
+   "now": "n1=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n6=0",
+   "now": "n1=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n6=0",
+   "now": "n1=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n6=0",
+   "now": "n1=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n6=0",
+   "now": "n1=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=0;n6=0",
+   "now": "n1=0;n6=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_B[N]&\"=\"&[v],\";\",ZJ_B[N])",
+   "powerbi": "n1=128;n6=128",
+   "now": "n1=128;n6=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=158;x1=158;x2=158;x3=158;x4=158;x5=158",
+   "now": "=158;x1=158;x2=158;x3=158;x4=158;x5=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=158;x1=158;x2=158;x3=158;x4=158;x5=158",
+   "now": "=158;x1=158;x2=158;x3=158;x4=158;x5=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=67;x4=25",
+   "now": "=25;x2=67;x4=25"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=34;x1=47;x2=46;x4=61;x5=67",
+   "now": "=34;x1=47;x2=46;x4=61;x5=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=255;x1=255;x2=255;x3=255;x4=255;x5=255",
+   "now": "=255;x1=255;x2=255;x3=255;x4=255;x5=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=255;x1=255;x2=255;x3=255;x4=255;x5=255",
+   "now": "=255;x1=255;x2=255;x3=255;x4=255;x5=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=4;x1=4;x2=4;x3=4;x4=4;x5=4",
+   "now": "=4;x1=4;x2=4;x3=4;x4=4;x5=4"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x2=1;x5=1",
+   "now": "=1;x1=1;x2=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=2;x2=2;x4=2;x5=2",
+   "now": "=1;x1=2;x2=2;x4=2;x5=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0;x5=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0;x5=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0;x5=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0;x5=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0;x5=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0;x5=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=0;x1=0;x2=0;x3=0;x4=0;x5=0",
+   "now": "=0;x1=0;x2=0;x3=0;x4=0;x5=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=128;x1=128;x2=128;x3=128;x4=128;x5=128",
+   "now": "=128;x1=128;x2=128;x3=128;x4=128;x5=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=158;x3=158",
+   "now": "x2=158;x3=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=158;x3=158",
+   "now": "x2=158;x3=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=67",
+   "now": "x2=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=46",
+   "now": "x2=46"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=46;x3=46",
+   "now": "x2=46;x3=46"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=255;x3=255",
+   "now": "x2=255;x3=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=4;x3=4",
+   "now": "x2=4;x3=4"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1",
+   "now": "x2=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=2",
+   "now": "x2=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=0;x3=0",
+   "now": "x2=0;x3=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=0;x3=0",
+   "now": "x2=0;x3=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=0;x3=0",
+   "now": "x2=0;x3=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=0;x3=0",
+   "now": "x2=0;x3=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1;x3=1",
+   "now": "x2=1;x3=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1;x3=1",
+   "now": "x2=1;x3=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1;x3=1",
+   "now": "x2=1;x3=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1;x3=1",
+   "now": "x2=1;x3=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1;x3=1",
+   "now": "x2=1;x3=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1;x3=1",
+   "now": "x2=1;x3=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=1;x3=1",
+   "now": "x2=1;x3=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=128;x3=128",
+   "now": "x2=128;x3=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=158;x1=158;x2=158;x3=158;x4=158;x5=158",
+   "now": "=158;x1=158;x2=158;x3=158;x4=158;x5=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=158;x1=158;x2=158;x3=158;x4=158;x5=158",
+   "now": "=158;x1=158;x2=158;x3=158;x4=158;x5=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "x2=67;x4=25",
+   "now": "=25;x2=67;x4=25"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=34;x1=47;x2=46;x4=61;x5=67",
+   "now": "=34;x1=47;x2=46;x4=61;x5=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=255;x1=255;x2=255;x3=255;x4=255;x5=255",
+   "now": "=255;x1=255;x2=255;x3=255;x4=255;x5=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=255;x1=255;x2=255;x3=255;x4=255;x5=255",
+   "now": "=255;x1=255;x2=255;x3=255;x4=255;x5=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=2;x1=2;x2=2;x3=2;x4=2;x5=2",
+   "now": "=2;x1=2;x2=2;x3=2;x4=2;x5=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x2=1;x5=1",
+   "now": "=1;x1=1;x2=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=2;x2=2;x4=2;x5=2",
+   "now": "=1;x1=2;x2=2;x4=2;x5=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=1;x1=1;x2=1;x3=1;x4=1;x5=1",
+   "now": "=1;x1=1;x2=1;x3=1;x4=1;x5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_U[X]&\"=\"&[v],\";\",ZJ_U[X])",
+   "powerbi": "=128;x1=128;x2=128;x3=128;x4=128;x5=128",
+   "now": "=128;x1=128;x2=128;x3=128;x4=128;x5=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=158;y2=158;y3=158;y5=158;y7=158",
+   "now": "=158;y2=158;y3=158;y5=158;y7=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=158;y2=158;y3=158;y5=158;y7=158",
+   "now": "=158;y2=158;y3=158;y5=158;y7=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=25;y2=67",
+   "now": "=25;y2=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=142;y2=46;y5=67",
+   "now": "=142;y2=46;y5=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=142;y2=46;y5=67",
+   "now": "=142;y2=46;y5=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=255;y2=255;y3=255;y5=255;y7=255",
+   "now": "=255;y2=255;y3=255;y5=255;y7=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=4;y2=4;y3=4;y5=4;y7=4",
+   "now": "=4;y2=4;y3=4;y5=4;y7=4"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y5=1",
+   "now": "=1;y2=1;y5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=5;y2=2;y5=2",
+   "now": "=5;y2=2;y5=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=128;y2=128;y3=128;y5=128;y7=128",
+   "now": "=128;y2=128;y3=128;y5=128;y7=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=158;y2=158;y3=158;y5=158;y7=158",
+   "now": "=158;y2=158;y3=158;y5=158;y7=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=158;y2=158;y3=158;y5=158;y7=158",
+   "now": "=158;y2=158;y3=158;y5=158;y7=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "y2=67",
+   "now": "y2=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "y2=46",
+   "now": "y2=46"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "y2=46",
+   "now": "y2=46"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=255;y2=255;y3=255;y5=255;y7=255",
+   "now": "=255;y2=255;y3=255;y5=255;y7=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=4;y2=4;y3=4;y5=4;y7=4",
+   "now": "=4;y2=4;y3=4;y5=4;y7=4"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "y2=1",
+   "now": "y2=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "y2=2",
+   "now": "y2=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=0;y2=0;y3=0;y5=0;y7=0",
+   "now": "=0;y2=0;y3=0;y5=0;y7=0"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"j2\",\"j3\"},ZJ_U[K]),\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=128;y2=128;y3=128;y5=128;y7=128",
+   "now": "=128;y2=128;y3=128;y5=128;y7=128"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_A[V]),CROSSFILTER(ZJ_A[K],ZJ_B[K],NONE))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=158;y2=158;y3=158;y5=158;y7=158",
+   "now": "=158;y2=158;y3=158;y5=158;y7=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_A[V]),REMOVEFILTERS(ZJ_B))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=158;y2=158;y3=158;y5=158;y7=158",
+   "now": "=158;y2=158;y3=158;y5=158;y7=158"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=25;y2=67",
+   "now": "=25;y2=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_F[K],ZJ_U[K],BOTH))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=142;y2=46;y5=67",
+   "now": "=142;y2=46;y5=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),CROSSFILTER(ZJ_U[K],ZJ_W[K],ONEWAY))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 115) CrossFilter function for One to One relationships should not contain oneway direction.\"",
+   "now": "LOCAL-REJECT:CROSSFILTER OneWay is ambiguous for a one-to-one relationship."
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=142;y2=46;y5=67",
+   "now": "=142;y2=46;y5=67"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=255;y2=255;y3=255;y5=255;y7=255",
+   "now": "=255;y2=255;y3=255;y5=255;y7=255"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_B[N]),ZJ_A))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=2;y2=2;y3=2;y5=2;y7=2",
+   "now": "=2;y2=2;y3=2;y5=2;y7=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y5=1",
+   "now": "=1;y2=1;y5=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",COUNTROWS(RELATEDTABLE(ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=5;y2=2;y5=2",
+   "now": "=5;y2=2;y5=2"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_A))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_A[K]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_B))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_B[N]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F2))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_F[Amt]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_U))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_U[X]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_W))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",INT(ISCROSSFILTERED(ZJ_W[Y]))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=1;y2=1;y3=1;y5=1;y7=1",
+   "now": "=1;y2=1;y3=1;y5=1;y7=1"
+  },
+  {
+   "model": "ZJ",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({\"n1\",\"n6\"},ZJ_B[N]),\"v\",SUMX(TOPN(2,ALL(ZJ_U),CALCULATE(SUM(ZJ_F[Amt]))),CALCULATE(SUM(ZJ_F[Amt])))),ZJ_W[Y]&\"=\"&[v],\";\",ZJ_W[Y])",
+   "powerbi": "=128;y2=128;y3=128;y5=128;y7=128",
+   "now": "=128;y2=128;y3=128;y5=128;y7=128"
+  }
+ ]
+}
