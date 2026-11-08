@@ -34,3 +34,6 @@ Today's refusal messages are "CROSSFILTER needs an active relationship in this l
 - [ ] Step 3: implement rules 1–4.
 - [ ] Step 4: run the new test, and every tests/*.py mentioning CROSSFILTER or USERELATIONSHIP, and the iteration 176–184 tests — all pass.
 - [ ] Step 5: leave uncommitted, report (Opus commits).
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 185. Locked 531486.
