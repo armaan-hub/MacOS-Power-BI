@@ -46,3 +46,6 @@ lists the existing INFO functions are in (the catalog-equals-supported tests mus
   `tests/test_iteration126_info_empty_26.py`, `tests/test_iteration97_pending_gaps_1.py`, `tests/test_dax_intellisense.py`,
   `tests/test_iteration180_other_functions_81.py` and every test file that greps `DAX_FUNCTION_NAMES` or `dax_function_catalog`.
 - [ ] Step 5: commit "Task 92: the 22 missing INFO functions (info-storage-82)".
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 181. Locked 531486.
