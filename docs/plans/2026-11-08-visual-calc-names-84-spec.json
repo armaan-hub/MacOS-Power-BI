@@ -1,0 +1,845 @@
+{
+ "source": "Power BI Desktop 2.157 guest, 2026-11-08 (DAX queries, not a visual calculation)",
+ "cases": [
+  {
+   "expression": "RUNNINGSUM()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the RUNNINGSUM function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "RUNNINGSUM(1)",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(SUM(Facts[Sales]))",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(Facts[Quantity])",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(1,2)",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 40) Too many arguments were passed to the RUNNINGSUM function. The maximum argument count for the function is 5."
+  },
+  {
+   "expression": "IF(FALSE(),RUNNINGSUM(1),1)",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(RUNNINGSUM(1))",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,RUNNINGSUM(Facts[Quantity]))",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(Facts[Region])",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RUNNINGSUM(ROWS)",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(RUNNINGSUM(Facts))",
+   "power_bi": "ERR:RUNNINGSUM can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "MOVINGAVERAGE()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "MOVINGAVERAGE(1)",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "MOVINGAVERAGE(SUM(Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "MOVINGAVERAGE(Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "MOVINGAVERAGE(1,2)",
+   "power_bi": "ERR:MOVINGAVERAGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "MOVINGAVERAGE(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:MOVINGAVERAGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "MOVINGAVERAGE(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 47) Too many arguments were passed to the MOVINGAVERAGE function. The maximum argument count for the function is 7."
+  },
+  {
+   "expression": "IF(FALSE(),MOVINGAVERAGE(1),1)",
+   "power_bi": "ERR:Query (1, 30) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "ISERROR(MOVINGAVERAGE(1))",
+   "power_bi": "ERR:Query (1, 27) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "SUMX(Facts,MOVINGAVERAGE(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 30) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "MOVINGAVERAGE(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:MOVINGAVERAGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "MOVINGAVERAGE(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:MOVINGAVERAGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "MOVINGAVERAGE(Facts[Region])",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "MOVINGAVERAGE(ROWS)",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "COUNTROWS(MOVINGAVERAGE(Facts))",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the MOVINGAVERAGE function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "FIRST()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the FIRST function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "FIRST(1)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(SUM(Facts[Sales]))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(Facts[Quantity])",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(1,2)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 35) Too many arguments were passed to the FIRST function. The maximum argument count for the function is 5."
+  },
+  {
+   "expression": "IF(FALSE(),FIRST(1),1)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(FIRST(1))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,FIRST(Facts[Quantity]))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(Facts[Region])",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "FIRST(ROWS)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(FIRST(Facts))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the LAST function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "LAST(1)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(SUM(Facts[Sales]))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(Facts[Quantity])",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(1,2)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 34) Too many arguments were passed to the LAST function. The maximum argument count for the function is 5."
+  },
+  {
+   "expression": "IF(FALSE(),LAST(1),1)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(LAST(1))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,LAST(Facts[Quantity]))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(Facts[Region])",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LAST(ROWS)",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(LAST(Facts))",
+   "power_bi": "ERR:LAST can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the NEXT function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "NEXT(1)",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(SUM(Facts[Sales]))",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(Facts[Quantity])",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(1,2)",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 36) Too many arguments were passed to the NEXT function. The maximum argument count for the function is 6."
+  },
+  {
+   "expression": "IF(FALSE(),NEXT(1),1)",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(NEXT(1))",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,NEXT(Facts[Quantity]))",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(Facts[Region])",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "NEXT(ROWS)",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(NEXT(Facts))",
+   "power_bi": "ERR:NEXT can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the PREVIOUS function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "PREVIOUS(1)",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(SUM(Facts[Sales]))",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(Facts[Quantity])",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(1,2)",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 40) Too many arguments were passed to the PREVIOUS function. The maximum argument count for the function is 6."
+  },
+  {
+   "expression": "IF(FALSE(),PREVIOUS(1),1)",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(PREVIOUS(1))",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,PREVIOUS(Facts[Quantity]))",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(Facts[Region])",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "PREVIOUS(ROWS)",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUS(Facts))",
+   "power_bi": "ERR:PREVIOUS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the RANGE function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "RANGE(1)",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(SUM(Facts[Sales]))",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(Facts[Quantity])",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(1,2)",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 37) Too many arguments were passed to the RANGE function. The maximum argument count for the function is 6."
+  },
+  {
+   "expression": "IF(FALSE(),RANGE(1),1)",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(RANGE(1))",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,RANGE(Facts[Quantity]))",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(Facts[Region])",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "RANGE(ROWS)",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(RANGE(Facts))",
+   "power_bi": "ERR:RANGE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the LOOKUP function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "LOOKUP(1)",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(SUM(Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(1,2)",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "IF(FALSE(),LOOKUP(1),1)",
+   "power_bi": "ERR:Query (1, 30) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(LOOKUP(1))",
+   "power_bi": "ERR:Query (1, 27) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,LOOKUP(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 30) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(Facts[Region])",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUP(ROWS)",
+   "power_bi": "ERR:Query (1, 19) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(LOOKUP(Facts))",
+   "power_bi": "ERR:Query (1, 29) LOOKUP can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the LOOKUPWITHTOTALS function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(1)",
+   "power_bi": "ERR:Query (1, 19) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(SUM(Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 19) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(1,2)",
+   "power_bi": "ERR:Query (1, 38) Function LOOKUPWITHTOTALS expects a column reference as argument number 2."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:Query (1, 54) Function LOOKUPWITHTOTALS expects a column reference as argument number 2."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 38) Function LOOKUPWITHTOTALS expects a column reference as argument number 2."
+  },
+  {
+   "expression": "IF(FALSE(),LOOKUPWITHTOTALS(1),1)",
+   "power_bi": "ERR:Query (1, 30) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(LOOKUPWITHTOTALS(1))",
+   "power_bi": "ERR:Query (1, 27) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,LOOKUPWITHTOTALS(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 30) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:Query (1, 54) Function LOOKUPWITHTOTALS expects a column reference as argument number 2."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:Query (1, 54) Function LOOKUPWITHTOTALS expects a column reference as argument number 2."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(Facts[Region])",
+   "power_bi": "ERR:Query (1, 19) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "LOOKUPWITHTOTALS(ROWS)",
+   "power_bi": "ERR:Query (1, 19) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(LOOKUPWITHTOTALS(Facts))",
+   "power_bi": "ERR:Query (1, 29) LOOKUPWITHTOTALS can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the EXPAND function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "EXPAND(1)",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(SUM(Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(1,2)",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "IF(FALSE(),EXPAND(1),1)",
+   "power_bi": "ERR:Query (1, 30) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(EXPAND(1))",
+   "power_bi": "ERR:Query (1, 27) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,EXPAND(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 30) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(Facts[Region])",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPAND(ROWS)",
+   "power_bi": "ERR:Query (1, 19) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(EXPAND(Facts))",
+   "power_bi": "ERR:Query (1, 29) EXPAND can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the EXPANDALL function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "EXPANDALL(1)",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(SUM(Facts[Sales]))",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(Facts[Quantity])",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(1,2)",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 33) Too many arguments were passed to the EXPANDALL function. The maximum argument count for the function is 2."
+  },
+  {
+   "expression": "IF(FALSE(),EXPANDALL(1),1)",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(EXPANDALL(1))",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,EXPANDALL(Facts[Quantity]))",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(Facts[Region])",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "EXPANDALL(ROWS)",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(EXPANDALL(Facts))",
+   "power_bi": "ERR:EXPANDALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the COLLAPSE function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "COLLAPSE(1)",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(SUM(Facts[Sales]))",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(1,2)",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "IF(FALSE(),COLLAPSE(1),1)",
+   "power_bi": "ERR:Query (1, 30) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(COLLAPSE(1))",
+   "power_bi": "ERR:Query (1, 27) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,COLLAPSE(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 30) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(Facts[Region])",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSE(ROWS)",
+   "power_bi": "ERR:Query (1, 19) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(COLLAPSE(Facts))",
+   "power_bi": "ERR:Query (1, 29) COLLAPSE can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the COLLAPSEALL function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "COLLAPSEALL(1)",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(SUM(Facts[Sales]))",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(Facts[Quantity])",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(1,2)",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 35) Too many arguments were passed to the COLLAPSEALL function. The maximum argument count for the function is 2."
+  },
+  {
+   "expression": "IF(FALSE(),COLLAPSEALL(1),1)",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(COLLAPSEALL(1))",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,COLLAPSEALL(Facts[Quantity]))",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(Facts[Region])",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COLLAPSEALL(ROWS)",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(COLLAPSEALL(Facts))",
+   "power_bi": "ERR:COLLAPSEALL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISATLEVEL()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the ISATLEVEL function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "ISATLEVEL(1)",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISATLEVEL(SUM(Facts[Sales]))",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISATLEVEL(Facts[Quantity])",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISATLEVEL(1,2)",
+   "power_bi": "ERR:Query (1, 31) Too many arguments were passed to the ISATLEVEL function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "ISATLEVEL(SUM(Facts[Sales]),2)",
+   "power_bi": "ERR:Query (1, 47) Too many arguments were passed to the ISATLEVEL function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "ISATLEVEL(1,2,3,4,5,6,7,8)",
+   "power_bi": "ERR:Query (1, 31) Too many arguments were passed to the ISATLEVEL function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "IF(FALSE(),ISATLEVEL(1),1)",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISERROR(ISATLEVEL(1))",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "SUMX(Facts,ISATLEVEL(Facts[Quantity]))",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISATLEVEL(SUM(Facts[Sales]),ROWS)",
+   "power_bi": "ERR:Query (1, 47) Too many arguments were passed to the ISATLEVEL function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "ISATLEVEL(SUM(Facts[Sales]),COLUMNS)",
+   "power_bi": "ERR:Query (1, 47) Too many arguments were passed to the ISATLEVEL function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "ISATLEVEL(Facts[Region])",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "ISATLEVEL(ROWS)",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  },
+  {
+   "expression": "COUNTROWS(ISATLEVEL(Facts))",
+   "power_bi": "ERR:ISATLEVEL can only be used in the expression of a visual calculation."
+  }
+ ]
+}
