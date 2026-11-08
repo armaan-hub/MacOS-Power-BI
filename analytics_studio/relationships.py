@@ -422,15 +422,19 @@ def _apply_expanded_table_filters(
                 continue
             target_paths = one_side_paths(target_id)
             common = sorted((set(root_paths) & set(target_paths)) - {root_id, target_id})
-            if len(common) < 2:
+            if not common:
                 continue
+            # Task 88: with one common one-side table the blank member is a value of that table (a row with no match in it is
+            # the blank member, live Power BI: CALCULATE(COUNTROWS(F), F2) keeps the F rows of U's blank member, selected by F2's orphans);
+            # with two or more common tables a key with no match is still refused
+            blank_allowed = len(common) == 1
             root_tuples = root_tuples_by_common.get(tuple(common))
             if root_tuples is None:
                 root_tuples = root_tuples_by_common[tuple(common)] = set()
                 for row in rows_by_id[root_id]:
                     reached = reached_positions(root_id, root_position[id(row)], root_paths)
                     values = tuple(reached.get(table_id) for table_id in common)
-                    if None in values:
+                    if None in values and not blank_allowed:
                         raise RelationshipError(
                             f"A table filter on {root.get('name', root_id)!r} points at a key with no match in the expanded table; "
                             "this shape is not supported yet."
@@ -441,7 +445,7 @@ def _apply_expanded_table_filters(
             for row in rows_by_id[target_id]:
                 reached = reached_positions(target_id, target_position[id(row)], target_paths)
                 values = tuple(reached.get(table_id) for table_id in common)
-                if None in values:
+                if None in values and not blank_allowed:
                     raise RelationshipError(
                         f"A table filter reaches {target.get('name', target_id)!r} through a key with no match in the expanded table; "
                         "this shape is not supported yet."
