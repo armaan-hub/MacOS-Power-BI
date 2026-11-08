@@ -1,0 +1,581 @@
+{
+ "source": "Power BI Desktop 2.157 guest, 2026-11-08, model Facts of tools/dax_oracle_diff.py",
+ "cases": [
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],Facts[Quantity],Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],Facts[Quantity])))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],Facts[Quantity]),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],Facts[Region])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],Facts[Region],Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],Facts[Region])",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],Facts[Region]),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],Facts[Region]),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,Facts[Region])",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],Facts[Region])))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],Facts[Region]),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],Facts[Region]),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],1)",
+   "power_bi": "East1,North4,West0,East5,East2,West3"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],1,Facts[Quantity])",
+   "power_bi": "East1,North4,West0,East5,East2,West3"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],1)",
+   "power_bi": "East1,East2,East5,North4,West0,West3"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],1),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,1,2"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],1),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "1,2,5"
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,1)",
+   "power_bi": "4"
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],1)))",
+   "power_bi": "2"
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],1),Facts[Quantity])",
+   "power_bi": "3"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],1),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,3,5"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],0)",
+   "power_bi": "West3,East2,East5,West0,North4,East1"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],0,Facts[Quantity])",
+   "power_bi": "West3,East2,East5,West0,North4,East1"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],0)",
+   "power_bi": "East5,East2,East1,North4,West3,West0"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],0),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "3,4,5"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],0),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "1,2,5"
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,0)",
+   "power_bi": "3"
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],0)))",
+   "power_bi": "2"
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],0),Facts[Quantity])",
+   "power_bi": "7"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],0),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,2,5"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],2)",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],2,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],2)",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],2),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],2),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,2)",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],2)))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],2),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],2),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],-1)",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],-1,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],-1)",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],-1),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],-1),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,-1)",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],-1)))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],-1),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],-1),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],TRUE())",
+   "power_bi": "East1,North4,West0,East5,East2,West3"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],TRUE(),Facts[Quantity])",
+   "power_bi": "East1,North4,West0,East5,East2,West3"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],TRUE())",
+   "power_bi": "East1,East2,East5,North4,West0,West3"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],TRUE()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,1,2"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],TRUE()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "1,2,5"
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,TRUE())",
+   "power_bi": "4"
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],TRUE())))",
+   "power_bi": "2"
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],TRUE()),Facts[Quantity])",
+   "power_bi": "3"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],TRUE()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,3,5"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],FALSE())",
+   "power_bi": "West3,East2,East5,West0,North4,East1"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],FALSE(),Facts[Quantity])",
+   "power_bi": "West3,East2,East5,West0,North4,East1"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],FALSE())",
+   "power_bi": "East5,East2,East1,North4,West3,West0"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],FALSE()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "3,4,5"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],FALSE()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "1,2,5"
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,FALSE())",
+   "power_bi": "3"
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],FALSE())))",
+   "power_bi": "2"
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],FALSE()),Facts[Quantity])",
+   "power_bi": "7"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],FALSE()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,2,5"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],ASC)",
+   "power_bi": "East1,North4,West0,East5,East2,West3"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],ASC,Facts[Quantity])",
+   "power_bi": "East1,North4,West0,East5,East2,West3"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],ASC)",
+   "power_bi": "East1,East2,East5,North4,West0,West3"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,1,2"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "1,2,5"
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,ASC)",
+   "power_bi": "4"
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],ASC)))",
+   "power_bi": "2"
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],ASC),Facts[Quantity])",
+   "power_bi": "3"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,3,5"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],DESC)",
+   "power_bi": "West3,East2,East5,West0,North4,East1"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],DESC,Facts[Quantity])",
+   "power_bi": "West3,East2,East5,West0,North4,East1"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],DESC)",
+   "power_bi": "East5,East2,East1,North4,West3,West0"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "3,4,5"
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "1,2,5"
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,DESC)",
+   "power_bi": "3"
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)))",
+   "power_bi": "2"
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],DESC),Facts[Quantity])",
+   "power_bi": "7"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "0,2,5"
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],\"ASC\")",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],\"ASC\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],\"ASC\")",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],\"ASC\"),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],\"ASC\"),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,\"ASC\")",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],\"ASC\")))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],\"ASC\"),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],\"ASC\"),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],BLANK())",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],BLANK(),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],BLANK())",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],BLANK()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],BLANK()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,BLANK())",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],BLANK())))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],BLANK()),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],BLANK()),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],Facts[Sales]>0)",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],Facts[Sales]>0,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],Facts[Sales]>0)",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],Facts[Sales]>0),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],Facts[Sales]>0),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,Facts[Sales]>0)",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],Facts[Sales]>0)))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],Facts[Sales]>0),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],Facts[Sales]>0),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],1.5)",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],1.5,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],1.5)",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],1.5),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],1.5),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,1.5)",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],1.5)))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],1.5),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 59) Unexpected value for ORDER argument in TOPNSKIP function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],1.5),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],SKIP)",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],SKIP,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],SKIP)",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],SKIP),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],SKIP),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,SKIP)",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],SKIP)))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],SKIP),Facts[Quantity])",
+   "power_bi": "7"
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],SKIP),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],DENSE)",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Sales],DENSE,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 85) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(Facts,Facts[Region]&Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],DENSE)",
+   "power_bi": "ERR:Query (1, 106) Unexpected value for ORDER argument in CONCATENATEX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],DENSE),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 61) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC,Facts[Quantity],DENSE),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 79) Unexpected value for ORDER argument in TOPN function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "RANKX(ALL(Facts),Facts[Quantity],3,DENSE)",
+   "power_bi": "ERR:Query (1, 54) Unexpected value for ORDER argument in RANKX function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "COUNTROWS(WINDOW(1,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DENSE)))",
+   "power_bi": "ERR:Query (1, 93) Unexpected value for ORDER argument in ORDERBY function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  },
+  {
+   "expression": "SUMX(TOPNSKIP(2,1,Facts,Facts[Quantity],DENSE),Facts[Quantity])",
+   "power_bi": "ERR:The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows."
+  },
+  {
+   "expression": "CONCATENATEX(SAMPLE(3,Facts,Facts[Quantity],DENSE),Facts[Quantity],\",\",Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 63) Unexpected value for ORDER argument in SAMPLE function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+  }
+ ]
+}

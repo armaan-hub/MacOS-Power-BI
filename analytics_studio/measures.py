@@ -166,6 +166,49 @@ class _HardError(MeasureError):
     """
 
 
+def _order_argument_descending(node: Any, function: str, held: Any = None) -> bool:
+    """Task 95 (live Power BI, order-argument-85): the ORDER argument of CONCATENATEX, RANKX or ORDERBY. True for descending.
+
+    Only 0 / FALSE / DESC (descending) and 1 / TRUE / ASC (ascending) are accepted. Any other literal (another number, text,
+    BLANK(), a comparison, a column, SKIP, DENSE) is Power BI's thrown error. A variable is judged by its DEFINITION (followed
+    through variable chains, `held` maps a variable name to its definition node): defined as one of the allowed literals it
+    answers like that literal, defined as anything else (1+0, INT(1), 2, "ASC", BLANK(), a comparison) it is the thrown error.
+    A measure reference or a call the local engine does not measure is refused rather than guessed.
+    """
+    message = (
+        f"Unexpected value for ORDER argument in {function} function. "
+        "Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+    )
+    kind = node[0]
+    if kind == "var":
+        seen: set[str] = set()
+        while node[0] == "var":
+            name = node[1]
+            if name in seen or held is None or name not in held:
+                raise MeasureError(f"The ORDER argument of {function} is a variable the local engine does not measure.")
+            seen.add(name)
+            node = held[name]
+        kind = node[0]
+        if kind in {"let", "tablecapture"} or (kind == "reference" and not node[1]):
+            raise MeasureError(f"The ORDER argument of {function} is a variable the local engine does not measure.")
+        if kind == "table" and str(node[1]).upper() in {"ASC", "DESC"}:
+            return str(node[1]).upper() == "DESC"
+        if kind == "number" and node[1] in (0, 1):
+            return node[1] == 0
+        if kind == "boolean":
+            return node[1] is False
+        raise _HardError(message)
+    if kind == "table" and str(node[1]).upper() in {"ASC", "DESC"}:
+        return str(node[1]).upper() == "DESC"
+    if kind == "number" and node[1] in (0, 1):
+        return node[1] == 0
+    if kind == "boolean":
+        return node[1] is False
+    if kind in {"unary", "reference", "string", "blank", "comparison", "table", "number"} or (kind == "call" and node[1] == "BLANK"):
+        raise _HardError(message)
+    raise MeasureError(f"The ORDER argument of {function} is not a literal the local engine measures.")
+
+
 _PLAN_CONSTANT_CALLS = frozenset({
     "BLANK", "TRUE", "FALSE", "PI", "SQRT", "VALUE", "LEN", "ABS", "DATE", "ISBLANK", "ISNUMBER", "ISTEXT", "ISLOGICAL",
     "ISNONTEXT", "DIVIDE", "NOT", "AND", "OR", "IF", "ROUND", "INT", "LN", "EXP", "POWER", "UPPER", "LOWER", "LEFT", "RIGHT",
@@ -12873,15 +12916,9 @@ def _evaluate_measures_once(
             descending, expression = False, arguments[index]
             index += 1
             if index < len(arguments):
-                direction = arguments[index]
-                if direction[0] == "table" and str(direction[1]).upper() in {"ASC", "DESC"}:
-                    descending = str(direction[1]).upper() == "DESC"
-                    index += 1
-                elif direction[0] in {"number", "boolean"}:
-                    if direction[1] not in (0, 1):
-                        raise MeasureError("Unexpected value for the ORDER argument. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
-                    descending = direction[1] == 0 or direction[1] is False
-                    index += 1
+                # Task 95 (live Power BI, order-argument-85): the argument after an expression is always its ORDER, so a column there is an error
+                descending = _order_argument_descending(arguments[index], "ORDERBY", variable_nodes)
+                index += 1
             spec.append((expression, descending))
         return spec
 
@@ -18593,9 +18630,8 @@ def _evaluate_measures_once(
         ascending = False
         dense = False
         if len(arguments) > 3 and arguments[3][0] != "omitted":
-            ascending = (
-                str(arguments[3][1]).upper() == "ASC" if arguments[3][0] == "table" else dax_typed.to_number(evaluate(arguments[3])) != 0
-            )
+            # Task 95 (live Power BI, order-argument-85): the ORDER is 0/FALSE/DESC or 1/TRUE/ASC; any other value is thrown
+            ascending = not _order_argument_descending(arguments[3], "RANKX", variable_nodes)
         if len(arguments) > 4:
             dense = arguments[4][0] == "table" and str(arguments[4][1]).upper() == "DENSE"
         return rank_of(wanted, scores, ascending, dense)
@@ -22616,15 +22652,9 @@ def _evaluate_measures_once(
                 expression, descending = arguments[position], False
                 position += 1
                 if position < len(arguments):
-                    direction = arguments[position]
-                    if direction[0] == "table" and str(direction[1]).upper() in {"ASC", "DESC"}:
-                        descending = str(direction[1]).upper() == "DESC"
-                        position += 1
-                    elif direction[0] in {"number", "boolean"}:
-                        if direction[1] not in (0, 1):
-                            raise MeasureError("Unexpected value for the ORDER argument. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
-                        descending = direction[1] == 0 or direction[1] is False
-                        position += 1
+                    # Task 95 (live Power BI, order-argument-85): the argument after an expression is always its ORDER, never a second expression
+                    descending = _order_argument_descending(arguments[position], "CONCATENATEX", variable_nodes)
+                    position += 1
                 order_spec.append((expression, descending))
             def fold_read_node(n: Any) -> Any:
                 if isinstance(n, tuple) and len(n) == 3 and n[0] == "call" and n[1] in {"IF", "IF.EAGER"} and len(n[2]) >= 2:

@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 183 (Task 94 visual-calc-names-84) shipped: all 470 Power BI DAX function names known. Next: DAX close-out test pass over all functions, then Power Query M.
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 184 (Task 95 order-argument-85, DAX close-out fix) shipped. Next: DAX close-out continues (under-covered function groups), then Power Query M.
 **Branch in use:** none
 **Working tree clean:** main yes
 
