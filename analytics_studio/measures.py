@@ -10374,14 +10374,18 @@ def _evaluate_measures_once(
             partner_index = one_side_value_index(contexts_by_id[last_one], last_there)
 
             def partner_position(typed: dict[str, Any]) -> int | None:
-                """The row of the last hop's start that this input row reaches, when that row has no partner (its partner is the blank member)."""
+                """What this input row reaches in the last hop's start table when its partner there is the blank member: the position of
+                the row that has no partner, or -1 when the input row's key has no row there (an orphan key reaches that table's own
+                blank member, which belongs to the blank group as well). None when the row has a partner."""
                 key = typed[first_header]
                 position: int | None = None
                 for step, (_node, _here, one_id, there) in enumerate(hops[:-1]):
                     one_context = contexts_by_id[one_id]
                     matches = one_side_value_index(one_context, there).get(cell_key(key))
                     if not matches:
-                        return None
+                        if len(hops) > 2:  # an orphan key further down a chain reaches the unknown member of a table that is not the start
+                            raise MeasureError("SUMMARIZE blank group of a one-to-one table reached through an orphan key of a longer chain is not supported in the local engine.")
+                        return -1
                     position = min(matches)
                     next_here = hops[step + 1][1]
                     key = typed_cell(one_context, next_here, one_context["rows"][position].get(next_here))
@@ -10467,8 +10471,13 @@ def _evaluate_measures_once(
         merged: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] = {}
         for table_id, (base_context, column_rows) in extra.items():
             held = by_column.get(table_id, (base_context, {}))[1]
+            def intersect(rows: frozenset[int], other: frozenset[int]) -> frozenset[int]:
+                both = rows & other
+                if isinstance(rows, BlankSet) and rows.blank:  # the blank member stays only while the other filter selects it too
+                    return BlankSet(both, blank=isinstance(other, BlankSet) and other.blank)
+                return both
             merged[table_id] = (base_context, {
-                column: (rows & held[column] if column in held else rows) for column, rows in column_rows.items()
+                column: (intersect(rows, held[column]) if column in held else rows) for column, rows in column_rows.items()
             })
         # a group on the key column of the relationship (Dim[Prod] for Fact[Prod]) is the same key as the summarized table's own column;
         # any other column of a table on the one side only reaches the summarized table by the context transition
@@ -10967,10 +10976,13 @@ def _evaluate_measures_once(
                         position_of = group[2].partner_position  # type: ignore[attr-defined]
                         if position_of is None or group_row.get(c) is not None:
                             continue
-                        positions = frozenset(
+                        reached = [
                             p for typed in typed_rows if row_key(typed[k] for k in group_columns) == key
                             for p in [position_of(typed)] if p is not None
-                        )
+                        ]
+                        # the filter the blank group puts on the one-to-one start table: the rows with no partner that its input rows carry,
+                        # plus the table's own blank member when an input row has an orphan key (the facts with an orphan key then count too)
+                        positions = BlankSet((p for p in reached if p >= 0), blank=any(p < 0 for p in reached))
                         found_partners.append((contexts_by_id[group[2].partner_node_id], positions))  # type: ignore[attr-defined]
                     return found_partners
 
