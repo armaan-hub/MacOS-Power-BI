@@ -56,7 +56,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_swi_ties, dax_time_sets, dax_typed
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_swi_ties, dax_time_sets, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -579,6 +579,7 @@ _LOOKUP_ARITY = {
     "ROW": (2, None),
 }
 _LOOKUP_ARITY |= dax_model_fns.LOOKUP_ARITY  # Task 58: PATH, USEROBJECTID
+_LOOKUP_ARITY |= dax_sampling_fns.LOOKUP_ARITY  # Task 91: SELECTEDMEASUREFORMATSTRING (a runtime error)
 class _UnmodelledField:
     """Sentinel for a Tabular Model metadata field not modelled by the local engine."""
     __slots__ = ("name",)
@@ -1020,6 +1021,9 @@ _FUNCTIONS |= set(_TABLE_FUNCTION_ARITY) | set(_RANK_ARITY)
 _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets and balances (iteration 84)
 _FUNCTIONS.add("RELATEDTABLE")
 _FUNCTIONS |= dax_model_fns.NAMES  # Task 58: the ten model and selection functions
+_FUNCTIONS |= dax_sampling_fns.NAMES  # Task 91: the five sampling, join and format functions
+_TABLE_FUNCTION_ARITY |= dax_sampling_fns.TABLE_ARITY  # Task 91: table functions with a table argument
+_NEW_TABLE_FUNCTIONS |= set(dax_sampling_fns.TABLE_ARITY)  # Task 91: evaluated by new_table_function
 _TABLE_FUNCTION_ARITY |= dax_model_fns.TABLE_ARITY  # Task 58: CALENDARAUTO is a table function like CALENDAR
 _NEW_TABLE_FUNCTIONS |= {"CALENDARAUTO"}  # Task 58: a Date table over the model dates
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
@@ -1041,6 +1045,7 @@ def _table_position(parent_function: str, argument_index: int) -> bool:
         or (parent_function == "CALCULATE" and argument_index >= 1)
         or (parent_function == "KEEPFILTERS" and argument_index == 0)
         or (parent_function == "SAMPLE" and argument_index == 1)
+        or dax_sampling_fns.is_table_argument(parent_function, argument_index)  # Task 91
         or (parent_function == "TOPNSKIP" and argument_index == 2)
         or parent_function in _TABLE_ANY_PARENTS
         or (parent_function == "TOPN" and argument_index == 1)
@@ -6213,6 +6218,8 @@ class _Parser:
             self._expect(")")
             if function in dax_model_fns.NAMES:
                 dax_model_fns.check_syntax(function, tuple(arguments))  # Task 58: measured argument errors at parse time
+            if function in dax_sampling_fns.NAMES:
+                dax_sampling_fns.check_syntax(function, tuple(arguments))  # Task 91: measured argument errors at parse time
             if function in dax_math.STAT_PERCENTILE_COLUMN and len(arguments) == 2 and arguments[1][0] == "blank":
                 arguments[1] = ("number", Decimal(0))  # live Power BI (iteration 88): a BLANK() percentile is 0 (PERCENTILE.EXC of 0 is an error)
             if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and len(arguments) == 3 and arguments[2][0] == "blank":
@@ -12398,6 +12405,8 @@ def _evaluate_measures_once(
         )
 
     def new_table_function(function: str, arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        if function in dax_sampling_fns.TABLE_ARITY:  # Task 91
+            return dax_sampling_fns.table_rows(function, arguments, table_argument_value, evaluate)
         if function == "SUMMARIZECOLUMNS":
             return summarize_columns(arguments)
         if function == "GROUPBY":
@@ -18185,6 +18194,8 @@ def _evaluate_measures_once(
             return getpass.getuser()
         if function == "USEROBJECTID":
             return dax_model_fns.user_object_id()
+        if function == "SELECTEDMEASUREFORMATSTRING":  # Task 91: a runtime error, raised when evaluated
+            return dax_sampling_fns.selected_measure_format_string()
         if function == "PATH":
             return dax_model_fns.path_value(arguments, row_context, lambda table: contexts_by_id[resolve_table_context(table)["id"]], typed_row)
         if function == "COMBINEVALUES":

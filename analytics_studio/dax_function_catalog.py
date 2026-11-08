@@ -131,6 +131,7 @@ EXACT(<text1>, <text2>) ;; Checks whether two text strings are exactly the same 
 EXCEPT(<table1>, <table2>) ;; Returns the rows of the first table that do not appear in the second.
 EXP(<number>) ;; Returns e raised to the power of a number.
 EXPON.DIST(<x>, <lambda>, <cumulative>) ;; Returns the exponential distribution.
+EXTERNALMEASURE(<measureName>, [<dataType>], [<dataSourceName>]) ;; Returns the result of a measure from an external data source.
 FACT(<number>) ;; Returns the factorial of a number.
 FALSE() ;; Returns the logical value FALSE.
 FILTER(<table>, <filter>) ;; Returns the rows of a table that satisfy a condition.
@@ -262,6 +263,7 @@ MOD(<number>, <divisor>) ;; Returns the remainder after a number is divided by a
 MONTH(<datetime>) ;; Returns the month as a number from 1 to 12.
 MROUND(<number>, <multiple>) ;; Rounds a number to the desired multiple.
 NATURALINNERJOIN(<leftTable>, <rightTable>) ;; Inner join of two tables using the columns they have in common.
+NATURALJOINUSAGE(<table>) ;; Marks a table for use as a value filter of SUMMARIZECOLUMNS that joins naturally.
 NATURALLEFTOUTERJOIN(<leftTable>, <rightTable>) ;; Left outer join of two tables using the columns they have in common.
 NETWORKDAYS(<start_date>, <end_date>, [<weekend>], [<holidays>]) ;; Number of whole working days between two dates.
 NEXTDAY(<dates>) ;; Returns the dates of the day after the first date in the context.
@@ -343,10 +345,13 @@ ROWNUMBER([<relation>], [<orderBy>], [<blanks>], [<partitionBy>], [<matchBy>], [
 RRI(<nper>, <pv>, <fv>) ;; Equivalent interest rate for the growth of an investment.
 SAMEPERIODLASTYEAR(<dates>) ;; Returns the dates one year before the dates in the context.
 SAMPLE(<n_value>, <table>, <orderBy_expression>, [<order>]…) ;; Returns a sample of rows from a table.
+SAMPLEAXISWITHLOCALMINMAX(<MaxPoints>, <table>, <X>, <Y>, <GroupBy>, <Measure>, <MinimumResolution>, [<DynamicSeries>]) ;; Returns a sample of table rows that keeps the local minimum and maximum along the axis.
+SAMPLECARTESIANPOINTSBYCOVER(<MaxPoints>, <table>, <X>, <Y>, [<Radius>], [<MaxMinRatio>], [<MaxBlankRatio>]) ;; Returns a sample of table rows that covers the X and Y plane.
 SEARCH(<find_text>, <within_text>, [<start_num>], [<NotFoundValue>]) ;; Position of one text string in another (not case sensitive).
 SECOND(<datetime>) ;; Returns the seconds as a number from 0 to 59.
 SELECTCOLUMNS(<table>, [<name>], <expression>, [<name>], [<expression>]…) ;; Returns a table with the selected columns.
 SELECTEDMEASURE() ;; Returns the measure that is currently being evaluated (calculation groups).
+SELECTEDMEASUREFORMATSTRING() ;; Returns the format string of the measure currently being evaluated (calculation groups).
 SELECTEDMEASURENAME() ;; Returns the name of the measure currently being evaluated.
 SELECTEDVALUE(<columnName>, [<alternateResult>]) ;; Returns the value when the context for the column has one distinct value.
 SIGN(<number>) ;; Returns the sign of a number: 1, 0 or -1.
