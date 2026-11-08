@@ -545,6 +545,12 @@ def _add_generated_templates() -> None:
         # Task 58 (2026-11-05): function now supported
         "PATH": ("PATH('Table'[ID], 'Table'[ParentID])", "'Table'[ID]"),
         "USEROBJECTID": ("USEROBJECTID()", None),
+        # Task 91 (2026-11-08): functions now recognised by the local engine
+        "EXTERNALMEASURE": ("EXTERNALMEASURE(\"Measure\", INTEGER, \"DataSource\")", None),
+        "NATURALJOINUSAGE": ("NATURALJOINUSAGE('Table')", None),
+        "SAMPLEAXISWITHLOCALMINMAX": ("SAMPLEAXISWITHLOCALMINMAX(100, 'Table', 'Table'[X], 'Table'[Y], 'Table'[Group], 'Table'[Measure], 1)", None),
+        "SAMPLECARTESIANPOINTSBYCOVER": ("SAMPLECARTESIANPOINTSBYCOVER(100, 'Table', 'Table'[X], 'Table'[Y])", None),
+        "SELECTEDMEASUREFORMATSTRING": ("SELECTEDMEASUREFORMATSTRING()", None),
         "CALENDARAUTO": ("CALENDARAUTO()", None),
         "APPROXIMATEDISTINCTCOUNT": ("APPROXIMATEDISTINCTCOUNT('Table'[Column])", "'Table'[Column]"),
         "DATESWTD": ("DATESWTD('Calendar'[Date])", "'Calendar'[Date]"),

@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 179 / Task 90 summarize-groups-80, SUMMARIZE blank group through a one-to-one table, orphan input keys take the blank member, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4055 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: DAX Step A: EXTERNALMEASURE, NATURALJOINUSAGE, SAMPLEAXISWITHLOCALMINMAX, SAMPLECARTESIANPOINTSBYCOVER, SELECTEDMEASUREFORMATSTRING and the missing INFO.* functions
+**Latest status (2026-11-05, after Iteration 180 / Task 91 other-functions-81, five DAX functions: EXTERNALMEASURE, NATURALJOINUSAGE, SAMPLEAXISWITHLOCALMINMAX, SAMPLECARTESIANPOINTSBYCOVER, SELECTEDMEASUREFORMATSTRING, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4058 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: DAX Step A continued: the 22 missing INFO.* functions (names from Power BI INFO.FUNCTIONS)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
