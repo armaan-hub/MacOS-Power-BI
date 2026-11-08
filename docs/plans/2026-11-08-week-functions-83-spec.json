@@ -1,0 +1,293 @@
+{
+ "source": "Power BI Desktop 2.157 guest, 2026-11-08 (no calendar objects: INFO.CALENDARS is unavailable at this compatibility level)",
+ "cases": [
+  {
+   "expression": "COUNTROWS(STARTOFWEEK())",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the STARTOFWEEK function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 41) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK(Facts[Quantity],1))",
+   "power_bi": "ERR:Query (1, 57) Too many arguments were passed to the STARTOFWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK(Facts[Quantity],1,2))",
+   "power_bi": "ERR:Query (1, 57) Too many arguments were passed to the STARTOFWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK(1))",
+   "power_bi": "ERR:Query (1, 41) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK(\"x\"))",
+   "power_bi": "ERR:Query (1, 41) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK(Facts))",
+   "power_bi": "ERR:Query (1, 41) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "IF(FALSE(),COUNTROWS(STARTOFWEEK(Facts[Quantity])),1)",
+   "power_bi": "ERR:Query (1, 52) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "CALCULATE(SUM(Facts[Sales]),STARTOFWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 59) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "ISERROR(COUNTROWS(STARTOFWEEK(Facts[Quantity])))",
+   "power_bi": "ERR:Query (1, 49) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK(Facts[Region]))",
+   "power_bi": "ERR:Query (1, 41) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(STARTOFWEEK([x]))",
+   "power_bi": "ERR:Query (1, 41) STARTOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK())",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the ENDOFWEEK function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 39) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK(Facts[Quantity],1))",
+   "power_bi": "ERR:Query (1, 55) Too many arguments were passed to the ENDOFWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK(Facts[Quantity],1,2))",
+   "power_bi": "ERR:Query (1, 55) Too many arguments were passed to the ENDOFWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK(1))",
+   "power_bi": "ERR:Query (1, 39) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK(\"x\"))",
+   "power_bi": "ERR:Query (1, 39) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK(Facts))",
+   "power_bi": "ERR:Query (1, 39) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "IF(FALSE(),COUNTROWS(ENDOFWEEK(Facts[Quantity])),1)",
+   "power_bi": "ERR:Query (1, 50) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "CALCULATE(SUM(Facts[Sales]),ENDOFWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 57) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "ISERROR(COUNTROWS(ENDOFWEEK(Facts[Quantity])))",
+   "power_bi": "ERR:Query (1, 47) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK(Facts[Region]))",
+   "power_bi": "ERR:Query (1, 39) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(ENDOFWEEK([x]))",
+   "power_bi": "ERR:Query (1, 39) ENDOFWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK())",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the NEXTWEEK function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 38) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK(Facts[Quantity],1))",
+   "power_bi": "ERR:Query (1, 54) Too many arguments were passed to the NEXTWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK(Facts[Quantity],1,2))",
+   "power_bi": "ERR:Query (1, 54) Too many arguments were passed to the NEXTWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK(1))",
+   "power_bi": "ERR:Query (1, 38) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK(\"x\"))",
+   "power_bi": "ERR:Query (1, 38) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK(Facts))",
+   "power_bi": "ERR:Query (1, 38) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "IF(FALSE(),COUNTROWS(NEXTWEEK(Facts[Quantity])),1)",
+   "power_bi": "ERR:Query (1, 49) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "CALCULATE(SUM(Facts[Sales]),NEXTWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 56) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "ISERROR(COUNTROWS(NEXTWEEK(Facts[Quantity])))",
+   "power_bi": "ERR:Query (1, 46) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK(Facts[Region]))",
+   "power_bi": "ERR:Query (1, 38) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(NEXTWEEK([x]))",
+   "power_bi": "ERR:Query (1, 38) NEXTWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK())",
+   "power_bi": "ERR:Query (1, 29) Too few arguments were passed to the PREVIOUSWEEK function. The minimum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 42) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK(Facts[Quantity],1))",
+   "power_bi": "ERR:Query (1, 58) Too many arguments were passed to the PREVIOUSWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK(Facts[Quantity],1,2))",
+   "power_bi": "ERR:Query (1, 58) Too many arguments were passed to the PREVIOUSWEEK function. The maximum argument count for the function is 1."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK(1))",
+   "power_bi": "ERR:Query (1, 42) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK(\"x\"))",
+   "power_bi": "ERR:Query (1, 42) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK(Facts))",
+   "power_bi": "ERR:Query (1, 42) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "IF(FALSE(),COUNTROWS(PREVIOUSWEEK(Facts[Quantity])),1)",
+   "power_bi": "ERR:Query (1, 53) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "CALCULATE(SUM(Facts[Sales]),PREVIOUSWEEK(Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 60) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "ISERROR(COUNTROWS(PREVIOUSWEEK(Facts[Quantity])))",
+   "power_bi": "ERR:Query (1, 50) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK(Facts[Region]))",
+   "power_bi": "ERR:Query (1, 42) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "COUNTROWS(PREVIOUSWEEK([x]))",
+   "power_bi": "ERR:Query (1, 42) PREVIOUSWEEK's parameter 1 must be a calendar reference."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the OPENINGBALANCEWEEK function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1)",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the OPENINGBALANCEWEEK function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(SUM(Facts[Sales]),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1,Facts[Quantity],Facts[Region]=\"East\")",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1,Facts[Quantity],TRUE(),4)",
+   "power_bi": "ERR:Query (1, 63) Too many arguments were passed to the OPENINGBALANCEWEEK function. The maximum argument count for the function is 3."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1,Facts[Quantity],TRUE(),4,5)",
+   "power_bi": "ERR:Query (1, 63) Too many arguments were passed to the OPENINGBALANCEWEEK function. The maximum argument count for the function is 3."
+  },
+  {
+   "expression": "IF(FALSE(),OPENINGBALANCEWEEK(1,Facts[Quantity]),1)",
+   "power_bi": "ERR:Query (1, 30) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1,1)",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1,Facts)",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "OPENINGBALANCEWEEK(1,\"x\")",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "ISERROR(OPENINGBALANCEWEEK(1,Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 27) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK()",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the CLOSINGBALANCEWEEK function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1)",
+   "power_bi": "ERR:Query (1, 19) Too few arguments were passed to the CLOSINGBALANCEWEEK function. The minimum argument count for the function is 2."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1,Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(SUM(Facts[Sales]),Facts[Quantity])",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1,Facts[Quantity],Facts[Region]=\"East\")",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1,Facts[Quantity],TRUE(),4)",
+   "power_bi": "ERR:Query (1, 63) Too many arguments were passed to the CLOSINGBALANCEWEEK function. The maximum argument count for the function is 3."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1,Facts[Quantity],TRUE(),4,5)",
+   "power_bi": "ERR:Query (1, 63) Too many arguments were passed to the CLOSINGBALANCEWEEK function. The maximum argument count for the function is 3."
+  },
+  {
+   "expression": "IF(FALSE(),CLOSINGBALANCEWEEK(1,Facts[Quantity]),1)",
+   "power_bi": "ERR:Query (1, 30) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1,1)",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1,Facts)",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "CLOSINGBALANCEWEEK(1,\"x\")",
+   "power_bi": "ERR:Query (1, 19) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  },
+  {
+   "expression": "ISERROR(CLOSINGBALANCEWEEK(1,Facts[Quantity]))",
+   "power_bi": "ERR:Query (1, 27) The last argument must be one of these keywords: DAY, MONTH, QUARTER, or YEAR."
+  }
+ ]
+}

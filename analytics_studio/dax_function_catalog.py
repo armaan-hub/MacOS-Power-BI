@@ -55,6 +55,7 @@ CHISQ.INV(<probability>, <deg_freedom>) ;; Returns the inverse of the left-taile
 CHISQ.INV.RT(<probability>, <deg_freedom>) ;; Returns the inverse of the right-tailed chi-squared distribution.
 CLOSINGBALANCEMONTH(<expression>, <dates>, [<filter>]) ;; Value of the expression at the last date of the month.
 CLOSINGBALANCEQUARTER(<expression>, <dates>, [<filter>]) ;; Value of the expression at the last date of the quarter.
+CLOSINGBALANCEWEEK(<expression>, <dates>, [<period>]) ;; Value of the expression at the last date of the week.
 CLOSINGBALANCEYEAR(<expression>, <dates>, [<filter>], [<year_end_date>]) ;; Value of the expression at the last date of the year.
 COLUMNSTATISTICS() ;; Returns a table of statistics for every column in the model.
 COALESCE(<expression>, <expression>, [<expression>]…) ;; Returns the first expression that does not evaluate to blank.
@@ -123,6 +124,7 @@ EDATE(<start_date>, <months>) ;; Returns the date that is the given number of mo
 EFFECT(<nominal_rate>, <npery>) ;; Effective annual interest rate.
 ENDOFMONTH(<dates>) ;; Returns the last date of the month in the current context.
 ENDOFQUARTER(<dates>) ;; Returns the last date of the quarter in the current context.
+ENDOFWEEK(<dates>) ;; Returns the last date of the week in the current context.
 ENDOFYEAR(<dates>, [<year_end_date>]) ;; Returns the last date of the year in the current context.
 EOMONTH(<start_date>, <months>) ;; Returns the last day of the month that is the given number of months away.
 ERROR(<text>) ;; Raises an error with the given message.
@@ -291,6 +293,7 @@ NETWORKDAYS(<start_date>, <end_date>, [<weekend>], [<holidays>]) ;; Number of wh
 NEXTDAY(<dates>) ;; Returns the dates of the day after the first date in the context.
 NEXTMONTH(<dates>) ;; Returns the dates of the month after the first date in the context.
 NEXTQUARTER(<dates>) ;; Returns the dates of the quarter after the first date in the context.
+NEXTWEEK(<dates>) ;; Returns the dates of the week after the first date in the context.
 NEXTYEAR(<dates>, [<year_end_date>]) ;; Returns the dates of the year after the first date in the context.
 NOMINAL(<effect_rate>, <npery>) ;; Nominal annual interest rate.
 NONVISUAL(<expression>) ;; Marks a measure filter in SUMMARIZECOLUMNS as not affecting visual totals.
@@ -309,6 +312,7 @@ ODDLYIELD(<settlement>, <maturity>, <last_interest>, <rate>, <pr>, <redemption>,
 OFFSET(<delta>, [<relation>], [<orderBy>], [<blanks>], [<partitionBy>], [<matchBy>], [<reset>]) ;; Returns a row that is a number of rows before or after the current row.
 OPENINGBALANCEMONTH(<expression>, <dates>, [<filter>]) ;; Value of the expression at the first date of the month.
 OPENINGBALANCEQUARTER(<expression>, <dates>, [<filter>]) ;; Value of the expression at the first date of the quarter.
+OPENINGBALANCEWEEK(<expression>, <dates>, [<period>]) ;; Value of the expression at the first date of the week.
 OPENINGBALANCEYEAR(<expression>, <dates>, [<filter>], [<year_end_date>]) ;; Value of the expression at the first date of the year.
 OR(<logical1>, <logical2>) ;; Returns TRUE when either argument is TRUE.
 ORDERBY(<orderBy_expression>, [<order>]…) ;; Defines the sort order inside window functions.
@@ -333,6 +337,7 @@ PPMT(<rate>, <per>, <nper>, <pv>, [<fv>], [<type>]) ;; Principal payment for a p
 PREVIOUSDAY(<dates>) ;; Returns the dates of the day before the first date in the context.
 PREVIOUSMONTH(<dates>) ;; Returns the dates of the month before the first date in the context.
 PREVIOUSQUARTER(<dates>) ;; Returns the dates of the quarter before the first date in the context.
+PREVIOUSWEEK(<dates>) ;; Returns the dates of the week before the first date in the context.
 PREVIOUSYEAR(<dates>, [<year_end_date>]) ;; Returns the dates of the year before the first date in the context.
 PRICE(<settlement>, <maturity>, <rate>, <yld>, <redemption>, <frequency>, [<basis>]) ;; Price per $100 of a security with periodic interest.
 PRICEDISC(<settlement>, <maturity>, <discount>, <redemption>, [<basis>]) ;; Price per $100 of a discounted security.
@@ -384,6 +389,7 @@ SQRT(<number>) ;; Returns the square root of a number.
 SQRTPI(<number>) ;; Returns the square root of (number * pi).
 STARTOFMONTH(<dates>) ;; Returns the first date of the month in the current context.
 STARTOFQUARTER(<dates>) ;; Returns the first date of the quarter in the current context.
+STARTOFWEEK(<dates>) ;; Returns the first date of the week in the current context.
 STARTOFYEAR(<dates>, [<year_end_date>]) ;; Returns the first date of the year in the current context.
 STDEV.P(<column>) ;; Standard deviation of a population in a column.
 STDEV.S(<column>) ;; Standard deviation of a sample in a column.
