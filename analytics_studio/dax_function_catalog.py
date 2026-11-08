@@ -57,6 +57,8 @@ CLOSINGBALANCEMONTH(<expression>, <dates>, [<filter>]) ;; Value of the expressio
 CLOSINGBALANCEQUARTER(<expression>, <dates>, [<filter>]) ;; Value of the expression at the last date of the quarter.
 CLOSINGBALANCEWEEK(<expression>, <dates>, [<period>]) ;; Value of the expression at the last date of the week.
 CLOSINGBALANCEYEAR(<expression>, <dates>, [<filter>], [<year_end_date>]) ;; Value of the expression at the last date of the year.
+COLLAPSE(<column>, ...) ;; Visual calculation only: collapses the named axis columns one level.
+COLLAPSEALL(<axis>, [<skipLevel>]) ;; Visual calculation only: collapses every axis column.
 COLUMNSTATISTICS() ;; Returns a table of statistics for every column in the model.
 COALESCE(<expression>, <expression>, [<expression>]…) ;; Returns the first expression that does not evaluate to blank.
 COMBIN(<number>, <number_chosen>) ;; Returns the number of combinations for a number of items.
@@ -132,6 +134,8 @@ EVEN(<number>) ;; Rounds a number up to the nearest even integer.
 EXACT(<text1>, <text2>) ;; Checks whether two text strings are exactly the same (case sensitive).
 EXCEPT(<table1>, <table2>) ;; Returns the rows of the first table that do not appear in the second.
 EXP(<number>) ;; Returns e raised to the power of a number.
+EXPAND(<column>, ...) ;; Visual calculation only: expands the named axis columns one level.
+EXPANDALL(<axis>, [<skipLevel>]) ;; Visual calculation only: expands every axis column.
 EXPON.DIST(<x>, <lambda>, <cumulative>) ;; Returns the exponential distribution.
 EXTERNALMEASURE(<measureName>, [<dataType>], [<dataSourceName>]) ;; Returns the result of a measure from an external data source.
 FACT(<number>) ;; Returns the factorial of a number.
@@ -139,6 +143,7 @@ FALSE() ;; Returns the logical value FALSE.
 FILTER(<table>, <filter>) ;; Returns the rows of a table that satisfy a condition.
 FILTERS(<columnName>) ;; Returns the values that are directly applied as filters to a column.
 FIND(<find_text>, <within_text>, [<start_num>], [<NotFoundValue>]) ;; Position of one text string in another (case sensitive).
+FIRST(<column>, [<axis>], [<blanks>], [<orderBy>], [<reset>]) ;; Visual calculation only: the first value along an axis.
 FIRSTDATE(<dates>) ;; Returns the first date in the current context.
 FIRSTNONBLANK(<column>, <expression>) ;; Returns the first value of a column for which the expression is not blank.
 FIRSTNONBLANKVALUE(<column>, <expression>) ;; Returns the expression value for the first column value that is not blank.
@@ -238,6 +243,7 @@ INTERSECT(<table1>, <table2>) ;; Returns the rows that appear in both tables.
 INTRATE(<settlement>, <maturity>, <investment>, <redemption>, [<basis>]) ;; Interest rate for a fully invested security.
 IPMT(<rate>, <per>, <nper>, <pv>, [<fv>], [<type>]) ;; Interest payment for a period of an investment.
 ISAFTER(<scalar_expression>, <scalar_expression>, [<sort_order>]…) ;; Compares sorted tuples; used in filters.
+ISATLEVEL(<column>) ;; Visual calculation only: TRUE when the column is at the current level.
 ISBLANK(<value>) ;; Returns TRUE if the value is blank.
 ISBOOLEAN(<value>) ;; Returns TRUE if the value is a Boolean.
 ISCROSSFILTERED(<columnName>) ;; Returns TRUE when the column or another column of the table is cross-filtered.
@@ -260,6 +266,7 @@ ISSTRING(<value>) ;; Returns TRUE if the value is a string.
 ISSUBTOTAL(<columnName>) ;; Returns TRUE when a row is a subtotal row.
 ISTEXT(<value>) ;; Returns TRUE if the value is text.
 KEEPFILTERS(<expression>) ;; Changes how filters are applied inside CALCULATE.
+LAST(<column>, [<axis>], [<blanks>], [<orderBy>], [<reset>]) ;; Visual calculation only: the last value along an axis.
 LASTDATE(<dates>) ;; Returns the last date in the current context.
 LASTNONBLANK(<column>, <expression>) ;; Returns the last value of a column for which the expression is not blank.
 LASTNONBLANKVALUE(<column>, <expression>) ;; Returns the expression value for the last column value that is not blank.
@@ -269,7 +276,9 @@ LEN(<text>) ;; Returns the number of characters in a text string.
 LN(<number>) ;; Returns the natural logarithm of a number.
 LOG(<number>, [<base>]) ;; Returns the logarithm of a number to the given base.
 LOG10(<number>) ;; Returns the base-10 logarithm of a number.
+LOOKUP(<expression>, ...) ;; Visual calculation only: evaluates an expression at other positions of the visual.
 LOOKUPVALUE(<result_columnName>, <search_columnName>, <search_value>, [<search_columnName>, <search_value>]…, [<alternateResult>]) ;; Returns the value in the result column for the row that matches the search values.
+LOOKUPWITHTOTALS(<expression>, <column>, ...) ;; Visual calculation only: like LOOKUP, with totals included.
 LOWER(<text>) ;; Converts text to lowercase.
 MATCHBY(<matchBy_columnName>, [<matchBy_columnName>]…) ;; Defines the columns that identify the current row in window functions.
 MAX(<column> | <scalar1>, [<scalar2>]) ;; Returns the largest value in a column or between two expressions.
@@ -285,11 +294,13 @@ MINUTE(<datetime>) ;; Returns the minute as a number from 0 to 59.
 MINX(<table>, <expression>, [<variant>]) ;; Returns the smallest value of an expression evaluated for each row of a table.
 MOD(<number>, <divisor>) ;; Returns the remainder after a number is divided by a divisor.
 MONTH(<datetime>) ;; Returns the month as a number from 1 to 12.
+MOVINGAVERAGE(<expression>, <window>, [<axis>], ...) ;; Visual calculation only: moving average over a window of rows.
 MROUND(<number>, <multiple>) ;; Rounds a number to the desired multiple.
 NATURALINNERJOIN(<leftTable>, <rightTable>) ;; Inner join of two tables using the columns they have in common.
 NATURALJOINUSAGE(<table>) ;; Marks a table for use as a value filter of SUMMARIZECOLUMNS that joins naturally.
 NATURALLEFTOUTERJOIN(<leftTable>, <rightTable>) ;; Left outer join of two tables using the columns they have in common.
 NETWORKDAYS(<start_date>, <end_date>, [<weekend>], [<holidays>]) ;; Number of whole working days between two dates.
+NEXT(<column>, [<axis>], [<blanks>], [<orderBy>], [<reset>]) ;; Visual calculation only: the next value along an axis.
 NEXTDAY(<dates>) ;; Returns the dates of the day after the first date in the context.
 NEXTMONTH(<dates>) ;; Returns the dates of the month after the first date in the context.
 NEXTQUARTER(<dates>) ;; Returns the dates of the quarter after the first date in the context.
@@ -334,6 +345,7 @@ PMT(<rate>, <nper>, <pv>, [<fv>], [<type>]) ;; Payment for a loan.
 POISSON.DIST(<x>, <mean>, <cumulative>) ;; Returns the Poisson distribution.
 POWER(<number>, <power>) ;; Returns a number raised to a power.
 PPMT(<rate>, <per>, <nper>, <pv>, [<fv>], [<type>]) ;; Principal payment for a period of an investment.
+PREVIOUS(<column>, [<axis>], [<blanks>], [<orderBy>], [<reset>]) ;; Visual calculation only: the previous value along an axis.
 PREVIOUSDAY(<dates>) ;; Returns the dates of the day before the first date in the context.
 PREVIOUSMONTH(<dates>) ;; Returns the dates of the month before the first date in the context.
 PREVIOUSQUARTER(<dates>) ;; Returns the dates of the quarter before the first date in the context.
@@ -350,6 +362,7 @@ QUOTIENT(<numerator>, <denominator>) ;; Returns the integer portion of a divisio
 RADIANS(<angle>) ;; Converts degrees to radians.
 RAND() ;; Returns a random number between 0 and 1.
 RANDBETWEEN(<bottom>, <top>) ;; Returns a random integer between two numbers.
+RANGE(<expression>, [<axis>], ...) ;; Visual calculation only: the range of rows around the current one.
 RANK(<ties>, [<relation>], [<orderBy>], [<blanks>], [<partitionBy>], [<matchBy>], [<reset>]) ;; Returns the rank of the current row within a partition.
 RANK.EQ(<value>, <column>, [<order>]) ;; Returns the rank of a number in a column of numbers.
 RANKX(<table>, <expression>, [<value>], [<order>], [<ties>]) ;; Returns the rank of a value in the result of an expression over a table.
@@ -370,6 +383,7 @@ ROUNDUP(<number>, <num_digits>) ;; Rounds a number up, away from zero.
 ROW(<name>, <expression>, [<name>, <expression>]…) ;; Returns a single-row table with the given columns.
 ROWNUMBER([<relation>], [<orderBy>], [<blanks>], [<partitionBy>], [<matchBy>], [<reset>]) ;; Returns the unique rank of the current row within a partition.
 RRI(<nper>, <pv>, <fv>) ;; Equivalent interest rate for the growth of an investment.
+RUNNINGSUM(<expression>, [<axis>], [<blanks>], [<orderBy>], [<reset>]) ;; Visual calculation only: running total along an axis.
 SAMEPERIODLASTYEAR(<dates>) ;; Returns the dates one year before the dates in the context.
 SAMPLE(<n_value>, <table>, <orderBy_expression>, [<order>]…) ;; Returns a sample of rows from a table.
 SAMPLEAXISWITHLOCALMINMAX(<MaxPoints>, <table>, <X>, <Y>, <GroupBy>, <Measure>, <MinimumResolution>, [<DynamicSeries>]) ;; Returns a sample of table rows that keeps the local minimum and maximum along the axis.
