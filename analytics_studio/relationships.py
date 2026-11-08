@@ -511,8 +511,12 @@ def unknown_member_table_ids(
     tables: list[dict[str, Any]],
     relationships: list[dict[str, Any]],
     visible_rows_by_id: dict[str, list[dict[str, Any]]] | None = None,
+    no_orphan_blank_from: set[str] | None = None,
 ) -> set[str]:
-    """Return tables with a visible relationship-generated blank member."""
+    """Return tables with a visible relationship-generated blank member.
+
+    no_orphan_blank_from: one-to-one partners whose visible rows without a match give the other end no blank member (live Power BI: a
+    row of U picked by the filter context under a table filter argument of CALCULATE leaves VALUES(W[Y]) empty, not the blank member)."""
     tables_by_id = {str(table.get("id", "")): table for table in tables}
     visible_rows_by_id = visible_rows_by_id or {}
     unknown_tables: set[str] = set()
@@ -587,9 +591,9 @@ def unknown_member_table_ids(
                     else to_table["rows"]
                 )
             }
-            if visible_from_keys - all_to_keys:
+            if visible_from_keys - all_to_keys and from_id not in (no_orphan_blank_from or ()):
                 unknown_tables.add(to_id)
-            if visible_to_keys - all_from_keys:
+            if visible_to_keys - all_from_keys and to_id not in (no_orphan_blank_from or ()):
                 unknown_tables.add(from_id)
             continue
         else:

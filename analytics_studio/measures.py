@@ -9507,11 +9507,23 @@ def _evaluate_measures_once(
                 ) from exc
             visible_rows_by_id = propagated_without_target
 
+        # Task 87 (live Power BI): with a table filter argument in effect a one-to-one table does not list its blank member for a visible
+        # partner row that has no match in it (VALUES(W[Y]) under a U row without a partner is empty, not the blank member)
+        table_filter_in_effect = any(
+            context.get("filter_table_by_filter") is not None
+            or any(isinstance(shape, dict) and shape.get("whole_row") and not shape.get("dirty") for shape in (context.get("filter_shapes") or ()))
+            for context in contexts_by_id.values()
+        )
+        no_orphan_blank_from = {
+            table_id for table_id in independent_filter_roots
+            if table_filter_in_effect and not own_unknown_member_selected(contexts_by_id[table_id])
+        }
         try:
             context_unknown_members = unknown_member_table_ids(
                 list(contexts_by_id.values()),
                 relationship_definitions,
                 visible_rows_by_id,
+                no_orphan_blank_from=no_orphan_blank_from,
             )
         except (RelationshipError, DecimalException) as exc:
             raise MeasureError(
@@ -9609,6 +9621,7 @@ def _evaluate_measures_once(
                     list(contexts_by_id.values()),
                     [relationship],
                     visible_rows_by_id,
+                    no_orphan_blank_from=no_orphan_blank_from,
                 )
             except (RelationshipError, DecimalException) as exc:
                 raise MeasureError(
@@ -16243,6 +16256,9 @@ def _evaluate_measures_once(
             if target is None:
                 continue
             if one_rows is None:  # the unknown member stays: whatever filtered this table is replaced by nothing
+                outer_columns = target.get("filter_column_rows", {})
+                if outer_columns and all(getattr(rows, "blank", False) and not rows for rows in outer_columns.values()):
+                    continue  # Task 87: a filter on the blank member alone survives (same as a table filter argument, see general_table_filter_sets)
                 for state in ("filter_rows", "filter_table_rows", "filter_shapes", "filter_column_extra"):
                     target.pop(state, None)
                 target["filter_column_rows"] = {}
@@ -17110,6 +17126,26 @@ def _evaluate_measures_once(
             if {column.casefold() for column in columns} == {header.casefold() for header in base_context["headers"]}:
                 # Task 87: the set of whole rows of a table filter argument; relationships.py filters the other tables by its expanded rows
                 filters[table_id][2][0]["whole_row"] = True
+                # Task 87 (live Power BI: CALCULATE(COUNTROWS(W), U) under TREATAS({"y2","y7"}, W[Y]) is 2 although y7 has no partner in U):
+                # a whole-table filter on one end of a one-to-one pair keeps a partner row without a partner in a way not modelled, so
+                # that shape is refused for an expression that reads the partner, while only a TREATAS argument of SUMMARIZECOLUMNS filters the pair
+                # (groups on W[Y] or U[X] under the same TREATAS drop the partner's row without a partner: y2 alone)
+                for relationship in relationship_definitions:
+                    if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                        continue
+                    ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+                    if table_id not in ends or len(set(ends)) != 2:
+                        continue
+                    partner_id = next(end for end in ends if end != table_id)
+                    partner_outer = evaluation_contexts_by_id.get(partner_id)
+                    if partner_outer is None or partner_id not in contexts_by_id or "filter_rows" not in partner_outer or not eff_sc_args.get(partner_id) or eff_group_keys.get(partner_id) or "filter_rows" in evaluation_contexts_by_id.get(table_id, {}):
+                        continue
+                    orphan_ids = {id(contexts_by_id[partner_id]["rows"][index]) for index in one_to_one_unmatched(partner_id)[0]}
+                    treatas_rows = [marked[0] for marked in eff_sc_args[partner_id].values() if marked[0] is not None]
+                    if any(id(row) in orphan_ids for row in partner_outer["filter_rows"]) and any(
+                        len(partner_outer["filter_rows"]) == len(rows) for rows in treatas_rows
+                    ):  # no group on the partner narrowed the TREATAS rows further
+                        filters[table_id][2][0]["orphan_partner"] = partner_id  # refused when the expression reads that table, see evaluate_with_general_filters
                 # a filter over every column of a table is a filter of the table with the tables on its one side
                 for one_id, one_rows in referenced_one_side_rows(table_id, allowed).items():
                     one_context = contexts_by_id[one_id]
@@ -17544,6 +17580,21 @@ def _evaluate_measures_once(
 
     scanning_calculates: set[int] = set()  # Task 19 Part D: the open CALCULATEs that scan (a filter, or a row context to transition); a BLANK under one does not cancel
 
+    def expression_reads_table(node: Any, table_id: str) -> bool:
+        """Does the expression name a column or the table itself, or a measure whose reads are not followed (then assume it does)?"""
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "measure":
+            return True
+        if node[0] in {"reference", "table"} and len(node) >= 2 and isinstance(node[1], str):
+            try:
+                if resolve_table_context(node[1])["id"] == table_id:
+                    return True
+            except MeasureError:
+                pass
+        children = node if isinstance(node[0], tuple) else node[1:]
+        return any(expression_reads_table(child, table_id) for child in children if isinstance(child, (tuple, list)))
+
     def evaluate_with_general_filters(
         expression_node: tuple[Any, ...],
         filter_arguments: tuple[tuple[Any, ...], ...],
@@ -17674,6 +17725,10 @@ def _evaluate_measures_once(
                 elif _is_general_table_filter(node):
                     additions.append((keep, general_table_filter_sets(node)))
                     table_filters_present = True
+                    for _context, _columns, shapes in additions[-1][1].values():
+                        for shape in shapes:
+                            if shape.get("orphan_partner") and expression_reads_table(expression_node, str(shape["orphan_partner"])):
+                                raise MeasureError("A table filter on one table of a one-to-one relationship whose partner is filtered to rows without a partner is not supported in the local engine when the partner is read.")
                 else:
                     additions.append((keep, general_boolean_filter_sets(node)))
             if table_filters_present and relationship_modifiers and unknown_member_ids and any(

@@ -59,9 +59,34 @@ CASES = [
     ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=1;y2=1;y5=1'),
     ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"j2","j3"},ZJ_U[K]),"v",CALCULATE(SUM(ZJ_F[Amt]),REMOVEFILTERS(ZJ_W))),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=255;y2=255;y3=255;y5=255;y7=255'),
     ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"n1","n6"},ZJ_B[N]),"v",CALCULATE(SUM(ZJ_F2[Amt]),ZJ_F)),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=25;y2=67'),
+    # Task 87 fix pass: items that were wrong on main and now match (blank member of a one-to-one partner under a table filter, FILTER(F, ..) blank group)
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_U[X]&"="&[v],";",ZM_U[X])', '=1;x1=1;x2=1;x3=1'),
+    ('ZM', 'CONCATENATEX(SUMMARIZECOLUMNS(ZM_U[X],TREATAS({"n1","n5"},ZM_B[N]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZM_W[Y]),ZM_F))),ZM_U[X]&"="&[v],";",ZM_U[X])', '=1;x1=1;x2=1;x3=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=1;x2=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],TREATAS({"n1","n6"},ZJ_B[N]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=1;x2=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",CALCULATE(COUNTROWS(ZJ_U),FILTER(ZJ_F,ZJ_F[Amt]>10))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', 'x1=1;x2=1;x4=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_U[X]),FILTER(ZJ_F,ZJ_F[Amt]>10)))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=1;x1=1;x2=1;x4=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_U[X]),ZJ_F))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=1;x1=1;x2=1;x4=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),FILTER(ZJ_F,ZJ_F[Amt]>10)))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=1;x2=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_A))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', '=2;x2=1;x3=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_F2))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', 'x2=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_U[X],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_U))),ZJ_U[X]&"="&[v],";",ZJ_U[X])', 'x2=1;x3=1;x5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_U[X]),ZJ_A))),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', '=3;y2=1;y3=1;y5=1'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_W[Y],TREATAS({"y2","y7"},ZJ_W[Y]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_U[X]),ZJ_A))),ZJ_W[Y]&"="&[v],";",ZJ_W[Y])', 'y2=1'),
+]
+
+REFUSED = [
+    # table filter on one end of a one-to-one pair, partner filtered by a TREATAS argument alone: y7 survives in Power BI in a way not modelled
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({"y2","y7"},ZJ_W[Y]),"v",CALCULATE(COUNTROWS(ZJ_W),ZJ_U)),ZJ_B[N]&"="&[v],";",ZJ_B[N])'),
+    ('ZJ', 'CONCATENATEX(SUMMARIZECOLUMNS(ZJ_B[N],TREATAS({"y2","y7"},ZJ_W[Y]),"v",COUNTROWS(CALCULATETABLE(VALUES(ZJ_W[Y]),ZJ_U))),ZJ_B[N]&"="&[v],";",ZJ_B[N])'),
 ]
 
 
 @pytest.mark.parametrize("model, expression, expected", CASES, ids=[f"case{n:02d}-{model}" for n, (model, _e, _p) in enumerate(CASES)])
 def test_table_filter_matches_power_bi(model, expression, expected):
     assert m.ours_for(model, expression) == expected
+
+
+@pytest.mark.parametrize("model, expression", REFUSED, ids=[f"refused{n:02d}-{model}" for n, (model, _e) in enumerate(REFUSED)])
+def test_unmodelled_table_filter_is_refused(model, expression):
+    assert m.ours_for(model, expression).startswith("LOCAL-REJECT")
