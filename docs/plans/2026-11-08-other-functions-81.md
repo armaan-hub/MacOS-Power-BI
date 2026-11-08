@@ -67,3 +67,6 @@ test `tests/test_iteration180_other_functions_81.py`.
 - [ ] Step 4: run the new test (66 pass), then `tests/test_dax_function_catalog*.py tests/test_dax_intellisense*.py tests/test_iteration148*.py`
   and the 4 newest `tests/test_iteration17*.py` files, all pass. Use `-p no:cacheprovider`.
 - [ ] Step 5: commit on branch `antigravity/other-functions-81`: "Task 91: EXTERNALMEASURE, NATURALJOINUSAGE, SAMPLEAXISWITHLOCALMINMAX, SAMPLECARTESIANPOINTSBYCOVER, SELECTEDMEASUREFORMATSTRING (other-functions-81)".
+
+## Review outcome (2026-11-05)
+Shipped as Iteration 180. Locked 531486.
