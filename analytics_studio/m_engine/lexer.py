@@ -65,7 +65,26 @@ _OPERATORS = (
 )
 _WHITESPACE = " \t\r\n\f\v﻿"
 _HEX_ESCAPE_RE = re.compile(r"[0-9A-Fa-f]{4}|[0-9A-Fa-f]{8}")
-_SIMPLE_ESCAPES = {"lf": "\n", "cr": "\r", "tab": "\t", "cr,lf": "\r\n"}
+_SIMPLE_ESCAPES = {"lf": "\n", "cr": "\r", "tab": "\t"}
+
+
+def _decode_escape_list(body: str) -> Optional[str]:
+    """Decode the inside of ``#(...)``: a comma-separated list of ``cr``, ``lf``, ``tab``, ``#`` (a literal
+    ``#``), or a 4 or 8 digit hex code point. Returns None when any item is not one of these."""
+    pieces: list[str] = []
+    for item in body.split(","):
+        if item in _SIMPLE_ESCAPES:
+            pieces.append(_SIMPLE_ESCAPES[item])
+        elif item == "#":
+            pieces.append("#")
+        elif _HEX_ESCAPE_RE.fullmatch(item):
+            try:
+                pieces.append(chr(int(item, 16)))
+            except ValueError:
+                return None
+        else:
+            return None
+    return "".join(pieces)
 
 
 def _read_string(source: str, quote: int, terminator_msg: str) -> tuple[str, int]:
@@ -90,15 +109,10 @@ def _read_string(source: str, quote: int, terminator_msg: str) -> tuple[str, int
             if close < 0:
                 raise MSyntaxError("Unterminated escape sequence", j, source)
             body = source[j + 2:close]
-            if body in _SIMPLE_ESCAPES:
-                out.append(_SIMPLE_ESCAPES[body])
-            elif _HEX_ESCAPE_RE.fullmatch(body):
-                try:
-                    out.append(chr(int(body, 16)))
-                except ValueError:
-                    raise MSyntaxError("Invalid character code in escape sequence", j, source)
-            else:
+            decoded = _decode_escape_list(body)
+            if decoded is None:
                 raise MSyntaxError(f"Invalid escape sequence '#({body})'", j, source)
+            out.append(decoded)
             j = close + 1
             continue
         out.append(ch)

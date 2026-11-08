@@ -1,0 +1,445 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09 (second held-out, never used while coding)",
+ "cases": [
+  {
+   "expression": "3*(2+1)-4/8",
+   "power_bi": "V:number:8.5"
+  },
+  {
+   "expression": "10-2-3",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "2*3+4*5",
+   "power_bi": "V:number:26"
+  },
+  {
+   "expression": "-(-(-2))",
+   "power_bi": "V:number:-2"
+  },
+  {
+   "expression": "1.25*4",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "1e2+1e-2",
+   "power_bi": "V:number:100.01"
+  },
+  {
+   "expression": "7/7",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "100000*100000",
+   "power_bi": "V:number:10000000000"
+  },
+  {
+   "expression": "1e15*10",
+   "power_bi": "V:number:10000000000000000"
+  },
+  {
+   "expression": "2/3",
+   "power_bi": "V:number:0.66666666666666663"
+  },
+  {
+   "expression": "0.7+0.1",
+   "power_bi": "V:number:0.79999999999999993"
+  },
+  {
+   "expression": "1-0.9",
+   "power_bi": "V:number:0.099999999999999978"
+  },
+  {
+   "expression": "5e-324",
+   "power_bi": "V:number:4.94065645841247E-324"
+  },
+  {
+   "expression": "1.7976931348623157e308",
+   "power_bi": "V:number:1.7976931348623157E+308"
+  },
+  {
+   "expression": "12345.6789*1",
+   "power_bi": "V:number:12345.6789"
+  },
+  {
+   "expression": "\"x\"&\"y\"&\"z\"",
+   "power_bi": "V:text:\"xyz\""
+  },
+  {
+   "expression": "\"#(cr,lf)\"",
+   "power_bi": "V:text:\"\\r\\n\""
+  },
+  {
+   "expression": "\"#(000D)\"",
+   "power_bi": "V:text:\"\\r\""
+  },
+  {
+   "expression": "\"#(#)(lf)\"",
+   "power_bi": "V:text:\"#(lf)\""
+  },
+  {
+   "expression": "{1,2,3}&{}",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "{{1}}&{{2}}",
+   "power_bi": "V:list:[list:[number:1],list:[number:2]]"
+  },
+  {
+   "expression": "[x=1,y=2]&[]",
+   "power_bi": "V:record:[\"x\"=number:1,\"y\"=number:2]"
+  },
+  {
+   "expression": "[]&[a=null]",
+   "power_bi": "V:record:[\"a\"=null]"
+  },
+  {
+   "expression": "{1,2}{1}",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "{\"a\",\"b\"}{0}",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "[a={1,2}][a]{1}",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "{[a=1]}{0}[a]",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "let l={1..4} in l{3}",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "{5..1}",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "{1..1}",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "{-2..1}",
+   "power_bi": "V:list:[number:-2,number:-1,number:0,number:1]"
+  },
+  {
+   "expression": "{\"x\"..\"z\"}",
+   "power_bi": "V:list:[text:\"x\",text:\"y\",text:\"z\"]"
+  },
+  {
+   "expression": "{\"a\"..\"\"}",
+   "power_bi": "ERR:Expression.Error: The value isn't a single-character string."
+  },
+  {
+   "expression": "try {1}{-5}",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"The index cannot be negative.\",\"Detail\"=record:[\"Value\"=list:[number:1],\"Index\"=number:-5],\"Message.Format\"=text:\"The index cannot be negative.\",\"Message.Parameters\"=null,\"ErrorCode\"=text:\"10038\"]]"
+  },
+  {
+   "expression": "try [a=1][a]",
+   "power_bi": "V:record:[\"HasError\"=false,\"Value\"=number:1]"
+  },
+  {
+   "expression": "try ([a=1]{0})",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"Expression.Error\",\"Message\"=text:\"We cannot convert a value of type Record to type List.\",\"Detail\"=record:[\"Value\"=record:[\"a\"=number:1],\"Type\"=type],\"Message.Format\"=text:\"We cannot convert a value of type #{0} to type #{1}.\",\"Message.Parameters\"=list:[text:\"Record\",text:\"List\"],\"ErrorCode\"=text:\"10276\"]]"
+  },
+  {
+   "expression": "try error \"q\" otherwise null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "try (1/0) otherwise 0",
+   "power_bi": "V:number:+Infinity"
+  },
+  {
+   "expression": "(try error \"e\")[Error][Message]",
+   "power_bi": "V:text:\"e\""
+  },
+  {
+   "expression": "try error [Reason=\"A\", Message=\"B\", Detail=[x=1]]",
+   "power_bi": "V:record:[\"HasError\"=true,\"Error\"=record:[\"Reason\"=text:\"A\",\"Message\"=text:\"B\",\"Detail\"=record:[\"x\"=number:1],\"Message.Format\"=null,\"Message.Parameters\"=null,\"ErrorCode\"=null]]"
+  },
+  {
+   "expression": "let f=(a,b)=>a-b in f(5,2)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "let f=(a, optional b)=>b in f(1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "let f=(a as number, b as text)=>b&Text.From(a) in f(1,\"n\")",
+   "power_bi": "V:text:\"n1\""
+  },
+  {
+   "expression": "let f=(x as list)=>x in f(1)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type List."
+  },
+  {
+   "expression": "let sq=each _*_ in sq(9)",
+   "power_bi": "V:number:81"
+  },
+  {
+   "expression": "let add=(x)=>(y)=>x+y, inc=add(1) in inc(41)",
+   "power_bi": "V:number:42"
+  },
+  {
+   "expression": "let a=2, b=a*a, c=b*b in c",
+   "power_bi": "V:number:16"
+  },
+  {
+   "expression": "let a=[x=1] in a[x]+a[x]",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "let fib=(n)=>if n<2 then n else @fib(n-1)+@fib(n-2) in fib(15)",
+   "power_bi": "V:number:610"
+  },
+  {
+   "expression": "[a=1, b=[a=2][a]+a][b]",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "if 1>2 then \"a\" else if 2>1 then \"b\" else \"c\"",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "if \"a\"=\"a\" then 1 else 0",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "if false then 1/0 else 7",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "null and false",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null and true",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "true and true",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "false or false",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null or null",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "not true",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "not false",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "1 = null",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null <> null",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "\"a\" = null",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "null = \"a\"",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "{null} = {null}",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "[a=null] = [a=null]",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "#date(2024,1,1) = #date(2024,1,1)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "#time(1,2,3) = #time(1,2,3)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "#duration(0,0,1,0) > #duration(0,0,0,59)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"abc\" < \"abd\"",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"ab\" < \"abc\"",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"Z\" < \"a\"",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"a\" < \"B\"",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "2 > 1.5",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "-1 < 0",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "#date(2023,12,31) < #date(2024,1,1)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "#date(2024,1,31)+#duration(30,0,0,0)",
+   "power_bi": "V:date:2024-03-01"
+  },
+  {
+   "expression": "#datetime(2024,1,1,12,0,0)-#duration(0,13,0,0)",
+   "power_bi": "V:datetime:2023-12-31T23:00:00.0000000"
+  },
+  {
+   "expression": "#datetime(2024,1,2,0,0,0)-#datetime(2024,1,1,6,30,0)",
+   "power_bi": "V:duration:17:30:00"
+  },
+  {
+   "expression": "#time(12,0,0)-#time(6,30,0)",
+   "power_bi": "V:duration:05:30:00"
+  },
+  {
+   "expression": "#duration(2,3,4,5)*1.5",
+   "power_bi": "V:duration:3.04:36:07.5000000"
+  },
+  {
+   "expression": "#duration(10,0,0,0)/4",
+   "power_bi": "V:duration:2.12:00:00"
+  },
+  {
+   "expression": "#duration(0,0,0,0)-#duration(0,0,0,1)",
+   "power_bi": "V:duration:-00:00:01"
+  },
+  {
+   "expression": "#datetimezone(2024,6,1,12,0,0,2,0)-#datetimezone(2024,6,1,12,0,0,0,0)",
+   "power_bi": "V:duration:-02:00:00"
+  },
+  {
+   "expression": "#datetimezone(2024,1,1,0,0,0,0,0)+#duration(0,1,0,0)",
+   "power_bi": "V:datetimezone:2024-01-01T01:00:00.0000000+00:00"
+  },
+  {
+   "expression": "#date(2024,1,1)&#time(23,59,59)",
+   "power_bi": "V:datetime:2024-01-01T23:59:59.0000000"
+  },
+  {
+   "expression": "Text.Length(\"h\u00e9llo\")",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Text.Upper(\"\u01c6\")",
+   "power_bi": "V:text:\"\u01c4\""
+  },
+  {
+   "expression": "Text.Upper(\"\ufb01\")",
+   "power_bi": "V:text:\"\ufb01\""
+  },
+  {
+   "expression": "Text.From(-0.5)",
+   "power_bi": "V:text:\"-0.5\""
+  },
+  {
+   "expression": "Text.From(1e-5)",
+   "power_bi": "V:text:\"1E-05\""
+  },
+  {
+   "expression": "Text.From(123456789)",
+   "power_bi": "V:text:\"123456789\""
+  },
+  {
+   "expression": "Text.From(#time(13,5,0))",
+   "power_bi": "V:text:\"1:05 PM\""
+  },
+  {
+   "expression": "Text.From(#datetime(2024,12,25,8,0,0))",
+   "power_bi": "V:text:\"12/25/2024 8:00:00 AM\""
+  },
+  {
+   "expression": "Text.From(#duration(1,2,0,0))",
+   "power_bi": "V:text:\"1.02:00:00\""
+  },
+  {
+   "expression": "Text.From(false)",
+   "power_bi": "V:text:\"false\""
+  },
+  {
+   "expression": "Text.From(\"x\")",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "List.Sum({1.5,2.5})",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "List.Sum({#duration(1,0,0,0),#duration(0,12,0,0)})",
+   "power_bi": "V:duration:1.12:00:00"
+  },
+  {
+   "expression": "List.Sum({1,\"2\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"2\" to type Number."
+  },
+  {
+   "expression": "Value.Type(1) = type number",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Metadata([a=1] meta [m=\"x\"])[m]",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Character.ToNumber(\"A\")+1",
+   "power_bi": "V:number:66"
+  },
+  {
+   "expression": "Table.FromRecords({[x=\"a\"],[x=\"b\"],[x=\"c\"]})",
+   "power_bi": "V:table:cols=[\"x\":\"any\"];rows=[list:[text:\"a\"],list:[text:\"b\"],list:[text:\"c\"]]"
+  },
+  {
+   "expression": "Table.FromRecords({[a=1,b=2]})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,number:2]]"
+  },
+  {
+   "expression": "1 is nullable number",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "null is nullable number",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "\"a\" is number",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "{} is any",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "(1 meta [a=1]) = 1",
+   "power_bi": "V:true"
+  }
+ ]
+}

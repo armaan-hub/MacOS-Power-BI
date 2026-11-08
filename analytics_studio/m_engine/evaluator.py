@@ -255,10 +255,35 @@ def _less(x: Any, y: Any) -> bool:
     return x < y
 
 
-def relational(op: str, a: MValue, b: MValue) -> MValue:
-    """< <= > >=. Power BI names the types right to left for < and >=; copied from the battery."""
-    if isinstance(a, V.Null) or isinstance(b, V.Null):
+# What null may be combined with (measured against Power BI): the other operand's kinds for which the result
+# is null. Any other kind is an operator error that names the other operand first and null second.
+_NULL_ARITHMETIC = {
+    "+": frozenset({"number", "date", "time", "datetime", "datetimezone", "duration"}),
+    "-": frozenset({"number", "date", "time", "datetime", "datetimezone", "duration"}),
+    "*": frozenset({"number", "duration"}),
+    "/": frozenset({"number", "duration"}),
+    "&": frozenset({"text", "date", "time"}),
+}
+_SWAPPED_RELATION = {"<": ">", ">": "<", "<=": ">=", ">=": "<="}
+
+
+def _null_operand(op: str, a: MValue, b: MValue, allowed: frozenset) -> MValue:
+    """The result of ``a op b`` when at least one operand is null."""
+    a_null, b_null = isinstance(a, V.Null), isinstance(b, V.Null)
+    if a_null and b_null:
         return V.Null()
+    other = b if a_null else a
+    if V.kind_of(other) in allowed:
+        return V.Null()
+    if op in _SWAPPED_RELATION and a_null:
+        op = _SWAPPED_RELATION[op]
+    raise V.operator_error(op, other, V.Null())
+
+
+def relational(op: str, a: MValue, b: MValue) -> MValue:
+    """< <= > >=. Power BI names the types right to left for mixed kinds; copied from the battery."""
+    if isinstance(a, V.Null) or isinstance(b, V.Null):
+        return _null_operand(op, a, b, _COMPARABLE)
     ka, kb = V.kind_of(a), V.kind_of(b)
     if ka in _COMPARABLE and ka == kb:
         x, y = _sort_key(a), _sort_key(b)
@@ -269,10 +294,8 @@ def relational(op: str, a: MValue, b: MValue) -> MValue:
         if op == ">=":
             return V.Logical(not _less(x, y))
         return V.Logical(not _less(y, x))  # <=
-    if ka in _COMPARABLE and kb in _COMPARABLE:
-        if op in ("<", ">="):
-            raise V.operator_error("<", b, a)
-        raise V.operator_error("<", a, b)
+    if ka in _COMPARABLE:  # measured: a comparable left operand with any other kind reports ``<`` (b, a)
+        raise V.operator_error("<", b, a)
     raise V.operator_error(op, a, b)
 
 
@@ -307,7 +330,7 @@ def _divide_duration(ticks: int, divisor: float) -> MValue:
 
 def arithmetic(op: str, a: MValue, b: MValue) -> MValue:
     if isinstance(a, V.Null) or isinstance(b, V.Null):
-        return V.Null()
+        return _null_operand(op, a, b, _NULL_ARITHMETIC[op])
     ka, kb = V.kind_of(a), V.kind_of(b)
     if ka == "number" and kb == "number":
         return V.Number(_num_op(op, a.value, b.value))
@@ -355,8 +378,8 @@ def _floor_to_day(ticks: int) -> int:
 
 
 def concat(a: MValue, b: MValue) -> MValue:
-    if isinstance(a, V.Null) and isinstance(b, V.Null):
-        return V.Null()
+    if isinstance(a, V.Null) or isinstance(b, V.Null):
+        return _null_operand("&", a, b, _NULL_ARITHMETIC["&"])
     if isinstance(a, V.Text) and (isinstance(b, V.Text) or isinstance(b, V.Null)):
         return V.Null() if isinstance(b, V.Null) else V.Text(a.value + b.value)
     if isinstance(a, V.Null) and isinstance(b, V.Text):
@@ -386,7 +409,7 @@ def _unary(op: str, value: MValue) -> MValue:
     if op == "not":
         if isinstance(value, V.Logical):
             return V.Logical(not value.value)
-        raise MError("Expression.Error", f"We cannot apply operator not to the type {V.type_display(value)}.")
+        raise V.unary_error("not", value)
     kind = V.kind_of(value)
     if op == "+" and kind in ("number", "duration"):
         return value
@@ -396,7 +419,7 @@ def _unary(op: str, value: MValue) -> MValue:
         return V.Number(-value.value)
     if op == "-" and kind == "duration":
         return V.make_duration(-value.ticks)
-    raise MError("Expression.Error", f"We cannot apply operator {op} to the type {V.type_display(value)}.")
+    raise V.unary_error(op, value)
 
 
 # ---- index, field and projection ------------------------------------------
@@ -411,11 +434,11 @@ def _field_access(target: MValue, name: str, optional: bool) -> MValue:
     if isinstance(target, V.Null):
         if optional:
             return V.Null()
-        raise MError("Expression.Error", "We cannot apply field access to the type Null.")
+        raise V.field_access_error(target, name)
     if not isinstance(target, V.Record):
         if optional:  # measured: Power BI reports a list conversion for ``5[a]?``
             raise V.convert_error(target, V.TypeValue("list"))
-        raise MError("Expression.Error", f"We cannot apply field access to the type {V.type_display(target)}.")
+        raise V.field_access_error(target, name)
     if target.has(name):
         return target.get(name)
     if optional:
@@ -433,10 +456,15 @@ def _item_access(node: A.ItemAccess, env: Env) -> MValue:
     if not isinstance(target, V.List):
         raise V.convert_error(target, V.TypeValue("list"))
     if not isinstance(index, V.Number):
-        raise MError("Expression.Error", f"We cannot apply an index of type {V.type_display(index)}.")
+        shown = V.type_display(index)
+        raise MError("Expression.Error", f"We cannot apply an index of type {shown}.",
+                     detail=V.Record((("Value", target), ("Index", index))),
+                     fmt="We cannot apply an index of type #{0}.", params=(V.Text(shown),), code="10058")
     k = V.to_int32(index)
     if k < 0:
-        raise MError("Expression.Error", "The index cannot be negative.")
+        raise MError("Expression.Error", "The index cannot be negative.",
+                     detail=V.Record((("Value", target), ("Index", index))),
+                     fmt="The index cannot be negative.", code="10038")
     if k >= len(target.items):
         if node.optional:
             return V.Null()
