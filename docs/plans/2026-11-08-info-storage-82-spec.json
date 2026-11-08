@@ -1,0 +1,1639 @@
+{
+ "source": "Power BI Desktop 2.157 guest, 2026-11-08 (guest model: VAT workbook tables + Facts)",
+ "schemas": {
+  "INFO.ANNOTATIONS": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "ObjectID",
+    "int64"
+   ],
+   [
+    "ObjectType",
+    "int64"
+   ],
+   [
+    "Name",
+    "text"
+   ],
+   [
+    "Value",
+    "text"
+   ],
+   [
+    "ModifiedTime",
+    "datetime"
+   ]
+  ],
+  "INFO.ATTRIBUTEHIERARCHIES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "ColumnID",
+    "int64"
+   ],
+   [
+    "State",
+    "int64"
+   ],
+   [
+    "AttributeHierarchyStorageID",
+    "int64"
+   ],
+   [
+    "ModifiedTime",
+    "datetime"
+   ],
+   [
+    "RefreshedTime",
+    "datetime"
+   ]
+  ],
+  "INFO.ATTRIBUTEHIERARCHYSTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "AttributeHierarchyID",
+    "int64"
+   ],
+   [
+    "SortOrder",
+    "int64"
+   ],
+   [
+    "OptimizationLevel",
+    "int64"
+   ],
+   [
+    "MaterializationType",
+    "int64"
+   ],
+   [
+    "ColumnPositionToData",
+    "int64"
+   ],
+   [
+    "ColumnDataToPosition",
+    "int64"
+   ],
+   [
+    "DistinctDataCount",
+    "int64"
+   ],
+   [
+    "DataVersion",
+    "int64"
+   ],
+   [
+    "StorageFileID",
+    "int64"
+   ],
+   [
+    "SystemTableID",
+    "int64"
+   ],
+   [
+    "HasStatistics",
+    "boolean"
+   ],
+   [
+    "MinValue",
+    "text"
+   ],
+   [
+    "MaxValue",
+    "text"
+   ],
+   [
+    "StringValueMaxLength",
+    "int64"
+   ]
+  ],
+  "INFO.CATALOGS": [
+   [
+    "CATALOG_NAME",
+    "text"
+   ],
+   [
+    "DESCRIPTION",
+    "text"
+   ],
+   [
+    "ROLES",
+    "text"
+   ],
+   [
+    "DATE_MODIFIED",
+    "datetime"
+   ],
+   [
+    "COMPATIBILITY_LEVEL",
+    "int64"
+   ],
+   [
+    "TYPE",
+    "int64"
+   ],
+   [
+    "VERSION",
+    "int64"
+   ],
+   [
+    "DATABASE_ID",
+    "text"
+   ],
+   [
+    "DATABASE_GUID",
+    "text"
+   ],
+   [
+    "DATE_QUERIED",
+    "datetime"
+   ],
+   [
+    "CURRENTLY_USED",
+    "boolean"
+   ],
+   [
+    "POPULARITY",
+    "double"
+   ],
+   [
+    "WEIGHTEDPOPULARITY",
+    "double"
+   ],
+   [
+    "CLIENTCACHEREFRESHPOLICY",
+    "int64"
+   ],
+   [
+    "ENCRYPTION_LEVEL",
+    "text"
+   ],
+   [
+    "CRYPTOKEY_UPDATED",
+    "datetime"
+   ]
+  ],
+  "INFO.COLUMNPARTITIONSTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "ColumnStorageID",
+    "int64"
+   ],
+   [
+    "PartitionStorageID",
+    "int64"
+   ],
+   [
+    "DataVersion",
+    "int64"
+   ],
+   [
+    "State",
+    "int64"
+   ],
+   [
+    "SegmentStorageID",
+    "int64"
+   ],
+   [
+    "StorageFileID",
+    "int64"
+   ]
+  ],
+  "INFO.COLUMNSTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "ColumnID",
+    "int64"
+   ],
+   [
+    "Name",
+    "text"
+   ],
+   [
+    "StoragePosition",
+    "int64"
+   ],
+   [
+    "DictionaryStorageID",
+    "int64"
+   ],
+   [
+    "Settings",
+    "int64"
+   ],
+   [
+    "ColumnFlags",
+    "int64"
+   ],
+   [
+    "Collation",
+    "text"
+   ],
+   [
+    "OrderByColumn",
+    "text"
+   ],
+   [
+    "Locale",
+    "int64"
+   ],
+   [
+    "BinaryCharacters",
+    "int64"
+   ],
+   [
+    "Statistics_DistinctStates",
+    "int64"
+   ],
+   [
+    "Statistics_MinDataID",
+    "int64"
+   ],
+   [
+    "Statistics_MaxDataID",
+    "int64"
+   ],
+   [
+    "Statistics_OriginalMinSegmentDataID",
+    "int64"
+   ],
+   [
+    "Statistics_RLESortOrder",
+    "int64"
+   ],
+   [
+    "Statistics_RowCount",
+    "int64"
+   ],
+   [
+    "Statistics_HasNulls",
+    "boolean"
+   ],
+   [
+    "Statistics_RLERuns",
+    "int64"
+   ],
+   [
+    "Statistics_OthersRLERuns",
+    "int64"
+   ],
+   [
+    "Statistics_Usage",
+    "int64"
+   ],
+   [
+    "Statistics_DBType",
+    "int64"
+   ],
+   [
+    "Statistics_XMType",
+    "int64"
+   ],
+   [
+    "Statistics_CompressionType",
+    "int64"
+   ],
+   [
+    "Statistics_CompressionParam",
+    "int64"
+   ],
+   [
+    "Statistics_EncodingHint",
+    "int64"
+   ],
+   [
+    "IsDeltaPartitionColumn",
+    "boolean"
+   ],
+   [
+    "DeltaColumnMappingPhysicalName",
+    "text"
+   ],
+   [
+    "DeltaColumnMappingId",
+    "int64"
+   ],
+   [
+    "FramedSourceColumn",
+    "text"
+   ],
+   [
+    "DeltaColumnPrimitiveType",
+    "int64"
+   ],
+   [
+    "DeltaTableColumnStorageID",
+    "int64"
+   ],
+   [
+    "StringIndexStorageID",
+    "int64"
+   ],
+   [
+    "ColumnIndexStorageID",
+    "int64"
+   ],
+   [
+    "FullTextIndexStorageID",
+    "int64"
+   ]
+  ],
+  "INFO.CSDLMETADATA": [
+   [
+    "METADATA",
+    "text"
+   ]
+  ],
+  "INFO.CULTURES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "ModelID",
+    "int64"
+   ],
+   [
+    "Name",
+    "text"
+   ],
+   [
+    "LinguisticMetadataID",
+    "int64"
+   ],
+   [
+    "ModifiedTime",
+    "datetime"
+   ],
+   [
+    "StructureModifiedTime",
+    "datetime"
+   ]
+  ],
+  "INFO.DICTIONARYSTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "ColumnStorageID",
+    "int64"
+   ],
+   [
+    "Type",
+    "int64"
+   ],
+   [
+    "DataType",
+    "int64"
+   ],
+   [
+    "DataVersion",
+    "int64"
+   ],
+   [
+    "BaseId",
+    "int64"
+   ],
+   [
+    "Magnitude",
+    "double"
+   ],
+   [
+    "LastId",
+    "int64"
+   ],
+   [
+    "IsNullable",
+    "boolean"
+   ],
+   [
+    "IsUnique",
+    "boolean"
+   ],
+   [
+    "IsOperatingOn32",
+    "boolean"
+   ],
+   [
+    "DictionaryFlags",
+    "int64"
+   ],
+   [
+    "StorageFileID",
+    "int64"
+   ],
+   [
+    "Size",
+    "int64"
+   ]
+  ],
+  "INFO.FUNCTIONS": [
+   [
+    "FUNCTION_NAME",
+    "text"
+   ],
+   [
+    "DESCRIPTION",
+    "text"
+   ],
+   [
+    "PARAMETER_LIST",
+    "text"
+   ],
+   [
+    "RETURN_TYPE",
+    "int64"
+   ],
+   [
+    "ORIGIN",
+    "int64"
+   ],
+   [
+    "INTERFACE_NAME",
+    "text"
+   ],
+   [
+    "LIBRARY_NAME",
+    "text"
+   ],
+   [
+    "DLL_NAME",
+    "text"
+   ],
+   [
+    "HELP_FILE",
+    "text"
+   ],
+   [
+    "HELP_CONTEXT",
+    "int64"
+   ],
+   [
+    "OBJECT",
+    "text"
+   ],
+   [
+    "CAPTION",
+    "text"
+   ],
+   [
+    "PARAMETERINFO",
+    "int64"
+   ],
+   [
+    "DIRECTQUERY_PUSHABLE",
+    "int64"
+   ],
+   [
+    "VISUAL_CALCULATIONS_INFO",
+    "int64"
+   ]
+  ],
+  "INFO.MODEL": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "Name",
+    "text"
+   ],
+   [
+    "Description",
+    "text"
+   ],
+   [
+    "StorageLocation",
+    "text"
+   ],
+   [
+    "DefaultMode",
+    "int64"
+   ],
+   [
+    "DefaultDataView",
+    "int64"
+   ],
+   [
+    "Culture",
+    "text"
+   ],
+   [
+    "Collation",
+    "text"
+   ],
+   [
+    "ModifiedTime",
+    "datetime"
+   ],
+   [
+    "StructureModifiedTime",
+    "datetime"
+   ],
+   [
+    "Version",
+    "int64"
+   ],
+   [
+    "DataAccessOptions",
+    "text"
+   ],
+   [
+    "DefaultMeasureID",
+    "int64"
+   ],
+   [
+    "DefaultPowerBIDataSourceVersion",
+    "int64"
+   ],
+   [
+    "ForceUniqueNames",
+    "boolean"
+   ],
+   [
+    "DiscourageImplicitMeasures",
+    "boolean"
+   ],
+   [
+    "DataSourceVariablesOverrideBehavior",
+    "int64"
+   ],
+   [
+    "DataSourceDefaultMaxConnections",
+    "int64"
+   ],
+   [
+    "SourceQueryCulture",
+    "text"
+   ],
+   [
+    "MAttributes",
+    "text"
+   ],
+   [
+    "DiscourageCompositeModels",
+    "boolean"
+   ],
+   [
+    "AutomaticAggregationOptions",
+    "text"
+   ],
+   [
+    "DisableAutoExists",
+    "int64"
+   ],
+   [
+    "MaxParallelismPerRefresh",
+    "int64"
+   ],
+   [
+    "MaxParallelismPerQuery",
+    "int64"
+   ],
+   [
+    "DirectLakeBehavior",
+    "int64"
+   ],
+   [
+    "ValueFilterBehavior",
+    "int64"
+   ],
+   [
+    "SelectionExpressionBehavior",
+    "int64"
+   ],
+   [
+    "VersionMarker",
+    "text"
+   ]
+  ],
+  "INFO.PARTITIONS": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "TableID",
+    "int64"
+   ],
+   [
+    "Name",
+    "text"
+   ],
+   [
+    "Description",
+    "text"
+   ],
+   [
+    "DataSourceID",
+    "int64"
+   ],
+   [
+    "QueryDefinition",
+    "text"
+   ],
+   [
+    "State",
+    "int64"
+   ],
+   [
+    "Type",
+    "int64"
+   ],
+   [
+    "PartitionStorageID",
+    "int64"
+   ],
+   [
+    "Mode",
+    "int64"
+   ],
+   [
+    "DataView",
+    "int64"
+   ],
+   [
+    "ModifiedTime",
+    "datetime"
+   ],
+   [
+    "RefreshedTime",
+    "datetime"
+   ],
+   [
+    "SystemFlags",
+    "int64"
+   ],
+   [
+    "ErrorMessage",
+    "text"
+   ],
+   [
+    "RetainDataTillForceCalculate",
+    "boolean"
+   ],
+   [
+    "RangeStart",
+    "datetime"
+   ],
+   [
+    "RangeEnd",
+    "datetime"
+   ],
+   [
+    "RangeGranularity",
+    "int64"
+   ],
+   [
+    "RefreshBookmark",
+    "text"
+   ],
+   [
+    "QueryGroupID",
+    "int64"
+   ],
+   [
+    "ExpressionSourceID",
+    "int64"
+   ],
+   [
+    "MAttributes",
+    "text"
+   ],
+   [
+    "DataCoverageDefinitionID",
+    "int64"
+   ],
+   [
+    "SchemaName",
+    "text"
+   ]
+  ],
+  "INFO.PARTITIONSTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "PartitionID",
+    "int64"
+   ],
+   [
+    "Name",
+    "text"
+   ],
+   [
+    "StoragePosition",
+    "int64"
+   ],
+   [
+    "SegmentMapStorageID",
+    "int64"
+   ],
+   [
+    "DataObjectId",
+    "int64"
+   ],
+   [
+    "StorageFolderID",
+    "int64"
+   ],
+   [
+    "DeltaTableMetadataStorageID",
+    "int64"
+   ]
+  ],
+  "INFO.PROPERTIES": [
+   [
+    "PropertyName",
+    "text"
+   ],
+   [
+    "PropertyDescription",
+    "text"
+   ],
+   [
+    "PropertyType",
+    "text"
+   ],
+   [
+    "PropertyAccessType",
+    "text"
+   ],
+   [
+    "IsRequired",
+    "boolean"
+   ],
+   [
+    "Value",
+    "variant"
+   ]
+  ],
+  "INFO.SEGMENTMAPSTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "PartitionStorageID",
+    "int64"
+   ],
+   [
+    "Type",
+    "int64"
+   ],
+   [
+    "RecordCount",
+    "int64"
+   ],
+   [
+    "SegmentCount",
+    "int64"
+   ],
+   [
+    "RecordsPerSegment",
+    "int64"
+   ]
+  ],
+  "INFO.SEGMENTSTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "ColumnPartitionStorageID",
+    "int64"
+   ],
+   [
+    "SegmentCount",
+    "int64"
+   ],
+   [
+    "StorageFileID",
+    "int64"
+   ]
+  ],
+  "INFO.STORAGEFILES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "OwnerID",
+    "int64"
+   ],
+   [
+    "OwnerType",
+    "int64"
+   ],
+   [
+    "StorageFolderID",
+    "int64"
+   ],
+   [
+    "FileName",
+    "text"
+   ]
+  ],
+  "INFO.STORAGEFOLDERS": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "OwnerID",
+    "int64"
+   ],
+   [
+    "OwnerType",
+    "int64"
+   ],
+   [
+    "Path",
+    "text"
+   ]
+  ],
+  "INFO.STORAGETABLECOLUMNS": [
+   [
+    "DATABASE_NAME",
+    "text"
+   ],
+   [
+    "CUBE_NAME",
+    "text"
+   ],
+   [
+    "MEASURE_GROUP_NAME",
+    "text"
+   ],
+   [
+    "DIMENSION_NAME",
+    "text"
+   ],
+   [
+    "ATTRIBUTE_NAME",
+    "text"
+   ],
+   [
+    "TABLE_ID",
+    "text"
+   ],
+   [
+    "COLUMN_ID",
+    "text"
+   ],
+   [
+    "COLUMN_TYPE",
+    "text"
+   ],
+   [
+    "COLUMN_ENCODING",
+    "int64"
+   ],
+   [
+    "DATATYPE",
+    "text"
+   ],
+   [
+    "ISKEY",
+    "boolean"
+   ],
+   [
+    "ISUNIQUE",
+    "boolean"
+   ],
+   [
+    "ISNULLABLE",
+    "boolean"
+   ],
+   [
+    "ISROWNUMBER",
+    "boolean"
+   ],
+   [
+    "DICTIONARY_SIZE",
+    "int64"
+   ],
+   [
+    "DICTIONARY_ISPAGEABLE",
+    "boolean"
+   ],
+   [
+    "DICTIONARY_ISRESIDENT",
+    "boolean"
+   ],
+   [
+    "DICTIONARY_TEMPERATURE",
+    "double"
+   ],
+   [
+    "DICTIONARY_LAST_ACCESSED",
+    "datetime"
+   ],
+   [
+    "STRING_INDEX_SIZE",
+    "int64"
+   ],
+   [
+    "FULLTEXT_INDEX_SIZE",
+    "int64"
+   ]
+  ],
+  "INFO.STORAGETABLECOLUMNSEGMENTS": [
+   [
+    "DATABASE_NAME",
+    "text"
+   ],
+   [
+    "CUBE_NAME",
+    "text"
+   ],
+   [
+    "MEASURE_GROUP_NAME",
+    "text"
+   ],
+   [
+    "PARTITION_NAME",
+    "text"
+   ],
+   [
+    "DIMENSION_NAME",
+    "text"
+   ],
+   [
+    "TABLE_ID",
+    "text"
+   ],
+   [
+    "COLUMN_ID",
+    "text"
+   ],
+   [
+    "SEGMENT_NUMBER",
+    "int64"
+   ],
+   [
+    "TABLE_PARTITION_NUMBER",
+    "int64"
+   ],
+   [
+    "RECORDS_COUNT",
+    "int64"
+   ],
+   [
+    "ALLOCATED_SIZE",
+    "int64"
+   ],
+   [
+    "USED_SIZE",
+    "int64"
+   ],
+   [
+    "COMPRESSION_TYPE",
+    "text"
+   ],
+   [
+    "BITS_COUNT",
+    "int64"
+   ],
+   [
+    "BOOKMARK_BITS_COUNT",
+    "int64"
+   ],
+   [
+    "VERTIPAQ_STATE",
+    "text"
+   ],
+   [
+    "ISPAGEABLE",
+    "boolean"
+   ],
+   [
+    "ISRESIDENT",
+    "boolean"
+   ],
+   [
+    "TEMPERATURE",
+    "double"
+   ],
+   [
+    "LAST_ACCESSED",
+    "datetime"
+   ]
+  ],
+  "INFO.STORAGETABLES": [
+   [
+    "DATABASE_NAME",
+    "text"
+   ],
+   [
+    "CUBE_NAME",
+    "text"
+   ],
+   [
+    "MEASURE_GROUP_NAME",
+    "text"
+   ],
+   [
+    "DIMENSION_NAME",
+    "text"
+   ],
+   [
+    "TABLE_ID",
+    "text"
+   ],
+   [
+    "TABLE_PARTITIONS_COUNT",
+    "int64"
+   ],
+   [
+    "HINT_TABLE_TYPE",
+    "text"
+   ],
+   [
+    "ROWS_COUNT",
+    "int64"
+   ],
+   [
+    "RIVIOLATION_COUNT",
+    "int64"
+   ]
+  ],
+  "INFO.TABLESTORAGES": [
+   [
+    "ID",
+    "int64"
+   ],
+   [
+    "TableID",
+    "int64"
+   ],
+   [
+    "Name",
+    "text"
+   ],
+   [
+    "Version",
+    "int64"
+   ],
+   [
+    "Settings",
+    "int64"
+   ],
+   [
+    "RIViolationCount",
+    "int64"
+   ],
+   [
+    "StorageFolderID",
+    "int64"
+   ]
+  ]
+ },
+ "cases": [
+  {
+   "expression": "COUNTROWS(INFO.ANNOTATIONS())",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.ANNOTATIONS()),\"e\",\"n\")",
+   "power_bi": "e"
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.ANNOTATIONS(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[ObjectID],[ObjectType],[Name],[Value],[ModifiedTime]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.ANNOTATIONS(1))",
+   "power_bi": "ERR:Query (1, 46) The 'INFO.ANNOTATIONS' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.ANNOTATIONS(\"ID\"))",
+   "power_bi": "ERR:Query (1, 46) The 'INFO.ANNOTATIONS' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.ANNOTATIONS(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.ATTRIBUTEHIERARCHIES())",
+   "power_bi": "26"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.ATTRIBUTEHIERARCHIES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.ATTRIBUTEHIERARCHIES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[ColumnID],[State],[AttributeHierarchyStorageID],[ModifiedTime],[RefreshedTime]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.ATTRIBUTEHIERARCHIES(1))",
+   "power_bi": "ERR:Query (1, 55) The 'INFO.ATTRIBUTEHIERARCHIES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.ATTRIBUTEHIERARCHIES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 55) The 'INFO.ATTRIBUTEHIERARCHIES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.ATTRIBUTEHIERARCHIES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.ATTRIBUTEHIERARCHYSTORAGES())",
+   "power_bi": "26"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.ATTRIBUTEHIERARCHYSTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.ATTRIBUTEHIERARCHYSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[AttributeHierarchyID],[SortOrder],[OptimizationLevel],[MaterializationType],[ColumnPositionToData],[ColumnDataToPosition],[DistinctDataCount],[DataVersion],[StorageFileID],[SystemTableID],[HasStatistics],[MinValue],[MaxValue],[StringValueMaxLength]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.ATTRIBUTEHIERARCHYSTORAGES(1))",
+   "power_bi": "ERR:Query (1, 61) The 'INFO.ATTRIBUTEHIERARCHYSTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.ATTRIBUTEHIERARCHYSTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 61) The 'INFO.ATTRIBUTEHIERARCHYSTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.ATTRIBUTEHIERARCHYSTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.CATALOGS())",
+   "power_bi": "1"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.CATALOGS()),\"e\",\"n\")",
+   "power_bi": "n"
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.CATALOGS(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[CATALOG_NAME],[DESCRIPTION],[ROLES],[DATE_MODIFIED],[COMPATIBILITY_LEVEL],[TYPE],[VERSION],[DATABASE_ID],[DATABASE_GUID],[DATE_QUERIED],[CURRENTLY_USED],[POPULARITY],[WEIGHTEDPOPULARITY],[CLIENTCACHEREFRESHPOLICY],[ENCRYPTION_LEVEL],[CRYPTOKEY_UPDATED]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.CATALOGS(1))",
+   "power_bi": "ERR:Query (1, 43) The 'INFO.CATALOGS' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.CATALOGS(\"ID\"))",
+   "power_bi": "ERR:Query (1, 43) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.CATALOGS(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.COLUMNPARTITIONSTORAGES())",
+   "power_bi": "60"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.COLUMNPARTITIONSTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.COLUMNPARTITIONSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[ColumnStorageID],[PartitionStorageID],[DataVersion],[State],[SegmentStorageID],[StorageFileID]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.COLUMNPARTITIONSTORAGES(1))",
+   "power_bi": "ERR:Query (1, 58) The 'INFO.COLUMNPARTITIONSTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.COLUMNPARTITIONSTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 58) The 'INFO.COLUMNPARTITIONSTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.COLUMNPARTITIONSTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.COLUMNSTORAGES())",
+   "power_bi": "60"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.COLUMNSTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.COLUMNSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[ColumnID],[Name],[StoragePosition],[DictionaryStorageID],[Settings],[ColumnFlags],[Collation],[OrderByColumn],[Locale],[BinaryCharacters],[Statistics_DistinctStates],[Statistics_MinDataID],[Statistics_MaxDataID],[Statistics_OriginalMinSegmentDataID],[Statistics_RLESortOrder],[Statistics_RowCount],[Statistics_HasNulls],[Statistics_RLERuns],[Statistics_OthersRLERuns],[Statistics_Usage],[Statistics_DBType],[Statistics_XMType],[Statistics_CompressionType],[Statistics_CompressionParam],[Statistics_EncodingHint],[IsDeltaPartitionColumn],[DeltaColumnMappingPhysicalName],[DeltaColumnMappingId],[FramedSourceColumn],[DeltaColumnPrimitiveType],[DeltaTableColumnStorageID],[StringIndexStorageID],[ColumnIndexStorageID],[FullTextIndexStorageID]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.COLUMNSTORAGES(1))",
+   "power_bi": "ERR:Query (1, 49) The 'INFO.COLUMNSTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.COLUMNSTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 49) The 'INFO.COLUMNSTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.COLUMNSTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.CSDLMETADATA())",
+   "power_bi": "1"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.CSDLMETADATA()),\"e\",\"n\")",
+   "power_bi": "n"
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.CSDLMETADATA(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[METADATA]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.CSDLMETADATA(1))",
+   "power_bi": "ERR:Query (1, 47) The 'INFO.CSDLMETADATA' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.CSDLMETADATA(\"ID\"))",
+   "power_bi": "ERR:Query (1, 47) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.CSDLMETADATA(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.CULTURES())",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.CULTURES()),\"e\",\"n\")",
+   "power_bi": "e"
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.CULTURES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[ModelID],[Name],[LinguisticMetadataID],[ModifiedTime],[StructureModifiedTime]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.CULTURES(1))",
+   "power_bi": "ERR:Query (1, 43) The 'INFO.CULTURES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.CULTURES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 43) The 'INFO.CULTURES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.CULTURES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.DICTIONARYSTORAGES())",
+   "power_bi": "60"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.DICTIONARYSTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.DICTIONARYSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[ColumnStorageID],[Type],[DataType],[DataVersion],[BaseId],[Magnitude],[LastId],[IsNullable],[IsUnique],[IsOperatingOn32],[DictionaryFlags],[StorageFileID],[Size]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.DICTIONARYSTORAGES(1))",
+   "power_bi": "ERR:Query (1, 53) The 'INFO.DICTIONARYSTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.DICTIONARYSTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 53) The 'INFO.DICTIONARYSTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.DICTIONARYSTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.FUNCTIONS())",
+   "power_bi": "470"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.FUNCTIONS()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.FUNCTIONS(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[FUNCTION_NAME],[DESCRIPTION],[PARAMETER_LIST],[RETURN_TYPE],[ORIGIN],[INTERFACE_NAME],[LIBRARY_NAME],[DLL_NAME],[HELP_FILE],[HELP_CONTEXT],[OBJECT],[CAPTION],[PARAMETERINFO],[DIRECTQUERY_PUSHABLE],[VISUAL_CALCULATIONS_INFO]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.FUNCTIONS(1))",
+   "power_bi": "ERR:Query (1, 44) The 'INFO.FUNCTIONS' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.FUNCTIONS(\"ID\"))",
+   "power_bi": "ERR:Query (1, 44) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.FUNCTIONS(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.MODEL())",
+   "power_bi": "1"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.MODEL()),\"e\",\"n\")",
+   "power_bi": "n"
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.MODEL(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[Name],[Description],[StorageLocation],[DefaultMode],[DefaultDataView],[Culture],[Collation],[ModifiedTime],[StructureModifiedTime],[Version],[DataAccessOptions],[DefaultMeasureID],[DefaultPowerBIDataSourceVersion],[ForceUniqueNames],[DiscourageImplicitMeasures],[DataSourceVariablesOverrideBehavior],[DataSourceDefaultMaxConnections],[SourceQueryCulture],[MAttributes],[DiscourageCompositeModels],[AutomaticAggregationOptions],[DisableAutoExists],[MaxParallelismPerRefresh],[MaxParallelismPerQuery],[DirectLakeBehavior],[ValueFilterBehavior],[SelectionExpressionBehavior],[VersionMarker]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.MODEL(1))",
+   "power_bi": "ERR:Query (1, 40) The 'INFO.MODEL' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.MODEL(\"ID\"))",
+   "power_bi": "ERR:Query (1, 40) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.MODEL(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.PARTITIONS())",
+   "power_bi": "7"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.PARTITIONS()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.PARTITIONS(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[TableID],[Name],[Description],[DataSourceID],[QueryDefinition],[State],[Type],[PartitionStorageID],[Mode],[DataView],[ModifiedTime],[RefreshedTime],[SystemFlags],[ErrorMessage],[RetainDataTillForceCalculate],[RangeStart],[RangeEnd],[RangeGranularity],[RefreshBookmark],[QueryGroupID],[ExpressionSourceID],[MAttributes],[DataCoverageDefinitionID],[SchemaName]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.PARTITIONS(1))",
+   "power_bi": "ERR:Query (1, 45) The 'INFO.PARTITIONS' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.PARTITIONS(\"ID\"))",
+   "power_bi": "ERR:Query (1, 45) The 'INFO.PARTITIONS' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.PARTITIONS(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.PARTITIONSTORAGES())",
+   "power_bi": "30"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.PARTITIONSTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.PARTITIONSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[PartitionID],[Name],[StoragePosition],[SegmentMapStorageID],[DataObjectId],[StorageFolderID],[DeltaTableMetadataStorageID]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.PARTITIONSTORAGES(1))",
+   "power_bi": "ERR:Query (1, 52) The 'INFO.PARTITIONSTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.PARTITIONSTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 52) The 'INFO.PARTITIONSTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.PARTITIONSTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.PROPERTIES())",
+   "power_bi": "144"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.PROPERTIES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.PROPERTIES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[PropertyName],[PropertyDescription],[PropertyType],[PropertyAccessType],[IsRequired],[Value]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.PROPERTIES(1))",
+   "power_bi": "ERR:Query (1, 45) The 'INFO.PROPERTIES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.PROPERTIES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 45) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.PROPERTIES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.SEGMENTMAPSTORAGES())",
+   "power_bi": "30"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.SEGMENTMAPSTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.SEGMENTMAPSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[PartitionStorageID],[Type],[RecordCount],[SegmentCount],[RecordsPerSegment]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.SEGMENTMAPSTORAGES(1))",
+   "power_bi": "ERR:Query (1, 53) The 'INFO.SEGMENTMAPSTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.SEGMENTMAPSTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 53) The 'INFO.SEGMENTMAPSTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.SEGMENTMAPSTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.SEGMENTSTORAGES())",
+   "power_bi": "60"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.SEGMENTSTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.SEGMENTSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[ColumnPartitionStorageID],[SegmentCount],[StorageFileID]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.SEGMENTSTORAGES(1))",
+   "power_bi": "ERR:Query (1, 50) The 'INFO.SEGMENTSTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.SEGMENTSTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 50) The 'INFO.SEGMENTSTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.SEGMENTSTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGEFILES())",
+   "power_bi": "139"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.STORAGEFILES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.STORAGEFILES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[OwnerID],[OwnerType],[StorageFolderID],[FileName]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGEFILES(1))",
+   "power_bi": "ERR:Query (1, 47) The 'INFO.STORAGEFILES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGEFILES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 47) The 'INFO.STORAGEFILES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.STORAGEFILES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGEFOLDERS())",
+   "power_bi": "60"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.STORAGEFOLDERS()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.STORAGEFOLDERS(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[OwnerID],[OwnerType],[Path]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGEFOLDERS(1))",
+   "power_bi": "ERR:Query (1, 49) The 'INFO.STORAGEFOLDERS' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGEFOLDERS(\"ID\"))",
+   "power_bi": "ERR:Query (1, 49) The 'INFO.STORAGEFOLDERS' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.STORAGEFOLDERS(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLECOLUMNS())",
+   "power_bi": "60"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.STORAGETABLECOLUMNS()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.STORAGETABLECOLUMNS(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[DATABASE_NAME],[CUBE_NAME],[MEASURE_GROUP_NAME],[DIMENSION_NAME],[ATTRIBUTE_NAME],[TABLE_ID],[COLUMN_ID],[COLUMN_TYPE],[COLUMN_ENCODING],[DATATYPE],[ISKEY],[ISUNIQUE],[ISNULLABLE],[ISROWNUMBER],[DICTIONARY_SIZE],[DICTIONARY_ISPAGEABLE],[DICTIONARY_ISRESIDENT],[DICTIONARY_TEMPERATURE],[DICTIONARY_LAST_ACCESSED],[STRING_INDEX_SIZE],[FULLTEXT_INDEX_SIZE]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLECOLUMNS(1))",
+   "power_bi": "ERR:Query (1, 54) The 'INFO.STORAGETABLECOLUMNS' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLECOLUMNS(\"ID\"))",
+   "power_bi": "ERR:Query (1, 54) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.STORAGETABLECOLUMNS(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLECOLUMNSEGMENTS())",
+   "power_bi": "90"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.STORAGETABLECOLUMNSEGMENTS()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.STORAGETABLECOLUMNSEGMENTS(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[DATABASE_NAME],[CUBE_NAME],[MEASURE_GROUP_NAME],[PARTITION_NAME],[DIMENSION_NAME],[TABLE_ID],[COLUMN_ID],[SEGMENT_NUMBER],[TABLE_PARTITION_NUMBER],[RECORDS_COUNT],[ALLOCATED_SIZE],[USED_SIZE],[COMPRESSION_TYPE],[BITS_COUNT],[BOOKMARK_BITS_COUNT],[VERTIPAQ_STATE],[ISPAGEABLE],[ISRESIDENT],[TEMPERATURE],[LAST_ACCESSED]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLECOLUMNSEGMENTS(1))",
+   "power_bi": "ERR:Query (1, 61) The 'INFO.STORAGETABLECOLUMNSEGMENTS' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLECOLUMNSEGMENTS(\"ID\"))",
+   "power_bi": "ERR:Query (1, 61) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.STORAGETABLECOLUMNSEGMENTS(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLES())",
+   "power_bi": "30"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.STORAGETABLES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.STORAGETABLES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[DATABASE_NAME],[CUBE_NAME],[MEASURE_GROUP_NAME],[DIMENSION_NAME],[TABLE_ID],[TABLE_PARTITIONS_COUNT],[HINT_TABLE_TYPE],[ROWS_COUNT],[RIVIOLATION_COUNT]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLES(1))",
+   "power_bi": "ERR:Query (1, 48) The 'INFO.STORAGETABLES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.STORAGETABLES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 48) 'ID' is not a valid restriction name."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.STORAGETABLES(),FALSE()))",
+   "power_bi": "BLANK"
+  },
+  {
+   "expression": "COUNTROWS(INFO.TABLESTORAGES())",
+   "power_bi": "30"
+  },
+  {
+   "expression": "IF(ISEMPTY(INFO.TABLESTORAGES()),\"e\",\"n\")",
+   "power_bi": "ERR:An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+  },
+  {
+   "expression": "TOCSV(FILTER(INFO.TABLESTORAGES(),FALSE()),3,\",\",TRUE)",
+   "power_bi": "[ID],[TableID],[Name],[Version],[Settings],[RIViolationCount],[StorageFolderID]\n"
+  },
+  {
+   "expression": "COUNTROWS(INFO.TABLESTORAGES(1))",
+   "power_bi": "ERR:Query (1, 48) The 'INFO.TABLESTORAGES' function expects a constant string representing a restriction name."
+  },
+  {
+   "expression": "COUNTROWS(INFO.TABLESTORAGES(\"ID\"))",
+   "power_bi": "ERR:Query (1, 48) The 'INFO.TABLESTORAGES' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values."
+  },
+  {
+   "expression": "COUNTROWS(FILTER(INFO.TABLESTORAGES(),FALSE()))",
+   "power_bi": "BLANK"
+  }
+ ]
+}
