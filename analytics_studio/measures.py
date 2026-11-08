@@ -8794,7 +8794,11 @@ def _evaluate_measures_once(
     def unknown_member_hidden(table_id: str) -> bool:
         """ALLNOBLANKROW(T) removes the blank member from every view of T; ALLNOBLANKROW(T[column]) only keeps the rows that
         point at it out of the facts (live Power BI: VALUES(T[c]) still lists it, SUM over the facts drops its rows)."""
-        return table_id in unknown_member_exclusions and unknown_member_exclusions[table_id] is None
+        if table_id in unknown_member_exclusions and unknown_member_exclusions[table_id] is None:
+            return True
+        # Task 89: the blank member a one-to-one partner of an ALLNOBLANKROW table takes from that table's blank member is not listed
+        # (the rows it keeps for the facts that point at them stay)
+        return bool((evaluation_contexts_by_id.get(table_id) or {}).get("noblank_listing"))
 
     def own_unknown_member_selected(context: dict[str, Any], ignore_exclusion: bool = False) -> bool:
         """Do the filters on this table itself still select its virtual blank member (the predicate holds for a row of BLANKs)?"""
@@ -16560,6 +16564,20 @@ def _evaluate_measures_once(
                 updated.pop("filter_rows", None)
                 updated_filter_roots.discard(updated["id"])
 
+        if function == "ALLNOBLANKROW" and not clear_all and target_context is not None:
+            # Task 89 (live Power BI: CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_W[K])), ALLNOBLANKROW(ZH_U)), ZH_F2) is 3, not 4): the
+            # blank member a one-to-one partner takes from the blank member of the table ALLNOBLANKROW names is not kept
+            named_id = target_context["id"]
+            for item in relationship_definitions:
+                if not (isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"):
+                    continue
+                ends = {str(item.get("from_table_id")), str(item.get("to_table_id"))}
+                if named_id not in ends or len(ends) != 2:
+                    continue
+                partner = updated_by_id.get((ends - {named_id}).pop())
+                if partner is None:
+                    continue
+                partner["noblank_listing"] = True
         if captured_table_filter is not None:
             table_id, matching_indexes = captured_table_filter
             updated = updated_by_id[table_id]
