@@ -8977,6 +8977,7 @@ def _evaluate_measures_once(
         refuse_one_to_one_pair_filters(tables, set(filter_table_ids))
         ignored = set(ignore_exclusions)
         excluded = {table_id for table_id in unknown_member_exclusions if table_id in unknown_member_ids and table_id not in ignored}
+        exclusion_only = excluded - set(filter_table_ids)  # Task 89: roots only because ALLNOBLANKROW excludes their blank member
         filter_table_ids = set(filter_table_ids) | excluded  # ALLNOBLANKROW leaves no filter on its table, only the missing blank member
         selected = {
             str(table.get("id")): own_unknown_member_selected(table, str(table.get("id")) in ignored)
@@ -8992,7 +8993,7 @@ def _evaluate_measures_once(
             if table.get("id") in filter_table_ids and table.get("filter_column_rows")
             and all(getattr(rows, "many", False) for rows in table["filter_column_rows"].values())
         }
-        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected, peer_blank=peer_blank, many_blank=many_blank)
+        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected, peer_blank=peer_blank, many_blank=many_blank, exclusion_only=exclusion_only)
 
     try:
         rows_by_table_id = propagate_relationship_filters(
@@ -13704,7 +13705,7 @@ def _evaluate_measures_once(
                 return context, unique_rows
             context, actual = resolve_table(source[1], source[2])
             held = evaluation_contexts_by_id.get(context["id"], {})
-            if argument[1] == "VALUES" and held.get("filter_column_rows") and not eff_transition.get(context["id"]) and any(  # a table with a many-side child
+            if argument[1] == "VALUES" and held.get("filter_column_rows") and not held.get("noblank_listing") and not eff_transition.get(context["id"]) and any(  # a table with a many-side child
                 isinstance(item, dict) and item.get("is_active") and (
                     (item.get("cardinality") == "many_to_one" and str(item.get("to_table_id")) == context["id"])
                     or (item.get("cardinality") == "one_to_many" and str(item.get("from_table_id")) == context["id"])
@@ -16564,20 +16565,6 @@ def _evaluate_measures_once(
                 updated.pop("filter_rows", None)
                 updated_filter_roots.discard(updated["id"])
 
-        if function == "ALLNOBLANKROW" and not clear_all and target_context is not None:
-            # Task 89 (live Power BI: CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_W[K])), ALLNOBLANKROW(ZH_U)), ZH_F2) is 3, not 4): the
-            # blank member a one-to-one partner takes from the blank member of the table ALLNOBLANKROW names is not kept
-            named_id = target_context["id"]
-            for item in relationship_definitions:
-                if not (isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"):
-                    continue
-                ends = {str(item.get("from_table_id")), str(item.get("to_table_id"))}
-                if named_id not in ends or len(ends) != 2:
-                    continue
-                partner = updated_by_id.get((ends - {named_id}).pop())
-                if partner is None:
-                    continue
-                partner["noblank_listing"] = True
         if captured_table_filter is not None:
             table_id, matching_indexes = captured_table_filter
             updated = updated_by_id[table_id]
@@ -16599,6 +16586,24 @@ def _evaluate_measures_once(
         elif function == "ALLNOBLANKROW" and target_context is not None and modifier_arguments[0][0] == "table":
             # the table without its blank row is the expanded table of the rows that exist: only the one-side rows they point at
             narrow_one_side_tables(updated_by_id, updated_filter_roots, target_context["id"], range(len(target_context["rows"])))
+        if function == "ALLNOBLANKROW" and not clear_all and target_context is not None:
+            # Task 89 (live Power BI: CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_W[K])), ALLNOBLANKROW(ZH_U)), ZH_F2) is 3, not 4): the
+            # blank member a one-to-one partner takes from the blank member of the table ALLNOBLANKROW names is not kept
+            named_id = target_context["id"]
+            for item in relationship_definitions:
+                if not (isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"):
+                    continue
+                ends = {str(item.get("from_table_id")), str(item.get("to_table_id"))}
+                if named_id not in ends or len(ends) != 2:
+                    continue
+                partner = updated_by_id.get((ends - {named_id}).pop())
+                if partner is None:
+                    continue
+                held_rows = partner.get("filter_column_rows") or {}  # after the table filter / the narrowing above has settled the partner
+                if held_rows and all(getattr(rows, "blank", False) for rows in held_rows.values()):
+                    # only a blank member the partner holds through a filter (the named table's blank member selected it); a partner that
+                    # lists its own blank member for the named table's rows without a partner is not changed (not measured)
+                    partner["noblank_listing"] = True
 
         previous_rows = rows_by_table_id
         previous_context = current_context

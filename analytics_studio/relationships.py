@@ -64,6 +64,7 @@ def propagate_relationship_filters(
     diagnostics: dict[str, set[str]] | None = None,
     peer_blank: set[str] | None = None,
     many_blank: set[str] | None = None,
+    exclusion_only: set[str] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Propagate explicitly filtered rows across active, loaded relationships.
 
@@ -226,7 +227,7 @@ def propagate_relationship_filters(
         # live Power BI: with ambiguous routes every filtered table pushes ITS OWN filter along its shortest routes; what each
         # filter leaves on a table is intersected (a table narrowed by another filter's detour does not push that narrowing on)
         per_root = [
-            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected, peer_blank=peer_blank, many_blank=many_blank)
+            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected, peer_blank=peer_blank, many_blank=many_blank, exclusion_only=exclusion_only)
             for root_id in sorted(filter_roots)
         ]
         merged: dict[str, list[dict[str, Any]]] = {}
@@ -322,7 +323,7 @@ def propagate_relationship_filters(
                 constrained_ids.add(target_id)
                 constrained.append(target_id)
 
-    _apply_expanded_table_filters(tables_by_id, rows_by_id, relationships, filter_roots, unknown_state)
+    _apply_expanded_table_filters(tables_by_id, rows_by_id, relationships, filter_roots, unknown_state, exclusion_only)
     return rows_by_id
 
 
@@ -352,6 +353,7 @@ def _apply_expanded_table_filters(
     relationships: list[dict[str, Any]],
     filter_roots: set[str],
     unknown_state: dict[str, bool] | None = None,
+    exclusion_only: set[str] | None = None,
 ) -> None:
     """Task 87 (table-filter-77): a table used as a filter argument filters the other tables by its EXPANDED table, row by row.
 
@@ -444,7 +446,9 @@ def _apply_expanded_table_filters(
                 else:
                     reached_rows.setdefault(table_id, set()).add(position)
         for table_id in root_paths:
-            if table_id == root_id or table_id in filter_roots or table_id not in blank_reached or root_id in (tables_by_id[table_id].get("expanded_filter_cleared") or ()):
+            # Task 89: a table that is a root only because ALLNOBLANKROW excludes its blank member has no filter of its own
+            excluded_only = table_id in (exclusion_only or ())
+            if table_id == root_id or (table_id in filter_roots and not excluded_only) or (table_id not in blank_reached and not excluded_only) or root_id in (tables_by_id[table_id].get("expanded_filter_cleared") or ()):
                 # a one-side table with a filter of its own: what a filter on its key column replaces is settled by the caller; when every
                 # key of the filter rows has a match the caller narrows the table itself (and settles what a later ALL() clears)
                 continue
@@ -453,8 +457,6 @@ def _apply_expanded_table_filters(
             narrowed = _RowsWithBlankMember(row for row in rows_by_id[table_id] if position_of[id(row)] in keep)
             narrowed.blank_member = table_id in blank_reached and (unknown_state or {}).get(table_id, True)
             rows_by_id[table_id] = narrowed
-        if by_filter_function and not _is_whole_row_table_filter(root):
-            continue  # the other tables a FILTER(T, ..) reaches through its one side are left to the caller (not modelled here)
         for target_id, target in tables_by_id.items():
             if target_id == root_id or target_id in root_paths or root_id in (target.get("expanded_filter_cleared") or ()):
                 continue  # Task 88: a table the user cleared (ALL / REMOVEFILTERS ..) after this table filter was applied is no longer narrowed by it

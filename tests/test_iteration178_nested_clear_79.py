@@ -128,6 +128,64 @@ CASES = [
      'y1=1;y3=1;y6=1'),  # matching (spec item 279)
     ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(SUM(ZH_F2[Amt]),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
      '=69;y1=15;y3=29;y6=22'),  # matching (spec item 288)
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[K])),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F,ZH_F[Amt]>10))',
+     '5'),  # fixed (Task 89 part 2, spec89 item 1)
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLNOBLANKROW(ZH_W)),FILTER(ZH_F,ZH_F[Amt]>10))',
+     '3'),  # fixed (Task 89 part 2, spec89 item 7)
+    ('CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALL(ZH_U[K])),FILTER(ZH_F2,ZH_F2[Amt]>10))',
+     '9'),  # fixed (Task 89 part 2, spec89 item 27)
+    ('CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALL(ZH_U[K])),FILTER(ZH_F2,ZH_F2[Amt]>10))',
+     '176'),  # fixed (Task 89 part 2, spec89 item 64)
+    ('CALCULATE(CALCULATE(SUM(ZH_F[Amt]),REMOVEFILTERS(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))',
+     '176'),  # fixed (Task 89 part 2, spec89 item 68)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[K])),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=5;m2=5;m2b=5;m4=5;m7=5'),  # fixed (Task 89 part 2, spec89 item 73)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[K])),ALLNOBLANKROW(ZH_U[X])),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=4;m2=4;m2b=4;m4=4;m7=4'),  # fixed (Task 89 part 2, spec89 item 74)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[K])),ALLNOBLANKROW(ZH_W)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=3;m2=3;m2b=3;m4=3;m7=3'),  # fixed (Task 89 part 2, spec89 item 75)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F,ZH_F[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=5;m2=5;m2b=5;m4=5;m7=5'),  # fixed (Task 89 part 2, spec89 item 81)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLNOBLANKROW(ZH_W)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=3;m2=3;m2b=3;m4=3;m7=3'),  # fixed (Task 89 part 2, spec89 item 82)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLNOBLANKROW(ZH_W)),ZH_F2)),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=3;m2=3;m2b=3;m4=3;m7=3'),  # fixed (Task 89 part 2, spec89 item 83)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLSELECTED(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=176;m2=176;m2b=176;m4=176;m7=176'),  # fixed (Task 89 part 2, spec89 item 142)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLSELECTED(ZH_W)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=176;m2=176;m2b=176;m4=176;m7=176'),  # fixed (Task 89 part 2, spec89 item 143)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=1;x1=1;x3=1;x6=1'),  # fixed (Task 89 part 2, spec89 item 156)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALLSELECTED(ZH_W)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=4;x1=2;x3=1;x6=2'),  # fixed (Task 89 part 2, spec89 item 182)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),REMOVEFILTERS(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=4;x1=2;x3=1;x6=2'),  # fixed (Task 89 part 2, spec89 item 184)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     'x1=1;x3=1;x6=1'),  # fixed (Task 89 part 2, spec89 item 190)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[K])),ALLNOBLANKROW(ZH_W)),ZH_F2)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=3;y1=3;y10=3;y3=3;y6=3;y9=3'),  # fixed (Task 89 part 2, spec89 item 231)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(VALUES(ZH_U[X])),ALLNOBLANKROW(ZH_W)),ZH_F)),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=3;y1=3;y10=3;y3=3;y6=3;y9=3'),  # fixed (Task 89 part 2, spec89 item 237)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     'y1=2;y3=1;y6=2'),  # fixed (Task 89 part 2, spec89 item 261)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALLSELECTED(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=4;y1=2;y3=1;y6=2'),  # fixed (Task 89 part 2, spec89 item 265)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALLSELECTED(ZH_W)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=4;y1=2;y3=1;y6=2'),  # fixed (Task 89 part 2, spec89 item 266)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_U),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     'y1=1;y3=1;y6=1'),  # fixed (Task 89 part 2, spec89 item 272)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLNOBLANKROW(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     'y1=18;y3=9;y6=36'),  # fixed (Task 89 part 2, spec89 item 294)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=113;y1=18;y3=9;y6=36'),  # fixed (Task 89 part 2, spec89 item 296)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_W[Y],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),REMOVEFILTERS(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_W[Y]&"="&[v],";",ZH_W[Y])',
+     '=113;y1=18;y3=9;y6=36'),  # fixed (Task 89 part 2, spec89 item 298)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_B[N],"v",CALCULATE(CALCULATE(SUM(ZH_F[Amt]),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_B[N]&"="&[v],";",ZH_B[N])',
+     'm1=176;m2=176;m2b=176;m4=176;m7=176'),  # fixed (Task 89 part 2, spec3 item 124)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),ALLSELECTED(ZH_U)),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=4;x1=2;x3=1;x6=2'),  # fixed (Task 89 part 2, spec3 item 147)
+    ('CONCATENATEX(SUMMARIZECOLUMNS(ZH_U[X],"v",CALCULATE(CALCULATE(COUNTROWS(ZH_F),REMOVEFILTERS(ZH_U[X])),FILTER(ZH_F2,ZH_F2[Amt]>10))),ZH_U[X]&"="&[v],";",ZH_U[X])',
+     '=4;x1=2;x3=1;x6=2'),  # fixed (Task 89 part 2, spec3 item 148)
 ]
 
 
