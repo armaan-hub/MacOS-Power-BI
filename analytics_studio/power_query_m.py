@@ -4102,7 +4102,8 @@ class PowerQueryMEditorDialog(QDialog):
                     )
                 source_candidate = self._source_candidate
             candidate = apply_transformations(
-                source_candidate, steps, parameters=self._parameters
+                source_candidate, steps, parameters=self._parameters,
+                initial_types=self._source_column_types,
             )
         except (PowerQueryMScriptError, TransformationError) as exc:
             self._set_status(str(exc), ok=False)

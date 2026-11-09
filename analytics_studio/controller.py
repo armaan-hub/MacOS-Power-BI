@@ -4093,6 +4093,9 @@ class StudioController(QObject):
             transformed = apply_transformations(
                 raw_candidate, steps,
                 parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                initial_types=self._source_initial_column_types(
+                    source, self._project, raw_candidate
+                ),
             )
         except (OSError, ProjectFileError, TypeError, ValueError) as exc:
             self._set_status(f"Could not set {column} to {type_name.replace('_', ' ')}: {exc}")
@@ -5027,6 +5030,7 @@ class StudioController(QObject):
             source_candidate = apply_transformations(
                 parsed, transform_steps,
                 parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                initial_types=table_record["column_types"],
             )
             base_types = column_types_after_steps(
                 parsed.headers,
@@ -5163,6 +5167,7 @@ class StudioController(QObject):
             source_candidate = apply_transformations(
                 parsed, transform_steps,
                 parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                initial_types=table_record["column_types"],
             )
             base_types = column_types_after_steps(
                 parsed.headers,
@@ -5342,6 +5347,7 @@ class StudioController(QObject):
             source_candidate = apply_transformations(
                 parsed, transform_steps,
                 parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                initial_types=table_record["column_types"],
             )
             base_types = column_types_after_steps(
                 parsed.headers,
@@ -6338,20 +6344,21 @@ class StudioController(QObject):
                         f"{source.get('name', source_id)}: {notice}"
                         for notice in raw.notices
                     )
-                query_candidate = apply_transformations(
-                    raw, source_steps,
-                    parameters=parameter_values(candidate.get("query_parameters", []), candidate.get("query_functions", [])),
-                )
-                query_candidates[source_id] = query_candidate
-                model_candidate = _model_candidate_with_format_errors_as_blank(
-                    query_candidate
-                )
                 initial_types = (
                     self._query_input_column_types(
                         source, candidate, candidate=raw
                     )
                     if kind == "query"
                     else infer_column_types(raw.headers, raw.rows)
+                )
+                query_candidate = apply_transformations(
+                    raw, source_steps,
+                    parameters=parameter_values(candidate.get("query_parameters", []), candidate.get("query_functions", [])),
+                    initial_types=initial_types,
+                )
+                query_candidates[source_id] = query_candidate
+                model_candidate = _model_candidate_with_format_errors_as_blank(
+                    query_candidate
                 )
                 type_map = column_types_after_steps(
                     raw.headers,
@@ -7058,6 +7065,7 @@ class StudioController(QObject):
             source_candidate = apply_transformations(
                 parsed, transform_steps,
                 parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                initial_types=table_record["column_types"],
             )
             base_types = column_types_after_steps(
                 parsed.headers,
@@ -7324,6 +7332,8 @@ class StudioController(QObject):
             transformed = apply_transformations(
                 candidate, validated_steps,
                 parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                # The steps are only type conversions: no formula reads a cell, so no cell is typed first.
+                initial_types={},
             )
             source_record = {
                 "id": source_id,
@@ -7604,6 +7614,7 @@ class StudioController(QObject):
                     transformed = apply_transformations(
                         query_candidate, query_steps,
                         parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                        initial_types=source_column_types,
                     )
                     type_map = column_types_after_steps(
                         query_candidate.headers,
@@ -8153,6 +8164,8 @@ class StudioController(QObject):
         query_candidate = apply_transformations(
             raw_candidate, source.get("transform_steps", []),
             parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            # The persisted table types describe the output of the steps; a formula sees the types before them.
+            initial_types=self._source_initial_column_types(source, self._project, raw_candidate),
         )
         persisted_types = next_table.get("column_types", {})
         initial_types = (
@@ -9046,6 +9059,26 @@ class StudioController(QObject):
         value = table.get("column_summarizations", {}).get(column)
         return value if value in _MODEL_COLUMN_SUMMARIZATIONS else None
 
+    def _source_initial_column_types(
+        self,
+        source: dict[str, Any],
+        project: dict[str, Any],
+        raw: ImportCandidate,
+        *,
+        dependency_types: dict[str, dict[str, str]] | None = None,
+    ) -> dict[str, str]:
+        """Return the column types of ``raw`` before the source's steps, the ones the model applies afterwards.
+
+        A file, web, folder, SQL or inline source is typed by what the import detected in its cells. A saved query
+        keeps the types of the queries it reads (a text column that holds "2" stays text); only a query that has
+        no inherited types is detected from its cells. Custom-column formulas read cells as these types."""
+        types: dict[str, str] = {}
+        if source.get("kind") == "query":
+            types = self._query_input_column_types(
+                source, project, candidate=raw, dependency_types=dependency_types
+            )
+        return types or infer_column_types(raw.headers, raw.rows)
+
     @classmethod
     def _query_input_column_types(
         cls,
@@ -9892,7 +9925,8 @@ class StudioController(QObject):
                 )
                 if isinstance(raw_cached, ImportCandidate):
                     preview = apply_transformations(
-                        raw_cached, steps, parameters=parameters
+                        raw_cached, steps, parameters=parameters,
+                        initial_types=initial_types,
                     )
                     result_types = column_types_after_steps(
                         raw_cached.headers,
@@ -9942,9 +9976,6 @@ class StudioController(QObject):
             steps = validate_steps(
                 source_state.get("steps", source.get("transform_steps", []))
             )
-            transformed = apply_transformations(
-                raw, steps, parameters=parameters
-            )
             definition = source.get("query_definition", {})
             dependencies = [
                 str(item) for item in definition.get("source_ids", [])
@@ -9969,6 +10000,9 @@ class StudioController(QObject):
                     source_types = infer_column_types(raw.headers, raw.rows)
             else:
                 source_types = infer_column_types(raw.headers, raw.rows)
+            transformed = apply_transformations(
+                raw, steps, parameters=parameters, initial_types=source_types
+            )
             type_map = column_types_after_steps(
                 raw.headers,
                 steps,
@@ -10290,20 +10324,22 @@ class StudioController(QObject):
             if not all(item in candidates for item in dependencies):
                 continue
             raw = self._query_candidate(source, candidates, project=project)
+            input_types = self._query_input_column_types(
+                source,
+                project,
+                candidate=raw,
+                dependency_types=type_maps,
+            )
             query_candidate = apply_transformations(
                 raw, source.get("transform_steps", []),
                 parameters=parameter_values(project.get("query_parameters", []), project.get("query_functions", [])),
+                initial_types=input_types,
             )
             type_map = column_types_after_steps(
                 raw.headers,
                 source.get("transform_steps", []),
                 output_headers=query_candidate.headers,
-                initial_types=self._query_input_column_types(
-                    source,
-                    project,
-                    candidate=raw,
-                    dependency_types=type_maps,
-                ),
+                initial_types=input_types,
             )
             transformed, calculated_types = self._apply_calculated_columns(
                 source_id,
@@ -10395,15 +10431,6 @@ class StudioController(QObject):
                     "The source changed while Transform data was open. Reopen Transform data to preview the latest rows."
                 )
                 return False
-            confirmed = apply_transformations(
-                raw_candidate, validated_steps,
-                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
-            )
-            if not _candidate_snapshot_matches(confirmed, transformed):
-                self._set_status(
-                    "The transformation result no longer matches its preview. Reopen Transform data and try again."
-                )
-                return False
             source_column_types = (
                 self._query_input_column_types(
                     source, self._project, candidate=raw_candidate
@@ -10415,6 +10442,16 @@ class StudioController(QObject):
                 source_column_types = infer_column_types(
                     raw_candidate.headers, raw_candidate.rows
                 )
+            confirmed = apply_transformations(
+                raw_candidate, validated_steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                initial_types=source_column_types,
+            )
+            if not _candidate_snapshot_matches(confirmed, transformed):
+                self._set_status(
+                    "The transformation result no longer matches its preview. Reopen Transform data and try again."
+                )
+                return False
             next_project = deepcopy(self._project)
             target = next(
                 item for item in next_project["data_sources"]
@@ -11085,18 +11122,6 @@ class StudioController(QObject):
                         f"The source for {source.get('name', source_id)!r} changed during the Power Query session. Reopen it and preview again."
                     )
                     return False
-                transformed = apply_transformations(
-                    raw_candidate, validated,
-                    parameters=parameter_values(session_project.get("query_parameters", []), session_project.get("query_functions", [])),
-                )
-                if (
-                    not _candidate_snapshot_matches(transformed, previewed_result)
-                    and not can_rebuild_from_staged_dependency
-                ):
-                    self._set_status(
-                        f"The preview for {source.get('name', source_id)!r} no longer matches its steps. Reopen it and preview again."
-                    )
-                    return False
                 # Downstream query source candidates in the open session were
                 # built from these saved upstream steps and refreshed root data.
                 definition = source.get("query_definition", {})
@@ -11128,6 +11153,19 @@ class StudioController(QObject):
                     initial_types = infer_column_types(
                         raw_candidate.headers, raw_candidate.rows
                     )
+                transformed = apply_transformations(
+                    raw_candidate, validated,
+                    parameters=parameter_values(session_project.get("query_parameters", []), session_project.get("query_functions", [])),
+                    initial_types=initial_types,
+                )
+                if (
+                    not _candidate_snapshot_matches(transformed, previewed_result)
+                    and not can_rebuild_from_staged_dependency
+                ):
+                    self._set_status(
+                        f"The preview for {source.get('name', source_id)!r} no longer matches its steps. Reopen it and preview again."
+                    )
+                    return False
                 result_types = column_types_after_steps(
                     raw_candidate.headers,
                     validated,
@@ -11204,6 +11242,7 @@ class StudioController(QObject):
                     baseline_transformed = apply_transformations(
                         raw_candidate, baseline_steps,
                         parameters=parameter_values(session_project.get("query_parameters", []), session_project.get("query_functions", [])),
+                        initial_types=initial_types,
                     )
                     baseline_types = column_types_after_steps(
                         raw_candidate.headers,
@@ -11974,10 +12013,6 @@ class StudioController(QObject):
                         preserve_origins=kind == "folder",
                     )
                 raw_candidates[source_id] = raw
-                query_candidate = apply_transformations(
-                    raw, source.get("transform_steps", []),
-                    parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
-                )
                 definition = source.get("query_definition", {})
                 input_types: dict[str, str] = (
                     self._query_input_column_types(
@@ -11988,6 +12023,11 @@ class StudioController(QObject):
                     )
                     if kind == "query"
                     else infer_column_types(raw.headers, raw.rows)
+                )
+                query_candidate = apply_transformations(
+                    raw, source.get("transform_steps", []),
+                    parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                    initial_types=input_types,
                 )
                 base_types = column_types_after_steps(
                     raw.headers,

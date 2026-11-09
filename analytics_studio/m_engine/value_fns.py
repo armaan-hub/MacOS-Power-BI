@@ -701,6 +701,10 @@ def _arith(op: str) -> Callable[[MValue, MValue], MValue]:
 
 
 def _value_type(value: MValue) -> MValue:
+    if isinstance(value, V.Number) and value.subtype is not None:
+        # Power BI's Value.Type of an Int64 cell is not a value this engine has measured (the saved answer for
+        # Value.Type([Units]) = Int64.Type is false, the plain number type gives true): refuse, never guess.
+        raise _unsupported(f"Value.Type of a {value.subtype} value")
     if isinstance(value, V.Function):
         params = tuple((spec.name, spec.type_ if spec.type_ is not None else
                         (V.TypeValue("any") if value.origin is not None else None), spec.optional)

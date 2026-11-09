@@ -202,7 +202,8 @@ from analytics_studio.power_query_expression import (
 from analytics_studio.m_custom_column import (
     MFormulaRefused,
     MStorageRefused,
-    evaluate_m_formula_traced,
+    UnconvertedCell,
+    evaluate_m_formula,
     usable_m_formula,
 )
 from analytics_studio.power_query_values import (
@@ -1169,8 +1170,13 @@ def apply_transformations(
     steps: Any,
     *,
     parameters: dict[str, Any] | None = None,
+    initial_types: dict[str, str] | None = None,
 ) -> ImportCandidate:
-    """Return a transformed copy of ``candidate`` after replaying ``steps``."""
+    """Return a transformed copy of ``candidate`` after replaying ``steps``.
+
+    ``initial_types`` are the column types of ``candidate`` (the model types of the source). They reach custom
+    columns: an M formula sees each cell as a value of its column's type, as after Power BI's Changed Type step.
+    When omitted they are inferred from the candidate's own cells, which is how a file import is typed."""
     validated_steps = validate_steps(
         steps, allow_unused_sparse_boundary_helper=True
     )
@@ -1224,7 +1230,21 @@ def apply_transformations(
         notices=deepcopy(candidate.notices),
         source_id=candidate.source_id,
     )
-    for step in validated_steps:
+    source_types: dict[str, str] | None = None
+
+    def column_types_before(step_index: int) -> dict[str, str]:
+        """The column types in effect just before step ``step_index`` (the source types followed through the steps)."""
+        nonlocal source_types
+        if source_types is None:
+            source_types = (
+                dict(initial_types) if initial_types is not None
+                else infer_column_types(candidate.headers, candidate.rows)
+            )
+        return column_types_after_steps(
+            candidate.headers, validated_steps[:step_index], initial_types=source_types
+        )
+
+    for step_index, step in enumerate(validated_steps):
         op = step["op"]
         if op == "m_sparse_boundary_helper":
             continue
@@ -1402,6 +1422,7 @@ def apply_transformations(
                 parameter_values,
                 output_type=step.get("output_type", "text"),
                 query_functions=compiled_query_functions,
+                column_types=column_types_before(step_index),
             )
             _check_candidate_limits(result.headers, result.rows)
             continue
@@ -2651,8 +2672,13 @@ def _add_custom_column(
     *,
     output_type: str = "text",
     query_functions: dict[str, tuple[dict[str, str], tuple[Any, ...]]] | None = None,
+    column_types: dict[str, str] | None = None,
 ) -> ImportCandidate:
-    """Evaluate one bounded M-style formula against each row and append its result."""
+    """Evaluate one bounded M-style formula against each row and append its result.
+
+    ``column_types`` are the types of the candidate's columns at this step. Each cell is converted to its type
+    first (the rules of the model's typed columns), so the formula sees numbers, dates and logicals, as after
+    Power BI's Changed Type step. A cell that does not convert is refused when the formula reads it."""
     if name in candidate.headers:
         raise TransformationError(f"Column {name!r} already exists.")
     if len(candidate.headers) >= MAX_COLUMNS:
@@ -2682,25 +2708,28 @@ def _add_custom_column(
             raise TransformationError(
                 f"Custom column formula refers to missing column {missing[0]!r}."
             )
+    # Both evaluators see the same typed cells; the text rows are kept for the stored row objects.
+    typed_rows = _typed_rows_for_formula(candidate.rows, column_types or {})
     m_values: list[Any] | None = None
     if m_formula is not None:
         try:
-            m_values = []
-            for row in candidate.rows:
-                value, text_read = evaluate_m_formula_traced(m_formula, row)
-                if formula is not None and text_read and is_cell_error(value):
-                    # An error on a text cell may be an untyped number or date that the small evaluator
-                    # converts; the table does not say which, so the small evaluator keeps this formula.
-                    m_values = None
-                    break
-                m_values.append(value)
+            m_values = [evaluate_m_formula(m_formula, typed) for typed in typed_rows]
         except MStorageRefused as exc:
-            # The engine has Power BI's answer but a cell cannot hold it: the other evaluator would differ.
+            # The engine has Power BI's answer but a cell cannot hold it, or a cell cannot be read as its type:
+            # the other evaluator would differ, so the step is refused.
             raise TransformationError(f"Custom column formula: {exc}") from exc
         except MFormulaRefused as exc:
             if formula is None:
                 raise TransformationError(f"Custom column formula: {exc}") from exc
             m_values = None
+    if m_values is None and formula is not None and any(
+        isinstance(cell, UnconvertedCell) for typed in typed_rows for cell in typed.values()
+    ):
+        # The small evaluator cannot read a cell that did not convert to its column's type: refuse, do not guess.
+        message = next(
+            cell.message for typed in typed_rows for cell in typed.values() if isinstance(cell, UnconvertedCell)
+        )
+        raise TransformationError(f"Custom column formula: {message}")
 
     total_output_bytes = 0
     for row_index, row in enumerate(candidate.rows, 1):
@@ -2709,7 +2738,7 @@ def _add_custom_column(
                 value = m_values[row_index - 1]
             else:
                 value = evaluate_expression(
-                    formula, row, parameter_values, function_map
+                    formula, typed_rows[row_index - 1], parameter_values, function_map
                 )
             if output_type != "text" and not is_cell_error(value):
                 from analytics_studio.query_functions import (
@@ -2783,6 +2812,38 @@ def _add_custom_column(
         notices=candidate.notices,
         source_id=candidate.source_id,
     )
+
+
+def _typed_rows_for_formula(
+    rows: list[dict[str, Any]], column_types: dict[str, str]
+) -> list[dict[str, Any]]:
+    """Each row with its typed columns converted to their column type, the way Power BI's Changed Type step does.
+
+    A blank text cell in a typed column is a null (the model counts it as blank, not as an error). A cell that does
+    not convert becomes an ``UnconvertedCell``, which refuses the formula only when the formula reads it."""
+    typed_columns = [
+        (column, canonical_column_type(column_type))
+        for column, column_type in column_types.items()
+        if canonical_column_type(column_type) != "text"
+    ]
+    if not typed_columns:
+        return [dict(row) for row in rows]
+    typed_rows: list[dict[str, Any]] = []
+    for row_index, row in enumerate(rows, 1):
+        typed = dict(row)
+        for column, target_type in typed_columns:
+            if column not in row:
+                continue
+            value = row[column]
+            if value is None or value == "":
+                typed[column] = None
+                continue
+            try:
+                typed[column] = _convert_value(value, target_type, row_index, column)
+            except TransformationError as exc:
+                typed[column] = UnconvertedCell(str(exc))
+        typed_rows.append(typed)
+    return typed_rows
 
 
 def _parameter_filter_text(value: Any) -> str:

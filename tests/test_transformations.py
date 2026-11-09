@@ -382,7 +382,9 @@ class TransformationTests(unittest.TestCase):
         ])
 
         self.assertEqual(result.rows[0]["Selected"], "safe")
-        self.assertEqual(result.rows[1]["Selected"], source.rows[1]["Fault"])
+        # UseFault is a logical after Power BI's Changed Type step, and a logical is never equal to the text "true"
+        # (measured: 'true = 1' is false), so row 2 takes the else branch.
+        self.assertEqual(result.rows[1]["Selected"], "safe")
 
     def test_demote_headers_synthetic_row_has_no_source_row_lineage(self) -> None:
         source = ImportCandidate("inline", ["Key", "Amount"], [
@@ -452,17 +454,18 @@ class TransformationTests(unittest.TestCase):
             {"Amount": "0"},
         ], {"source_id": "sales-source"}, [])
 
-        result = apply_transformations(source, [
-            {"op": "add_custom_column", "name": "Rate", "expression": "10 / [Amount]"},
-            {"op": "add_custom_column", "name": "Label", "expression": "[Rate] & \"x\""},
-        ])
-
+        # Amount is a whole number after Power BI's Changed Type step, so 10 / 0 is +Infinity in Power BI
+        # (measured: Price / Units with Units 0 is +Infinity). A custom-column cell cannot hold it: the step is refused.
+        with self.assertRaises(TransformationError) as raised:
+            apply_transformations(source, [
+                {"op": "add_custom_column", "name": "Rate", "expression": "10 / [Amount]"},
+            ])
+        self.assertIn("non-finite", str(raised.exception))
+        result = apply_transformations(
+            ImportCandidate("inline", ["Amount"], [{"Amount": "2"}], {"source_id": "sales-source"}, []),
+            [{"op": "add_custom_column", "name": "Rate", "expression": "10 / [Amount]"}],
+        )
         self.assertEqual(result.rows[0]["Rate"], "5")
-        rate_error = result.rows[1]["Rate"]
-        self.assertIsInstance(rate_error, PowerQueryCellError)
-        self.assertEqual(rate_error.reason, "Expression.Error")
-        self.assertEqual(rate_error.row, 2)
-        self.assertEqual(result.rows[1]["Label"], rate_error)
 
     def test_remove_rows_with_errors_supports_all_or_selected_columns(self) -> None:
         error = PowerQueryCellError("DataFormat.Error", "bad value", "bad", "number", row=1)

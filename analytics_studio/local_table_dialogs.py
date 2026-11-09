@@ -1323,6 +1323,14 @@ class _PreviewColumnMenu:
         handler()
 
 
+def _step_input_types(types: dict[str, str] | None) -> dict[str, str] | None:
+    """The column types a custom-column formula reads cells as: the query's known source types.
+
+    A query session supplies the types of every source column (a column that holds "2" but is text stays text).
+    A dialog opened on a bare candidate has none, so its cells are typed by detection, as a fresh import is."""
+    return dict(types) if types else None
+
+
 def _candidate_with_source_id(
     candidate: ImportCandidate, source_id: str
 ) -> ImportCandidate:
@@ -2997,6 +3005,7 @@ class TransformDataDialog(QDialog):
                         parameters=parameter_values(
                             self._query_parameters, self._query_functions
                         ),
+                        initial_types=_step_input_types(query.get("source_column_types")),
                     )
                     step_metadata = validate_applied_step_metadata(
                         query.get("step_metadata", []), len(query_steps)
@@ -3065,6 +3074,8 @@ class TransformDataDialog(QDialog):
                     parameters=parameter_values(
                         self._query_parameters, self._query_functions
                     ),
+                    # A dialog opened on a bare candidate knows no source types: its cells are detected.
+                    initial_types=None,
                 ),
             }
             self._query_order.append(query_id)
@@ -5231,7 +5242,8 @@ class TransformDataDialog(QDialog):
                 )
             steps = validate_steps(query.get("steps", []))
             preview = apply_transformations(
-                candidate, steps, parameters=self._parameter_values()
+                candidate, steps, parameters=self._parameter_values(),
+                initial_types=_step_input_types(source_types),
             )
             result_types = column_types_after_steps(
                 candidate.headers,
@@ -5406,6 +5418,7 @@ class TransformDataDialog(QDialog):
             return apply_transformations(
                 self._source_candidate, self._steps[:upto],
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         return self._preview_candidate
 
@@ -5653,6 +5666,7 @@ class TransformDataDialog(QDialog):
                 apply_transformations(
                     self._source_candidate, validated,
                     parameters=self._parameter_values(),
+                    initial_types=self._active_source_types(),
                 )
             except (TransformationError, ValueError) as exc:
                 return str(exc)
@@ -5729,6 +5743,7 @@ class TransformDataDialog(QDialog):
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except TransformationError as exc:
             self._show_error(str(exc))
@@ -5749,7 +5764,8 @@ class TransformDataDialog(QDialog):
             else self._steps[:self._insert_position()]
         )
         return apply_transformations(
-            self._source_candidate, steps, parameters=self._parameter_values()
+            self._source_candidate, steps, parameters=self._parameter_values(),
+            initial_types=self._active_source_types(),
         )
 
     def _validate_custom_column_draft(
@@ -5777,6 +5793,7 @@ class TransformDataDialog(QDialog):
                 self._source_candidate,
                 validated,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except (TransformationError, ValueError) as exc:
             return str(exc)
@@ -6144,6 +6161,7 @@ class TransformDataDialog(QDialog):
         duplicate["preview_candidate"] = apply_transformations(
             duplicate["source_candidate"], duplicate["steps"],
             parameters=self._parameter_values(),
+            initial_types=_step_input_types(duplicate.get("source_column_types")),
         )
         duplicate["column_types"] = column_types_after_steps(
             duplicate["source_candidate"].headers,
@@ -6265,6 +6283,16 @@ class TransformDataDialog(QDialog):
                 "candidate": candidate,
             })
         return sources
+
+    def _active_source_types(self) -> dict[str, str] | None:
+        """The source column types of the active query (see ``_step_input_types``)."""
+        state = self._query_states.get(self._active_query_id, {})
+        return _step_input_types(state.get("source_column_types"))
+
+    def _known_source_types_kwargs(self) -> dict[str, dict[str, str]]:
+        """``initial_types=...`` when the active query has known source types, else nothing."""
+        types = self._active_source_types()
+        return {} if types is None else {"initial_types": types}
 
     def _save_active_query_state(self) -> None:
         state = self._query_states.get(self._active_query_id)
@@ -6410,6 +6438,7 @@ class TransformDataDialog(QDialog):
                 preview = apply_transformations(
                     raw_candidate, query.get("steps", []),
                     parameters=self._parameter_values(),
+                    initial_types=_step_input_types(source_types),
                 )
                 query["preview_candidate"] = preview
                 query["column_types"] = column_types_after_steps(
@@ -6571,7 +6600,8 @@ class TransformDataDialog(QDialog):
                 if output_types.get(header, "text") != "text"
             ])
             preview = apply_transformations(
-                candidate, steps, parameters=self._parameter_values()
+                candidate, steps, parameters=self._parameter_values(),
+                initial_types=_step_input_types(output_types),
             )
             column_types = column_types_after_steps(
                 candidate.headers,
@@ -6814,7 +6844,8 @@ class TransformDataDialog(QDialog):
                         query["source_candidate"] = raw_candidate
                         query["source_column_types"] = source_types
                 preview = apply_transformations(
-                    query["source_candidate"], query["steps"], parameters=values
+                    query["source_candidate"], query["steps"], parameters=values,
+                    initial_types=_step_input_types(query.get("source_column_types")),
                 )
                 query["preview_candidate"] = preview
                 query["column_types"] = column_types_after_steps(
@@ -6920,7 +6951,8 @@ class TransformDataDialog(QDialog):
                         query["source_candidate"], query_id
                     )
                 preview = apply_transformations(
-                    query["source_candidate"], query["steps"], parameters=values
+                    query["source_candidate"], query["steps"], parameters=values,
+                    initial_types=_step_input_types(query.get("source_column_types")),
                 )
                 query["preview_candidate"] = preview
                 query["column_types"] = column_types_after_steps(
@@ -7249,6 +7281,7 @@ class TransformDataDialog(QDialog):
                 self._source_candidate,
                 next_steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except TransformationError as exc:
             self._steps = original_steps
@@ -7385,6 +7418,8 @@ class TransformDataDialog(QDialog):
                 self._source_candidate,
                 next_steps,
                 parameters=self._parameter_values(),
+                # The keyword goes only when the session knows its types; omitting it is the same as None.
+                **self._known_source_types_kwargs(),
             )
         except TransformationError as exc:
             self._show_error(str(exc))
@@ -8908,6 +8943,7 @@ class TransformDataDialog(QDialog):
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except TransformationError as exc:
             self._show_error(str(exc))
@@ -8938,6 +8974,7 @@ class TransformDataDialog(QDialog):
                 transformed = apply_transformations(
                     self._source_candidate, next_steps,
                     parameters=self._parameter_values(),
+                    initial_types=self._active_source_types(),
                 )
             except TransformationError as exc:
                 self._show_error(str(exc))
@@ -8972,6 +9009,7 @@ class TransformDataDialog(QDialog):
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
             next_metadata = validate_applied_step_metadata(
                 deepcopy(self._step_metadata), len(self._steps)
@@ -9015,6 +9053,7 @@ class TransformDataDialog(QDialog):
                 apply_transformations(
                     self._source_candidate, self._steps[:at],
                     parameters=self._parameter_values(),
+                    initial_types=self._active_source_types(),
                 )
                 if inserting else self._preview_candidate
             )
@@ -9042,6 +9081,7 @@ class TransformDataDialog(QDialog):
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
             next_metadata = (
                 validate_applied_step_metadata(
@@ -9094,6 +9134,7 @@ class TransformDataDialog(QDialog):
             transformed = apply_transformations(
                 self._source_candidate, self._steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except TransformationError as exc:
             self._steps = original_steps
@@ -9119,6 +9160,7 @@ class TransformDataDialog(QDialog):
             self._preview_candidate = apply_transformations(
                 self._source_candidate, self._steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except TransformationError as exc:
             self._steps[index], self._steps[target] = self._steps[target], self._steps[index]
@@ -9142,6 +9184,7 @@ class TransformDataDialog(QDialog):
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except TransformationError as exc:
             self._show_error(str(exc))
@@ -9567,6 +9610,7 @@ class TransformDataDialog(QDialog):
                 source_candidate,
                 steps,
                 parameters=self._parameter_values(),
+                initial_types=_step_input_types(source_types),
             )
             result_types = column_types_after_steps(
                 source_candidate.headers,
@@ -9636,6 +9680,7 @@ class TransformDataDialog(QDialog):
             return apply_transformations(
                 self._source_candidate, self._steps[: selected_step + 1],
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         return self._preview_candidate
 
@@ -9835,6 +9880,7 @@ class TransformDataDialog(QDialog):
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
             )
         except (PowerQueryMScriptError, TransformationError, ValueError) as exc:
             self._show_error(str(exc))
@@ -10092,6 +10138,7 @@ class TransformDataDialog(QDialog):
                 candidate = apply_transformations(
                     query["source_candidate"], query_steps,
                     parameters=self._parameter_values(),
+                    initial_types=_step_input_types(query.get("source_column_types")),
                 )
                 if candidate != query["preview_candidate"]:
                     raise TransformationError(

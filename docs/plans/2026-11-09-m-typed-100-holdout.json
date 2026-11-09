@@ -1,0 +1,43 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "raw": "#table({\"Name\",\"Units\",\"Price\",\"Day\",\"Flag\"}, {{\"Alpha\",\"2\",\"10.5\",\"2024-01-15\",\"TRUE\"},{\"beta\",\"0\",\"3\",\"2024-02-29\",\"false\"},{\"\",\"7\",\"0.25\",\"2023-12-31\",\"true\"},{\"Gamma\",\"12\",\"1000\",\"2024-06-01\",\"FALSE\"}})",
+ "types": "{{\"Name\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}, {\"Flag\", type logical}}",
+ "cases": [
+  {
+   "formula": "[Units] * [Price]",
+   "cells": [
+    "V:number:21",
+    "V:number:0",
+    "V:number:1.75",
+    "V:number:12000"
+   ]
+  },
+  {
+   "formula": "[Day] > #date(2024,1,31)",
+   "cells": [
+    "V:false",
+    "V:true",
+    "V:false",
+    "V:true"
+   ]
+  },
+  {
+   "formula": "Number.IsEven([Units])",
+   "cells": [
+    "V:true",
+    "V:true",
+    "V:false",
+    "V:true"
+   ]
+  },
+  {
+   "formula": "Date.DayOfWeekName([Day])",
+   "cells": [
+    "V:text:\"Monday\"",
+    "V:text:\"Thursday\"",
+    "V:text:\"Sunday\"",
+    "V:text:\"Saturday\""
+   ]
+  }
+ ]
+}
