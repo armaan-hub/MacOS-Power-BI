@@ -4809,7 +4809,7 @@ def _has_table_operand(node: Any) -> bool:
         return False
     if node[0] in {"table", "table_call", "tablevalue", "tablecapture", "tableconstructor"}:
         return True
-    if node[0] == "call" and node[1] in (_AGGREGATING_CALLS - {"CALCULATE"}) | _ITERATOR_CALLS:
+    if node[0] == "call" and node[1] in (_AGGREGATING_CALLS - {"CALCULATE"}) | _ITERATOR_CALLS | {"CONVERT", "DATEDIFF"}:
         return False  # Task 37: the table inside COUNTROWS(Facts) or SUMX(...) is that call's argument; the call gives a scalar, not a table operand
     children = node if isinstance(node[0], tuple) else node[1:]
     return any(_has_table_operand(child) for child in children if isinstance(child, tuple))
@@ -8294,18 +8294,25 @@ def _static_numeric_type(
         at = _static_numeric_type(args[0], columns, variables) if args else None
         if at in {"int64", "double", "currency"}:
             return at
-        return {"bool": "int64", "text": "double"}.get(at or "")
+        return {"bool": "int64", "text": "double", "datetime": "double"}.get(at or "")
     if fn in {"FLOOR", "CEILING", "MROUND", "MOD"}:
         if len(args) != 2:
             return None
         lt = _static_numeric_type(args[0], columns, variables)
         rt = _static_numeric_type(args[1], columns, variables)
+        if fn == "MOD":
+            if (lt, rt) == ("int64", "int64"):
+                return "int64"
+            if "currency" in (lt, rt) and {lt, rt} <= {"currency", "int64"}:
+                return "currency"
+            if (lt in {"int64", "double", "currency", "text"} or lt is None) and (rt in {"int64", "double", "currency", "text"} or rt is None):
+                if lt is not None or rt is not None:
+                    return "double"
+            return None
         if lt not in {"int64", "double", "currency"} or rt not in {"int64", "double", "currency"}:
             return None
         if "currency" in (lt, rt):
             return "currency" if {lt, rt} <= {"currency", "int64"} else None
-        if fn == "MOD":
-            return "int64" if (lt, rt) == ("int64", "int64") else "double"
         return rt
     if fn == "DIVIDE":
         if len(args) < 2:
@@ -18421,18 +18428,20 @@ def _evaluate_measures_once(
             if not number.is_finite():
                 raise MeasureRuntimeError("An argument of function 'CONVERT' has the wrong data type or the result is too large or too small.")
             if abs(number) >= _INT64_RANGE:
-                raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: an Integer beyond the 64-bit range is the error
+                raise _ConvertFailure("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: an Integer beyond the 64-bit range is the error
             rounded = number.quantize(Decimal(1), rounding=ROUND_HALF_EVEN if isinstance(value, str) and "$" in value else ROUND_HALF_UP)  # Task 74 (t74e): a currency text rounds half to even (CONVERT("$0.5",INTEGER) is 0)
             if abs(rounded) >= _INT64_RANGE:
-                raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")
+                raise _ConvertFailure("The result of a conversion or arithmetic operation is either too large or too small.")
             return rounded
         if target in {"DOUBLE", "CURRENCY"}:
             if target == "DOUBLE":
                 return Decimal(number)
             if isinstance(value, str):
                 return dax_math.text_to_currency(number)  # Task 21 Part C: a text is rounded from its exact digits; beyond the range is the Out of present range error
-            if not number.is_finite() or abs(number) > _CURRENCY_LIMIT:  # Part B: Infinity, NaN and beyond the Currency range are the error
+            if not number.is_finite():
                 raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")
+            if abs(number) > _CURRENCY_LIMIT:  # Part B: beyond the Currency range is the error
+                raise _ConvertFailure("The result of a conversion or arithmetic operation is either too large or too small.")
             return dax_math.to_currency(number)
         if target == "DATETIME":
             if not number.is_finite():
@@ -18830,15 +18839,63 @@ def _evaluate_measures_once(
                 isinstance(op, tuple) and op[:1] == ("string",) for op in node[2:4]
             ):
                 return "refuse"
-            return None
         if function not in _TYPE_TESTS:
             return None
         date_calls = {"DATE", "TIME", "DATEVALUE"}
-        if (node[0] == "binary" and node[1] == "+") or node[0] == "comparison":
-            # a DATE / TIME / DATEVALUE call that fails, added to or compared with another operand: Power BI raised in every measured row
+        if node[0] == "binary" and node[1] == "+":
+            # a DATE / TIME / DATEVALUE call that fails, added to another operand: Power BI raised in every measured row
             if any(isinstance(op, tuple) and op[:1] == ("call",) and str(op[1]).upper() in date_calls and failed(op) for op in node[2:4]):
                 return "error"
             return None
+        if node[0] == "comparison":
+            date_and_val_calls = {"DATE", "TIME", "DATEVALUE", "VALUE"}
+            if any(isinstance(op, tuple) and op[:1] == ("call",) and str(op[1]).upper() in date_and_val_calls and failed(op) for op in node[2:4]):
+                return "error"
+            t2 = static_type_of(node[2])
+            t3 = static_type_of(node[3])
+            num_types = {"int64", "double", "currency", "decimal", "number"}
+            if (t2 in num_types and t3 in {"text", "bool"}) or (t3 in num_types and t2 in {"text", "bool"}):
+                return "error"
+            if (t2 == "datetime" and t3 in {"text", "bool"}) or (t3 == "datetime" and t2 in {"text", "bool"}):
+                return "error"
+            if function == "ISBLANK" and any(isinstance(op, tuple) and op[:1] == ("string",) for op in node[2:4]):
+                return "refuse"
+
+            errs: list[tuple[Any, Exception]] = []
+            for op in node[2:4]:
+                try:
+                    evaluate(op, row_context, allow_text=True, allow_boolean=True)
+                except Exception as exc:
+                    errs.append((op, exc))
+
+            if not errs:
+                return "error"
+
+            def _is_ln_sqrt_domain(op: Any, exc: Exception) -> bool:
+                msg = str(exc)
+                return ("LN needs" in msg or "SQRT needs" in msg) and calls_named(op, {"LN", "SQRT"})
+
+            if any(_is_ln_sqrt_domain(op, exc) for op, exc in errs):
+                return "error"
+
+            def _is_measured_static(op: Any, exc: Exception) -> bool:
+                if isinstance(exc, _TextConversionFailure) or "Cannot convert value" in str(exc):
+                    return True
+                if isinstance(exc, (_ConvertFailure, _IntegerRangeFailure, _CurrencyRangeFailure, _CurrencyOverflowError)):
+                    if "either too large or too small" in str(exc) or "cannot be converted to" in str(exc).lower():
+                        return True
+                if calls_named(op, {"MOD"}) and ("MOD cannot divide by zero" in str(exc) or "divide by zero" in str(exc).lower()):
+                    return True
+                if isinstance(exc, (_DivisionError, _CurrencyDivisionError)) or "division by zero" in str(exc).lower() or "divide by zero" in str(exc).lower():
+                    return True
+                if isinstance(exc, _PowerFailure) or (calls_named(op, {"POWER"}) and "argument of function 'POWER'" in str(exc)):
+                    return True
+                return False
+
+            if all(_is_measured_static(op, exc) for op, exc in errs):
+                return "static"
+
+            return "refuse"
         if node[0] == "let":
             # VAR ... RETURN v & "" over a failing non-date bound: the measured VAR-suffix shapes are mixed (error or False), so refused
             body = node[2]
@@ -19181,23 +19238,23 @@ def _evaluate_measures_once(
                 # Task 57: a type test over a binary / logical operator where one operand holds a DATEVALUE / TIMEVALUE of an unparsable text and the
                 # other operand fails as well: Power BI raised the conversion error in every live row (the static type does not hide it)
                 raise dax_typed.refusal("A type test over an operator with a failing DATEVALUE operand beside another failing operand raises in Power BI and is not modelled by the local engine.") from failure
-            if function in _TYPE_TESTS and len(arguments) == 1:
-                task64 = task64_family(function, arguments[0], row_context)  # Task 64: the measured families of a failing value (before the static answer)
-                if task64 == "refuse":
-                    raise dax_typed.refusal("A type test of a failing value in this shape is not modelled by the local engine.") from failure
-                if task64 == "error":
-                    raise  # Power BI raises the failure in every measured row of this family
             if function in _TASK64_OWN_TYPE and len(arguments) == 1 and not isinstance(failure, _TASK64_RANGE_FAILURES) and _task64_wrapped(arguments[0]):
                 # Task 64: a wrapper (VAR ... RETURN, COALESCE, SWITCH, or IF beside a BLANK branch) around a failing value whose own result type is the one the
                 # test asks for (INT -> int64, DATE -> datetime, CURRENCY -> currency): the failure shows, as the CONVERT same-target-type rule below says.
                 # A bare failing call or arithmetic around it is not touched (measured True: ISINT64(INT("b")), ISDOUBLE(ABS("m")), ISINTEGER(SIGN("s"))).
                 if static_type_of(arguments[0]) in _TASK64_OWN_TYPE[function]:
                     raise
+            if function in _TYPE_TESTS and len(arguments) == 1:
+                task64 = task64_family(function, arguments[0], row_context)  # Task 64: the measured families of a failing value (before the static answer)
+                if task64 == "refuse":
+                    raise dax_typed.refusal("A type test of a failing value in this shape is not modelled by the local engine.") from failure
+                if task64 == "error":
+                    raise  # Power BI raises the failure in every measured row of this family
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
                 structural = _structural_type_answer(function, arguments[0], static_scope()[0])  # Task 50: a failing argument answered by its static type
                 if structural is not None:
                     return structural
-            if isinstance(failure, _PowerFailure) and function in _TYPE_TESTS and len(arguments) == 1 and (
+            if isinstance(failure, _PowerFailure) and function in _TYPE_TESTS and len(arguments) == 1 and arguments[0][0] != "comparison" and (
                 not _is_bare_power(arguments[0]) or (failure.zero_base and failure.row_dependent)
             ):
                 # measured both ways: ISNUMBER(MIN(x)^0.5+1) is True, ISNUMBER(2/0+0.0^0.0) is the error; no rule found yet, so no answer is given
@@ -19206,10 +19263,11 @@ def _evaluate_measures_once(
                 (isinstance(failure, _StaticTypeFailure) and (
                     not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISDOUBLE"}
                 ))
+                or (arguments[0][0] == "comparison")
                 or (isinstance(failure, _HardError) and _has_kind(arguments[0], {"let"}) and not _has_bare_error(arguments[0])
                     and not (_is_bare_let_var(arguments[0]) and function in {"ISNUMBER", "ISDOUBLE", "ISINTEGER", "ISINT64", "ISNUMERIC"}))
             )
-            if isinstance(failure, (_DivisionError, _CurrencyDivisionError)):
+            if isinstance(failure, (_DivisionError, _CurrencyDivisionError)) and arguments[0][0] != "comparison":
                 hidden = False
             if isinstance(failure, _HardError):
                 if not _reads_no_data(arguments[0], variable_nodes.get):
@@ -19232,16 +19290,17 @@ def _evaluate_measures_once(
                 if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _failing_convert_unmeasured(arguments[0], variable_nodes.get):
                     raise dax_typed.refusal("A type test of arithmetic around a failing CONVERT beside data reads raised in Power BI and is not modelled by the local engine.") from failure
                 # When CONVERT of text fails, type tests for the target type or ISNUMBER cannot be answered statically (in Power BI they error)
-                target_t = static_type_of(arguments[0])
-                if (function in {"ISNUMBER", "ISNUMERIC"} and target_t in {"int64", "double", "currency", "decimal", "datetime"}) or (
-                    (function in {"ISINTEGER", "ISINT64"} and target_t == "int64")
-                    or (function == "ISDOUBLE" and target_t == "double")
-                    or (function in {"ISCURRENCY", "ISDECIMAL"} and target_t == "currency")
-                    or (function == "ISDATETIME" and target_t == "datetime")
-                    or (function in {"ISLOGICAL", "ISBOOLEAN"} and target_t == "bool")
-                    or (function in {"ISTEXT", "ISSTRING"} and target_t == "text")
-                ):
-                    hidden = False
+                if arguments[0][0] != "comparison":
+                    target_t = static_type_of(arguments[0])
+                    if (function in {"ISNUMBER", "ISNUMERIC"} and target_t in {"int64", "double", "currency", "decimal", "datetime"}) or (
+                        (function in {"ISINTEGER", "ISINT64"} and target_t == "int64")
+                        or (function == "ISDOUBLE" and target_t == "double")
+                        or (function in {"ISCURRENCY", "ISDECIMAL"} and target_t == "currency")
+                        or (function == "ISDATETIME" and target_t == "datetime")
+                        or (function in {"ISLOGICAL", "ISBOOLEAN"} and target_t == "bool")
+                        or (function in {"ISTEXT", "ISSTRING"} and target_t == "text")
+                    ):
+                        hidden = False
             if isinstance(failure, _TextConversionFailure):
                 def _has_static_blocker(n: Any) -> bool:
                     if not isinstance(n, tuple) or not n:
