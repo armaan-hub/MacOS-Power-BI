@@ -1,0 +1,901 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09 (m-list-94 held-out fixes: covariance, average, standard deviation, Replacer.ReplaceText, List.ReplaceValue, List.Intersect)",
+ "cases": [
+  {
+   "expression": "List.Covariance({1,2,3}, {2,4,7})",
+   "power_bi": "V:number:1.6666666666666661"
+  },
+  {
+   "expression": "List.Covariance({3.0,-9.0}, {26.0,-15.0})",
+   "power_bi": "V:number:123"
+  },
+  {
+   "expression": "List.Covariance({18.0,6.0,-16.0}, {16.0,-17.0,10.0})",
+   "power_bi": "V:number:0.66666666666667318"
+  },
+  {
+   "expression": "List.Covariance({-15.1,-13.7,9.7}, {37.9,-11.3,-4.4})",
+   "power_bi": "V:number:-106.27333333333337"
+  },
+  {
+   "expression": "List.Covariance({23.9,46.3,20.4,7.8}, {48.3,-16.7,40.1,0.3})",
+   "power_bi": "V:number:-142.41500000000002"
+  },
+  {
+   "expression": "List.Covariance({-9.9,-11.75,1.59,37.13}, {-7.35,20.71,24.72,6.07})",
+   "power_bi": "V:number:-23.575931250000011"
+  },
+  {
+   "expression": "List.Covariance({18.0,-16.0,-16.0,-6.0,28.0}, {10.0,2.0,21.0,12.0,1.0})",
+   "power_bi": "V:number:-61.11999999999999"
+  },
+  {
+   "expression": "List.Covariance({35.6,28.9,-2.9,20.2,16.8}, {41.3,31.1,0.2,48.6,-11.7})",
+   "power_bi": "V:number:198.86199999999991"
+  },
+  {
+   "expression": "List.Covariance({9.27,33.0,-9.36,14.23,-17.26}, {26.78,33.52,20.11,41.28,1.96})",
+   "power_bi": "V:number:196.16668"
+  },
+  {
+   "expression": "List.Covariance({28.67,21.61,20.59,11.93,38.8,46.13}, {13.19,26.49,-15.75,29.1,25.3,49.52})",
+   "power_bi": "V:number:110.90459166666665"
+  },
+  {
+   "expression": "List.Covariance({37.5,-0.1,7.0,26.8,-18.4,12.3,-8.2}, {-11.8,-15.9,33.8,-10.9,-2.7,7.4,41.0})",
+   "power_bi": "V:number:-146.34122448979593"
+  },
+  {
+   "expression": "List.Covariance({-14.359,11.443,18.461,41.837,37.35,40.479,-0.511}, {9.071,5.114,41.893,47.041,-9.436,-7.665,-3.763})",
+   "power_bi": "V:number:60.872220959183664"
+  },
+  {
+   "expression": "List.Covariance({-3.67,13.95,21.24,-1.61,-19.71,9.33,5.85,19.64}, {46.72,28.33,16.08,23.23,27.33,-16.22,42.97,34.6})",
+   "power_bi": "V:number:-46.72699999999999"
+  },
+  {
+   "expression": "List.Covariance({41.2,35.9,7.5,7.9,-12.8,24.4,-15.6,-15.3,-5.4,-8.6}, {3.8,-16.3,-20.0,-9.4,-12.9,5.5,-18.2,41.2,23.0,-9.6})",
+   "power_bi": "V:number:-66.526200000000031"
+  },
+  {
+   "expression": "List.Covariance({-2.34,4.32,5.49,-11.4,39.43,49.52,12.62,13.87,-13.99,-12.85}, {3.98,-1.47,38.02,-8.7,-18.38,46.57,16.98,-9.74,18.02,-18.11})",
+   "power_bi": "V:number:136.47483100000005"
+  },
+  {
+   "expression": "List.Covariance({16.968,48.495,40.433,28.734,-1.722,5.669,-8.307,34.036,17.281,34.534,3.077,-4.387}, {36.806,48.945,39.684,36.426,37.283,31.791,-4.128,16.235,4.889,-17.971,-18.044,-0.441})",
+   "power_bi": "V:number:164.74172249305542"
+  },
+  {
+   "expression": "List.Covariance({-1.86,28.48,46.96}, {11.31,45.59,49.16})",
+   "power_bi": "V:number:328.20731111111115"
+  },
+  {
+   "expression": "List.Covariance({47.0,6.0,-5.0,-4.0}, {-6.0,-6.0,24.0,43.0})",
+   "power_bi": "V:number:-303.75"
+  },
+  {
+   "expression": "List.Covariance({38.8,13.6,25.7,36.0,-14.1,26.2}, {43.7,34.8,32.5,13.5,-7.5,35.2})",
+   "power_bi": "V:number:219.46777777777777"
+  },
+  {
+   "expression": "List.Covariance({3.28,36.06,48.02,7.71,8.1,46.28,30.74,-8.1,-11.11}, {-9.42,43.34,36.46,-9.77,37.86,48.62,26.01,4.53,18.41})",
+   "power_bi": "V:number:312.89356296296285"
+  },
+  {
+   "expression": "List.Covariance({-10.831,-19.003,47.962,25.477,16.861}, {45.354,10.367,41.022,37.831,-5.227})",
+   "power_bi": "V:number:118.14653772000008"
+  },
+  {
+   "expression": "List.Covariance({-2.4,0.5}, {-3.2,21.1})",
+   "power_bi": "V:number:17.6175"
+  },
+  {
+   "expression": "List.Covariance({-1.844,9.331,-10.825}, {43.701,4.765,12.071})",
+   "power_bi": "V:number:-33.144500666666659"
+  },
+  {
+   "expression": "List.Covariance({20.834,43.301,9.444,44.24}, {15.115,17.228,16.645,-18.691})",
+   "power_bi": "V:number:-125.2973706875"
+  },
+  {
+   "expression": "List.Covariance({11.0,-7.0,-20.0,36.0,-8.0,13.0,31.0,19.0}, {3.0,16.0,19.0,35.0,-13.0,19.0,-3.0,-1.0})",
+   "power_bi": "V:number:42.109375"
+  },
+  {
+   "expression": "List.Covariance({34.06,15.54,19.32,33.2,43.87,11.03,22.88,15.39,15.85,28.49,11.66}, {17.33,13.46,45.91,28.95,41.36,45.95,-1.83,19.17,46.03,38.8,-10.4})",
+   "power_bi": "V:number:39.199370247933871"
+  },
+  {
+   "expression": "List.Covariance({-11.486,10.948,-14.922,-3.155,-14.882,26.863}, {34.876,42.792,-9.189,30.128,26.218,-9.991})",
+   "power_bi": "V:number:-70.271814166666658"
+  },
+  {
+   "expression": "List.Covariance({41.8,47.7,-4.6,46.7,7.9,14.1,49.3,38.3,-8.7,10.2,16.1,3.7,-6.3,2.3,30.6}, {-18.6,18.8,10.8,-18.7,3.2,23.7,15.9,-15.5,49.0,35.2,48.0,-12.7,-1.4,-17.2,34.5})",
+   "power_bi": "V:number:-103.8584444444444"
+  },
+  {
+   "expression": "List.Covariance({-1.07,-10.93,9.56,43.8,37.33,-1.9,-9.54,44.34,19.94,29.03,-13.74,-15.97,28.17,9.77,-14.93,45.68,24.41,36.11,-14.14,39.94}, {-15.34,40.39,11.76,3.74,18.71,44.87,-1.25,-10.95,16.88,-3.31,-12.34,-8.7,-16.47,-5.88,1.84,1.35,33.16,0.3,15.01,-7.55})",
+   "power_bi": "V:number:-57.958123000000008"
+  },
+  {
+   "expression": "List.Covariance({4.0,-19.0,-2.0,-19.0,31.0,19.0,-7.0}, {13.0,45.0,-13.0,37.0,10.0,15.0,38.0})",
+   "power_bi": "V:number:-185.14285714285714"
+  },
+  {
+   "expression": "List.Average({11.7,19.2})",
+   "power_bi": "V:number:15.45"
+  },
+  {
+   "expression": "List.StandardDeviation({11.7,19.2})",
+   "power_bi": "V:number:5.3033008588991066"
+  },
+  {
+   "expression": "List.Average({44.7,12.6,15.5})",
+   "power_bi": "V:number:24.266666666666669"
+  },
+  {
+   "expression": "List.StandardDeviation({44.7,12.6,15.5})",
+   "power_bi": "V:number:17.755093165999817"
+  },
+  {
+   "expression": "List.Average({21.12,-7.07,15.83})",
+   "power_bi": "V:number:9.9599999999999991"
+  },
+  {
+   "expression": "List.StandardDeviation({21.12,-7.07,15.83})",
+   "power_bi": "V:number:14.983714492741777"
+  },
+  {
+   "expression": "List.Average({24.1,35.5,-13.4,1.2})",
+   "power_bi": "V:number:11.850000000000001"
+  },
+  {
+   "expression": "List.StandardDeviation({24.1,35.5,-13.4,1.2})",
+   "power_bi": "V:number:22.063317973505256"
+  },
+  {
+   "expression": "List.Average({-13.65,36.68,28.54,-17.07})",
+   "power_bi": "V:number:8.6249999999999982"
+  },
+  {
+   "expression": "List.StandardDeviation({-13.65,36.68,28.54,-17.07})",
+   "power_bi": "V:number:27.92907027931053"
+  },
+  {
+   "expression": "List.Average({48.8,47.5,25.8,23.1,-9.0})",
+   "power_bi": "V:number:27.240000000000002"
+  },
+  {
+   "expression": "List.StandardDeviation({48.8,47.5,25.8,23.1,-9.0})",
+   "power_bi": "V:number:23.493892823455209"
+  },
+  {
+   "expression": "List.Average({-18.95,16.99,-15.83,-6.69,-3.06})",
+   "power_bi": "V:number:-5.5080000000000009"
+  },
+  {
+   "expression": "List.StandardDeviation({-18.95,16.99,-15.83,-6.69,-3.06})",
+   "power_bi": "V:number:14.149036009566164"
+  },
+  {
+   "expression": "List.Average({-17.894,12.475,10.837,38.97,16.339})",
+   "power_bi": "V:number:12.145400000000002"
+  },
+  {
+   "expression": "List.StandardDeviation({-17.894,12.475,10.837,38.97,16.339})",
+   "power_bi": "V:number:20.256675104764849"
+  },
+  {
+   "expression": "List.Average({24.82,14.98,26.37,12.01,-0.53,49.84})",
+   "power_bi": "V:number:21.248333333333335"
+  },
+  {
+   "expression": "List.StandardDeviation({24.82,14.98,26.37,12.01,-0.53,49.84})",
+   "power_bi": "V:number:17.061103618074263"
+  },
+  {
+   "expression": "List.Average({49.7,38.8,29.5,2.1,-3.9,0.2,-15.1})",
+   "power_bi": "V:number:14.471428571428568"
+  },
+  {
+   "expression": "List.StandardDeviation({49.7,38.8,29.5,2.1,-3.9,0.2,-15.1})",
+   "power_bi": "V:number:24.588256972635961"
+  },
+  {
+   "expression": "List.Average({33.64,8.028,39.261,7.056,47.063,39.312,-19.962})",
+   "power_bi": "V:number:22.05685714285714"
+  },
+  {
+   "expression": "List.StandardDeviation({33.64,8.028,39.261,7.056,47.063,39.312,-19.962})",
+   "power_bi": "V:number:24.292034938971057"
+  },
+  {
+   "expression": "List.Average({-5.32,43.72,12.9,48.63,7.82,-14.89,24.06,34.5})",
+   "power_bi": "V:number:18.9275"
+  },
+  {
+   "expression": "List.StandardDeviation({-5.32,43.72,12.9,48.63,7.82,-14.89,24.06,34.5})",
+   "power_bi": "V:number:22.856770644290815"
+  },
+  {
+   "expression": "List.Average({-1.1,-13.9,3.3,47.5,33.1,-11.7,-2.8,-12.9,-15.8,35.8})",
+   "power_bi": "V:number:6.15"
+  },
+  {
+   "expression": "List.StandardDeviation({-1.1,-13.9,3.3,47.5,33.1,-11.7,-2.8,-12.9,-15.8,35.8})",
+   "power_bi": "V:number:23.620530147404491"
+  },
+  {
+   "expression": "List.Average({-7.56,19.15,11.32,-6.65,31.23,-10.83,25.06,-11.84,9.45,-5.1})",
+   "power_bi": "V:number:5.4229999999999992"
+  },
+  {
+   "expression": "List.StandardDeviation({-7.56,19.15,11.32,-6.65,31.23,-10.83,25.06,-11.84,9.45,-5.1})",
+   "power_bi": "V:number:15.910357248590547"
+  },
+  {
+   "expression": "List.Average({-1.114,47.965,36.239,1.29,41.941,-5.25,7.599,39.806,24.928,-12.977,49.251,-5.073})",
+   "power_bi": "V:number:18.717083333333328"
+  },
+  {
+   "expression": "List.StandardDeviation({-1.114,47.965,36.239,1.29,41.941,-5.25,7.599,39.806,24.928,-12.977,49.251,-5.073})",
+   "power_bi": "V:number:23.515831033034797"
+  },
+  {
+   "expression": "List.Average({-1.92,34.09,3.03,0.74,-14.86,-13.69,20.79,-2.99,22.09})",
+   "power_bi": "V:number:5.2533333333333339"
+  },
+  {
+   "expression": "List.StandardDeviation({-1.92,34.09,3.03,0.74,-14.86,-13.69,20.79,-2.99,22.09})",
+   "power_bi": "V:number:16.824585433228364"
+  },
+  {
+   "expression": "List.Average({6.0,11.7,47.1,13.9,20.2,40.7})",
+   "power_bi": "V:number:23.266666666666666"
+  },
+  {
+   "expression": "List.StandardDeviation({6.0,11.7,47.1,13.9,20.2,40.7})",
+   "power_bi": "V:number:16.739255260215931"
+  },
+  {
+   "expression": "List.Average({-7.2,-9.2,43.6,37.2,-2.5,-6.7,31.8,45.8,-6.2,46.5,41.8,22.2,9.5,-12.7,-17.3})",
+   "power_bi": "V:number:14.439999999999998"
+  },
+  {
+   "expression": "List.StandardDeviation({-7.2,-9.2,43.6,37.2,-2.5,-6.7,31.8,45.8,-6.2,46.5,41.8,22.2,9.5,-12.7,-17.3})",
+   "power_bi": "V:number:24.560706132240696"
+  },
+  {
+   "expression": "List.Average({47.39,-3.31,29.32,-2.01,37.66,21.75,0.54,-7.72,30.42,-15.19,-4.01,19.16,39.67,23.0,-0.38,44.22,-5.72,-18.84,-1.16,11.2})",
+   "power_bi": "V:number:12.299500000000002"
+  },
+  {
+   "expression": "List.StandardDeviation({47.39,-3.31,29.32,-2.01,37.66,21.75,0.54,-7.72,30.42,-15.19,-4.01,19.16,39.67,23.0,-0.38,44.22,-5.72,-18.84,-1.16,11.2})",
+   "power_bi": "V:number:20.72140298923085"
+  },
+  {
+   "expression": "List.Average({-15.768,-7.662,5.815,20.052})",
+   "power_bi": "V:number:0.6092499999999994"
+  },
+  {
+   "expression": "List.StandardDeviation({-15.768,-7.662,5.815,20.052})",
+   "power_bi": "V:number:15.724166694931721"
+  },
+  {
+   "expression": "List.Average({0.1,0.2,0.3})",
+   "power_bi": "V:number:0.2"
+  },
+  {
+   "expression": "List.Average({0.1,0.7,0.3,0.9})",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "List.Covariance({4.2,4.5,3.9}, {-4.2,0.9,-0.8})",
+   "power_bi": "V:number:0.16999999999999904"
+  },
+  {
+   "expression": "List.Covariance({6.02,-73.94,-61.6,-11.09}, {-55.79,-8.99,-95.05,-82.85})",
+   "power_bi": "V:number:-357.01435000000015"
+  },
+  {
+   "expression": "List.Covariance({0.7,0.4,0.5,0.7,0.4}, {0.1,0.8,0.6,0.7,0.6})",
+   "power_bi": "V:number:-0.018400000000000027"
+  },
+  {
+   "expression": "List.Covariance({941.4705,-274.415,519.5732,-262.6324,144.0936,321.0642}, {-371.2178,-828.5278,-51.8672,435.828,181.2194,-105.0969})",
+   "power_bi": "V:number:-16653.498197645851"
+  },
+  {
+   "expression": "List.Covariance({6.42,1.82,1.79,3.23,8.16,1.96,1.14}, {0.99,0.39,2.76,5.73,8.21,3.31,3.7})",
+   "power_bi": "V:number:2.9037734693877582"
+  },
+  {
+   "expression": "List.Covariance({-1.3,-1.2,1.7,0.3,-1.4,-2.4,1.7,1.2}, {2.0,-1.6,0.3,2.5,0.6,2.7,-2.0,2.9})",
+   "power_bi": "V:number:-0.6706249999999998"
+  },
+  {
+   "expression": "List.Covariance({-44.408,-8.378,-47.664,30.956,18.721,47.374,30.496,44.883,3.86}, {48.822,24.901,-15.386,47.439,-12.3,-30.669,-42.412,-3.404,-30.336})",
+   "power_bi": "V:number:-367.647849925926"
+  },
+  {
+   "expression": "List.Covariance({93.36,95.05,21.6,10.35,52.9,16.97,54.36,81.28,25.31,42.18}, {90.09,44.47,34.28,89.23,81.38,89.52,68.77,41.26,69.3,82.98})",
+   "power_bi": "V:number:-163.31498799999918"
+  },
+  {
+   "expression": "List.Covariance({42.2,11.4,15.7,24.5,52.4,35.9,35.3,56.6,1.4,41.6,18.6,36.1,57.3}, {12.1,66.3,-0.9,36.3,34.7,11.1,36.2,29.2,27.6,48.3,-6.7,22.0,53.5})",
+   "power_bi": "V:number:67.073846153846262"
+  },
+  {
+   "expression": "List.Covariance({-14.33,14.7,-11.86,7.25,-13.07,-2.03,-3.1,-16.73,7.98,-0.79,7.56,1.57,2.23,1.05,-8.09,15.95,-16.54,15.06,14.54,-0.09,11.08,6.93,4.2,-8.33,-7.21}, {-6.02,-7.91,18.39,-6.35,-4.5,-3.22,12.66,-0.89,2.15,-9.78,-8.88,-16.44,-11.31,-9.44,14.09,0.1,-15.58,-1.49,-15.16,2.64,-2.31,14.33,-9.63,14.03,-10.1})",
+   "power_bi": "V:number:-17.82836544"
+  },
+  {
+   "expression": "List.Covariance({491.3,317.1,21.3,403.6,137.8,181.1,73.3,418.7,45.2,369.1,197.9,339.7,146.5,39.1,457.6,327.4,84.8,488.1,455.9,91.3,9.5,305.5,69.6,365.9,234.4,354.5,284.9,385.4,410.8,301.5}, {295.7,163.4,67.0,46.2,428.5,103.0,213.3,158.4,309.8,266.7,429.5,218.0,181.0,325.6,372.4,462.7,155.9,443.2,490.7,491.2,64.6,190.1,387.0,415.5,19.8,197.5,362.1,379.1,267.5,105.3})",
+   "power_bi": "V:number:4188.30248888889"
+  },
+  {
+   "expression": "List.Covariance({-0.186384,-0.88291,-0.368636,-0.145263}, {0.64588,0.178669,-0.171269,-0.508134})",
+   "power_bi": "V:number:-0.020933205897374987"
+  },
+  {
+   "expression": "List.Covariance({1003.15,1006.71,1004.45,1001.73,1008.22}, {1005.76,1009.68,1005.36,1006.23,1004.28})",
+   "power_bi": "V:number:0.19843599991872907"
+  },
+  {
+   "expression": "List.Covariance({21656.7,83766.91,96258.01,32190.88,-13952.14,-87463.87}, {68039.73,-21715.7,-23510.45,-88577.29,-93174.3,-21892.72})",
+   "power_bi": "V:number:291140957.70594174"
+  },
+  {
+   "expression": "List.Covariance({9.0,5.0,4.0}, {3.0,-5.0,-7.0})",
+   "power_bi": "V:number:9.3333333333333339"
+  },
+  {
+   "expression": "List.Covariance({18.0,2.0,18.0,15.0,16.0,4.0,2.0,14.0}, {4.0,19.0,9.0,19.0,23.0,18.0,16.0,6.0})",
+   "power_bi": "V:number:-19.40625"
+  },
+  {
+   "expression": "List.Covariance({-0.306,0.956,-0.463,-0.431,-0.013,0.092,0.581,-0.41,0.926,-0.956,0.581}, {0.139,0.802,-0.694,0.378,0.894,0.334,-0.775,0.842,0.939,-0.778,0.655})",
+   "power_bi": "V:number:0.17831717355371904"
+  },
+  {
+   "expression": "List.Covariance({-168.27,-167.48,118.15,87.97,182.87,52.77,4.68,-91.17,29.14,196.98,58.67,150.22,-121.02,93.99,92.71,-171.66}, {128.08,-129.57,-113.06,-175.52,65.07,-143.08,190.28,-199.98,123.8,103.67,27.72,28.79,119.19,54.54,-144.25,118.74})",
+   "power_bi": "V:number:-1214.9275679687507"
+  },
+  {
+   "expression": "List.Covariance({0.1,0.1,0.1}, {0.3,0.3,0.3})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Covariance({5}, {7})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Covariance({1.5}, {2.5})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {5,5,5})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Covariance({0.1,0.2,0.3}, {0.1,0.2,0.3})",
+   "power_bi": "V:number:0.006666666666666661"
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {1,2})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {1,2,3})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({1,null,3}, {1,2,3})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {1,null,3})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {1,\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Covariance({}, {})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance(null, {1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type List."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {1,2},3)",
+   "power_bi": "ERR:Expression.Error: 3 arguments were passed to a function which expects 2."
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {\"a\",\"b\",\"c\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {1,null})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({null,null}, {1,2})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({1,null}, {1,null})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Covariance({1,null,3}, {1,2})",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "List.Covariance({1,null,3}, {1,3})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Covariance({null}, {null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Covariance({null}, {})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Covariance({}, {null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Covariance({1}, {})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {true,false})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Number."
+  },
+  {
+   "expression": "List.Covariance({true,false}, {1,2})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Number."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {#date(2020,1,1),#date(2020,1,2)})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #date(2020, 1, 1) to type Number."
+  },
+  {
+   "expression": "List.Covariance({\"a\"}, {})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({\"a\"}, {1,2})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {\"a\",\"b\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {1,2,\"a\"})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Covariance({1,2}, {#duration(0,0,0,1),#duration(0,0,0,2)})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #duration(0, 0, 0, 1) to type Number."
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {1,2,3})",
+   "power_bi": "V:number:0.66666666666666607"
+  },
+  {
+   "expression": "List.Covariance({1,2,3,4}, {4,3,2,1})",
+   "power_bi": "V:number:-1.25"
+  },
+  {
+   "expression": "List.Covariance({-1,-2,-3}, {7,1,4})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Covariance({1e10,2e10,3.5e10}, {1e-3,2e-3,5e-3})",
+   "power_bi": "V:number:17222222.222222209"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",\"cb\"}, \"b\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"aX\",text:\"cX\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"abab\",\"b\"}, \"ab\", \"\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"\",text:\"b\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"aaa\"}, \"aa\", \"b\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ba\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"Ab\",\"ab\"}, \"a\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"Ab\",text:\"Xb\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",null,\"cb\"}, \"b\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"aX\",null,text:\"cX\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",1,\"cb\"}, \"b\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"aX\",number:1,text:\"cX\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, \"1\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, Replacer.ReplaceText)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, null, \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", null, Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, 1, \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", 1, Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({}, \"a\", \"b\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",true}, \"a\", \"b\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"bb\",true]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",#date(2020,1,1)}, \"a\", \"b\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"bb\",date:2020-01-01]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"a b\",\"  \"}, \" \", \"_\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"a_b\",text:\"__\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"b\", Replacer.ReplaceValue)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",\"a\"}, \"a\", \"b\", Replacer.ReplaceValue)",
+   "power_bi": "V:list:[text:\"ab\",text:\"b\"]"
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"abc\",\"b\",\"X\")",
+   "power_bi": "V:text:\"aXc\""
+  },
+  {
+   "expression": "Replacer.ReplaceText(null,\"b\",\"X\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Replacer.ReplaceText(5,\"b\",\"X\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"abc\",\"b\")",
+   "power_bi": "ERR:Expression.Error: 2 arguments were passed to a function which expects 3."
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"b\", Replacer.ReplaceText, 1)",
+   "power_bi": "ERR:Expression.Error: 5 arguments were passed to a function which expects 4."
+  },
+  {
+   "expression": "List.ReplaceValue({\"éa\",\"Éa\"}, \"é\", \"e\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ea\",text:\"Éa\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"X\", (v,o,n)=>Text.Replace(v,o,n))",
+   "power_bi": "V:list:[text:\"Xb\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"ab\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"X\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"a,b,c\"}, \",\", \";\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"a;b;c\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",\"\"}, \"\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\",text:\"\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"x\"}, \"x\", {1}, Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"x\"]"
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"ab\",null,\"X\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"ab\",1,\"X\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"ab\",\"a\",null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"ab\",\"a\",1)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"ab\",\"\",\"X\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"abab\",\"ab\",\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Replacer.ReplaceText(null,1,2)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(5,1,2)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(true,\"a\",\"b\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Text."
+  },
+  {
+   "expression": "Replacer.ReplaceText(\"ab\",\"a\",{1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type List to type Text."
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"X\", Replacer.ReplaceValue)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2,1}, 1, 9, Replacer.ReplaceValue)",
+   "power_bi": "V:list:[number:9,number:2,number:9]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\", 5}, \"a\", \"X\", (v,o,n)=>Replacer.ReplaceText(v,o,n))",
+   "power_bi": "V:list:[text:\"Xb\",number:5]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\", 5}, \"a\", \"X\", (v,o,n)=>Text.Replace(v,o,n))",
+   "power_bi": "V:list:[text:\"Xb\",number:5]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",null}, \"a\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"Xb\",null]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",null}, null, \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\",null]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",error \"x\"}, \"a\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"X\", null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"X\", 5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Function."
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, {\"a\"}, \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({1}, 1, \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"X\", each _)",
+   "power_bi": "V:list:[text:\"ab\"]"
+  },
+  {
+   "expression": "Replacer.ReplaceText",
+   "power_bi": "V:function"
+  },
+  {
+   "expression": "Value.Is(Replacer.ReplaceText, type function)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Function.Invoke(Replacer.ReplaceText, {\"ab\",\"a\",\"X\"})",
+   "power_bi": "V:text:\"Xb\""
+  },
+  {
+   "expression": "List.Transform({\"ab\"}, each Replacer.ReplaceText(_, \"a\", \"X\"))",
+   "power_bi": "V:list:[text:\"Xb\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (v,o,n)=>error \"boom\")",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (v,o,n)=>1/0)",
+   "power_bi": "V:list:[number:+Infinity,number:+Infinity]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (v,o,n)=>Text.Upper(v))",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (v,o,n)=>v+o+n)",
+   "power_bi": "V:list:[number:7,number:8]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"a\",2}, 1, 5, (v,o,n)=>v+o+n)",
+   "power_bi": "V:list:[text:\"a\",number:8]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (v)=>v)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, ()=>7)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (a,b,c,d)=>7)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, each 7)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (v,o,n)=>{v})",
+   "power_bi": "V:list:[list:[number:1],list:[number:2]]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2}, 1, 5, (v,o,n)=>null)",
+   "power_bi": "V:list:[null,null]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,\"a\"}, 1, 5, (v,o,n)=>Text.Length(v))",
+   "power_bi": "V:list:[number:1,number:1]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\"}, \"a\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"Xb\"]"
+  },
+  {
+   "expression": "List.Intersect({{1,2,2},{2,2,3}})",
+   "power_bi": "V:list:[number:2,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{1,2,2,2},{2,2,3}})",
+   "power_bi": "V:list:[number:2,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{2,2,3},{1,2,2,2}})",
+   "power_bi": "V:list:[number:2,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2,3,3},{3,1,3,3,1},{1,3,3}})",
+   "power_bi": "V:list:[number:1,number:3,number:3]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2,3,3},{3,1,3,3,1},{1,3}})",
+   "power_bi": "V:list:[number:1,number:3]"
+  },
+  {
+   "expression": "List.Intersect({{3,1,2,1},{1,3}})",
+   "power_bi": "V:list:[number:3,number:1]"
+  },
+  {
+   "expression": "List.Intersect({{\"a\",\"b\",\"a\"},{\"a\",\"a\",\"a\",\"b\"}})",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Intersect({{\"a\",\"A\",\"a\"},{\"A\",\"a\"}})",
+   "power_bi": "V:list:[text:\"a\",text:\"A\"]"
+  },
+  {
+   "expression": "List.Intersect({{1,null,null},{null,null,null}})",
+   "power_bi": "V:list:[null,null]"
+  },
+  {
+   "expression": "List.Intersect({{1,1},{1}})",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "List.Intersect({{1,1}})",
+   "power_bi": "V:list:[number:1,number:1]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2}})",
+   "power_bi": "V:list:[number:1,number:1,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{1,2},{3,4}})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Intersect({{},{1}})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Intersect({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2,2,3},{2,2,2,1,1,1}})",
+   "power_bi": "V:list:[number:1,number:1,number:2,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{2,2,1},{1,2,2}})",
+   "power_bi": "V:list:[number:2,number:2,number:1]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2},{1,2}},Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{\"a\",\"A\",\"a\"},{\"a\",\"a\",\"A\",\"A\"}},Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:list:[text:\"a\",text:\"A\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2},{1,1,2}},(x,y)=>x=y)",
+   "power_bi": "ERR:Expression.Error: A custom comparer cannot be used in this context."
+  },
+  {
+   "expression": "List.Intersect({{1,1,2},{2,1,1}},each _)",
+   "power_bi": "V:list:[number:1,number:1,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{{1},{1},{2}},{{1},{1},{1}}})",
+   "power_bi": "V:list:[list:[number:1],list:[number:1]]"
+  },
+  {
+   "expression": "List.Intersect({{1.5,1.5,2},{1.5,2,2}})",
+   "power_bi": "V:list:[number:1.5,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,1},{1,1},{1,1,1,1}})",
+   "power_bi": "V:list:[number:1,number:1]"
+  },
+  {
+   "expression": "List.Intersect({{1,2,1,2},{2,1,2,1}})",
+   "power_bi": "V:list:[number:1,number:2,number:1,number:2]"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2},{1,3}, {1,1}})",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "List.Intersect({{5,5,5,6,6},{6,5,6,5}})",
+   "power_bi": "V:list:[number:5,number:5,number:6,number:6]"
+  },
+  {
+   "expression": "List.Intersect({{#date(2020,1,1),#date(2020,1,1)},{#date(2020,1,1)}})",
+   "power_bi": "V:list:[date:2020-01-01]"
+  }
+ ]
+}

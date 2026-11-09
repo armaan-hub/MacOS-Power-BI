@@ -1,0 +1,405 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "List.Sum({1.5, 2.25, null})",
+   "power_bi": "V:number:3.75"
+  },
+  {
+   "expression": "List.Average({10, 20, 25})",
+   "power_bi": "V:number:18.333333333333336"
+  },
+  {
+   "expression": "List.Median({5, 1, 4})",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "List.Mode({\"x\",\"y\",\"x\"})",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "List.Modes({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Min({3, null, -2})",
+   "power_bi": "V:number:-2"
+  },
+  {
+   "expression": "List.Max({\"apple\",\"Banana\"})",
+   "power_bi": "V:text:\"apple\""
+  },
+  {
+   "expression": "List.Product({2, 3, 4})",
+   "power_bi": "V:number:24"
+  },
+  {
+   "expression": "List.StandardDeviation({2,4,4,4,5,5,7,9})",
+   "power_bi": "V:number:2.1380899352993952"
+  },
+  {
+   "expression": "List.Count({null, null})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.NonNullCount({null, 1})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Reverse({\"a\", 1, null})",
+   "power_bi": "V:list:[null,number:1,text:\"a\"]"
+  },
+  {
+   "expression": "List.Distinct({1, 1.0, \"1\"})",
+   "power_bi": "V:list:[number:1,text:\"1\"]"
+  },
+  {
+   "expression": "List.IsDistinct({1, 2, 1})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.Positions({\"q\",\"r\"})",
+   "power_bi": "V:list:[number:0,number:1]"
+  },
+  {
+   "expression": "List.FirstN({5,6,7,8}, each _ > 5)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.FirstN({5,6,7,8}, each _ < 7)",
+   "power_bi": "V:list:[number:5,number:6]"
+  },
+  {
+   "expression": "List.LastN({5,6,7,8}, each _ > 6)",
+   "power_bi": "V:list:[number:7,number:8]"
+  },
+  {
+   "expression": "List.Skip({5,6,7,8}, each _ < 7)",
+   "power_bi": "V:list:[number:7,number:8]"
+  },
+  {
+   "expression": "List.RemoveFirstN({5,6,7}, 1)",
+   "power_bi": "V:list:[number:6,number:7]"
+  },
+  {
+   "expression": "List.RemoveLastN({5,6,7}, 2)",
+   "power_bi": "V:list:[number:5]"
+  },
+  {
+   "expression": "List.MaxN({4,9,1,7}, 2)",
+   "power_bi": "V:list:[number:9,number:7]"
+  },
+  {
+   "expression": "List.MinN({4,9,1,7}, 3)",
+   "power_bi": "V:list:[number:1,number:4,number:7]"
+  },
+  {
+   "expression": "List.Range({10,20,30,40}, 2)",
+   "power_bi": "V:list:[number:30,number:40]"
+  },
+  {
+   "expression": "List.Range({10,20,30,40}, 1, 1)",
+   "power_bi": "V:list:[number:20]"
+  },
+  {
+   "expression": "List.Alternate({1..10}, 2, 1)",
+   "power_bi": "V:list:[number:3,number:6,number:9]"
+  },
+  {
+   "expression": "List.Alternate({1..10}, 1, 2, 1)",
+   "power_bi": "V:list:[number:1,number:3,number:4,number:6,number:7,number:9,number:10]"
+  },
+  {
+   "expression": "List.Repeat({\"z\"}, 3)",
+   "power_bi": "V:list:[text:\"z\",text:\"z\",text:\"z\"]"
+  },
+  {
+   "expression": "List.Split({1..7}, 3)",
+   "power_bi": "V:list:[list:[number:1,number:2,number:3],list:[number:4,number:5,number:6],list:[number:7]]"
+  },
+  {
+   "expression": "List.RemoveRange({1,2,3,4}, 2, 1)",
+   "power_bi": "V:list:[number:1,number:2,number:4]"
+  },
+  {
+   "expression": "List.InsertRange({1,2}, 0, {0})",
+   "power_bi": "V:list:[number:0,number:1,number:2]"
+  },
+  {
+   "expression": "List.ReplaceRange({1,2,3}, 1, 1, {8,9})",
+   "power_bi": "V:list:[number:1,number:8,number:9,number:3]"
+  },
+  {
+   "expression": "List.Contains({1,2,3}, 4)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.ContainsAll({\"a\",\"b\"}, {\"a\"})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.ContainsAny({1,2}, {})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.PositionOf({1,2,1,2}, 2, Occurrence.All)",
+   "power_bi": "V:list:[number:1,number:3]"
+  },
+  {
+   "expression": "List.PositionOf({1,2}, 5)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "List.PositionOfAny({7,8,9}, {9,8})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.RemoveItems({1,2,3,2}, {2})",
+   "power_bi": "V:list:[number:1,number:3]"
+  },
+  {
+   "expression": "List.RemoveMatchingItems({1,2,3,2}, {2,3})",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "List.ReplaceMatchingItems({1,2,3}, {{3,30}})",
+   "power_bi": "V:list:[number:1,number:2,number:30]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"ab\",\"cb\"}, \"b\", \"X\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"aX\",text:\"cX\"]"
+  },
+  {
+   "expression": "List.Difference({1,2,2,3}, {2})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Intersect({{1,2,2},{2,2,3}})",
+   "power_bi": "V:list:[number:2,number:2]"
+  },
+  {
+   "expression": "List.Union({{\"a\"},{\"b\",\"a\"}})",
+   "power_bi": "V:list:[text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.Select({1..6}, each Number.IsEven(_))",
+   "power_bi": "V:list:[number:2,number:4,number:6]"
+  },
+  {
+   "expression": "List.Transform({1,2}, each _ * _)",
+   "power_bi": "V:list:[number:1,number:4]"
+  },
+  {
+   "expression": "List.MatchesAll({2,4}, each Number.IsEven(_))",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.MatchesAny({1,3}, each Number.IsEven(_))",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.FindText({\"cat\",\"dog\",\"cart\"}, \"ca\")",
+   "power_bi": "V:list:[text:\"cat\",text:\"cart\"]"
+  },
+  {
+   "expression": "List.Sort({\"b\",\"c\",\"a\"}, Order.Descending)",
+   "power_bi": "V:list:[text:\"c\",text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Sort({3,null,1})",
+   "power_bi": "V:list:[null,number:1,number:3]"
+  },
+  {
+   "expression": "List.Percentile({10,20,30,40,50}, 0.9)",
+   "power_bi": "V:number:46"
+  },
+  {
+   "expression": "List.Covariance({1,2,3}, {2,4,7})",
+   "power_bi": "V:number:1.6666666666666661"
+  },
+  {
+   "expression": "List.Numbers(10, 3, -2)",
+   "power_bi": "V:list:[number:10,number:8,number:6]"
+  },
+  {
+   "expression": "List.Numbers(0, 4, 0.25)",
+   "power_bi": "V:list:[number:0,number:0.25,number:0.5,number:0.75]"
+  },
+  {
+   "expression": "List.Accumulate({1..4}, 1, (s, c) => s * c)",
+   "power_bi": "V:number:24"
+  },
+  {
+   "expression": "List.Generate(() => [i=0], each [i] < 3, each [i=[i]+1], each [i])",
+   "power_bi": "V:list:[number:0,number:1,number:2]"
+  },
+  {
+   "expression": "List.Zip({{1,2},{3,4},{5}})",
+   "power_bi": "V:list:[list:[number:1,number:3,number:5],list:[number:2,number:4,null]]"
+  },
+  {
+   "expression": "List.TransformMany({\"a\"}, each {1,2}, (x, y) => x & Text.From(y))",
+   "power_bi": "V:list:[text:\"a1\",text:\"a2\"]"
+  },
+  {
+   "expression": "List.Combine({{\"a\"},{\"b\"}})",
+   "power_bi": "V:list:[text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.AllTrue({true, false})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.AnyTrue({false, null})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.First({9,8}, 0)",
+   "power_bi": "V:number:9"
+  },
+  {
+   "expression": "List.Last({9,8})",
+   "power_bi": "V:number:8"
+  },
+  {
+   "expression": "List.Single({\"only\"})",
+   "power_bi": "V:text:\"only\""
+  },
+  {
+   "expression": "List.SingleOrDefault({4})",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "List.IsEmpty({null})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.Buffer({1,2})",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.Count({1..100})",
+   "power_bi": "V:number:100"
+  },
+  {
+   "expression": "List.Covariance({0.1,0.7,1.3,2.9},{5.5,-2.25,3,0.4})",
+   "power_bi": "V:number:-1.069375"
+  },
+  {
+   "expression": "List.Covariance({10,20},{3,1})",
+   "power_bi": "V:number:-5"
+  },
+  {
+   "expression": "List.Covariance({1.1,2.2,3.3,4.4,5.5},{9,7,5,3,1})",
+   "power_bi": "V:number:-4.3999999999999986"
+  },
+  {
+   "expression": "List.StandardDeviation({0.3,0.6,0.9,1.7})",
+   "power_bi": "V:number:0.60207972893961481"
+  },
+  {
+   "expression": "List.StandardDeviation({100,101,102,250,3})",
+   "power_bi": "V:number:88.440375394951829"
+  },
+  {
+   "expression": "List.StandardDeviation({-1.5,2.5})",
+   "power_bi": "V:number:2.8284271247461903"
+  },
+  {
+   "expression": "List.Average({0.1,0.2,0.3})",
+   "power_bi": "V:number:0.2"
+  },
+  {
+   "expression": "List.Average({1e10,1,-1e10})",
+   "power_bi": "V:number:0.33333396911621094"
+  },
+  {
+   "expression": "List.Average({7})",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "List.Intersect({{\"a\",\"b\",\"a\"},{\"a\",\"a\",\"c\"},{\"a\"}})",
+   "power_bi": "V:list:[text:\"a\"]"
+  },
+  {
+   "expression": "List.Intersect({{3,1,3,2},{3,3,3,1}})",
+   "power_bi": "V:list:[number:3,number:1,number:3]"
+  },
+  {
+   "expression": "List.Intersect({{1,2},{}})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"aa\",5,null}, \"a\", \"b\", Replacer.ReplaceText)",
+   "power_bi": "V:list:[text:\"bb\",number:5,null]"
+  },
+  {
+   "expression": "List.ReplaceValue({1,2,1}, 1, 9, Replacer.ReplaceValue)",
+   "power_bi": "V:list:[number:9,number:2,number:9]"
+  },
+  {
+   "expression": "List.Median({1.5,2.5,9,0.25})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.Percentile({3,1,4,1,5,9,2}, 0.3)",
+   "power_bi": "V:number:1.7999999999999998"
+  },
+  {
+   "expression": "List.Union({{3,3},{1},{3,1,1}})",
+   "power_bi": "V:list:[number:3,number:3,number:1,number:1]"
+  },
+  {
+   "expression": "List.Numbers(1.5, 4, 0.1)",
+   "power_bi": "V:list:[number:1.5,number:1.6,number:1.7,number:1.8]"
+  },
+  {
+   "expression": "List.MaxN({\"b\",\"a\",\"c\"}, 2)",
+   "power_bi": "V:list:[text:\"c\",text:\"b\"]"
+  },
+  {
+   "expression": "List.Sort({\"b\",1,null,true})",
+   "power_bi": "V:list:[null,number:1,true,text:\"b\"]"
+  },
+  {
+   "expression": "List.Distinct({\"a\",\"A\"})",
+   "power_bi": "V:list:[text:\"a\",text:\"A\"]"
+  },
+  {
+   "expression": "List.Mode({1,2,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Product({1.5,null,4})",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "List.Sum({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Alternate({1..9}, 2, 3, 1)",
+   "power_bi": "V:list:[number:1,number:4,number:5,number:6,number:9]"
+  },
+  {
+   "expression": "List.Split({}, 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Zip({{1},{}})",
+   "power_bi": "V:list:[list:[number:1,null]]"
+  },
+  {
+   "expression": "List.PositionOf({\"a\",\"A\"}, \"a\", Occurrence.Last, Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.RemoveItems({\"a\",\"A\",\"b\"}, {\"a\"})",
+   "power_bi": "V:list:[text:\"A\",text:\"b\"]"
+  },
+  {
+   "expression": "List.Accumulate({\"x\",\"y\"}, {}, (s,c) => s & {c})",
+   "power_bi": "V:list:[text:\"x\",text:\"y\"]"
+  }
+ ]
+}
