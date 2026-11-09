@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes (quota back 2026-11-09), Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 200 (Task 111 m-script-101) shipped: unmappable M scripts run on the M engine. In progress: Task 112 (Antigravity, worktree Power BI tool-task112).
+**Active agent:** Antigravity codes, Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 201 (Task 112 m-residual-102) shipped. In progress: Task 113 DAX refusal backlog part 1 (Antigravity, worktree Power BI tool-task113).
 **Branch in use:** none
 **Working tree clean:** main yes
 
