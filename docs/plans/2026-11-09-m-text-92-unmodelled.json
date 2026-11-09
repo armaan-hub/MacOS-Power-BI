@@ -1,0 +1,105 @@
+{
+ "source": "Power BI Desktop live answers via tools/m_oracle_diff.py, 2026-11-09 (Task 102): measured but deliberately NOT modelled by the evaluator (single-byte code pages with best-fit character tables, other legacy code pages, cultures other than en-US, Comparer.FromCulture, #table/Number.NaN in format arguments). The evaluator must answer each with an explicit ERR, never a different value.",
+ "cases": [
+  {
+   "expression": "Text.Contains(\"abc\",\"b\",Comparer.FromCulture(\"en-US\"))",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",65000)",
+   "power_bi": "V:binary:YStBT2st"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\u00e9\",1251)",
+   "power_bi": "V:binary:YWU="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",932)",
+   "power_bi": "V:binary:YQ=="
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",54936)",
+   "power_bi": "V:binary:YQ=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\u0100\u0107\u0141\u2122\u2013\u00a0\",1252)",
+   "power_bi": "V:binary:QWNMmZag"
+  },
+  {
+   "expression": "Text.ToBinary(\"\u4f60\u03b1\",1252)",
+   "power_bi": "V:binary:P2E="
+  },
+  {
+   "expression": "Text.ToBinary(\"\u0100\",28591)",
+   "power_bi": "V:binary:QQ=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\u00e9\",50220)",
+   "power_bi": "V:binary:ZQ=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\u0100\",437)",
+   "power_bi": "V:binary:QQ=="
+  },
+  {
+   "expression": "Text.ToBinary(\"\u0100\",0)",
+   "power_bi": "V:binary:QQ=="
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#table({\"a\"},{})})",
+   "power_bi": "V:text:\"table\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{Number.NaN})",
+   "power_bi": "V:text:\"NaN\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{Number.PositiveInfinity})",
+   "power_bi": "V:text:\"\u221e\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"fr-FR\")",
+   "power_bi": "V:text:\"1,5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#date(2020,1,2)},\"de-DE\")",
+   "power_bi": "V:text:\"02.01.2020\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{true},\"de-DE\")",
+   "power_bi": "V:text:\"true\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#table({\"a\"},{})},\"zz\")",
+   "power_bi": "V:text:\"table\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"de\")",
+   "power_bi": "V:text:\"1,5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"en\")",
+   "power_bi": "V:text:\"1.5\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#date(2020,1,2)},\"fr-FR\")",
+   "power_bi": "V:text:\"02/01/2020\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#duration(1,0,0,0)},\"de-DE\")",
+   "power_bi": "V:text:\"1.00:00:00\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#time(13,2,3)},\"de-DE\")",
+   "power_bi": "V:text:\"13:02\""
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,5\",\"de-DE\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.5\",\"de-DE\")",
+   "power_bi": "V:type"
+  }
+ ]
+}

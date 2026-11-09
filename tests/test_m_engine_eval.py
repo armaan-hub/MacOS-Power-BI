@@ -20,6 +20,10 @@ HELDOUT = PLANS / "2026-11-09-m-core-heldout.json"
 PROBES = PLANS / "2026-11-09-m-eval-probes.json"
 HELDOUT2 = PLANS / "2026-11-09-m-core-heldout2.json"
 ERROR_PROBES = PLANS / "2026-11-09-m-error-probes.json"
+TEXT_SPEC = PLANS / "2026-11-09-m-text-92-spec.json"
+TEXT_HOLDOUT = PLANS / "2026-11-09-m-text-92-holdout.json"
+TEXT_PROBES = PLANS / "2026-11-09-m-text-92-probes.json"
+TEXT_UNMODELLED = PLANS / "2026-11-09-m-text-92-unmodelled.json"
 PARTITION_PREFIX = "ERR:PARTITION"
 SYNTAX_PREFIX = "ERR:SYNTAX"
 
@@ -78,6 +82,39 @@ class HeldOut2Tests(unittest.TestCase):
         self.assertGreater(len(cases), 250)
         failures = _differences(cases)
         self.assertEqual(failures, [], "\n".join(failures))
+
+
+class TextFunctionSpecTests(unittest.TestCase):
+    def test_text_function_family_matches_power_bi(self):
+        """272 live answers for the 41 Power Query Text.* functions (Task 102, m-text-92)."""
+        cases = _cases(TEXT_SPEC)
+        self.assertEqual(len(cases), 272)
+        failures = _differences(cases)
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_text_function_held_out_matches_power_bi(self):
+        """68 live answers the coder never saw (Task 102)."""
+        cases = _cases(TEXT_HOLDOUT)
+        self.assertEqual(len(cases), 68)
+        failures = _differences(cases)
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_text_function_probes_match_power_bi(self):
+        """Live answers measured while fixing the held-out misses: null first arguments, delimiter indexes,
+        argument errors and their order, text encodings, Text.Clean, Text.InferNumberType, Text.Format."""
+        cases = _cases(TEXT_PROBES)
+        self.assertEqual(len(cases), 942)
+        failures = _differences(cases)
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_unmodelled_text_cases_are_explicit_errors_never_other_values(self):
+        """Measured answers the evaluator does not reproduce (best-fit code pages, other cultures,
+        Comparer.FromCulture): each must stay an explicit ERR, never a different value."""
+        cases = _cases(TEXT_UNMODELLED)
+        self.assertEqual(len(cases), 25)
+        wrong = [f"{case['expression']!r}: {evaluate_to_text(case['expression'])!r}" for case in cases
+                 if not evaluate_to_text(case["expression"]).startswith("ERR:")]
+        self.assertEqual(wrong, [], "\n".join(wrong))
 
 
 class ProbeTests(unittest.TestCase):
