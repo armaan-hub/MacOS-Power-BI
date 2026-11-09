@@ -9,6 +9,7 @@ here in the test only; the app code never reads it.
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -24,6 +25,9 @@ TEXT_SPEC = PLANS / "2026-11-09-m-text-92-spec.json"
 TEXT_HOLDOUT = PLANS / "2026-11-09-m-text-92-holdout.json"
 TEXT_PROBES = PLANS / "2026-11-09-m-text-92-probes.json"
 TEXT_UNMODELLED = PLANS / "2026-11-09-m-text-92-unmodelled.json"
+NUMBER_SPEC = PLANS / "2026-11-09-m-number-93-spec.json"
+NUMBER_HOLDOUT = PLANS / "2026-11-09-m-number-93-holdout.json"
+NUMBER_PROBES = PLANS / "2026-11-09-m-number-93-probes.json"
 PARTITION_PREFIX = "ERR:PARTITION"
 SYNTAX_PREFIX = "ERR:SYNTAX"
 
@@ -109,9 +113,98 @@ class TextFunctionSpecTests(unittest.TestCase):
 
     def test_unmodelled_text_cases_are_explicit_errors_never_other_values(self):
         """Measured answers the evaluator does not reproduce (best-fit code pages, other cultures,
-        Comparer.FromCulture): each must stay an explicit ERR, never a different value."""
+        Comparer.FromCulture): each must stay an explicit ERR, never a different value. The two cases that the
+        number family (Task 103) now models (NaN and infinity inside Text.Format) must equal Power BI exactly."""
+        modelled = {'Text.Format("#{0}",{Number.NaN})', 'Text.Format("#{0}",{Number.PositiveInfinity})'}
         cases = _cases(TEXT_UNMODELLED)
         self.assertEqual(len(cases), 25)
+        self.assertEqual({case["expression"] for case in cases} & modelled, modelled)
+        wrong = []
+        for case in cases:
+            actual = evaluate_to_text(case["expression"])
+            if case["expression"] in modelled:
+                if actual != case["power_bi"]:
+                    wrong.append(f"{case['expression']!r}: power bi {case['power_bi']!r} / ours {actual!r}")
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+
+
+REFUSAL = re.compile(r"ERR:Expression\.Error: The result of (Number\.\w+) for this input cannot be reproduced exactly by the local engine\.")
+NUMBER_REFUSALS = PLANS / "2026-11-09-m-number-93-refusals.json"
+
+
+def _refusal_allowed() -> dict:
+    """The spec / holdout cases (by set) whose Power BI answer is an inexact transcendental result the engine
+    refuses on purpose (see the reason in the JSON)."""
+    with NUMBER_REFUSALS.open(encoding="utf-8") as handle:
+        document = json.load(handle)
+    assert "inexact" in document["reason"]
+    allowed: dict = {}
+    for case in document["cases"]:
+        allowed.setdefault(case["set"], {})[case["expression"]] = case["function"]
+    return allowed
+
+
+def _outcomes(cases: list, allowed: dict) -> tuple:
+    """(exact, refused, wrong): exact equals Power BI; refused is the listed explicit refusal; wrong is anything else."""
+    exact, refused, wrong = 0, 0, []
+    for index, case in enumerate(cases):
+        expression, expected = case["expression"], case["power_bi"]
+        actual = evaluate_to_text(expression)
+        if (actual.startswith(SYNTAX_PREFIX) if expected.startswith(PARTITION_PREFIX) else actual == expected):
+            exact += 1
+            continue
+        match = REFUSAL.fullmatch(actual)
+        if match and allowed.get(expression) == match.group(1) and f"{match.group(1)}(" in expression:
+            refused += 1
+            continue
+        wrong.append(f"[{index}] {expression!r}: power bi {expected!r} / ours {actual!r}")
+    return exact, refused, wrong
+
+
+class NumberFunctionSpecTests(unittest.TestCase):
+    def test_number_function_family_matches_power_bi(self):
+        """683 live answers for the Power Query Number.* functions and converters (Task 103, m-number-93): each is
+        exact, or an explicit refusal of an inexact transcendental result (never a wrong value)."""
+        cases = _cases(NUMBER_SPEC)
+        self.assertEqual(len(cases), 683)
+        exact, refused, wrong = _outcomes(cases, _refusal_allowed()["spec"])
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertEqual((exact, refused), (612, 71))
+
+    def test_number_held_out_cases_match_power_bi(self):
+        """170 further live answers, never seen while writing the number code."""
+        cases = _cases(NUMBER_HOLDOUT)
+        self.assertEqual(len(cases), 170)
+        exact, refused, wrong = _outcomes(cases, _refusal_allowed()["holdout"])
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertEqual((exact, refused), (159, 11))
+
+    def test_refusal_list_only_names_refusing_functions_with_inexact_answers(self):
+        """Every listed refusal is one of the twelve inexact functions, and an exact-by-mathematics input is never in it."""
+        functions = {"Number.Sin", "Number.Cos", "Number.Tan", "Number.Asin", "Number.Acos", "Number.Atan",
+                     "Number.Atan2", "Number.Sinh", "Number.Cosh", "Number.Tanh", "Number.Power", "Number.Log"}
+        for name, listed in _refusal_allowed().items():
+            for expression, function in listed.items():
+                self.assertIn(function, functions)
+                self.assertIn(function + "(", expression)
+
+    def test_number_probes_match_power_bi(self):
+        """Live answers measured while fixing the number misses: Decimal-typed results (Abs, Int64.From, FromText),
+        FromText percent / currency / parenthesis / sign forms, every Number.ToText standard format, Sin / Cos / Tan
+        beyond 2**30 and 2**63, Tanh / Sinh / Cosh at large arguments, Power with integer exponents."""
+        cases = _cases(NUMBER_PROBES)
+        self.assertGreater(len(cases), 650)
+        failures = _differences(cases)
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_number_residual_is_refused_or_an_explicit_error(self):
+        """Measured answers the engine does not return (inexact transcendental results, the tangent beyond 2**63,
+        formats and cultures not modelled): each must be an explicit ERR, never a value."""
+        with NUMBER_PROBES.open(encoding="utf-8") as handle:
+            cases = json.load(handle)["residual"]
+        self.assertGreater(len(cases), 150)
         wrong = [f"{case['expression']!r}: {evaluate_to_text(case['expression'])!r}" for case in cases
                  if not evaluate_to_text(case["expression"]).startswith("ERR:")]
         self.assertEqual(wrong, [], "\n".join(wrong))
