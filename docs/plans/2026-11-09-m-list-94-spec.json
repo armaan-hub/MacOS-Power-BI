@@ -1,0 +1,1941 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "List.Count({})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Count({1,2,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Count({3,1,2,1})",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "List.Count({1,null,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Count({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Count({1,\"a\",true})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Count({2.5,-1,0})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Count({null})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Count({{1},{2,3}})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.Count({1..5})",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "List.NonNullCount({1,2,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.NonNullCount({3,1,2,1})",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "List.NonNullCount({2.5,-1,0})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.NonNullCount({null})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.NonNullCount({{1},{2,3}})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.IsEmpty({})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsEmpty({1,2,3})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.IsEmpty({1,null,3})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.IsEmpty({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.IsEmpty({2.5,-1,0})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.IsEmpty({null})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.IsEmpty({1..5})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.First({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.First({1,2,3})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.First({3,1,2,1})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.First({1,null,3})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.First({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "List.First({1,\"a\",true})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.First({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.First({{1},{2,3}})",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "List.First({1..5})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Last({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:text:\"B\""
+  },
+  {
+   "expression": "List.Last({1,\"a\",true})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.Last({2.5,-1,0})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Last({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Last({{1},{2,3}})",
+   "power_bi": "V:list:[number:2,number:3]"
+  },
+  {
+   "expression": "List.Last({1..5})",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "List.Single({})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Single({1,2,3})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Single({3,1,2,1})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Single({1,null,3})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Single({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Single({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Single({1..5})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({1,2,3})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({3,1,2,1})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({1,null,3})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({1,\"a\",true})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({2.5,-1,0})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.SingleOrDefault({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({1..5})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Reverse({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Reverse({3,1,2,1})",
+   "power_bi": "V:list:[number:1,number:2,number:1,number:3]"
+  },
+  {
+   "expression": "List.Reverse({1,null,3})",
+   "power_bi": "V:list:[number:3,null,number:1]"
+  },
+  {
+   "expression": "List.Reverse({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:list:[text:\"B\",text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.Reverse({2.5,-1,0})",
+   "power_bi": "V:list:[number:0,number:-1,number:2.5]"
+  },
+  {
+   "expression": "List.Reverse({null})",
+   "power_bi": "V:list:[null]"
+  },
+  {
+   "expression": "List.Reverse({1..5})",
+   "power_bi": "V:list:[number:5,number:4,number:3,number:2,number:1]"
+  },
+  {
+   "expression": "List.Distinct({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Distinct({1,2,3})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Distinct({3,1,2,1})",
+   "power_bi": "V:list:[number:3,number:1,number:2]"
+  },
+  {
+   "expression": "List.Distinct({1,null,3})",
+   "power_bi": "V:list:[number:1,null,number:3]"
+  },
+  {
+   "expression": "List.Distinct({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:list:[text:\"b\",text:\"a\",text:\"B\"]"
+  },
+  {
+   "expression": "List.Distinct({1,\"a\",true})",
+   "power_bi": "V:list:[number:1,text:\"a\",true]"
+  },
+  {
+   "expression": "List.Distinct({2.5,-1,0})",
+   "power_bi": "V:list:[number:2.5,number:-1,number:0]"
+  },
+  {
+   "expression": "List.Distinct({null})",
+   "power_bi": "V:list:[null]"
+  },
+  {
+   "expression": "List.Distinct({{1},{2,3}})",
+   "power_bi": "V:list:[list:[number:1],list:[number:2,number:3]]"
+  },
+  {
+   "expression": "List.Distinct({1..5})",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.IsDistinct({1,2,3})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsDistinct({3,1,2,1})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.IsDistinct({1,null,3})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsDistinct({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsDistinct({1,\"a\",true})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsDistinct({2.5,-1,0})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsDistinct({null})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsDistinct({{1},{2,3}})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.IsDistinct({1..5})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.RemoveNulls({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveNulls({1,2,3})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.RemoveNulls({3,1,2,1})",
+   "power_bi": "V:list:[number:3,number:1,number:2,number:1]"
+  },
+  {
+   "expression": "List.RemoveNulls({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:list:[text:\"b\",text:\"a\",text:\"B\"]"
+  },
+  {
+   "expression": "List.RemoveNulls({1,\"a\",true})",
+   "power_bi": "V:list:[number:1,text:\"a\",true]"
+  },
+  {
+   "expression": "List.RemoveNulls({null})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveNulls({1..5})",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Sum({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Sum({1,2,3})",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "List.Sum({3,1,2,1})",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "List.Sum({\"b\",\"a\",\"B\"})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Text."
+  },
+  {
+   "expression": "List.Sum({1,\"a\",true})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Sum({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Sum({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types List and List."
+  },
+  {
+   "expression": "List.Sum({1..5})",
+   "power_bi": "V:number:15"
+  },
+  {
+   "expression": "List.Product({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Product({1,2,3})",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "List.Product({1,null,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Product({1,\"a\",true})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Number and Text."
+  },
+  {
+   "expression": "List.Product({2.5,-1,0})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Product({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Product({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types List and List."
+  },
+  {
+   "expression": "List.Product({1..5})",
+   "power_bi": "V:number:120"
+  },
+  {
+   "expression": "List.Average({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Average({1,2,3})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.Average({3,1,2,1})",
+   "power_bi": "V:number:1.75"
+  },
+  {
+   "expression": "List.Average({1,null,3})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.Average({1,\"a\",true})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Number."
+  },
+  {
+   "expression": "List.Average({2.5,-1,0})",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "List.Average({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Average({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types List and List."
+  },
+  {
+   "expression": "List.Average({1..5})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Median({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Median({1,2,3})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.Median({3,1,2,1})",
+   "power_bi": "V:number:1.5"
+  },
+  {
+   "expression": "List.Median({1,null,3})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.Median({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "List.Median({1,\"a\",true})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.Median({2.5,-1,0})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Median({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Median({1..5})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Mode({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Mode({1,2,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Mode({3,1,2,1})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Mode({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:text:\"B\""
+  },
+  {
+   "expression": "List.Mode({1,\"a\",true})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.Mode({2.5,-1,0})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Mode({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Mode({{1},{2,3}})",
+   "power_bi": "V:list:[number:2,number:3]"
+  },
+  {
+   "expression": "List.Mode({1..5})",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "List.Modes({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Modes({1,2,3})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Modes({3,1,2,1})",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "List.Modes({1,null,3})",
+   "power_bi": "V:list:[number:1,null,number:3]"
+  },
+  {
+   "expression": "List.Modes({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:list:[text:\"b\",text:\"a\",text:\"B\"]"
+  },
+  {
+   "expression": "List.Modes({2.5,-1,0})",
+   "power_bi": "V:list:[number:2.5,number:-1,number:0]"
+  },
+  {
+   "expression": "List.Modes({{1},{2,3}})",
+   "power_bi": "V:list:[list:[number:1],list:[number:2,number:3]]"
+  },
+  {
+   "expression": "List.Modes({1..5})",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Min({3,1,2,1})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Min({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:text:\"B\""
+  },
+  {
+   "expression": "List.Min({1,\"a\",true})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Min({2.5,-1,0})",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "List.Min({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types List and List."
+  },
+  {
+   "expression": "List.Min({1..5})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.Max({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Max({1,2,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Max({3,1,2,1})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Max({1,null,3})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "List.Max({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "List.Max({1,\"a\",true})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "List.Max({2.5,-1,0})",
+   "power_bi": "V:number:2.5"
+  },
+  {
+   "expression": "List.Max({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.StandardDeviation({})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.StandardDeviation({1,2,3})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.StandardDeviation({3,1,2,1})",
+   "power_bi": "V:number:0.9574271077563381"
+  },
+  {
+   "expression": "List.StandardDeviation({1,null,3})",
+   "power_bi": "V:number:1.4142135623730951"
+  },
+  {
+   "expression": "List.StandardDeviation({\"b\",\"a\",\"B\"})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Text."
+  },
+  {
+   "expression": "List.StandardDeviation({1,\"a\",true})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Number."
+  },
+  {
+   "expression": "List.StandardDeviation({2.5,-1,0})",
+   "power_bi": "V:number:1.8027756377319946"
+  },
+  {
+   "expression": "List.StandardDeviation({null})",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.StandardDeviation({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types List and List."
+  },
+  {
+   "expression": "List.StandardDeviation({1..5})",
+   "power_bi": "V:number:1.5811388300841898"
+  },
+  {
+   "expression": "List.Sort({1,2,3})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Sort({3,1,2,1})",
+   "power_bi": "V:list:[number:1,number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Sort({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:list:[text:\"B\",text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.Sort({2.5,-1,0})",
+   "power_bi": "V:list:[number:-1,number:0,number:2.5]"
+  },
+  {
+   "expression": "List.Sort({null})",
+   "power_bi": "V:list:[null]"
+  },
+  {
+   "expression": "List.Sort({1..5})",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Buffer({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Buffer({1,2,3})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Buffer({1,null,3})",
+   "power_bi": "V:list:[number:1,null,number:3]"
+  },
+  {
+   "expression": "List.Buffer({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:list:[text:\"b\",text:\"a\",text:\"B\"]"
+  },
+  {
+   "expression": "List.Buffer({1,\"a\",true})",
+   "power_bi": "V:list:[number:1,text:\"a\",true]"
+  },
+  {
+   "expression": "List.Buffer({2.5,-1,0})",
+   "power_bi": "V:list:[number:2.5,number:-1,number:0]"
+  },
+  {
+   "expression": "List.Buffer({null})",
+   "power_bi": "V:list:[null]"
+  },
+  {
+   "expression": "List.Buffer({1..5})",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Positions({1,2,3})",
+   "power_bi": "V:list:[number:0,number:1,number:2]"
+  },
+  {
+   "expression": "List.Positions({\"b\",\"a\",\"B\"})",
+   "power_bi": "V:list:[number:0,number:1,number:2]"
+  },
+  {
+   "expression": "List.Positions({1,\"a\",true})",
+   "power_bi": "V:list:[number:0,number:1,number:2]"
+  },
+  {
+   "expression": "List.Positions({2.5,-1,0})",
+   "power_bi": "V:list:[number:0,number:1,number:2]"
+  },
+  {
+   "expression": "List.Positions({null})",
+   "power_bi": "V:list:[number:0]"
+  },
+  {
+   "expression": "List.Positions({{1},{2,3}})",
+   "power_bi": "V:list:[number:0,number:1]"
+  },
+  {
+   "expression": "List.Positions({1..5})",
+   "power_bi": "V:list:[number:0,number:1,number:2,number:3,number:4]"
+  },
+  {
+   "expression": "List.AllTrue({})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.AllTrue({1,2,3})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "List.AllTrue({1,null,3})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "List.AllTrue({\"b\",\"a\",\"B\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"b\" to type Logical."
+  },
+  {
+   "expression": "List.AllTrue({1,\"a\",true})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "List.AllTrue({2.5,-1,0})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 2.5 to type Logical."
+  },
+  {
+   "expression": "List.AllTrue({null})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.AllTrue({{1},{2,3}})",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type List to type Logical."
+  },
+  {
+   "expression": "List.AnyTrue({})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.AnyTrue({1,2,3})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "List.AnyTrue({3,1,2,1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 3 to type Logical."
+  },
+  {
+   "expression": "List.AnyTrue({1,null,3})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "List.AnyTrue({1,\"a\",true})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "List.AnyTrue({2.5,-1,0})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 2.5 to type Logical."
+  },
+  {
+   "expression": "List.AnyTrue({null})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.AnyTrue({1..5})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Logical."
+  },
+  {
+   "expression": "List.Combine({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Combine({1,2,3})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.Combine({3,1,2,1})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.Combine({1,null,3})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.Combine({1,\"a\",true})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.Combine({null})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.Combine({{1},{2,3}})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Combine({1..5})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.FirstN({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.LastN({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Skip({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveFirstN({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MaxN({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({}, 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MaxN({}, 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({}, 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.FirstN({}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.LastN({}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Skip({}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.FirstN({}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveFirstN({}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveLastN({}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.MinN({}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.FirstN({}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.LastN({}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.Skip({}, null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveFirstN({}, null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({}, null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MaxN({}, null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.MinN({}, null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.FirstN({}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.LastN({}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Skip({}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveFirstN({}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MaxN({}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.LastN({1,2,3,4,5}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Skip({1,2,3,4,5}, 0)",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.MaxN({1,2,3,4,5}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({1,2,3,4,5}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.FirstN({1,2,3,4,5}, 2)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.LastN({1,2,3,4,5}, 2)",
+   "power_bi": "V:list:[number:4,number:5]"
+  },
+  {
+   "expression": "List.Skip({1,2,3,4,5}, 2)",
+   "power_bi": "V:list:[number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveFirstN({1,2,3,4,5}, 2)",
+   "power_bi": "V:list:[number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveLastN({1,2,3,4,5}, 2)",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.MaxN({1,2,3,4,5}, 2)",
+   "power_bi": "V:list:[number:5,number:4]"
+  },
+  {
+   "expression": "List.FirstN({1,2,3,4,5}, 10)",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveFirstN({1,2,3,4,5}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({1,2,3,4,5}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MaxN({1,2,3,4,5}, 10)",
+   "power_bi": "V:list:[number:5,number:4,number:3,number:2,number:1]"
+  },
+  {
+   "expression": "List.MinN({1,2,3,4,5}, 10)",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.LastN({1,2,3,4,5}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "List.Skip({1,2,3,4,5}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveFirstN({1,2,3,4,5}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveLastN({1,2,3,4,5}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.MaxN({1,2,3,4,5}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.MinN({1,2,3,4,5}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.FirstN({1,2,3,4,5}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.LastN({1,2,3,4,5}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.Skip({1,2,3,4,5}, null)",
+   "power_bi": "V:list:[number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveFirstN({1,2,3,4,5}, null)",
+   "power_bi": "V:list:[number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveLastN({1,2,3,4,5}, null)",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4]"
+  },
+  {
+   "expression": "List.MaxN({1,2,3,4,5}, null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.MinN({1,2,3,4,5}, null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.FirstN({1,2,3,4,5}, each _ < 3)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.LastN({1,2,3,4,5}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Skip({1,2,3,4,5}, each _ < 3)",
+   "power_bi": "V:list:[number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveLastN({1,2,3,4,5}, each _ < 3)",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.MaxN({1,2,3,4,5}, each _ < 3)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({1,2,3,4,5}, each _ < 3)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.FirstN({\"a\",\"b\",\"c\"}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.LastN({\"a\",\"b\",\"c\"}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Skip({\"a\",\"b\",\"c\"}, 0)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "List.RemoveFirstN({\"a\",\"b\",\"c\"}, 0)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "List.MaxN({\"a\",\"b\",\"c\"}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.LastN({\"a\",\"b\",\"c\"}, 2)",
+   "power_bi": "V:list:[text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "List.Skip({\"a\",\"b\",\"c\"}, 2)",
+   "power_bi": "V:list:[text:\"c\"]"
+  },
+  {
+   "expression": "List.RemoveFirstN({\"a\",\"b\",\"c\"}, 2)",
+   "power_bi": "V:list:[text:\"c\"]"
+  },
+  {
+   "expression": "List.RemoveLastN({\"a\",\"b\",\"c\"}, 2)",
+   "power_bi": "V:list:[text:\"a\"]"
+  },
+  {
+   "expression": "List.MaxN({\"a\",\"b\",\"c\"}, 2)",
+   "power_bi": "V:list:[text:\"c\",text:\"b\"]"
+  },
+  {
+   "expression": "List.MinN({\"a\",\"b\",\"c\"}, 2)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.FirstN({\"a\",\"b\",\"c\"}, 10)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "List.Skip({\"a\",\"b\",\"c\"}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveFirstN({\"a\",\"b\",\"c\"}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({\"a\",\"b\",\"c\"}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({\"a\",\"b\",\"c\"}, 10)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "List.FirstN({\"a\",\"b\",\"c\"}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "List.Skip({\"a\",\"b\",\"c\"}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveFirstN({\"a\",\"b\",\"c\"}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveLastN({\"a\",\"b\",\"c\"}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.MaxN({\"a\",\"b\",\"c\"}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.MinN({\"a\",\"b\",\"c\"}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.FirstN({\"a\",\"b\",\"c\"}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.LastN({\"a\",\"b\",\"c\"}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.RemoveFirstN({\"a\",\"b\",\"c\"}, null)",
+   "power_bi": "V:list:[text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "List.RemoveLastN({\"a\",\"b\",\"c\"}, null)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.MaxN({\"a\",\"b\",\"c\"}, null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.MinN({\"a\",\"b\",\"c\"}, null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.FirstN({\"a\",\"b\",\"c\"}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.LastN({\"a\",\"b\",\"c\"}, each _ < 3)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Number and Text."
+  },
+  {
+   "expression": "List.Skip({\"a\",\"b\",\"c\"}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.RemoveLastN({\"a\",\"b\",\"c\"}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.MaxN({\"a\",\"b\",\"c\"}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.MinN({\"a\",\"b\",\"c\"}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.FirstN({1,null,2}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.LastN({1,null,2}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Skip({1,null,2}, 0)",
+   "power_bi": "V:list:[number:1,null,number:2]"
+  },
+  {
+   "expression": "List.RemoveFirstN({1,null,2}, 0)",
+   "power_bi": "V:list:[number:1,null,number:2]"
+  },
+  {
+   "expression": "List.MaxN({1,null,2}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MinN({1,null,2}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.FirstN({1,null,2}, 2)",
+   "power_bi": "V:list:[number:1,null]"
+  },
+  {
+   "expression": "List.LastN({1,null,2}, 2)",
+   "power_bi": "V:list:[null,number:2]"
+  },
+  {
+   "expression": "List.RemoveLastN({1,null,2}, 2)",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "List.MaxN({1,null,2}, 2)",
+   "power_bi": "V:list:[number:2,number:1]"
+  },
+  {
+   "expression": "List.MinN({1,null,2}, 2)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.FirstN({1,null,2}, 10)",
+   "power_bi": "V:list:[number:1,null,number:2]"
+  },
+  {
+   "expression": "List.LastN({1,null,2}, 10)",
+   "power_bi": "V:list:[number:1,null,number:2]"
+  },
+  {
+   "expression": "List.Skip({1,null,2}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveLastN({1,null,2}, 10)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MaxN({1,null,2}, 10)",
+   "power_bi": "V:list:[number:2,number:1]"
+  },
+  {
+   "expression": "List.MinN({1,null,2}, 10)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.FirstN({1,null,2}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "List.LastN({1,null,2}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "List.Skip({1,null,2}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveFirstN({1,null,2}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.MaxN({1,null,2}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.FirstN({1,null,2}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.LastN({1,null,2}, null)",
+   "power_bi": "ERR:Expression.Error: We expected a CountOrCondition value."
+  },
+  {
+   "expression": "List.Skip({1,null,2}, null)",
+   "power_bi": "V:list:[null,number:2]"
+  },
+  {
+   "expression": "List.RemoveFirstN({1,null,2}, null)",
+   "power_bi": "V:list:[null,number:2]"
+  },
+  {
+   "expression": "List.RemoveLastN({1,null,2}, null)",
+   "power_bi": "V:list:[number:1,null]"
+  },
+  {
+   "expression": "List.MinN({1,null,2}, null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Function."
+  },
+  {
+   "expression": "List.FirstN({1,null,2}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.LastN({1,null,2}, each _ < 3)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Logical."
+  },
+  {
+   "expression": "List.Skip({1,null,2}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.RemoveFirstN({1,null,2}, each _ < 3)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.MaxN({1,null,2}, each _ < 3)",
+   "power_bi": "V:list:[number:2,number:1]"
+  },
+  {
+   "expression": "List.MinN({1,null,2}, each _ < 3)",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.Range({1,2,3,4,5}, 1)",
+   "power_bi": "V:list:[number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Range({1,2,3,4,5}, 1, 2)",
+   "power_bi": "V:list:[number:2,number:3]"
+  },
+  {
+   "expression": "List.Range({1,2,3,4,5}, 4, 5)",
+   "power_bi": "V:list:[number:5]"
+  },
+  {
+   "expression": "List.Range({1,2,3,4,5}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.Range({1,2,3,4,5}, 6)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Alternate({1,2,3,4,5}, 1, 1)",
+   "power_bi": "V:list:[number:2,number:4]"
+  },
+  {
+   "expression": "List.Alternate({1,2,3,4,5}, 2, 1, 1)",
+   "power_bi": "V:list:[number:1,number:4]"
+  },
+  {
+   "expression": "List.Repeat({1,2,3,4,5}, 2)",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5,number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveRange({1,2,3,4,5}, 1)",
+   "power_bi": "V:list:[number:1,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveRange({1,2,3,4,5}, 1, 2)",
+   "power_bi": "V:list:[number:1,number:4,number:5]"
+  },
+  {
+   "expression": "List.InsertRange({1,2,3,4,5}, 1, {9})",
+   "power_bi": "V:list:[number:1,number:9,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.InsertRange({1,2,3,4,5}, 9, {9})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.ReplaceRange({1,2,3,4,5}, 0, 2, {7})",
+   "power_bi": "V:list:[number:7,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Contains({1,2,3,4,5}, \"a\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.Contains({1,2,3,4,5}, 2)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.ContainsAny({1,2,3,4,5}, {9,\"a\"})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.PositionOf({1,2,3,4,5}, \"a\", Occurrence.Last)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "List.PositionOf({1,2,3,4,5}, \"a\", Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.PositionOfAny({1,2,3,4,5}, {2,\"b\"})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.RemoveItems({1,2,3,4,5}, {1,\"a\"})",
+   "power_bi": "V:list:[number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.RemoveMatchingItems({1,2,3,4,5}, {1,\"a\"})",
+   "power_bi": "V:list:[number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Difference({1,2,3,4,5}, {1,\"a\"})",
+   "power_bi": "V:list:[number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Intersect({1,2,3,4,5}, {1,\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Function."
+  },
+  {
+   "expression": "List.Select({1,2,3,4,5}, each _ <> 2)",
+   "power_bi": "V:list:[number:1,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Transform({1,2,3,4,5}, each Text.From(_) & \"!\")",
+   "power_bi": "V:list:[text:\"1!\",text:\"2!\",text:\"3!\",text:\"4!\",text:\"5!\"]"
+  },
+  {
+   "expression": "List.MatchesAll({1,2,3,4,5}, each _ <> null)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.MatchesAny({1,2,3,4,5}, each _ = 3)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.FindText({1,2,3,4,5}, \"a\")",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Sort({1,2,3,4,5}, Order.Descending)",
+   "power_bi": "V:list:[number:5,number:4,number:3,number:2,number:1]"
+  },
+  {
+   "expression": "List.Range({\"a\",\"b\",\"a\"}, 1, 2)",
+   "power_bi": "V:list:[text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Range({\"a\",\"b\",\"a\"}, 4, 5)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Range({\"a\",\"b\",\"a\"}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.Range({\"a\",\"b\",\"a\"}, 6)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Alternate({\"a\",\"b\",\"a\"}, 1)",
+   "power_bi": "V:list:[text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Alternate({\"a\",\"b\",\"a\"}, 1, 1)",
+   "power_bi": "V:list:[text:\"b\"]"
+  },
+  {
+   "expression": "List.Alternate({\"a\",\"b\",\"a\"}, 2, 1, 1)",
+   "power_bi": "V:list:[text:\"a\"]"
+  },
+  {
+   "expression": "List.Repeat({\"a\",\"b\",\"a\"}, 2)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"a\",text:\"a\",text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Split({\"a\",\"b\",\"a\"}, 2)",
+   "power_bi": "V:list:[list:[text:\"a\",text:\"b\"],list:[text:\"a\"]]"
+  },
+  {
+   "expression": "List.Split({\"a\",\"b\",\"a\"}, 0)",
+   "power_bi": "ERR:Expression.Error: The 'pageSize' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveRange({\"a\",\"b\",\"a\"}, 1)",
+   "power_bi": "V:list:[text:\"a\",text:\"a\"]"
+  },
+  {
+   "expression": "List.RemoveRange({\"a\",\"b\",\"a\"}, 1, 2)",
+   "power_bi": "V:list:[text:\"a\"]"
+  },
+  {
+   "expression": "List.InsertRange({\"a\",\"b\",\"a\"}, 1, {9})",
+   "power_bi": "V:list:[text:\"a\",number:9,text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.InsertRange({\"a\",\"b\",\"a\"}, 9, {9})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.ReplaceRange({\"a\",\"b\",\"a\"}, 0, 2, {7})",
+   "power_bi": "V:list:[number:7,text:\"a\"]"
+  },
+  {
+   "expression": "List.Contains({\"a\",\"b\",\"a\"}, \"a\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.Contains({\"a\",\"b\",\"a\"}, 2)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.ContainsAll({\"a\",\"b\",\"a\"}, {1,2})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.ContainsAny({\"a\",\"b\",\"a\"}, {9,\"a\"})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.PositionOf({\"a\",\"b\",\"a\"}, \"a\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.PositionOf({\"a\",\"b\",\"a\"}, \"a\", Occurrence.Last)",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.PositionOf({\"a\",\"b\",\"a\"}, \"a\", Occurrence.All)",
+   "power_bi": "V:list:[number:0,number:2]"
+  },
+  {
+   "expression": "List.PositionOfAny({\"a\",\"b\",\"a\"}, {2,\"b\"})",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "List.RemoveItems({\"a\",\"b\",\"a\"}, {1,\"a\"})",
+   "power_bi": "V:list:[text:\"b\"]"
+  },
+  {
+   "expression": "List.RemoveMatchingItems({\"a\",\"b\",\"a\"}, {1,\"a\"})",
+   "power_bi": "V:list:[text:\"b\"]"
+  },
+  {
+   "expression": "List.ReplaceMatchingItems({\"a\",\"b\",\"a\"}, {{1,9},{\"a\",\"z\"}})",
+   "power_bi": "V:list:[text:\"z\",text:\"b\",text:\"z\"]"
+  },
+  {
+   "expression": "List.ReplaceValue({\"a\",\"b\",\"a\"}, \"a\", \"q\", Replacer.ReplaceValue)",
+   "power_bi": "V:list:[text:\"q\",text:\"b\",text:\"q\"]"
+  },
+  {
+   "expression": "List.Difference({\"a\",\"b\",\"a\"}, {1,\"a\"})",
+   "power_bi": "V:list:[text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Intersect({\"a\",\"b\",\"a\"}, {1,\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Function."
+  },
+  {
+   "expression": "List.Select({\"a\",\"b\",\"a\"}, each _ <> 2)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"a\"]"
+  },
+  {
+   "expression": "List.MatchesAny({\"a\",\"b\",\"a\"}, each _ = 3)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.Sort({\"a\",\"b\",\"a\"}, Order.Descending)",
+   "power_bi": "V:list:[text:\"b\",text:\"a\",text:\"a\"]"
+  },
+  {
+   "expression": "List.Percentile({\"a\",\"b\",\"a\"}, 0.5)",
+   "power_bi": "ERR:Expression.Error: List.Percentile requires a list of dates, datetimes, datetimezones, durations, numbers or times."
+  },
+  {
+   "expression": "List.Covariance({\"a\",\"b\",\"a\"}, {5,4,3,2,1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Range({}, 1)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Range({}, 1, 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Range({}, 4, 5)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Range({}, -1)",
+   "power_bi": "ERR:Expression.Error: The 'countOrCondition' argument is out of range."
+  },
+  {
+   "expression": "List.Range({}, 6)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Alternate({}, 1)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Alternate({}, 1, 1)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Alternate({}, 2, 1, 1)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Repeat({}, 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Repeat({}, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Split({}, 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Split({}, 0)",
+   "power_bi": "ERR:Expression.Error: The 'pageSize' argument is out of range."
+  },
+  {
+   "expression": "List.RemoveRange({}, 1)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.RemoveRange({}, 1, 2)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.InsertRange({}, 1, {9})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.ReplaceRange({}, 0, 2, {7})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "List.Contains({}, \"a\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.Contains({}, 2)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.ContainsAll({}, {1,2})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.ContainsAny({}, {9,\"a\"})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "List.PositionOf({}, \"a\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "List.PositionOf({}, \"a\", Occurrence.Last)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "List.PositionOfAny({}, {2,\"b\"})",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "List.RemoveItems({}, {1,\"a\"})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.RemoveMatchingItems({}, {1,\"a\"})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.ReplaceValue({}, \"a\", \"q\", Replacer.ReplaceValue)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Difference({}, {1,\"a\"})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Intersect({}, {1,\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Function."
+  },
+  {
+   "expression": "List.Select({}, each _ <> 2)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Transform({}, each Text.From(_) & \"!\")",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.MatchesAll({}, each _ <> null)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.FindText({}, \"a\")",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Sort({}, Order.Descending)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Percentile({}, 0.5)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "List.Covariance({}, {5,4,3,2,1})",
+   "power_bi": "ERR:Expression.Error: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.Numbers(1, 5)",
+   "power_bi": "V:list:[number:1,number:2,number:3,number:4,number:5]"
+  },
+  {
+   "expression": "List.Numbers(0, 0)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Numbers(1, -1)",
+   "power_bi": "ERR:Expression.Error: The 'count' argument is out of range."
+  },
+  {
+   "expression": "List.Accumulate({1,2,3}, 0, (s,c) => s + c)",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "List.Accumulate({\"a\",\"b\"}, \"\", (s,c) => s & c)",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "List.Generate(() => 1, each _ < 50, each _ * 3, each _ - 1)",
+   "power_bi": "V:list:[number:0,number:2,number:8,number:26]"
+  },
+  {
+   "expression": "List.Generate(() => 5, each false, each _)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Zip({{1,2},{\"a\",\"b\",\"c\"}})",
+   "power_bi": "V:list:[list:[number:1,text:\"a\"],list:[number:2,text:\"b\"],list:[null,text:\"c\"]]"
+  },
+  {
+   "expression": "List.Zip({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.Intersect({{1,2,3},{2,3,4}})",
+   "power_bi": "V:list:[number:2,number:3]"
+  },
+  {
+   "expression": "List.Intersect({})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "List.TransformMany({1,2}, each {_, _*10}, (x,y) => x + y)",
+   "power_bi": "V:list:[number:2,number:11,number:4,number:22]"
+  },
+  {
+   "expression": "List.Combine({{1},{},{2,3}})",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "List.Sort({3,1,2}, each -_)",
+   "power_bi": "V:list:[number:3,number:2,number:1]"
+  },
+  {
+   "expression": "List.Sort({\"b\",\"A\",\"a\"}, Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:list:[text:\"A\",text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.Sort({{2,\"x\"},{1,\"y\"}}, {{each _{0}, Order.Ascending}})",
+   "power_bi": "V:list:[list:[number:1,text:\"y\"],list:[number:2,text:\"x\"]]"
+  },
+  {
+   "expression": "List.Distinct({\"a\",\"A\",\"b\"}, Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:list:[text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "List.Contains({\"A\"}, \"a\", Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.Max({}, 0)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Min({}, -1)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "List.Max({\"b\",\"a\"})",
+   "power_bi": "V:text:\"b\""
+  },
+  {
+   "expression": "List.Max({1,\"a\"})",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "List.Sum({1,\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value \"a\" to type Number."
+  },
+  {
+   "expression": "List.Average({\"a\"})",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Text."
+  },
+  {
+   "expression": "List.Sum({#duration(1,0,0,0)})",
+   "power_bi": "V:duration:1.00:00:00"
+  },
+  {
+   "expression": "List.Average({1,2})",
+   "power_bi": "V:number:1.5"
+  },
+  {
+   "expression": "List.Median({1,2,3,4})",
+   "power_bi": "V:number:2.5"
+  },
+  {
+   "expression": "List.Mode({1,1,2,2})",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "List.Modes({1,1,2,2,3})",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "List.StandardDeviation({1})",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "List.Percentile({1,2,3,4}, {0.25,0.75})",
+   "power_bi": "V:list:[number:1.75,number:3.25]"
+  },
+  {
+   "expression": "List.Percentile({1,2,3,4}, 0.25, [PercentileMode=PercentileMode.ExcelExc])",
+   "power_bi": "V:number:1.25"
+  },
+  {
+   "expression": "List.First({}, \"d\")",
+   "power_bi": "V:text:\"d\""
+  },
+  {
+   "expression": "List.Single({1,2})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({1,2})",
+   "power_bi": "ERR:Expression.Error: There were too many elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "List.SingleOrDefault({}, 7)",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "List.Dates(#date(2024,1,30), 3, #duration(1,0,0,0))",
+   "power_bi": "V:list:[date:2024-01-30,date:2024-01-31,date:2024-02-01]"
+  },
+  {
+   "expression": "List.Times(#time(23,0,0), 3, #duration(0,0,30,0))",
+   "power_bi": "V:list:[time:23:00:00.0000000,time:23:30:00.0000000,time:00:00:00.0000000]"
+  },
+  {
+   "expression": "List.Durations(#duration(0,1,0,0), 3, #duration(0,0,15,0))",
+   "power_bi": "V:list:[duration:01:00:00,duration:01:15:00,duration:01:30:00]"
+  },
+  {
+   "expression": "List.DateTimes(#datetime(2024,2,28,12,0,0), 2, #duration(1,0,0,0))",
+   "power_bi": "V:list:[datetime:2024-02-28T12:00:00.0000000,datetime:2024-02-29T12:00:00.0000000]"
+  },
+  {
+   "expression": "{1,2,3}{1}",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "{1,2,3}{5}?",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "{1,2} & {3}",
+   "power_bi": "V:list:[number:1,number:2,number:3]"
+  },
+  {
+   "expression": "{1,2} = {1,2}",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "List.Type",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is({1}, List.Type)",
+   "power_bi": "V:true"
+  }
+ ]
+}

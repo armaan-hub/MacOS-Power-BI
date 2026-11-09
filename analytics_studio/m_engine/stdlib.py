@@ -16,6 +16,7 @@ from . import values as V
 from .canonical import duration_text, number_text_of
 from .text import TEXT_GLOBALS
 from .number import NUMBER_GLOBALS
+from .list_fns import LIST_GLOBALS
 from .values import MError, MValue, ParamSpec
 
 
@@ -366,4 +367,5 @@ GLOBALS: dict = {
     "List.Sum": _native((("list", False), ("precision", True)), _list_sum),
     **TEXT_GLOBALS,
     **NUMBER_GLOBALS,
+    **LIST_GLOBALS,
 }

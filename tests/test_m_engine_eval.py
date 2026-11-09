@@ -28,6 +28,8 @@ TEXT_UNMODELLED = PLANS / "2026-11-09-m-text-92-unmodelled.json"
 NUMBER_SPEC = PLANS / "2026-11-09-m-number-93-spec.json"
 NUMBER_HOLDOUT = PLANS / "2026-11-09-m-number-93-holdout.json"
 NUMBER_PROBES = PLANS / "2026-11-09-m-number-93-probes.json"
+LIST_SPEC = PLANS / "2026-11-09-m-list-94-spec.json"
+LIST_PROBES = PLANS / "2026-11-09-m-list-94-probes.json"
 PARTITION_PREFIX = "ERR:PARTITION"
 SYNTAX_PREFIX = "ERR:SYNTAX"
 
@@ -208,6 +210,39 @@ class NumberFunctionSpecTests(unittest.TestCase):
         wrong = [f"{case['expression']!r}: {evaluate_to_text(case['expression'])!r}" for case in cases
                  if not evaluate_to_text(case["expression"]).startswith("ERR:")]
         self.assertEqual(wrong, [], "\n".join(wrong))
+
+
+class ListFunctionSpecTests(unittest.TestCase):
+    def test_list_function_family_matches_power_bi(self):
+        """484 live answers for the Power Query List.* functions (Task 104, m-list-94): each is exact, or an
+        explicit ERR (never a value that differs from Power BI)."""
+        cases = _cases(LIST_SPEC)
+        self.assertEqual(len(cases), 484)
+        wrong = []
+        for index, case in enumerate(cases):
+            expected = case["power_bi"]
+            actual = evaluate_to_text(case["expression"])
+            if actual == expected or actual.startswith("ERR:"):
+                continue
+            wrong.append(f"[{index}] {case['expression']!r}: power bi {expected!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+
+    def test_list_probes_match_power_bi(self):
+        """224 live answers measured while fixing the held-out list differences: List.Covariance (running means of
+        x*y, x and y; nulls dropped; the two lists walked in step), List.StandardDeviation (Welford), List.Average,
+        Replacer.ReplaceText, List.ReplaceValue (a failing replacer call keeps the item), List.Intersect (multiset).
+        Each is exact or an explicit ERR; all but five are exact."""
+        cases = _cases(LIST_PROBES)
+        self.assertEqual(len(cases), 224)
+        wrong, exact = [], 0
+        for case in cases:
+            actual = evaluate_to_text(case["expression"])
+            if actual == case["power_bi"]:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {case['power_bi']!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 219)
 
 
 class ProbeTests(unittest.TestCase):
