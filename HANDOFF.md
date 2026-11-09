@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships/reviews). Task 112 (m-residual-102) built by Antigravity, ready for review.
-**Branch in use:** antigravity/m-residual-102
-**Working tree clean:** no (uncommitted changes on branch antigravity/m-residual-102 ready for review)
+**Active agent:** Antigravity codes (quota back 2026-11-09), Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 200 (Task 111 m-script-101) shipped: unmappable M scripts run on the M engine. In progress: Task 112 (Antigravity, worktree Power BI tool-task112).
+**Branch in use:** none
+**Working tree clean:** main yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`

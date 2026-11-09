@@ -68,6 +68,13 @@ class AdvancedEditorBase(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.app = QApplication.instance() or QApplication(["Advanced Editor tests"])
 
+    def tearDown(self) -> None:
+        # a failing assertion must never leave a visible dialog behind: the next test's modal exec() would hang on it
+        for widget in list(QApplication.topLevelWidgets()):
+            if isinstance(widget, QDialog) and widget.isVisible():
+                widget.reject()
+        self.app.processEvents()
+
 
 class GeneratedMTests(AdvancedEditorBase):
     def test_three_removals_through_the_dialog_chain_and_match_the_preview(self) -> None:
@@ -331,15 +338,15 @@ class EditorWindowTests(AdvancedEditorBase):
         dialog = self.editor()
         text = (
             'let\n    Source = #"Sheet_1",\n'
-            '    B = Table.Buffer(Source),\n    C = List.Sum(B)\nin\n    C'
-        )
+            '    B = Sql.Database("server", "database"),\n    C = List.Sum(B)\nin\n    C'
+        )  # a data-source function: neither the step editor nor the M engine can run it
         dialog.editor.setPlainText(text)
         self.assertFalse(dialog.done_button.isEnabled())
-        self.assertIn("Table.Buffer", dialog.status_label.text())
+        self.assertIn("Sql.Database", dialog.status_label.text())
         dialog._accept_query()
         self.assertNotEqual(dialog.result(), QDialog.DialogCode.Accepted)
         self.assertEqual(dialog.editor.toPlainText(), text)
-        self.assertIn("Table.Buffer", dialog.status_label.text())
+        self.assertIn("Sql.Database", dialog.status_label.text())
         dialog.deleteLater()
 
     def test_runtime_error_is_shown_and_blocks_done(self) -> None:
@@ -397,21 +404,34 @@ class EditorInsideQueryWindowTests(AdvancedEditorBase):
     def with_editor(self, dialog: TransformDataDialog, act) -> str:
         """Open the Advanced Editor from the ribbon button, run ``act(editor)``; return its text."""
         seen: list[str] = []
+        failures: list[BaseException] = []
+
+        def open_editors() -> list:
+            return [widget for widget in QApplication.topLevelWidgets()
+                    if isinstance(widget, PowerQueryMEditorDialog) and widget.isVisible()]
+
+        def close_editors() -> None:
+            for editor in open_editors():
+                with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+                    editor.cancel_button.click()
+                if editor.isVisible():
+                    editor.reject()
 
         def drive() -> None:
-            editor = next(
-                widget for widget in QApplication.topLevelWidgets()
-                if isinstance(widget, PowerQueryMEditorDialog) and widget.isVisible()
-            )
-            seen.append(editor.editor.toPlainText())
-            act(editor)
-            if editor.isVisible():
-                with patch.object(QMessageBox, "question",
-                                  return_value=QMessageBox.StandardButton.Yes):
-                    editor.cancel_button.click()
+            try:
+                editor = open_editors()[0]
+                seen.append(editor.editor.toPlainText())
+                act(editor)
+            except BaseException as error:  # noqa: BLE001 - re-raised below, after the modal loop has ended
+                failures.append(error)
+            finally:
+                close_editors()  # a failure inside ``act`` must still end the modal exec() of the button click
 
         QTimer.singleShot(0, drive)
+        QTimer.singleShot(10000, close_editors)  # watchdog: nothing can keep the modal loop open for good
         dialog.advanced_editor_button.click()
+        if failures:
+            raise failures[0]
         return seen[0]
 
     def test_edit_in_the_real_editor_and_click_done_updates_steps_and_preview(self) -> None:

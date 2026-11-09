@@ -26,6 +26,8 @@ The scratch table is deleted after every batch and the model is asked whether it
 from __future__ import annotations
 
 import base64
+import os
+import re
 import json
 import sys
 
@@ -194,8 +196,29 @@ def _run_batch(expressions: list[str], port_: str) -> tuple[list[str] | None, st
     raise RuntimeError(f"Power BI returned no complete answer for {len(expressions)} expressions after {TRIES} tries")
 
 
+_HANG_RISK = re.compile(
+    r"(?<![\w.])\d{17,}|\d(?:\.\d+)?[eE]\+?(?:1[6-9]|[2-9]\d|\d{3,})"
+    r"|MaxValue|MinValue|PositiveInfinity|NegativeInfinity|\bInt(?:32|64)\.Max|2147483647|9223372036854775807"
+)
+
+
+def _guard(expressions: list[str]) -> None:
+    """Refuse expressions likely to hang Power BI (huge numbers, extreme limits) — they hung the guest four times.
+
+    Set M_ORACLE_ALLOW_BIG=1 only for a deliberate, single-expression check."""
+    if os.environ.get("M_ORACLE_ALLOW_BIG") == "1":
+        return
+    risky = [e for e in expressions if _HANG_RISK.search(e) or len(e) > 4000]
+    if risky:
+        raise SystemExit(
+            "m_oracle_diff: refusing expressions that risk hanging Power BI (numbers of 17+ digits, exponents "
+            f"above 15, Max/MinValue, infinities or text over 4000 chars): {risky[:3]}"
+        )
+
+
 def power_query(expressions: list[str], port_: str, chunk: int = 100) -> list[str]:
     """Power BI's answer for every M expression, asked in batches of `chunk`."""
+    _guard(expressions)
     answers: list[str] = []
     for batch in chunks(expressions, chunk):
         got, _failure = _run_batch(batch, port_)

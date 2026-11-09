@@ -22,6 +22,7 @@ _STEP_NAMES: dict[str, str] = {
     "filter_rows_advanced": "Filtered Rows",
     "add_custom_column": "Added Custom",
     "conditional_column": "Added Conditional Column",
+    "m_script": "Custom M Script",
     "convert_type": "Changed Type",
     "convert_type_using_locale": "Changed Type with Locale",
     "sort_rows": "Sorted Rows",

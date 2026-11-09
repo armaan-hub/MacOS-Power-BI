@@ -546,5 +546,101 @@ class Residual102SpecTests(unittest.TestCase):
         self.assertGreaterEqual(exact, 28)
 
 
+SCRIPT_STEP_SPEC = PLANS / "2026-11-09-m-script-101-spec.json"
+SCRIPT_STEP_REFUSAL = "is not supported by this engine yet."
+
+
+class ScriptStepEngineCaseTests(unittest.TestCase):
+    """Task 111 (m-script-101): Table.TransformColumnTypes conversions and Table.Pivot aggregations, checked against
+    Power BI's live answers. Each case is exact, or an explicit refusal; a wrong answer fails the test."""
+
+    MINIMUM_EXACT = 166  # 169 measured cases; the three refused are today's-date and separated-date shapes
+
+    def test_every_engine_case_is_exact_or_refused_and_none_is_wrong(self) -> None:
+        with SCRIPT_STEP_SPEC.open(encoding="utf-8") as handle:
+            cases = json.load(handle)["engine_cases"]
+        exact, refused, wrong = 0, [], []
+        for case in cases:
+            actual = evaluate_to_text(case["expression"])
+            if actual == case["power_bi"]:
+                exact += 1
+            elif actual.startswith("ERR:") and SCRIPT_STEP_REFUSAL in actual:
+                refused.append(case["expression"])
+            else:
+                wrong.append(f"{case['expression']!r}: power bi {case['power_bi']!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, self.MINIMUM_EXACT)
+        self.assertEqual(exact + len(refused), len(cases))
+
+    def test_unmeasured_culture_and_column_type_are_refused(self) -> None:
+        self.assertIn(SCRIPT_STEP_REFUSAL, evaluate_to_text(
+            'Table.TransformColumnTypes(#table({"c"}, {{"1,5"}}), {{"c", type number}}, "fr-FR"){0}[c]'))
+        self.assertIn(SCRIPT_STEP_REFUSAL, evaluate_to_text(
+            'Table.TransformColumnTypes(#table({"c"}, {{"12"}}), {{"c", type binary}}){0}[c]'))
+        self.assertEqual(evaluate_to_text(
+            'Table.TransformColumnTypes(#table({"c"}, {{"12"}}), {{"c", Int64.Type}}){0}[c]'), "V:number:12")
+
+    def test_pivot_aggregation_orders_rows_by_key_and_counts_missing_values_as_zero(self) -> None:
+        self.assertEqual(
+            evaluate_to_text(
+                'Table.Pivot(#table({"r","k","v"}, {{"b","y",3},{"a","x",1}}), {"x","y"}, "k", "v", List.Count){0}[r]'),
+            "V:text:\"a\"",
+        )
+        self.assertEqual(
+            evaluate_to_text(
+                'Table.Pivot(#table({"r","k","v"}, {{"a","x",1},{"b","y",3}}), {"x","y"}, "k", "v", List.Count){1}[y]'),
+            "V:number:1",
+        )
+        self.assertEqual(
+            evaluate_to_text(
+                'Table.Pivot(#table({"r","k","v"}, {{"a","x",1},{"b","y",3}}), {"x","y"}, "k", "v", List.Count){0}[y]'),
+            "V:number:0",
+        )
+
+
+SCRIPT_STEP_PROBES = PLANS / "2026-11-09-m-script-101-probes.json"
+
+
+class ScriptStepConversionProbeTests(unittest.TestCase):
+    """Task 111: Table.TransformColumnTypes of 130 varied texts to each of 10 target types, measured with the live
+    Power BI oracle after the first fit (see the probes file). Exact, or an explicit refusal; never a wrong answer."""
+
+    MINIMUM_EXACT = 970
+
+    def test_every_probe_is_exact_or_refused_and_none_is_wrong(self) -> None:
+        with SCRIPT_STEP_PROBES.open(encoding="utf-8") as handle:
+            cases = json.load(handle)["cases"]
+        exact, refused, wrong = 0, 0, []
+        for case in cases:
+            actual = evaluate_to_text(case["expression"])
+            if actual == case["power_bi"]:
+                exact += 1
+            elif actual.startswith("ERR:") and SCRIPT_STEP_REFUSAL in actual:
+                refused += 1
+            else:
+                wrong.append(f"{case['expression']!r}: power bi {case['power_bi']!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong[:20]))
+        self.assertGreaterEqual(exact, self.MINIMUM_EXACT)
+        self.assertEqual(exact + refused, len(cases))
+
+    def test_the_first_fit_mistakes_are_fixed(self) -> None:
+        # two digits are an hour of the day; an empty text stays an empty text for a text column
+        self.assertEqual(evaluate_to_text(
+            'Table.TransformColumnTypes(#table({"c"}, {{"12"}}), {{"c", type time}}){0}[c]'), "V:time:12:00:00.0000000")
+        self.assertEqual(evaluate_to_text(
+            'Table.TransformColumnTypes(#table({"c"}, {{""}}), {{"c", type text}}){0}[c]'), 'V:text:""')
+
+    def test_unmeasured_shapes_are_refused_not_guessed(self) -> None:
+        for source, target in (("2400", "type time"), ("1,23", "type date"),
+                               ("12:30", "type datetime"), ("2024-02-30", "type date"), ("Feb 30, 2024", "type date")):
+            actual = evaluate_to_text(
+                f'Table.TransformColumnTypes(#table({{"c"}}, {{{{"{source}"}}}}), {{{{"c", {target}}}}}){{0}}[c]')
+            self.assertTrue(actual.startswith("ERR:") and SCRIPT_STEP_REFUSAL in actual, f"{source} {target}: {actual}")
+
+    def test_pivot_rows_in_an_unmeasured_order_are_refused(self) -> None:
+        self.assertIn(SCRIPT_STEP_REFUSAL, evaluate_to_text(
+            'Table.Pivot(#table({"r","s","k","v"}, {{"b",1,"y",3},{"a",2,"x",1}}), {"x","y"}, "k", "v", List.Count)'))
+
+
 if __name__ == "__main__":
     unittest.main()
