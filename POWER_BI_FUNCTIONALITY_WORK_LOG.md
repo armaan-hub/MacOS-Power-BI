@@ -2268,3 +2268,9 @@ Spec 48 formulas x 4 rows: 164 exact, 28 refused, 0 wrong (3 old-evaluator wrong
 Spec 26 formulas x 4 rows: 92 exact, 12 refused, 0 wrong. Holdout 4 formulas: 16/16 exact. Live Power BI checks of text vs whole-number columns in reference queries match after save/reopen/refresh.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4390 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 200 (Task 111 m-script-101: M scripts the step editor cannot map run on the M engine (m-script-101): new m_script step over the app's typed table, editor fallback with exact round trip, save/reopen/refresh; Table.TransformColumnTypes conversions (measured shape families) and Table.Pivot aggregation.)
+
+Engine cases 169: 166 exact, 3 refused. Scripts 32: 28 exact, 3 refused. Probes 999: 976 exact, 23 refused. Holdout 50 conversions + 5 scripts all exact. 0 wrong anywhere.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4414 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
