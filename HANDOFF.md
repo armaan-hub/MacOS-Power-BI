@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 115 (next DAX refusal batch); Opus plans and reviews.
-**Branch in use:** antigravity/dax-typetest-104
-**Working tree clean:** worktree task114 yes
+**Active agent:** Claude Opus reviews Task 115.
+**Branch in use:** antigravity/dax-maxxnan-105
+**Working tree clean:** worktree task115 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 112 m-residual-102, on branch `antigravity/m-residual-102` in the worktree `/Users/armaan/Power BI tool-task112`. Ready for review by Claude Opus 5.5.
+Task 115 dax-maxxnan-105, on branch `antigravity/dax-maxxnan-105` in worktree `/Users/armaan/Power BI tool-task115`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -964,3 +964,46 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - `CONVERT(1E300, DATETIME)` remains refused as required by `PartAConvertTypingTests.test_convert_datetime_too_large_is_refused_not_guessed`.
   - All 752 spec items evaluated with zero wrong answers (`wrong: 0`).
+
+### Antigravity (Task 115) ready for review
+- **Scorecard on `docs/plans/2026-11-10-dax-maxxnan-105-spec.json` (539 items):**
+  - `exact`: 400
+  - `refused`: 139
+  - `wrong / diff`: **0**
+  - Result: 400 exact, 139 refused, **0 wrong** across all 539 spec items.
+- **Overall Battery `dax_battery_maxxnan53_extra.json` (1,800 items):**
+  - `match`: 1,629
+  - `gap-reject`: 171
+  - `DIFF`: **0**
+  - `CRASH`: **0**
+- **Full Regression Replay Gate across ALL batteries (540,401 replayed answers):**
+  - `replayed 540401 Power BI answers: {'match': 532087, 'gap-reject': 8314, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+  - `PARITY GATE PASSED -> PARITY_LEDGER.md`
+  - `DIFF`: 0, `CRASH`: 0 across all 540,401 replayed answers. Zero regressions across all locked items.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. *Universal Mathematical Extreme Accumulation with `NaN`:*
+     - In DAX Variant iterators (`MAXX` / `MINX`), non-numeric rows (text, boolean, BLANK) do not participate in numeric extreme accumulation (they are ignored/skipped).
+     - Among numeric rows (numbers, infinities, NaN): since `NaN > x` and `x > NaN` are both `False`, the running accumulator retains the *first numeric value encountered*:
+       - If `NaN` is encountered first in the row walk, `NaN` can never be replaced by any subsequent number -> evaluates to `NaN`.
+       - If a real number (finite or infinite) is encountered first, subsequent `NaN` values cannot replace it -> evaluates to `max(ordered)` or `min(ordered)`.
+  2. *Walk Order by Shape Family:*
+     - `EXCEPT(T1, T2)`: Evaluated in-memory by the Formula Engine in the storage row order of `T1` (`iteration_rows`). All 180 `EXCEPT` items in the spec match live Power BI with 0 diffs. Refused cleanly if the right table is empty via a constant condition (`FILTER(..., FALSE())`).
+     - `INTERSECT(T1, T2)`: Evaluated in-memory by the Formula Engine in storage row order (`iteration_rows`) when at least one table operand is an unfiltered stored table (`Facts`). Matches 212/212 such items in the spec. When both tables are `FILTER(...)` expressions (`INTERSECT(FILTER, FILTER)`), VertiPaq's multi-table filter pushdown ordering differs from sequential walk order; this shape family stays cleanly refused (71 items refused, 0 wrong). Refused if `INTERSECT(Facts, Facts)` has a constant zero division (`_has_constant_zero_division`) per Iteration 153.
+     - Stored scans (`Facts`, `ALL(Facts)`) and `FILTER(Facts, ...)`:
+       - With `IF` / `IF.EAGER` bodies: Walked in dictionary order of the body's columns (`dictionary_ordered_rows`), lifting the previous `len(value_positions) != len(values)` restriction so non-numeric Variant cells beside numbers and `NaN` are properly handled.
+       - With `SWITCH` bodies: Where branches have column conditions, VertiPaq evaluates branch conditions rather than pure dictionary order; these remain cleanly refused (`MeasureError`).
+     - Derived tables outside scope (`ADDCOLUMNS`, `TOPN`, `SUMMARIZE`, `UNION`, `DISTINCT`, `ALLNOBLANKROW`, `ALLEXCEPT`, etc.): Explicitly refused with `MeasureError` to avoid unmodelled row-order guesses, preserving 0 DIFF across `dax_battery_typed3_extra` and `dax_battery_convert9_extra`.
+     - Division by literal zero (`0/0`): Explicitly refused (`_has_literal_zero_division`).
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Anti-cheat test: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py`: `1 passed in 1.01s`.
+  - Regression unit tests: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q -p no:cacheprovider tests/test_iteration153_maxx_nan_53.py tests/test_no_answer_key_in_app.py`: `3 passed, 13 subtests passed in 1.14s`.
+  - Full parity gate: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`:
+    `replayed 540401 Power BI answers: {'match': 532087, 'gap-reject': 8314, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+    `PARITY GATE PASSED`
+  - `PARITY_LEDGER.md` restored via `git checkout PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - All 539 spec items scored with 0 wrong (400 exact, 139 refused).
+  - All 1,800 items in `dax_battery_maxxnan53_extra` replayed with 0 DIFF (1,629 match, 171 gap-reject).
