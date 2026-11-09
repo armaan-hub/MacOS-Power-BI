@@ -166,6 +166,7 @@ implement every Power Query calendar or format rule.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import re
 import unicodedata
@@ -197,6 +198,12 @@ from analytics_studio.power_query_expression import (
     evaluate_expression,
     expression_value_to_text,
     referenced_columns,
+)
+from analytics_studio.m_custom_column import (
+    MFormulaRefused,
+    MStorageRefused,
+    evaluate_m_formula_traced,
+    usable_m_formula,
 )
 from analytics_studio.power_query_values import (
     PowerQueryCellError,
@@ -831,9 +838,10 @@ def validate_steps(
                     allow_unknown_functions=True,
                 )
             except PowerQueryExpressionError as exc:
-                raise TransformationError(
-                    f"Custom column formula in step {index}: {exc}"
-                ) from exc
+                if usable_m_formula(expression) is None:
+                    raise TransformationError(
+                        f"Custom column formula in step {index}: {exc}"
+                    ) from exc
             step = {**step, "name": name.strip(), "expression": expression.strip()}
         elif op == "conditional_column":
             name = step["name"]
@@ -2652,27 +2660,57 @@ def _add_custom_column(
     if len(candidate.rows) * (len(candidate.headers) + 1) > MAX_CELLS:
         raise TransformationError(f"Adding a custom column exceeds the {MAX_CELLS:,}-cell limit.")
     parameter_values = parameters if parameters is not None else {}
+    function_map = query_functions or {}
+    # The M engine answers first (it is checked against Power BI Desktop); the small evaluator only runs for a
+    # formula the engine cannot compile or run yet, which keeps its behaviour for those formulas as it was.
+    m_formula = usable_m_formula(expression, app_names={*parameter_values, *function_map})
+    formula = None
+    old_error: PowerQueryExpressionError | None = None
     try:
-        function_map = query_functions or {}
         formula = compile_expression(
             expression,
             allowed_symbols=set(parameter_values),
             function_names=set(function_map),
         )
     except PowerQueryExpressionError as exc:
-        raise TransformationError(f"Custom column formula: {exc}") from exc
-    missing = sorted(referenced_columns(formula) - set(candidate.headers))
-    if missing:
-        raise TransformationError(
-            f"Custom column formula refers to missing column {missing[0]!r}."
-        )
+        old_error = exc
+    if formula is None and m_formula is None:
+        raise TransformationError(f"Custom column formula: {old_error}") from old_error
+    if formula is not None:
+        missing = sorted(referenced_columns(formula) - set(candidate.headers))
+        if missing:
+            raise TransformationError(
+                f"Custom column formula refers to missing column {missing[0]!r}."
+            )
+    m_values: list[Any] | None = None
+    if m_formula is not None:
+        try:
+            m_values = []
+            for row in candidate.rows:
+                value, text_read = evaluate_m_formula_traced(m_formula, row)
+                if formula is not None and text_read and is_cell_error(value):
+                    # An error on a text cell may be an untyped number or date that the small evaluator
+                    # converts; the table does not say which, so the small evaluator keeps this formula.
+                    m_values = None
+                    break
+                m_values.append(value)
+        except MStorageRefused as exc:
+            # The engine has Power BI's answer but a cell cannot hold it: the other evaluator would differ.
+            raise TransformationError(f"Custom column formula: {exc}") from exc
+        except MFormulaRefused as exc:
+            if formula is None:
+                raise TransformationError(f"Custom column formula: {exc}") from exc
+            m_values = None
 
     total_output_bytes = 0
     for row_index, row in enumerate(candidate.rows, 1):
         try:
-            value = evaluate_expression(
-                formula, row, parameter_values, function_map
-            )
+            if m_values is not None:
+                value = m_values[row_index - 1]
+            else:
+                value = evaluate_expression(
+                    formula, row, parameter_values, function_map
+                )
             if output_type != "text" and not is_cell_error(value):
                 from analytics_studio.query_functions import (
                     QueryFunctionError,
@@ -2699,6 +2737,16 @@ def _add_custom_column(
             )
             continue
         if is_cell_error(value):
+            if m_values is not None and value.row is None:
+                value = dataclasses.replace(
+                    value,
+                    target_type=output_type,
+                    row=row_index,
+                    source_rows=tuple(getattr(row, "source_rows", ())),
+                    source_rows_truncated=bool(
+                        getattr(row, "source_rows_truncated", False)
+                    ),
+                )
             row[name] = value
             continue
         try:

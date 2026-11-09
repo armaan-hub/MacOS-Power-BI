@@ -144,17 +144,28 @@ def parameter_references(
         expression = step.get("expression")
         if isinstance(expression, str) and expression.strip():
             from analytics_studio.power_query_expression import (
+                ExpressionError,
                 compile_expression,
                 referenced_symbols,
             )
 
-            tree = compile_expression(
-                expression,
-                allow_unknown_symbols=True,
-                function_names=function_names,
-                allow_unknown_functions=True,
-            )
-            references.update(referenced_symbols(tree))
+            try:
+                tree = compile_expression(
+                    expression,
+                    allow_unknown_symbols=True,
+                    function_names=function_names,
+                    allow_unknown_functions=True,
+                )
+            except ExpressionError:
+                # A custom-column formula the M engine runs refers to no app parameter (it cannot see them).
+                from analytics_studio.m_custom_column import usable_m_formula
+
+                if step.get("op") == "add_custom_column" and usable_m_formula(expression) is not None:
+                    tree = None
+                else:
+                    raise
+            if tree is not None:
+                references.update(referenced_symbols(tree))
         for clause in step.get("clauses", []):
             if isinstance(clause, dict) and isinstance(clause.get("parameter"), str):
                 references.add(clause["parameter"])

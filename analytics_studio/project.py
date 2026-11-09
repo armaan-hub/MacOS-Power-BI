@@ -963,9 +963,17 @@ def validate_project(value: Any) -> dict[str, Any]:
                         function_names=function_names,
                     )
                 except ExpressionError as exc:
-                    raise TransformationError(
-                        f"Custom column formula: {exc}"
-                    ) from exc
+                    # A formula the M engine can run (no app parameter or function inside) is valid too.
+                    from analytics_studio.m_custom_column import usable_m_formula
+
+                    if usable_m_formula(
+                        step["expression"],
+                        app_names={*parameter_names, *function_names},
+                    ) is None:
+                        raise TransformationError(
+                            f"Custom column formula: {exc}"
+                        ) from exc
+                    continue
                 unresolved = referenced_functions(formula) - function_names
                 if unresolved:
                     raise TransformationError(

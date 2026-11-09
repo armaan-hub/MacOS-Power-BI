@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import decimal as _decimal
+import threading
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -37,12 +38,28 @@ TICKS_PER_HOUR = 60 * TICKS_PER_MINUTE
 TICKS_PER_DAY = 24 * TICKS_PER_HOUR
 
 
+_GAPS = threading.local()
+
+
+def note_engine_gap() -> None:
+    """Count one "not supported by this engine yet" error created on this thread (an engine gap, not a Power BI
+    answer). A caller that must never store a guessed value compares ``engine_gap_count`` before and after an
+    evaluation: ``try ... otherwise`` and similar catch sites cannot hide a gap from it."""
+    _GAPS.count = getattr(_GAPS, "count", 0) + 1
+
+
+def engine_gap_count() -> int:
+    return getattr(_GAPS, "count", 0)
+
+
 class MError(Exception):
     """An M error in flight. Fields mirror the M error record."""
 
     def __init__(self, reason: str, message: Optional[str], detail: Any = None,
                  fmt: Optional[str] = None, params: Optional[tuple] = None, code: Optional[str] = None):
         super().__init__(message or "")
+        if message and "is not supported by this engine yet" in message:
+            note_engine_gap()
         self.reason = reason
         self.message = message
         self.detail = detail
