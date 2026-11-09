@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 202 / Task 113 dax-scalar-103, DAX refusal backlog part 1: scalar coercion and subnormals, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531545 match, 8856 refused, 0 DIFF, 0 CRASH, locked 531525. Next: Task 114 dax-typetest-104: type tests of failing values (typeerr54, blank8, convert9)
+**Latest status (2026-11-10, after Iteration 203 / Task 114 dax-typetest-104, DAX refusal backlog part 2: type tests over failing comparisons, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531587 match, 8814 refused, 0 DIFF, 0 CRASH, locked 531567. Next: maxxnan53 and the ordering groups (orderaudit56-59, rank61, rankx60)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

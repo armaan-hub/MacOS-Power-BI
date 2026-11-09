@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Opus reviews Task 114 (Antigravity ready for review).
+**Active agent:** Antigravity codes Task 115 (next DAX refusal batch); Opus plans and reviews.
 **Branch in use:** antigravity/dax-typetest-104
 **Working tree clean:** worktree task114 yes
 
