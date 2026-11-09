@@ -19,6 +19,7 @@ from .number import NUMBER_GLOBALS
 from .list_fns import LIST_GLOBALS
 from .record_fns import RECORD_GLOBALS
 from .date_fns import DATE_TIME_GLOBALS
+from .table_fns import TABLE_GLOBALS
 from .values import MError, MValue, ParamSpec
 
 
@@ -372,4 +373,5 @@ GLOBALS: dict = {
     **LIST_GLOBALS,
     **RECORD_GLOBALS,
     **DATE_TIME_GLOBALS,
+    **TABLE_GLOBALS,
 }
