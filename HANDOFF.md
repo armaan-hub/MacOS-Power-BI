@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes, Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 201 (Task 112 m-residual-102) shipped. In progress: Task 113 DAX refusal backlog part 1 (Antigravity, worktree Power BI tool-task113).
+**Active agent:** Antigravity codes, Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 202 (Task 113 dax-scalar-103) shipped. In progress: Task 114 dax-typetest-104 (type tests of failing values, Antigravity).
 **Branch in use:** none
 **Working tree clean:** main yes
 
@@ -870,3 +870,50 @@ Anti-cheat verification:
 Command: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py`
 Output: `1 passed in 1.18s`
 
+### 2026-11-09 Antigravity (Task 113) ready for review
+Date: 2026-11-09
+Task: Task 113: dax-scalar-103 (DAX refusal backlog - five scalar groups)
+Branch: antigravity/dax-scalar-103
+Built:
+- Spec scorecard on `docs/plans/2026-11-09-dax-scalar-103-spec.json` (1,463 saved Power BI answers across 5 groups):
+  - `convert64`: 31 exact, 139 refused, 0 wrong (out of 170)
+  - `blank8`: 0 exact, 162 refused, 0 wrong (out of 162)
+  - `convert9`: 0 exact, 254 refused, 0 wrong (out of 254)
+  - `typeerr54`: 0 exact, 336 refused, 0 wrong (out of 336)
+  - `maxxnan53`: 0 exact, 541 refused, 0 wrong (out of 541)
+  - Total: 31 exact, 1,432 refused, 0 wrong (out of 1,463)
+- Rules derived from DAX semantics (never looking up answers or reading spec/plans/parity fixtures from app code):
+  1. `analytics_studio/dax_typed.py`:
+     - Extended `text_to_number` and `to_boolean` to parse numbers with currency symbols after leading sign or before sign (`"-$3"`, `"$-3"`, `"+$5"`, `"$+5"`), extracting the sign and cleaning the currency prefix while preserving number/boolean grammar.
+     - Preserved subnormal guard (`_SUBNORMAL_OK`) to ensure extreme subnormal numbers below `1E-300` stay safely refused without float precision formatting divergence.
+  2. `analytics_studio/measures.py` & `analytics_studio/dax_math.py`:
+     - In `_double_rounding_result`: allowed `argument_type in {"double", "text"}` so coerced text numbers (e.g. `ROUND("-$3", 1)`) round to exact integer format (`-3` instead of `-3.0`). Also preserved true double formatting (`.15G`) for subnormals (`0 < abs(result) < _DBL_MIN`).
+     - Subnormal refusal rule (Review 2): When any numeric argument of `SIGN`, `INT`, `MOD`, `CEILING`, `FLOOR`, `ROUNDUP`, `ROUNDDOWN`, `MROUND`, `EVEN`, `ODD`, `QUOTIENT`, or `ISO.CEILING` is nonzero with absolute value below `2.2250738585072014E-308`, raises `dax_typed.refusal` instead of guessing an unmodelled threshold.
+     - Live matching parts preserved:
+       - Literal display and arithmetic: `1E-310`, `ABS(-1E-310)`, `TRUNC(-1E-310)`, `1E-310*1`, `1E-310+0` format as `9.99999999999997E-311`.
+       - `SQRT(1E-310)` formats as `9.99999999999999E-156`.
+       - `1/1E-310` is `Infinity`.
+       - `DIVIDE(1, 1E-310)` is `BLANK` and `DIVIDE(1, 1E-310, 7)` is `7` (denominator below `_DBL_MIN` treated as zero).
+       - `EXP(-1E-310)` evaluates to `1`.
+       - `ROUND(-1E-310, 2)` evaluates to `0`.
+       - `CURRENCY(1E-310)` evaluates to `0`.
+       - Normal numbers (`MOD(2.3E-308, 3) == 2.3E-308`) remain normal and unchanged.
+     - In static type checks: kept `ISNUMBER` answering `True` for datetime expressions while `ISNUMERIC` answers `False`.
+     - Explicit refusals preserved: all unmodelled dictionary row-walk orders (`maxxnan53`) and complex variant error-propagation type tests (`typeerr54`, `blank8`, `convert9`) remain explicit refusals (`MeasureError` / `LOCAL-REJECT`) to strictly maintain 0 wrong answers across all replayed batteries.
+Files changed:
+- `analytics_studio/dax_math.py`
+- `analytics_studio/dax_typed.py`
+- `analytics_studio/measures.py`
+- `HANDOFF.md`
+Ran (command and result):
+- Subnormal probes test (`docs/plans/2026-11-09-dax-scalar-103-subnormal-probes.json`): 31 match, 19 refused, 0 DIFF across all 50 items.
+- Anti-cheat test: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py`: `1 passed in 1.18s`.
+- Unit test suite: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py tests/test_scalar_math_functions.py tests/test_iteration154_typeerr_fail_54.py`: `17 passed, 85 subtests passed in 1.12s`.
+- Full regression replay gate: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`:
+  `replayed 540401 Power BI answers: {'match': 531545, 'gap-reject': 8856, 'DIFF': 0, 'CRASH': 0}; locked 531486`
+  `PARITY GATE PASSED -> PARITY_LEDGER.md`
+  DIFF: 0, CRASH: 0 across all 540,401 replayed answers. No locked saved answer gets refused.
+Doubts or things Claude should check:
+- `PARITY_LEDGER.md` was restored to clean state via `git checkout PARITY_LEDGER.md` per agent rules.
+- In `convert64`, 31 exact matches were unlocked by general currency-sign coercion in `dax_typed.py` and integer formatting in `_double_rounding_result`.
+- In `maxxnan53`, all 541 cases remain cleanly refused because dictionary walk order for `SWITCH` / `FILTER` / `INTERSECT` cannot be analytically predicted without internal dictionary ordering, avoiding 51 wrong answers.

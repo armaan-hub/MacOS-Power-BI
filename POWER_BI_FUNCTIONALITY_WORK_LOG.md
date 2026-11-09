@@ -2280,3 +2280,9 @@ Engine cases 169: 166 exact, 3 refused. Scripts 32: 28 exact, 3 refused. Probes 
 Spec 76: 28 exact, 48 refused, 0 wrong. Fresh 60 (two rounds): 49 exact, 11 refused, 0 wrong. Two review rounds fixed a guessed 'any' return type, a one-input special case and a text fallback.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4413 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-09 — Iteration 202 (Task 113 dax-scalar-103: DAX refusal backlog part 1: scalar coercion and subnormals)
+
+Antigravity coded, Opus reviewed twice. Currency sign after a sign in text ("-$3"+1), ROUND of coerced text as a Double, ISNUMERIC excludes datetime, DIVIDE overflow to Infinity and subnormal denominator as zero, subnormal literals kept as their true double (1E-310 shows 9.99999999999997E-311). Live probes showed Power BI's switch point for SIGN/INT/MOD/CEILING/FLOOR/ROUNDUP is not at DBL_MIN (SIGN(2E-308)=1, SIGN(1E-310)=0), so subnormal arguments of those functions are refused. Fixed pre-existing wrong INT(-1E-310) and MOD(-1E-310,3). Spec 31 exact / 1432 refused / 0 wrong; holdout 8/314/0; 50 fresh live probes 31/19/0 (saved in docs/plans/2026-11-09-dax-scalar-103-subnormal-probes.json).
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4415 passed; replay 540401: 531545 match, 8856 refused, 0 DIFF, 0 CRASH; locked 531486 to 531525. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
