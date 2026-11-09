@@ -1,0 +1,525 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09 (fresh Text check, never used while coding)",
+ "cases": [
+  {
+   "expression": "Text.Start(\"Mississippi\",2)&Text.End(\"Mississippi\",2)",
+   "power_bi": "V:text:\"Mipi\""
+  },
+  {
+   "expression": "Text.Length(Text.Trim(\"Mississippi\"))",
+   "power_bi": "V:number:11"
+  },
+  {
+   "expression": "Text.Proper(Text.Lower(\"Mississippi\"))",
+   "power_bi": "V:text:\"Mississippi\""
+  },
+  {
+   "expression": "Text.Split(\"Mississippi\",\";\")",
+   "power_bi": "V:list:[text:\"Mississippi\"]"
+  },
+  {
+   "expression": "Text.PositionOf(\"Mississippi\",\"s\",Occurrence.All)",
+   "power_bi": "V:list:[number:2,number:3,number:5,number:6]"
+  },
+  {
+   "expression": "Text.Replace(\"Mississippi\",\"s\",\"$\")",
+   "power_bi": "V:text:\"Mi$$i$$ippi\""
+  },
+  {
+   "expression": "Text.Middle(\"Mississippi\",1)",
+   "power_bi": "V:text:\"ississippi\""
+  },
+  {
+   "expression": "Text.Range(\"Mississippi\",0,1)",
+   "power_bi": "V:text:\"M\""
+  },
+  {
+   "expression": "Text.PadStart(\"Mississippi\",12,\"0\")",
+   "power_bi": "V:text:\"0Mississippi\""
+  },
+  {
+   "expression": "Text.Combine(Text.ToList(\"Mississippi\"),\"|\")",
+   "power_bi": "V:text:\"M|i|s|s|i|s|s|i|p|p|i\""
+  },
+  {
+   "expression": "Text.Contains(\"Mississippi\",\"S\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Remove(\"Mississippi\",{\"a\"..\"m\"})",
+   "power_bi": "V:text:\"Msssspp\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"Mississippi\",\"i\",2)",
+   "power_bi": "V:text:\"Mississ\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"Mississippi\",\"s\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"sippi\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"Mississippi\",\"i\",\"p\")",
+   "power_bi": "V:text:\"ssissi\""
+  },
+  {
+   "expression": "Text.Insert(\"Mississippi\",2,\"--\")",
+   "power_bi": "V:text:\"Mi--ssissippi\""
+  },
+  {
+   "expression": "Text.Reverse(Text.Upper(\"Mississippi\"))",
+   "power_bi": "V:text:\"IPPISSISSIM\""
+  },
+  {
+   "expression": "Text.SplitAny(\"Mississippi\",\"si;\")",
+   "power_bi": "V:list:[text:\"M\",text:\"\",text:\"\",text:\"\",text:\"\",text:\"\",text:\"\",text:\"pp\",text:\"\"]"
+  },
+  {
+   "expression": "Text.Start(\"  Tab#(tab)Sep  \",2)&Text.End(\"  Tab#(tab)Sep  \",2)",
+   "power_bi": "V:text:\"    \""
+  },
+  {
+   "expression": "Text.Length(Text.Trim(\"  Tab#(tab)Sep  \"))",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "Text.Proper(Text.Lower(\"  Tab#(tab)Sep  \"))",
+   "power_bi": "V:text:\"  Tab\\tSep  \""
+  },
+  {
+   "expression": "Text.Split(\"  Tab#(tab)Sep  \",\";\")",
+   "power_bi": "V:list:[text:\"  Tab\\tSep  \"]"
+  },
+  {
+   "expression": "Text.PositionOf(\"  Tab#(tab)Sep  \",\"s\",Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.Replace(\"  Tab#(tab)Sep  \",\"s\",\"$\")",
+   "power_bi": "V:text:\"  Tab\\tSep  \""
+  },
+  {
+   "expression": "Text.Middle(\"  Tab#(tab)Sep  \",1)",
+   "power_bi": "V:text:\" Tab\\tSep  \""
+  },
+  {
+   "expression": "Text.Range(\"  Tab#(tab)Sep  \",0,1)",
+   "power_bi": "V:text:\" \""
+  },
+  {
+   "expression": "Text.PadStart(\"  Tab#(tab)Sep  \",12,\"0\")",
+   "power_bi": "V:text:\"0  Tab\\tSep  \""
+  },
+  {
+   "expression": "Text.Combine(Text.ToList(\"  Tab#(tab)Sep  \"),\"|\")",
+   "power_bi": "V:text:\" | |T|a|b|\\t|S|e|p| | \""
+  },
+  {
+   "expression": "Text.Contains(\"  Tab#(tab)Sep  \",\"S\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.Remove(\"  Tab#(tab)Sep  \",{\"a\"..\"m\"})",
+   "power_bi": "V:text:\"  T\\tSp  \""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"  Tab#(tab)Sep  \",\"i\",2)",
+   "power_bi": "V:text:\"  Tab\\tSep  \""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"  Tab#(tab)Sep  \",\"s\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"  Tab\\tSep  \""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"  Tab#(tab)Sep  \",\"i\",\"p\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Insert(\"  Tab#(tab)Sep  \",2,\"--\")",
+   "power_bi": "V:text:\"  --Tab\\tSep  \""
+  },
+  {
+   "expression": "Text.Reverse(Text.Upper(\"  Tab#(tab)Sep  \"))",
+   "power_bi": "V:text:\"  PES\\tBAT  \""
+  },
+  {
+   "expression": "Text.SplitAny(\"  Tab#(tab)Sep  \",\"si;\")",
+   "power_bi": "V:list:[text:\"  Tab\\tSep  \"]"
+  },
+  {
+   "expression": "Text.Start(\"x\",2)&Text.End(\"x\",2)",
+   "power_bi": "V:text:\"xx\""
+  },
+  {
+   "expression": "Text.Length(Text.Trim(\"x\"))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Text.Proper(Text.Lower(\"x\"))",
+   "power_bi": "V:text:\"X\""
+  },
+  {
+   "expression": "Text.Split(\"x\",\";\")",
+   "power_bi": "V:list:[text:\"x\"]"
+  },
+  {
+   "expression": "Text.PositionOf(\"x\",\"s\",Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.Replace(\"x\",\"s\",\"$\")",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.Middle(\"x\",1)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Range(\"x\",0,1)",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.PadStart(\"x\",12,\"0\")",
+   "power_bi": "V:text:\"00000000000x\""
+  },
+  {
+   "expression": "Text.Combine(Text.ToList(\"x\"),\"|\")",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.Contains(\"x\",\"S\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.Remove(\"x\",{\"a\"..\"m\"})",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"x\",\"i\",2)",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"x\",\"s\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"x\",\"i\",\"p\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Insert(\"x\",2,\"--\")",
+   "power_bi": "ERR:Expression.Error: The 'offset' argument is out of range."
+  },
+  {
+   "expression": "Text.Reverse(Text.Upper(\"x\"))",
+   "power_bi": "V:text:\"X\""
+  },
+  {
+   "expression": "Text.SplitAny(\"x\",\"si;\")",
+   "power_bi": "V:list:[text:\"x\"]"
+  },
+  {
+   "expression": "Text.Start(\"ABCdef\",2)&Text.End(\"ABCdef\",2)",
+   "power_bi": "V:text:\"ABef\""
+  },
+  {
+   "expression": "Text.Length(Text.Trim(\"ABCdef\"))",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Text.Proper(Text.Lower(\"ABCdef\"))",
+   "power_bi": "V:text:\"Abcdef\""
+  },
+  {
+   "expression": "Text.Split(\"ABCdef\",\";\")",
+   "power_bi": "V:list:[text:\"ABCdef\"]"
+  },
+  {
+   "expression": "Text.PositionOf(\"ABCdef\",\"s\",Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.Replace(\"ABCdef\",\"s\",\"$\")",
+   "power_bi": "V:text:\"ABCdef\""
+  },
+  {
+   "expression": "Text.Middle(\"ABCdef\",1)",
+   "power_bi": "V:text:\"BCdef\""
+  },
+  {
+   "expression": "Text.Range(\"ABCdef\",0,1)",
+   "power_bi": "V:text:\"A\""
+  },
+  {
+   "expression": "Text.PadStart(\"ABCdef\",12,\"0\")",
+   "power_bi": "V:text:\"000000ABCdef\""
+  },
+  {
+   "expression": "Text.Combine(Text.ToList(\"ABCdef\"),\"|\")",
+   "power_bi": "V:text:\"A|B|C|d|e|f\""
+  },
+  {
+   "expression": "Text.Contains(\"ABCdef\",\"S\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.Remove(\"ABCdef\",{\"a\"..\"m\"})",
+   "power_bi": "V:text:\"ABC\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"ABCdef\",\"i\",2)",
+   "power_bi": "V:text:\"ABCdef\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"ABCdef\",\"s\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"ABCdef\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"ABCdef\",\"i\",\"p\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Insert(\"ABCdef\",2,\"--\")",
+   "power_bi": "V:text:\"AB--Cdef\""
+  },
+  {
+   "expression": "Text.Reverse(Text.Upper(\"ABCdef\"))",
+   "power_bi": "V:text:\"FEDCBA\""
+  },
+  {
+   "expression": "Text.SplitAny(\"ABCdef\",\"si;\")",
+   "power_bi": "V:list:[text:\"ABCdef\"]"
+  },
+  {
+   "expression": "Text.Start(\"\u00fcmlaut \u00c4rger\",2)&Text.End(\"\u00fcmlaut \u00c4rger\",2)",
+   "power_bi": "V:text:\"\u00fcmer\""
+  },
+  {
+   "expression": "Text.Length(Text.Trim(\"\u00fcmlaut \u00c4rger\"))",
+   "power_bi": "V:number:12"
+  },
+  {
+   "expression": "Text.Proper(Text.Lower(\"\u00fcmlaut \u00c4rger\"))",
+   "power_bi": "V:text:\"\u00dcmlaut \u00c4rger\""
+  },
+  {
+   "expression": "Text.Split(\"\u00fcmlaut \u00c4rger\",\";\")",
+   "power_bi": "V:list:[text:\"\u00fcmlaut \u00c4rger\"]"
+  },
+  {
+   "expression": "Text.PositionOf(\"\u00fcmlaut \u00c4rger\",\"s\",Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.Replace(\"\u00fcmlaut \u00c4rger\",\"s\",\"$\")",
+   "power_bi": "V:text:\"\u00fcmlaut \u00c4rger\""
+  },
+  {
+   "expression": "Text.Middle(\"\u00fcmlaut \u00c4rger\",1)",
+   "power_bi": "V:text:\"mlaut \u00c4rger\""
+  },
+  {
+   "expression": "Text.Range(\"\u00fcmlaut \u00c4rger\",0,1)",
+   "power_bi": "V:text:\"\u00fc\""
+  },
+  {
+   "expression": "Text.PadStart(\"\u00fcmlaut \u00c4rger\",12,\"0\")",
+   "power_bi": "V:text:\"\u00fcmlaut \u00c4rger\""
+  },
+  {
+   "expression": "Text.Combine(Text.ToList(\"\u00fcmlaut \u00c4rger\"),\"|\")",
+   "power_bi": "V:text:\"\u00fc|m|l|a|u|t| |\u00c4|r|g|e|r\""
+  },
+  {
+   "expression": "Text.Contains(\"\u00fcmlaut \u00c4rger\",\"S\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.Remove(\"\u00fcmlaut \u00c4rger\",{\"a\"..\"m\"})",
+   "power_bi": "V:text:\"\u00fcut \u00c4rr\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"\u00fcmlaut \u00c4rger\",\"i\",2)",
+   "power_bi": "V:text:\"\u00fcmlaut \u00c4rger\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"\u00fcmlaut \u00c4rger\",\"s\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"\u00fcmlaut \u00c4rger\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"\u00fcmlaut \u00c4rger\",\"i\",\"p\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Insert(\"\u00fcmlaut \u00c4rger\",2,\"--\")",
+   "power_bi": "V:text:\"\u00fcm--laut \u00c4rger\""
+  },
+  {
+   "expression": "Text.Reverse(Text.Upper(\"\u00fcmlaut \u00c4rger\"))",
+   "power_bi": "V:text:\"REGR\u00c4 TUALM\u00dc\""
+  },
+  {
+   "expression": "Text.SplitAny(\"\u00fcmlaut \u00c4rger\",\"si;\")",
+   "power_bi": "V:list:[text:\"\u00fcmlaut \u00c4rger\"]"
+  },
+  {
+   "expression": "Text.Start(\"a;b;c;d\",2)&Text.End(\"a;b;c;d\",2)",
+   "power_bi": "V:text:\"a;;d\""
+  },
+  {
+   "expression": "Text.Length(Text.Trim(\"a;b;c;d\"))",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "Text.Proper(Text.Lower(\"a;b;c;d\"))",
+   "power_bi": "V:text:\"A;B;C;D\""
+  },
+  {
+   "expression": "Text.Split(\"a;b;c;d\",\";\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\",text:\"d\"]"
+  },
+  {
+   "expression": "Text.PositionOf(\"a;b;c;d\",\"s\",Occurrence.All)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Text.Replace(\"a;b;c;d\",\"s\",\"$\")",
+   "power_bi": "V:text:\"a;b;c;d\""
+  },
+  {
+   "expression": "Text.Middle(\"a;b;c;d\",1)",
+   "power_bi": "V:text:\";b;c;d\""
+  },
+  {
+   "expression": "Text.Range(\"a;b;c;d\",0,1)",
+   "power_bi": "V:text:\"a\""
+  },
+  {
+   "expression": "Text.PadStart(\"a;b;c;d\",12,\"0\")",
+   "power_bi": "V:text:\"00000a;b;c;d\""
+  },
+  {
+   "expression": "Text.Combine(Text.ToList(\"a;b;c;d\"),\"|\")",
+   "power_bi": "V:text:\"a|;|b|;|c|;|d\""
+  },
+  {
+   "expression": "Text.Contains(\"a;b;c;d\",\"S\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.Remove(\"a;b;c;d\",{\"a\"..\"m\"})",
+   "power_bi": "V:text:\";;;\""
+  },
+  {
+   "expression": "Text.BeforeDelimiter(\"a;b;c;d\",\"i\",2)",
+   "power_bi": "V:text:\"a;b;c;d\""
+  },
+  {
+   "expression": "Text.AfterDelimiter(\"a;b;c;d\",\"s\",{1,RelativePosition.FromEnd})",
+   "power_bi": "V:text:\"a;b;c;d\""
+  },
+  {
+   "expression": "Text.BetweenDelimiters(\"a;b;c;d\",\"i\",\"p\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.Insert(\"a;b;c;d\",2,\"--\")",
+   "power_bi": "V:text:\"a;--b;c;d\""
+  },
+  {
+   "expression": "Text.Reverse(Text.Upper(\"a;b;c;d\"))",
+   "power_bi": "V:text:\"D;C;B;A\""
+  },
+  {
+   "expression": "Text.SplitAny(\"a;b;c;d\",\"si;\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\",text:\"d\"]"
+  },
+  {
+   "expression": "Text.Format(\"#{0}/#{1}/#{0}\",{\"a\",\"b\"})",
+   "power_bi": "V:text:\"a/b/a\""
+  },
+  {
+   "expression": "Text.Format(\"#[a]#[a]\",[a=1])",
+   "power_bi": "V:text:\"11\""
+  },
+  {
+   "expression": "Text.Repeat(\"-\",5)",
+   "power_bi": "V:text:\"-----\""
+  },
+  {
+   "expression": "Text.Combine({\"x\",\"y\"},\"\")",
+   "power_bi": "V:text:\"xy\""
+  },
+  {
+   "expression": "Text.EndsWith(\"abc\",\"BC\",Comparer.OrdinalIgnoreCase)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Text.PositionOfAny(\"hello\",{\"l\",\"o\"},Occurrence.Last)",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Text.ReplaceRange(\"hello\",0,5,\"\")",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.RemoveRange(\"hello\",0,5)",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Text.At(\"hello\",4)",
+   "power_bi": "V:text:\"o\""
+  },
+  {
+   "expression": "Text.Select(\"Hello World\",{\"A\"..\"Z\"})",
+   "power_bi": "V:text:\"HW\""
+  },
+  {
+   "expression": "Text.Clean(\"x#(lf)y\")",
+   "power_bi": "V:text:\"xy\""
+  },
+  {
+   "expression": "Text.TrimStart(\"000123\",\"0\")",
+   "power_bi": "V:text:\"123\""
+  },
+  {
+   "expression": "Text.TrimEnd(\"1.500\",\"0\")",
+   "power_bi": "V:text:\"1.5\""
+  },
+  {
+   "expression": "Text.InferNumberType(\"-3\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"12%\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't match '' with any known number pattern."
+  },
+  {
+   "expression": "Text.From(3)",
+   "power_bi": "V:text:\"3\""
+  },
+  {
+   "expression": "Text.From(-0.25)",
+   "power_bi": "V:text:\"-0.25\""
+  },
+  {
+   "expression": "Text.FromBinary(Text.ToBinary(\"ok\"))",
+   "power_bi": "V:text:\"ok\""
+  },
+  {
+   "expression": "Text.Length(Text.ToBinary(\"\u00e9\"))",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type Binary to type Text."
+  },
+  {
+   "expression": "Text.Middle(null,1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Text.Proper(null)",
+   "power_bi": "V:null"
+  }
+ ]
+}
