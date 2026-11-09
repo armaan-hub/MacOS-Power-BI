@@ -1,0 +1,4001 @@
+{
+"source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09. Task 111 probes: Table.TransformColumnTypes of one source value to each of 10 target types (number, Int64, text, date, datetime, time, logical, Currency, Percentage, duration), over 130 varied source texts; answers that hold today's date are left out.",
+"cases": [
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"7\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:7.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:13"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:13"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"13\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:13:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:13"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:13"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:13.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:23"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:23"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"23\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:23:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:23"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:23"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:23.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:24"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:24"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"24\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:24"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:24"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:24.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"0\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:10"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:10"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"10\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:10:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:10"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:10"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:10.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:11"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:11"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"11\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:11:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:11"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:11"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"11\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:11.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"00\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"01\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:01:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"007\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"007\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:7.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"+5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"-0\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-0\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:-1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:-1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"-1\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:-1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:-1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:-1.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"100\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:100.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:9999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:9999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"9999\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:9999-01-01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:9999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:9999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"9999\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:9999.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"+12\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+12\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1.0\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.0\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0.5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\".5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0.5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0.5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"5.\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5.\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1e2\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e2\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1E2\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1E2\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1e\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1e+2\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:100"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e+2\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0.01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1e-2\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0.01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0.01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e-2\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"0x10\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0x10\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1 000\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 000\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1,23\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,23\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1,2,3\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:2003-01-02"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "V:datetime:2003-01-02T00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:123"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,2,3\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1,000\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,000\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:12345678"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:12345678"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12,345,678\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:12345678"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:12345678"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12,345,678\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:-1000.5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:-1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"-1,000.5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:-1000.5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:-1000.5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1,000.5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"$5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"$5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"$5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0.05"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"5%\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0.05"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0.05"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"5%\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:-5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:-5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"(5)\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:-5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:-5"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"(5)\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"--5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"--5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"-\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"+\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"+\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\".\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\".\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"Infinity\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Infinity\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:NaN"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:Expression.Error: The number is out of range of a 64 bit integer value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"NaN\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:Expression.Error: The number is out of range of a decimal value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"NaN\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1.2.3\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:2003-01-02"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "V:datetime:2003-01-02T00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.2.3\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0.1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"0.1\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0.1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0.1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0.1\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"  \""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"  \"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\" \""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" \"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:null"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:2024"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:2024"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"2024\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:2024-01-01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:20:24:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:2024"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:2024"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:2024.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1000\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:1000-01-01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:10:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1000\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1000.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"0001\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:0001-01-01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:00:01:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0001\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:10000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:10000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"10000\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:10000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:10000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"10000\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:10000.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:99"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:99"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"99\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:99"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:99"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"99\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:99.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"999\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:999"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"999\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:999.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:12345"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:12345"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12345\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:12345"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:12345"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12345\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12345.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1900"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1900"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1900\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:1900-01-01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:19:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1900"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1900"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1900\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1900.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1899"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1899"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1899\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:1899-01-01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1899"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1899"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1899\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1899.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"0000\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:0"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0000\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:15"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:15"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1,5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:15"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:15"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1.5.2024\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:2024-01-05"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "V:datetime:2024-01-05T00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.5.2024\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"١٢٣\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"١٢٣\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1 \""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1 \"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\" 1\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 1\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"\\t7\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:7"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\t7\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:7.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12:30:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30:45\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:45.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12:30:45"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1:05\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:01:05:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:01:05:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"01:05\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:01:05:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"01:05\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:01:05:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"7:30 PM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:19:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7:30 PM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"7 PM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:19:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"7 PM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12 AM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 AM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30:45.5\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:45.5000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.5\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12:30:45.5000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30:45.1234567\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:45.1234567"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.1234567\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12:30:45.1234567"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"24:00\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"24:00\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"23:59\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:23:59:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:23:59:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"23:59:59\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:23:59:59.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:59:59\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:23:59:59"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"23:60\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"23:60\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"25:00\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"25:00\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"-1:00\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-1:00\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:-01:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1:2\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:01:02:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:2\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:01:02:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:3\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:03:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:3\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12:03:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30:\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30:60\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:60\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"0:00\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:00\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"00:00:00\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:00:00:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"00:00:00\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:12.3"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:12"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12.30\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:12.3"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:12.3"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12.30\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "V:number:1230"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "V:number:1230"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1230\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "V:date:1230-01-01"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "V:number:1230"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "V:number:1230"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1230\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1230.00:00:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30 pm\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30 pm\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30PM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30PM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1:05 AM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:01:05:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:05 AM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"13:05 PM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:13:05:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:05 PM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"0:30 AM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:00:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0:30 AM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30:45 PM\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:45.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45 PM\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\" 12:30 \""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 12:30 \"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12:30:00"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12 : 30\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12 : 30\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"T12:30\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"T12:30\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"2024-02-29 13:45\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "V:datetime:2024-02-29T13:45:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29 13:45\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"2024-02-29T13:45\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "V:datetime:2024-02-29T13:45:00.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1.02:03:04\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1.02:03:04\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:1.02:03:04"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"02:03:04\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:02:03:04.0000000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"02:03:04\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:02:03:04"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"1:02:03:04\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1:02:03:04\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"100:00:00\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"100:00:00\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"12:30:45.123\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "V:time:12:30:45.1230000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12:30:45.123\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:12:30:45.1230000"
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", type number}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", Int64.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", type text}}){0}[c]",
+"power_bi": "V:text:\"-12:30\""
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", type date}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", type datetime}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", type time}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", type logical}}){0}[c]",
+"power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", Currency.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+"power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+},
+{
+"expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-12:30\"}}), {{\"c\", type duration}}){0}[c]",
+"power_bi": "V:duration:-12:30:00"
+}
+]
+}

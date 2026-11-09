@@ -16,6 +16,7 @@ import math
 from functools import cmp_to_key
 from typing import Callable, Optional
 
+from . import column_types
 from . import values as V
 from .canonical import number_text
 from .list_fns import _hash_key, _order, compare
@@ -697,41 +698,41 @@ def _transform_columns(table: MValue, transforms: MValue, default: MValue, missi
     return V.Table(columns, tuple(rows))
 
 
-def _convert_cell(value: MValue, type_name: str) -> MValue:
-    if isinstance(value, V.Null):
-        return value
-    if type_name == "text":
-        if isinstance(value, V.Text):
-            return value
-        if isinstance(value, V.Number):
-            return V.Text(number_text(value.value))
-        raise _unsupported("conversion to text of this value")
-    if type_name == "number" and isinstance(value, V.Number):
-        return value
-    raise _unsupported("column type conversion")
+def _conversion_culture(culture: MValue) -> Optional[str]:
+    """The culture argument of Table.TransformColumnTypes: null is not given; a text is checked by column_types."""
+    if isinstance(culture, V.Null):
+        return None
+    if not isinstance(culture, V.Text):
+        raise _unsupported("culture argument")
+    return culture.value
 
 
 def _transform_column_types(table: MValue, transforms: MValue, culture: MValue) -> MValue:
     t = _table(table)
-    _no_option(culture, "culture argument")
-    changes: dict = {}
+    use_culture = _conversion_culture(culture)
+    changes: dict = {}  # column index -> target TypeName (Table.Schema)
     for item in _items(transforms):
         pair = _items(item)
         if len(pair) != 2 or not isinstance(pair[1], V.TypeValue):
             raise _unsupported("column type transform")
         i = _index(t, _text(pair[0]))
         type_value = pair[1]
-        if type_value.nullable or type_value.name not in ("text", "number") or i in changes:
+        if type_value.nullable or i in changes:
             raise _unsupported("column type transform")
-        changes[i] = type_value.name
-    kinds = {i: _col(_PRIMITIVE_TYPE_NAMES[name] + ".Type", True) for i, name in changes.items()}
+        _base_kind, type_name, _nullable = _parts(_type_spec(type_value))
+        if type_name not in column_types.BASE_OF_TYPE:
+            raise _unsupported("column type transform")
+        changes[i] = type_name
     rows = []
     for row in t.rows:
         cells = list(row)
         for i, type_name in changes.items():
-            cells[i] = _convert_cell(V.force(row[i]), type_name)
+            # lazy, as Power BI's cell errors are: a failed conversion raises only when the cell is read
+            cells[i] = V.Thunk(lambda cell=row[i], tn=type_name: column_types.convert_cell(V.force(cell), tn,
+                                                                                         use_culture))
         rows.append(tuple(cells))
-    columns = tuple((name, kinds.get(i, kind)) for i, (name, kind) in enumerate(t.columns))
+    columns = tuple((name, _col(changes[i], True) if i in changes else kind)
+                    for i, (name, kind) in enumerate(t.columns))
     return V.Table(columns, tuple(rows))
 
 
@@ -1286,8 +1287,54 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
     return V.Table(columns, tuple(rows))
 
 
+def _aggregate_kind(fn: V.Function, column_kind: str) -> str:
+    """The kind of a Table.Pivot column made by an aggregation. Measured: over an untyped column List.Sum and a
+    custom function give any; over an Int64 column List.Sum gives number. Other typed cases are not measured."""
+    base = _base(column_kind)
+    if base == "any":
+        return _function_spec(fn)
+    if _is_library(fn, "List.Count"):
+        return _function_spec(fn)
+    if _is_library(fn, "List.Sum") and base == "number":
+        return _col("Number.Type", True)
+    raise _unsupported("pivot aggregation over a typed column")
+
+
+def _pivot_row_order(t: V.Table, others: list, groups: dict, order: list) -> list:
+    """The order of a Table.Pivot's rows. Measured (one case, text keys): the rows come sorted by the key column, not
+    in first-appearance order. Only that is modelled: the order is computed for a single text key column whose
+    ordinal and case-folded sorts agree, and any other key set whose sorted order differs from first appearance is
+    refused."""
+    if len(order) < 2:
+        return order
+    keyed = [([V.force(groups[key][0][j]) for j in others], key) for key in order]
+    if len(others) == 1 and all(isinstance(values[0], V.Text) for values, _ in keyed):
+        texts = [(values[0].value, key) for values, key in keyed]
+        by_ordinal = sorted(texts, key=lambda item: item[0])
+        by_folded = sorted(texts, key=lambda item: (item[0].casefold(), item[0]))
+        if [k for _, k in by_ordinal] != [k for _, k in by_folded]:
+            raise _unsupported("pivot row order of keys that differ in letter case")
+        return [key for _, key in by_ordinal]
+    ordered = [key for _values, key in sorted(keyed, key=cmp_to_key(
+        lambda x, y: _compare_rows(x[0], y[0])))] if all(
+        not isinstance(cell, V.Null) for values, _ in keyed for cell in values) else None
+    if ordered != order:
+        raise _unsupported("pivot row order of these key columns")
+    return order
+
+
+def _compare_rows(left: list, right: list) -> int:
+    for x, y in zip(left, right):
+        result = compare(x, y)
+        if result:
+            return result
+    return 0
+
+
 def _pivot(table: MValue, values: MValue, attribute: MValue, value_column: MValue, aggregate: MValue) -> MValue:
-    _no_option(aggregate, "aggregationFunction argument")
+    if not isinstance(aggregate, (V.Null, V.Function)):
+        raise _unsupported("aggregationFunction argument")
+    fn = aggregate if isinstance(aggregate, V.Function) else None
     t = _table(table)
     pivots = _names(values)
     _no_repeat(pivots)
@@ -1299,7 +1346,8 @@ def _pivot(table: MValue, values: MValue, attribute: MValue, value_column: MValu
     if any(t.columns[j][0] in pivots for j in others):
         raise _unsupported("pivot value that is also a column name")
     _base_kind, value_type, _nullable = _parts(t.columns[vi][1])
-    value_kind = _col(value_type, True)  # a pivot cell is null where there is no row
+    # a pivot cell is null where there is no row; with an aggregation the column has the function's return type
+    value_kind = _col(value_type, True) if fn is None else _aggregate_kind(fn, t.columns[vi][1])
     groups: dict = {}
     order = []
     for row in t.rows:
@@ -1308,6 +1356,7 @@ def _pivot(table: MValue, values: MValue, attribute: MValue, value_column: MValu
             groups[key] = []
             order.append(key)
         groups[key].append(row)
+    order = _pivot_row_order(t, others, groups, order)
     columns = tuple(t.columns[j] for j in others) + tuple((p, value_kind) for p in pivots)
     rows = []
     for key in order:
@@ -1316,6 +1365,9 @@ def _pivot(table: MValue, values: MValue, attribute: MValue, value_column: MValu
         for p in pivots:
             hits = [row for row in members
                     if isinstance(V.force(row[ai]), V.Text) and V.force(row[ai]).value == p]
+            if fn is not None:  # the aggregation sees every value of the group, nulls included, and no rows at all
+                cells.append(V.Thunk(lambda hits=hits: _apply(fn, V.List(tuple(row[vi] for row in hits)))))
+                continue
             if len(hits) > 1:
                 raise _unsupported("pivot with a repeated attribute value")
             cells.append(hits[0][vi] if hits else V.Null())

@@ -1,0 +1,233 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "source_table": "Table.TransformColumnTypes(#table({\"Region\",\"Product\",\"Units\",\"Price\",\"Day\"}, {{\"North\",\"Pen\",\"2\",\"1.5\",\"2024-01-15\"},{\"South\",\"Pen\",\"5\",\"1.5\",\"2024-01-20\"},{\"North\",\"Ink\",\"1\",\"12\",\"2024-02-03\"},{\"East\",\"Pad\",\"10\",\"0.75\",\"2024-02-29\"},{\"South\",\"Ink\",\"3\",\"12\",\"2024-03-01\"}}), {{\"Region\", type text}, {\"Product\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}})",
+ "scripts": [
+  {
+   "name": "Removed",
+   "script": "let Source = Table.TransformColumnTypes(#table({\"Region\",\"Product\",\"Units\",\"Price\",\"Day\"}, {{\"North\",\"Pen\",\"2\",\"1.5\",\"2024-01-15\"},{\"South\",\"Pen\",\"5\",\"1.5\",\"2024-01-20\"},{\"North\",\"Ink\",\"1\",\"12\",\"2024-02-03\"},{\"East\",\"Pad\",\"10\",\"0.75\",\"2024-02-29\"},{\"South\",\"Ink\",\"3\",\"12\",\"2024-03-01\"}}), {{\"Region\", type text}, {\"Product\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}}), Removed = Table.RemoveColumns(Source, {\"Price\", \"Day\"}) in Removed",
+   "power_bi": "V:table:cols=[\"Region\":\"text\",\"Product\":\"text\",\"Units\":\"number\"];rows=[list:[text:\"North\",text:\"Pen\",number:2],list:[text:\"South\",text:\"Pen\",number:5],list:[text:\"North\",text:\"Ink\",number:1],list:[text:\"East\",text:\"Pad\",number:10],list:[text:\"South\",text:\"Ink\",number:3]]"
+  },
+  {
+   "name": "Index",
+   "script": "let Source = Table.TransformColumnTypes(#table({\"Region\",\"Product\",\"Units\",\"Price\",\"Day\"}, {{\"North\",\"Pen\",\"2\",\"1.5\",\"2024-01-15\"},{\"South\",\"Pen\",\"5\",\"1.5\",\"2024-01-20\"},{\"North\",\"Ink\",\"1\",\"12\",\"2024-02-03\"},{\"East\",\"Pad\",\"10\",\"0.75\",\"2024-02-29\"},{\"South\",\"Ink\",\"3\",\"12\",\"2024-03-01\"}}), {{\"Region\", type text}, {\"Product\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}}), Index = Table.AddIndexColumn(Source, \"Idx\", 1, 1, Int64.Type) in Index",
+   "power_bi": "V:table:cols=[\"Region\":\"text\",\"Product\":\"text\",\"Units\":\"number\",\"Price\":\"number\",\"Day\":\"date\",\"Idx\":\"number\"];rows=[list:[text:\"North\",text:\"Pen\",number:2,number:1.5,date:2024-01-15,number:1],list:[text:\"South\",text:\"Pen\",number:5,number:1.5,date:2024-01-20,number:2],list:[text:\"North\",text:\"Ink\",number:1,number:12,date:2024-02-03,number:3],list:[text:\"East\",text:\"Pad\",number:10,number:0.75,date:2024-02-29,number:4],list:[text:\"South\",text:\"Ink\",number:3,number:12,date:2024-03-01,number:5]]"
+  },
+  {
+   "name": "Rank",
+   "script": "let Source = Table.TransformColumnTypes(#table({\"Region\",\"Product\",\"Units\",\"Price\",\"Day\"}, {{\"North\",\"Pen\",\"2\",\"1.5\",\"2024-01-15\"},{\"South\",\"Pen\",\"5\",\"1.5\",\"2024-01-20\"},{\"North\",\"Ink\",\"1\",\"12\",\"2024-02-03\"},{\"East\",\"Pad\",\"10\",\"0.75\",\"2024-02-29\"},{\"South\",\"Ink\",\"3\",\"12\",\"2024-03-01\"}}), {{\"Region\", type text}, {\"Product\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}}), Rank = Table.AddColumn(Source, \"Big\", each if [Price] > 5 then \"High\" else \"Low\", type text) in Rank",
+   "power_bi": "V:table:cols=[\"Region\":\"text\",\"Product\":\"text\",\"Units\":\"number\",\"Price\":\"number\",\"Day\":\"date\",\"Big\":\"text\"];rows=[list:[text:\"North\",text:\"Pen\",number:2,number:1.5,date:2024-01-15,text:\"Low\"],list:[text:\"South\",text:\"Pen\",number:5,number:1.5,date:2024-01-20,text:\"Low\"],list:[text:\"North\",text:\"Ink\",number:1,number:12,date:2024-02-03,text:\"High\"],list:[text:\"East\",text:\"Pad\",number:10,number:0.75,date:2024-02-29,text:\"Low\"],list:[text:\"South\",text:\"Ink\",number:3,number:12,date:2024-03-01,text:\"High\"]]"
+  },
+  {
+   "name": "Running",
+   "script": "let Source = Table.TransformColumnTypes(#table({\"Region\",\"Product\",\"Units\",\"Price\",\"Day\"}, {{\"North\",\"Pen\",\"2\",\"1.5\",\"2024-01-15\"},{\"South\",\"Pen\",\"5\",\"1.5\",\"2024-01-20\"},{\"North\",\"Ink\",\"1\",\"12\",\"2024-02-03\"},{\"East\",\"Pad\",\"10\",\"0.75\",\"2024-02-29\"},{\"South\",\"Ink\",\"3\",\"12\",\"2024-03-01\"}}), {{\"Region\", type text}, {\"Product\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}}), Running = Table.AddColumn(Table.AddIndexColumn(Source, \"i\", 0), \"Cum\", (r) => List.Sum(List.FirstN(Source[Units], r[i] + 1)), type number) in Running",
+   "power_bi": "V:table:cols=[\"Region\":\"text\",\"Product\":\"text\",\"Units\":\"number\",\"Price\":\"number\",\"Day\":\"date\",\"i\":\"number\",\"Cum\":\"number\"];rows=[list:[text:\"North\",text:\"Pen\",number:2,number:1.5,date:2024-01-15,number:0,number:2],list:[text:\"South\",text:\"Pen\",number:5,number:1.5,date:2024-01-20,number:1,number:7],list:[text:\"North\",text:\"Ink\",number:1,number:12,date:2024-02-03,number:2,number:8],list:[text:\"East\",text:\"Pad\",number:10,number:0.75,date:2024-02-29,number:3,number:18],list:[text:\"South\",text:\"Ink\",number:3,number:12,date:2024-03-01,number:4,number:21]]"
+  },
+  {
+   "name": "Keep",
+   "script": "let Source = Table.TransformColumnTypes(#table({\"Region\",\"Product\",\"Units\",\"Price\",\"Day\"}, {{\"North\",\"Pen\",\"2\",\"1.5\",\"2024-01-15\"},{\"South\",\"Pen\",\"5\",\"1.5\",\"2024-01-20\"},{\"North\",\"Ink\",\"1\",\"12\",\"2024-02-03\"},{\"East\",\"Pad\",\"10\",\"0.75\",\"2024-02-29\"},{\"South\",\"Ink\",\"3\",\"12\",\"2024-03-01\"}}), {{\"Region\", type text}, {\"Product\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}}), Keep = Table.SelectColumns(Table.SelectRows(Source, each [Region] <> \"East\"), {\"Region\", \"Units\"}) in Keep",
+   "power_bi": "V:table:cols=[\"Region\":\"text\",\"Units\":\"number\"];rows=[list:[text:\"North\",number:2],list:[text:\"South\",number:5],list:[text:\"North\",number:1],list:[text:\"South\",number:3]]"
+  }
+ ],
+ "engine_cases": [
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type number}}){0}[c]",
+   "power_bi": "V:number:12"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"12\"}}), {{\"c\", type time}}){0}[c]",
+   "power_bi": "V:time:12:00:00.0000000"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-3.5\"}}), {{\"c\", type number}}){0}[c]",
+   "power_bi": "V:number:-3.5"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"-3.5\"}}), {{\"c\", type logical}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1,234.5\"}}), {{\"c\", Int64.Type}}){0}[c]",
+   "power_bi": "V:number:1234"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e3\"}}), {{\"c\", type date}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e3\"}}), {{\"c\", type logical}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"1e3\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+   "power_bi": "V:number:1000"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 7 \"}}), {{\"c\", type number}}){0}[c]",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 7 \"}}), {{\"c\", Int64.Type}}){0}[c]",
+   "power_bi": "V:number:7"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\" 7 \"}}), {{\"c\", type date}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"abc\"}}), {{\"c\", type text}}){0}[c]",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"abc\"}}), {{\"c\", type date}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"abc\"}}), {{\"c\", type datetime}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"abc\"}}), {{\"c\", type logical}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\"}}), {{\"c\", Int64.Type}}){0}[c]",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\"}}), {{\"c\", type text}}){0}[c]",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"\"}}), {{\"c\", Currency.Type}}){0}[c]",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29\"}}), {{\"c\", type number}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29\"}}), {{\"c\", type time}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29\"}}), {{\"c\", type duration}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"29/02/2024\"}}), {{\"c\", type date}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"Feb 29, 2024\"}}), {{\"c\", type date}}){0}[c]",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45:00\"}}), {{\"c\", Int64.Type}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"2024-02-29T13:45:00\"}}), {{\"c\", type text}}){0}[c]",
+   "power_bi": "V:text:\"2024-02-29T13:45:00\""
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"13:45\"}}), {{\"c\", type logical}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"TRUE\"}}), {{\"c\", type time}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"TRUE\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"false\"}}), {{\"c\", type number}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"false\"}}), {{\"c\", Int64.Type}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"false\"}}), {{\"c\", Currency.Type}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"yes\"}}), {{\"c\", Percentage.Type}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", Int64.Type}}){0}[c]",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type logical}}){0}[c]",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{\"0\"}}), {{\"c\", type duration}}){0}[c]",
+   "power_bi": "V:duration:00:00:00"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{null}}), {{\"c\", Int64.Type}}){0}[c]",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{null}}), {{\"c\", type text}}){0}[c]",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{null}}), {{\"c\", type logical}}){0}[c]",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{null}}), {{\"c\", type duration}}){0}[c]",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{12}}), {{\"c\", type number}}){0}[c]",
+   "power_bi": "V:number:12"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{1.5}}), {{\"c\", type date}}){0}[c]",
+   "power_bi": "V:date:1899-12-31"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{1.5}}), {{\"c\", type time}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Time."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{1.5}}), {{\"c\", type duration}}){0}[c]",
+   "power_bi": "V:duration:1.12:00:00"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{true}}), {{\"c\", type text}}){0}[c]",
+   "power_bi": "V:text:\"true\""
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{true}}), {{\"c\", type date}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Date."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{true}}), {{\"c\", type datetime}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to DateTime."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{true}}), {{\"c\", type time}}){0}[c]",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Time."
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{true}}), {{\"c\", type logical}}){0}[c]",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{true}}), {{\"c\", Percentage.Type}}){0}[c]",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Table.TransformColumnTypes(#table({\"c\"}, {{#date(2024,1,2)}}), {{\"c\", type text}}){0}[c]",
+   "power_bi": "V:text:\"1/2/2024\""
+  }
+ ]
+}
