@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-10, after Iteration 203 / Task 114 dax-typetest-104, DAX refusal backlog part 2: type tests over failing comparisons, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531587 match, 8814 refused, 0 DIFF, 0 CRASH, locked 531567. Next: maxxnan53 and the ordering groups (orderaudit56-59, rank61, rankx60)
+**Latest status (2026-11-10, after Iteration 204 / Task 115 dax-maxxnan-105, DAX refusal backlog part 3: MAXX / MINX over NaN beside other values, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 532087 match, 8314 refused, 0 DIFF, 0 CRASH, locked 532067. Next: RANK / ROWNUMBER / RANKX inside row contexts (Task 116, rank61 and rankx60)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
