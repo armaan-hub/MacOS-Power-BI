@@ -250,7 +250,10 @@ def _locate(hay: str, delim: str, index: int, from_end: bool) -> tuple:
 # ---- Comparer, Occurrence, RelativePosition, TextEncoding ------------------------
 
 def _compare(a: MValue, b: MValue, fold: bool) -> MValue:
-    x, y = _units(_text(a)), _units(_text(b))
+    if not (isinstance(a, V.Text) and isinstance(b, V.Text)):
+        from .value_fns import compare_non_text  # local import: value_fns imports this module
+        return compare_non_text(a, b, fold)
+    x, y = _units(a.value), _units(b.value)
     if fold:
         x, y = _fold(x), _fold(y)
     return V.Number(float((x > y) - (x < y)))

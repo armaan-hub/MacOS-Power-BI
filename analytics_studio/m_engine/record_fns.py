@@ -371,8 +371,14 @@ def _transform_fields(record: MValue, transforms: MValue, missing: MValue) -> MV
 def _type_record_fields(type_value: MValue) -> MValue:
     if not isinstance(type_value, V.TypeValue):
         raise V.convert_error(type_value, V.TypeValue("type"))
+    if type_value.raw_fields is not None:
+        return type_value.raw_fields  # Type.ForRecord: the field record as it was given
     if type_value.fields is None:
-        raise _unsupported("Type.RecordFields of a type that has no field list")
+        if type_value.name == "record":
+            return V.Record(())
+        if type_value.name == "table":
+            raise _unsupported("Type.RecordFields of a table type")
+        raise V.generic_error("We cannot convert Type to Record type.")
     return V.Record(tuple(
         (name, V.Record((("Type", field_type), ("Optional", V.Logical(optional)))))
         for name, field_type, optional in type_value.fields))

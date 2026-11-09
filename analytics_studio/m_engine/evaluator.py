@@ -46,6 +46,9 @@ class Env:
         raise MError("Expression.Error", f"The import {name} matches no exports. Did you miss a module reference?")
 
 
+from dataclasses import replace as _dc_replace
+
+
 # ---- type nodes -------------------------------------------------------------
 
 def type_of_node(node: A.Node) -> V.TypeValue:
@@ -53,15 +56,23 @@ def type_of_node(node: A.Node) -> V.TypeValue:
         return V.TypeValue(node.name)
     if isinstance(node, A.NullableType):
         inner = type_of_node(node.inner)
-        return V.TypeValue(inner.name, True, fields=inner.fields)
+        return _dc_replace(inner, nullable=True)
     if isinstance(node, A.ListType):
-        return V.TypeValue("list")
+        return V.TypeValue("list", item=type_of_node(node.item))
     if isinstance(node, A.RecordType):
-        return V.TypeValue("record", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.fields))
+        return V.TypeValue("record", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.fields),
+                           open_record=node.open_)
     if isinstance(node, A.TableType):
         return V.TypeValue("table", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.row.fields))
     if isinstance(node, A.FunctionType):
-        return V.TypeValue("function")
+        names = [p.name for p in node.params]
+        for name in names:
+            if names.count(name) > 1:
+                raise MError("Expression.Error", f"Duplicate parameter named '{name}'.")
+        params = tuple((p.name, type_of_node(p.type_) if p.type_ is not None else V.TypeValue("any"), p.optional)
+                       for p in node.params)
+        ret = type_of_node(node.return_type) if node.return_type is not None else None
+        return V.TypeValue("function", signature=(params, ret))
     raise MError("Expression.Error", "unknown type expression")
 
 
@@ -133,6 +144,8 @@ def apply_function(fn: MValue, items: list) -> MValue:
     """Call a function value with lazy argument items (Thunk or MValue)."""
     if not isinstance(fn, V.Function):
         raise V.convert_error(fn, V.TypeValue("function"))
+    if fn.variadic:
+        return fn.invoke(list(items))
     specs = fn.params
     required = sum(1 for spec in specs if not spec.optional)
     if len(items) < required or len(items) > len(specs):

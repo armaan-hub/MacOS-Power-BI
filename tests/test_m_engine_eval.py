@@ -467,5 +467,63 @@ class TableFunctionSpecTests(unittest.TestCase):
         self.assertGreaterEqual(exact, 1343)
 
 
+VALUE_SPEC = PLANS / "2026-11-09-m-value-98-spec.json"
+
+
+class ValueFamilySpecTests(unittest.TestCase):
+    def test_value_family_matches_power_bi(self):
+        """450 live answers for the Power Query Splitter, Combiner, Comparer, Value and Type functions and the small
+        families (Function, Expression, Logical, Character, Binary, Uri, Json, Lines, Occurrence, the Type constants)
+        (Task 108, m-value-98). Each is exact, or an explicit ERR (never a value that differs from Power BI). A case
+        that Power BI rejected with ERR:PARTITION must be a syntax error here. At least 447 are exact; the others are
+        refusals: cultures and clock values not measured, and forms not measured (Culture.Current, Type.ForFunction,
+        Type.AddTableKey)."""
+        cases = _cases(VALUE_SPEC)
+        self.assertEqual(len(cases), 450)
+        wrong, exact = [], 0
+        for case in cases:
+            expected = case["power_bi"]
+            actual = evaluate_to_text(case["expression"])
+            if expected.startswith(PARTITION_PREFIX):
+                matched = actual.startswith(SYNTAX_PREFIX)
+            else:
+                matched = actual == expected
+            if matched:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {expected!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 447)
+
+
+VALUE_PROBES = PLANS / "2026-11-09-m-value-98-probes.json"
+
+
+class ValueFamilyProbeTests(unittest.TestCase):
+    def test_value_family_probes_match_power_bi(self):
+        """Fix-round probes (Task 108): behaviour measured on Power BI Desktop for the Splitter and Combiner
+        functions (quote styles, CsvStyle, white-space runs, startAtEnd, lengths, positions, ranges, templates,
+        each-delimiter quoting), Lines, Comparer.Ordinal and Value.Compare/Equals (kind order, Precision),
+        Logical.From, the Type functions (Type.Is, ListItem, ForRecord, FunctionParameters, ReplaceFacets,
+        Facets), Function.From/InvokeAfter, Binary.Combine/From/FromText, Value.FromText, Uri.Combine/Parts and
+        Json.Document. Each is exact or an explicit ERR; a different value is wrong and must be zero. A case that
+        Power BI rejected with ERR:PARTITION must be a syntax error here."""
+        cases = _cases(VALUE_PROBES)
+        wrong, exact = [], 0
+        for case in cases:
+            expected = case["power_bi"]
+            actual = evaluate_to_text(case["expression"])
+            if expected.startswith(PARTITION_PREFIX):
+                matched = actual.startswith(SYNTAX_PREFIX)
+            else:
+                matched = actual == expected
+            if matched:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {expected!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 1690)
+
+
 if __name__ == "__main__":
     unittest.main()
