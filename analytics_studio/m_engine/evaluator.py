@@ -52,11 +52,11 @@ def type_of_node(node: A.Node) -> V.TypeValue:
         return V.TypeValue(node.name)
     if isinstance(node, A.NullableType):
         inner = type_of_node(node.inner)
-        return V.TypeValue(inner.name, True)
+        return V.TypeValue(inner.name, True, fields=inner.fields)
     if isinstance(node, A.ListType):
         return V.TypeValue("list")
     if isinstance(node, A.RecordType):
-        return V.TypeValue("record")
+        return V.TypeValue("record", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.fields))
     if isinstance(node, A.TableType):
         return V.TypeValue("table")
     if isinstance(node, A.FunctionType):

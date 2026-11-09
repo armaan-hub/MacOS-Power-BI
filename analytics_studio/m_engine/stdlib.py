@@ -17,6 +17,7 @@ from .canonical import duration_text, number_text_of
 from .text import TEXT_GLOBALS
 from .number import NUMBER_GLOBALS
 from .list_fns import LIST_GLOBALS
+from .record_fns import RECORD_GLOBALS
 from .values import MError, MValue, ParamSpec
 
 
@@ -368,4 +369,5 @@ GLOBALS: dict = {
     **TEXT_GLOBALS,
     **NUMBER_GLOBALS,
     **LIST_GLOBALS,
+    **RECORD_GLOBALS,
 }

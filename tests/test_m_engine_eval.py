@@ -30,6 +30,7 @@ NUMBER_HOLDOUT = PLANS / "2026-11-09-m-number-93-holdout.json"
 NUMBER_PROBES = PLANS / "2026-11-09-m-number-93-probes.json"
 LIST_SPEC = PLANS / "2026-11-09-m-list-94-spec.json"
 LIST_PROBES = PLANS / "2026-11-09-m-list-94-probes.json"
+RECORD_SPEC = PLANS / "2026-11-09-m-record-95-spec.json"
 PARTITION_PREFIX = "ERR:PARTITION"
 SYNTAX_PREFIX = "ERR:SYNTAX"
 
@@ -243,6 +244,24 @@ class ListFunctionSpecTests(unittest.TestCase):
                 wrong.append(f"{case['expression']!r}: power bi {case['power_bi']!r} / ours {actual!r}")
         self.assertEqual(wrong, [], "\n".join(wrong))
         self.assertGreaterEqual(exact, 219)
+
+
+class RecordFunctionSpecTests(unittest.TestCase):
+    def test_record_function_family_matches_power_bi(self):
+        """284 live answers for the Power Query Record.* functions, MissingField, Type.RecordFields and record
+        syntax (Task 105, m-record-95): each is exact or an explicit ERR (never a value that differs from Power BI).
+        The four cases that use the #table literal are refused until that literal is modelled."""
+        cases = _cases(RECORD_SPEC)
+        self.assertEqual(len(cases), 284)
+        wrong, exact = [], 0
+        for case in cases:
+            actual = evaluate_to_text(case["expression"])
+            if actual == case["power_bi"]:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {case['power_bi']!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 280)
 
 
 class ProbeTests(unittest.TestCase):

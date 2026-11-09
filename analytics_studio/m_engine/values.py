@@ -195,6 +195,7 @@ class TypeValue(MValue):
     name: str
     nullable: bool = False
     meta: Optional["Record"] = None
+    fields: Optional[tuple] = None  # record types only: ((name, TypeValue, optional), ...) in declared order
 
 
 # ---- names used in messages and type checks -------------------------------
