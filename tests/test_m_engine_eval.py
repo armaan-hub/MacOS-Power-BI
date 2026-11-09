@@ -398,5 +398,28 @@ class SyntaxErrorTests(unittest.TestCase):
         self.assertTrue(evaluate_to_text("1 +").startswith(SYNTAX_PREFIX))
 
 
+DATE_SPEC = PLANS / "2026-11-09-m-date-96-spec.json"
+
+
+class DateFunctionSpecTests(unittest.TestCase):
+    def test_date_time_function_family_matches_power_bi(self):
+        """622 live answers for the Power Query Date, DateTime, DateTimeZone, Time and Duration functions, the Day
+        constants and the clock refusals (Task 106, m-date-96). Each is exact, or an explicit ERR (never a value that
+        differs from Power BI). At least 615 are exact; the others are refusals: the machine's time zone, today's
+        date, and forms not measured."""
+        cases = _cases(DATE_SPEC)
+        self.assertEqual(len(cases), 622)
+        wrong, exact = [], 0
+        for case in cases:
+            expected = case["power_bi"]
+            actual = evaluate_to_text(case["expression"])
+            if actual == expected:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {expected!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 615)
+
+
 if __name__ == "__main__":
     unittest.main()
