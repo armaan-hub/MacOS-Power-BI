@@ -8829,8 +8829,20 @@ def _nan_walk_measured(table_node: Any, body: Any) -> bool:
         isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] == "ALL"
         and len(table_node[2]) == 1 and isinstance(table_node[2][0], tuple) and table_node[2][0][0] == "table"
     )
+    filter_of_table = (
+        isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] == "FILTER"
+        and len(table_node[2]) >= 1 and isinstance(table_node[2][0], tuple) and table_node[2][0][0] == "table"
+    )
     conditional = isinstance(body, tuple) and len(body) == 3 and body[0] == "call" and body[1] in {"IF", "IF.EAGER"}
-    return bool((plain or all_of_table) and conditional)
+    return bool((plain or all_of_table or filter_of_table) and conditional)
+
+
+def _has_literal_zero_division(node: Any) -> bool:
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "binary" and node[1] == "/" and len(node[2]) == 2 and node[2][0] == ("literal", 0) and node[2][1] == ("literal", 0):
+        return True
+    return any(_has_literal_zero_division(c) for c in (node if isinstance(node[0], tuple) else node[1:]) if isinstance(c, tuple))
 
 
 def _evaluate_measures_once(
@@ -21208,13 +21220,29 @@ def _evaluate_measures_once(
                     # live Power BI (Task 12 review): NaN or the other value, depending on the order the engine walks the rows (which columns the body reads)
                     # Task 51 Part C: the running MAXX / MINX keeps the value it visits first, because NaN > x and x > NaN are both false: NaN
                     # when the walk visits a NaN first, otherwise the extreme of the numbers.  The walk is the dictionary order of the body's columns.
-                    walked = dictionary_ordered_rows(arguments[0], context, iteration_rows, [arguments[1]], beside_doubles=_nan_walk_measured(arguments[0], arguments[1])) if _stored_scan(arguments[0], variable_nodes.get) is True else iteration_rows  # a derived table's walk is not measured
-                    if walked is iteration_rows or len(value_positions) != len(values):
+                    is_stored = _stored_scan(arguments[0], variable_nodes.get) is True
+                    is_except = isinstance(arguments[0], tuple) and len(arguments[0]) == 3 and arguments[0][0] == "call" and arguments[0][1] == "EXCEPT"
+                    is_intersect = isinstance(arguments[0], tuple) and len(arguments[0]) == 3 and arguments[0][0] == "call" and arguments[0][1] == "INTERSECT"
+                    if not (is_stored or is_except or is_intersect):
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    if _has_literal_zero_division(arguments[1]):
+                        raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    if is_except and (len(arguments[0][2]) < 2 or (arguments[0][2][1][0] == "call" and arguments[0][2][1][1] == "FILTER" and len(arguments[0][2][1][2]) >= 2 and (arguments[0][2][1][2][1] == ("boolean", False) or arguments[0][2][1][2][1][:2] == ("call", "FALSE")))):
+                        raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    if is_intersect and all(a[0] == "table" for a in arguments[0][2]) and _has_constant_zero_division(arguments[1]):
+                        raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    if is_intersect and (arguments[0][2][0][0] == "call" and arguments[0][2][0][1] == "FILTER" and arguments[0][2][1][0] == "call" and arguments[0][2][1][1] == "FILTER"):
+                        raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    if is_stored:
+                        walked = dictionary_ordered_rows(arguments[0], context, iteration_rows, [arguments[1]], beside_doubles=_nan_walk_measured(arguments[0], arguments[1]))
+                        if walked is iteration_rows:
+                            raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    else:
+                        walked = iteration_rows
                     slot_of_position = {position: index for index, position in enumerate(value_positions)}
                     index_of_row = {id(row): index for index, row in enumerate(iteration_rows)}
                     walked_values = [values[slot_of_position[index_of_row[id(row)]]] for row in walked if index_of_row[id(row)] in slot_of_position]
-                    if walked_values[0].is_nan():
+                    if walked_values and walked_values[0].is_nan():
                         return walked_values[0]
                 if not ordered:
                     if values and arguments[0][0] == "table_call" and arguments[0][1] == "VALUES" and _zero_division_beside_other_operand(arguments[1]):
