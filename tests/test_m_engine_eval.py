@@ -525,5 +525,26 @@ class ValueFamilyProbeTests(unittest.TestCase):
         self.assertGreaterEqual(exact, 1690)
 
 
+RESIDUAL_102_SPEC = PLANS / "2026-11-09-m-residual-102-spec.json"
+
+
+class Residual102SpecTests(unittest.TestCase):
+    def test_residual_102_spec_matches_power_bi(self):
+        """Task 112 (m-residual-102): 76 live Power BI answers the M engine still refused.
+        Cases are exact or an explicit refusal; wrong must be 0."""
+        cases = _cases(RESIDUAL_102_SPEC)
+        self.assertEqual(len(cases), 76)
+        wrong, exact = [], 0
+        for case in cases:
+            expected = case["power_bi"]
+            actual = evaluate_to_text(case["expression"])
+            if actual == expected:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {expected!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 28)
+
+
 if __name__ == "__main__":
     unittest.main()

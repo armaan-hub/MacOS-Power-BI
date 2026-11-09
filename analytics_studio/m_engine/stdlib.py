@@ -377,3 +377,5 @@ GLOBALS: dict = {
     **TABLE_GLOBALS,
     **VALUE_GLOBALS,
 }
+GLOBALS["#shared"] = V.Record(tuple(GLOBALS.items()))
+

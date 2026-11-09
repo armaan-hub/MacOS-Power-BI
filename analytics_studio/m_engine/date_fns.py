@@ -251,7 +251,15 @@ def _days_in_month(w):
 def _quarter(w): return _num((_day(w).month - 1) // 3 + 1)
 
 
-def _is_leap(w): return V.Logical(calendar.isleap(_day(w).year))
+def _is_leap(value: MValue) -> MValue:
+    if isinstance(value, V.Null):
+        return V.Null()
+    if isinstance(value, V.Number):
+        if not math.isfinite(value.value):
+            raise _unsupported("non-finite number as a year")
+        return V.Logical(calendar.isleap(int(value.value)))
+    w = _when(value, DATE_ARG, text_is_date=True)
+    return V.Null() if w is None else V.Logical(calendar.isleap(_day(w).year))
 
 
 def _day_of_week(value: MValue, first: MValue = V.Null()) -> MValue:
@@ -594,11 +602,14 @@ def _date_to_text(value: MValue, options: MValue = V.Null()) -> MValue:
 
 # ---- parsing --------------------------------------------------------------
 
-_ISO_DATE = re.compile(r"(\d{4})-(\d{1,2})-(\d{1,2})")
-_SLASH_DATE = re.compile(r"(\d{1,2})/(\d{1,2})/(\d{4})")
-_NAMED_DATE = re.compile(r"([A-Za-z]+)\.? (\d{1,2}), (\d{4})")
-_TIME_ONLY = re.compile(r"(\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,7}))?)?")
-_TIME_TAIL = re.compile(r"[T ](\d{1,2}:\d{2}(?::\d{2}(?:\.\d{1,7})?)?)(Z|[+-]\d{2}:\d{2})?")
+_ISO_DATE = re.compile(r"(\d{4})[-/](\d{1,2})[-/](\d{1,2})")
+_SLASH_DATE = re.compile(r"(\d{1,2})[/-](\d{1,2})[/-](\d{4})")
+_DOT_DATE = re.compile(r"(\d{1,2})\.(\d{1,2})\.(\d{1,2}|\d{4})")
+_NAMED_DATE = re.compile(r"([A-Za-z]+)\.? (\d{1,2}),? (\d{4})")
+_NAMED_DATE_DAY_FIRST = re.compile(r"(\d{1,2}) ([A-Za-z]+)\.? (\d{4})")
+_TIME_ONLY = re.compile(r"(\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.(\d{1,7}))?)?")
+_TIME_12H = re.compile(r"(\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.(\d{1,7}))?)?\s*([AP]M|[ap]m)")
+_TIME_TAIL = re.compile(r"[T ](\d{1,2}:\d{1,2}(?::\d{1,2}(?:\.\d{1,7})?)?)\s*(Z|[+-]\d{2}:\d{2})?")
 _OFFSET = re.compile(r"([+-])(\d{2}):(\d{2})")
 _DURATION_CLOCK = re.compile(r"(-)?(?:(\d+)\.)?(\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,7}))?)?")
 _DURATION_ISO = re.compile(r"P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)(?:\.(\d{1,7}))?S)?)?")
@@ -651,6 +662,12 @@ def _date_head(head: str, culture: _Culture) -> Optional[_dt.date]:
         a, b, year = int(match.group(1)), int(match.group(2)), int(match.group(3))
         month, day = (a, b) if culture.numeric_order == "MDY" else (b, a)
         return _make_day(year, month, day)
+    match = _DOT_DATE.fullmatch(head)
+    if match:
+        a, b, y = int(match.group(1)), int(match.group(2)), int(match.group(3))
+        year = (2000 + y) if y < 100 else y
+        month, day = (a, b) if (culture.numeric_order or "MDY") == "MDY" else (b, a)
+        return _make_day(year, month, day)
     match = _NAMED_DATE.fullmatch(head)
     if match:
         if culture.name != "en-us":
@@ -659,11 +676,34 @@ def _date_head(head: str, culture: _Culture) -> Optional[_dt.date]:
         if month is None:
             raise _Refuse()  # an English month name outside the full and three-letter names: not measured
         return _make_day(int(match.group(3)), month, int(match.group(2)))
+    match = _NAMED_DATE_DAY_FIRST.fullmatch(head)
+    if match:
+        if culture.name != "en-us":
+            raise _Refuse()
+        month = _MONTH_BY_NAME.get(match.group(2).lower())
+        if month is None:
+            raise _Refuse()
+        return _make_day(int(match.group(3)), month, int(match.group(1)))
     return None
 
 
 def _parse(text: str, culture: _Culture) -> _Parsed:
-    if text != text.strip() or re.search(r"\b(AM|PM|am|pm)\b", text):
+    if text != text.strip():
+        raise _Refuse()
+    m12 = _TIME_12H.fullmatch(text)
+    if m12:
+        hour, minute = int(m12.group(1)), int(m12.group(2))
+        second = int(m12.group(3) or 0)
+        fraction = int((m12.group(4) or "").ljust(7, "0") or 0)
+        meridiem = m12.group(5).upper()
+        if not (1 <= hour <= 12 and 0 <= minute <= 59 and 0 <= second <= 59):
+            raise _Refuse()
+        if meridiem == "AM":
+            hour = 0 if hour == 12 else hour
+        else:
+            hour = 12 if hour == 12 else hour + 12
+        return _Parsed(None, hour * TPH + minute * TPM + second * TPS + fraction, None)
+    if re.search(r"\b(AM|PM|am|pm)\b", text):
         raise _Refuse()
     if re.fullmatch(r"\d{1,2}:\d{1,2}(?::\d{1,2}(?:\.\d+)?)?", text) and not _TIME_ONLY.fullmatch(text):
         raise _Refuse()  # a clock-shaped text outside the measured grammar (one-digit minutes, long fractions)
@@ -934,6 +974,10 @@ def _duration_from(value: MValue, culture: MValue = V.Null()) -> MValue:
         return V.Null()
     if isinstance(value, V.Duration):
         return value
+    if isinstance(value, V.Number):
+        if not math.isfinite(value.value):
+            raise _unsupported("non-finite number as a duration")
+        return V.Duration(int(round(value.value * TPD)))
     if isinstance(value, V.Text):
         return _duration_from_text(value)
     raise _unsupported(f"{V.type_display(value)} value as a Duration")
@@ -1165,7 +1209,7 @@ DATE_GLOBALS: dict = {
     "Date.DayOfYear": _native((("date", False),), _date_component(_day_of_year)),
     "Date.DaysInMonth": _native((("date", False),), _date_component(_days_in_month)),
     "Date.QuarterOfYear": _native((("date", False),), _date_component(_quarter)),
-    "Date.IsLeapYear": _native((("date", False),), _date_component(_is_leap)),
+    "Date.IsLeapYear": _native((("date", False),), _is_leap),
     "Date.DayOfWeek": _native((("date", False), ("firstDayOfWeek", True)), _day_of_week),
     "Date.WeekOfMonth": _native((("date", False), ("firstDayOfWeek", True)), _week_of_month),
     "Date.WeekOfYear": _native((("date", False), ("firstDayOfWeek", True)), _week_of_year),

@@ -1,0 +1,245 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "Value.FromText(\"3/4/2024\")",
+   "power_bi": "V:date:2024-03-04"
+  },
+  {
+   "expression": "Value.FromText(\"2024-03-04 10:20:30\")",
+   "power_bi": "V:datetime:2024-03-04T10:20:30.0000000"
+  },
+  {
+   "expression": "Value.FromText(\"0.5\")",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "Value.FromText(\"-12\")",
+   "power_bi": "V:number:-12"
+  },
+  {
+   "expression": "Value.FromText(\"1.2.3\")",
+   "power_bi": "V:date:2003-01-02"
+  },
+  {
+   "expression": "Value.FromText(\"Mar 4, 2024\")",
+   "power_bi": "V:date:2024-03-04"
+  },
+  {
+   "expression": "Value.FromText(\"10:20:30\")",
+   "power_bi": "V:time:10:20:30.0000000"
+  },
+  {
+   "expression": "Value.FromText(\"1 5\")",
+   "power_bi": "V:date:2026-01-05"
+  },
+  {
+   "expression": "Value.FromText(\"P1D\")",
+   "power_bi": "V:duration:1.00:00:00"
+  },
+  {
+   "expression": "Value.FromText(\"true \")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.FromText(\"12 May\")",
+   "power_bi": "V:date:2026-05-12"
+  },
+  {
+   "expression": "Value.FromText(\"2024-03-04T10:20:30+02:00\")",
+   "power_bi": "V:datetimezone:2024-03-04T10:20:30.0000000+02:00"
+  },
+  {
+   "expression": "Text.ToBinary(\"abc\", TextEncoding.Ascii)",
+   "power_bi": "V:binary:YWJj"
+  },
+  {
+   "expression": "Text.ToBinary(\"é\", TextEncoding.Unicode)",
+   "power_bi": "V:binary:6QA="
+  },
+  {
+   "expression": "Text.ToBinary(\"é\", TextEncoding.BigEndianUnicode)",
+   "power_bi": "V:binary:AOk="
+  },
+  {
+   "expression": "Text.ToBinary(\"hi\", TextEncoding.Utf16)",
+   "power_bi": "V:binary:aABpAA=="
+  },
+  {
+   "expression": "Text.Format(\"#[a]-#[b]\", [a=1, b=\"x\"])",
+   "power_bi": "V:text:\"1-x\""
+  },
+  {
+   "expression": "Text.Format(\"#{0}#{0}\", {\"z\"})",
+   "power_bi": "V:text:\"zz\""
+  },
+  {
+   "expression": "Text.Format(\"#{1}\", {1})",
+   "power_bi": "ERR:Expression.Error: Invalid placeholder or value in format string. Underlying error message: There weren't enough elements in the enumeration to complete the operation."
+  },
+  {
+   "expression": "Uri.Parts(\"http://a.org\")",
+   "power_bi": "V:record:[\"Scheme\"=text:\"http\",\"Host\"=text:\"a.org\",\"Port\"=number:80,\"Path\"=text:\"/\",\"Query\"=record:[],\"Fragment\"=text:\"\",\"UserName\"=text:\"\",\"Password\"=text:\"\"]"
+  },
+  {
+   "expression": "Uri.Parts(\"https://a.org:8443/p/q?x=1\")",
+   "power_bi": "V:record:[\"Scheme\"=text:\"https\",\"Host\"=text:\"a.org\",\"Port\"=number:8443,\"Path\"=text:\"/p/q\",\"Query\"=record:[\"x\"=text:\"1\"],\"Fragment\"=text:\"\",\"UserName\"=text:\"\",\"Password\"=text:\"\"]"
+  },
+  {
+   "expression": "Uri.Combine(\"http://a.org/x/y\", \"z\")",
+   "power_bi": "V:text:\"http://a.org/x/z\""
+  },
+  {
+   "expression": "Uri.Combine(\"http://a.org/x/y/\", \"../../z\")",
+   "power_bi": "V:text:\"http://a.org/z\""
+  },
+  {
+   "expression": "Time.FromText(\"7:05 PM\")",
+   "power_bi": "V:time:19:05:00.0000000"
+  },
+  {
+   "expression": "Time.FromText(\"12:00 AM\")",
+   "power_bi": "V:time:00:00:00.0000000"
+  },
+  {
+   "expression": "Time.FromText(\"23:59:59.5\")",
+   "power_bi": "V:time:23:59:59.5000000"
+  },
+  {
+   "expression": "Duration.From(2.25)",
+   "power_bi": "V:duration:2.06:00:00"
+  },
+  {
+   "expression": "Duration.From(-1)",
+   "power_bi": "V:duration:-1.00:00:00"
+  },
+  {
+   "expression": "Date.IsLeapYear(2024)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Date.IsLeapYear(2100)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Text.InferNumberType(\"12\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.5\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Expression.Identifier(\"ok_name\")",
+   "power_bi": "V:text:\"ok_name\""
+  },
+  {
+   "expression": "Expression.Identifier(\"has space\")",
+   "power_bi": "V:text:\"#\\\"has space\\\"\""
+  },
+  {
+   "expression": "Expression.Identifier(\"1abc\")",
+   "power_bi": "V:text:\"#\\\"1abc\\\"\""
+  },
+  {
+   "expression": "Expression.Evaluate(\"2 * 3\")",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Binary.FromText(\"AQI=\")",
+   "power_bi": "V:binary:AQI="
+  },
+  {
+   "expression": "Binary.FromText(\"0aff\", BinaryEncoding.Hex)",
+   "power_bi": "V:binary:Cv8="
+  },
+  {
+   "expression": "DateTime.FromText(\"2024-03-04 05:06\")",
+   "power_bi": "V:datetime:2024-03-04T05:06:00.0000000"
+  },
+  {
+   "expression": "Type.Is(Type.FunctionReturn(Value.Type(Text.Upper)), type text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.FromText(\"PT2H\")",
+   "power_bi": "V:duration:02:00:00"
+  },
+  {
+   "expression": "Value.FromText(\"May 2024\")",
+   "power_bi": "V:date:2024-05-01"
+  },
+  {
+   "expression": "Value.FromText(\"abc12\")",
+   "power_bi": "V:text:\"abc12\""
+  },
+  {
+   "expression": "Value.FromText(\"1/2\")",
+   "power_bi": "V:date:2026-01-02"
+  },
+  {
+   "expression": "Value.FromText(\"2:30 PM\")",
+   "power_bi": "V:time:14:30:00.0000000"
+  },
+  {
+   "expression": "Value.FromText(\"1.5.2024\")",
+   "power_bi": "V:date:2024-01-05"
+  },
+  {
+   "expression": "Value.FromText(\"$5\")",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Value.FromText(\"50%\")",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "Value.FromText(\"1 day\")",
+   "power_bi": "V:text:\"1 day\""
+  },
+  {
+   "expression": "Value.FromText(\"Q1\")",
+   "power_bi": "V:text:\"Q1\""
+  },
+  {
+   "expression": "Value.FromText(\"hello world\")",
+   "power_bi": "V:text:\"hello world\""
+  },
+  {
+   "expression": "Value.FromText(\"2024\")",
+   "power_bi": "V:number:2024"
+  },
+  {
+   "expression": "Value.FromText(\"2024-13-01\")",
+   "power_bi": "V:text:\"2024-13-01\""
+  },
+  {
+   "expression": "Value.FromText(\"1:2:3\")",
+   "power_bi": "V:time:01:02:03.0000000"
+  },
+  {
+   "expression": "Value.FromText(\"-0\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Value.FromText(\"1e5\")",
+   "power_bi": "V:number:100000"
+  },
+  {
+   "expression": "Value.FromText(\"TRUE\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.FromText(\"12/31/2024 11:59 PM\")",
+   "power_bi": "V:datetime:2024-12-31T23:59:00.0000000"
+  },
+  {
+   "expression": "Value.FromText(\"3.00:00:00\")",
+   "power_bi": "V:duration:3.00:00:00"
+  },
+  {
+   "expression": "Value.FromText(\"x-1\")",
+   "power_bi": "V:text:\"x-1\""
+  }
+ ]
+}
