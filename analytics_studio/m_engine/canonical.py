@@ -56,8 +56,8 @@ def number_text(x: float) -> str:
         return "Infinity" if x > 0 else "-Infinity"
     if x == math.floor(x):
         magnitude = abs(x)
-        if magnitude < 2.0 ** 63:
-            return str(int(x))  # also turns -0.0 into 0
+        if magnitude < 2.0 ** 63 or x == -(2.0 ** 63):
+            return str(int(x))  # also turns -0.0 into 0; -2**63 is the Int64 minimum (measured)
         if magnitude < 2.0 ** 96:
             digits, e = _round_digits(magnitude, 15)
             return ("-" if x < 0 else "") + digits + "0" * (e + 1 - len(digits))

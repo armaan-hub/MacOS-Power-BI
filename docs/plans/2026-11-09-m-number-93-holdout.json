@@ -1,0 +1,684 @@
+{
+ "cases": [
+  {
+   "expression": "Number.Abs(123456789.987654321)",
+   "power_bi": "V:number:123456789.987654321"
+  },
+  {
+   "expression": "Number.Sign(-1)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Number.Sign(1.5)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.Sign(3.14159)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.Sign(123456789.987654321)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.Sqrt(#nan)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Exp(-1)",
+   "power_bi": "V:number:0.36787944117144233"
+  },
+  {
+   "expression": "Number.Exp(1.5)",
+   "power_bi": "V:number:4.4816890703380645"
+  },
+  {
+   "expression": "Number.Exp(#nan)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Exp(-#infinity)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.Ln(2.5)",
+   "power_bi": "V:number:0.91629073187415511"
+  },
+  {
+   "expression": "Number.Ln(1.5)",
+   "power_bi": "V:number:0.40546510810816438"
+  },
+  {
+   "expression": "Number.Ln(3.14159)",
+   "power_bi": "V:number:1.1447290411851783"
+  },
+  {
+   "expression": "Number.Log10(-1)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Log10(0.5)",
+   "power_bi": "V:number:-0.3010299956639812"
+  },
+  {
+   "expression": "Number.Log10(3.14159)",
+   "power_bi": "V:number:0.49714950586112328"
+  },
+  {
+   "expression": "Number.Log10(1e10)",
+   "power_bi": "V:number:10"
+  },
+  {
+   "expression": "Number.Log10(#nan)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Sin(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Cos(1e10)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.Cos(#nan)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Cos(-#infinity)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Asin(1.5)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Acos(1.5)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Acos(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Acos(#infinity)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Atan(1)",
+   "power_bi": "V:number:0.78539816339744828"
+  },
+  {
+   "expression": "Number.Atan(-1)",
+   "power_bi": "V:number:-0.78539816339744828"
+  },
+  {
+   "expression": "Number.Atan(-2.5)",
+   "power_bi": "V:number:-1.1902899496825317"
+  },
+  {
+   "expression": "Number.Atan(0.5)",
+   "power_bi": "V:number:0.46364760900080609"
+  },
+  {
+   "expression": "Number.Atan(1.5)",
+   "power_bi": "V:number:0.982793723247329"
+  },
+  {
+   "expression": "Number.Atan(-0.000001)",
+   "power_bi": "V:number:-9.9999999999966665E-07"
+  },
+  {
+   "expression": "Number.Atan(123456789.987654321)",
+   "power_bi": "V:number:1.5707963186948966"
+  },
+  {
+   "expression": "Number.Sinh(1)",
+   "power_bi": "V:number:1.1752011936438014"
+  },
+  {
+   "expression": "Number.Sinh(0.5)",
+   "power_bi": "V:number:0.52109530549374738"
+  },
+  {
+   "expression": "Number.Sinh(-#infinity)",
+   "power_bi": "V:number:-Infinity"
+  },
+  {
+   "expression": "Number.Cosh(0)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.Cosh(2.5)",
+   "power_bi": "V:number:6.1322894796636866"
+  },
+  {
+   "expression": "Number.Cosh(3.14159)",
+   "power_bi": "V:number:11.591922629945449"
+  },
+  {
+   "expression": "Number.Cosh(#infinity)",
+   "power_bi": "V:number:+Infinity"
+  },
+  {
+   "expression": "Number.Tanh(#nan)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Round(2.5)",
+   "power_bi": "V:number:2.0"
+  },
+  {
+   "expression": "Number.Round(1.5)",
+   "power_bi": "V:number:2.0"
+  },
+  {
+   "expression": "Number.Round(-0.000001)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.Round(#nan)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.RoundUp(2.5)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Number.RoundUp(1.5)",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Number.RoundUp(1e10)",
+   "power_bi": "V:number:10000000000"
+  },
+  {
+   "expression": "Number.RoundDown(1)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.RoundDown(-1)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Number.RoundDown(3.14159)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Number.RoundTowardZero(3.14159)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Number.RoundTowardZero(1e10)",
+   "power_bi": "V:number:10000000000"
+  },
+  {
+   "expression": "Number.RoundTowardZero(123456789.987654321)",
+   "power_bi": "V:number:123456789"
+  },
+  {
+   "expression": "Number.RoundTowardZero(#infinity)",
+   "power_bi": "V:number:+Infinity"
+  },
+  {
+   "expression": "Number.RoundAwayFromZero(-0.000001)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Number.IsEven(0)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Number.IsEven(1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsEven(-2.5)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsEven(1e10)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Number.IsEven(#nan)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsOdd(0)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsOdd(123456789.987654321)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Number.IsOdd(null)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Number.IsNaN(0)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsNaN(1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsNaN(0.5)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsNaN(1.5)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Number.IsNaN(#nan)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Number.Factorial(3.14159)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 64 bit integer value."
+  },
+  {
+   "expression": "Number.Factorial(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.ToText(1.5)",
+   "power_bi": "V:text:\"1.5\""
+  },
+  {
+   "expression": "Number.ToText(1e10)",
+   "power_bi": "V:text:\"10000000000\""
+  },
+  {
+   "expression": "Number.ToText(123456789.987654321)",
+   "power_bi": "V:text:\"123456789.987654321\""
+  },
+  {
+   "expression": "Number.From(0)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.From(-0.000001)",
+   "power_bi": "V:number:-1E-06"
+  },
+  {
+   "expression": "Int64.From(#infinity)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 64 bit integer value."
+  },
+  {
+   "expression": "Int32.From(-1)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Int32.From(-2.5)",
+   "power_bi": "V:number:-2"
+  },
+  {
+   "expression": "Int32.From(1.5)",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Int32.From(-0.000001)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Int16.From(1)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Int16.From(-1)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Int16.From(1e10)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 16 bit integer value."
+  },
+  {
+   "expression": "Int8.From(3.14159)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Int8.From(1e10)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of an 8 bit integer value."
+  },
+  {
+   "expression": "Int8.From(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Byte.From(-1)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a byte value."
+  },
+  {
+   "expression": "Byte.From(0.5)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Byte.From(1e10)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a byte value."
+  },
+  {
+   "expression": "Byte.From(#infinity)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 64 bit integer value."
+  },
+  {
+   "expression": "Double.From(0)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Double.From(2.5)",
+   "power_bi": "V:number:2.5"
+  },
+  {
+   "expression": "Double.From(0.5)",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "Double.From(-0.000001)",
+   "power_bi": "V:number:-1E-06"
+  },
+  {
+   "expression": "Double.From(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Double.From(-#infinity)",
+   "power_bi": "V:number:-Infinity"
+  },
+  {
+   "expression": "Single.From(1)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Single.From(-0.000001)",
+   "power_bi": "V:number:-9.9999999747524271E-07"
+  },
+  {
+   "expression": "Single.From(123456789.987654321)",
+   "power_bi": "V:number:123456792"
+  },
+  {
+   "expression": "Decimal.From(0)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Decimal.From(1e10)",
+   "power_bi": "V:number:10000000000"
+  },
+  {
+   "expression": "Currency.From(123456789.987654321)",
+   "power_bi": "V:number:123456789.9877"
+  },
+  {
+   "expression": "Percentage.From(1)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Percentage.From(123456789.987654321)",
+   "power_bi": "V:number:123456789.987654321"
+  },
+  {
+   "expression": "Logical.From(1)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Logical.From(0.5)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Logical.From(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Round(2.345,0)",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Number.Round(2.345,1,RoundingMode.ToEven)",
+   "power_bi": "V:number:2.3"
+  },
+  {
+   "expression": "Number.RoundUp(2.345,1)",
+   "power_bi": "V:number:2.4"
+  },
+  {
+   "expression": "Number.Round(-2.345,0)",
+   "power_bi": "V:number:-2"
+  },
+  {
+   "expression": "Number.Round(-2.345,-1)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.Round(2.5,1,RoundingMode.AwayFromZero)",
+   "power_bi": "V:number:2.5"
+  },
+  {
+   "expression": "Number.RoundDown(2.5,-1)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.RoundTowardZero(2.5,1)",
+   "power_bi": "V:number:2.5"
+  },
+  {
+   "expression": "Number.Round(-2.5,0)",
+   "power_bi": "V:number:-2.0"
+  },
+  {
+   "expression": "Number.Round(-2.5,-2)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.RoundUp(-2.5,1)",
+   "power_bi": "V:number:-2.5"
+  },
+  {
+   "expression": "Number.RoundAwayFromZero(-2.5,2)",
+   "power_bi": "V:number:-2.5"
+  },
+  {
+   "expression": "Number.Round(1234.5678,1)",
+   "power_bi": "V:number:1234.6"
+  },
+  {
+   "expression": "Number.Round(1234.5678,-1)",
+   "power_bi": "V:number:1230"
+  },
+  {
+   "expression": "Number.Round(1234.5678,-2)",
+   "power_bi": "V:number:1200"
+  },
+  {
+   "expression": "Number.Round(0.125,-1)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.Round(null,1,RoundingMode.Up)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Round(null,1,RoundingMode.AwayFromZero)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Round(null,1,RoundingMode.TowardZero)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Round(null,1,RoundingMode.ToEven)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.RoundDown(null,-1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.RoundAwayFromZero(null,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Mod(7,2)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.Mod(-7,2)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Number.Power(7,0)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.Log(0,0)",
+   "power_bi": "V:number:NaN"
+  },
+  {
+   "expression": "Number.Mod(null,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Log(null,2)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Power(2,null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.Mod(1e300,1e-300)",
+   "power_bi": "V:number:4.891554850853602E-301"
+  },
+  {
+   "expression": "Number.BitwiseShiftLeft(12,10)",
+   "power_bi": "V:number:12288"
+  },
+  {
+   "expression": "Number.BitwiseAnd(-1,3)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Number.BitwiseShiftLeft(-1,3)",
+   "power_bi": "V:number:-8"
+  },
+  {
+   "expression": "Number.BitwiseNot(-1)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Number.Permutations(-1,3)",
+   "power_bi": "ERR:Expression.Error: This function operates only on Unsigned values, but value -1 doesn't match the Unsigned pattern."
+  },
+  {
+   "expression": "Number.Combinations(255,8)",
+   "power_bi": "V:number:396861704798625"
+  },
+  {
+   "expression": "Number.BitwiseShiftLeft(6,2.5)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 32 bit integer value."
+  },
+  {
+   "expression": "Number.Permutations(6,2.5)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of a 64 bit integer value."
+  },
+  {
+   "expression": "Number.Log(100)",
+   "power_bi": "V:number:4.6051701859880918"
+  },
+  {
+   "expression": "Number.Factorial(21)",
+   "power_bi": "V:number:51090942171709400000"
+  },
+  {
+   "expression": "Number.ToText(1234.5,\"N2\")",
+   "power_bi": "V:text:\"1,234.50\""
+  },
+  {
+   "expression": "Number.ToText(255,\"X\")",
+   "power_bi": "V:text:\"FF\""
+  },
+  {
+   "expression": "Number.ToText(1234.5,\"0,0.00\")",
+   "power_bi": "V:text:\"1,234.50\""
+  },
+  {
+   "expression": "Number.FromText(\"1,234.5\")",
+   "power_bi": "V:number:1234.5"
+  },
+  {
+   "expression": "Number.FromText(\"12%\")",
+   "power_bi": "V:number:0.12"
+  },
+  {
+   "expression": "Number.FromText(\"0x10\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Number."
+  },
+  {
+   "expression": "Number.From(true)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Number.From(\"1e2\")",
+   "power_bi": "V:number:100"
+  },
+  {
+   "expression": "Int64.From(2.5)",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Int64.From(3.5)",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Int64.From(9223372036854775807)",
+   "power_bi": "V:number:9223372036854775807"
+  },
+  {
+   "expression": "Int8.From(128)",
+   "power_bi": "ERR:Expression.Error: The number is out of range of an 8 bit integer value."
+  },
+  {
+   "expression": "Logical.From(2)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Logical.From(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Logical.FromText(\"False\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Logical.ToText(true)",
+   "power_bi": "V:text:\"true\""
+  },
+  {
+   "expression": "Logical.ToText(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Number.PI",
+   "power_bi": "V:number:3.1415926535897931"
+  },
+  {
+   "expression": "Number.Random() < 1",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Number.Ln(0)",
+   "power_bi": "V:number:-Infinity"
+  },
+  {
+   "expression": "Number.Log10(0)",
+   "power_bi": "V:number:-Infinity"
+  },
+  {
+   "expression": "Number.Sign(-0.0)",
+   "power_bi": "V:number:0"
+  }
+ ]
+}

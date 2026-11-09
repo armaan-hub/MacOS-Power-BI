@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-05, after Iteration 191 / Task 102 m-text-92, Power Query Text function family, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4346 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: Power Query track: the Number family
+**Latest status (2026-11-05, after Iteration 192 / Task 103 m-number-93, Power Query Number family (m-number-93): rounding, modulo, bitwise, text conversion and formats exact against live Power BI; trig, hyperbolic, Power and based Log refused unless provably exact (Power BI's Windows maths library differs by 1 ulp)., Opus planned, Haiku coded, Sonnet fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4351 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 531506 match, 8895 refused, 0 DIFF, 0 CRASH, locked 531486. Next: Task 104: Power Query List family.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
