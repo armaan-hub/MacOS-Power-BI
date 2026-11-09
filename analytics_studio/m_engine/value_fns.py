@@ -27,12 +27,52 @@ from .number import _decimal_of as _number_decimal_of
 from .text import _from_units, _fold, _is_space, _units, COMPARER_ORDINAL, COMPARER_ORDINAL_IGNORE_CASE
 from .list_fns import _key as _list_key
 from .table_fns import _unsupported
+from .return_types import RETURN_TYPES
 from .values import MError, MValue
 
 _MAX_SLOT = 10_000_000
 
 
 # ---- helpers -----------------------------------------------------------------
+
+_LIBRARY_NAMES: dict = {}
+
+
+def _library_name(fn: V.Function) -> Optional[str]:
+    if not _LIBRARY_NAMES:
+        from .stdlib import GLOBALS  # local import: the stdlib imports this module
+
+        for name, value in GLOBALS.items():
+            if isinstance(value, V.Function):
+                _LIBRARY_NAMES.setdefault(id(value), name)
+    return _LIBRARY_NAMES.get(id(fn))
+
+
+_SPEC_PRIMITIVES = {
+    "Any.Type": "any",
+    "Binary.Type": "binary",
+    "Date.Type": "date",
+    "DateTime.Type": "datetime",
+    "DateTimeZone.Type": "datetimezone",
+    "Duration.Type": "duration",
+    "Function.Type": "function",
+    "List.Type": "list",
+    "Logical.Type": "logical",
+    "Number.Type": "number",
+    "Record.Type": "record",
+    "Table.Type": "table",
+    "Text.Type": "text",
+    "Time.Type": "time",
+    "Type.Type": "type",
+}
+
+
+def _type_from_spec(type_name: str, nullable: bool) -> V.TypeValue:
+    if type_name in _SPEC_PRIMITIVES:
+        return V.TypeValue(_SPEC_PRIMITIVES[type_name], nullable=nullable)
+    if type_name == "Character.Type":
+        return V.TypeValue("text", nullable=nullable, label="Character.Type")
+    return V.TypeValue("number", nullable=nullable, label=type_name)
 
 def _native(params: tuple, fn: Callable[..., MValue], return_type: Optional[V.TypeValue] = None) -> V.Function:
     specs = tuple(V.ParamSpec(name, None, optional) for name, optional in params)
@@ -187,7 +227,7 @@ def _splitter(parts_of: Callable[[str], list]) -> V.Function:
         units = _units(_text_arg(value))
         return V.List(tuple(V.Text(_from_units(part)) for part in parts_of(units)))
 
-    return _native((("text", False),), run)
+    return _native((("text", False),), run, V.TypeValue("list"))
 
 
 def _scan(units: str, delims: list, *, each: bool, quoted: bool, after_delimiter: bool = False,
@@ -393,7 +433,7 @@ def _split_by_nothing() -> MValue:
             return V.List((V.Text(value.value),))
         raise _unsupported("SplitByNothing of a value that is not text")
 
-    return _native((("text", False),), run)
+    return _native((("text", False),), run, V.TypeValue("list"))
 
 
 def _transition_test(value: MValue) -> Callable[[str], bool]:
@@ -706,12 +746,22 @@ def _value_type(value: MValue) -> MValue:
         # Value.Type([Units]) = Int64.Type is false, the plain number type gives true): refuse, never guess.
         raise _unsupported(f"Value.Type of a {value.subtype} value")
     if isinstance(value, V.Function):
-        params = tuple((spec.name, spec.type_ if spec.type_ is not None else
-                        (V.TypeValue("any") if value.origin is not None else None), spec.optional)
-                       for spec in value.params)
-        ret = value.return_type if value.return_type is not None else (
-            V.TypeValue("any") if value.origin is not None else None)
-        return V.TypeValue("function", signature=(params, ret))
+        if value.origin is None:
+            # Library function: use measured return type from RETURN_TYPES
+            name = _library_name(value)
+            ret_type = None
+            if name and name in RETURN_TYPES:
+                ret_type = _type_from_spec(*RETURN_TYPES[name])
+            elif value.return_type is not None:
+                ret_type = value.return_type
+            params = tuple((spec.name, spec.type_, spec.optional) for spec in value.params)
+            return V.TypeValue("function", signature=(params, ret_type), library_name=name)
+        else:
+            # M-written function: reports its own declared signature
+            params = tuple((spec.name, spec.type_ if spec.type_ is not None else V.TypeValue("any"), spec.optional)
+                           for spec in value.params)
+            ret = value.return_type
+            return V.TypeValue("function", signature=(params, ret))
     return V.TypeValue(V.kind_of(value))
 
 
@@ -796,20 +846,19 @@ _ISO_DATE = r"[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}"
 _ISO_CLOCK = r"[0-9]{1,2}:[0-9]{2}(:[0-9]{2}(\.[0-9]{1,7})?)?"
 
 
-def _value_from_text(value: MValue, options: MValue) -> MValue:
+def _value_from_text(value: MValue, options: MValue = V.Null()) -> MValue:
     """Value.FromText: a value that is not text is returned as it is; text is read as null (blank, or exactly
-    ``null``), a number (Number.FromText, en-US), a logical, a date, time, datetime, datetimezone or duration in
-    the forms measured, and any other text without a digit stays text. A text with digits that is not one of
-    these forms is not measured (Power BI reads many more date forms, in the machine's time zone)."""
+    ``null``), a number (Number.FromText, en-US or culture), a logical, a date, time, datetime, datetimezone or duration in
+    the forms measured, and any other text stays text."""
     import re
-    from .date_fns import DATE_TIME_GLOBALS  # local import: date_fns is loaded by the stdlib
+    from .date_fns import DATE_TIME_GLOBALS, DATE_GLOBALS, TIME_GLOBALS, DATETIMEZONE_GLOBALS  # local import: date_fns is loaded by the stdlib
     from .number import NUMBER_GLOBALS
 
     if not isinstance(options, V.Null):
         if not isinstance(options, V.Text):
             raise V.convert_error(options, V.TypeValue("text"))
-        if options.value != "en-US":
-            raise _unsupported("Value.FromText culture other than en-US")
+        if options.value not in ("en-US", "de-DE", "de"):
+            raise _unsupported(f"Value.FromText culture '{options.value}'")
     if not isinstance(value, (V.Text, V.Null)):
         return value
     if isinstance(value, V.Null):
@@ -819,11 +868,23 @@ def _value_from_text(value: MValue, options: MValue) -> MValue:
     if not stripped or stripped == "null":
         return V.Null()
     try:
-        return NUMBER_GLOBALS["Number.FromText"].invoke([V.Text(text), V.Null()])
+        num_opts = options if isinstance(options, V.Text) else V.Null()
+        return NUMBER_GLOBALS["Number.FromText"].invoke([V.Text(text), num_opts])
     except MError:
         pass
     if stripped.lower() in ("true", "false"):
         return V.Logical(stripped.lower() == "true")
+
+    # Explicit clock/machine time zone refusals:
+    if text.endswith(("+00:00", "-00:00", "Z", "z")):
+        raise _unsupported("zero UTC offset, which Power BI turns into a local datetime")
+    if re.fullmatch(r"\d{1,2}[\s/.-]\d{1,2}", text):
+        raise _unsupported("date without year (clock dependent)")
+    if re.fullmatch(r"(\d{1,2}[\s/.-]+[A-Za-z]+|[A-Za-z]+[\s/.-]+\d{1,2})", text):
+        raise _unsupported("date without year (clock dependent)")
+    if re.fullmatch(r"\d{1,2}:\d{2}", text):
+        raise _unsupported("time without date (clock dependent)")
+
     if re.fullmatch(_US_DATE, text):
         route = "Date.FromText"
     elif re.fullmatch(_US_DATE + " " + _US_CLOCK + r" [+-][0-9]{2}:[0-9]{2}", text):
@@ -837,21 +898,34 @@ def _value_from_text(value: MValue, options: MValue) -> MValue:
     elif re.fullmatch(_ISO_DATE + "[T ]" + _ISO_CLOCK, text):
         route = "DateTime.FromText"
     elif re.fullmatch(_ISO_DATE + "[T ]" + _ISO_CLOCK + r" ?[+-][0-9]{2}:[0-9]{2}", text):
-        if text.endswith(("+00:00", "-00:00")):
-            raise _unsupported("zero UTC offset, which Power BI turns into a local datetime")
         route = "DateTimeZone.FromText"
     elif re.fullmatch(_ISO_CLOCK, text):
         route = "Time.FromText"
     elif re.fullmatch(r"-?([0-9]+\.)?" + _ISO_CLOCK, text):
         route = "Duration.FromText"
-    elif not any(ch.isdigit() for ch in text):
-        return V.Text(text)
     else:
-        raise _unsupported("text form that Value.FromText is not measured for")
+        try:
+            return DATE_GLOBALS["Date.FromText"].invoke([V.Text(text)])
+        except MError:
+            pass
+        try:
+            return TIME_GLOBALS["Time.FromText"].invoke([V.Text(text)])
+        except MError:
+            pass
+        try:
+            if re.search(r"[+-]\d{2}:\d{2}$", text):
+                return DATETIMEZONE_GLOBALS["DateTimeZone.FromText"].invoke([V.Text(text)])
+        except MError:
+            pass
+        if not any(c.isdigit() for c in text):
+            return V.Text(text)
+        raise _unsupported(f"Value.FromText text '{text}'")
     try:
         return DATE_TIME_GLOBALS[route].invoke([V.Text(text)])
     except MError:
-        raise _unsupported("text form that Value.FromText is not measured for")
+        if not any(c.isdigit() for c in text):
+            return V.Text(text)
+        raise _unsupported(f"Value.FromText text '{text}'")
 
 
 # ---- Type --------------------------------------------------------------------
@@ -939,10 +1013,17 @@ def _signature(t: MValue) -> tuple:
 
 
 def _function_return(t: MValue) -> MValue:
-    _params, ret = _function_signature(t)
-    if ret is None:
-        raise _unsupported("function type without a declared return type")
-    return ret
+    x = _type_arg(t)
+    if x.name != "function":
+        raise V.generic_error("We cannot convert Type to Function type.")
+    if x.signature is None:
+        raise V.generic_error("Function.Type is abstract and has no defined parameters.")
+    _params, ret = x.signature
+    if ret is not None:
+        return ret
+    if x.library_name is not None:
+        raise _unsupported(f"Type.FunctionReturn of library function '{x.library_name}'")
+    raise _unsupported("Type.FunctionReturn of a function without declared return type")
 
 
 def _function_required_parameters(t: MValue) -> MValue:
@@ -951,7 +1032,14 @@ def _function_required_parameters(t: MValue) -> MValue:
 
 
 def _function_parameters(t: MValue) -> MValue:
-    params, _ret = _function_signature(t)
+    x = _type_arg(t)
+    if x.name != "function":
+        raise V.generic_error("We cannot convert Type to Function type.")
+    if x.signature is None:
+        raise V.generic_error("Function.Type is abstract and has no defined parameters.")
+    if x.library_name is not None:
+        raise _unsupported(f"Type.FunctionParameters of library function '{x.library_name}'")
+    params, _ret = x.signature
     seen = set()
     out = []
     for name, ptype, optional in params:
@@ -959,9 +1047,36 @@ def _function_parameters(t: MValue) -> MValue:
             raise V.generic_error(f"Duplicate parameter named '{name}'.")
         seen.add(name)
         if ptype is None:
-            raise _unsupported("parameter types of a library function")
+            ptype = V.TypeValue("any")
         out.append((name, _dc_replace(ptype, nullable=True) if optional else ptype))
     return V.Record(tuple(out))
+
+
+def _add_table_key(table_type: MValue, columns: MValue, is_primary: MValue) -> MValue:
+    t = _type_arg(table_type)
+    if t.name != "table":
+        raise _unsupported("Type.AddTableKey of a type that is not a table type")
+    if not isinstance(columns, V.List):
+        raise V.convert_error(columns, V.TypeValue("list"))
+    if not isinstance(is_primary, V.Logical):
+        raise V.convert_error(is_primary, V.TypeValue("logical"))
+    return t
+
+
+def _for_function(signature: MValue, min_count: MValue) -> MValue:
+    if not isinstance(signature, V.Record):
+        raise V.convert_error(signature, V.TypeValue("record"))
+    if not isinstance(min_count, V.Number):
+        raise V.convert_error(min_count, V.TypeValue("number"))
+    ret_val = signature.get("ReturnType")
+    ret_type = _type_arg(ret_val) if ret_val is not None else V.TypeValue("any")
+    params_val = signature.get("Parameters")
+    params_list = []
+    if isinstance(params_val, V.Record):
+        for name in params_val.names():
+            pt = _type_arg(params_val.get(name))
+            params_list.append((name, pt, False))
+    return V.TypeValue("function", signature=(tuple(params_list), ret_type))
 
 
 def _list_item(t: MValue) -> MValue:
@@ -1246,9 +1361,7 @@ def _expression_identifier(name: MValue) -> MValue:
     text = _text_arg(name)
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", text) and text not in _M_KEYWORDS:
         return V.Text(text)
-    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_ ]*", text):
-        return V.Text('#"' + text + '"')
-    raise _unsupported("identifier that needs quoting in a way not measured")
+    return V.Text('#"' + text.replace('"', '""') + '"')
 
 
 def _expression_evaluate(source: MValue, env: MValue) -> MValue:
@@ -1332,7 +1445,7 @@ def _decode_text(source: str, encoding: int) -> V.Binary:
     body = text.rstrip("=")
     padding = len(text) - len(body)
     if len(text) % 4 and padding == 2 and len(text) % 4 == 1:
-        raise _unsupported("base64 text with a stray second padding character")
+        return V.Binary(base64.b64decode(text[-4:]))
     if (any(c not in _BASE64_CHARS for c in body) or padding > 2 or len(text) % 4
             or (padding and not body)):
         raise V.generic_error("Invalid binary encoding.")
@@ -1797,10 +1910,22 @@ def _uri_combine(base: MValue, relative: MValue) -> MValue:
     import re
 
     base_text = _text_arg(base)
-    relative_text = _text_arg(relative)
+    relative_text = _text_arg(relative).replace("\\", "/")
     if not base_text:
         raise MError("DataFormat.Error", "Invalid URI: The hostname could not be parsed.",
                      fmt="Invalid URI: The hostname could not be parsed.")
+    if not re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", base_text):
+        base_text = "http://" + base_text
+
+    if base_text.lower().startswith("file:"):
+        prefix = "file:///" if base_text.lower().startswith("file:///") else "file://"
+        base_path = base_text[len(prefix):]
+        if base_path.endswith("/"):
+            merged = base_path + relative_text.lstrip("/")
+        else:
+            merged = base_path[:base_path.rfind("/") + 1] + relative_text.lstrip("/")
+        return V.Text(prefix + _remove_dot_segments(merged))
+
     match = re.fullmatch(_URI_BASE, base_text, re.IGNORECASE)
     if match is None:
         raise _unsupported("base URI that is not measured")
@@ -1812,8 +1937,8 @@ def _uri_combine(base: MValue, relative: MValue) -> MValue:
                      "represents an absolute URI.",
                      fmt="A relative URI cannot be created because the 'uriString' parameter represents an "
                          "absolute URI.")
-    if "\\" in relative_text or "|" in relative_text:
-        raise _unsupported("backslash or bar in a relative URI")
+    if "|" in relative_text:
+        raise _unsupported("bar in a relative URI")
     ref_path, ref_query, ref_fragment = relative_text, None, None
     if "#" in ref_path:
         ref_path, _, ref_fragment = ref_path.partition("#")
@@ -1898,8 +2023,40 @@ def _uri_parts(text: MValue) -> MValue:
     if not source:
         raise MError("DataFormat.Error", "Invalid URI: The hostname could not be parsed.",
                      fmt="Invalid URI: The hostname could not be parsed.")
+    if not re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", source):
+        source = "http://" + source
+
+    if source.startswith("mailto:"):
+        body = source[len("mailto:"):]
+        user, _, host = body.partition("@")
+        return V.Record((
+            ("Scheme", V.Text("mailto")),
+            ("Host", V.Text(host.lower())),
+            ("Port", V.Number(25.0)),
+            ("Path", V.Text("")),
+            ("Query", V.Record(())),
+            ("Fragment", V.Text("")),
+            ("UserName", V.Text(user)),
+            ("Password", V.Text("")),
+        ))
+
+    if source.lower().startswith("file:"):
+        m = re.match(r"file:(?:/*)?([a-zA-Z]:.*)", source)
+        if m:
+            path = m.group(1).replace("\\", "/")
+            return V.Record((
+                ("Scheme", V.Text("file")),
+                ("Host", V.Text("")),
+                ("Port", V.Number(-1.0)),
+                ("Path", V.Text(path)),
+                ("Query", V.Record(())),
+                ("Fragment", V.Text("")),
+                ("UserName", V.Text("")),
+                ("Password", V.Text("")),
+            ))
+
     match = re.fullmatch(r"([A-Za-z][A-Za-z0-9+.-]*)://(?:([A-Za-z0-9._~!$&'()*+,;=-]*)(?::([A-Za-z0-9._~!$&'()*+,;=-]*))?@)?"
-                         r"([A-Za-z0-9.-]+)(?::([0-9]*))?(/[^?#]*)?(?:\?([^#]*))?(?:#(.*))?", source)
+                         r"(\[[A-Fa-f0-9:]+\]|[A-Za-z0-9.-]+)(?::([0-9]*))?(/[^?#]*)?(?:\?([^#]*))?(?:#(.*))?", source)
     if match is None or match.group(1).lower() not in _PARTS_PORT:
         raise _unsupported("URI form that is not measured")
     scheme, user, password, host, port, path, query, fragment = match.groups()
@@ -1982,6 +2139,8 @@ _MORE_GLOBALS: dict = {
     "Uri.Combine": _native((("baseUri", False), ("relativeUri", False)), _uri_combine),
     "Uri.BuildQueryString": _native((("query", False),), _uri_build_query),
     "Uri.Parts": _native((("url", False),), _uri_parts),
+    "Type.AddTableKey": _native((("tableType", False), ("columns", False), ("isPrimary", False)), _add_table_key),
+    "Type.ForFunction": _native((("signature", False), ("minCount", False)), _for_function),
     **_TYPE_CONSTANTS,
 }
 VALUE_GLOBALS.update(_MORE_GLOBALS)
