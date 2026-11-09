@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 198 (Task 109 m-wire-99) shipped: M engine evaluates custom columns first (all M function families done earlier). Next: Task 110 Power BI-style column typing on import, then M engine in query refresh.
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 199 (Task 110 m-typed-100) shipped: custom columns read Power BI-typed cells. Next: Task 111 M engine in query refresh.
 **Branch in use:** none
 **Working tree clean:** main yes
 
