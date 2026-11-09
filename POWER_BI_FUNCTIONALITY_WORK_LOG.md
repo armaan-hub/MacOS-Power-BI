@@ -2220,3 +2220,9 @@ A second held-out set (110 live Power BI answers, never used while coding) score
 All 41 Text.* functions in the M engine with Comparer.Ordinal/OrdinalIgnoreCase, Occurrence, RelativePosition and TextEncoding values. Exact on 272 spec answers, the 68-answer holdout (59 after Haiku, 68 after Sonnet), 942 measured probe answers (null first arguments, delimiter forms, encodings, number inference) and a fresh 130-answer check never used while coding (130/130). 25 rare forms (other code pages and cultures, Comparer.FromCulture) are explicit errors, never guesses. Power BI hung on an int.MinValue index probe and was restarted without saving (user's standing instruction); not wired into the app yet.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4346 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 192 (Task 103 m-number-93: Power Query Number family (m-number-93): rounding, modulo, bitwise, text conversion and formats exact against live Power BI; trig, hyperbolic, Power and based Log refused unless provably exact (Power BI's Windows maths library differs by 1 ulp).)
+
+Spec 683: 612 exact, 71 refused, 0 wrong. Holdout 170: 159 exact, 11 refused, 0 wrong. Probes 703 exact, 196 residual refused. Fresh held-out 40: 33 exact, 7 refused, 0 wrong. Exp, Ln, Log10, Sqrt exact.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4351 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
