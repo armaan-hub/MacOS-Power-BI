@@ -1,0 +1,1086 @@
+[
+ {
+  "expr": "ISBLANK((MAX(Facts[Sales]))>=(ABS(\"q\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((MIN(Facts[Quantity]))>=(SIGN(\"r\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((POWER(-8,0.5))=(MAX(Facts[Sales])))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((SQRT(-4))=(TRUE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISBLANK(CONVERT(-1E300,CURRENCY))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISBLANK(CONVERT(1E19,INTEGER))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISBLANK(CONVERT(1E300,INTEGER))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISBOOLEAN((1)<(CONVERT(\"t\",DOUBLE)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISBOOLEAN((DATE(2020,1,1))==(CONVERT(\"t\",DOUBLE)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISBOOLEAN((INT(\"w\"))==(MAX(Facts[Sales])))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISBOOLEAN((LN(0))==(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISBOOLEAN((MIN(Facts[Quantity]))<>(VALUE(\"u\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 54) Cannot convert value 'u' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISBOOLEAN((SIGN(\"r\"))<(CURRENCY(3)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISBOOLEAN((TRUNC(\"o\"))>=(TRUE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISCURRENCY((2.5)<>(SIGN(\"r\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((CONVERT(1E300,INTEGER))<(1))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((CURRENCY(\"y\"))=(CURRENCY(3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((MAX(Facts[Sales]))==(MOD(5,0)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((POWER(-8,0.5))<>(TRUE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISCURRENCY(CONVERT(-1E300,CURRENCY))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISCURRENCY(CONVERT(1E19,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY(CONVERT(1E300,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((0/0)>=(CURRENCY(3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((1)=(CONVERT(1E300,INTEGER)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((2.5)<(LN(0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 37) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((2.5)>=(CURRENCY(\"y\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((ABS(\"q\"))<>(CURRENCY(3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((CONVERT(1E300,INTEGER))==(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISDATETIME((DATE(2020,\"i\",1))<(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'i' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISDATETIME((MAX(Facts[Sales]))>=(CONVERT(1E300,CURRENCY)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((MIN(Facts[Quantity]))<(SQRT(-4)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 54) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((MOD(5,0))<(CURRENCY(3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((POWER(-8,0.5))=(TRUE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISDOUBLE((0/0)==(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISDOUBLE((ABS(\"q\"))==(2.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE((BLANK())==(INT(\"w\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE((CURRENCY(\"y\"))<>(2.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE((MOD(5,0))>=(CURRENCY(3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE(CONVERT(-1E300,CURRENCY))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE(CONVERT(1E19,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE(CONVERT(1E300,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISERROR((0/0)>=(BLANK()))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISERROR((CONVERT(1E300,CURRENCY))=(DATE(2020,1,1)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((CONVERT(1E300,INTEGER))==(2.5))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((MAX(Facts[Sales]))==(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISERROR((MIN(Facts[Quantity]))<(CONVERT(\"t\",DOUBLE)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISINT64((1)<(SIGN(\"r\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64((1)<>(DATE(2020,\"i\",1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'i' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISINT64((2.5)==(MOD(5,0)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64((ABS(\"q\"))>=(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISINT64((DATE(2020,\"i\",1))>=(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'i' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISINT64((DATE(2020,1,1))==(ABS(\"q\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64((MIN(Facts[Quantity]))=(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64((TRUE())<>(1/0))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type True/False with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISINT64((TRUNC(\"o\"))<(2.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64((TRUNC(\"o\"))==(1))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64(CONVERT(-1E300,CURRENCY))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64(CONVERT(1E19,INTEGER))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISINT64(CONVERT(1E300,INTEGER))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISLOGICAL((1/0)<(DATE(2020,1,1)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((2.5)>=(LN(0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 37) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISLOGICAL((CONVERT(\"t\",DOUBLE))<(2.5))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((CONVERT(\"t\",DOUBLE))<(DATE(2020,1,1)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((DATE(2020,1,1))=(CURRENCY(\"y\")))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((INT(\"w\"))<(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISLOGICAL((INT(\"w\"))<(MAX(Facts[Sales])))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((MIN(Facts[Quantity]))=(CURRENCY(\"y\")))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((POWER(-8,0.5))=(2.5))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((ROUND(\"e\",2))<(CURRENCY(3)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((SQRT(-4))<(TRUE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISLOGICAL((VALUE(\"u\"))=(2.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'u' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISLOGICAL(CONVERT(-1E300,CURRENCY))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISLOGICAL(CONVERT(1E19,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISLOGICAL(CONVERT(1E300,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNONTEXT((CURRENCY(\"y\"))>=(DATE(2020,1,1)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISNONTEXT((CURRENCY(\"y\"))>=(MAX(Facts[Sales])))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISNONTEXT((DATE(2020,1,1))==(LN(0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 48) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNONTEXT((MOD(5,0))=(BLANK()))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISNONTEXT((POWER(-8,0.5))<(BLANK()))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISNONTEXT((POWER(-8,0.5))=(2.5))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISNONTEXT((ROUND(\"e\",2))=(BLANK()))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISNONTEXT((SQRT(-4))<>(TRUE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMBER((\"k\")=(TRUNC(\"o\")))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMBER((\"k\")>=(DATE(2020,\"i\",1)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DAX comparison operations do not support comparing values of type Text with values of type Date. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMBER((0/0)<(TRUE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMBER((0/0)=(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMBER((0/0)>=(DATE(2020,1,1)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER((1)<(TRUNC(\"o\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER((ABS(\"q\"))<(CURRENCY(3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER((CONVERT(MAX(Facts[Note]),INTEGER))<>(1))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER((CURRENCY(\"y\"))<(BLANK()))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER((CURRENCY(\"y\"))>=(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DAX comparison operations do not support comparing values of type Currency with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMBER((SIGN(\"r\"))<(MIN(Facts[Quantity])))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER(CONVERT(-1E300,CURRENCY))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER(CONVERT(1E19,INTEGER))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER(CONVERT(1E300,INTEGER))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) The result of a conversion or arithmetic operation is either too large or too small.\""
+ },
+ {
+  "expr": "ISNUMERIC((2.5)==(CONVERT(1E300,INTEGER)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((ABS(\"q\"))=(2.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((CONVERT(1E300,CURRENCY))=(2.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((CONVERT(MAX(Facts[Note]),INTEGER))<>(BLANK()))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((CURRENCY(\"y\"))=(2.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((DATE(2020,1,1))<(TRUNC(\"o\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((DATE(2020,1,1))>=(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((LN(0))<(2.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMERIC((MAX(Facts[Sales]))>=(CONVERT(\"t\",DOUBLE)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((MIN(Facts[Quantity]))<(CONVERT(1E300,INTEGER)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((MIN(Facts[Quantity]))==(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((MOD(5,0))<>(DATE(2020,1,1)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((ROUND(\"e\",2))>=(MAX(Facts[Sales])))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISSTRING((DATE(2020,1,1))<(CONVERT(1E300,CURRENCY)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISSTRING((MAX(Facts[Sales]))==(CONVERT(\"t\",DOUBLE)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISSTRING((TRUNC(\"o\"))>=(BLANK()))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT((1)<>(CONVERT(MAX(Facts[Note]),INTEGER)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT((1)=(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT((1/0)>=(MIN(Facts[Quantity])))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT((CONVERT(\"t\",DOUBLE))=(\"k\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISTEXT((MIN(Facts[Quantity]))<(DATE(2020,\"i\",1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 60) Cannot convert value 'i' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISTEXT((POWER(-8,0.5))>=(DATE(2020,1,1)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT(CONVERT(-1E300,CURRENCY))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT(CONVERT(1E19,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT(CONVERT(1E300,INTEGER))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((\"m\")=(CONVERT(1E300,INTEGER)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISBLANK((\"m\")>=(POWER(-2,0.5)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISBLANK((0/0)>(\"m\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISBLANK((1)>(FACT(-1)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((1/0)<(1))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((ASIN(3))<(MAX(Facts[Sales])))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((COUNTROWS(Facts))<>(DATE(2020,\"a\",1)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((CURRENCY(\"x\"))<(1))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((DATE(2021,2,3))<(ASIN(3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((INT(\"p\"))<=(-3.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((LN(0))>(COUNTROWS(Facts)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((MAX(Facts[Sales]))<(DATEVALUE(\"nope\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((MAX(Facts[Sales]))<(EXP(1E5)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBLANK((SQRT(-1))<=(\"m\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISBLANK((SQRT(-1))>=(CURRENCY(7)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISBOOLEAN((-3.5)<=(0/0))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISBOOLEAN((1)<(ACOS(2)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) An argument of function 'ACOS' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISBOOLEAN((CURRENCY(7))>=(EXP(1E5)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISBOOLEAN((DATE(2020,\"a\",1))>(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'a' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISBOOLEAN((INT(\"p\"))<(DATE(2021,2,3)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISCURRENCY((-3.5)<(EXP(1E5)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((1)>(CONVERT(1E300,INTEGER)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((COUNTROWS(Facts))>=(VALUE(\"z\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'z' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISCURRENCY((DATE(2020,\"a\",1))=(-3.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'a' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISCURRENCY((DATE(2021,2,3))<>(POWER(-2,0.5)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((DATEVALUE(\"nope\"))>(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'nope' of type Text to type Date.\""
+ },
+ {
+  "expr": "ISCURRENCY((EXP(1E5))==(COUNTROWS(Facts)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((LOG(0))<>(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISCURRENCY((LOG(0))=(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISCURRENCY((POWER(-2,0.5))<=(1))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISCURRENCY((SQRT(-1))>=(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISCURRENCY((VALUE(\"z\"))<>(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'z' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISDATETIME((-3.5)=(LOG(0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((-3.5)==(ACOS(2)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) An argument of function 'ACOS' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((BLANK())<(LOG10(-5)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((COUNTROWS(Facts))<=(LN(0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((CURRENCY(7))<(CURRENCY(\"x\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((DATE(2021,2,3))=(CONVERT(1E300,INTEGER)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDATETIME((DATEVALUE(\"nope\"))==(CURRENCY(7)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'nope' of type Text to type Date.\""
+ },
+ {
+  "expr": "ISDATETIME((LOG(0))==(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((LOG(0))==(DATE(2021,2,3)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((LOG10(-5))>(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((LOG10(-5))>(CURRENCY(7)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDATETIME((MOD(7,0))>(\"m\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISDATETIME((MOD(7,0))>=(COUNTROWS(Facts)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDECIMAL((1)=(ASIN(3)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) An argument of function 'ASIN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDECIMAL((ACOS(2))>=(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'ACOS' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDECIMAL((COUNTROWS(Facts))<=(EXP(1E5)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDECIMAL((COUNTROWS(Facts))<=(SQRT(MIN(Facts[Quantity])-1E9)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDECIMAL((DATE(2020,\"a\",1))<=(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'a' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISDECIMAL((FALSE())<(LN(-1)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type True/False with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISDECIMAL((LN(0))>(FALSE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISDECIMAL((MAX(Facts[Sales]))<>(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDECIMAL((MOD(7,0))>=(DATE(2021,2,3)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDECIMAL((POWER(-2,0.5))>(COUNTROWS(Facts)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE((-3.5)>(1/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE((-3.5)>=(ASIN(3)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 37) An argument of function 'ASIN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDOUBLE((COUNTROWS(Facts))>=(MOD(7,0)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE((DATE(2021,2,3))>(SQRT(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 46) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDOUBLE((LN(-1))<>(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISDOUBLE((SQRT(MIN(Facts[Quantity])-1E9))>(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISERROR((\"m\")=(ASIN(3)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISERROR((\"m\")=(EXP(1E5)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISERROR((1)=(LN(0)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((ACOS(2))>(FALSE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISERROR((COUNTROWS(Facts))==(LOG10(-5)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((COUNTROWS(Facts))>=(DATEVALUE(\"nope\")))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((CURRENCY(\"x\"))<>(MAX(Facts[Sales])))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((DATE(2020,\"a\",1))<=(\"m\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISERROR((DATE(2021,2,3))>(CONVERT(1E300,INTEGER)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((LN(0))==(COUNTROWS(Facts)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((MAX(Facts[Sales]))<=(LN(-1)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((MAX(Facts[Sales]))==(ASIN(3)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISERROR((POWER(-2,0.5))>(FALSE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISERROR((SQRT(MIN(Facts[Quantity])-1E9))<(-3.5))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISINT64((1)=(SQRT(MIN(Facts[Quantity])-1E9)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINT64((ACOS(2))<=(FALSE()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Number with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISINT64((ASIN(3))==(CURRENCY(7)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) An argument of function 'ASIN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINT64((CURRENCY(7))=(DATEVALUE(\"nope\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'nope' of type Text to type Date.\""
+ },
+ {
+  "expr": "ISINT64((CURRENCY(7))>=(DATE(2020,\"a\",1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 53) Cannot convert value 'a' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISINT64((EXP(1E5))<>(-3.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINT64((FALSE())<=(LN(0)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type True/False with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISINT64((FALSE())>=(ACOS(2)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type True/False with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISINT64((LOG(0))<=(CURRENCY(7)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINT64((LOG10(-5))==(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINT64((MAX(Facts[Sales]))=(LOG10(-5)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 48) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINT64((SQRT(MIN(Facts[Quantity])-1E9))>=(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINTEGER((0/0)==(MAX(Facts[Sales])))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINTEGER((1)>(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINTEGER((ASIN(3))>=(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'ASIN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINTEGER((CONVERT(1E300,INTEGER))<>(1))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINTEGER((LN(-1))<=(-3.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINTEGER((LN(-1))<=(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINTEGER((LN(0))<=(\"m\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISINTEGER((LOG(0))<>(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISINTEGER((SQRT(MIN(Facts[Quantity])-1E9))>=(\"m\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISINTEGER((VALUE(\"z\"))<=(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'z' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISLOGICAL((\"m\")<=(LN(0)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISLOGICAL((1)<(LOG(0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISLOGICAL((ACOS(2))==(CURRENCY(7)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'ACOS' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISLOGICAL((BLANK())==(FACT(-1)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((CURRENCY(7))<=(INT(\"p\")))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((DATE(2021,2,3))<=(FACT(-1)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((LOG(0))<(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISLOGICAL((MAX(Facts[Sales]))=(DATE(2020,\"a\",1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 60) Cannot convert value 'a' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISLOGICAL((MAX(Facts[Sales]))>(DATEVALUE(\"nope\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'nope' of type Text to type Date.\""
+ },
+ {
+  "expr": "ISLOGICAL((MOD(7,0))==(BLANK()))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISLOGICAL((SQRT(MIN(Facts[Quantity])-1E9))<=(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNONTEXT((1/0)<>(COUNTROWS(Facts)))",
+  "powerbi": "True"
+ },
+ {
+  "expr": "ISNONTEXT((ASIN(3))<=(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'ASIN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNONTEXT((COUNTROWS(Facts))>=(SQRT(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNONTEXT((DATEVALUE(\"nope\"))>(\"m\"))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNONTEXT((LOG(0))=(DATE(2021,2,3)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNONTEXT((VALUE(\"z\"))<=(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'z' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISNUMBER((-3.5)>(SQRT(MIN(Facts[Quantity])-1E9)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER((0/0)<(CURRENCY(7)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER((ACOS(2))<=(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'ACOS' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER((BLANK())=(LOG10(-5)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER((BLANK())==(SQRT(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER((COUNTROWS(Facts))>(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMBER((DATEVALUE(\"nope\"))=(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'nope' of type Text to type Date.\""
+ },
+ {
+  "expr": "ISNUMBER((FALSE())<(CONVERT(1E300,INTEGER)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMBER((LN(-1))=(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER((LOG(0))=(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMBER((SQRT(MIN(Facts[Quantity])-1E9))<=(CURRENCY(7)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMERIC((\"m\")=(SQRT(-1)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISNUMERIC((LN(-1))>=(-3.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMERIC((MAX(Facts[Sales]))<>(VALUE(\"z\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'z' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISNUMERIC((MAX(Facts[Sales]))=(SQRT(MIN(Facts[Quantity])-1E9)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMERIC((MOD(7,0))=(CURRENCY(7)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISNUMERIC((SQRT(-1))<(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISNUMERIC((SQRT(MIN(Facts[Quantity])-1E9))>=(1))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISSTRING((1)>(EXP(1E5)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISSTRING((COUNTROWS(Facts))<=(0/0))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISSTRING((LOG10(-5))<=(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISSTRING((MAX(Facts[Sales]))<=(CURRENCY(\"x\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISSTRING((SQRT(-1))<(CURRENCY(7)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISSTRING((SQRT(MIN(Facts[Quantity])-1E9))==(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISSTRING((VALUE(\"z\"))>=(-3.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'z' of type Text to type Number.\""
+ },
+ {
+  "expr": "ISTEXT((\"m\")=(POWER(-2,0.5)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISTEXT((\"m\")==(ASIN(3)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+ },
+ {
+  "expr": "ISTEXT((1)>=(DATE(2020,\"a\",1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'a' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISTEXT((BLANK())<=(LOG10(-5)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISTEXT((BLANK())>(FACT(-1)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT((CURRENCY(\"x\"))>(-3.5))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT((DATE(2020,\"a\",1))=(BLANK()))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value 'a' of type Text to type Integer.\""
+ },
+ {
+  "expr": "ISTEXT((DATEVALUE(\"nope\"))=(COUNTROWS(Facts)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'nope' of type Text to type Date.\""
+ },
+ {
+  "expr": "ISTEXT((INT(\"p\"))=(CURRENCY(7)))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISTEXT((LOG10(-5))<(MAX(Facts[Sales])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "ISTEXT((POWER(-2,0.5))==(MAX(Facts[Sales])))",
+  "powerbi": "False"
+ }
+]

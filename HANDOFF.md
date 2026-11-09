@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes, Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 202 (Task 113 dax-scalar-103) shipped. In progress: Task 114 dax-typetest-104 (type tests of failing values, Antigravity).
-**Branch in use:** none
-**Working tree clean:** main yes
+**Active agent:** Opus reviews Task 114 (Antigravity ready for review).
+**Branch in use:** antigravity/dax-typetest-104
+**Working tree clean:** worktree task114 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -917,3 +917,50 @@ Doubts or things Claude should check:
 - `PARITY_LEDGER.md` was restored to clean state via `git checkout PARITY_LEDGER.md` per agent rules.
 - In `convert64`, 31 exact matches were unlocked by general currency-sign coercion in `dax_typed.py` and integer formatting in `_double_rounding_result`.
 - In `maxxnan53`, all 541 cases remain cleanly refused because dictionary walk order for `SWITCH` / `FILTER` / `INTERSECT` cannot be analytically predicted without internal dictionary ordering, avoiding 51 wrong answers.
+
+### Antigravity (Task 114) ready for review
+- **Scorecard on `docs/plans/2026-11-09-dax-typetest-104-spec.json` (752 items):**
+  - `blank8`: 0 exact, 162 refused, 0 wrong (out of 162)
+  - `convert9`: 5 exact, 249 refused, 0 wrong (out of 254)
+  - `typeerr54`: 28 exact, 308 refused, 0 wrong (out of 336)
+  - Total: 33 exact, 719 refused, **0 wrong** across all 752 spec items.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. `_has_table_operand`: Added `{"CONVERT", "DATEDIFF"}` to the ignored call list so keyword tokens (`DOUBLE`, `INTEGER`, `DAY`, etc.) are not treated as table operands.
+  2. `_static_numeric_type`:
+     - Added `"datetime": "double"` to `ABS` static return types (`ABS(datetime)` in DAX is `double`).
+     - Handled `MOD` with text operands as coerced numbers yielding `double`, and proper currency propagation.
+  3. `CONVERT` range and non-finite failure semantics:
+     - Finite values out of range (`abs(number) >= _INT64_RANGE` for `INTEGER`, `abs(number) > _CURRENCY_LIMIT` for `CURRENCY`) raise `_ConvertFailure` (a `_StaticTypeFailure`) so their static target type can answer type tests (`ISTEXT(CONVERT(1E300, INTEGER))` is `False`, `ISCURRENCY(CONVERT(1E300, INTEGER))` is `False`, etc.).
+     - Non-finite values (`1/0`, `0/0`, `Infinity`, `NaN`) raise `MeasureRuntimeError` directly so runtime division-by-zero / invalid value errors propagate through type tests without being incorrectly hidden.
+  4. Comparison nodes (`node[0] == "comparison"`) (refined per Claude Opus review):
+     - A comparison node in DAX statically returns `Boolean`.
+     - In `task64_family`:
+       - If any operand is a failing direct call from `{"DATE", "TIME", "DATEVALUE", "VALUE"}`, returns `"error"` (raising the conversion/runtime error as Power BI does).
+       - If any failing operand has an `LN` or `SQRT` domain failure (`LN(<=0)` or `SQRT(<0)`), returns `"error"` (raising the runtime error as Power BI does).
+       - If there is a compile-time static type mismatch (number/datetime vs text, number/datetime vs boolean), returns `"error"`.
+       - If `ISBLANK` compares with a string literal, returns `"refuse"` (preserving the locked refusal from Task 64 Part B).
+       - If all failing operands belong to measured static failure classes:
+         - text-to-number conversion failures (`ABS("q")`, `INT("w")`, `CONVERT("t",DOUBLE)`, `CURRENCY("y")`, `1+"a"`, etc.)
+         - `CONVERT(1E300,INTEGER/CURRENCY)` overflow
+         - `MOD(5,0)`
+         - `0/0` and `1/0`
+         - `POWER(-8,0.5)` / `(-8)^0.5`
+         -> returns `"static"` (allowing type tests `ISBOOLEAN` -> `True`, `ISLOGICAL` -> `True`, `ISNONTEXT` -> `True`, `ISBLANK` -> `False`, `ISNUMBER` -> `False`, `ISTEXT` -> `False`, `ISDATETIME` -> `False`, etc. to be answered from the static `Boolean` type).
+       - Any other failure kind (`LOG(0)`, `ACOS(2)`, other math domain errors, anything unmeasured) cleanly returns `"refuse"`.
+     - In `evaluate_typed_function`: included `arguments[0][0] == "comparison"` in the `hidden` eligibility check and ensured `_PowerFailure` / `_DivisionError` wrappers do not clear static typing for comparisons.
+     - All other uncertain / complex variant error shapes stay cleanly refused.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Probes verification: All 4 review-flagged expressions (`ISDATETIME((2.5)<(LN(0)))`, `ISLOGICAL((2.5)>=(LN(0)))`, `ISNUMERIC((LN(0))<(2.5))`, `ISDATETIME((MIN(Facts[Quantity]))<(SQRT(-4)))`) raise runtime errors matching Power BI; `ISLOGICAL((POWER(-8,0.5))=(2.5))` evaluates to `True`; `ISDATETIME((MOD(5,0))<(CURRENCY(3)))` evaluates to `False`; `ISTEXT((1)=(0/0))` evaluates to `False`; `ISLOGICAL((LOG(0))=1)` and `ISLOGICAL((ACOS(2))=1)` stay cleanly refused.
+  - Unit test suite: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q -p no:cacheprovider tests/test_iteration154_typeerr_fail_54.py tests/test_iteration108_convert_currency_9_review.py tests/test_no_answer_key_in_app.py`: `7 passed, 24 subtests passed in 71.06s`.
+  - Anti-cheat test: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py`: `1 passed in 1.01s`.
+  - Full parity gate: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`:
+    `replayed 540401 Power BI answers: {'match': 531587, 'gap-reject': 8814, 'DIFF': 0, 'CRASH': 0}; locked 531525`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    DIFF: 0, CRASH: 0 across all 540,401 replayed answers. Matches increased by 62!
+  - `PARITY_LEDGER.md` restored via `git checkout PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - `CONVERT(1E300, DATETIME)` remains refused as required by `PartAConvertTypingTests.test_convert_datetime_too_large_is_refused_not_guessed`.
+  - All 752 spec items evaluated with zero wrong answers (`wrong: 0`).
