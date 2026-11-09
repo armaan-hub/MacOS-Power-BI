@@ -1,0 +1,1805 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\")(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"\",text:\"c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.Csv)(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"\",text:\"c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByAnyDelimiter({\",\", \" \"})(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"\",text:\"c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByEachDelimiter({\",\", \",\"})(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\",c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByLengths({2, 3})(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a,\",text:\"b,,\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByPositions({0, 3})(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a,b\",text:\",,c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRanges({{0,2},{4,2}})(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a,\",text:\",c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRepeatedLengths(3)(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a,b\",text:\",,c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByWhitespace()(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a,b,,c\"]"
+  },
+  {
+   "expression": "Splitter.SplitByNothing()(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a,b,,c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition((c) => not List.Contains({\"0\"..\"9\"}, c), {\"0\"..\"9\"})(\"a,b,,c\")",
+   "power_bi": "V:list:[text:\"a,b,,c\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.Csv)(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  x  y z \"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByAnyDelimiter({\",\", \" \"})(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"\",text:\"\",text:\"x\",text:\"\",text:\"y\",text:\"z\",text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByEachDelimiter({\",\", \",\"})(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  x  y z \"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByLengths({2, 3})(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  \",text:\"x  \"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByPositions({0, 3})(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  x\",text:\"  y z \"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRanges({{0,2},{4,2}})(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  \",text:\" y\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRepeatedLengths(3)(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  x\",text:\"  y\",text:\" z \"]"
+  },
+  {
+   "expression": "Splitter.SplitByNothing()(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  x  y z \"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition({\"a\"..\"z\"}, {\"A\"..\"Z\"})(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  x  y z \"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition((c) => not List.Contains({\"0\"..\"9\"}, c), {\"0\"..\"9\"})(\"  x  y z \")",
+   "power_bi": "V:list:[text:\"  x  y z \"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.None, true)(\"  x  y z \")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Number."
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\")(\"\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByEachDelimiter({\",\", \",\"})(\"\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByLengths({2, 3})(\"\")",
+   "power_bi": "V:list:[text:\"\",text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRanges({{0,2},{4,2}})(\"\")",
+   "power_bi": "V:list:[text:\"\",text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRepeatedLengths(3)(\"\")",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByWhitespace()(\"\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitByNothing()(\"\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition({\"a\"..\"z\"}, {\"A\"..\"Z\"})(\"\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition((c) => not List.Contains({\"0\"..\"9\"}, c), {\"0\"..\"9\"})(\"\")",
+   "power_bi": "V:list:[text:\"\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\")(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"abcDefGHi\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByAnyDelimiter({\",\", \" \"})(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"abcDefGHi\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByEachDelimiter({\",\", \",\"})(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"abcDefGHi\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByLengths({2, 3})(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"ab\",text:\"cDe\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByPositions({0, 3})(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"abc\",text:\"DefGHi\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRanges({{0,2},{4,2}})(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"ab\",text:\"ef\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRepeatedLengths(3)(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"abc\",text:\"Def\",text:\"GHi\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByWhitespace()(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"abcDefGHi\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition((c) => not List.Contains({\"0\"..\"9\"}, c), {\"0\"..\"9\"})(\"abcDefGHi\")",
+   "power_bi": "V:list:[text:\"abcDefGHi\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.None, true)(\"abcDefGHi\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Number."
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.Csv)(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12ab34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByAnyDelimiter({\",\", \" \"})(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12ab34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByEachDelimiter({\",\", \",\"})(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12ab34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByLengths({2, 3})(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12\",text:\"ab3\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByPositions({0, 3})(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12a\",text:\"b34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRepeatedLengths(3)(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12a\",text:\"b34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByWhitespace()(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12ab34\"]"
+  },
+  {
+   "expression": "Splitter.SplitByNothing()(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12ab34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition({\"a\"..\"z\"}, {\"A\"..\"Z\"})(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12ab34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition((c) => not List.Contains({\"0\"..\"9\"}, c), {\"0\"..\"9\"})(\"12ab34\")",
+   "power_bi": "V:list:[text:\"12ab\",text:\"34\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.None, true)(\"12ab34\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Number."
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\")(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.Csv)(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByAnyDelimiter({\",\", \" \"})(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByEachDelimiter({\",\", \",\"})(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByLengths({2, 3})(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByPositions({0, 3})(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRanges({{0,2},{4,2}})(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByRepeatedLengths(3)(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByWhitespace()(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitByNothing()(null)",
+   "power_bi": "V:list:[null]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition({\"a\"..\"z\"}, {\"A\"..\"Z\"})(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByCharacterTransition((c) => not List.Contains({\"0\"..\"9\"}, c), {\"0\"..\"9\"})(null)",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\", QuoteStyle.Csv)(\"\\\"a,b\\\",c\")",
+   "power_bi": "ERR:PARTITION: Exception calling \"ExecuteNonQuery\" with \"0\" argument(s): \"M Engine error: 'Microsoft.Data.Mashup.Preview; Token ',' expected.'.\""
+  },
+  {
+   "expression": "Splitter.SplitTextByLengths({2}, true)(\"abcdef\")",
+   "power_bi": "V:list:[text:\"ef\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByPositions({0, 2}, true)(\"abcdef\")",
+   "power_bi": "V:list:[text:\"abcd\",text:\"ef\"]"
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\"\")(\"abc\")",
+   "power_bi": "ERR:Expression.Error: A delimiter must be text at least 1 character in length."
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(5)(\"abc\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Splitter.SplitTextByDelimiter(\",\")(5)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 5 to type Text."
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\")({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"a,b,c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\", QuoteStyle.Csv)({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"a,b,c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\"\")({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"abc\""
+  },
+  {
+   "expression": "Combiner.CombineTextByEachDelimiter({\"-\", \"+\"})({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"a-b+c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByLengths({1, 2, 3})({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"ab c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByPositions({0, 2, 5})({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"a b  c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByRanges({{0,1},{3,2}})({\"a\",\"b\",\"c\"})",
+   "power_bi": "V:text:\"a  b\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\")({\"a\",null,\"c\"})",
+   "power_bi": "V:text:\"a,,c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByEachDelimiter({\"-\", \"+\"})({\"a\",null,\"c\"})",
+   "power_bi": "V:text:\"a-+c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByLengths({1, 2, 3})({\"a\",null,\"c\"})",
+   "power_bi": "V:text:\"a  c\""
+  },
+  {
+   "expression": "Combiner.CombineTextByRanges({{0,1},{3,2}})({\"a\",null,\"c\"})",
+   "power_bi": "V:text:\"a  \""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\")({})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\", QuoteStyle.Csv)({})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\"\")({})",
+   "power_bi": "V:text:\"\""
+  },
+  {
+   "expression": "Combiner.CombineTextByLengths({1, 2, 3})({})",
+   "power_bi": "V:text:\"   \""
+  },
+  {
+   "expression": "Combiner.CombineTextByPositions({0, 2, 5})({})",
+   "power_bi": "V:text:\"     \""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\")({\"x,y\",\"z\"})",
+   "power_bi": "V:text:\"\\\"x,y\\\",z\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\", QuoteStyle.Csv)({\"x,y\",\"z\"})",
+   "power_bi": "V:text:\"\\\"x,y\\\",z\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\"\")({\"x,y\",\"z\"})",
+   "power_bi": "V:text:\"x,yz\""
+  },
+  {
+   "expression": "Combiner.CombineTextByEachDelimiter({\"-\", \"+\"})({\"x,y\",\"z\"})",
+   "power_bi": "V:text:\"x,y-z\""
+  },
+  {
+   "expression": "Combiner.CombineTextByLengths({1, 2, 3})({\"x,y\",\"z\"})",
+   "power_bi": "V:text:\"xz \""
+  },
+  {
+   "expression": "Combiner.CombineTextByPositions({0, 2, 5})({\"x,y\",\"z\"})",
+   "power_bi": "V:text:\"x,z  \""
+  },
+  {
+   "expression": "Combiner.CombineTextByRanges({{0,1},{3,2}})({\"x,y\",\"z\"})",
+   "power_bi": "V:text:\"x  z\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\", QuoteStyle.Csv)({\"ab\",\"cde\"})",
+   "power_bi": "V:text:\"ab,cde\""
+  },
+  {
+   "expression": "Combiner.CombineTextByEachDelimiter({\"-\", \"+\"})({\"ab\",\"cde\"})",
+   "power_bi": "V:text:\"ab-cde\""
+  },
+  {
+   "expression": "Combiner.CombineTextByLengths({1, 2, 3})({\"ab\",\"cde\"})",
+   "power_bi": "V:text:\"acd\""
+  },
+  {
+   "expression": "Combiner.CombineTextByPositions({0, 2, 5})({\"ab\",\"cde\"})",
+   "power_bi": "V:text:\"abcde\""
+  },
+  {
+   "expression": "Combiner.CombineTextByRanges({{0,1},{3,2}})({\"ab\",\"cde\"})",
+   "power_bi": "V:text:\"a  cd\""
+  },
+  {
+   "expression": "Combiner.CombineTextByDelimiter(\",\")({1,2})",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value 1 to type Text."
+  },
+  {
+   "expression": "Comparer.Ordinal(\"a\", \"A\")",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(\"a\", \"A\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.Ordinal, \"a\", \"A\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.OrdinalIgnoreCase, \"a\", \"A\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\")(\"a\", \"A\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\", true)(\"a\", \"A\")",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Value.Compare(\"a\", \"A\")",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Equals(\"a\", \"A\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.NullableEquals(\"a\", \"A\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Add(\"a\", \"A\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Text and Text."
+  },
+  {
+   "expression": "Value.Subtract(\"a\", \"A\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Text."
+  },
+  {
+   "expression": "Value.Divide(\"a\", \"A\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Text and Text."
+  },
+  {
+   "expression": "Comparer.Ordinal(\"a\", \"b\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(\"a\", \"b\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\")(\"a\", \"b\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Value.Compare(\"a\", \"b\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Value.Equals(\"a\", \"b\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.NullableEquals(\"a\", \"b\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Add(\"a\", \"b\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Text and Text."
+  },
+  {
+   "expression": "Value.Subtract(\"a\", \"b\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Text."
+  },
+  {
+   "expression": "Value.Divide(\"a\", \"b\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Text and Text."
+  },
+  {
+   "expression": "Comparer.Ordinal(\"B\", \"a\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(\"B\", \"a\")",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.OrdinalIgnoreCase, \"B\", \"a\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\")(\"B\", \"a\")",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Compare(\"B\", \"a\")",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Value.Equals(\"B\", \"a\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.NullableEquals(\"B\", \"a\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Subtract(\"B\", \"a\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Text."
+  },
+  {
+   "expression": "Value.Divide(\"B\", \"a\")",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Text and Text."
+  },
+  {
+   "expression": "Comparer.Ordinal(1, 2)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(1, 2)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.OrdinalIgnoreCase, 1, 2)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\")(1, 2)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\", true)(1, 2)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Value.Compare(1, 2)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Value.Equals(1, 2)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Add(1, 2)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Value.Multiply(1, 2)",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Comparer.Ordinal(2, 2)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.Ordinal, 2, 2)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\")(2, 2)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\", true)(2, 2)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Value.Compare(2, 2)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Value.NullableEquals(2, 2)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Add(2, 2)",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Value.Subtract(2, 2)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Value.Multiply(2, 2)",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Value.Divide(2, 2)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(null, 1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Null and Number."
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.Ordinal, null, 1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.OrdinalIgnoreCase, null, 1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\", true)(null, 1)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Value.Compare(null, 1)",
+   "power_bi": "V:number:-1"
+  },
+  {
+   "expression": "Value.Equals(null, 1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.NullableEquals(null, 1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Value.Add(null, 1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Value.Subtract(null, 1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Value.Multiply(null, 1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Value.Divide(null, 1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(\"1\", 1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator < to types Text and Number."
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.Ordinal, \"1\", 1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.OrdinalIgnoreCase, \"1\", 1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\")(\"1\", 1)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\", true)(\"1\", 1)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Compare(\"1\", 1)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Equals(\"1\", 1)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Subtract(\"1\", 1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Text and Number."
+  },
+  {
+   "expression": "Value.Multiply(\"1\", 1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Text and Number."
+  },
+  {
+   "expression": "Value.Divide(\"1\", 1)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Text and Number."
+  },
+  {
+   "expression": "Comparer.Ordinal(true, false)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(true, false)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.Ordinal, true, false)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.OrdinalIgnoreCase, true, false)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\", true)(true, false)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Compare(true, false)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.NullableEquals(true, false)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Add(true, false)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Logical and Logical."
+  },
+  {
+   "expression": "Value.Subtract(true, false)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator - to types Logical and Logical."
+  },
+  {
+   "expression": "Value.Divide(true, false)",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Logical and Logical."
+  },
+  {
+   "expression": "Comparer.Ordinal(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.OrdinalIgnoreCase(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Comparer.Equals(Comparer.Ordinal, #date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Comparer.FromCulture(\"en-US\")(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Compare(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Equals(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Add(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator + to types Date and Date."
+  },
+  {
+   "expression": "Value.Subtract(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "V:duration:365.00:00:00"
+  },
+  {
+   "expression": "Value.Multiply(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator * to types Date and Date."
+  },
+  {
+   "expression": "Value.Divide(#date(2024,1,1), #date(2023,1,1))",
+   "power_bi": "ERR:Expression.Error: We cannot apply operator / to types Date and Date."
+  },
+  {
+   "expression": "Value.Is(1, type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(1, type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(1, type number)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.Metadata(1)",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(1, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(1 meta [m=1])",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Value.FromText(Text.From(1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Type.Is(Value.Type(1), type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Logical.From(1)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Type(\"t\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(\"t\", type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is(\"t\", type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(\"t\", type nullable text)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Metadata(\"t\")",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(\"t\", [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Type.Is(Value.Type(\"t\"), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Logical.From(\"t\")",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Value.Type(null)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(null, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is(null, type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(null, type nullable text)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.As(null, type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value null to type Number."
+  },
+  {
+   "expression": "Value.Metadata(null)",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(null, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(null meta [m=1])",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Value.FromText(Text.From(null))",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Type.Is(Value.Type(null), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is(true, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(true, type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value true to type Number."
+  },
+  {
+   "expression": "Value.Metadata(true)",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(true, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.FromText(Text.From(true))",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Logical.From(true)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Type({1})",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is({1}, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is({1}, type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is({1}, type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As({1}, type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type List to type Number."
+  },
+  {
+   "expression": "Value.Metadata({1})",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata({1}, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata({1} meta [m=1])",
+   "power_bi": "V:list:[number:1]"
+  },
+  {
+   "expression": "Value.Type([a=1])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is([a=1], type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is([a=1], type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As([a=1], type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type Record to type Number."
+  },
+  {
+   "expression": "Value.Metadata([a=1])",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata([a=1], [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata([a=1] meta [m=1])",
+   "power_bi": "V:record:[\"a\"=number:1]"
+  },
+  {
+   "expression": "Value.Type(Value.Type([a=1]))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Logical.From([a=1])",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Value.Type(#date(2024,1,1))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(#date(2024,1,1), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(#date(2024,1,1), type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #date(2024, 1, 1) to type Number."
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(#date(2024,1,1), [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.FromText(Text.From(#date(2024,1,1)))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Type.Is(Value.Type(#date(2024,1,1)), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Logical.From(#date(2024,1,1))",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Value.Is(#duration(1,0,0,0), type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(#duration(1,0,0,0), type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(#duration(1,0,0,0), type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #duration(1, 0, 0, 0) to type Number."
+  },
+  {
+   "expression": "Value.Metadata(#duration(1,0,0,0))",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(#duration(1,0,0,0), [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(#duration(1,0,0,0) meta [m=1])",
+   "power_bi": "V:duration:1.00:00:00"
+  },
+  {
+   "expression": "Value.FromText(Text.From(#duration(1,0,0,0)))",
+   "power_bi": "V:duration:1.00:00:00"
+  },
+  {
+   "expression": "Type.Is(Value.Type(#duration(1,0,0,0)), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Logical.From(#duration(1,0,0,0))",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Value.Is(#time(1,0,0), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is(#time(1,0,0), type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(#time(1,0,0), type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(#time(1,0,0), type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #time(1, 0, 0) to type Number."
+  },
+  {
+   "expression": "Value.Metadata(#time(1,0,0))",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(#time(1,0,0), [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(#time(1,0,0) meta [m=1])",
+   "power_bi": "V:time:01:00:00.0000000"
+  },
+  {
+   "expression": "Value.FromText(Text.From(#time(1,0,0)))",
+   "power_bi": "V:time:01:00:00.0000000"
+  },
+  {
+   "expression": "Type.Is(Value.Type(#time(1,0,0)), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(#binary({1,2}))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(#binary({1,2}), type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(#binary({1,2}), type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(#binary({1,2}), type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type Binary to type Number."
+  },
+  {
+   "expression": "Value.Metadata(#binary({1,2}))",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(#binary({1,2}), [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(#binary({1,2}) meta [m=1])",
+   "power_bi": "V:binary:AQI="
+  },
+  {
+   "expression": "Value.Type(Value.Type(#binary({1,2})))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(Value.Type(#binary({1,2})), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(type text)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(type text, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is(type text, type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Metadata(type text)",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(type text, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(type text meta [m=1])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(Value.Type(type text), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Logical.From(type text)",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Value.Type((x) => x)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is((x) => x, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is((x) => x, type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Metadata((x) => x)",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata((x) => x, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata((x) => x meta [m=1])",
+   "power_bi": "V:function"
+  },
+  {
+   "expression": "Value.Type(Value.Type((x) => x))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(Value.Type((x) => x), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(#table({\"a\"},{}))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(#table({\"a\"},{}), type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(#table({\"a\"},{}), type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Metadata(#table({\"a\"},{}))",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(#table({\"a\"},{}), [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(#table({\"a\"},{}) meta [m=1])",
+   "power_bi": "V:table:cols=[\"a\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Value.Type(Value.Type(#table({\"a\"},{})))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(Value.Type(#table({\"a\"},{})), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Logical.From(#table({\"a\"},{}))",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Value.Type(1.5)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(1.5, type any)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Is(1.5, type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(1.5, type number)",
+   "power_bi": "V:number:1.5"
+  },
+  {
+   "expression": "Value.Metadata(1.5)",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(1.5, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(1.5 meta [m=1])",
+   "power_bi": "V:number:1.5"
+  },
+  {
+   "expression": "Value.FromText(Text.From(1.5))",
+   "power_bi": "V:number:1.5"
+  },
+  {
+   "expression": "Type.Is(Value.Type(1.5), type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Type(-0)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(-0, type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.As(-0, type number)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Value.Metadata(-0)",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.Metadata(Value.ReplaceMetadata(-0, [m=1]))",
+   "power_bi": "V:record:[\"m\"=number:1]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(-0 meta [m=1])",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Value.FromText(Text.From(-0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Type.Is(Value.Type(-0), type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Logical.From(-0)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(#datetimezone(2024,1,1,0,0,0,1,0))",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Value.Is(#datetimezone(2024,1,1,0,0,0,1,0), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Is(#datetimezone(2024,1,1,0,0,0,1,0), type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.As(#datetimezone(2024,1,1,0,0,0,1,0), type number)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 1, 1, 0, 0, 0, 1, 0) to type Number."
+  },
+  {
+   "expression": "Value.Metadata(#datetimezone(2024,1,1,0,0,0,1,0))",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Value.RemoveMetadata(#datetimezone(2024,1,1,0,0,0,1,0) meta [m=1])",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000+01:00"
+  },
+  {
+   "expression": "Value.FromText(Text.From(#datetimezone(2024,1,1,0,0,0,1,0)))",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000+01:00"
+  },
+  {
+   "expression": "Type.Is(Value.Type(#datetimezone(2024,1,1,0,0,0,1,0)), type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Logical.From(#datetimezone(2024,1,1,0,0,0,1,0))",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Type.NonNullable(type number)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type number, type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Type.Facets(type number)",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.NonNullable(type nullable text)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type number, type nullable text)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Facets(type nullable text)",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.NonNullable(type any)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type any, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Facets(type any)",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.IsNullable(type null)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Type.NonNullable(type null)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type null, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Is(type number, type null)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(type null)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Facets(type null)",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.IsNullable(type {number})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Is(type {number}, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Is(type number, type {number})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(type {number})",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Facets(type {number})",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.IsNullable(type [a=number, optional b=text])",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.NonNullable(type [a=number, optional b=text])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type [a=number, optional b=text], type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Facets(type [a=number, optional b=text])",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.NonNullable(type [a=number, ...])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type [a=number, ...], type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Is(type number, type [a=number, ...])",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(type [a=number, ...])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Facets(type [a=number, ...])",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.IsNullable(type table [a=number])",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.NonNullable(type table [a=number])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type table [a=number], type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Is(type number, type table [a=number])",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(type table [a=number])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.IsNullable(type function (x as number, optional y as text) as logical)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.NonNullable(type function (x as number, optional y as text) as logical)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type number, type function (x as number, optional y as text) as logical)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(type function (x as number, optional y as text) as logical)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Facets(type function (x as number, optional y as text) as logical)",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.NonNullable(Int64.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(Int64.Type, type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Type.Is(type number, Int64.Type)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Type(Int64.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Facets(Int64.Type)",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.IsNullable(Text.Type)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.NonNullable(Text.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(type number, Text.Type)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(Text.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.NonNullable(Number.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(Number.Type, type number)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Type.Is(type number, Number.Type)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Value.Type(Number.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.IsNullable(Date.Type)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.NonNullable(Date.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Is(Date.Type, type number)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Type.Is(type number, Date.Type)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Value.Type(Date.Type)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Facets(Date.Type)",
+   "power_bi": "V:record:[\"NumericPrecisionBase\"=null,\"NumericPrecision\"=null,\"NumericScale\"=null,\"IsSigned\"=null,\"DateTimePrecision\"=null,\"MaxLength\"=null,\"IsVariableLength\"=null,\"NativeTypeName\"=null,\"NativeDefaultExpression\"=null,\"NativeExpression\"=null]"
+  },
+  {
+   "expression": "Type.RecordFields(type [a=number, optional b=text])",
+   "power_bi": "V:record:[\"a\"=record:[\"Type\"=type,\"Optional\"=false],\"b\"=record:[\"Type\"=type,\"Optional\"=true]]"
+  },
+  {
+   "expression": "Type.IsOpenRecord(type [a=number, ...])",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Type.OpenRecord(type [a=number])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.ClosedRecord(type [a=number, ...])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.TableRow(type table [a=number])",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.TableColumn(type table [a=number, b=text], \"b\")",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.TableSchema(type table [a=number])",
+   "power_bi": "V:table:cols=[\"Name\":\"text\",\"Position\":\"number\",\"TypeName\":\"text\",\"Kind\":\"text\",\"IsNullable\":\"logical\",\"NumericPrecisionBase\":\"number\",\"NumericPrecision\":\"number\",\"NumericScale\":\"number\",\"IsSigned\":\"logical\",\"DateTimePrecision\":\"number\",\"MaxLength\":\"number\",\"IsVariableLength\":\"logical\",\"NativeTypeName\":\"text\",\"NativeDefaultExpression\":\"text\",\"NativeExpression\":\"text\",\"Description\":\"text\",\"IsWritable\":\"logical\",\"FieldCaption\":\"text\"];rows=[list:[text:\"a\",number:0,text:\"Number.Type\",text:\"number\",false,null,null,null,null,null,null,null,null,null,null,null,null,null]]"
+  },
+  {
+   "expression": "Type.TableKeys(type table [a=number])",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Type.AddTableKey(type table [a=number], {\"a\"}, true)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.FunctionReturn(type function (x as number) as text)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.FunctionRequiredParameters(type function (x as number, optional y as text) as any)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Type.ForFunction([ReturnType=type text, Parameters=[x=type number]], 1)",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Union({type number, type text})",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Union({type number, type number})",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Type.Union({type nullable number, type number})",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Function.Invoke((a,b) => a+b, {1,2})",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Function.Invoke(Text.Upper, {\"x\"})",
+   "power_bi": "V:text:\"X\""
+  },
+  {
+   "expression": "Function.From(type function (a as number, b as number) as number, (l) => List.Sum(l))(1, 2)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Expression.Constant(1)",
+   "power_bi": "V:text:\"1\""
+  },
+  {
+   "expression": "Expression.Constant(#date(2024,1,2))",
+   "power_bi": "V:text:\"#date(2024, 1, 2)\""
+  },
+  {
+   "expression": "Expression.Constant({1,\"x\"})",
+   "power_bi": "ERR:Expression.Error: Expected a constant value. List is not a constant."
+  },
+  {
+   "expression": "Expression.Identifier(\"a b\")",
+   "power_bi": "V:text:\"#\\\"a b\\\"\""
+  },
+  {
+   "expression": "Expression.Identifier(\"ab\")",
+   "power_bi": "V:text:\"ab\""
+  },
+  {
+   "expression": "Expression.Evaluate(\"1 + 2\")",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Expression.Evaluate(\"x * 2\", [x=5])",
+   "power_bi": "V:number:10"
+  },
+  {
+   "expression": "Expression.Evaluate(\"Text.Upper(\\\"a\\\")\", #shared)",
+   "power_bi": "ERR:PARTITION: Exception calling \"ExecuteNonQuery\" with \"0\" argument(s): \"M Engine error: 'Microsoft.Data.Mashup.Preview; Token ',' expected.'.\""
+  },
+  {
+   "expression": "Logical.FromText(\"TRUE\")",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Logical.FromText(\"yes\")",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Logical."
+  },
+  {
+   "expression": "Logical.ToText(false)",
+   "power_bi": "V:text:\"false\""
+  },
+  {
+   "expression": "Logical.From(2)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Character.FromNumber(65)",
+   "power_bi": "V:text:\"A\""
+  },
+  {
+   "expression": "Character.FromNumber(128512)",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Character.ToNumber(\"A\")",
+   "power_bi": "V:number:65"
+  },
+  {
+   "expression": "Character.FromNumber(-1)",
+   "power_bi": "ERR:Expression.Error: We couldn't convert to Character."
+  },
+  {
+   "expression": "Binary.FromText(\"AQID\")",
+   "power_bi": "V:binary:AQID"
+  },
+  {
+   "expression": "Binary.FromText(\"010203\", BinaryEncoding.Hex)",
+   "power_bi": "V:binary:AQID"
+  },
+  {
+   "expression": "Binary.ToText(#binary({1,2,255}))",
+   "power_bi": "V:text:\"AQL/\""
+  },
+  {
+   "expression": "Binary.ToText(#binary({1,2,255}), BinaryEncoding.Hex)",
+   "power_bi": "V:text:\"0102ff\""
+  },
+  {
+   "expression": "Binary.ToList(#binary({1,2}))",
+   "power_bi": "V:list:[number:1,number:2]"
+  },
+  {
+   "expression": "Binary.FromList({1,2,3})",
+   "power_bi": "V:binary:AQID"
+  },
+  {
+   "expression": "Binary.Length(#binary({1,2,3}))",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Binary.Range(#binary({1,2,3,4}), 1, 2)",
+   "power_bi": "V:binary:AgM="
+  },
+  {
+   "expression": "Binary.Split(#binary({1,2,3,4,5}), 2)",
+   "power_bi": "V:list:[binary:AQI=,binary:AwQ=,binary:BQ==]"
+  },
+  {
+   "expression": "Text.FromBinary(#binary({104,105}))",
+   "power_bi": "V:text:\"hi\""
+  },
+  {
+   "expression": "Text.ToBinary(\"hi\")",
+   "power_bi": "V:binary:aGk="
+  },
+  {
+   "expression": "Binary.From(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Uri.Combine(\"http://a.com/b/\", \"c\")",
+   "power_bi": "V:text:\"http://a.com/b/c\""
+  },
+  {
+   "expression": "Uri.EscapeDataString(\"a b&c\")",
+   "power_bi": "V:text:\"a%20b%26c\""
+  },
+  {
+   "expression": "Uri.BuildQueryString([a=\"1\", b=\"x y\"])",
+   "power_bi": "V:text:\"a=1&b=x%20y\""
+  },
+  {
+   "expression": "Uri.Parts(\"http://u:p@a.com:8080/x/y?q=1#f\")",
+   "power_bi": "V:record:[\"Scheme\"=text:\"http\",\"Host\"=text:\"a.com\",\"Port\"=number:8080,\"Path\"=text:\"/x/y\",\"Query\"=record:[\"q\"=text:\"1\"],\"Fragment\"=text:\"f\",\"UserName\"=text:\"u\",\"Password\"=text:\"p\"]"
+  },
+  {
+   "expression": "Json.Document(\"[1, 2.5, \"\"x\"\"]\")",
+   "power_bi": "V:list:[number:1,number:2.5,text:\"x\"]"
+  },
+  {
+   "expression": "Json.Document(\"bad\")",
+   "power_bi": "ERR:DataFormat.Error: We found an unexpected character in the JSON input."
+  },
+  {
+   "expression": "Text.FromBinary(Json.FromValue([a=1, b={2,\"x\"}]))",
+   "power_bi": "V:text:\"{\\\"a\\\":1,\\\"b\\\":[2,\\\"x\\\"]}\""
+  },
+  {
+   "expression": "Text.FromBinary(Json.FromValue(#date(2024,1,2)))",
+   "power_bi": "V:text:\"\\\"2024-01-02\\\"\""
+  },
+  {
+   "expression": "Lines.FromText(\"a#(lf)b#(cr,lf)c\")",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "Lines.ToText({\"a\",\"b\"})",
+   "power_bi": "V:text:\"a\\r\\nb\\r\\n\""
+  },
+  {
+   "expression": "Error.Record(\"R\", \"M\", \"D\")",
+   "power_bi": "V:record:[\"Reason\"=text:\"R\",\"Message\"=text:\"M\",\"Detail\"=text:\"D\",\"Message.Format\"=null,\"Message.Parameters\"=null,\"ErrorCode\"=null]"
+  },
+  {
+   "expression": "Error.Record(\"R\")",
+   "power_bi": "V:record:[\"Reason\"=text:\"R\",\"Message\"=text:\"\",\"Detail\"=null,\"Message.Format\"=null,\"Message.Parameters\"=null,\"ErrorCode\"=null]"
+  },
+  {
+   "expression": "Occurrence.Optional",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Occurrence.Required",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Occurrence.Repeating",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Order.Ascending",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "RelativePosition.FromEnd",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "QuoteStyle.Csv",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "TextEncoding.Unicode",
+   "power_bi": "V:number:1200"
+  },
+  {
+   "expression": "BinaryEncoding.Base64",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Culture.Current",
+   "power_bi": "V:text:\"en-US\""
+  }
+ ]
+}
