@@ -216,6 +216,7 @@ from analytics_studio.power_query_values import (
 
 
 MAX_TRANSFORMATION_STEPS = 256
+MAX_M_SCRIPT_STEP_CHARS = 32_000  # the same bound as a saved M script (project.MAX_M_SCRIPT_LENGTH)
 MIN_INDEX_VALUE = -(2**63)
 MAX_INDEX_VALUE = 2**63 - 1
 MAX_GROUP_DECIMAL_PRECISION = 4096
@@ -362,6 +363,7 @@ _STEP_FIELDS: dict[str, set[str]] = {
     "remove_sparse_top_rows": {"op"},
     "remove_sparse_bottom_rows": {"op"},
     "m_sparse_boundary_helper": {"op", "name"},
+    "m_script": {"op", "script", "source_binding"},
     "keep_top_rows": {"op", "count"},
     "keep_bottom_rows": {"op", "count"},
     "keep_range_rows": {"op", "first_row", "count"},
@@ -454,6 +456,17 @@ def validate_steps(
                     f"Transformation step {index} needs a simple M helper name."
                 )
             step = {**step, "name": name}
+        if op == "m_script":
+            script = step["script"]
+            binding = step["source_binding"]
+            if not isinstance(script, str) or not script.strip() or len(script) > MAX_M_SCRIPT_STEP_CHARS or (
+                "\x00" in script
+            ):
+                raise TransformationError(
+                    f"Transformation step {index} needs an M script of at most {MAX_M_SCRIPT_STEP_CHARS:,} characters."
+                )
+            if not isinstance(binding, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", binding):
+                raise TransformationError(f"Transformation step {index} needs a simple source binding name.")
         if op in {"remove_duplicates", "keep_duplicates"} and "columns" in step:
             columns = step["columns"]
             if not isinstance(columns, list) or not columns or any(
@@ -1414,6 +1427,14 @@ def apply_transformations(
             )
             _check_candidate_limits(result.headers, result.rows)
             continue
+        if op == "m_script":
+            from analytics_studio.m_script_step import run_m_script  # local: m_script_step reads this module's helpers
+
+            result = run_m_script(
+                result, step["script"], step["source_binding"], column_types_before(step_index)
+            )
+            _check_candidate_limits(result.headers, result.rows)
+            continue
         if op == "add_custom_column":
             result = _add_custom_column(
                 result,
@@ -1564,8 +1585,15 @@ def apply_transformations(
         _check_candidate_limits(result.headers, result.rows)
     # Later value transforms can invalidate an earlier conversion. Check the
     # final values too so the persisted model type always describes its cells.
+    # A script step reads its input as the source types (see column_types_after_steps); other sequences are as before.
+    final_initial_types = None
+    if any(step["op"] == "m_script" for step in validated_steps):
+        final_initial_types = (
+            dict(initial_types) if initial_types is not None
+            else infer_column_types(candidate.headers, candidate.rows)
+        )
     for column, target_type in column_types_after_steps(
-        candidate.headers, validated_steps, output_headers=result.headers
+        candidate.headers, validated_steps, output_headers=result.headers, initial_types=final_initial_types
     ).items():
         if target_type != "text":
             _convert_column(result.rows, column, target_type)
@@ -1928,6 +1956,11 @@ def column_types_after_steps(
             types[step["name"]] = step.get("output_type", "text")
         elif op == "conditional_column":
             types[step["name"]] = "text"
+        elif op == "m_script":
+            from analytics_studio.m_script_step import output_types  # local: see apply_transformations
+
+            types = output_types(list(types), types, step["script"], step["source_binding"])
+            header_count = None
 
         # Keep a conservative schema width so a Pivot after Promote Headers can
         # distinguish retained keys from appended data-derived categories.

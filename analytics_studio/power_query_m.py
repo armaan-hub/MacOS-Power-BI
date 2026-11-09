@@ -32,6 +32,7 @@ from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
 from analytics_studio.m_code_editor import MCodeEditor
 from analytics_studio.m_custom_column import usable_m_formula
+from analytics_studio.m_engine.pbi_library_names import PBI_LIBRARY_NAMES
 from analytics_studio.power_query_expression import (
     ExpressionError,
     compile_expression,
@@ -120,9 +121,134 @@ def parse_m_query_script(
         )
     except PowerQueryMScriptError as exc:
         where = trace[0] if trace else None
+        fallback = _m_script_fallback(script, query_name, where, parameter_names, query_functions)
+        if fallback is not None:
+            if step_bindings is not None:
+                step_bindings[:] = []
+            return None, fallback
         if exc.line is None and where is not None and isinstance(script, str):
             exc.line, exc.column = _locate_m_error(script, where)
         raise
+
+
+def _m_script_fallback(
+    script: str,
+    query_name: str,
+    where: tuple[Any, ...] | None,
+    parameter_names: set[str] | None,
+    query_functions: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]] | None:
+    """The one ``m_script`` step that runs a whole script the step editor cannot map (Task 111, m-script-101).
+
+    Only a script whose Source is the current query, whose failure is at a later binding, and that the M engine
+    can parse gets it. Scripts with Power Query functions or parameters are not run this way.
+    """
+    if where is None or where[0] != "binding" or where[1] < 1:
+        return None
+    if query_functions or parameter_names or not isinstance(script, str):
+        return None
+    try:
+        parts = _m_script_parts(script)
+        texts = _script_binding_texts(script)
+    except PowerQueryMScriptError:
+        return None
+    source_name, _inner, _output = parts
+    if source_name is None or where[1] >= len(texts):
+        return None
+    # Only a call to a library function the editor has no mapping for. A function it maps is refused as the editor
+    # refuses it (a form it does not write back canonically), so the script stays an editor error.
+    failing = texts[where[1]]
+    equals_at = _find_top_level_character(failing, "=")
+    call = _LIBRARY_CALL.match(failing[equals_at + 1:].strip()) if equals_at >= 0 else None
+    if call is None or call.group(1) in _EDITOR_MAPPED_FUNCTIONS:
+        return None
+    if call.group(1) not in PBI_LIBRARY_NAMES:  # not a Power Query library function: an error in the script itself
+        return None
+    from analytics_studio.m_engine.lexer import MSyntaxError
+    from analytics_studio.m_engine.parser import parse
+    from analytics_studio.m_engine import ast as _A
+
+    try:
+        node = parse(script.strip())
+    except (MSyntaxError, RecursionError):
+        return None
+    if not isinstance(node, _A.LetExpr) or not node.bindings or node.bindings[0].name != source_name:
+        return None
+    body_source = _parse_query_reference_or_none(script, source_name)
+    if body_source is None or body_source.casefold() != query_name.strip().casefold():
+        return None
+    return [{"op": "m_script", "script": script.strip(), "source_binding": source_name}]
+
+
+_LIBRARY_CALL = re.compile(r"([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+)\s*\(")
+# The library functions the step editor maps (its own dispatch table): a script that calls one of these in a form
+# the editor refuses stays refused, and only a call the editor has no mapping for falls back to an m_script step.
+_EDITOR_MAPPED_FUNCTIONS = frozenset({
+    'Combiner.CombineTextByDelimiter', 'Date.Day', 'Date.From', 'Date.Month', 'Date.Year', 'List.Average',
+    'List.Count', 'List.Distinct', 'List.Max', 'List.Median', 'List.Min', 'List.RemoveItems', 'List.Sum',
+    'List.Transform', 'Number.Abs', 'Number.From', 'Number.Round', 'Record.Field', 'Replacer.ReplaceValue',
+    'Splitter.SplitTextByDelimiter', 'Splitter.SplitTextByEachDelimiter', 'Splitter.SplitTextByPositions',
+    'Table.AddColumn', 'Table.AddIndexColumn', 'Table.AlternateRows', 'Table.Column', 'Table.Combine',
+    'Table.CombineColumns', 'Table.DemoteHeaders', 'Table.Distinct', 'Table.DuplicateColumn',
+    'Table.ExpandListColumn', 'Table.FillDown', 'Table.FillUp', 'Table.FirstN', 'Table.FromValue', 'Table.Group',
+    'Table.LastN', 'Table.Pivot', 'Table.PromoteHeaders', 'Table.Range', 'Table.RemoveColumns',
+    'Table.RemoveLastN', 'Table.RemoveRowsWithErrors', 'Table.RenameColumns', 'Table.ReorderColumns',
+    'Table.ReplaceValue', 'Table.SelectColumns', 'Table.SelectRows', 'Table.Skip', 'Table.Sort',
+    'Table.SplitColumn', 'Table.TransformColumnTypes', 'Table.TransformColumns', 'Table.Transpose', 'Table.Unpivot',
+    'Table.UnpivotOtherColumns', 'Text.AfterDelimiter', 'Text.BeforeDelimiter', 'Text.BetweenDelimiters',
+    'Text.Clean', 'Text.Combine', 'Text.Contains', 'Text.EndsWith', 'Text.From', 'Text.Length', 'Text.Lower',
+    'Text.Proper', 'Text.Replace', 'Text.Reverse', 'Text.Split', 'Text.StartsWith', 'Text.Trim', 'Text.Upper',
+})
+
+
+def _script_binding_texts(script: str) -> list[str]:
+    """The let bindings of a script as written, the source binding first."""
+    clean = _strip_line_comments(script).strip()
+    body = clean[3:].strip()
+    in_position = _find_last_keyword(body, "in")
+    if in_position < 0:
+        raise PowerQueryMScriptError("Add an in clause that returns the final step.")
+    return [item.strip() for item in _split_let_bindings(body[:in_position].strip().rstrip(",").strip())]
+
+
+def _parse_query_reference_or_none(script: str, source_name: str) -> str | None:
+    """The query named by ``Source = <query>`` (a reference to a query in this query), or None."""
+    clean = _strip_line_comments(script).strip()
+    body = clean[3:].strip()
+    in_position = _find_last_keyword(body, "in")
+    if in_position < 0:
+        return None
+    first = _split_let_bindings(body[:in_position].strip().rstrip(",").strip())
+    if not first:
+        return None
+    equals_at = _find_top_level_character(first[0], "=")
+    if equals_at < 0:
+        return None
+    try:
+        return _parse_query_reference(first[0][equals_at + 1:].strip())
+    except PowerQueryMScriptError:
+        return None
+
+
+def _m_script_parts(script: str) -> tuple[str | None, list[str], str]:
+    """(the source binding name, the bindings after it as written, the output name as written) of a let script."""
+    clean = _strip_line_comments(script).strip()
+    if not clean[:3].casefold() == "let" or (len(clean) > 3 and clean[3].isalnum()):
+        raise PowerQueryMScriptError("A local M query must start with let and finish with in.")
+    body = clean[3:].strip()
+    in_position = _find_last_keyword(body, "in")
+    if in_position < 0:
+        raise PowerQueryMScriptError("Add an in clause that returns the final step.")
+    bindings = [item.strip() for item in _split_let_bindings(body[:in_position].strip().rstrip(",").strip())]
+    if not bindings or any(not item for item in bindings):
+        raise PowerQueryMScriptError("The let block contains an empty step.")
+    first_equals = _find_top_level_character(bindings[0], "=")
+    if first_equals < 0:
+        raise PowerQueryMScriptError("Step 1 must use Name = expression.")
+    source_name = bindings[0][:first_equals].strip()
+    if not _IDENTIFIER.fullmatch(source_name):
+        return None, bindings[1:], body[in_position + 2:].strip()
+    return source_name, bindings[1:], body[in_position + 2:].strip()
 
 
 def _locate_m_error(script: str, where: tuple[Any, ...]) -> tuple[int | None, int | None]:
@@ -396,6 +522,14 @@ def steps_to_m_script(
             + ", ".join(sorted(missing_functions))
             + "."
         )
+    script_steps = [step for step in validated if step["op"] == "m_script"]
+    if script_steps:
+        if any(step["op"] == "m_sparse_boundary_helper" for step in validated) or used_functions or source_query_names:
+            raise PowerQueryMScriptError("A script step cannot be combined with sparse-boundary helpers or functions.")
+        if len(script_steps) > 1:
+            raise PowerQueryMScriptError("A query may hold one script step.")
+        if len(validated) == 1:
+            return script_steps[0]["script"]  # measured round trip: the editor shows the script as it was typed
     if source_query_names is None:
         source = _m_quoted_name(query_name)
     else:
@@ -438,10 +572,15 @@ def steps_to_m_script(
         step_names[index] if step_names is not None and index < len(step_names) else None
         for index, _step in table_steps
     ]
+    script_names: list[str] = []
+    for script_step in script_steps:
+        _source, inner, _output = _m_script_parts(script_step["script"])
+        for item in inner:
+            script_names.append(item[:_find_top_level_character(item, "=")].strip())
     generated_names = assign_step_names(
         [step for _index, step in table_steps],
         custom_names=custom_names,
-        reserved=[*reserved_names, sparse_boundary_helper_name],
+        reserved=[*reserved_names, sparse_boundary_helper_name, *script_names],
     )
     table_step_number = 0
     for index, step in enumerate(validated):
@@ -449,6 +588,11 @@ def steps_to_m_script(
             continue
         step_name = generated_names[table_step_number]
         table_step_number += 1
+        if step["op"] == "m_script":
+            _source, inner, output = _m_script_parts(step["script"])
+            bindings.extend(f"    {item}" for item in inner)
+            previous = output
+            continue
         binding = _m_quoted_name(step_name)
         input_types = _m_column_types_after_steps(
             [
@@ -499,6 +643,8 @@ def step_expression_to_m(
     if not 0 <= index < len(validated):
         raise PowerQueryMScriptError("The selected step has no generated M binding.")
     selected = validated[index]
+    if selected["op"] == "m_script":
+        return selected["script"]
     if selected["op"] == "m_sparse_boundary_helper":
         prefix = validated
     else:
