@@ -1,0 +1,242 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "raw": "#table({\"Name\",\"Units\",\"Price\",\"Day\",\"Flag\"}, {{\"Alpha\",\"2\",\"10.5\",\"2024-01-15\",\"TRUE\"},{\"beta\",\"0\",\"3\",\"2024-02-29\",\"false\"},{\"\",\"7\",\"0.25\",\"2023-12-31\",\"true\"},{\"Gamma\",\"12\",\"1000\",\"2024-06-01\",\"FALSE\"}})",
+ "types": "{{\"Name\", type text}, {\"Units\", Int64.Type}, {\"Price\", type number}, {\"Day\", type date}, {\"Flag\", type logical}}",
+ "note": "cells[i] = (each formula)(Table.TransformColumnTypes(raw, types){i}); raw rows are text as an import would give them; types are the Power BI Changed Type step",
+ "cases": [
+  {
+   "formula": "[Units] > 1",
+   "cells": [
+    "V:true",
+    "V:false",
+    "V:true",
+    "V:true"
+   ]
+  },
+  {
+   "formula": "[Units] = 2",
+   "cells": [
+    "V:true",
+    "V:false",
+    "V:false",
+    "V:false"
+   ]
+  },
+  {
+   "formula": "[Price] / [Units]",
+   "cells": [
+    "V:number:5.25",
+    "V:number:+Infinity",
+    "V:number:0.035714285714285712",
+    "V:number:83.333333333333329"
+   ]
+  },
+  {
+   "formula": "[Units] + 1",
+   "cells": [
+    "V:number:3",
+    "V:number:1",
+    "V:number:8",
+    "V:number:13"
+   ]
+  },
+  {
+   "formula": "Text.From([Units]) & \"x\"",
+   "cells": [
+    "V:text:\"2x\"",
+    "V:text:\"0x\"",
+    "V:text:\"7x\"",
+    "V:text:\"12x\""
+   ]
+  },
+  {
+   "formula": "[Name] & \"!\"",
+   "cells": [
+    "V:text:\"Alpha!\"",
+    "V:text:\"beta!\"",
+    "V:text:\"!\"",
+    "V:text:\"Gamma!\""
+   ]
+  },
+  {
+   "formula": "Date.Year([Day])",
+   "cells": [
+    "V:number:2024",
+    "V:number:2024",
+    "V:number:2023",
+    "V:number:2024"
+   ]
+  },
+  {
+   "formula": "Date.AddDays([Day], [Units])",
+   "cells": [
+    "V:date:2024-01-17",
+    "V:date:2024-02-29",
+    "V:date:2024-01-07",
+    "V:date:2024-06-13"
+   ]
+  },
+  {
+   "formula": "if [Flag] then \"Y\" else \"N\"",
+   "cells": [
+    "V:text:\"Y\"",
+    "V:text:\"N\"",
+    "V:text:\"Y\"",
+    "V:text:\"N\""
+   ]
+  },
+  {
+   "formula": "not [Flag]",
+   "cells": [
+    "V:false",
+    "V:true",
+    "V:false",
+    "V:true"
+   ]
+  },
+  {
+   "formula": "Number.Round([Price] * 1.1, 1)",
+   "cells": [
+    "V:number:11.60",
+    "V:number:3.3",
+    "V:number:0.3",
+    "V:number:1100"
+   ]
+  },
+  {
+   "formula": "Text.Length([Name])",
+   "cells": [
+    "V:number:5",
+    "V:number:4",
+    "V:number:0",
+    "V:number:5"
+   ]
+  },
+  {
+   "formula": "[Name] = \"\"",
+   "cells": [
+    "V:false",
+    "V:false",
+    "V:true",
+    "V:false"
+   ]
+  },
+  {
+   "formula": "Date.MonthName([Day])",
+   "cells": [
+    "V:text:\"January\"",
+    "V:text:\"February\"",
+    "V:text:\"December\"",
+    "V:text:\"June\""
+   ]
+  },
+  {
+   "formula": "List.Sum({[Units], [Price]})",
+   "cells": [
+    "V:number:12.5",
+    "V:number:3",
+    "V:number:7.25",
+    "V:number:1012"
+   ]
+  },
+  {
+   "formula": "[Units] ?? 0",
+   "cells": [
+    "V:number:2",
+    "V:number:0",
+    "V:number:7",
+    "V:number:12"
+   ]
+  },
+  {
+   "formula": "try [Units] / 0 otherwise -1",
+   "cells": [
+    "V:number:+Infinity",
+    "V:number:NaN",
+    "V:number:+Infinity",
+    "V:number:+Infinity"
+   ]
+  },
+  {
+   "formula": "Value.Type([Units]) = Int64.Type",
+   "cells": [
+    "V:false",
+    "V:false",
+    "V:false",
+    "V:false"
+   ]
+  },
+  {
+   "formula": "Text.PadStart(Text.From([Units]), 3, \"0\")",
+   "cells": [
+    "V:text:\"002\"",
+    "V:text:\"000\"",
+    "V:text:\"007\"",
+    "V:text:\"012\""
+   ]
+  },
+  {
+   "formula": "[Price] >= 10",
+   "cells": [
+    "V:true",
+    "V:false",
+    "V:false",
+    "V:true"
+   ]
+  },
+  {
+   "formula": "Number.ToText([Price], \"F2\")",
+   "cells": [
+    "V:text:\"10.50\"",
+    "V:text:\"3.00\"",
+    "V:text:\"0.25\"",
+    "V:text:\"1000.00\""
+   ]
+  },
+  {
+   "formula": "Duration.Days(#date(2024,12,31) - [Day])",
+   "cells": [
+    "V:number:351",
+    "V:number:306",
+    "V:number:366",
+    "V:number:213"
+   ]
+  },
+  {
+   "formula": "[Units] - [Price]",
+   "cells": [
+    "V:number:-8.5",
+    "V:number:-3",
+    "V:number:6.75",
+    "V:number:-988"
+   ]
+  },
+  {
+   "formula": "Text.Upper([Name]) & Text.From([Price])",
+   "cells": [
+    "V:text:\"ALPHA10.5\"",
+    "V:text:\"BETA3\"",
+    "V:text:\"0.25\"",
+    "V:text:\"GAMMA1000\""
+   ]
+  },
+  {
+   "formula": "Logical.ToText([Flag])",
+   "cells": [
+    "V:text:\"true\"",
+    "V:text:\"false\"",
+    "V:text:\"true\"",
+    "V:text:\"false\""
+   ]
+  },
+  {
+   "formula": "Record.Field(_, \"Units\") + 1",
+   "cells": [
+    "V:number:3",
+    "V:number:1",
+    "V:number:8",
+    "V:number:13"
+   ]
+  }
+ ]
+}
