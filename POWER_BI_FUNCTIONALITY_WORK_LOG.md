@@ -2238,3 +2238,9 @@ Spec 484/484 exact. Probes 224: 219 exact, 5 refused. Holdout 115: 114 exact, 1 
 Spec 284: 280 exact, 4 refused (#table). Holdout 81: 79 exact, 2 refused. Fresh 35: 35 exact. 0 wrong anywhere.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4354 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 195 (Task 106 m-date-96: Power Query Date/DateTime/DateTimeZone/Time/Duration family (m-date-96): deterministic date and time functions, literals, arithmetic, text parsing and .NET formats exact against live Power BI; clock- and machine-zone-dependent results refused.)
+
+Spec 622: 615 exact, 7 refused. Holdout 146: 143 exact, 3 refused. Fresh 50: 48 exact, 2 refused. 0 wrong anywhere.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4355 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

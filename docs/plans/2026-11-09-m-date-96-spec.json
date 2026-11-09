@@ -1,0 +1,2493 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "Date.Year(#date(2024,2,29))",
+   "power_bi": "V:number:2024"
+  },
+  {
+   "expression": "Date.Month(#date(2024,2,29))",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Date.Day(#date(2024,2,29))",
+   "power_bi": "V:number:29"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(2024,2,29))",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Date.DayOfYear(#date(2024,2,29))",
+   "power_bi": "V:number:60"
+  },
+  {
+   "expression": "Date.DaysInMonth(#date(2024,2,29))",
+   "power_bi": "V:number:29"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#date(2024,2,29))",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(2024,2,29))",
+   "power_bi": "V:number:9"
+  },
+  {
+   "expression": "Date.IsLeapYear(#date(2024,2,29))",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Date.StartOfMonth(#date(2024,2,29))",
+   "power_bi": "V:date:2024-02-01"
+  },
+  {
+   "expression": "Date.EndOfMonth(#date(2024,2,29))",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#date(2024,2,29))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#date(2024,2,29))",
+   "power_bi": "V:date:2024-03-31"
+  },
+  {
+   "expression": "Date.StartOfYear(#date(2024,2,29))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.EndOfYear(#date(2024,2,29))",
+   "power_bi": "V:date:2024-12-31"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(2024,2,29))",
+   "power_bi": "V:date:2024-02-25"
+  },
+  {
+   "expression": "Date.EndOfWeek(#date(2024,2,29))",
+   "power_bi": "V:date:2024-03-02"
+  },
+  {
+   "expression": "Date.StartOfDay(#date(2024,2,29))",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Date.EndOfDay(#date(2024,2,29))",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Date.ToRecord(#date(2024,2,29))",
+   "power_bi": "V:record:[\"Year\"=number:2024,\"Month\"=number:2,\"Day\"=number:29]"
+  },
+  {
+   "expression": "Date.DayOfWeekName(#date(2024,2,29))",
+   "power_bi": "V:text:\"Thursday\""
+  },
+  {
+   "expression": "Date.AddDays(#date(2024,2,29), 1)",
+   "power_bi": "V:date:2024-03-01"
+  },
+  {
+   "expression": "Date.AddDays(#date(2024,2,29), -60)",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.AddMonths(#date(2024,2,29), 1)",
+   "power_bi": "V:date:2024-03-29"
+  },
+  {
+   "expression": "Date.AddYears(#date(2024,2,29), 1)",
+   "power_bi": "V:date:2025-02-28"
+  },
+  {
+   "expression": "Date.AddQuarters(#date(2024,2,29), 2)",
+   "power_bi": "V:date:2024-08-29"
+  },
+  {
+   "expression": "Date.AddWeeks(#date(2024,2,29), -1)",
+   "power_bi": "V:date:2024-02-22"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(2024,2,29), Day.Monday)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(2024,2,29), Day.Sunday)",
+   "power_bi": "V:date:2024-02-25"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(2024,2,29), Day.Monday)",
+   "power_bi": "V:number:9"
+  },
+  {
+   "expression": "Date.ToText(#date(2024,2,29), \"yyyy-MM-dd\")",
+   "power_bi": "V:text:\"2024-02-29\""
+  },
+  {
+   "expression": "Date.ToText(#date(2024,2,29), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "V:text:\"29 Feb 2024\""
+  },
+  {
+   "expression": "Date.ToText(#date(2024,2,29), [Format=\"D\", Culture=\"de-DE\"])",
+   "power_bi": "V:text:\"Donnerstag, 29. Februar 2024\""
+  },
+  {
+   "expression": "Date.MonthName(#date(2024,2,29), \"fr-FR\")",
+   "power_bi": "V:text:\"février\""
+  },
+  {
+   "expression": "Date.ToText(#date(2024,2,29))",
+   "power_bi": "V:text:\"2/29/2024\""
+  },
+  {
+   "expression": "#date(2024,2,29) + #duration(1,0,0,0)",
+   "power_bi": "V:date:2024-03-01"
+  },
+  {
+   "expression": "#date(2024,2,29) - #duration(0,12,0,0)",
+   "power_bi": "V:date:2024-02-28"
+  },
+  {
+   "expression": "DateTime.From(#date(2024,2,29))",
+   "power_bi": "V:datetime:2024-02-29T00:00:00.0000000"
+  },
+  {
+   "expression": "Text.From(#date(2024,2,29))",
+   "power_bi": "V:text:\"2/29/2024\""
+  },
+  {
+   "expression": "Date.Year(#date(2023,12,31))",
+   "power_bi": "V:number:2023"
+  },
+  {
+   "expression": "Date.Day(#date(2023,12,31))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(2023,12,31))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.DayOfYear(#date(2023,12,31))",
+   "power_bi": "V:number:365"
+  },
+  {
+   "expression": "Date.DaysInMonth(#date(2023,12,31))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#date(2023,12,31))",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#date(2023,12,31))",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(2023,12,31))",
+   "power_bi": "V:number:53"
+  },
+  {
+   "expression": "Date.IsLeapYear(#date(2023,12,31))",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Date.StartOfMonth(#date(2023,12,31))",
+   "power_bi": "V:date:2023-12-01"
+  },
+  {
+   "expression": "Date.EndOfMonth(#date(2023,12,31))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#date(2023,12,31))",
+   "power_bi": "V:date:2023-10-01"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#date(2023,12,31))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.EndOfYear(#date(2023,12,31))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.EndOfWeek(#date(2023,12,31))",
+   "power_bi": "V:date:2024-01-06"
+  },
+  {
+   "expression": "Date.StartOfDay(#date(2023,12,31))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.EndOfDay(#date(2023,12,31))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.MonthName(#date(2023,12,31))",
+   "power_bi": "V:text:\"December\""
+  },
+  {
+   "expression": "Date.DayOfWeekName(#date(2023,12,31))",
+   "power_bi": "V:text:\"Sunday\""
+  },
+  {
+   "expression": "Date.AddDays(#date(2023,12,31), 1)",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.AddDays(#date(2023,12,31), -60)",
+   "power_bi": "V:date:2023-11-01"
+  },
+  {
+   "expression": "Date.AddMonths(#date(2023,12,31), 1)",
+   "power_bi": "V:date:2024-01-31"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(2023,12,31), Day.Monday)",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(2023,12,31), Day.Sunday)",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(2023,12,31), Day.Monday)",
+   "power_bi": "V:number:53"
+  },
+  {
+   "expression": "Date.ToText(#date(2023,12,31), \"yyyy-MM-dd\")",
+   "power_bi": "V:text:\"2023-12-31\""
+  },
+  {
+   "expression": "Date.ToText(#date(2023,12,31), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "V:text:\"31 Dec 2023\""
+  },
+  {
+   "expression": "Date.ToText(#date(2023,12,31), [Format=\"D\", Culture=\"de-DE\"])",
+   "power_bi": "V:text:\"Sonntag, 31. Dezember 2023\""
+  },
+  {
+   "expression": "Date.ToText(#date(2023,12,31))",
+   "power_bi": "V:text:\"12/31/2023\""
+  },
+  {
+   "expression": "#date(2023,12,31) + #duration(1,0,0,0)",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "#date(2023,12,31) - #duration(0,12,0,0)",
+   "power_bi": "V:date:2023-12-30"
+  },
+  {
+   "expression": "Date.From(#date(2023,12,31))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "DateTime.From(#date(2023,12,31))",
+   "power_bi": "V:datetime:2023-12-31T00:00:00.0000000"
+  },
+  {
+   "expression": "Text.From(#date(2023,12,31))",
+   "power_bi": "V:text:\"12/31/2023\""
+  },
+  {
+   "expression": "Date.Year(#date(2024,1,1))",
+   "power_bi": "V:number:2024"
+  },
+  {
+   "expression": "Date.Day(#date(2024,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DayOfYear(#date(2024,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DaysInMonth(#date(2024,1,1))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#date(2024,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.IsLeapYear(#date(2024,1,1))",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Date.StartOfMonth(#date(2024,1,1))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#date(2024,1,1))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.StartOfYear(#date(2024,1,1))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(2024,1,1))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.EndOfWeek(#date(2024,1,1))",
+   "power_bi": "V:date:2024-01-06"
+  },
+  {
+   "expression": "Date.StartOfDay(#date(2024,1,1))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.EndOfDay(#date(2024,1,1))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "Date.ToRecord(#date(2024,1,1))",
+   "power_bi": "V:record:[\"Year\"=number:2024,\"Month\"=number:1,\"Day\"=number:1]"
+  },
+  {
+   "expression": "Date.MonthName(#date(2024,1,1))",
+   "power_bi": "V:text:\"January\""
+  },
+  {
+   "expression": "Date.DayOfWeekName(#date(2024,1,1))",
+   "power_bi": "V:text:\"Monday\""
+  },
+  {
+   "expression": "Date.AddDays(#date(2024,1,1), 1)",
+   "power_bi": "V:date:2024-01-02"
+  },
+  {
+   "expression": "Date.AddDays(#date(2024,1,1), -60)",
+   "power_bi": "V:date:2023-11-02"
+  },
+  {
+   "expression": "Date.AddMonths(#date(2024,1,1), -13)",
+   "power_bi": "V:date:2022-12-01"
+  },
+  {
+   "expression": "Date.AddYears(#date(2024,1,1), 1)",
+   "power_bi": "V:date:2025-01-01"
+  },
+  {
+   "expression": "Date.AddQuarters(#date(2024,1,1), 2)",
+   "power_bi": "V:date:2024-07-01"
+  },
+  {
+   "expression": "Date.AddWeeks(#date(2024,1,1), -1)",
+   "power_bi": "V:date:2023-12-25"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(2024,1,1), Day.Monday)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(2024,1,1), Day.Sunday)",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(2024,1,1), Day.Monday)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.ToText(#date(2024,1,1), \"yyyy-MM-dd\")",
+   "power_bi": "V:text:\"2024-01-01\""
+  },
+  {
+   "expression": "Date.ToText(#date(2024,1,1), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "V:text:\"01 Jan 2024\""
+  },
+  {
+   "expression": "Date.ToText(#date(2024,1,1), [Format=\"D\", Culture=\"de-DE\"])",
+   "power_bi": "V:text:\"Montag, 1. Januar 2024\""
+  },
+  {
+   "expression": "Date.MonthName(#date(2024,1,1), \"fr-FR\")",
+   "power_bi": "V:text:\"janvier\""
+  },
+  {
+   "expression": "Date.ToText(#date(2024,1,1))",
+   "power_bi": "V:text:\"1/1/2024\""
+  },
+  {
+   "expression": "#date(2024,1,1) + #duration(1,0,0,0)",
+   "power_bi": "V:date:2024-01-02"
+  },
+  {
+   "expression": "#date(2024,1,1) - #duration(0,12,0,0)",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "DateTime.From(#date(2024,1,1))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Text.From(#date(2024,1,1))",
+   "power_bi": "V:text:\"1/1/2024\""
+  },
+  {
+   "expression": "Date.Month(#date(1,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(1,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DayOfYear(#date(1,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DaysInMonth(#date(1,1,1))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#date(1,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#date(1,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(1,1,1))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.IsLeapYear(#date(1,1,1))",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Date.EndOfMonth(#date(1,1,1))",
+   "power_bi": "V:date:0001-01-31"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#date(1,1,1))",
+   "power_bi": "V:date:0001-01-01"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#date(1,1,1))",
+   "power_bi": "V:date:0001-03-31"
+  },
+  {
+   "expression": "Date.StartOfYear(#date(1,1,1))",
+   "power_bi": "V:date:0001-01-01"
+  },
+  {
+   "expression": "Date.EndOfYear(#date(1,1,1))",
+   "power_bi": "V:date:0001-12-31"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(1,1,1))",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.StartOfDay(#date(1,1,1))",
+   "power_bi": "V:date:0001-01-01"
+  },
+  {
+   "expression": "Date.EndOfDay(#date(1,1,1))",
+   "power_bi": "V:date:0001-01-01"
+  },
+  {
+   "expression": "Date.ToRecord(#date(1,1,1))",
+   "power_bi": "V:record:[\"Year\"=number:1,\"Month\"=number:1,\"Day\"=number:1]"
+  },
+  {
+   "expression": "Date.MonthName(#date(1,1,1))",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to DateTimeZone."
+  },
+  {
+   "expression": "Date.DayOfWeekName(#date(1,1,1))",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to DateTimeZone."
+  },
+  {
+   "expression": "Date.AddDays(#date(1,1,1), 1)",
+   "power_bi": "V:date:0001-01-02"
+  },
+  {
+   "expression": "Date.AddDays(#date(1,1,1), -60)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.AddMonths(#date(1,1,1), 1)",
+   "power_bi": "V:date:0001-02-01"
+  },
+  {
+   "expression": "Date.AddMonths(#date(1,1,1), -13)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.AddQuarters(#date(1,1,1), 2)",
+   "power_bi": "V:date:0001-07-01"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(1,1,1), Day.Monday)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(1,1,1), Day.Sunday)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.ToText(#date(1,1,1), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "V:text:\"01 Jan 0001\""
+  },
+  {
+   "expression": "Date.MonthName(#date(1,1,1), \"fr-FR\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to DateTimeZone."
+  },
+  {
+   "expression": "Date.ToText(#date(1,1,1))",
+   "power_bi": "V:text:\"1/1/0001\""
+  },
+  {
+   "expression": "#date(1,1,1) + #duration(1,0,0,0)",
+   "power_bi": "V:date:0001-01-02"
+  },
+  {
+   "expression": "Date.From(#date(1,1,1))",
+   "power_bi": "V:date:0001-01-01"
+  },
+  {
+   "expression": "DateTime.From(#date(1,1,1))",
+   "power_bi": "V:datetime:0001-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Text.From(#date(1,1,1))",
+   "power_bi": "V:text:\"1/1/0001\""
+  },
+  {
+   "expression": "Date.Year(#date(9999,12,31))",
+   "power_bi": "V:number:9999"
+  },
+  {
+   "expression": "Date.Day(#date(9999,12,31))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(9999,12,31))",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Date.DayOfYear(#date(9999,12,31))",
+   "power_bi": "V:number:365"
+  },
+  {
+   "expression": "Date.DaysInMonth(#date(9999,12,31))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#date(9999,12,31))",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#date(9999,12,31))",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(9999,12,31))",
+   "power_bi": "V:number:53"
+  },
+  {
+   "expression": "Date.StartOfMonth(#date(9999,12,31))",
+   "power_bi": "V:date:9999-12-01"
+  },
+  {
+   "expression": "Date.EndOfMonth(#date(9999,12,31))",
+   "power_bi": "V:date:9999-12-31"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#date(9999,12,31))",
+   "power_bi": "V:date:9999-10-01"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#date(9999,12,31))",
+   "power_bi": "V:date:9999-12-31"
+  },
+  {
+   "expression": "Date.EndOfYear(#date(9999,12,31))",
+   "power_bi": "V:date:9999-12-31"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(9999,12,31))",
+   "power_bi": "V:date:9999-12-26"
+  },
+  {
+   "expression": "Date.EndOfWeek(#date(9999,12,31))",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.EndOfDay(#date(9999,12,31))",
+   "power_bi": "V:date:9999-12-31"
+  },
+  {
+   "expression": "Date.ToRecord(#date(9999,12,31))",
+   "power_bi": "V:record:[\"Year\"=number:9999,\"Month\"=number:12,\"Day\"=number:31]"
+  },
+  {
+   "expression": "Date.MonthName(#date(9999,12,31))",
+   "power_bi": "V:text:\"December\""
+  },
+  {
+   "expression": "Date.DayOfWeekName(#date(9999,12,31))",
+   "power_bi": "V:text:\"Friday\""
+  },
+  {
+   "expression": "Date.AddDays(#date(9999,12,31), 1)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.AddDays(#date(9999,12,31), -60)",
+   "power_bi": "V:date:9999-11-01"
+  },
+  {
+   "expression": "Date.AddMonths(#date(9999,12,31), 1)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.AddYears(#date(9999,12,31), 1)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.AddQuarters(#date(9999,12,31), 2)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(9999,12,31), Day.Monday)",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(9999,12,31), Day.Sunday)",
+   "power_bi": "V:date:9999-12-26"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(9999,12,31), Day.Monday)",
+   "power_bi": "V:number:53"
+  },
+  {
+   "expression": "Date.ToText(#date(9999,12,31), \"yyyy-MM-dd\")",
+   "power_bi": "V:text:\"9999-12-31\""
+  },
+  {
+   "expression": "Date.ToText(#date(9999,12,31), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "V:text:\"31 Dec 9999\""
+  },
+  {
+   "expression": "Date.ToText(#date(9999,12,31), [Format=\"D\", Culture=\"de-DE\"])",
+   "power_bi": "V:text:\"Freitag, 31. Dezember 9999\""
+  },
+  {
+   "expression": "Date.MonthName(#date(9999,12,31), \"fr-FR\")",
+   "power_bi": "V:text:\"décembre\""
+  },
+  {
+   "expression": "Date.ToText(#date(9999,12,31))",
+   "power_bi": "V:text:\"12/31/9999\""
+  },
+  {
+   "expression": "#date(9999,12,31) + #duration(1,0,0,0)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "#date(9999,12,31) - #duration(0,12,0,0)",
+   "power_bi": "V:date:9999-12-30"
+  },
+  {
+   "expression": "Date.From(#date(9999,12,31))",
+   "power_bi": "V:date:9999-12-31"
+  },
+  {
+   "expression": "Text.From(#date(9999,12,31))",
+   "power_bi": "V:text:\"12/31/9999\""
+  },
+  {
+   "expression": "Date.Year(#date(2025,6,15))",
+   "power_bi": "V:number:2025"
+  },
+  {
+   "expression": "Date.Month(#date(2025,6,15))",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Date.Day(#date(2025,6,15))",
+   "power_bi": "V:number:15"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(2025,6,15))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.DayOfYear(#date(2025,6,15))",
+   "power_bi": "V:number:166"
+  },
+  {
+   "expression": "Date.DaysInMonth(#date(2025,6,15))",
+   "power_bi": "V:number:30"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#date(2025,6,15))",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#date(2025,6,15))",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(2025,6,15))",
+   "power_bi": "V:number:25"
+  },
+  {
+   "expression": "Date.IsLeapYear(#date(2025,6,15))",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Date.StartOfMonth(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-01"
+  },
+  {
+   "expression": "Date.EndOfMonth(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-30"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#date(2025,6,15))",
+   "power_bi": "V:date:2025-04-01"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-30"
+  },
+  {
+   "expression": "Date.StartOfYear(#date(2025,6,15))",
+   "power_bi": "V:date:2025-01-01"
+  },
+  {
+   "expression": "Date.EndOfYear(#date(2025,6,15))",
+   "power_bi": "V:date:2025-12-31"
+  },
+  {
+   "expression": "Date.StartOfWeek(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-15"
+  },
+  {
+   "expression": "Date.EndOfWeek(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-21"
+  },
+  {
+   "expression": "Date.StartOfDay(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-15"
+  },
+  {
+   "expression": "Date.EndOfDay(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-15"
+  },
+  {
+   "expression": "Date.MonthName(#date(2025,6,15))",
+   "power_bi": "V:text:\"June\""
+  },
+  {
+   "expression": "Date.DayOfWeekName(#date(2025,6,15))",
+   "power_bi": "V:text:\"Sunday\""
+  },
+  {
+   "expression": "Date.AddDays(#date(2025,6,15), 1)",
+   "power_bi": "V:date:2025-06-16"
+  },
+  {
+   "expression": "Date.AddDays(#date(2025,6,15), -60)",
+   "power_bi": "V:date:2025-04-16"
+  },
+  {
+   "expression": "Date.AddMonths(#date(2025,6,15), 1)",
+   "power_bi": "V:date:2025-07-15"
+  },
+  {
+   "expression": "Date.AddMonths(#date(2025,6,15), -13)",
+   "power_bi": "V:date:2024-05-15"
+  },
+  {
+   "expression": "Date.AddYears(#date(2025,6,15), 1)",
+   "power_bi": "V:date:2026-06-15"
+  },
+  {
+   "expression": "Date.AddWeeks(#date(2025,6,15), -1)",
+   "power_bi": "V:date:2025-06-08"
+  },
+  {
+   "expression": "Date.DayOfWeek(#date(2025,6,15), Day.Monday)",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Date.WeekOfYear(#date(2025,6,15), Day.Monday)",
+   "power_bi": "V:number:24"
+  },
+  {
+   "expression": "Date.ToText(#date(2025,6,15), \"yyyy-MM-dd\")",
+   "power_bi": "V:text:\"2025-06-15\""
+  },
+  {
+   "expression": "Date.ToText(#date(2025,6,15), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "V:text:\"15 Jun 2025\""
+  },
+  {
+   "expression": "Date.MonthName(#date(2025,6,15), \"fr-FR\")",
+   "power_bi": "V:text:\"juin\""
+  },
+  {
+   "expression": "Date.ToText(#date(2025,6,15))",
+   "power_bi": "V:text:\"6/15/2025\""
+  },
+  {
+   "expression": "#date(2025,6,15) + #duration(1,0,0,0)",
+   "power_bi": "V:date:2025-06-16"
+  },
+  {
+   "expression": "#date(2025,6,15) - #duration(0,12,0,0)",
+   "power_bi": "V:date:2025-06-14"
+  },
+  {
+   "expression": "Date.From(#date(2025,6,15))",
+   "power_bi": "V:date:2025-06-15"
+  },
+  {
+   "expression": "Text.From(#date(2025,6,15))",
+   "power_bi": "V:text:\"6/15/2025\""
+  },
+  {
+   "expression": "Date.Year(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:2024"
+  },
+  {
+   "expression": "Date.Month(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Date.Day(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:29"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Date.DayOfYear(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:60"
+  },
+  {
+   "expression": "Date.DaysInMonth(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:29"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:9"
+  },
+  {
+   "expression": "Date.StartOfMonth(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-02-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfMonth(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-02-29T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-03-31T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.StartOfYear(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.StartOfDay(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-02-29T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfDay(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-02-29T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.ToRecord(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2024, 2, 29, 13, 45, 30.5) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:text:\"February\""
+  },
+  {
+   "expression": "Date.DayOfWeekName(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:text:\"Thursday\""
+  },
+  {
+   "expression": "Date.AddDays(#datetime(2024,2,29,13,45,30.5), 1)",
+   "power_bi": "V:datetime:2024-03-01T13:45:30.5000000"
+  },
+  {
+   "expression": "Date.AddDays(#datetime(2024,2,29,13,45,30.5), -60)",
+   "power_bi": "V:datetime:2023-12-31T13:45:30.5000000"
+  },
+  {
+   "expression": "Date.AddMonths(#datetime(2024,2,29,13,45,30.5), 1)",
+   "power_bi": "V:datetime:2024-03-29T13:45:30.5000000"
+  },
+  {
+   "expression": "Date.AddMonths(#datetime(2024,2,29,13,45,30.5), -13)",
+   "power_bi": "V:datetime:2023-01-29T13:45:30.5000000"
+  },
+  {
+   "expression": "Date.AddQuarters(#datetime(2024,2,29,13,45,30.5), 2)",
+   "power_bi": "V:datetime:2024-08-29T13:45:30.5000000"
+  },
+  {
+   "expression": "Date.AddWeeks(#datetime(2024,2,29,13,45,30.5), -1)",
+   "power_bi": "V:datetime:2024-02-22T13:45:30.5000000"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetime(2024,2,29,13,45,30.5), Day.Monday)",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetime(2024,2,29,13,45,30.5), Day.Sunday)",
+   "power_bi": "V:datetime:2024-02-25T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetime(2024,2,29,13,45,30.5), Day.Monday)",
+   "power_bi": "V:number:9"
+  },
+  {
+   "expression": "Date.ToText(#datetime(2024,2,29,13,45,30.5), [Format=\"D\", Culture=\"de-DE\"])",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2024, 2, 29, 13, 45, 30.5) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetime(2024,2,29,13,45,30.5), \"fr-FR\")",
+   "power_bi": "V:text:\"février\""
+  },
+  {
+   "expression": "#datetime(2024,2,29,13,45,30.5) - #duration(0,12,0,0)",
+   "power_bi": "V:datetime:2024-02-29T01:45:30.5000000"
+  },
+  {
+   "expression": "Date.From(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "DateTime.From(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-02-29T13:45:30.5000000"
+  },
+  {
+   "expression": "Text.From(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:text:\"2/29/2024 1:45:30 PM\""
+  },
+  {
+   "expression": "Date.Month(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:12"
+  },
+  {
+   "expression": "Date.Day(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.DayOfYear(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:365"
+  },
+  {
+   "expression": "Date.DaysInMonth(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Date.StartOfMonth(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.StartOfYear(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfYear(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-31T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-31T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfWeek(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2024-01-06T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.StartOfDay(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-31T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfDay(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-31T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.ToRecord(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2023, 12, 31, 23, 59, 59) to type Date."
+  },
+  {
+   "expression": "Date.DayOfWeekName(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:text:\"Sunday\""
+  },
+  {
+   "expression": "Date.AddDays(#datetime(2023,12,31,23,59,59), 1)",
+   "power_bi": "V:datetime:2024-01-01T23:59:59.0000000"
+  },
+  {
+   "expression": "Date.AddDays(#datetime(2023,12,31,23,59,59), -60)",
+   "power_bi": "V:datetime:2023-11-01T23:59:59.0000000"
+  },
+  {
+   "expression": "Date.AddMonths(#datetime(2023,12,31,23,59,59), 1)",
+   "power_bi": "V:datetime:2024-01-31T23:59:59.0000000"
+  },
+  {
+   "expression": "Date.AddYears(#datetime(2023,12,31,23,59,59), 1)",
+   "power_bi": "V:datetime:2024-12-31T23:59:59.0000000"
+  },
+  {
+   "expression": "Date.AddQuarters(#datetime(2023,12,31,23,59,59), 2)",
+   "power_bi": "V:datetime:2024-06-30T23:59:59.0000000"
+  },
+  {
+   "expression": "Date.AddWeeks(#datetime(2023,12,31,23,59,59), -1)",
+   "power_bi": "V:datetime:2023-12-24T23:59:59.0000000"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetime(2023,12,31,23,59,59), Day.Monday)",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetime(2023,12,31,23,59,59), Day.Monday)",
+   "power_bi": "V:number:53"
+  },
+  {
+   "expression": "Date.ToText(#datetime(2023,12,31,23,59,59), \"yyyy-MM-dd\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2023, 12, 31, 23, 59, 59) to type Date."
+  },
+  {
+   "expression": "Date.ToText(#datetime(2023,12,31,23,59,59), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2023, 12, 31, 23, 59, 59) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetime(2023,12,31,23,59,59), \"fr-FR\")",
+   "power_bi": "V:text:\"décembre\""
+  },
+  {
+   "expression": "Date.ToText(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2023, 12, 31, 23, 59, 59) to type Date."
+  },
+  {
+   "expression": "#datetime(2023,12,31,23,59,59) + #duration(1,0,0,0)",
+   "power_bi": "V:datetime:2024-01-01T23:59:59.0000000"
+  },
+  {
+   "expression": "Date.From(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:date:2023-12-31"
+  },
+  {
+   "expression": "DateTime.From(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-31T23:59:59.0000000"
+  },
+  {
+   "expression": "Text.From(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:text:\"12/31/2023 11:59:59 PM\""
+  },
+  {
+   "expression": "Date.Month(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.Day(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DayOfYear(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DaysInMonth(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.WeekOfMonth(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.IsLeapYear(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Date.StartOfMonth(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-03-31T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.StartOfYear(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2023-12-31T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfWeek(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-06T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.StartOfDay(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.EndOfDay(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T23:59:59.9999999"
+  },
+  {
+   "expression": "Date.ToRecord(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2024, 1, 1, 0, 0, 0) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:text:\"January\""
+  },
+  {
+   "expression": "Date.AddDays(#datetime(2024,1,1,0,0,0), -60)",
+   "power_bi": "V:datetime:2023-11-02T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.AddMonths(#datetime(2024,1,1,0,0,0), -13)",
+   "power_bi": "V:datetime:2022-12-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.AddQuarters(#datetime(2024,1,1,0,0,0), 2)",
+   "power_bi": "V:datetime:2024-07-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.AddWeeks(#datetime(2024,1,1,0,0,0), -1)",
+   "power_bi": "V:datetime:2023-12-25T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetime(2024,1,1,0,0,0), Day.Monday)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetime(2024,1,1,0,0,0), Day.Sunday)",
+   "power_bi": "V:datetime:2023-12-31T00:00:00.0000000"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetime(2024,1,1,0,0,0), Day.Monday)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.ToText(#datetime(2024,1,1,0,0,0), \"yyyy-MM-dd\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2024, 1, 1, 0, 0, 0) to type Date."
+  },
+  {
+   "expression": "Date.ToText(#datetime(2024,1,1,0,0,0), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2024, 1, 1, 0, 0, 0) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetime(2024,1,1,0,0,0), \"fr-FR\")",
+   "power_bi": "V:text:\"janvier\""
+  },
+  {
+   "expression": "Date.ToText(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetime(2024, 1, 1, 0, 0, 0) to type Date."
+  },
+  {
+   "expression": "#datetime(2024,1,1,0,0,0) + #duration(1,0,0,0)",
+   "power_bi": "V:datetime:2024-01-02T00:00:00.0000000"
+  },
+  {
+   "expression": "#datetime(2024,1,1,0,0,0) - #duration(0,12,0,0)",
+   "power_bi": "V:datetime:2023-12-31T12:00:00.0000000"
+  },
+  {
+   "expression": "Date.From(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "DateTime.From(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Text.From(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:text:\"1/1/2024 12:00:00 AM\""
+  },
+  {
+   "expression": "Date.Day(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:10"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:11"
+  },
+  {
+   "expression": "Date.IsLeapYear(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Date.StartOfMonth(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-03-01T00:00:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.EndOfMonth(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-03-31T23:59:59.9999999+05:30"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-03-31T23:59:59.9999999+05:30"
+  },
+  {
+   "expression": "Date.EndOfYear(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-12-31T23:59:59.9999999+05:30"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-03-10T00:00:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.ToRecord(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 3, 10, 8, 30, 0, 5, 30) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:text:\"March\""
+  },
+  {
+   "expression": "Date.AddDays(#datetimezone(2024,3,10,8,30,0,5,30), 1)",
+   "power_bi": "V:datetimezone:2024-03-11T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.AddDays(#datetimezone(2024,3,10,8,30,0,5,30), -60)",
+   "power_bi": "V:datetimezone:2024-01-10T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.AddMonths(#datetimezone(2024,3,10,8,30,0,5,30), 1)",
+   "power_bi": "V:datetimezone:2024-04-10T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.AddMonths(#datetimezone(2024,3,10,8,30,0,5,30), -13)",
+   "power_bi": "V:datetimezone:2023-02-10T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.AddYears(#datetimezone(2024,3,10,8,30,0,5,30), 1)",
+   "power_bi": "V:datetimezone:2025-03-10T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.AddQuarters(#datetimezone(2024,3,10,8,30,0,5,30), 2)",
+   "power_bi": "V:datetimezone:2024-09-10T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.AddWeeks(#datetimezone(2024,3,10,8,30,0,5,30), -1)",
+   "power_bi": "V:datetimezone:2024-03-03T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetimezone(2024,3,10,8,30,0,5,30), Day.Monday)",
+   "power_bi": "V:number:6"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetimezone(2024,3,10,8,30,0,5,30), Day.Sunday)",
+   "power_bi": "V:datetimezone:2024-03-10T00:00:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetimezone(2024,3,10,8,30,0,5,30), Day.Monday)",
+   "power_bi": "V:number:10"
+  },
+  {
+   "expression": "Date.ToText(#datetimezone(2024,3,10,8,30,0,5,30), \"yyyy-MM-dd\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 3, 10, 8, 30, 0, 5, 30) to type Date."
+  },
+  {
+   "expression": "Date.ToText(#datetimezone(2024,3,10,8,30,0,5,30), [Format=\"D\", Culture=\"de-DE\"])",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 3, 10, 8, 30, 0, 5, 30) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetimezone(2024,3,10,8,30,0,5,30), \"fr-FR\")",
+   "power_bi": "V:text:\"mars\""
+  },
+  {
+   "expression": "#datetimezone(2024,3,10,8,30,0,5,30) + #duration(1,0,0,0)",
+   "power_bi": "V:datetimezone:2024-03-11T08:30:00.0000000+05:30"
+  },
+  {
+   "expression": "Date.From(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:date:2024-03-10"
+  },
+  {
+   "expression": "DateTime.From(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetime:2024-03-10T07:00:00.0000000"
+  },
+  {
+   "expression": "Text.From(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:text:\"3/10/2024 8:30:00 AM +05:30\""
+  },
+  {
+   "expression": "Date.Year(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:2024"
+  },
+  {
+   "expression": "Date.Month(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.Day(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DayOfYear(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.DaysInMonth(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:31"
+  },
+  {
+   "expression": "Date.QuarterOfYear(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.StartOfMonth(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.EndOfMonth(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-31T23:59:59.9999999-08:00"
+  },
+  {
+   "expression": "Date.StartOfQuarter(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.EndOfQuarter(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-03-31T23:59:59.9999999-08:00"
+  },
+  {
+   "expression": "Date.StartOfYear(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.EndOfYear(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-12-31T23:59:59.9999999-08:00"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2023-12-31T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.EndOfWeek(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-06T23:59:59.9999999-08:00"
+  },
+  {
+   "expression": "Date.StartOfDay(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.EndOfDay(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-01T23:59:59.9999999-08:00"
+  },
+  {
+   "expression": "Date.ToRecord(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 1, 1, 0, 0, 0, -8, 0) to type Date."
+  },
+  {
+   "expression": "Date.DayOfWeekName(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:text:\"Monday\""
+  },
+  {
+   "expression": "Date.AddDays(#datetimezone(2024,1,1,0,0,0,-8,0), 1)",
+   "power_bi": "V:datetimezone:2024-01-02T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.AddDays(#datetimezone(2024,1,1,0,0,0,-8,0), -60)",
+   "power_bi": "V:datetimezone:2023-11-02T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.AddMonths(#datetimezone(2024,1,1,0,0,0,-8,0), 1)",
+   "power_bi": "V:datetimezone:2024-02-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.AddMonths(#datetimezone(2024,1,1,0,0,0,-8,0), -13)",
+   "power_bi": "V:datetimezone:2022-12-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.AddYears(#datetimezone(2024,1,1,0,0,0,-8,0), 1)",
+   "power_bi": "V:datetimezone:2025-01-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.DayOfWeek(#datetimezone(2024,1,1,0,0,0,-8,0), Day.Monday)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Date.StartOfWeek(#datetimezone(2024,1,1,0,0,0,-8,0), Day.Sunday)",
+   "power_bi": "V:datetimezone:2023-12-31T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.WeekOfYear(#datetimezone(2024,1,1,0,0,0,-8,0), Day.Monday)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Date.ToText(#datetimezone(2024,1,1,0,0,0,-8,0), \"yyyy-MM-dd\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 1, 1, 0, 0, 0, -8, 0) to type Date."
+  },
+  {
+   "expression": "Date.ToText(#datetimezone(2024,1,1,0,0,0,-8,0), [Format=\"dd MMM yyyy\", Culture=\"en-US\"])",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 1, 1, 0, 0, 0, -8, 0) to type Date."
+  },
+  {
+   "expression": "Date.ToText(#datetimezone(2024,1,1,0,0,0,-8,0), [Format=\"D\", Culture=\"de-DE\"])",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 1, 1, 0, 0, 0, -8, 0) to type Date."
+  },
+  {
+   "expression": "Date.MonthName(#datetimezone(2024,1,1,0,0,0,-8,0), \"fr-FR\")",
+   "power_bi": "V:text:\"janvier\""
+  },
+  {
+   "expression": "Date.ToText(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 1, 1, 0, 0, 0, -8, 0) to type Date."
+  },
+  {
+   "expression": "#datetimezone(2024,1,1,0,0,0,-8,0) - #duration(0,12,0,0)",
+   "power_bi": "V:datetimezone:2023-12-31T12:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Date.From(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "DateTime.From(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetime:2024-01-01T12:00:00.0000000"
+  },
+  {
+   "expression": "Text.From(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:text:\"1/1/2024 12:00:00 AM -08:00\""
+  },
+  {
+   "expression": "DateTime.Date(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "DateTime.ToRecord(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:record:[\"Year\"=number:2024,\"Month\"=number:2,\"Day\"=number:29,\"Hour\"=number:13,\"Minute\"=number:45,\"Second\"=number:30.5]"
+  },
+  {
+   "expression": "DateTime.ToText(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:text:\"2/29/2024 1:45:30 PM\""
+  },
+  {
+   "expression": "DateTime.ToText(#datetime(2024,2,29,13,45,30.5), \"yyyy-MM-ddTHH:mm:ss.fff\")",
+   "power_bi": "V:text:\"2024-02-29T13:45:30.500\""
+  },
+  {
+   "expression": "DateTime.AddZone(#datetime(2024,2,29,13,45,30.5), 2)",
+   "power_bi": "V:datetimezone:2024-02-29T13:45:30.5000000+02:00"
+  },
+  {
+   "expression": "Time.Hour(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:13"
+  },
+  {
+   "expression": "Time.Minute(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:45"
+  },
+  {
+   "expression": "Time.Second(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:number:30.5"
+  },
+  {
+   "expression": "Time.StartOfHour(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-02-29T13:00:00.0000000"
+  },
+  {
+   "expression": "Time.EndOfHour(#datetime(2024,2,29,13,45,30.5))",
+   "power_bi": "V:datetime:2024-02-29T13:59:59.9999999"
+  },
+  {
+   "expression": "DateTime.Time(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:time:23:59:59.0000000"
+  },
+  {
+   "expression": "DateTime.ToRecord(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:record:[\"Year\"=number:2023,\"Month\"=number:12,\"Day\"=number:31,\"Hour\"=number:23,\"Minute\"=number:59,\"Second\"=number:59]"
+  },
+  {
+   "expression": "DateTime.ToText(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:text:\"12/31/2023 11:59:59 PM\""
+  },
+  {
+   "expression": "DateTime.ToText(#datetime(2023,12,31,23,59,59), \"yyyy-MM-ddTHH:mm:ss.fff\")",
+   "power_bi": "V:text:\"2023-12-31T23:59:59.000\""
+  },
+  {
+   "expression": "DateTime.AddZone(#datetime(2023,12,31,23,59,59), 2)",
+   "power_bi": "V:datetimezone:2023-12-31T23:59:59.0000000+02:00"
+  },
+  {
+   "expression": "Time.Hour(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:23"
+  },
+  {
+   "expression": "Time.Minute(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:59"
+  },
+  {
+   "expression": "Time.Second(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:number:59"
+  },
+  {
+   "expression": "Time.StartOfHour(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-31T23:00:00.0000000"
+  },
+  {
+   "expression": "Time.EndOfHour(#datetime(2023,12,31,23,59,59))",
+   "power_bi": "V:datetime:2023-12-31T23:59:59.9999999"
+  },
+  {
+   "expression": "DateTime.Date(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "DateTime.Time(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:time:00:00:00.0000000"
+  },
+  {
+   "expression": "DateTime.ToRecord(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:record:[\"Year\"=number:2024,\"Month\"=number:1,\"Day\"=number:1,\"Hour\"=number:0,\"Minute\"=number:0,\"Second\"=number:0]"
+  },
+  {
+   "expression": "DateTime.ToText(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:text:\"1/1/2024 12:00:00 AM\""
+  },
+  {
+   "expression": "DateTime.ToText(#datetime(2024,1,1,0,0,0), \"yyyy-MM-ddTHH:mm:ss.fff\")",
+   "power_bi": "V:text:\"2024-01-01T00:00:00.000\""
+  },
+  {
+   "expression": "DateTime.AddZone(#datetime(2024,1,1,0,0,0), 2)",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000+02:00"
+  },
+  {
+   "expression": "Time.Hour(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.Minute(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.Second(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.StartOfHour(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "Time.EndOfHour(#datetime(2024,1,1,0,0,0))",
+   "power_bi": "V:datetime:2024-01-01T00:59:59.9999999"
+  },
+  {
+   "expression": "DateTime.ToRecord(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 3, 10, 8, 30, 0, 5, 30) to type DateTime."
+  },
+  {
+   "expression": "DateTime.ToText(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 3, 10, 8, 30, 0, 5, 30) to type DateTime."
+  },
+  {
+   "expression": "DateTime.ToText(#datetimezone(2024,3,10,8,30,0,5,30), \"yyyy-MM-ddTHH:mm:ss.fff\")",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 3, 10, 8, 30, 0, 5, 30) to type DateTime."
+  },
+  {
+   "expression": "DateTime.AddZone(#datetimezone(2024,3,10,8,30,0,5,30), 2)",
+   "power_bi": "ERR:Expression.Error: We cannot convert the value #datetimezone(2024, 3, 10, 8, 30, 0, 5, 30) to type DateTime."
+  },
+  {
+   "expression": "Time.Hour(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:8"
+  },
+  {
+   "expression": "Time.Minute(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:30"
+  },
+  {
+   "expression": "Time.Second(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.StartOfHour(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-03-10T08:00:00.0000000+05:30"
+  },
+  {
+   "expression": "Time.EndOfHour(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-03-10T08:59:59.9999999+05:30"
+  },
+  {
+   "expression": "DateTime.Date(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:date:2024-01-01"
+  },
+  {
+   "expression": "DateTime.Time(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:time:00:00:00.0000000"
+  },
+  {
+   "expression": "Time.Hour(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.Second(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.StartOfHour(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-01T00:00:00.0000000-08:00"
+  },
+  {
+   "expression": "Time.EndOfHour(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetimezone:2024-01-01T00:59:59.9999999-08:00"
+  },
+  {
+   "expression": "DateTimeZone.ZoneHours(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:5"
+  },
+  {
+   "expression": "DateTimeZone.ZoneMinutes(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:number:30"
+  },
+  {
+   "expression": "DateTimeZone.ToUtc(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetimezone:2024-03-10T03:00:00.0000000+00:00"
+  },
+  {
+   "expression": "DateTimeZone.SwitchZone(#datetimezone(2024,3,10,8,30,0,5,30), -5)",
+   "power_bi": "V:datetimezone:2024-03-09T22:00:00.0000000-05:00"
+  },
+  {
+   "expression": "DateTimeZone.SwitchZone(#datetimezone(2024,3,10,8,30,0,5,30), 0, 45)",
+   "power_bi": "V:datetimezone:2024-03-10T03:45:00.0000000+00:45"
+  },
+  {
+   "expression": "DateTimeZone.RemoveZone(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetime:2024-03-10T08:30:00.0000000"
+  },
+  {
+   "expression": "DateTimeZone.ToRecord(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:record:[\"Year\"=number:2024,\"Month\"=number:3,\"Day\"=number:10,\"Hour\"=number:8,\"Minute\"=number:30,\"Second\"=number:0,\"ZoneHours\"=number:5,\"ZoneMinutes\"=number:30]"
+  },
+  {
+   "expression": "DateTimeZone.ToText(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:text:\"3/10/2024 8:30:00 AM +05:30\""
+  },
+  {
+   "expression": "DateTimeZone.ToText(#datetimezone(2024,3,10,8,30,0,5,30), \"yyyy-MM-dd HH:mm zzz\")",
+   "power_bi": "V:text:\"2024-03-10 08:30 +05:30\""
+  },
+  {
+   "expression": "DateTimeZone.ZoneHours(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:-8"
+  },
+  {
+   "expression": "DateTimeZone.ZoneMinutes(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "DateTimeZone.SwitchZone(#datetimezone(2024,1,1,0,0,0,-8,0), -5)",
+   "power_bi": "V:datetimezone:2024-01-01T03:00:00.0000000-05:00"
+  },
+  {
+   "expression": "DateTimeZone.RemoveZone(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetime:2024-01-01T00:00:00.0000000"
+  },
+  {
+   "expression": "DateTimeZone.ToText(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:text:\"1/1/2024 12:00:00 AM -08:00\""
+  },
+  {
+   "expression": "DateTimeZone.ToText(#datetimezone(2024,1,1,0,0,0,-8,0), \"yyyy-MM-dd HH:mm zzz\")",
+   "power_bi": "V:text:\"2024-01-01 00:00 -08:00\""
+  },
+  {
+   "expression": "Time.Minute(#time(0,0,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.Second(#time(0,0,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Time.ToRecord(#time(0,0,0))",
+   "power_bi": "V:record:[\"Hour\"=number:0,\"Minute\"=number:0,\"Second\"=number:0]"
+  },
+  {
+   "expression": "Time.ToText(#time(0,0,0))",
+   "power_bi": "V:text:\"12:00 AM\""
+  },
+  {
+   "expression": "Time.ToText(#time(0,0,0), \"hh:mm tt\")",
+   "power_bi": "V:text:\"12:00 AM\""
+  },
+  {
+   "expression": "Time.StartOfHour(#time(0,0,0))",
+   "power_bi": "V:time:00:00:00.0000000"
+  },
+  {
+   "expression": "Time.From(#time(0,0,0))",
+   "power_bi": "V:time:00:00:00.0000000"
+  },
+  {
+   "expression": "Duration.From(#time(0,0,0) - #time(0,0,0))",
+   "power_bi": "V:duration:00:00:00"
+  },
+  {
+   "expression": "Time.Hour(#time(13,5,9.25))",
+   "power_bi": "V:number:13"
+  },
+  {
+   "expression": "Time.Second(#time(13,5,9.25))",
+   "power_bi": "V:number:9.25"
+  },
+  {
+   "expression": "Time.ToRecord(#time(13,5,9.25))",
+   "power_bi": "V:record:[\"Hour\"=number:13,\"Minute\"=number:5,\"Second\"=number:9.25]"
+  },
+  {
+   "expression": "Time.ToText(#time(13,5,9.25))",
+   "power_bi": "V:text:\"1:05 PM\""
+  },
+  {
+   "expression": "Time.ToText(#time(13,5,9.25), \"hh:mm tt\")",
+   "power_bi": "V:text:\"01:05 PM\""
+  },
+  {
+   "expression": "Time.StartOfHour(#time(13,5,9.25))",
+   "power_bi": "V:time:13:00:00.0000000"
+  },
+  {
+   "expression": "Time.EndOfHour(#time(13,5,9.25))",
+   "power_bi": "V:time:13:59:59.9999999"
+  },
+  {
+   "expression": "Time.From(#time(13,5,9.25))",
+   "power_bi": "V:time:13:05:09.2500000"
+  },
+  {
+   "expression": "Time.Hour(#time(23,59,59))",
+   "power_bi": "V:number:23"
+  },
+  {
+   "expression": "Time.Minute(#time(23,59,59))",
+   "power_bi": "V:number:59"
+  },
+  {
+   "expression": "Time.Second(#time(23,59,59))",
+   "power_bi": "V:number:59"
+  },
+  {
+   "expression": "Time.ToRecord(#time(23,59,59))",
+   "power_bi": "V:record:[\"Hour\"=number:23,\"Minute\"=number:59,\"Second\"=number:59]"
+  },
+  {
+   "expression": "Time.StartOfHour(#time(23,59,59))",
+   "power_bi": "V:time:23:00:00.0000000"
+  },
+  {
+   "expression": "Time.EndOfHour(#time(23,59,59))",
+   "power_bi": "V:time:23:59:59.9999999"
+  },
+  {
+   "expression": "Time.From(#time(23,59,59))",
+   "power_bi": "V:time:23:59:59.0000000"
+  },
+  {
+   "expression": "#time(23,59,59) + #duration(0,1,0,0)",
+   "power_bi": "V:time:00:59:59.0000000"
+  },
+  {
+   "expression": "Duration.From(#time(23,59,59) - #time(0,0,0))",
+   "power_bi": "V:duration:23:59:59"
+  },
+  {
+   "expression": "Duration.Days(#duration(1,2,3,4))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Duration.Hours(#duration(1,2,3,4))",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Duration.Minutes(#duration(1,2,3,4))",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Duration.Seconds(#duration(1,2,3,4))",
+   "power_bi": "V:number:4"
+  },
+  {
+   "expression": "Duration.TotalDays(#duration(1,2,3,4))",
+   "power_bi": "V:number:1.0854629629629629"
+  },
+  {
+   "expression": "Duration.TotalHours(#duration(1,2,3,4))",
+   "power_bi": "V:number:26.051111111111108"
+  },
+  {
+   "expression": "Duration.TotalMinutes(#duration(1,2,3,4))",
+   "power_bi": "V:number:1563.0666666666666"
+  },
+  {
+   "expression": "Duration.TotalSeconds(#duration(1,2,3,4))",
+   "power_bi": "V:number:93784"
+  },
+  {
+   "expression": "Duration.ToRecord(#duration(1,2,3,4))",
+   "power_bi": "V:record:[\"Days\"=number:1,\"Hours\"=number:2,\"Minutes\"=number:3,\"Seconds\"=number:4]"
+  },
+  {
+   "expression": "#duration(1,2,3,4) * 2",
+   "power_bi": "V:duration:2.04:06:08"
+  },
+  {
+   "expression": "#duration(1,2,3,4) / 4",
+   "power_bi": "V:duration:06:30:46"
+  },
+  {
+   "expression": "-#duration(1,2,3,4)",
+   "power_bi": "V:duration:-1.02:03:04"
+  },
+  {
+   "expression": "Text.From(#duration(1,2,3,4))",
+   "power_bi": "V:text:\"1.02:03:04\""
+  },
+  {
+   "expression": "Duration.Hours(#duration(0,0,0,0.5))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Duration.Minutes(#duration(0,0,0,0.5))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Duration.TotalHours(#duration(0,0,0,0.5))",
+   "power_bi": "V:number:0.00013888888888888889"
+  },
+  {
+   "expression": "Duration.TotalMinutes(#duration(0,0,0,0.5))",
+   "power_bi": "V:number:0.0083333333333333332"
+  },
+  {
+   "expression": "Duration.TotalSeconds(#duration(0,0,0,0.5))",
+   "power_bi": "V:number:0.5"
+  },
+  {
+   "expression": "Duration.ToText(#duration(0,0,0,0.5))",
+   "power_bi": "V:text:\"00:00:00.5000000\""
+  },
+  {
+   "expression": "#duration(0,0,0,0.5) * 2",
+   "power_bi": "V:duration:00:00:01"
+  },
+  {
+   "expression": "-#duration(0,0,0,0.5)",
+   "power_bi": "V:duration:-00:00:00.5000000"
+  },
+  {
+   "expression": "#duration(0,0,0,0.5) + #duration(0,0,0,1)",
+   "power_bi": "V:duration:00:00:01.5000000"
+  },
+  {
+   "expression": "Text.From(#duration(0,0,0,0.5))",
+   "power_bi": "V:text:\"00:00:00.5000000\""
+  },
+  {
+   "expression": "Duration.Days(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:-2"
+  },
+  {
+   "expression": "Duration.Hours(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:-3"
+  },
+  {
+   "expression": "Duration.Minutes(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Duration.Seconds(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Duration.TotalDays(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:-2.125"
+  },
+  {
+   "expression": "Duration.TotalHours(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:-51"
+  },
+  {
+   "expression": "Duration.TotalMinutes(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:-3060"
+  },
+  {
+   "expression": "Duration.TotalSeconds(#duration(-2,-3,0,0))",
+   "power_bi": "V:number:-183600"
+  },
+  {
+   "expression": "Duration.ToRecord(#duration(-2,-3,0,0))",
+   "power_bi": "V:record:[\"Days\"=number:-2,\"Hours\"=number:-3,\"Minutes\"=number:0,\"Seconds\"=number:0]"
+  },
+  {
+   "expression": "Duration.ToText(#duration(-2,-3,0,0))",
+   "power_bi": "V:text:\"-2.03:00:00\""
+  },
+  {
+   "expression": "#duration(-2,-3,0,0) * 2",
+   "power_bi": "V:duration:-4.06:00:00"
+  },
+  {
+   "expression": "#duration(-2,-3,0,0) / 4",
+   "power_bi": "V:duration:-12:45:00"
+  },
+  {
+   "expression": "-#duration(-2,-3,0,0)",
+   "power_bi": "V:duration:2.03:00:00"
+  },
+  {
+   "expression": "#duration(-2,-3,0,0) + #duration(0,0,0,1)",
+   "power_bi": "V:duration:-2.02:59:59"
+  },
+  {
+   "expression": "Duration.Days(#duration(0,36,90,125.75))",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Duration.Hours(#duration(0,36,90,125.75))",
+   "power_bi": "V:number:13"
+  },
+  {
+   "expression": "Duration.Minutes(#duration(0,36,90,125.75))",
+   "power_bi": "V:number:32"
+  },
+  {
+   "expression": "Duration.TotalDays(#duration(0,36,90,125.75))",
+   "power_bi": "V:number:1.5639554398148148"
+  },
+  {
+   "expression": "Duration.TotalHours(#duration(0,36,90,125.75))",
+   "power_bi": "V:number:37.534930555555555"
+  },
+  {
+   "expression": "Duration.TotalMinutes(#duration(0,36,90,125.75))",
+   "power_bi": "V:number:2252.0958333333333"
+  },
+  {
+   "expression": "Duration.TotalSeconds(#duration(0,36,90,125.75))",
+   "power_bi": "V:number:135125.75"
+  },
+  {
+   "expression": "Duration.ToRecord(#duration(0,36,90,125.75))",
+   "power_bi": "V:record:[\"Days\"=number:1,\"Hours\"=number:13,\"Minutes\"=number:32,\"Seconds\"=number:5.75]"
+  },
+  {
+   "expression": "Duration.ToText(#duration(0,36,90,125.75))",
+   "power_bi": "V:text:\"1.13:32:05.7500000\""
+  },
+  {
+   "expression": "#duration(0,36,90,125.75) * 2",
+   "power_bi": "V:duration:3.03:04:11.5000000"
+  },
+  {
+   "expression": "#duration(0,36,90,125.75) / 4",
+   "power_bi": "V:duration:09:23:01.4375000"
+  },
+  {
+   "expression": "Text.From(#duration(0,36,90,125.75))",
+   "power_bi": "V:text:\"1.13:32:05.7500000\""
+  },
+  {
+   "expression": "Date.FromText(\"2024-02-29\")",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "DateTime.FromText(\"2024-02-29\")",
+   "power_bi": "V:datetime:2024-02-29T00:00:00.0000000"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"2024-02-29\")",
+   "power_bi": "V:datetimezone:2024-02-29T00:00:00.0000000+04:00"
+  },
+  {
+   "expression": "Time.FromText(\"2024-02-29\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.FromText(\"2024-02-29\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.From(\"2024-02-29\")",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Time.From(\"2024-02-29\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.From(\"2024-02-29\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.FromText(\"2024-13-01\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"2024-13-01\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTimeZone value."
+  },
+  {
+   "expression": "Time.FromText(\"2024-13-01\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Date.From(\"2024-13-01\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Time.From(\"2024-13-01\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.From(\"2024-13-01\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.FromText(\"29/02/2024\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "DateTime.FromText(\"29/02/2024\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"29/02/2024\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTimeZone value."
+  },
+  {
+   "expression": "Time.FromText(\"29/02/2024\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.FromText(\"29/02/2024\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.From(\"29/02/2024\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Time.From(\"29/02/2024\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Date.FromText(\"Feb 29, 2024\")",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "DateTime.FromText(\"Feb 29, 2024\")",
+   "power_bi": "V:datetime:2024-02-29T00:00:00.0000000"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"Feb 29, 2024\")",
+   "power_bi": "V:datetimezone:2024-02-29T00:00:00.0000000+04:00"
+  },
+  {
+   "expression": "Time.FromText(\"Feb 29, 2024\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.FromText(\"Feb 29, 2024\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.From(\"Feb 29, 2024\")",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Time.From(\"Feb 29, 2024\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.From(\"Feb 29, 2024\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "DateTime.FromText(\"2024-02-29T13:45:00\")",
+   "power_bi": "V:datetime:2024-02-29T13:45:00.0000000"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"2024-02-29T13:45:00\")",
+   "power_bi": "V:datetimezone:2024-02-29T13:45:00.0000000+04:00"
+  },
+  {
+   "expression": "Time.FromText(\"2024-02-29T13:45:00\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Date.From(\"2024-02-29T13:45:00\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Time.From(\"2024-02-29T13:45:00\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.From(\"2024-02-29T13:45:00\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.FromText(\"2024-02-29T13:45:00+05:30\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "DateTime.FromText(\"2024-02-29T13:45:00+05:30\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"2024-02-29T13:45:00+05:30\")",
+   "power_bi": "V:datetimezone:2024-02-29T13:45:00.0000000+05:30"
+  },
+  {
+   "expression": "Time.FromText(\"2024-02-29T13:45:00+05:30\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.FromText(\"2024-02-29T13:45:00+05:30\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.From(\"2024-02-29T13:45:00+05:30\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Time.From(\"2024-02-29T13:45:00+05:30\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Date.FromText(\"13:45\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "DateTime.FromText(\"13:45\")",
+   "power_bi": "V:datetime:2026-11-09T13:45:00.0000000"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"13:45\")",
+   "power_bi": "V:datetimezone:2026-11-09T13:45:00.0000000+04:00"
+  },
+  {
+   "expression": "Time.FromText(\"13:45\")",
+   "power_bi": "V:time:13:45:00.0000000"
+  },
+  {
+   "expression": "Duration.FromText(\"13:45\")",
+   "power_bi": "V:duration:13:45:00"
+  },
+  {
+   "expression": "Date.From(\"13:45\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Time.From(\"13:45\")",
+   "power_bi": "V:time:13:45:00.0000000"
+  },
+  {
+   "expression": "Duration.From(\"13:45\")",
+   "power_bi": "V:duration:13:45:00"
+  },
+  {
+   "expression": "DateTime.FromText(\"1.02:03:04\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"1.02:03:04\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTimeZone value."
+  },
+  {
+   "expression": "Time.FromText(\"1.02:03:04\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.FromText(\"1.02:03:04\")",
+   "power_bi": "V:duration:1.02:03:04"
+  },
+  {
+   "expression": "Date.From(\"1.02:03:04\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Time.From(\"1.02:03:04\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.From(\"1.02:03:04\")",
+   "power_bi": "V:duration:1.02:03:04"
+  },
+  {
+   "expression": "Date.FromText(\"P1DT2H\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"P1DT2H\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTimeZone value."
+  },
+  {
+   "expression": "Time.FromText(\"P1DT2H\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.FromText(\"P1DT2H\")",
+   "power_bi": "V:duration:1.02:00:00"
+  },
+  {
+   "expression": "Time.From(\"P1DT2H\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the input provided as a Time value."
+  },
+  {
+   "expression": "Duration.From(\"P1DT2H\")",
+   "power_bi": "V:duration:1.02:00:00"
+  },
+  {
+   "expression": "Date.FromText(\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "DateTime.FromText(\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Time.FromText(\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Duration.FromText(\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Date.From(\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Duration.From(\"\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Date.FromText(\"abc\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "DateTime.FromText(\"abc\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTime value."
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"abc\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a DateTimeZone value."
+  },
+  {
+   "expression": "Duration.FromText(\"abc\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.From(\"abc\")",
+   "power_bi": "ERR:DataFormat.Error: We couldn't parse the input provided as a Date value."
+  },
+  {
+   "expression": "Duration.From(\"abc\")",
+   "power_bi": "ERR:Expression.Error: We couldn't parse the Duration literal."
+  },
+  {
+   "expression": "Date.FromText(\"29/02/2024\", [Format=\"dd/MM/yyyy\"])",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Date.FromText(\"02/03/2024\", [Culture=\"en-GB\"])",
+   "power_bi": "V:date:2024-03-02"
+  },
+  {
+   "expression": "Date.From(45351.75)",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "DateTime.From(45351.75)",
+   "power_bi": "V:datetime:2024-02-29T18:00:00.0000000"
+  },
+  {
+   "expression": "Time.From(0.5)",
+   "power_bi": "V:time:12:00:00.0000000"
+  },
+  {
+   "expression": "Date.From(-1)",
+   "power_bi": "V:date:1899-12-29"
+  },
+  {
+   "expression": "Date.From(3000000)",
+   "power_bi": "ERR:DataFormat.Error: We couldn't convert to Date."
+  },
+  {
+   "expression": "Number.From(#date(2024,2,29))",
+   "power_bi": "V:number:45351"
+  },
+  {
+   "expression": "Number.From(#datetime(2024,2,29,12,0,0))",
+   "power_bi": "V:number:45351.5"
+  },
+  {
+   "expression": "Number.From(#time(6,0,0))",
+   "power_bi": "V:number:0.25"
+  },
+  {
+   "expression": "Number.From(#duration(1,12,0,0))",
+   "power_bi": "V:number:1.5"
+  },
+  {
+   "expression": "#date(2024,2,30)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "#date(2023,2,29)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "#date(0,1,1)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "#date(10000,1,1)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "#time(24,0,0)",
+   "power_bi": "V:time:00:00:00.0000000"
+  },
+  {
+   "expression": "#time(23,60,0)",
+   "power_bi": "ERR:Expression.Error: The Time operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "#datetimezone(2024,1,1,0,0,0,15,0)",
+   "power_bi": "ERR:Expression.Error: The DateTimeZone operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "#datetime(2024,3,1,0,0,0) - #datetime(2024,2,28,12,0,0)",
+   "power_bi": "V:duration:1.12:00:00"
+  },
+  {
+   "expression": "#time(10,0,0) - #time(12,30,0)",
+   "power_bi": "V:duration:-02:30:00"
+  },
+  {
+   "expression": "#date(2024,1,1) = #datetime(2024,1,1,0,0,0)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "#date(2024,1,31) + #duration(0,36,0,0)",
+   "power_bi": "V:date:2024-02-01"
+  },
+  {
+   "expression": "Date.AddMonths(#date(2024,1,31), 1)",
+   "power_bi": "V:date:2024-02-29"
+  },
+  {
+   "expression": "Date.AddDays(#date(1,1,1), -1)",
+   "power_bi": "ERR:Expression.Error: The Date operation failed because the resulting value falls outside the range of allowed values."
+  },
+  {
+   "expression": "Date.Year(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Date.Year(\"2024-01-01\")",
+   "power_bi": "ERR:Expression.Error: The Date value must contain the Date component."
+  },
+  {
+   "expression": "Date.AddDays(null, 1)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Duration.Days(null)",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Date.Type",
+   "power_bi": "V:type"
+  },
+  {
+   "expression": "Day.Sunday",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Day.Saturday",
+   "power_bi": "V:number:6"
+  }
+ ]
+}
