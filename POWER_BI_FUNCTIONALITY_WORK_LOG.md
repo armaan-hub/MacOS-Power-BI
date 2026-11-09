@@ -2226,3 +2226,9 @@ All 41 Text.* functions in the M engine with Comparer.Ordinal/OrdinalIgnoreCase,
 Spec 683: 612 exact, 71 refused, 0 wrong. Holdout 170: 159 exact, 11 refused, 0 wrong. Probes 703 exact, 196 residual refused. Fresh held-out 40: 33 exact, 7 refused, 0 wrong. Exp, Ln, Log10, Sqrt exact.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4351 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 193 (Task 104 m-list-94: Power Query List family (m-list-94): 70 List functions plus Order/Occurrence/Replacer/PercentileMode/Comparer constants, exact against live Power BI; Covariance and StandardDeviation use Power BI's running-mean formulas.)
+
+Spec 484/484 exact. Probes 224: 219 exact, 5 refused. Holdout 115: 114 exact, 1 refused. Fresh 100: 100 exact. 0 wrong anywhere.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4353 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
