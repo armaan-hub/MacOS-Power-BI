@@ -1,0 +1,329 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "Record.FieldCount([])",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Record.FieldNames([])",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Record.ToTable([])",
+   "power_bi": "V:table:cols=[\"Name\":\"text\",\"Value\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Record.FieldOrDefault([], \"z\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Record.FieldOrDefault([], \"A\", 0)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Record.SelectFields([], {\"a\",\"z\"})",
+   "power_bi": "ERR:Expression.Error: The field 'a' of the record wasn't found."
+  },
+  {
+   "expression": "Record.AddField([], \"n\", 5)",
+   "power_bi": "V:record:[\"n\"=number:5]"
+  },
+  {
+   "expression": "Record.FieldCount([a=1])",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Record.ToTable([a=1])",
+   "power_bi": "V:table:cols=[\"Name\":\"text\",\"Value\":\"any\"];rows=[list:[text:\"a\",number:1]]"
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=1], \"b\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Record.Field([a=1], \"z\")",
+   "power_bi": "ERR:Expression.Error: The field 'z' of the record wasn't found."
+  },
+  {
+   "expression": "Record.Field([a=1], \"A\")",
+   "power_bi": "ERR:Expression.Error: The field 'A' of the record wasn't found."
+  },
+  {
+   "expression": "Record.SelectFields([a=1], {\"a\"})",
+   "power_bi": "V:record:[\"a\"=number:1]"
+  },
+  {
+   "expression": "Record.SelectFields([a=1], {\"b\",\"a\"})",
+   "power_bi": "ERR:Expression.Error: The field 'b' of the record wasn't found."
+  },
+  {
+   "expression": "Record.SelectFields([a=1], {\"a\",\"z\"}, MissingField.Ignore)",
+   "power_bi": "V:record:[\"a\"=number:1]"
+  },
+  {
+   "expression": "Record.TransformFields([a=1], {\"a\", each _ * 10})",
+   "power_bi": "V:record:[\"a\"=number:10]"
+  },
+  {
+   "expression": "Record.AddField([a=1], \"a\", 5)",
+   "power_bi": "ERR:Expression.Error: The field 'a' already exists in the record."
+  },
+  {
+   "expression": "[a=1] & [x=0]",
+   "power_bi": "V:record:[\"a\"=number:1,\"x\"=number:0]"
+  },
+  {
+   "expression": "[a=1] = [a=1]",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Record.FieldCount([a=1, b=\"x\"])",
+   "power_bi": "V:number:2"
+  },
+  {
+   "expression": "Record.FieldValues([a=1, b=\"x\"])",
+   "power_bi": "V:list:[number:1,text:\"x\"]"
+  },
+  {
+   "expression": "Record.ToList([a=1, b=\"x\"])",
+   "power_bi": "V:list:[number:1,text:\"x\"]"
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=1, b=\"x\"], \"b\", 0)",
+   "power_bi": "V:text:\"x\""
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=1, b=\"x\"], \"z\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Record.Field([a=1, b=\"x\"], \"A\")",
+   "power_bi": "ERR:Expression.Error: The field 'A' of the record wasn't found."
+  },
+  {
+   "expression": "Record.SelectFields([a=1, b=\"x\"], {\"a\"})",
+   "power_bi": "V:record:[\"a\"=number:1]"
+  },
+  {
+   "expression": "Record.RemoveFields([a=1, b=\"x\"], {\"a\"})",
+   "power_bi": "V:record:[\"b\"=text:\"x\"]"
+  },
+  {
+   "expression": "Record.ReorderFields([a=1, b=\"x\"], {\"a\"})",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=text:\"x\"]"
+  },
+  {
+   "expression": "Record.RemoveFields([a=1, b=\"x\"], \"z\", MissingField.Ignore)",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=text:\"x\"]"
+  },
+  {
+   "expression": "Record.ReorderFields([a=1, b=\"x\"], {\"z\"}, MissingField.UseNull)",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=text:\"x\",\"z\"=null]"
+  },
+  {
+   "expression": "Record.RenameFields([a=1, b=\"x\"], {{\"a\",\"q\"},{\"b\",\"a\"}})",
+   "power_bi": "V:record:[\"q\"=number:1,\"a\"=text:\"x\"]"
+  },
+  {
+   "expression": "Record.TransformFields([a=1, b=\"x\"], {\"a\", each _ * 10})",
+   "power_bi": "V:record:[\"a\"=number:10,\"b\"=text:\"x\"]"
+  },
+  {
+   "expression": "Record.Combine({[a=1, b=\"x\"], [a=9, d=4]})",
+   "power_bi": "V:record:[\"a\"=number:9,\"b\"=text:\"x\",\"d\"=number:4]"
+  },
+  {
+   "expression": "[a=1, b=\"x\"] = [a=1]",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Record.FieldNames([a=1, b=null, c={1,2}])",
+   "power_bi": "V:list:[text:\"a\",text:\"b\",text:\"c\"]"
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=1, b=null, c={1,2}], \"a\", 0)",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=1, b=null, c={1,2}], \"b\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Record.HasFields([a=1, b=null, c={1,2}], \"A\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=1, b=null, c={1,2}], \"A\", 0)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Record.HasFields([a=1, b=null, c={1,2}], {\"a\",\"z\"})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Record.HasFields([a=1, b=null, c={1,2}], {})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Record.RemoveFields([a=1, b=null, c={1,2}], {\"b\",\"a\"})",
+   "power_bi": "V:record:[\"c\"=list:[number:1,number:2]]"
+  },
+  {
+   "expression": "Record.SelectFields([a=1, b=null, c={1,2}], {\"a\",\"z\"}, MissingField.UseNull)",
+   "power_bi": "V:record:[\"a\"=number:1,\"z\"=null]"
+  },
+  {
+   "expression": "Record.RemoveFields([a=1, b=null, c={1,2}], \"z\", MissingField.Ignore)",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=null,\"c\"=list:[number:1,number:2]]"
+  },
+  {
+   "expression": "Record.ReorderFields([a=1, b=null, c={1,2}], {\"z\"}, MissingField.UseNull)",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=null,\"c\"=list:[number:1,number:2],\"z\"=null]"
+  },
+  {
+   "expression": "Record.TransformFields([a=1, b=null, c={1,2}], {\"a\", each _ * 10})",
+   "power_bi": "V:record:[\"a\"=number:10,\"b\"=null,\"c\"=list:[number:1,number:2]]"
+  },
+  {
+   "expression": "Record.AddField([a=1, b=null, c={1,2}], \"n\", 5)",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=null,\"c\"=list:[number:1,number:2],\"n\"=number:5]"
+  },
+  {
+   "expression": "Record.HasFields([B=2, a=1], \"b\")",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Record.Field([B=2, a=1], \"z\")",
+   "power_bi": "ERR:Expression.Error: The field 'z' of the record wasn't found."
+  },
+  {
+   "expression": "Record.FieldOrDefault([B=2, a=1], \"z\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Record.RemoveFields([B=2, a=1], {\"a\",\"z\"})",
+   "power_bi": "ERR:Expression.Error: The field 'z' of the record wasn't found."
+  },
+  {
+   "expression": "Record.SelectFields([B=2, a=1], {})",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Record.ReorderFields([B=2, a=1], {})",
+   "power_bi": "V:record:[\"B\"=number:2,\"a\"=number:1]"
+  },
+  {
+   "expression": "Record.RenameFields([B=2, a=1], {\"a\",\"q\"})",
+   "power_bi": "V:record:[\"B\"=number:2,\"q\"=number:1]"
+  },
+  {
+   "expression": "Record.RenameFields([B=2, a=1], {{\"a\",\"q\"},{\"b\",\"a\"}})",
+   "power_bi": "ERR:Expression.Error: The field 'b' of the record wasn't found."
+  },
+  {
+   "expression": "[B=2, a=1][a]",
+   "power_bi": "V:number:1"
+  },
+  {
+   "expression": "[B=2, a=1] & [x=0]",
+   "power_bi": "V:record:[\"B\"=number:2,\"a\"=number:1,\"x\"=number:0]"
+  },
+  {
+   "expression": "Record.FieldNames(Record.Combine({[B=2, a=1]}))",
+   "power_bi": "V:list:[text:\"B\",text:\"a\"]"
+  },
+  {
+   "expression": "Record.ToTable([a=[b=1]])",
+   "power_bi": "V:table:cols=[\"Name\":\"text\",\"Value\":\"any\"];rows=[list:[text:\"a\",record:[\"b\"=number:1]]]"
+  },
+  {
+   "expression": "Record.Field([a=[b=1]], \"b\")",
+   "power_bi": "ERR:Expression.Error: The field 'b' of the record wasn't found."
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=[b=1]], \"b\", 0)",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Record.FieldOrDefault([a=[b=1]], \"z\")",
+   "power_bi": "V:null"
+  },
+  {
+   "expression": "Record.HasFields([a=[b=1]], {\"a\"})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Record.HasFields([a=[b=1]], {\"a\",\"z\"})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Record.RemoveFields([a=[b=1]], {\"a\",\"z\"})",
+   "power_bi": "ERR:Expression.Error: The field 'z' of the record wasn't found."
+  },
+  {
+   "expression": "Record.HasFields([a=[b=1]], {})",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Record.SelectFields([a=[b=1]], {})",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Record.RemoveFields([a=[b=1]], {})",
+   "power_bi": "V:record:[\"a\"=record:[\"b\"=number:1]]"
+  },
+  {
+   "expression": "Record.ReorderFields([a=[b=1]], {})",
+   "power_bi": "V:record:[\"a\"=record:[\"b\"=number:1]]"
+  },
+  {
+   "expression": "Record.SelectFields([a=[b=1]], {\"b\",\"a\"})",
+   "power_bi": "ERR:Expression.Error: The field 'b' of the record wasn't found."
+  },
+  {
+   "expression": "Record.ReorderFields([a=[b=1]], {\"b\",\"a\"})",
+   "power_bi": "ERR:Expression.Error: The field 'b' of the record wasn't found."
+  },
+  {
+   "expression": "Record.RemoveFields([a=[b=1]], \"z\", MissingField.Ignore)",
+   "power_bi": "V:record:[\"a\"=record:[\"b\"=number:1]]"
+  },
+  {
+   "expression": "Record.AddField([a=[b=1]], \"n\", 5)",
+   "power_bi": "V:record:[\"a\"=record:[\"b\"=number:1],\"n\"=number:5]"
+  },
+  {
+   "expression": "Record.Combine({[a=[b=1]], [a=9, d=4]})",
+   "power_bi": "V:record:[\"a\"=number:9,\"d\"=number:4]"
+  },
+  {
+   "expression": "[a=[b=1]][a]?",
+   "power_bi": "V:record:[\"b\"=number:1]"
+  },
+  {
+   "expression": "Record.Combine({})",
+   "power_bi": "V:record:[]"
+  },
+  {
+   "expression": "Record.Combine({[a=1],[a=2],[b=3]})",
+   "power_bi": "V:record:[\"a\"=number:2,\"b\"=number:3]"
+  },
+  {
+   "expression": "Record.FromList({1,2}, {\"a\",\"b\"})",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=number:2]"
+  },
+  {
+   "expression": "Record.FromList({1,2}, type [a=number, b=text])",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=number:2]"
+  },
+  {
+   "expression": "Record.FieldValues([a=1, b=error \"boom\"])",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "MissingField.Ignore",
+   "power_bi": "V:number:1"
+  }
+ ]
+}
