@@ -2244,3 +2244,9 @@ Spec 284: 280 exact, 4 refused (#table). Holdout 81: 79 exact, 2 refused. Fresh 
 Spec 622: 615 exact, 7 refused. Holdout 146: 143 exact, 3 refused. Fresh 50: 48 exact, 2 refused. 0 wrong anywhere.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4355 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 196 (Task 107 m-table-97: Power Query Table family (m-table-97): #table, table values and ~70 Table functions exact against live Power BI, with column types from functions' declared return types (368 library functions measured); multi-match join order refused.)
+
+Spec 326: 318 exact, 8 refused. Probes 1626: 1343 exact, 283 refused. Holdout 72: 69 exact, 3 refused. Fresh 100: 91 exact, 9 refused. 0 wrong anywhere.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4357 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
