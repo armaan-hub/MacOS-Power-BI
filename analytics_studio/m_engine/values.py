@@ -114,6 +114,7 @@ class Number(MValue):
     value: float
     meta: Optional["Record"] = None
     exact: Optional[str] = None  # exact decimal text of a literal a double cannot hold; see module docstring
+    subtype: Optional[str] = None  # "Int64" on a whole-number custom-column cell (Value.Type of it is not measured)
 
 
 @dataclass(frozen=True, eq=False)

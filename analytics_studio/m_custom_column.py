@@ -41,6 +41,18 @@ class MStorageRefused(MFormulaRefused):
     record, a duration, ...). No other evaluator may be tried: its answer for the same row would differ."""
 
 
+class MUntypedCellRefused(MStorageRefused):
+    """A cell is not a value of its column's type, so Power BI's Changed Type step gives an error for it. The
+    formula reads that cell and Power BI's answer for it is not measured here: the step is refused."""
+
+
+@dataclass(frozen=True)
+class UnconvertedCell:
+    """A cell that did not convert to its column's type. Reading it refuses the formula (see MUntypedCellRefused)."""
+
+    message: str
+
+
 _UNKNOWN_IMPORT = re.compile(r"^The import (\S+) matches no exports\.")
 
 
@@ -90,23 +102,15 @@ def compile_m_formula(expression: str, *, app_names: Iterable[str] = ()) -> Comp
 def evaluate_m_formula(compiled: CompiledMFormula, row: dict[str, Any]) -> Any:
     """Run one compiled formula on one row (the row is the record ``_``) and return the stored cell value.
 
-    Returns ``m_to_cell`` of the result, or a ``PowerQueryCellError`` for a genuine M error. Raises
-    ``MFormulaRefused`` when the engine has no measured answer for the formula or the row.
+    The cells must already be values of their column types (see ``transformations``: Power BI's Changed Type step
+    runs before custom columns). Returns ``m_to_cell`` of the result, or a ``PowerQueryCellError`` for a genuine
+    M error. Raises ``MFormulaRefused`` when the engine has no measured answer for the formula or the row.
     """
-    return evaluate_m_formula_traced(compiled, row)[0]
-
-
-def evaluate_m_formula_traced(compiled: CompiledMFormula, row: dict[str, Any]) -> tuple[Any, bool]:
-    """Like ``evaluate_m_formula``, also telling whether the formula read a text cell of the row.
-
-    The app keeps imported columns as text until a type step converts them, so an M error on a text cell may be
-    an untyped number or date rather than a Power BI text column; the caller decides what to do with that."""
     if compiled.unsupported:
         raise MFormulaRefused(compiled.unsupported[0])
     gaps_before = V.engine_gap_count()
-    text_read = [False]
     try:
-        record = _row_record(row, text_read)
+        record = _row_record(row)
         result = apply_function(compiled.function, [record])
         cell = m_to_cell(result)
     except MFormulaRefused:
@@ -116,10 +120,10 @@ def evaluate_m_formula_traced(compiled: CompiledMFormula, row: dict[str, Any]) -
             raise MFormulaRefused(_gap_message(err)) from err
         source_cell = getattr(err, "source_cell", None)
         if isinstance(source_cell, PowerQueryCellError):
-            return source_cell, text_read[0]
+            return source_cell
         if _is_refusal(err):
             raise MFormulaRefused(err.message or "The formula is not supported by this engine yet.") from err
-        return PowerQueryCellError(reason=err.reason, message=err.message or ""), text_read[0]
+        return PowerQueryCellError(reason=err.reason, message=err.message or "")
     except RecursionError as exc:
         raise MFormulaRefused("The evaluation is nested too deeply for this engine.") from exc
     except Exception as exc:  # noqa: BLE001 - an engine bug is a refusal, never a stored value
@@ -127,7 +131,7 @@ def evaluate_m_formula_traced(compiled: CompiledMFormula, row: dict[str, Any]) -
     if V.engine_gap_count() != gaps_before:
         # An engine gap was hit and hidden by try ... otherwise (or a similar catch): the value is a guess.
         raise MFormulaRefused("The formula uses a function that is not supported by this engine yet.")
-    return cell, text_read[0]
+    return cell
 
 
 def _gap_message(err: MError) -> str:
@@ -156,12 +160,15 @@ def cell_to_m(value: Any) -> Any:
         return V.Null()
     if isinstance(value, PowerQueryCellError):
         return _error_thunk(value)
+    if isinstance(value, UnconvertedCell):
+        raise MUntypedCellRefused(value.message)
     if isinstance(value, bool):
         return V.Logical(value)
     if isinstance(value, Decimal):
         return _decimal_number(value)
     if isinstance(value, int):
-        return V.Number(float(value))
+        # A whole-number cell is an Int64 value after Power BI's Changed Type step; Value.Type reads that subtype.
+        return V.Number(float(value), subtype="Int64")
     if isinstance(value, float):
         return V.Number(value)
     if isinstance(value, str):
@@ -239,21 +246,21 @@ def _bound_names(node: Any) -> Iterator[str]:
             stack.extend(getattr(item, field.name) for field in fields(item))
 
 
-def _row_record(row: dict[str, Any], text_read: list[bool] | None = None) -> V.Record:
+def _row_record(row: dict[str, Any]) -> V.Record:
     fields_: list[tuple[str, Any]] = []
     for name, value in row.items():
-        if text_read is not None and isinstance(value, str):
-            fields_.append((str(name), _text_thunk(value, text_read)))
+        if isinstance(value, UnconvertedCell):
+            # Only a formula that reads this cell is refused; the others still get their answers.
+            fields_.append((str(name), _refusal_thunk(value.message)))
         else:
             fields_.append((str(name), cell_to_m(value)))
     return V.Record(tuple(fields_))
 
 
-def _text_thunk(value: str, text_read: list[bool]) -> Thunk:
-    def read() -> V.MValue:
-        text_read[0] = True
-        return V.Text(value)
-    return Thunk(read)
+def _refusal_thunk(message: str) -> Thunk:
+    def refuse() -> V.MValue:
+        raise MUntypedCellRefused(message)
+    return Thunk(refuse)
 
 
 def _error_thunk(cell: PowerQueryCellError) -> Thunk:
