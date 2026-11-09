@@ -1,0 +1,293 @@
+{
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09",
+ "cases": [
+  {
+   "expression": "Table.RowCount(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}))",
+   "power_bi": "V:number:3"
+  },
+  {
+   "expression": "Table.ColumnNames(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}))",
+   "power_bi": "V:list:[text:\"a\",text:\"b\"]"
+  },
+  {
+   "expression": "Table.IsEmpty(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}))",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Table.LastN(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:3,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.RemoveFirstN(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), 2)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:3,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.Range(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), 1, 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:2,text:\"y\"]]"
+  },
+  {
+   "expression": "Table.ReorderColumns(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), {\"b\",\"a\"})",
+   "power_bi": "V:table:cols=[\"b\":\"any\",\"a\":\"any\"];rows=[list:[text:\"x\",number:1],list:[text:\"y\",number:2],list:[text:\"x\",number:3]]"
+  },
+  {
+   "expression": "Table.AddIndexColumn(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), \"i\", 10, 5)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\",\"i\":\"number\"];rows=[list:[number:1,text:\"x\",number:10],list:[number:2,text:\"y\",number:15],list:[number:3,text:\"x\",number:20]]"
+  },
+  {
+   "expression": "Table.RemoveRows(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,text:\"x\"],list:[number:3,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.FillDown(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), {\"a\"})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,text:\"x\"],list:[number:2,text:\"y\"],list:[number:3,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.FillUp(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), {\"b\"})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,text:\"x\"],list:[number:2,text:\"y\"],list:[number:3,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.MatchesAnyRows(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), each [a] = 2)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Table.FindText(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), \"x\")",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,text:\"x\"],list:[number:3,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.Repeat(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), 2)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,text:\"x\"],list:[number:2,text:\"y\"],list:[number:3,text:\"x\"],list:[number:1,text:\"x\"],list:[number:2,text:\"y\"],list:[number:3,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.CombineColumns(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), {\"a\",\"b\"}, Combiner.CombineTextByDelimiter(\"-\"), \"ab\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Table.Max(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), \"a\")",
+   "power_bi": "V:record:[\"a\"=number:3,\"b\"=text:\"x\"]"
+  },
+  {
+   "expression": "Table.Min(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), \"a\")",
+   "power_bi": "V:record:[\"a\"=number:1,\"b\"=text:\"x\"]"
+  },
+  {
+   "expression": "Table.ColumnsOfType(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), {type number})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Table.Distinct(#table({\"a\",\"b\"}, {{1,\"x\"},{2,\"y\"},{3,\"x\"}}), {\"b\"})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,text:\"x\"],list:[number:2,text:\"y\"]]"
+  },
+  {
+   "expression": "Table.RowCount(#table({\"a\",\"b\"}, {}))",
+   "power_bi": "V:number:0"
+  },
+  {
+   "expression": "Table.Distinct(#table({\"a\",\"b\"}, {}))",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.Buffer(#table({\"a\",\"b\"}, {}))",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.Column(#table({\"a\",\"b\"}, {}), \"a\")",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Table.LastN(#table({\"a\",\"b\"}, {}), 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.Skip(#table({\"a\",\"b\"}, {}), 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.RemoveLastN(#table({\"a\",\"b\"}, {}), 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.Range(#table({\"a\",\"b\"}, {}), 1, 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.SelectColumns(#table({\"a\",\"b\"}, {}), {\"z\"})",
+   "power_bi": "ERR:Expression.Error: The column 'z' of the table wasn't found."
+  },
+  {
+   "expression": "Table.SelectRows(#table({\"a\",\"b\"}, {}), each [b] = \"x\")",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.DuplicateColumn(#table({\"a\",\"b\"}, {}), \"a\", \"a2\")",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\",\"a2\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.ContainsAny(#table({\"a\",\"b\"}, {}), {[b=\"y\"]})",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Table.MatchesAnyRows(#table({\"a\",\"b\"}, {}), each [a] = 2)",
+   "power_bi": "V:false"
+  },
+  {
+   "expression": "Table.FindText(#table({\"a\",\"b\"}, {}), \"x\")",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.InsertRows(#table({\"a\",\"b\"}, {}), 1, {[a=9, b=\"z\"]})",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Table.ColumnsOfType(#table({\"a\",\"b\"}, {}), {type number})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Table.RemoveRowsWithErrors(#table({\"a\",\"b\"}, {}))",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.Distinct(#table({\"a\",\"b\"}, {}), {\"b\"})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.Transpose(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}))",
+   "power_bi": "V:table:cols=[\"Column1\":\"any\",\"Column2\":\"any\"];rows=[list:[null,number:2],list:[text:\"x\",null]]"
+  },
+  {
+   "expression": "Table.SelectColumns(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}), {\"b\"})",
+   "power_bi": "V:table:cols=[\"b\":\"any\"];rows=[list:[text:\"x\"],list:[null]]"
+  },
+  {
+   "expression": "Table.RemoveRows(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}), 1)",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[null,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.Sort(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}), {{\"a\", Order.Descending}})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:2,null],list:[null,text:\"x\"]]"
+  },
+  {
+   "expression": "Table.ReplaceValue(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}), \"x\", \"z\", Replacer.ReplaceValue, {\"b\"})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[null,text:\"z\"],list:[number:2,null]]"
+  },
+  {
+   "expression": "Table.Max(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}), \"a\")",
+   "power_bi": "V:record:[\"a\"=number:2,\"b\"=null]"
+  },
+  {
+   "expression": "Table.ColumnsOfType(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}), {type number})",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Table.SelectRowsWithErrors(#table({\"a\",\"b\"}, {{null,\"x\"},{2,null}}))",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[]"
+  },
+  {
+   "expression": "Table.ToRecords(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}))",
+   "power_bi": "V:list:[record:[\"a\"=number:1,\"b\"=text:\"x\"],record:[\"a\"=number:2,\"b\"=text:\"y\"]]"
+  },
+  {
+   "expression": "Table.Keys(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}))",
+   "power_bi": "V:list:[]"
+  },
+  {
+   "expression": "Table.SelectColumns(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}), {\"z\"})",
+   "power_bi": "ERR:Expression.Error: The column 'z' of the table wasn't found."
+  },
+  {
+   "expression": "Table.AddColumn(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}), \"a\", each 1)",
+   "power_bi": "ERR:Expression.Error: The field 'a' already exists in the record."
+  },
+  {
+   "expression": "Table.AddIndexColumn(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}), \"i\", 10, 5)",
+   "power_bi": "V:table:cols=[\"a\":\"number\",\"b\":\"text\",\"i\":\"number\"];rows=[list:[number:1,text:\"x\",number:10],list:[number:2,text:\"y\",number:15]]"
+  },
+  {
+   "expression": "Table.MatchesAnyRows(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}), each [a] = 2)",
+   "power_bi": "V:true"
+  },
+  {
+   "expression": "Table.SplitColumn(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}), \"b\", Splitter.SplitTextByDelimiter(\",\"))",
+   "power_bi": "V:table:cols=[\"a\":\"number\",\"b.1\":\"text\"];rows=[list:[number:1,text:\"x\"],list:[number:2,text:\"y\"]]"
+  },
+  {
+   "expression": "Table.CombineColumns(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}), {\"a\",\"b\"}, Combiner.CombineTextByDelimiter(\"-\"), \"ab\")",
+   "power_bi": "UNREPRESENTABLE"
+  },
+  {
+   "expression": "Table.Unpivot(#table(type table [a=number, b=text], {{1,\"x\"},{2,\"y\"}}), {\"a\"}, \"Attr\", \"Val\")",
+   "power_bi": "V:table:cols=[\"b\":\"text\",\"Attr\":\"text\",\"Val\":\"number\"];rows=[list:[text:\"x\",text:\"a\",number:1],list:[text:\"y\",text:\"a\",number:2]]"
+  },
+  {
+   "expression": "Table.Distinct(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}))",
+   "power_bi": "V:table:cols=[\"k\":\"any\",\"v\":\"any\"];rows=[list:[text:\"p\",number:3],list:[text:\"q\",number:1],list:[text:\"p\",number:2]]"
+  },
+  {
+   "expression": "Table.PromoteHeaders(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}))",
+   "power_bi": "V:table:cols=[\"p\":\"any\",\"3\":\"any\"];rows=[list:[text:\"q\",number:1],list:[text:\"p\",number:2]]"
+  },
+  {
+   "expression": "Table.RemoveFirstN(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), 2)",
+   "power_bi": "V:table:cols=[\"k\":\"any\",\"v\":\"any\"];rows=[list:[text:\"p\",number:2]]"
+  },
+  {
+   "expression": "Table.Range(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), 1, 1)",
+   "power_bi": "V:table:cols=[\"k\":\"any\",\"v\":\"any\"];rows=[list:[text:\"q\",number:1]]"
+  },
+  {
+   "expression": "Table.SelectColumns(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), {\"z\"})",
+   "power_bi": "ERR:Expression.Error: The column 'z' of the table wasn't found."
+  },
+  {
+   "expression": "Table.SelectColumns(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), {\"z\"}, MissingField.UseNull)",
+   "power_bi": "V:table:cols=[\"z\":\"null\"];rows=[list:[null],list:[null],list:[null]]"
+  },
+  {
+   "expression": "Table.ReorderColumns(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), {\"b\",\"a\"})",
+   "power_bi": "ERR:Expression.Error: The column 'b' of the table wasn't found."
+  },
+  {
+   "expression": "Table.AddColumn(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), \"a\", each 1)",
+   "power_bi": "V:table:cols=[\"k\":\"any\",\"v\":\"any\",\"a\":\"any\"];rows=[list:[text:\"p\",number:3,number:1],list:[text:\"q\",number:1,number:1],list:[text:\"p\",number:2,number:1]]"
+  },
+  {
+   "expression": "Table.FillUp(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), {\"b\"})",
+   "power_bi": "ERR:Expression.Error: The column 'b' of the table wasn't found."
+  },
+  {
+   "expression": "Table.CombineColumns(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), {\"a\",\"b\"}, Combiner.CombineTextByDelimiter(\"-\"), \"ab\")",
+   "power_bi": "ERR:Expression.Error: The column 'b' of the table wasn't found."
+  },
+  {
+   "expression": "Table.Unpivot(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), {\"a\"}, \"Attr\", \"Val\")",
+   "power_bi": "ERR:Expression.Error: The column 'a' of the table wasn't found."
+  },
+  {
+   "expression": "Table.UnpivotOtherColumns(#table({\"k\",\"v\"}, {{\"p\",3},{\"q\",1},{\"p\",2}}), {\"b\"}, \"Attr\", \"Val\")",
+   "power_bi": "ERR:Expression.Error: The column 'b' of the table wasn't found."
+  },
+  {
+   "expression": "#table({}, {})",
+   "power_bi": "V:table:cols=[];rows=[]"
+  },
+  {
+   "expression": "#table({\"a\"}, {{1}}) & #table({\"b\"}, {{2}})",
+   "power_bi": "V:table:cols=[\"a\":\"any\",\"b\":\"any\"];rows=[list:[number:1,null],list:[null,number:2]]"
+  },
+  {
+   "expression": "Table.FromValue({1,2})",
+   "power_bi": "V:table:cols=[\"Value\":\"any\"];rows=[list:[number:1],list:[number:2]]"
+  },
+  {
+   "expression": "Table.Join(#table({\"k\"},{{1},{2}}), \"k\", #table({\"k2\",\"v\"},{{1,\"x\"}}), \"k2\", JoinKind.LeftOuter)",
+   "power_bi": "V:table:cols=[\"k\":\"any\",\"k2\":\"any\",\"v\":\"any\"];rows=[list:[number:1,number:1,text:\"x\"],list:[number:2,null,null]]"
+  },
+  {
+   "expression": "Table.ColumnNames({1})",
+   "power_bi": "ERR:Expression.Error: We cannot convert a value of type List to type Table."
+  },
+  {
+   "expression": "Table.ToList(#table({\"a\",\"b\"},{{1,\"x\"}}))",
+   "power_bi": "UNREPRESENTABLE"
+  }
+ ]
+}

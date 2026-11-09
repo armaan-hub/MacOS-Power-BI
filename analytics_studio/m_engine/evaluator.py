@@ -17,6 +17,7 @@ from .canonical import to_canonical
 from .lexer import MSyntaxError
 from .parser import parse
 from .stdlib import GLOBALS
+from .table_fns import combine_tables, table_field, table_item
 from .values import MError, MValue, Thunk, force
 
 
@@ -58,7 +59,7 @@ def type_of_node(node: A.Node) -> V.TypeValue:
     if isinstance(node, A.RecordType):
         return V.TypeValue("record", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.fields))
     if isinstance(node, A.TableType):
-        return V.TypeValue("table")
+        return V.TypeValue("table", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.row.fields))
     if isinstance(node, A.FunctionType):
         return V.TypeValue("function")
     raise MError("Expression.Error", "unknown type expression")
@@ -167,7 +168,11 @@ def _closure(params: tuple, return_type: Optional[V.TypeValue], body: A.Node, en
         scope = Env({spec.name: item for spec, item in zip(specs, bound)}, env)
         return evaluate(body, scope)
 
-    return V.Function(specs, invoke, return_type)
+    origin = "closure"
+    if (return_type is None and len(params) == 1 and isinstance(body, A.Identifier)
+            and body.name == params[0].name and not body.inclusive):
+        origin = "identity"
+    return V.Function(specs, invoke, return_type, None, origin)
 
 
 # ---- logical -----------------------------------------------------------------
@@ -225,7 +230,7 @@ def equals(a: MValue, b: MValue) -> bool:
         return all(equals(a.get(name), b.get(name)) for name in a.names())
     if kind == "table":
         return a.columns == b.columns and len(a.rows) == len(b.rows) and all(
-            all(equals(x, y) for x, y in zip(ra, rb)) for ra, rb in zip(a.rows, b.rows))
+            all(equals(force(x), force(y)) for x, y in zip(ra, rb)) for ra, rb in zip(a.rows, b.rows))
     if kind == "type":
         return a.name == b.name and a.nullable == b.nullable
     return a is b
@@ -385,7 +390,9 @@ def concat(a: MValue, b: MValue) -> MValue:
     if isinstance(a, V.Null) and isinstance(b, V.Text):
         return V.Null()
     if isinstance(a, V.List) and isinstance(b, V.List):
-        return V.List(a.items + b.items)
+        return V.List(a.items + b.items, None, True)
+    if isinstance(a, V.Table) and isinstance(b, V.Table):
+        return combine_tables([a, b])
     if isinstance(a, V.Record) and isinstance(b, V.Record):
         merged = list(a.fields)
         for name, item in b.fields:
@@ -431,6 +438,8 @@ def _as_number(value: MValue) -> float:
 
 
 def _field_access(target: MValue, name: str, optional: bool) -> MValue:
+    if isinstance(target, V.Table):
+        return table_field(target, name, optional)
     if isinstance(target, V.Null):
         if optional:
             return V.Null()
@@ -453,6 +462,8 @@ def _item_access(node: A.ItemAccess, env: Env) -> MValue:
         if node.optional:
             return V.Null()
         raise V.convert_error(target, V.TypeValue("list"))
+    if isinstance(target, V.Table):
+        return table_item(target, index, node.optional)
     if not isinstance(target, V.List):
         raise V.convert_error(target, V.TypeValue("list"))
     if not isinstance(index, V.Number):
@@ -554,7 +565,7 @@ def evaluate(node: A.Node, env: Env) -> MValue:
                 items += _range_items(evaluate(item.start, env), evaluate(item.end, env))
             else:
                 items.append(evaluate(item, env))
-        return V.List(tuple(items))
+        return V.List(tuple(items), None, True)
     if isinstance(node, A.UnaryOp):
         return _unary(node.op, evaluate(node.operand, env))
     if isinstance(node, A.BinaryOp):
@@ -578,7 +589,10 @@ def evaluate(node: A.Node, env: Env) -> MValue:
         items = [Thunk(lambda arg=arg: evaluate(arg, env)) for arg in node.args]
         return apply_function(fn, items)
     if isinstance(node, A.EachExpr):
-        return V.Function((V.ParamSpec("_"),), lambda bound: evaluate(node.body, Env({"_": bound[0]}, env)))
+        origin = ("identity" if isinstance(node.body, A.Identifier) and node.body.name == "_"
+                  and not node.body.inclusive else "closure")
+        return V.Function((V.ParamSpec("_"),), lambda bound: evaluate(node.body, Env({"_": bound[0]}, env)),
+                          None, None, origin)
     if isinstance(node, A.FunctionLiteral):
         return _closure(node.params, type_of_node(node.return_type) if node.return_type else None,
                         node.body, env)

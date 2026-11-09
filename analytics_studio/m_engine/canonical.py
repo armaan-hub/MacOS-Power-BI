@@ -169,7 +169,7 @@ def to_canonical(value: V.MValue) -> str:
         parts = [_quoted(name) + "=" + to_canonical(V.force(item)) for name, item in value.fields]
         return "record:[" + ",".join(parts) + "]"
     if isinstance(value, V.Table):
-        cols = ",".join(_quoted(name) + ":" + _quoted(kind) for name, kind in value.columns)
+        cols = ",".join(_quoted(name) + ":" + _quoted(kind.split("~")[0]) for name, kind in value.columns)  # "kind~TypeName~nullable"
         rows = ",".join("list:[" + ",".join(to_canonical(V.force(cell)) for cell in row) + "]" for row in value.rows)
         return f"table:cols=[{cols}];rows=[{rows}]"
     if isinstance(value, V.Binary):

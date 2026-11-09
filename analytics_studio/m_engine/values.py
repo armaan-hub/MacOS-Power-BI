@@ -147,6 +147,11 @@ class Binary(MValue):
 class List(MValue):
     items: tuple  # MValue or Thunk items (lists are built eagerly; items are values)
     meta: Optional["Record"] = None
+    # Table.FromColumns types a column from its list's item type. A list written in the query (or joined with &)
+    # has item type any (``literal``); a list read from a typed table column carries that column's kind in
+    # ``item_kind``. Any other list has an item type this engine does not track.
+    literal: bool = False
+    item_kind: Optional[str] = None
 
 
 @dataclass(frozen=True, eq=False)
@@ -187,6 +192,9 @@ class Function(MValue):
     invoke: Callable[[list], MValue] = field(repr=False)  # receives the lazy argument list
     return_type: Optional["TypeValue"] = None
     meta: Optional["Record"] = None
+    # How a function written in M was built: "closure", or "identity" for a function whose body is just its
+    # only parameter (``each _``, ``(x) => x``). None for library functions. Table functions read it.
+    origin: Optional[str] = None
 
 
 @dataclass(frozen=True, eq=False)

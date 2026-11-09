@@ -118,7 +118,9 @@ class TextFunctionSpecTests(unittest.TestCase):
         """Measured answers the evaluator does not reproduce (best-fit code pages, other cultures,
         Comparer.FromCulture): each must stay an explicit ERR, never a different value. The two cases that the
         number family (Task 103) now models (NaN and infinity inside Text.Format) must equal Power BI exactly."""
-        modelled = {'Text.Format("#{0}",{Number.NaN})', 'Text.Format("#{0}",{Number.PositiveInfinity})'}
+        modelled = {'Text.Format("#{0}",{Number.NaN})', 'Text.Format("#{0}",{Number.PositiveInfinity})',
+                    'Text.Format("#{0}",{#table({"a"},{})})',
+                    'Text.Format("#{0}",{#table({"a"},{})},"zz")'}
         cases = _cases(TEXT_UNMODELLED)
         self.assertEqual(len(cases), 25)
         self.assertEqual({case["expression"] for case in cases} & modelled, modelled)
@@ -419,6 +421,50 @@ class DateFunctionSpecTests(unittest.TestCase):
                 wrong.append(f"{case['expression']!r}: power bi {expected!r} / ours {actual!r}")
         self.assertEqual(wrong, [], "\n".join(wrong))
         self.assertGreaterEqual(exact, 615)
+
+
+TABLE_SPEC = PLANS / "2026-11-09-m-table-97-spec.json"
+TABLE_PROBES = PLANS / "2026-11-09-m-table-97-probes.json"
+
+
+class TableFunctionSpecTests(unittest.TestCase):
+    def test_table_function_family_matches_power_bi(self):
+        """326 live answers for the Power Query #table literal and Table.* functions, table access and the table
+        type (Task 107, m-table-97). Each is exact, or an explicit ERR (never a value that differs from Power BI).
+        At least 317 are exact; the others are refusals: forms not measured, and lazy cells that Power BI cannot
+        print (UNREPRESENTABLE)."""
+        cases = _cases(TABLE_SPEC)
+        self.assertEqual(len(cases), 326)
+        wrong, exact = [], 0
+        for case in cases:
+            expected = case["power_bi"]
+            actual = evaluate_to_text(case["expression"])
+            if actual == expected:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {expected!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 317)
+
+    def test_table_probes_match_power_bi(self):
+        """Answers measured live while fixing the held-out misses of Task 107: the type of a column made by
+        Table.TransformColumns, AddColumn, DuplicateColumn, AddIndexColumn, TransformColumnTypes, Group,
+        ReplaceValue, CombineColumns, Pivot, Unpivot, FromColumns, FromValue and Combine (the declared return type of
+        every library function, read back through Table.Schema), the order of Table.Join, ties in Table.Min and
+        Table.Max, Table.Range past the end, & on tables, Table.ToList and the quoting of
+        Combiner.CombineTextByDelimiter, and Table.SplitColumn (column count from the first row, number or names, default, ExtraValues). Each is exact or an explicit ERR; none may differ from Power BI."""
+        cases = _cases(TABLE_PROBES)
+        self.assertEqual(len(cases), 1626)
+        wrong, exact = [], 0
+        for case in cases:
+            expected = case["power_bi"]
+            actual = evaluate_to_text(case["expression"])
+            if actual == expected:
+                exact += 1
+            elif not actual.startswith("ERR:"):
+                wrong.append(f"{case['expression']!r}: power bi {expected!r} / ours {actual!r}")
+        self.assertEqual(wrong, [], "\n".join(wrong))
+        self.assertGreaterEqual(exact, 1343)
 
 
 if __name__ == "__main__":
