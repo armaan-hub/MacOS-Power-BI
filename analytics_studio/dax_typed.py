@@ -158,6 +158,8 @@ def currency_text(value: Decimal) -> str:
 
 _SUBNORMAL_OK = False
 _TINY_TEXT = 1e-300  # a text whose double is smaller than this (and not zero) is the tiny text of Task 74
+DBL_MIN = Decimal("2.2250738585072014E-308")  # smallest positive normal IEEE double; 0 < |x| < DBL_MIN is subnormal
+DBL_MIN_FLOAT = 2.2250738585072014e-308
 
 
 @contextlib.contextmanager
@@ -181,6 +183,11 @@ def text_to_number(text: str, dates: bool = False) -> Decimal:
         cleaned, negative = cleaned[1:-1].strip(), True
     if cleaned.startswith("$"):
         cleaned = cleaned[1:].strip()
+    if cleaned.startswith(("-", "+")):
+        sign = cleaned[0]
+        rest = cleaned[1:].strip()
+        if rest.startswith("$"):
+            cleaned = sign + rest[1:].strip()
     if cleaned.endswith("-") and not cleaned.startswith(("-", "+")):
         cleaned, negative = cleaned[:-1].strip(), not negative
     if not _NUMBER_TEXT.match(cleaned):
@@ -278,6 +285,11 @@ def to_boolean(value: object) -> bool:
         spelled = value.strip(" ")
         if spelled.startswith("$") and _BOOLEAN_NUMBER_TEXT.fullmatch(spelled[1:].lstrip(" ")):
             spelled = spelled[1:].lstrip(" ")  # Task 74 (t74c, measured): a currency sign is read, AND("$5","TRUE") is True and AND("$5","") BLANK
+        elif spelled.startswith(("+", "-")):
+            sign = spelled[0]
+            rest = spelled[1:].lstrip(" ")
+            if rest.startswith("$") and _BOOLEAN_NUMBER_TEXT.fullmatch(rest[1:].lstrip(" ")):
+                spelled = sign + rest[1:].lstrip(" ")
         if _BOOLEAN_NUMBER_TEXT.fullmatch(spelled):
             if beyond_double(spelled):  # Task 74 Part A: a logical read of a text beyond the Double range (measured)
                 raise _error("The following system error occurred: Out of present range.")

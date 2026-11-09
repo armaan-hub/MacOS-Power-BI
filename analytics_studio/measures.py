@@ -433,6 +433,8 @@ def _consume_infinity(thunk: Any) -> Any:
 
 
 _CURRENCY_LIMIT = Decimal("922337203685477.5807")  # the Currency type's range
+_DBL_MIN = dax_typed.DBL_MIN  # smallest positive normal IEEE double; 0 < |x| < _DBL_MIN is subnormal
+_DBL_MIN_FLOAT = dax_typed.DBL_MIN_FLOAT
 _TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISDATETIME", "ISBOOLEAN", "ISSTRING", "ISNUMERIC", "ISBLANK"})
 
 
@@ -3749,6 +3751,9 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
     LN(BLANK()) is -Infinity in Power BI, so it is rejected locally.
     """
     first = values[0]
+    if function in {"SIGN", "INT", "MOD", "CEILING", "FLOOR"}:
+        if any(v is not None and v.is_finite() and 0 < abs(v) < _DBL_MIN for v in values):
+            raise dax_typed.refusal(f"{function} with a subnormal argument is not modelled by the local engine.")
     if function in {"MOD", "CEILING", "FLOOR"} and first is None and values[1] is not None and not values[1].is_finite():
         return None  # Task 20 F4: a BLANK first argument is BLANK beside an Infinity or a NaN
     if function == "CEILING" and first is not None and first.is_finite() and first == 0 and values[1] is not None and not values[1].is_nan():
@@ -3762,6 +3767,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
     if function in {"CEILING", "FLOOR"}:
         return _round_to_multiple(function, first, values[1])
     if function == "EXP":
+        if first is not None and 0 < abs(first) < _DBL_MIN:
+            return Decimal(1)
         return (first or Decimal(0)).exp()
     if function == "LN":
         if first is None:
@@ -3871,6 +3878,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
     if function == "SQRT":
         if first < 0:
             raise MeasureRuntimeError("SQRT needs a number that is zero or greater.")
+        if 0 < first < _DBL_MIN:
+            return Decimal(f"{math.sqrt(float(first)):.15G}")
         return first.sqrt()
     # TRUNC(number[, digits])
     digits = values[1] if len(values) > 1 and values[1] is not None else Decimal(0)
@@ -3880,6 +3889,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         raise MeasureRuntimeError("TRUNC digits must be a number.")
     if abs(first) >= Decimal("1E16"):
         return first  # Part E: a finite value beyond 1E16 is returned unchanged by TRUNC (TRUNC(1E300) is 1E+300, measured)
+    if 0 < abs(first) < _DBL_MIN:
+        return first  # subnormals are returned as their true double value
     if digits > 28:
         return first  # live Power BI (iteration 88): nothing is left to cut (digits 29 and 100 give the number itself)
     if digits < -28:
@@ -5617,7 +5628,9 @@ def _is_power_node(node: Any) -> bool:
 
 def _double_rounding_result(function: str, result: Any, argument_type: str | None) -> Any:
     """Part A: ROUND, ROUNDUP, ROUNDDOWN, TRUNC, MROUND and MOD of a Double are Doubles: the result is its exact binary value."""
-    if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "MROUND", "MOD"} and argument_type == "double" and isinstance(result, Decimal) and result.is_finite():
+    if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "MROUND", "MOD"} and argument_type in {"double", "text"} and isinstance(result, Decimal) and result.is_finite():
+        if 0 < abs(result) < _DBL_MIN:
+            return Decimal(f"{float(result):.15G}")
         return Decimal(float(result))
     return result
 
@@ -6331,9 +6344,12 @@ class _Parser:
         if token.kind == "number":
             try:
                 value = Decimal(token.value)
-                digits = token.value.lower().split("e")[0].replace(".", "").lstrip("0")
-                if len(digits) > 15 and ("." in token.value or "e" in token.value.lower() or abs(value) > 9223372036854775807):
-                    value = Decimal(repr(float(token.value)))  # Power BI reads such literals as doubles
+                if 0 < abs(value) < _DBL_MIN:
+                    value = Decimal(f"{float(token.value):.15G}")
+                else:
+                    digits = token.value.lower().split("e")[0].replace(".", "").lstrip("0")
+                    if len(digits) > 15 and ("." in token.value or "e" in token.value.lower() or abs(value) > 9223372036854775807):
+                        value = Decimal(repr(float(token.value)))  # Power BI reads such literals as doubles
             except (DecimalException, OverflowError) as exc:
                 raise MeasureError(f"Invalid numeric literal {token.value!r}.") from exc
             if not value.is_finite():
@@ -18709,8 +18725,10 @@ def _evaluate_measures_once(
                 if function == "ISNONTEXT":
                     return True
             return None
-        if function in {"ISNUMBER", "ISNUMERIC"}:
+        if function == "ISNUMBER":
             return static_t in {"int64", "double", "currency", "decimal", "datetime"}
+        if function == "ISNUMERIC":
+            return static_t in {"int64", "double", "currency", "decimal"}
         if function in {"ISTEXT", "ISSTRING"}:
             return static_t == "text"
         if function == "ISNONTEXT":
@@ -19291,11 +19309,28 @@ def _evaluate_measures_once(
         if function in _DATE_FUNCTIONS:
             return dax_dates.date_function(function, values, interval)
         if function == "ISO.CEILING":
+            for val in values:
+                if val is not None:
+                    try:
+                        num = as_number(val)
+                        if num is not None and num.is_finite() and 0 < abs(num) < _DBL_MIN:
+                            raise dax_typed.refusal("ISO.CEILING with a subnormal argument is not modelled by the local engine.")
+                    except MeasureRuntimeError:
+                        pass
             return _scalar_math("CEILING", [
                 None if values[0] is None else as_number(values[0]),
                 # live Power BI (iteration 88): the sign of the significance is ignored, an omitted one is 1 and a BLANK one is 0
                 Decimal(1) if len(values) < 2 else Decimal(0) if values[1] is None else abs(as_number(values[1])),
             ])
+        if function in {"ROUNDUP", "ROUNDDOWN", "MROUND", "EVEN", "ODD", "QUOTIENT"}:
+            for val in values:
+                if val is not None:
+                    try:
+                        num = as_number(val)
+                        if num is not None and num.is_finite() and 0 < abs(num) < _DBL_MIN:
+                            raise dax_typed.refusal(f"{function} with a subnormal argument is not modelled by the local engine.")
+                    except MeasureRuntimeError:
+                        pass
         if function in dax_ext.ARITY:
             return dax_ext.call(function, values)
         if function == "CURRENCY" and isinstance(values[0], str):
@@ -19637,6 +19672,8 @@ def _evaluate_measures_once(
             return None
         if math.isinf(value):
             return Decimal("Infinity") if value > 0 else Decimal("-Infinity")
+        if 0 < abs(value) < _DBL_MIN_FLOAT:
+            return Decimal(f"{value:.15G}")
         return Decimal(value)
 
     def left_static_type(node: tuple[Any, ...], row_context: Any = None) -> str | None:
@@ -22041,7 +22078,7 @@ def _evaluate_measures_once(
                 if len(arguments) == 3:
                     raise dax_typed.refusal("DIVIDE with an alternate result and a NaN denominator is not modelled by the local engine.")
                 return None
-            if denominator == 0:
+            if denominator == 0 or 0 < abs(denominator) < _DBL_MIN:
                 if len(arguments) == 3:
                     alternate = evaluate(arguments[2], row_context, allow_text=True, allow_boolean=True)
                     if alternate is None or isinstance(alternate, (str, bool)):
@@ -22053,6 +22090,8 @@ def _evaluate_measures_once(
                     "DIVIDE with text or Boolean alternate result and non-zero denominator is not supported in the local engine."
                 )
             quotient = numerator / denominator
+            if quotient.is_finite() and float(quotient) in (float('inf'), float('-inf')):
+                quotient = Decimal("Infinity") if quotient > 0 else Decimal("-Infinity")
             if quotient.is_finite() and currency_typed(arguments[0]) and not currency_typed(arguments[1]):
                 return quotient.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Currency / number is a Currency, like the operator
             return quotient
@@ -22082,6 +22121,9 @@ def _evaluate_measures_once(
                     if function in {"INT", "EXP", "ROUND", "ABS", "ROUNDUP", "ROUNDDOWN", "TRUNC", "SIGN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
                         raise _TextConversionFailure(str(error)) from error
                     raise
+                if function in {"SIGN", "INT", "MOD", "CEILING", "FLOOR"}:
+                    if any(v is not None and v.is_finite() and 0 < abs(v) < _DBL_MIN for v in values):
+                        raise dax_typed.refusal(f"{function} with a subnormal argument is not modelled by the local engine.")
                 band = _power_band_double(arguments[0], values[0], variable_nodes.get, left_static_type(arguments[0], row_context) == "double") if function in {"INT", "FLOOR", "CEILING"} else None  # Task 55
                 if band is not None and function in {"FLOOR", "CEILING"} and not _has_power(arguments[0], variable_nodes.get) and (values[1] is None or not values[1].is_finite() or values[1] <= 0):
                     band = None  # a Double without a power keeps the older rules for a blank, zero or negative significance
@@ -22561,7 +22603,7 @@ def _evaluate_measures_once(
             def unreliable_double(value: Decimal, header: str) -> bool:
                 """A double the local decimals cannot reproduce digit for digit: a computed one beyond 1E15 (EXP(50), PI()*1E20) or a subnormal."""
                 magnitude = abs(value)
-                if magnitude != 0 and magnitude < Decimal("2.2250738585072014E-308"):
+                if magnitude != 0 and magnitude < _DBL_MIN:
                     return True
                 computed = context.get("derived") and header not in (context.get("lineage") or {}) and header not in literal_headers
                 return bool(computed and magnitude >= Decimal("1e15") and column_kind(header) in {None, "double"})

@@ -86,6 +86,12 @@ _BLANK_IN_BLANK_OUT = {"ASIN", "ASINH", "ATAN", "ATANH", "DEGREES", "RADIANS", "
 
 def math_function(function: str, args: list[object]) -> object:
     """Scalar math: returns the DAX result of an already-evaluated call."""
+    if function in {"ROUNDUP", "ROUNDDOWN", "MROUND", "EVEN", "ODD", "QUOTIENT"}:
+        for a in args:
+            if isinstance(a, (int, float, Decimal)):
+                d = Decimal(a)
+                if d.is_finite() and 0 < abs(d) < dax_typed.DBL_MIN:
+                    raise dax_typed.refusal(f"{function} with a subnormal argument is not modelled by the local engine.")
     if function in _BLANK_IN_BLANK_OUT and args and args[0] is None:
         return None
     if function == "QUOTIENT" and args[0] is None:

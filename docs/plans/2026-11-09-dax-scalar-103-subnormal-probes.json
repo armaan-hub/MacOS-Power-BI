@@ -1,0 +1,202 @@
+[
+ {
+  "expr": "SIGN(5E-320)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "SIGN(2E-308)",
+  "powerbi": "1"
+ },
+ {
+  "expr": "SIGN(-5E-320)",
+  "powerbi": "-1"
+ },
+ {
+  "expr": "INT(-5E-320)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "INT(5E-320)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "MOD(-5E-320,7)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "MOD(5E-320,7)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'MOD' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "MOD(7,-1E-310)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'MOD' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "MOD(-1E-310,-3)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'MOD' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "CEILING(1E-310,1)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "FLOOR(-1E-310,1)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "1E-310*2",
+  "powerbi": "1.99999999999999E-310"
+ },
+ {
+  "expr": "1E-310/2",
+  "powerbi": "4.99999999999974E-311"
+ },
+ {
+  "expr": "-1E-310",
+  "powerbi": "-9.99999999999997E-311"
+ },
+ {
+  "expr": "1E-310+1E-310",
+  "powerbi": "1.99999999999999E-310"
+ },
+ {
+  "expr": "LN(1E-310)",
+  "powerbi": "-713.801378828154"
+ },
+ {
+  "expr": "LOG10(1E-310)",
+  "powerbi": "-310"
+ },
+ {
+  "expr": "POWER(1E-310,2)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "ROUNDUP(1E-310,0)",
+  "powerbi": "9.99999999999997E-311"
+ },
+ {
+  "expr": "ROUNDDOWN(-1E-310,0)",
+  "powerbi": "-9.99999999999997E-311"
+ },
+ {
+  "expr": "EVEN(1E-310)",
+  "powerbi": "2"
+ },
+ {
+  "expr": "ODD(-1E-310)",
+  "powerbi": "-1"
+ },
+ {
+  "expr": "FIXED(1E-310,2)",
+  "powerbi": "0.00"
+ },
+ {
+  "expr": "FORMAT(1E-310,\"0.00\")",
+  "powerbi": "0.00"
+ },
+ {
+  "expr": "VALUE(\"1E-310\")",
+  "powerbi": "9.99999999999997E-311"
+ },
+ {
+  "expr": "CONVERT(1E-310,INTEGER)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "QUOTIENT(1E-310,1)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "TRUNC(1E-310,2)",
+  "powerbi": "9.99999999999997E-311"
+ },
+ {
+  "expr": "MROUND(1E-310,1)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "CURRENCY(-1E-310)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "1E-310*1E300",
+  "powerbi": "9.99999999999997E-11"
+ },
+ {
+  "expr": "ABS(5E-320)",
+  "powerbi": "4.99994433591342E-320"
+ },
+ {
+  "expr": "IF(1E-310>0,1,2)",
+  "powerbi": "1"
+ },
+ {
+  "expr": "IF(1E-310=0,1,2)",
+  "powerbi": "2"
+ },
+ {
+  "expr": "EXP(1E-310)",
+  "powerbi": "1"
+ },
+ {
+  "expr": "SQRT(4E-320)",
+  "powerbi": "1.9999888671517E-160"
+ },
+ {
+  "expr": "DIVIDE(1E-310,2)",
+  "powerbi": "4.99999999999974E-311"
+ },
+ {
+  "expr": "DIVIDE(-1,-1E-310)",
+  "powerbi": "BLANK"
+ },
+ {
+  "expr": "ROUND(1E-310,320)",
+  "powerbi": "9.99999999999997E-311"
+ },
+ {
+  "expr": "INT(-2E-308)",
+  "powerbi": "-1"
+ },
+ {
+  "expr": "MOD(-2E-308,5)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "MOD(2E-308,5)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'MOD' has the wrong data type or the result is too large or too small.\""
+ },
+ {
+  "expr": "SIGN(-2.2250738585072014E-308)",
+  "powerbi": "-1"
+ },
+ {
+  "expr": "1E-310&\"\"",
+  "powerbi": "9.99999999999997E-311"
+ },
+ {
+  "expr": "ISNUMBER(1E-310)",
+  "powerbi": "True"
+ },
+ {
+  "expr": "-1E-310*-1",
+  "powerbi": "9.99999999999997E-311"
+ },
+ {
+  "expr": "INT(\"-1E-310\")",
+  "powerbi": "0"
+ },
+ {
+  "expr": "MOD(\"-1E-310\",3)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "SIGN(\"1E-310\")",
+  "powerbi": "0"
+ },
+ {
+  "expr": "1/-1E-310",
+  "powerbi": "-Infinity"
+ }
+]
