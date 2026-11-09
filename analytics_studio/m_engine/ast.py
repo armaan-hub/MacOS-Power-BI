@@ -221,6 +221,7 @@ class TypeField:
 @dataclass(frozen=True)
 class RecordType(Node):
     fields: tuple[TypeField, ...]
+    open_: bool = False  # [a = number, ...]: the record may have other fields
 
 
 @dataclass(frozen=True)

@@ -921,6 +921,8 @@ def _logical_from_text(value: MValue, culture: MValue = V.Null()) -> MValue:
     if isinstance(value, V.Null):
         return V.Null()
     text = _text_arg(value).strip().lower()
+    if not text:
+        return V.Null()  # measured: empty or blank text is null
     if text == "true":
         return V.Logical(True)
     if text == "false":

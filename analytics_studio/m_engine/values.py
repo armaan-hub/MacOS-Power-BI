@@ -195,6 +195,8 @@ class Function(MValue):
     # How a function written in M was built: "closure", or "identity" for a function whose body is just its
     # only parameter (``each _``, ``(x) => x``). None for library functions. Table functions read it.
     origin: Optional[str] = None
+    # Function.From: the arguments are passed on as given, whatever their number or type (measured)
+    variadic: bool = False
 
 
 @dataclass(frozen=True, eq=False)
@@ -204,6 +206,13 @@ class TypeValue(MValue):
     nullable: bool = False
     meta: Optional["Record"] = None
     fields: Optional[tuple] = None  # record types only: ((name, TypeValue, optional), ...) in declared order
+    label: Optional[str] = None  # the Table.Schema TypeName of a subtype constant (Int64.Type), else None
+    open_record: bool = False  # record types: [a = number, ...]
+    # function types: ((name, TypeValue, optional), ...) parameters and the return TypeValue (None: not declared)
+    signature: Optional[tuple] = None
+    item: Optional["TypeValue"] = None  # list types: {T}
+    facets: Optional[tuple] = None  # Type.ReplaceFacets: the ten facet values in Type.Facets order
+    raw_fields: Optional["Record"] = None  # Type.ForRecord: the field record as given (read back unchanged)
 
 
 # ---- names used in messages and type checks -------------------------------

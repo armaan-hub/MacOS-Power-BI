@@ -447,6 +447,8 @@ class _Parser:
                 return A.TableType(self.record_type())
             if tok.text == "function" and self.at_op("("):
                 params, return_type = self._function_header()
+                if return_type is None or any(param.type_ is None for param in params):
+                    self.fail("Token 'as' expected.")
                 return A.FunctionType(params, return_type)
             return A.PrimitiveType(tok.text)
         self.fail("Expected a type")
@@ -458,6 +460,10 @@ class _Parser:
         if self.at_op("]"):
             self.advance()
             return A.RecordType(())
+        if self.at_op("..."):  # [...]: an open record with no declared fields
+            self.advance()
+            self.expect_op("]")
+            return A.RecordType((), open_=True)
         while True:
             optional = False
             if self.at_kw("optional"):
@@ -469,5 +475,9 @@ class _Parser:
             if not self.at_op(","):
                 break
             self.advance()
+            if self.at_op("..."):  # a trailing ... makes the record open
+                self.advance()
+                self.expect_op("]")
+                return A.RecordType(tuple(fields), open_=True)
         self.expect_op("]")
         return A.RecordType(tuple(fields))

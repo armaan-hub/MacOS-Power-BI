@@ -100,6 +100,8 @@ def _type_spec(type_value: MValue) -> str:
     if type_value.name == "anynonnull":
         return _col("Any.Type", False)
     nullable = type_value.nullable or type_value.name in _NULLABLE_BY_DEFAULT
+    if type_value.label is not None:  # a subtype constant such as Int64.Type keeps its own TypeName
+        return _col(type_value.label, nullable)
     return _col(_PRIMITIVE_TYPE_NAMES[type_value.name] + ".Type", nullable)
 
 
@@ -1651,18 +1653,6 @@ def table_item(table: V.Table, index: MValue, optional: bool) -> MValue:
 
 # ---- Splitter and Combiner ------------------------------------------------------
 
-def _split_by_delimiter(delimiter: MValue, quote: MValue) -> MValue:
-    _no_option(quote, "quoteStyle argument")
-    delim = _text(delimiter)
-    if not delim:
-        raise _unsupported("empty delimiter")
-
-    def split(text: MValue) -> MValue:
-        return V.List(tuple(V.Text(part) for part in _text(text).split(delim)))
-
-    return _native((("text", False),), split)
-
-
 _QUOTE_NONE, _QUOTE_CSV = 0, 1
 
 
@@ -1685,8 +1675,6 @@ def _combine_by_delimiter(delimiter: MValue, quote: MValue) -> MValue:
         for item in _items(items):
             text = "" if isinstance(item, V.Null) else _text(item)
             if style == _QUOTE_CSV and any(c in text for c in '"\r\n'):
-                if not delim:
-                    raise _unsupported("quoted item with an empty delimiter")
                 text = '"' + text.replace('"', '""') + '"'
             elif style == _QUOTE_CSV and delim and delim in text:
                 text = '"' + text.replace('"', '""') + '"'
@@ -1711,7 +1699,6 @@ TABLE_GLOBALS: dict = {
     "JoinKind.FullOuter": V.Number(3.0),
     "JoinKind.LeftAnti": V.Number(4.0),
     "JoinKind.RightAnti": V.Number(5.0),
-    "Splitter.SplitTextByDelimiter": _native((("delimiter", False), ("quoteStyle", True)), _split_by_delimiter),
     "Combiner.CombineTextByDelimiter": _native((("delimiter", False), ("quoteStyle", True)),
                                                _combine_by_delimiter),
     "Table.RowCount": _native((("table", False),), _row_count),
