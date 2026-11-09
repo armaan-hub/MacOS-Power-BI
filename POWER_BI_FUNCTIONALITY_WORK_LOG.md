@@ -2250,3 +2250,9 @@ Spec 622: 615 exact, 7 refused. Holdout 146: 143 exact, 3 refused. Fresh 50: 48 
 Spec 326: 318 exact, 8 refused. Probes 1626: 1343 exact, 283 refused. Holdout 72: 69 exact, 3 refused. Fresh 100: 91 exact, 9 refused. 0 wrong anywhere.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4357 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 197 (Task 108 m-value-98: Power Query Splitter/Combiner/Comparer/Value/Type and small families (m-value-98): splitters (Csv quoting, startAtEnd), combiners, comparers, Value.*, Type.*, Function/Expression/Logical/Character/Binary/Uri/Json/Lines exact against live Power BI. All M function families done.)
+
+Spec 450: 447 exact, 3 refused. Probes 1733: 1690 exact, 43 refused. Holdout 131: 129 exact, 2 refused. Fresh 130: 127 exact, 3 refused. 0 wrong anywhere.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4359 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
