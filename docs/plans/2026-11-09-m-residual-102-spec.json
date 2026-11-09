@@ -1,0 +1,385 @@
+{
+ "source": "live Power BI answers already saved in earlier Task 101-108 spec/probe/holdout/fresh files, collected 2026-11-09",
+ "cases": [
+  {
+   "expression": "Date.IsLeapYear(1900)",
+   "power_bi": "V:false",
+   "measured_in": "2026-11-09-m-date-96-fresh.json"
+  },
+  {
+   "expression": "Time.FromText(\"5:06 PM\")",
+   "power_bi": "V:time:17:06:00.0000000",
+   "measured_in": "2026-11-09-m-date-96-fresh.json"
+  },
+  {
+   "expression": "Duration.From(1.5)",
+   "power_bi": "V:duration:1.12:00:00",
+   "measured_in": "2026-11-09-m-date-96-holdout.json"
+  },
+  {
+   "expression": "DateTime.FromFileTime(133000000000000000)",
+   "power_bi": "V:datetime:2022-06-18T08:26:40.0000000",
+   "measured_in": "2026-11-09-m-date-96-holdout.json"
+  },
+  {
+   "expression": "DateTime.From(#datetimezone(2024,3,10,8,30,0,5,30))",
+   "power_bi": "V:datetime:2024-03-10T07:00:00.0000000",
+   "measured_in": "2026-11-09-m-date-96-spec.json"
+  },
+  {
+   "expression": "DateTime.From(#datetimezone(2024,1,1,0,0,0,-8,0))",
+   "power_bi": "V:datetime:2024-01-01T12:00:00.0000000",
+   "measured_in": "2026-11-09-m-date-96-spec.json"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"2024-02-29\")",
+   "power_bi": "V:datetimezone:2024-02-29T00:00:00.0000000+04:00",
+   "measured_in": "2026-11-09-m-date-96-spec.json"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"Feb 29, 2024\")",
+   "power_bi": "V:datetimezone:2024-02-29T00:00:00.0000000+04:00",
+   "measured_in": "2026-11-09-m-date-96-spec.json"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"2024-02-29T13:45:00\")",
+   "power_bi": "V:datetimezone:2024-02-29T13:45:00.0000000+04:00",
+   "measured_in": "2026-11-09-m-date-96-spec.json"
+  },
+  {
+   "expression": "DateTime.FromText(\"13:45\")",
+   "power_bi": "V:datetime:2026-11-09T13:45:00.0000000",
+   "measured_in": "2026-11-09-m-date-96-spec.json"
+  },
+  {
+   "expression": "DateTimeZone.FromText(\"13:45\")",
+   "power_bi": "V:datetimezone:2026-11-09T13:45:00.0000000+04:00",
+   "measured_in": "2026-11-09-m-date-96-spec.json"
+  },
+  {
+   "expression": "List.Intersect({{1,1,2},{2,1,1}},each _)",
+   "power_bi": "V:list:[number:1,number:1,number:2]",
+   "measured_in": "2026-11-09-m-list-94-probes.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"aé\",65000)",
+   "power_bi": "V:binary:YStBT2st",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"aé\",1251)",
+   "power_bi": "V:binary:YWU=",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",932)",
+   "power_bi": "V:binary:YQ==",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"a\",54936)",
+   "power_bi": "V:binary:YQ==",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"ĀćŁ™– \",1252)",
+   "power_bi": "V:binary:QWNMmZag",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"你α\",1252)",
+   "power_bi": "V:binary:P2E=",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"Ā\",28591)",
+   "power_bi": "V:binary:QQ==",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"é\",50220)",
+   "power_bi": "V:binary:ZQ==",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"Ā\",437)",
+   "power_bi": "V:binary:QQ==",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.ToBinary(\"Ā\",0)",
+   "power_bi": "V:binary:QQ==",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"fr-FR\")",
+   "power_bi": "V:text:\"1,5\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#date(2020,1,2)},\"de-DE\")",
+   "power_bi": "V:text:\"02.01.2020\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{true},\"de-DE\")",
+   "power_bi": "V:text:\"true\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"de\")",
+   "power_bi": "V:text:\"1,5\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{1.5},\"en\")",
+   "power_bi": "V:text:\"1.5\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#date(2020,1,2)},\"fr-FR\")",
+   "power_bi": "V:text:\"02/01/2020\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#duration(1,0,0,0)},\"de-DE\")",
+   "power_bi": "V:text:\"1.00:00:00\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.Format(\"#{0}\",{#time(13,2,3)},\"de-DE\")",
+   "power_bi": "V:text:\"13:02\"",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1,5\",\"de-DE\")",
+   "power_bi": "V:type",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Text.InferNumberType(\"1.5\",\"de-DE\")",
+   "power_bi": "V:type",
+   "measured_in": "2026-11-09-m-text-92-unmodelled.json"
+  },
+  {
+   "expression": "Expression.Identifier(\"#x\")",
+   "power_bi": "V:text:\"#\\\"#x\\\"\"",
+   "measured_in": "2026-11-09-m-value-98-fresh.json"
+  },
+  {
+   "expression": "Expression.Evaluate(\"List.Sum({1,2})\", #shared)",
+   "power_bi": "V:number:3",
+   "measured_in": "2026-11-09-m-value-98-fresh.json"
+  },
+  {
+   "expression": "Value.FromText(\"abc12\")",
+   "power_bi": "V:text:\"abc12\"",
+   "measured_in": "2026-11-09-m-value-98-fresh.json"
+  },
+  {
+   "expression": "Type.FunctionReturn(Value.Type(Splitter.SplitTextByDelimiter(\",\")))",
+   "power_bi": "V:type",
+   "measured_in": "2026-11-09-m-value-98-holdout.json"
+  },
+  {
+   "expression": "Binary.FromText(\"AQI==\")",
+   "power_bi": "V:binary:QA==",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Type.FunctionParameters(Value.Type(Text.Upper))",
+   "power_bi": "V:record:[\"text\"=type,\"culture\"=type]",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Type.FunctionReturn(Value.Type(Text.Upper))",
+   "power_bi": "V:type",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Uri.Combine(\"a/b\", \"c\")",
+   "power_bi": "V:text:\"http://a/c\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Uri.Combine(\"file:///c:/a/\", \"b\")",
+   "power_bi": "V:text:\"file:///c:/a/b\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Uri.Combine(\"https://x.org/a/b\", \"c\\\\d\")",
+   "power_bi": "V:text:\"https://x.org/a/c//d\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Uri.Parts(\"mailto:a@b.c\")",
+   "power_bi": "V:record:[\"Scheme\"=text:\"mailto\",\"Host\"=text:\"b.c\",\"Port\"=number:25,\"Path\"=text:\"\",\"Query\"=record:[],\"Fragment\"=text:\"\",\"UserName\"=text:\"a\",\"Password\"=text:\"\"]",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Uri.Parts(\"file:///c:/a\")",
+   "power_bi": "V:record:[\"Scheme\"=text:\"file\",\"Host\"=text:\"\",\"Port\"=number:-1,\"Path\"=text:\"c:/a\",\"Query\"=record:[],\"Fragment\"=text:\"\",\"UserName\"=text:\"\",\"Password\"=text:\"\"]",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Uri.Parts(\"x.org/p\")",
+   "power_bi": "V:record:[\"Scheme\"=text:\"http\",\"Host\"=text:\"x.org\",\"Port\"=number:80,\"Path\"=text:\"/p\",\"Query\"=record:[],\"Fragment\"=text:\"\",\"UserName\"=text:\"\",\"Password\"=text:\"\"]",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Uri.Parts(\"https://[::1]/p\")",
+   "power_bi": "V:record:[\"Scheme\"=text:\"https\",\"Host\"=text:\"[::1]\",\"Port\"=number:443,\"Path\"=text:\"/p\",\"Query\"=record:[],\"Fragment\"=text:\"\",\"UserName\"=text:\"\",\"Password\"=text:\"\"]",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2024-03-04T12:30:00Z\")",
+   "power_bi": "V:datetime:2024-03-04T16:30:00.0000000",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2024/03/04\")",
+   "power_bi": "V:date:2024-03-04",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1.2.3\")",
+   "power_bi": "V:date:2003-01-02",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"0x10\")",
+   "power_bi": "V:text:\"0x10\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1d\")",
+   "power_bi": "V:text:\"1d\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"[1,2]\")",
+   "power_bi": "V:text:\"[1,2]\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"{1,2}\")",
+   "power_bi": "V:text:\"{1,2}\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"[a=1]\")",
+   "power_bi": "V:text:\"[a=1]\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"Jan 2 2020\")",
+   "power_bi": "V:date:2020-01-02",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"January 2, 2020\")",
+   "power_bi": "V:date:2020-01-02",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2 Jan 2020\")",
+   "power_bi": "V:date:2020-01-02",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1e\")",
+   "power_bi": "V:text:\"1e\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1 000\")",
+   "power_bi": "V:text:\"1 000\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2020-13-45\")",
+   "power_bi": "V:text:\"2020-13-45\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"00:00:60\")",
+   "power_bi": "V:text:\"00:00:60\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"24:00:00\")",
+   "power_bi": "V:text:\"24:00:00\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"25:00:00\")",
+   "power_bi": "V:text:\"25:00:00\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1.2.3.4\")",
+   "power_bi": "V:text:\"1.2.3.4\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1-2-2020\")",
+   "power_bi": "V:date:2020-01-02",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2020-01-02 03:04:05 +05:00\")",
+   "power_bi": "V:datetimezone:2020-01-02T03:04:05.0000000+05:00",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1 2\")",
+   "power_bi": "V:date:2026-01-02",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1,5\", \"de-DE\")",
+   "power_bi": "V:number:1.5",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1,5\", \"fr-FR\")",
+   "power_bi": "V:number:1.5",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2020-01-02T03:04:05+00:00\")",
+   "power_bi": "V:datetime:2020-01-02T07:04:05.0000000",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2020-01-02T03:04:05 +05:00\")",
+   "power_bi": "V:datetimezone:2020-01-02T03:04:05.0000000+05:00",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"1:2:3\")",
+   "power_bi": "V:time:01:02:03.0000000",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"10000-01-01\")",
+   "power_bi": "V:text:\"10000-01-01\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Value.FromText(\"2020-02-30\")",
+   "power_bi": "V:text:\"2020-02-30\"",
+   "measured_in": "2026-11-09-m-value-98-probes.json"
+  },
+  {
+   "expression": "Type.AddTableKey(type table [a=number], {\"a\"}, true)",
+   "power_bi": "V:type",
+   "measured_in": "2026-11-09-m-value-98-spec.json"
+  },
+  {
+   "expression": "Type.ForFunction([ReturnType=type text, Parameters=[x=type number]], 1)",
+   "power_bi": "V:type",
+   "measured_in": "2026-11-09-m-value-98-spec.json"
+  }
+ ]
+}

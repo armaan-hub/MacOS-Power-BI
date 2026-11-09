@@ -231,6 +231,7 @@ class TypeValue(MValue):
     item: Optional["TypeValue"] = None  # list types: {T}
     facets: Optional[tuple] = None  # Type.ReplaceFacets: the ten facet values in Type.Facets order
     raw_fields: Optional["Record"] = None  # Type.ForRecord: the field record as given (read back unchanged)
+    library_name: Optional[str] = None  # library function name if created from Value.Type of a library function
 
 
 # ---- names used in messages and type checks -------------------------------

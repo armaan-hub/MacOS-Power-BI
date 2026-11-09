@@ -2274,3 +2274,9 @@ Spec 26 formulas x 4 rows: 92 exact, 12 refused, 0 wrong. Holdout 4 formulas: 16
 Engine cases 169: 166 exact, 3 refused. Scripts 32: 28 exact, 3 refused. Probes 999: 976 exact, 23 refused. Holdout 50 conversions + 5 scripts all exact. 0 wrong anywhere.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4414 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 201 (Task 112 m-residual-102: M engine residual refusals outside the Table family (m-residual-102, coded by Antigravity): Value.FromText shapes, Text.ToBinary encodings, Text.Format, Uri, date/time FromText, Type.FunctionReturn from measured return types, Type.AddTableKey/ForFunction, Expression.*; unmeasured digit texts refuse.)
+
+Spec 76: 28 exact, 48 refused, 0 wrong. Fresh 60 (two rounds): 49 exact, 11 refused, 0 wrong. Two review rounds fixed a guessed 'any' return type, a one-input special case and a text fallback.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4413 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

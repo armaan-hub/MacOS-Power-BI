@@ -179,13 +179,18 @@ def _hash_key(value: MValue):
 
 def _equal_fn(criteria: MValue):
     """(same, is_default) for an equationCriteria argument: null is value equality, a two-argument function is a
-    comparer whose answer 0 means equal. Key selectors are not modelled."""
+    comparer whose answer 0 means equal, or a one-argument function is a key selector."""
     from .evaluator import equals
 
     if isinstance(criteria, V.Null):
         return equals, True
     if not isinstance(criteria, V.Function):
         raise V.convert_error(criteria, V.TypeValue("function"))
+    if len(criteria.params) == 1:
+        def same(a: MValue, b: MValue) -> bool:
+            return equals(_apply(criteria, a), _apply(criteria, b))
+
+        return same, False
     if len(criteria.params) != 2:
         raise _unsupported("equation criteria that is not a comparer")
 

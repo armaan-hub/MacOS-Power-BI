@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes (quota back 2026-11-09), Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 200 (Task 111 m-script-101) shipped: unmappable M scripts run on the M engine. In progress: Task 112 (Antigravity, worktree Power BI tool-task112).
+**Active agent:** Antigravity codes, Opus plans/reviews/ships, Sonnet fixes; Haiku resting. Iteration 201 (Task 112 m-residual-102) shipped. In progress: Task 113 DAX refusal backlog part 1 (Antigravity, worktree Power BI tool-task113).
 **Branch in use:** none
 **Working tree clean:** main yes
 
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
+Task 112 m-residual-102, on branch `antigravity/m-residual-102` in the worktree `/Users/armaan/Power BI tool-task112`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -121,6 +121,22 @@ Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the work
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-09 Antigravity (Task 112 m-residual-102 built, ready for review)
+Task: Task 112 (Iteration 201) m-residual-102 (M engine remaining refusals outside Table family).
+Branch: `antigravity/m-residual-102` in `/Users/armaan/Power BI tool-task112`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from M/DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
+- Review fixes addressed:
+  1. `_function_return` uses measured return types from `return_types.py` (metadata table) for library functions, and explicitly refuses if unlisted; `_function_parameters` on library functions keeps explicit refusal (parameter types unmeasured); only M-written functions report their own declared types.
+  2. Replaced `text == "1 2"` in `_value_from_text` with general regex `re.fullmatch(r"\d{1,2}[\s/.-]\d{1,2}", text)` for two-number date without year (clock dependent).
+  3. Second review fix: removed general fallback that returned unparsed text as text in `_value_from_text`. Text with no digits stays text; text containing digits that does not match measured number/date/datetime/time/duration/logical shapes is an explicit refusal, preventing wrong answers on ISO durations ("P1D") or unmodelled strings. Day-and-month without year ("12 May", "May 12") explicitly refused as clock dependent.
+- Spec verification (`docs/plans/2026-11-09-m-residual-102-spec.json`): 76 cases total: 28 exact, 48 refused, 0 wrong.
+  - 28 exact: Date.IsLeapYear with number year, Duration.From with number days, DateTime/DateTimeZone dot/named-month/12-hour parsing and whitespace timezone tail, List.Contains with key selector function, Expression.Identifier quoting, Binary.FromText trailing chunk decode, Uri.Parts / Uri.Combine scheme defaults and formats, Type.FunctionReturn for measured library functions and splitters, Type.ForFunction, Type.AddTableKey, #shared environment record, Value.FromText measured date/time/number formats.
+  - 48 refused: 20 text unmodelled cases (codepages / culture format / infer type) mandated by existing tests in test_m_engine_eval.py; 1 fr-FR culture mandated by number/value tests; 11 clock / machine-time-zone / zero UTC offset cases per plan rules; 1 library function parameter types case (Type.FunctionParameters(Value.Type(Text.Upper))); 15 Value.FromText digit strings not matching measured shapes.
+  - 0 wrong: No answers differ from Power BI (0 wrong strictly maintained).
+  - 0 rules fitted to one case: all rules are general semantic implementations.
+- Tests: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q -p no:cacheprovider tests/test_m_engine_eval.py tests/test_m_engine_parser.py`: 247 passed, 51 subtests passed in 0.68s.
+Files changed: `analytics_studio/m_engine/date_fns.py`, `analytics_studio/m_engine/list_fns.py`, `analytics_studio/m_engine/stdlib.py`, `analytics_studio/m_engine/value_fns.py`, `analytics_studio/m_engine/values.py`, `tests/test_m_engine_eval.py`, `HANDOFF.md`.
 
 ### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
 Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).
@@ -797,3 +813,60 @@ Wrote the plan for Task 1 in `docs/plans/2026-10-26-scalar-gaps-1.md` (9 of the 
 
 ### 2026-10-26 Claude
 Set up the two-agent workflow: `AGENTS.md`, `GEMINI.md`, this file. Roles: Antigravity writes feature code, Claude plans, tests and fixes. No tasks yet.
+
+## Antigravity (Task 112) ready for review
+Task: Task 112 (Iteration 201) m-residual-102 (M engine remaining refusals outside Table family)
+Branch: `antigravity/m-residual-102`
+Worktree: `/Users/armaan/Power BI tool-task112`
+Working tree clean: no (uncommitted changes ready for review)
+
+Counts on `docs/plans/2026-11-09-m-residual-102-spec.json` (76 cases total):
+- Exact: 28
+- Refused: 48
+- Wrong: 0
+
+Review fixes applied:
+1. `Type.FunctionReturn` for library functions uses the measured declared return type from `return_types.py` (`RETURN_TYPES`), and keeps explicit refusal if unlisted. Parameter types of library functions (not measured) keep explicit refusal in `Type.FunctionParameters`. Only M-written functions report their own declared types.
+2. In `_value_from_text`, replaced literal check `text == "1 2"` with general regex `re.fullmatch(r"\d{1,2}[\s/.-]\d{1,2}", text)` for two-number date without year (clock dependent).
+3. Second review fix: removed general fallback that returned unparsed text as text in `_value_from_text`. Text with no digits stays text (measured in Task 108); text containing digits that does not match measured number/date/datetime/time/duration/logical shapes is an explicit refusal (`_unsupported(f"Value.FromText text '{text}'")`), preventing wrong answers on ISO durations ("P1D") or unmodelled strings. Day-and-month without year ("12 May", "May 12") explicitly refused as clock dependent.
+
+Breakdown:
+- Exact (28):
+  - `Date.IsLeapYear` supporting numeric year arguments (`calendar.isleap(int(value.value))`)
+  - `Duration.From` supporting numeric days arguments (`round(days * TPD)`)
+  - `DateTime.FromText` / `DateTimeZone.FromText` supporting dot separators (`2024.03.10`), named months with/without commas (`Feb 29, 2024`, `Feb 29 2024`), day-first named dates (`29 Feb 2024`), 12-hour AM/PM formats, and optional whitespace before timezone offsets
+  - `List.Contains` supporting 1-argument key selector criteria functions
+  - Standard environment record `#shared` containing all standard library globals
+  - `Value.Type` for functions returning parameter and return type signatures
+  - `Expression.Identifier` escaping non-regular identifiers with `#"..."` and doubled quotes
+  - `Binary.FromText` decoding trailing chunks when padding == 2 and text % 4 == 1
+  - `Uri.Combine` handling missing scheme default (`http://`), backslash normalization, and `file:///` URLs
+  - `Uri.Parts` handling default scheme (`http://`), `mailto:` (port 25), `file:` (port -1), IPv6 addresses `[::1]`
+  - `Type.FunctionReturn` for library functions (using measured return type from `return_types.py`) and splitters
+  - `Type.AddTableKey` and `Type.ForFunction` implemented and registered in standard library
+  - `Value.FromText` measured date/time/number formats
+- Still Refused (48):
+  - 20 text unmodelled cases (`Text.ToBinary` unmodelled codepages, `Text.Format` cultures `de-DE`, `fr-FR`, `de`, `en`, and `Text.InferNumberType`) mandated to be explicit errors (`ERR:`) by existing test `TextFunctionSpecTests.test_unmodelled_text_cases_are_explicit_errors_never_other_values`
+  - 1 culture case (`Value.FromText("1,5", "fr-FR")`) mandated to be an explicit error by existing tests (`NumberFunctionSpecTests.test_number_residual_is_refused_or_an_explicit_error` and `ValueFamilyProbeTests`)
+  - 11 clock / machine-time-zone dependent cases: `DateTime.FromFileTime`, `DateTime.From(#datetimezone(...))` without conversion, `DateTimeZone.FromText` without explicit timezone, `DateTime.FromText("13:45")`, zero UTC offset datetime conversions (`+00:00`, `Z`), and date without year (`1 2`)
+  - 1 library function parameter types case: `Type.FunctionParameters(Value.Type(Text.Upper))` kept as explicit refusal because parameter types of library functions are not measured
+  - 15 `Value.FromText` digit strings not matching measured shapes (e.g. unmodelled digit text, ISO durations)
+- Wrong (0): No answers differ from Power BI Desktop (0 wrong strictly maintained).
+- Rules fitted to one case: 0 (all rules are general DAX/M semantic implementations).
+
+Files changed:
+- `analytics_studio/m_engine/date_fns.py`
+- `analytics_studio/m_engine/list_fns.py`
+- `analytics_studio/m_engine/stdlib.py`
+- `analytics_studio/m_engine/value_fns.py`
+- `analytics_studio/m_engine/values.py`
+- `tests/test_m_engine_eval.py`
+- `HANDOFF.md`
+
+Pytest verification:
+Command: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q -p no:cacheprovider tests/test_m_engine_eval.py tests/test_m_engine_parser.py`
+Output: `247 passed, 51 subtests passed in 0.68s`
+Anti-cheat verification:
+Command: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py`
+Output: `1 passed in 1.18s`
+
