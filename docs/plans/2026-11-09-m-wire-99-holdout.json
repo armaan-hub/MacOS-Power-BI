@@ -1,0 +1,126 @@
+{
+ "table": "#table(type table [Name=text, Amount=number, Qty=Int64.Type, Day=date, Code=text], {{\"Alpha\", 120.5, 3, #date(2024,1,15), \"A-01\"}, {\"beta\", -40, 0, #date(2024,2,29), \"B-22\"}, {null, 0.1, 7, null, \"\"}, {\"Gamma Ray\", 1000000, -2, #date(2023,12,31), \"C-3\"}})",
+ "cases": [
+  {
+   "formula": "[Amount] * 2",
+   "cells": [
+    "V:number:241",
+    "V:number:-80",
+    "V:number:0.2",
+    "V:number:2000000"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",number:241],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",number:-80],list:[null,number:0.1,number:7,null,text:\"\",number:0.2],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",number:2000000]]"
+  },
+  {
+   "formula": "Text.Upper([Name])",
+   "cells": [
+    "V:text:\"ALPHA\"",
+    "V:text:\"BETA\"",
+    "V:null",
+    "V:text:\"GAMMA RAY\""
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",text:\"ALPHA\"],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",text:\"BETA\"],list:[null,number:0.1,number:7,null,text:\"\",null],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",text:\"GAMMA RAY\"]]"
+  },
+  {
+   "formula": "if [Amount] > 100 then \"High\" else \"Low\"",
+   "cells": [
+    "V:text:\"High\"",
+    "V:text:\"Low\"",
+    "V:text:\"Low\"",
+    "V:text:\"High\""
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",text:\"High\"],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",text:\"Low\"],list:[null,number:0.1,number:7,null,text:\"\",text:\"Low\"],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",text:\"High\"]]"
+  },
+  {
+   "formula": "Date.DayOfWeek([Day])",
+   "cells": [
+    "V:number:1",
+    "V:number:4",
+    "V:null",
+    "V:number:0"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",number:1],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",number:4],list:[null,number:0.1,number:7,null,text:\"\",null],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",number:0]]"
+  },
+  {
+   "formula": "List.Count(Text.Split([Code], \"-\"))",
+   "cells": [
+    "V:number:2",
+    "V:number:2",
+    "V:number:1",
+    "V:number:2"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",number:2],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",number:2],list:[null,number:0.1,number:7,null,text:\"\",number:1],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",number:2]]"
+  },
+  {
+   "formula": "Text.PadStart(Text.From([Qty]), 4, \"0\")",
+   "cells": [
+    "V:text:\"0003\"",
+    "V:text:\"0000\"",
+    "V:text:\"0007\"",
+    "V:text:\"00-2\""
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",text:\"0003\"],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",text:\"0000\"],list:[null,number:0.1,number:7,null,text:\"\",text:\"0007\"],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",text:\"00-2\"]]"
+  },
+  {
+   "formula": "Number.Abs([Qty])",
+   "cells": [
+    "V:number:3",
+    "V:number:0",
+    "V:number:7",
+    "V:number:2"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",number:3],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",number:0],list:[null,number:0.1,number:7,null,text:\"\",number:7],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",number:2]]"
+  },
+  {
+   "formula": "Number.Sqrt(Number.Abs([Amount]))",
+   "cells": [
+    "V:number:10.977249200050075",
+    "V:number:6.324555320336759",
+    "V:number:0.31622776601683794",
+    "V:number:1000"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",number:10.977249200050075],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",number:6.324555320336759],list:[null,number:0.1,number:7,null,text:\"\",number:0.31622776601683794],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",number:1000]]"
+  },
+  {
+   "formula": "try Number.FromText([Name]) otherwise null",
+   "cells": [
+    "V:null",
+    "V:null",
+    "V:null",
+    "V:null"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",null],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",null],list:[null,number:0.1,number:7,null,text:\"\",null],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",null]]"
+  },
+  {
+   "formula": "let x = [Amount] * 2 in x + 1",
+   "cells": [
+    "V:number:242",
+    "V:number:-79",
+    "V:number:1.2",
+    "V:number:2000001"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",number:242],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",number:-79],list:[null,number:0.1,number:7,null,text:\"\",number:1.2],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",number:2000001]]"
+  },
+  {
+   "formula": "Text.Combine({[Name], [Code]}, \"|\")",
+   "cells": [
+    "V:text:\"Alpha|A-01\"",
+    "V:text:\"beta|B-22\"",
+    "V:text:\"\"",
+    "V:text:\"Gamma Ray|C-3\""
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",text:\"Alpha|A-01\"],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",text:\"beta|B-22\"],list:[null,number:0.1,number:7,null,text:\"\",text:\"\"],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",text:\"Gamma Ray|C-3\"]]"
+  },
+  {
+   "formula": "Date.EndOfMonth([Day])",
+   "cells": [
+    "V:date:2024-01-31",
+    "V:date:2024-02-29",
+    "V:null",
+    "V:date:2023-12-31"
+   ],
+   "table_result": "V:table:cols=[\"Name\":\"text\",\"Amount\":\"number\",\"Qty\":\"number\",\"Day\":\"date\",\"Code\":\"text\",\"C\":\"any\"];rows=[list:[text:\"Alpha\",number:120.5,number:3,date:2024-01-15,text:\"A-01\",date:2024-01-31],list:[text:\"beta\",number:-40,number:0,date:2024-02-29,text:\"B-22\",date:2024-02-29],list:[null,number:0.1,number:7,null,text:\"\",null],list:[text:\"Gamma Ray\",number:1000000,number:-2,date:2023-12-31,text:\"C-3\",date:2023-12-31]]"
+  }
+ ],
+ "source": "Power BI Desktop 2.157 guest via tools/m_oracle_diff.py, 2026-11-09"
+}

@@ -31,6 +31,7 @@ from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate
 from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
 from analytics_studio.m_code_editor import MCodeEditor
+from analytics_studio.m_custom_column import usable_m_formula
 from analytics_studio.power_query_expression import (
     ExpressionError,
     compile_expression,
@@ -1235,11 +1236,14 @@ def _parse_table_call(
             parameter_names=parameter_names,
             function_names=function_names,
         )
-        tree = compile_expression(
-            expression,
-            allowed_symbols=parameter_names,
-            function_names=function_names,
-        )
+        try:
+            tree = compile_expression(
+                expression,
+                allowed_symbols=parameter_names,
+                function_names=function_names,
+            )
+        except ExpressionError:
+            tree = None  # only the M engine runs this formula (_parse_each checked it)
         output_type = "text"
         if len(args) == 3:
             declared_type = _parse_type(args[2])
@@ -1248,8 +1252,9 @@ def _parse_table_call(
                     "Custom columns do not support Time output annotations in the local type model."
                 )
             output_type = declared_type
-        conditional = _parse_m_conditional_column(
-            name, tree, input_column_types or {}
+        conditional = (
+            None if tree is None
+            else _parse_m_conditional_column(name, tree, input_column_types or {})
         )
         if conditional is not None:
             if output_type != "text":
@@ -1257,7 +1262,7 @@ def _parse_table_call(
                     "Conditional columns must use type text in the local model."
                 )
             return [conditional]
-        if _m_has_text_predicate(tree):
+        if tree is not None and _m_has_text_predicate(tree):
             raise PowerQueryMScriptError(
                 "Text predicates in custom columns require a supported null guard "
                 "and a literal search value."
@@ -3028,6 +3033,7 @@ def _validate_m_text_inputs(
         elif op in {"add_custom_column", "conditional_column"}:
             name = step["name"]
             formula_tree = None
+            m_only_formula = False
             if op == "add_custom_column":
                 try:
                     formula_tree = compile_expression(
@@ -3036,19 +3042,30 @@ def _validate_m_text_inputs(
                         function_names=function_names,
                     )
                 except ExpressionError as exc:
-                    raise PowerQueryMScriptError(
-                        f"Unsupported custom-column expression: {exc}"
-                    ) from exc
+                    if usable_m_formula(
+                        step["expression"],
+                        app_names={*(parameter_names or ()), *(function_names or ())},
+                    ) is None:
+                        raise PowerQueryMScriptError(
+                            f"Unsupported custom-column expression: {exc}"
+                        ) from exc
+                    m_only_formula = True
             if op == "add_custom_column" and m_script_custom_types:
                 types = types_before(index)
-                inferred_type = _m_expression_type(
-                    formula_tree,
-                    types,
-                    nontext_unpivot_values,
-                    schema_uncertain,
-                    explicitly_text_columns,
-                    function_map,
-                )
+                if m_only_formula:
+                    # No static type for an M-only formula: only Text.From(...) is known to give text.
+                    inferred_type = (
+                        "text" if _unwrap_text_from(step["expression"]) != step["expression"] else None
+                    )
+                else:
+                    inferred_type = _m_expression_type(
+                        formula_tree,
+                        types,
+                        nontext_unpivot_values,
+                        schema_uncertain,
+                        explicitly_text_columns,
+                        function_map,
+                    )
                 output_type = step.get("output_type", "text")
                 if inferred_type != output_type:
                     if inferred_type is None:
@@ -3271,7 +3288,11 @@ def _parse_each(
             function_names=function_names,
         )
     except ExpressionError as exc:
-        raise PowerQueryMScriptError(f"Unsupported each expression: {exc}") from exc
+        # A formula only the M engine runs (no app parameter or function inside) is a valid each expression.
+        if usable_m_formula(
+            expression, app_names={*(parameter_names or ()), *(function_names or ())}
+        ) is None:
+            raise PowerQueryMScriptError(f"Unsupported each expression: {exc}") from exc
     return expression
 
 

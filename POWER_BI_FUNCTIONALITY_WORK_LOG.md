@@ -2256,3 +2256,9 @@ Spec 326: 318 exact, 8 refused. Probes 1626: 1343 exact, 283 refused. Holdout 72
 Spec 450: 447 exact, 3 refused. Probes 1733: 1690 exact, 43 refused. Holdout 131: 129 exact, 2 refused. Fresh 130: 127 exact, 3 refused. 0 wrong anywhere.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4359 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-05 — Iteration 198 (Task 109 m-wire-99: M engine wired into custom columns (m-wire-99): every custom-column formula is evaluated by the M engine first (exact or refused), old evaluator only where M refuses; M-only columns save, reopen and refresh; engine gaps inside try/otherwise refuse.)
+
+Spec 48 formulas x 4 rows: 164 exact, 28 refused, 0 wrong (3 old-evaluator wrong answers now exact via M). Holdout 12 formulas: 48/48 exact. Real app add/save/reopen/refresh tested.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4374 passed; replay 540401: 531506 match, 8895 refused, 0 DIFF, 0 CRASH; locked 531486 to 531486. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
