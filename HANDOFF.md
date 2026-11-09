@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 194 (Task 105 m-record-95, Record family) shipped: Power Query M track in progress (core, errors, Text, Number, List, Record done). Next: Task 106 Date/DateTime/Time/Duration family.
+**Active agent:** Claude Opus 5.5 (plans/ships); Haiku codes, Sonnet fixes. Iteration 195 (Task 106 m-date-96, Date/Time family) shipped: Power Query M track in progress (core, errors, Text, Number, List, Record, Date/Time done). Next: Task 107 Table family.
 **Branch in use:** none
 **Working tree clean:** main yes
 
