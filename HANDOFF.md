@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus reviews Task 115.
+**Active agent:** Antigravity codes Task 116 (dax-rank-106); Opus plans and reviews.
 **Branch in use:** antigravity/dax-maxxnan-105
 **Working tree clean:** worktree task115 yes
 
