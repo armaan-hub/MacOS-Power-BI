@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude reviews Task 123.
-**Branch in use:** antigravity/dax-multicol-113
-**Working tree clean:** worktree task123 yes
+**Active agent:** Claude reviews Task 124.
+**Branch in use:** antigravity/dax-sumnum-114
+**Working tree clean:** worktree task124 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1439,3 +1439,31 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (180 items), holdout (59 items), and entire battery (2,722 items) have **0 wrong**.
+
+### Antigravity (Task 124) ready for review
+- **What was built:**
+  - Implemented group order for `SUMMARIZE` over numeric columns (Quantity, Sales) under an outer filter for `TOCSV` and `TOJSON` (groups `orderaudit58`, `orderaudit57`).
+  - In `analytics_studio/measures.py`:
+    - In `_evaluate_measures_once` under `TOCSV` / `TOJSON` (`order_class == "grouped"`):
+      - When `group_source` is `SUMMARIZE` over a loaded table and has filtered scan columns (`filtered_scan_columns(group_source)`):
+        - For `table_node[1] == "ADDMISSINGITEMS"`: preserved existing `rows_in_storage_scan(group_source, context, iteration_rows)`.
+        - For `table_node[1] == "SUMMARIZE"`: ordered rows via `dictionary_ordered_rows(table_node, context, iteration_rows, [("reference", "", h) for h in context["headers"] if h in (context.get("lineage") or {})], scan_filters=True, keep_undecided=True)`.
+      - Lifted the blanket refusal on numeric group columns when under an outer filter (`has_column_filter`), while strictly preserving refusal for `group_filtered` (i.e. where `group_source` is wrapped by an inner `CALCULATETABLE`, such as `TOCSV(ADDMISSINGITEMS(..., CALCULATETABLE(SUMMARIZE(...)), ...))`), preventing regressions across existing battery suites.
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-sumnum-114-spec.json`, 107 items): **107 match, 0 refused, 0 wrong** (100% exact match).
+  - Holdout in `orderaudit57_extra` and `orderaudit58_extra`: **142 newly matched answers, 0 wrong** (+20 in `orderaudit57_extra`, +122 in `orderaudit58_extra`; exact match for all 142 items previously refused).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 1.10s`).
+  - Unit regression tests:
+    - `tests/test_iteration158_order_audit3_58.py`, `tests/test_iteration157_order_audit2_57.py`, `tests/test_iteration156_order_audit_56.py`, `tests/test_iteration94_tocsv_tojson_1.py`, `tests/test_iteration94_tocsv_tojson_review.py`: 26 passed, 72 subtests passed in 12.33s.
+    - `tests/test_iteration96_table_fns_2_b_review.py`: 10 passed in 11.82s (merged `c693e2f` from Task 123 review, keeping the two `CALCULATETABLE(SUMMARIZE(...))` shapes in `STAYS_REFUSED`).
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {match: 535981, gap-reject: 4420, DIFF: 0, CRASH: 0}; locked 535573`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+408 matches over locked).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (107 items), holdout (142 items) all have **0 wrong**.
+  - All locked items intact (0 regressions).
