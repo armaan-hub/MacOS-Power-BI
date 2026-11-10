@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude reviews Task 121.
-**Branch in use:** antigravity/dax-topn-111
-**Working tree clean:** worktree task121 yes
+**Active agent:** Claude reviews Task 122.
+**Branch in use:** antigravity/dax-generate-112
+**Working tree clean:** worktree task122 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 121 dax-topn-111, on branch `antigravity/dax-topn-111` in worktree `/Users/armaan/Power BI tool-task121`. Ready for review by Claude Opus 5.5.
+Task 122 dax-generate-112, on branch `antigravity/dax-generate-112` in worktree `/Users/armaan/Power BI tool-task122`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1365,3 +1365,27 @@ Doubts or things Claude should check:
   - `analytics_studio/measures.py`
   - `docs/plans/2026-11-10-dax-topn-111-wrong.json`
   - `HANDOFF.md`
+
+### Antigravity (Task 122) ready for review
+- **What was built:**
+  - Implemented row order resolution for `GENERATE` and `CROSSJOIN` results under `TOCSV` / `TOJSON` when held in a `VAR` block (e.g. `CALCULATE(VAR T = CROSSJOIN(...) RETURN TOCSV(T, 100), ...)`).
+  - Previously, `TOCSV` on a direct `CROSSJOIN`/`GENERATE` table expression evaluated with order class `"grouped"` (established in Task 66), but when referenced via `table_node[0] == "var"`, `_tocsv_row_order` had no handler for `var` references and unconditionally raised `MeasureError`.
+  - In `evaluate_measures`, when `table_node[0] == "var"` and the referenced expression in `variable_nodes` is `CROSSJOIN`, `GENERATE`, or `GENERATEALL`, resolved `order_class` via a synthesized let-block evaluated by `_tocsv_row_order`. Other VAR-held tables remain refused.
+  - In `_tocsv_row_order`, strictly enforced `len(arguments) == 2` for `CROSSJOIN`, `GENERATE`, and `GENERATEALL` so that multi-table joins (>2 tables) remain refused as required by the plan ("REFUSE neighbouring shapes: other arguments, three tables, whole-table arguments").
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-generate-112-spec.json`, 87 items): **87 match, 0 refused, 0 wrong** (100% exact match).
+  - Holdout in `orderaudit56_extra` (683 items): **683 match, 0 refused, 0 wrong** (100% exact match).
+  - All 2,736 items in `dax_battery_orderaudit56_extra.json`: **2,518 matched, 218 refused, 0 diff** (+115 new matches from previously refused 115 items; zero diffs, zero crashes).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes green (`1 passed in 1.01s`).
+  - Unit regression tests: `tests/test_iteration158_order_audit3_58.py`, `tests/test_concatenatex_order.py`, `tests/test_iteration94_tocsv_tojson_1.py`, `tests/test_iteration94_tocsv_tojson_review.py`: **21 passed, 435 subtests passed in 10.21s**.
+  - Parity gate:
+    `replayed 540401 Power BI answers: {'match': 535593, 'gap-reject': 4808, 'DIFF': 0, 'CRASH': 0}; locked 535271`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers.
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (87 items), holdout (683 items), and all 2,736 items of `orderaudit56_extra` have **0 wrong**.
+  - Matches increased by 115 (+115 matches, -115 refusals). Parity gate passed with 0 DIFF, 0 CRASH.
