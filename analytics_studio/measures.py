@@ -4680,6 +4680,9 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         elif function in _TOCSV_JOIN_TABLES and arguments and all(_tocsv_row_order(argument) in {"constant", "dictionary", "grouped"} for argument in arguments):
             if function in {"CROSSJOIN", "GENERATE", "GENERATEALL"} and len(arguments) != 2:
                 raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            if function == "NATURALINNERJOIN":
+                if not (len(arguments) == 2 and all(_tocsv_row_order(a) in {"dictionary", "constant"} for a in arguments)):
+                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             return "grouped"
     raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
 
@@ -4764,6 +4767,14 @@ def _literal_double(node: Any) -> float | None:
             return None
         result = left + right if node[1] == "+" else left - right if node[1] == "-" else left * right if node[1] == "*" else left / right
         return result if math.isfinite(result) else None
+    if node[0] == "call" and node[1] == "ROUND" and len(node[2]) == 2:
+        val = _literal_double(node[2][0])
+        digits = _literal_double(node[2][1])
+        if val is not None and digits is not None and digits == int(digits) and -28 <= digits <= 28:
+            d_val = Decimal(repr(val))
+            quantum = Decimal(1).scaleb(-int(digits))
+            d_res = d_val.quantize(quantum, rounding=ROUND_HALF_UP)
+            return float(d_res)
     return None
 
 
@@ -4773,6 +4784,8 @@ def _tocsv_has_signed_zero_risk(node: Any, allowed: tuple[Any, ...] = ()) -> boo
     if not isinstance(node, tuple):
         return False
     if any(node is item for item in allowed):
+        return False
+    if node and node[0] == "call" and node[1] == "GENERATESERIES":
         return False
     if node and node[0] in {"binary", "unary"}:
         return True
@@ -11531,9 +11544,11 @@ def _evaluate_measures_once(
                     output = [{**left, **right} for right in rows for left in output]  # Power BI: the FIRST table varies fastest
                 if len({h.casefold() for h in merged_headers}) != len(merged_headers):
                     raise MeasureError("CROSSJOIN does not allow two columns with the same name.")
+                certain = set().union(*(c.get("explicit_types", ()) for c, _ in typed_tables))
                 return derived_table(merged_headers, output, lineage, {
                     k: v for c, _ in typed_tables for k, v in c.get("column_types", {}).items()
-                }, row_identity=all(not c.get("derived") or c.get("row_identity") or c.get("lineage") is None for c, _ in typed_tables))
+                }, row_identity=all(not c.get("derived") or c.get("row_identity") or c.get("lineage") is None for c, _ in typed_tables),
+                certain_types=certain)
             def column_kind(context: dict[str, Any], header: str) -> str:
                 kind = str(context.get("column_types", {}).get(header, "text")).casefold()
                 return "number" if kind in _COLUMN_NUMBER_TYPES else kind
@@ -11551,11 +11566,11 @@ def _evaluate_measures_once(
                 def lineage_ids(context: dict[str, Any]) -> dict[str, tuple[Any, str]]:  # the same source column, whatever copy of its table holds it
                     return {header: (table["id"], column.casefold()) for header, (table, column) in base_lineage(context).items()}
                 same_lineage = all(lineage_ids(c) == lineage_ids(first_context) for c, _ in typed_tables)
-                return derived_table(headers, output, base_lineage(first_context) if same_lineage else None, first_context.get("column_types"))
+                return derived_table(headers, output, base_lineage(first_context) if same_lineage else None, first_context.get("column_types"), certain_types=first_context.get("explicit_types", ()))
             right_keys = {row_key(row[h] for h in headers) for row in projected[1]}
             keep = (lambda key: key not in right_keys) if function == "EXCEPT" else (lambda key: key in right_keys)
             output = [row for row in projected[0] if keep(row_key(row[h] for h in headers))]
-            return derived_table(headers, output, base_lineage(first_context), first_context.get("column_types"))
+            return derived_table(headers, output, base_lineage(first_context), first_context.get("column_types"), certain_types=first_context.get("explicit_types", ()))
         if function == "CALCULATETABLE":
             captured: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
             capture_node = ("call", "CALCULATE", (("tablecapture", arguments[0], captured),) + tuple(arguments[1:]))
@@ -12396,7 +12411,8 @@ def _evaluate_measures_once(
                 output.append({**typed, **{h: None for h in extra}})
         lineage = {**base_lineage(right_context), **base_lineage(left_context)}
         types = {**right_context.get("column_types", {}), **left_context.get("column_types", {})}
-        return derived_table(list(left_context["headers"]) + extra, output, lineage, types)
+        certain = set(left_context.get("explicit_types", ())) | set(right_context.get("explicit_types", ()))
+        return derived_table(list(left_context["headers"]) + extra, output, lineage, types, certain_types=certain)
 
     def generate(arguments: tuple[tuple[Any, ...], ...], keep_empty: bool) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         left_context, left_rows = table_argument_value(arguments[0])
@@ -12436,8 +12452,10 @@ def _evaluate_measures_once(
             elif keep_empty:
                 output.append({**left, **{h: None for h in right_headers}})
         lineage = {**right_lineage, **base_lineage(left_context)}
+        certain = set(left_context.get("explicit_types", ())) | set(right_context.get("explicit_types", ()))
         return derived_table(list(left_context["headers"]) + right_headers, output, lineage, {**right_types, **left_context.get("column_types", {})},
-                             row_identity=(not left_context.get("derived") or bool(left_context.get("row_identity"))))
+                             row_identity=(not left_context.get("derived") or bool(left_context.get("row_identity"))),
+                             certain_types=certain)
 
     def contains_call(node: Any, names: frozenset[str], seen: tuple[str, ...] = ()) -> bool:
         """Whether a call to one of `names` sits anywhere in the expression, also inside a VAR it reads."""
@@ -22963,29 +22981,23 @@ def _evaluate_measures_once(
             # hand Power BI a negative zero makes a zero double cell uncertain.
             negative_zero_headers: set[str] = set()
             negative_zero_literals: list[tuple[Any, ...]] = []
+            double_cells: dict[str, Decimal] = {}
+            literal_headers: set[str] = set()
             if table_node[0] == "call" and table_node[1] == "ROW":
                 pairs = table_node[2]
                 for position in range(1, len(pairs), 2):
                     expression = pairs[position]
-                    if (
-                        expression[0] == "unary" and expression[1] == "-" and expression[2][0] == "number"
-                        and expression[2][1] == 0 and _static_numeric_type(expression[2]) == "double"
-                    ):
-                        negative_zero_headers.add(headers[position // 2])
-                        negative_zero_literals.append(expression)
-            signed_zero_risk = _tocsv_has_signed_zero_risk(table_node, tuple(negative_zero_literals))
-            # ROW cells that are literals or constant arithmetic on them: the double Power BI holds, and which cells are plain literals
-            double_cells: dict[str, Decimal] = {}
-            literal_headers: set[str] = set()
-            if table_node[0] == "call" and table_node[1] == "ROW":
-                for position in range(1, len(table_node[2]), 2):
-                    expression = table_node[2][position]
+                    header = headers[position // 2]
                     if _static_numeric_type(expression, table_context, variable_kinds) == "double":
                         double_value = _literal_double(expression)
                         if double_value is not None:
-                            double_cells[headers[position // 2]] = Decimal(repr(double_value))
+                            double_cells[header] = Decimal(repr(double_value))
+                            negative_zero_literals.append(expression)
+                            if double_value == 0.0 and math.copysign(1.0, double_value) < 0:
+                                negative_zero_headers.add(header)
                             if expression[0] == "number" or (expression[0] == "unary" and expression[2][0] == "number"):
-                                literal_headers.add(headers[position // 2])
+                                literal_headers.add(header)
+            signed_zero_risk = _tocsv_has_signed_zero_risk(table_node, tuple(negative_zero_literals))
 
             def zero_cell(header: str, suffix: str) -> str:
                 """The text of a zero number cell; suffix is "" or ".0" (the JSON double form)."""
