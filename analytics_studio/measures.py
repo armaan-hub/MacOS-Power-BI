@@ -4644,6 +4644,8 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             if all(o in {"scan", "constant", "dictionary", "grouped", "scan_forward", "window_order"} for o in arm_orders):
                 return "scan_forward"
         elif function in _TOCSV_JOIN_TABLES and arguments and all(_tocsv_row_order(argument) in {"constant", "dictionary", "grouped"} for argument in arguments):
+            if function in {"CROSSJOIN", "GENERATE", "GENERATEALL"} and len(arguments) != 2:
+                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             return "grouped"
     raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
 
@@ -12364,7 +12366,7 @@ def _evaluate_measures_once(
             right_types = dict(right_context.get("column_types", {}))
             right_lineage = base_lineage(right_context)
         if (
-            _independent_column_list(arguments[0]) and _independent_column_list(arguments[1]) and len(pending) > 1
+            not keep_empty and _independent_column_list(arguments[0]) and _independent_column_list(arguments[1]) and len(pending) > 1
             and all(len(matches) > 1 and matches == pending[0][1] for _left, matches in pending)
         ):
             # Task 66 (live Power BI, audit grids: 26 of 26 and 239 of 239 shapes over two lists of one column each, bare and under a CALCULATE filter): the two
@@ -22700,7 +22702,17 @@ def _evaluate_measures_once(
                 _tocsv_row_order(table_node)  # raises for a VAR-held table whose row order is not modelled
                 if _tocsv_row_order(_tocsv_inline_vars(table_node)) != "scan":  # a scan keeps the VAR block: Power BI never reverses it
                     table_node = _tocsv_inline_vars(table_node)  # the rows of the held table, in its own order
-            order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
+            if table_node[0] == "var" and table_node[1] in variable_nodes:
+                held_def = variable_nodes[table_node[1]]
+                while held_def and held_def[0] == "var" and held_def[1] in variable_nodes:
+                    held_def = variable_nodes[held_def[1]]
+                if held_def and held_def[0] == "call" and held_def[1] in {"CROSSJOIN", "GENERATE", "GENERATEALL"}:
+                    synth_let = ("let", ((table_node[1], held_def),), ("var", table_node[1]))
+                    order_class = _tocsv_row_order(synth_let)
+                else:
+                    order_class = _tocsv_row_order(table_node)
+            else:
+                order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
             max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
             if table_node[0] == "call" and table_node[1] == "TOPN" and len(table_node[2]) >= 3:
                 topn_walk_nodes[id(table_node)] = [table_node[2][2]]
