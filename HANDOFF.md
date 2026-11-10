@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude reviews Task 118.
-**Branch in use:** antigravity/dax-union-108
-**Working tree clean:** worktree task118 yes
+**Active agent:** Claude reviews Task 119.
+**Branch in use:** antigravity/dax-groupcols-109
+**Working tree clean:** worktree task119 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1178,3 +1178,42 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Both spec (`296` items) and review (`14` items) have 0 wrong answers.
   - Parity gate passed with 0 DIFF, 0 CRASH, +298 matches over main baseline.
+
+### Antigravity (Task 119) ready for review
+- **Scorecard:**
+  - **`docs/plans/2026-11-10-dax-groupcols-109-spec.json` (216 items):**
+    - `match`: 216
+    - `refused`: 0
+    - `wrong / diff`: **0**
+    - Result: 216 exact, 0 refused, **0 wrong** across all 216 spec items (100% exact matches).
+- **Full Parity Gate across ALL batteries (540,401 replayed answers):**
+  - `replayed 540401 Power BI answers: {'match': 535092, 'gap-reject': 5309, 'DIFF': 0, 'CRASH': 0}; locked 534478`
+  - `PARITY GATE PASSED`
+  - Matches increased by 296 (534,796 -> 535,092); gap-rejects reduced by 296 (5,605 -> 5,309).
+  - `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers. Zero regressions across locked items (534,478 locked answers).
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. *Row order for `SUMMARIZECOLUMNS` and `GROUPBY` under `TOCSV` / `TOJSON`:*
+     - In Power BI Desktop / VertiPaq, `SUMMARIZECOLUMNS` and `GROUPBY` output combinations/groups in dictionary order of the group columns.
+     - With multiple group columns belonging to the same table, the *later table column is the major key* (`major_first = sorted(headers, key=lambda h: -base_t["headers"].index(h))`), matching the existing `ROLLUPADDISSUBTOTAL` detail combinations and `dax_iteration_order` model.
+     - Within each column, dictionary order places `BLANK` first, numbers/dates ascending, and text in the first-seen order of the source column (`Profile.key`).
+     - In `_tocsv_row_order`: `SUMMARIZECOLUMNS` and `GROUPBY` return `"grouped"`, provided all group columns belong to the same base table. If group columns come from multiple tables, the cross-table order is unmodelled and refused.
+     - In `_tocsv_row_order` for `ADDMISSINGITEMS`: explicitly kept `ADDMISSINGITEMS(..., SUMMARIZECOLUMNS(...))` refused to preserve the locked contract from Iteration 96 (`tests/test_iteration96_table_fns_2.py`).
+  2. *Static numeric type annotations for `SUMMARIZECOLUMNS` extension columns:*
+     - Added static numeric type inference (`_static_numeric_type`) for extension columns in `summarize_columns`, passing `certain_types` to `derived_table`. This allows `TOJSON` to determine integer vs double formats for measures like `SUM(Facts[Sales])` without runtime rejection.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Spec evaluation (`docs/plans/2026-11-10-dax-groupcols-109-spec.json`, 216 items): `216 exact, 0 refused, 0 wrong`.
+  - Anti-cheat test: `python3 -m pytest -q -p no:cacheprovider tests/test_no_answer_key_in_app.py`: `1 passed in 0.90s`.
+  - Related order and regression tests: `21 passed, 435 subtests passed in 11.43s`.
+  - Summarize related tests: `69 passed, 6 subtests passed in 28.76s`.
+  - Iteration 96 tests: `15 passed in 7.04s`.
+  - Full parity gate: `caffeinate -i env PYTHONPATH=. python tools/parity_check.py --tests`:
+    `replayed 540401 Power BI answers: {'match': 535092, 'gap-reject': 5309, 'DIFF': 0, 'CRASH': 0}; locked 534478`
+    `PARITY GATE PASSED`
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - Spec (`216` items) has 0 wrong answers (100% exact matches).
+  - Parity gate passed with 0 DIFF, 0 CRASH, +296 matches.
