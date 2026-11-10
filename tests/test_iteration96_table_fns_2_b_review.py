@@ -31,11 +31,9 @@ R, N, Q = "Facts[Region]", "Facts[Note]", "Facts[Quantity]"
 STAYS_REFUSED = [
     # the order of SUMMARIZECOLUMNS groups is not the order the local engine produces
     f'TOCSV(ADDMISSINGITEMS({R},SUMMARIZECOLUMNS({R},FILTER(ALL(Facts),{Q}>2),"s",SUM({Q})),{R}))',
-    # the group order of SUMMARIZE over a numeric column under a filter, and of a several-column ALL, is not modelled
+    # the group order of SUMMARIZE over a numeric column under a filter is not modelled
     f'TOCSV(ADDMISSINGITEMS({Q},CALCULATETABLE(SUMMARIZE(Facts,{Q},"s",SUM({Q})),{R}<>"West"),{Q}))',
     f'TOCSV(CALCULATETABLE(SUMMARIZE(Facts,{Q},"s",SUM({Q})),{R}<>"West"))',
-    f"TOCSV(ADDMISSINGITEMS({R},ALL({R},{N}),{R},{N}))",
-    f"TOCSV(ALL({R},{N}))",
     # TOPN lists its rows in an order that is not modelled for the added rows
     f"TOCSV(ADDMISSINGITEMS({R},TOPN(2,VALUES({R}),{R},DESC),{R}))",
     # a SELECTCOLUMNS column named "Facts[Region]" keeps the join in Power BI
@@ -136,6 +134,13 @@ class AddMissingItemsReviewTest(unittest.TestCase):
         for expression in ERRORS:
             outcome = dax.local(expression)
             self.assertTrue(outcome.startswith(("LOCAL-REJECT", "ERR:")), f"{expression} -> {outcome}")
+
+    def test_several_column_all_matches_power_bi(self) -> None:
+        # live Power BI (Task 123 review, 2026-11-10): a several-column ALL keeps the storage order of its combinations,
+        # and ADDMISSINGITEMS over it adds no rows
+        expected = "'Facts'[Region],'Facts'[Note]\nEast,\nWest,\nEast,Paid\nWest,Paid\nNorth,Late"
+        for expression in (f"TOCSV(ADDMISSINGITEMS({R},ALL({R},{N}),{R},{N}))", f"TOCSV(ALL({R},{N}))"):
+            self.assertEqual(dax.local(expression), expected, expression)
 
     def test_valid_dax_stays_refused(self) -> None:
         for expression in STAYS_REFUSED:
