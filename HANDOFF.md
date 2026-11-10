@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 116 (dax-rank-106); Opus plans and reviews.
-**Branch in use:** antigravity/dax-maxxnan-105
-**Working tree clean:** worktree task115 yes
+**Active agent:** Antigravity codes Task 117 (dax-window-107) in its worktree; Iteration 205 (Task 116) shipped.
+**Branch in use:** antigravity/dax-window-107
+**Working tree clean:** worktree task117 (Antigravity working)
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 115 dax-maxxnan-105, on branch `antigravity/dax-maxxnan-105` in worktree `/Users/armaan/Power BI tool-task115`. Ready for review by Claude Opus 5.5.
+Task 116 dax-rank-106, on branch `antigravity/dax-rank-106` in worktree `/Users/armaan/Power BI tool-task116`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1007,3 +1007,81 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - All 539 spec items scored with 0 wrong (400 exact, 139 refused).
   - All 1,800 items in `dax_battery_maxxnan53_extra` replayed with 0 DIFF (1,629 match, 171 gap-reject).
+
+### Antigravity (Task 116) ready for review (updated with review 2 fixes)
+- **Review 2 probes scorecard (`docs/plans/2026-11-10-dax-rank-106-review-wrong2.json`, 3 items):**
+  - `exact`: 3
+  - `refused`: 0
+  - `wrong / diff`: **0**
+  - Details (all 3 match Power BI Desktop exactly):
+    - `CALCULATE(CONCATENATEX(ALL(Facts),RANK(DENSE,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Sales],ASC)),","),Facts[Note]="Paid")` -> `"1,1,1,1,1,1"`
+    - `CALCULATE(CONCATENATEX(ALL(Facts),RANK(SKIP,ALL(Facts),ORDERBY(Facts[Note],DESC)),","),Facts[Region]<>"East")` -> `"1,5,1,4,1,5"`
+    - `CALCULATE(CONCATENATEX(ALL(Facts),ROWNUMBER(ALL(Facts[Note],Facts[Sales]),ORDERBY(Facts[Note],ASC),PARTITIONBY(Facts[Note])),","),Facts[Sales]>0)` -> `"3,2,1,1,2,1"`
+- **Review 1 probes scorecard (`docs/plans/2026-11-10-dax-rank-106-review-wrong.json`, 11 items):**
+  - `exact`: 4
+  - `refused`: 7
+  - `wrong / diff`: **0**
+  - Details:
+    - 4 exact matches:
+      - `CONCATENATEX(ALL(Facts),RANK(SKIP,ALL(Facts[Note],Facts[Quantity]),ORDERBY(Facts[Note],ASC)),",")` -> `"1,1,4,4,4,3"`
+      - `CONCATENATEX(ALL(Facts),RANK(SKIP,ALL(Facts[Quantity],Facts[Quantity]),ORDERBY(Facts[Region],DESC,Facts[Quantity],DESC)),",")` -> `"5,4,1,6,3,2"`
+      - `CONCATENATEX(ALL(Facts),RANK(SKIP,ORDERBY(Facts[Quantity],DESC,Facts[Note],ASC)),",")` -> `"3,1,6,5,4,2"`
+      - `CONCATENATEX(ALL(Facts),ROWNUMBER(ORDERBY(Facts[Note],ASC)),",")` -> `"1,1,3,3,3,2"`
+    - 7 clean refusals (unmodelled row order or ALLSELECTED current row filtered out):
+      - 4 ALLSELECTED under outer CALCULATE filter: `RANK`/`ROWNUMBER` over `ALLSELECTED(Facts)` where the outer row context from `ALL(Facts)` has been excluded by `CALCULATE` cleanly refuses with `"RANK/ROWNUMBER over ALLSELECTED where the current row is filtered out is not modelled in the local engine."` (refusal isolated to when `window.has_row_context` is true, preserving `return None` for top-level expressions without an active row context).
+      - 3 multi-column ORDERBY walk orders: relation-less shapes with 3 ORDERBY columns or multi-column relation shapes now correctly participate in `rankx_walk` and trigger `rank_walk_order`, refusing cleanly with `_KeySpaceUndecided` (key space 54) rather than emitting unmodelled storage order.
+- **Scorecard on `docs/plans/2026-11-10-dax-rank-106-spec.json` (900 items):**
+  - `exact`: 861
+  - `refused`: 39
+  - `wrong / diff`: **0**
+  - Result: 861 exact, 39 refused, **0 wrong** across all 900 spec items.
+- **Scorecard by group:**
+  - `rank61` (741 items): 705 exact, 36 refused, 0 wrong
+  - `rankx60` (159 items): 156 exact, 3 refused, 0 wrong
+- **Refusals breakdown (39 items, honest DAX model boundaries):**
+  - 30: "The row order of this table for a key space between the measured sizes is not modelled in the local engine."
+  - 6: "The order of CONCATENATEX rows walked by a fractional column beside columns that hold one value, in a RANK / ROWNUMBER / RANKX over it, is not modelled in the local engine."
+  - 3: "The order of CONCATENATEX rows whose ORDER BY keys tie on every row, over a walk of a fractional column beside another column, is not modelled in the local engine."
+- **Full Parity Gate across ALL batteries (540,401 replayed answers):**
+  - `replayed 540401 Power BI answers: {'match': 533157, 'gap-reject': 7244, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+  - `PARITY GATE PASSED -> PARITY_LEDGER.md`
+  - Matches increased by 1,070 (532,087 -> 533,157); gap-rejects reduced by 1,070 (8,314 -> 7,244).
+  - `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers. Zero regressions across locked items.
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. *Candidate rows for current row context in `ALL` vs `ALLSELECTED`:*
+     - In `window_setup`: when matching the current row context against the window relation, if there is an active row context (`constraints` is non-empty) and the relation is an `ALL` relation (`ALL`, `ALLEXCEPT`, `ALLNOBLANKROW`), candidate source rows are drawn from `base_context["rows"]` (the base table's full rows). Because `ALL` removes outer filter context, the row context from an enclosing iterator (e.g. `ALL(Facts)`) exists in `base_context["rows"]` even if excluded by an outer `CALCULATE` filter.
+     - Conversely, when there is NO active row context (`not constraints`, e.g. standalone measures filtered purely by `CALCULATE`), candidate source rows draw from `rows_by_table_id[table_id]` so that the filter context correctly provides the single current row.
+  2. *`ALL(table)` unwrapping in `dictionary_ordered_rows`:*
+     - `walk_table_name` unwraps `ALL(table)` and `ALLSELECTED(table)` calls in addition to bare `table` references. This enables `rankx_walk` and `rank_walk_order` to determine the dictionary walk order for `CONCATENATEX(ALL(table), ...)`.
+  3. *Relation-less `RANK` / `ROWNUMBER`:*
+     - In DAX standard calculation mode, when the `<relation>` argument of `RANK` or `ROWNUMBER` is omitted inside an iterator (`SUMX`, `MAXX`, `CONCATENATEX`, `ADDCOLUMNS`), the implicit relation is `ALLSELECTED` over the unique columns referenced in `ORDERBY`, `PARTITIONBY`, and `MATCHBY`.
+     - In `window_setup`: when `relation is None`, synthesize `relation = ("call", "ALLSELECTED", tuple(cols))` from the unique column references in `order_spec`, `partition_refs`, and `match_refs`.
+     - Current row matching against the enclosing row context on those columns is handled by `window_setup`'s existing matching logic.
+  4. *Row-context sensitive ALLSELECTED refusal in `window_scalar`:*
+     - When `window.has_row_context` is true (non-boolean row context constraints exist on `row_stack`) and relation is `ALLSELECTED`, but the current row is filtered out (`not current`), raise `MeasureError(f"{function} over ALLSELECTED where the current row is filtered out is not modelled in the local engine.")` rather than returning partial blanks. When no row context exists on `row_stack`, preserve `return None` (BLANK) as required by top-level standalone queries.
+  5. *`TOCSV` base-table lineage vs arithmetic signed-zero risk:*
+     - In `zero_cell`: when formatting a zero cell in a derived table, if the column has lineage directly to an underived base table (`from_base = link is not None and not link[0].get("derived")`), the value 0 is loaded data from the base table, not a zero produced by arithmetic in the query. It is therefore formatted as `"0"`, eliminating spurious negative-zero refusals across `TOCSV(ADDCOLUMNS(Facts, "r", RANKX(...)))` without compromising actual IEEE signed-zero arithmetic guards.
+  6. *Enclosing row context read tracking in `CONCATENATEX`:*
+     - In `window_setup` and `evaluate_rank_function`: evaluating `order_spec` keys or `scores` over relation rows evaluates column expressions in the current step of the rank calculation. When a column is read from the enclosing iterator's row, it is reading the iterator's *own* row context (the row currently being processed), not an outer context enclosing the iterator. `outer_row_reads[0]` is preserved around `order_spec` key evaluation and `scores` evaluation, preventing `CONCATENATEX` from falsely concluding that an enclosing row context was read.
+  7. *Iteration order in `dax_iteration_order.py`:*
+     - In `rankx_walk` (`rebuild`): extended relation parsing to detect relation-less `RANK` and `ROWNUMBER` (where relation argument is omitted or immediately followed by `ORDERBY`, `PARTITIONBY`, or keywords). It collects the column references to `table_name` into `bodies`, preserving `kept` with `ORDERBY` and `PARTITIONBY`. Removed the `<= 2` column restriction (`if order_refs:`) so expressions with 3 ORDERBY columns trigger `rank_windows` and `rank_walk_order` (refusing cleanly with `_KeySpaceUndecided` rather than returning unmodelled storage order).
+  8. *Uncertain shapes kept refused:*
+     - The 30 key space gaps between measured sizes, 6 fractional-walk edge cases, and 3 tied ORDERBY fractional walk cases remain cleanly refused with honest `MeasureError` messages as required by the plan.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `analytics_studio/dax_iteration_order.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Anti-cheat test: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py`: `1 passed in 0.96s`.
+  - Regression unit tests: `python3 -m pytest -q -p no:cacheprovider tests/test_iteration160_rankx_audit_60.py tests/test_iteration161_rank_audit_61.py tests/test_iteration174_rankx_sets_75.py`: `112 passed, 27 subtests passed in 0.97s`.
+  - CONCATENATEX / TOCSV unit tests: `python3 -m pytest -q -p no:cacheprovider tests/test_concatenatex_order.py tests/test_iteration94_tocsv_tojson_1.py tests/test_iteration94_tocsv_tojson_review.py`: `10 passed, 417 subtests passed in 9.82s`.
+  - Full parity gate: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`:
+    `replayed 540401 Power BI answers: {'match': 533157, 'gap-reject': 7244, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+    `PARITY GATE PASSED`
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - All 3 review 2 probes in `docs/plans/2026-11-10-dax-rank-106-review-wrong2.json` exact (0 wrong).
+  - All 11 review 1 probes in `docs/plans/2026-11-10-dax-rank-106-review-wrong.json` resolved: 4 exact, 7 refused, 0 wrong.
+  - All 900 spec items scored with 0 wrong (861 exact, 39 refused).
+  - Parity gate passed with 0 DIFF, 0 CRASH, +1,070 matches.

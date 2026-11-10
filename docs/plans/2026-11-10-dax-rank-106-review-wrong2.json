@@ -1,0 +1,17 @@
+[
+ {
+  "expr": "CALCULATE(CONCATENATEX(ALL(Facts),RANK(DENSE,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Sales],ASC)),\",\"),Facts[Note]=\"Paid\")",
+  "powerbi": "1,1,1,1,1,1",
+  "local_now": "1,,1,,1,"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(ALL(Facts),RANK(SKIP,ALL(Facts),ORDERBY(Facts[Note],DESC)),\",\"),Facts[Region]<>\"East\")",
+  "powerbi": "1,5,1,4,1,5",
+  "local_now": ",5,,4,1,"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(ALL(Facts),ROWNUMBER(ALL(Facts[Note],Facts[Sales]),ORDERBY(Facts[Note],ASC),PARTITIONBY(Facts[Note])),\",\"),Facts[Sales]>0)",
+  "powerbi": "3,2,1,1,2,1",
+  "local_now": "3,2,,,,1"
+ }
+]

@@ -267,6 +267,36 @@ def rankx_walk(nodes: Iterable[Any], table_name: str) -> tuple[list[Any], list[A
                     elif isinstance(argument, tuple) and argument[:2] == ("call", "PARTITIONBY"):
                         kept.append(argument)
                 return ("call", node[1], tuple(kept))
+            omitted = relation is None or (isinstance(relation, tuple) and (
+                relation[0] == "omitted"
+                or (relation[0] == "call" and relation[1] in {"ORDERBY", "PARTITIONBY", "MATCHBY"})
+                or (relation[0] == "table" and str(relation[1]).upper() in {"FIRST", "LAST", "KEEP"})
+            ))
+            if omitted:
+                def _find_refs(n: Any) -> list[tuple[Any, ...]]:
+                    res = []
+                    if isinstance(n, tuple) and n:
+                        if n[0] == "reference":
+                            res.append(n)
+                        else:
+                            for child in (n if isinstance(n[0], tuple) else n[1:]):
+                                if isinstance(child, tuple):
+                                    res.extend(_find_refs(child))
+                    return res
+
+                order_refs = [
+                    ref for ref in _find_refs(node)
+                    if str(ref[1]).casefold() == str(table_name).casefold()
+                ]
+                if order_refs:
+                    bodies.extend(order_refs)
+                    kept = []
+                    for argument in node[2]:
+                        if isinstance(argument, tuple) and argument[:2] == ("call", "ORDERBY") and isinstance(argument[2], tuple):
+                            kept.append(("call", "ORDERBY", _order_expressions(argument[2])))
+                        elif isinstance(argument, tuple) and argument[:2] == ("call", "PARTITIONBY"):
+                            kept.append(argument)
+                    return ("call", node[1], tuple(kept))
         return tuple(rebuild(child) if isinstance(child, tuple) else child for child in node)
 
     rebuilt = [rebuild(node) for node in nodes]
