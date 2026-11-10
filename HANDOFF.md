@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 127 (dax-negzero-117).
-**Branch in use:** antigravity/dax-negzero-117
-**Working tree clean:** worktree task127 in use by Antigravity
+**Active agent:** Antigravity codes Task 128 (dax-typefail-118).
+**Branch in use:** antigravity/dax-typefail-118
+**Working tree clean:** worktree task128 in use by Antigravity
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 122 dax-generate-112, on branch `antigravity/dax-generate-112` in worktree `/Users/armaan/Power BI tool-task122`. Ready for review by Claude Opus 5.5.
+Task 127 dax-negzero-117, on branch `antigravity/dax-negzero-117` in worktree `/Users/armaan/Power BI tool-task127`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1496,30 +1496,32 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (118 items) and all 613 Task 118 probes have **0 wrong**.
 
-### Antigravity (Task 126) ready for review
+### Antigravity (Task 127) ready for review
 - **What was built:**
-  - Modelled row order of `ALLSELECTED`, `FILTER(ALLSELECTED(...))`, and `ADDCOLUMNS(FILTER(...), "r", RANKX(...))` results under `TOCSV` / `TOJSON`:
-    - `ADDCOLUMNS`: updated `_tocsv_row_order` so that `ADDCOLUMNS` over a scan (including `FILTER(table, ...)`) returns `"scan_forward"`, matching Power BI's forward storage order evaluation.
-    - `ALLSELECTED(table)` under outer filter: for direct `TOCSV(ALLSELECTED(table))` under an outer filter (`removed or filtered_here`), when `max_rows >= 0` Power BI returns reverse storage order (`reverse = True`), and when `max_rows < 0` (e.g. `max_rows = -1`) it returns forward storage order (`reverse = False`). When whole and unfiltered, it keeps forward storage order.
-    - VAR-held table variables in `TOCSV(T, 100)`:
-      - `VAR T = ALLSELECTED(table)`: when under an outer filter, returns reverse storage order for `max_rows >= 0`; when whole and unfiltered, keeps forward storage order.
-      - `VAR T = FILTER(ALLSELECTED(table), ...)`: returns reverse storage order for `max_rows >= 0`.
-      - `VAR T = ALLSELECTED(table[col])`: returns dictionary order.
+  - Negative zero handling in `TOCSV` and `TOJSON`:
+    - Updated `_literal_double(node)`: added constant evaluation for `ROUND(expr, digits)` calls with `ROUND_HALF_UP`, preserving floating-point signed zero (`-0.0` vs `0.0`).
+    - Updated `_tocsv_has_signed_zero_risk(node)`: exempted `GENERATESERIES` call nodes since `GENERATESERIES(start, stop, step)` stepping upwards across zero guarantees IEEE 754 positive zero `+0.0`.
+    - Updated `ROW` negative zero inspection: evaluated double expressions via `_literal_double`, registering `-0.0` headers in `negative_zero_headers` and adding them to `allowed` literals in `signed_zero_risk`; also added constant `+0.0` expressions (such as `-1.5 + 1.5`) to `allowed` literals so they are not rejected by `signed_zero_risk`.
+  - Whole-number vs double column type propagation in `TOJSON`:
+    - Propagated `certain_types` through derived table constructors (`natural_join`, `generate`, `CROSSJOIN`, `UNION`, `EXCEPT`, `INTERSECT`) so that explicit static types (such as `SUM(Facts[Quantity])` having `int64`) are preserved in non-lineage operations.
+  - Add-on: `NATURALINNERJOIN` row order:
+    - In `_tocsv_row_order`, restricted row order acceptance for `NATURALINNERJOIN` to shapes where both arguments are single-column dictionary / constant tables (such as `VALUES` or `ALL`), safely refusing unmodelled join shapes (such as `NATURALINNERJOIN(ALL(...), SUMMARIZE(...))`) where the row order is not derived, eliminating the wrong answer on probe `CALCULATE(TOCSV(NATURALINNERJOIN(ALL(Facts[Note]),SUMMARIZE(Facts,Facts[Note],"s",MAX(Facts[Quantity])))),Facts[Sales]>0,Facts[Quantity]>=2)`.
 - **Results:**
-  - Spec (`docs/plans/2026-11-10-dax-allsel-116-spec.json`, 56 items): **56 match, 0 refused, 0 wrong** (100% exact match).
-  - Existing batteries (`orderaudit56_extra`, `orderaudit57_extra`, `orderaudit58_extra`, `orderaudit59_extra`, 11,414 items total): **11,357 match, 57 refused, 0 wrong** (0 wrong across all 11,414 items; +75 newly matched).
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 1.02s`).
+  - Spec (`docs/plans/2026-11-10-dax-negzero-117-spec.json`, 39 items): **39 match, 0 refused, 0 wrong** (100% exact match).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.91s`).
   - Unit regression tests:
-    - `tests/test_iteration94_tocsv_tojson*.py`, `tests/test_allselected*.py`: 12 passed, 1920 subtests passed in 40.37s.
+    - `tests/test_iteration94_tocsv_tojson*.py`: 8 passed in 8.35s.
+    - `tests/test_iteration96_table_fns*.py`: 32 passed in 28.35s.
   - Full parity gate:
-    `replayed 540401 Power BI answers: {'match': 536213, 'gap-reject': 4188, 'DIFF': 0, 'CRASH': 0}; locked 535819`
+    `replayed 540401 Power BI answers: {'match': 536264, 'gap-reject': 4137, 'DIFF': 0, 'CRASH': 0}; locked 536119`
     `PARITY GATE PASSED -> PARITY_LEDGER.md`
-    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+394 matches over locked).
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+145 matches over locked).
   - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
 - **Files changed:**
   - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (56 items) and all 11,414 orderaudit battery items have **0 wrong**.
+  - Spec (39 items) has **0 wrong** (39 exact matches). Probe expression is safely refused (0 wrong).
+
 
 
