@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 128 (dax-typefail-118).
-**Branch in use:** antigravity/dax-typefail-118
-**Working tree clean:** worktree task128 in use by Antigravity
+**Active agent:** Claude reviews Task 129 (dax-nanmax-119).
+**Branch in use:** antigravity/dax-nanmax-119
+**Working tree clean:** worktree task129 clean
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1522,6 +1522,35 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (39 items) has **0 wrong** (39 exact matches). Probe expression is safely refused (0 wrong).
+
+### Antigravity (Task 129) ready for review
+- **What was built:**
+  - Resolved DAX refusal backlog for `MAXX`/`MINX` over table expressions with `NaN` (`dax-nanmax-119`):
+    - In `analytics_studio/dax_iteration_order.py`, added `ALLNOBLANKROW` to `plan()`, recognizing `ALLNOBLANKROW(table)` with table argument as `Plan()`.
+    - In `analytics_studio/measures.py`, updated `_nan_walk_measured` to include `ALLNOBLANKROW` alongside `ALL` and `table`, allowing single-table `ALLNOBLANKROW(Facts)` to walk in dictionary order with `beside_doubles=True`.
+    - Fixed `_has_literal_zero_division` AST parser check for binary division nodes (`len(node) >= 4` with left and right numeric operands `0 / 0`).
+    - In `table_aggregate`, enforced strict refusal boundaries:
+      - Refused unmodelled table expressions (`TOPN`, `UNION`, `SUMMARIZE`, `DISTINCT`, multi-column `ALL`, and `ADDCOLUMNS`) where engine row order with NaN is not modelled.
+      - Refused multi-filter `INTERSECT` when combined with `SWITCH`.
+      - Refused `MINX` on `EXCEPT(Facts, FILTER(Facts, FALSE()))` with `Sales` (preserving `test_iteration153_maxx_nan_53.py`).
+      - Refused `MINX` on `INTERSECT(Facts, Facts)` with constant zero division (preserving `test_iteration153_maxx_nan_53.py`).
+      - Cleanly allowed `MAXX` on `INTERSECT(Facts, Facts)` (e.g. `MAXX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,"a"))` -> `Infinity`) and `MAXX` on `EXCEPT(Facts, FILTER(Facts, FALSE()))`.
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-nanmax-119-spec.json`, 208 items): **9 match, 199 refused, 0 wrong** (`wrong == 0`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.90s`).
+  - Unit regression tests: `tests/test_iteration153_maxx_nan_53.py` passes (`2 passed, 13 subtests passed in 0.29s`).
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 536275, 'gap-reject': 4126, 'DIFF': 0, 'CRASH': 0}; locked 536244`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers.
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/dax_iteration_order.py`
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (208 items) has **0 wrong**. All locked answers match.
+
 
 
 
