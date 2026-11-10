@@ -1,0 +1,682 @@
+[
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Region]=\"West\",Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Sales]>0,Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],DESC),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],DESC),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],DESC),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Quantity]\n0\n3\n5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity]\n0\n3\n5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),100),Facts[Sales]>0,Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Quantity]\n0\n3\n5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),100),Facts[Sales]>0,Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity]\n0\n3\n5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Quantity]\n5\n2\n0",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Quantity]\n5\n2\n0",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Note]=\"Paid\",Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Quantity]>=2,Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],DESC),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],DESC),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],DESC),100),Facts[Region]<>\"East\",Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Note]=\"Paid\",Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n-1.5\n2.5\n20",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n-1.5\n2.5\n20",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Quantity]>1,Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales]\n-1.5\n2.5\n20",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales]\n-1.5\n2.5\n20",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales]\n20\n0\n-1.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n20\n0\n-1.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Quantity]>=2,Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n20\n0\n-1.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales]\n20\n0\n-1.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Quantity]<>3,Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],ASC),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],DESC),100),Facts[Region]<>\"East\",Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],DESC),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],DESC),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Quantity]\n2\n0\n1",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Quantity]\n3\n5\n4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100),Facts[Quantity]<>3,Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity]\n3\n5\n4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Quantity]\n3\n5\n4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity]\n3\n5\n4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Quantity]\n3\n5\n4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Quantity]>1,Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Quantity]>=2,Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],ASC),100),Facts[Region]=\"West\",Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],DESC),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],DESC),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],DESC),100),Facts[Region]=\"West\",Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales]\n0\n-1.5\n",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales]\n0\n-1.5\n",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales]\n0\n-1.5\n",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Region]=\"West\",Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n0\n-1.5\n",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales]\n0\n-1.5\n",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales]\n2.5\n20\n10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n2.5\n20\n10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales]\n2.5\n20\n10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Quantity]>=2,Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales]\n2.5\n20\n10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Region]=\"West\",Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n2.5\n20\n10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],DESC),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales]\n2.5\n20\n10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Note]),Facts[Note]),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Note]),Facts[Note]),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Note]),Facts[Note]),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Note]\n\nPaid",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Quantity]),Facts[Quantity]),100),Facts[Note]=\"Paid\",Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity]\n0",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Quantity]),Facts[Quantity]),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n4\n5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Quantity]),Facts[Quantity]),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity]\n0\n3\n4",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Region]\nEast\nWest",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Note]=\"Paid\",Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Region]\nEast",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Region]\nWest\nNorth",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Region]<>\"East\",Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Region]\nWest\nNorth",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Region]<>\"East\",Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Region]\nWest\nNorth",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Region]\nWest",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Region]),Facts[Region]),100),Facts[Region]=\"West\",Facts[Sales]>0)",
+  "powerbi": "'Facts'[Region]\nWest",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Sales]),Facts[Sales]),100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales]\n-1.5\n0\n2.5\n10.5\n20",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Sales]),Facts[Sales]),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales]\n-1.5\n0\n10.5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Sales]),Facts[Sales]),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales]\n\n2.5\n10.5\n20",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Sales]),Facts[Sales]),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales]\n\n0\n20",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Sales]),Facts[Sales]),100),Facts[Region]<>\"East\",Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales]\n0\n20",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS(VALUES(Facts[Sales]),Facts[Sales]),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales]\n2.5\n10.5\n20",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC)),Facts[Quantity]<>3)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Note]),Facts[Note],DESC)),Facts[Region]=\"West\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC)),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[0],\n\t\t[3],\n\t\t[5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC)),Facts[Quantity]>1,Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[0],\n\t\t[3],\n\t\t[5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],DESC)),Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[5],\n\t\t[2],\n\t\t[0]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC)),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC)),Facts[Quantity]<>3,Facts[Region]=\"West\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC)),Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC)),Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Region]),Facts[Region],DESC)),Facts[Region]=\"West\",Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],ASC)),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[-1.5],\n\t\t[2.5],\n\t\t[20.0]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],ASC)),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[-1.5],\n\t\t[2.5],\n\t\t[20.0]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Note]),Facts[Note],DESC)),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Note]),Facts[Note],DESC)),Facts[Region]=\"West\",Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],ASC)),Facts[Quantity]>=2,Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2],\n\t\t[0],\n\t\t[1]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],ASC)),Facts[Region]=\"West\",Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2],\n\t\t[0],\n\t\t[1]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC)),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[5],\n\t\t[4]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC)),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[5],\n\t\t[4]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC)),Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[5],\n\t\t[4]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Region]),Facts[Region],ASC)),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Region]),Facts[Region],ASC)),Facts[Region]=\"West\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Region]),Facts[Region],DESC)),Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC)),Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[0.0],\n\t\t[-1.5],\n\t\t[null]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Note]),Facts[Note])),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"Paid\"]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Note]),Facts[Note])),Facts[Region]<>\"East\",Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[null]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Note]),Facts[Note])),Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Quantity]),Facts[Quantity])),Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[5]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Region]),Facts[Region])),Facts[Quantity]>1,Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Region]),Facts[Region])),Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Sales]),Facts[Sales])),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[-1.5],\n\t\t[0.0],\n\t\t[10.5]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Sales]),Facts[Sales])),Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[0.0],\n\t\t[20.0]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(TREATAS(VALUES(Facts[Sales]),Facts[Sales])),Facts[Sales]>0,Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[20.0]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC),100)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(SAMPLE(3,ALL(Facts[Note]),Facts[Note],DESC),100)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),100)",
+  "powerbi": "'Facts'[Quantity]\n0\n3\n5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100)",
+  "powerbi": "'Facts'[Quantity]\n5\n2\n0",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC),100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(SAMPLE(3,ALL(Facts[Region]),Facts[Region],DESC),100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(TOPN(3,ALL(Facts[Note]),Facts[Note],ASC),100)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],ASC),100)",
+  "powerbi": "'Facts'[Quantity]\n2\n0\n1",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],DESC),100)",
+  "powerbi": "'Facts'[Quantity]\n3\n5\n4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(TOPN(3,ALL(Facts[Region]),Facts[Region],DESC),100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC),100)",
+  "powerbi": "'Facts'[Sales]\n0\n-1.5\n",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(TOPN(3,ALL(Facts[Sales]),Facts[Sales],DESC),100)",
+  "powerbi": "'Facts'[Sales]\n2.5\n20\n10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOCSV(TREATAS(VALUES(Facts[Note]),Facts[Note]),100)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "TOCSV(TREATAS(VALUES(Facts[Quantity]),Facts[Quantity]),100)",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n3\n4\n5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "TOCSV(TREATAS(VALUES(Facts[Sales]),Facts[Sales]),100)",
+  "powerbi": "'Facts'[Sales]\n\n-1.5\n0\n2.5\n10.5\n20",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "TOJSON(SAMPLE(3,ALL(Facts[Note]),Facts[Note],ASC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],ASC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[0],\n\t\t[3],\n\t\t[5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(SAMPLE(3,ALL(Facts[Quantity]),Facts[Quantity],DESC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[5],\n\t\t[2],\n\t\t[0]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(SAMPLE(3,ALL(Facts[Region]),Facts[Region],ASC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(SAMPLE(3,ALL(Facts[Sales]),Facts[Sales],DESC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0],\n\t\t[0.0],\n\t\t[-1.5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(TOPN(3,ALL(Facts[Quantity]),Facts[Quantity],ASC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2],\n\t\t[0],\n\t\t[1]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(TOPN(3,ALL(Facts[Region]),Facts[Region],DESC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(TOPN(3,ALL(Facts[Sales]),Facts[Sales],ASC))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[0.0],\n\t\t[-1.5],\n\t\t[null]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "TOJSON(TREATAS(VALUES(Facts[Region]),Facts[Region]))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "orderaudit57"
+ }
+]
