@@ -4522,6 +4522,8 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             return "scan" if node[1] == "VALUES" else "dictionary"
         if source[0] == "reference":
             return "dictionary"
+        if node[1] == "DISTINCT" and source[0] == "call" and source[1] == "SELECTCOLUMNS" and len(source[2]) == 3:
+            return "dictionary"
     elif kind == "call":
         function, arguments = node[1], node[2]
         if function == "EVALUATEANDLOG" and arguments:
@@ -4604,10 +4606,15 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             inner = next((argument for argument in arguments if argument[0] != "reference"), None)
             if inner is not None and not (inner[0] == "call" and inner[1] == "SUMMARIZECOLUMNS") and _tocsv_row_order(inner) in {"dictionary", "grouped"}:
                 return "grouped"
-        elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1 and arguments[0][0] == "table":
-            references = [(argument[1] or "").casefold() + "\0" + str(argument[2]).casefold() for argument in arguments[2::2] if argument[0] == "reference"]
-            if all(argument[0] == "string" for argument in arguments[1::2]) and len(references) == len(arguments[2::2]) == len(set(references)):
-                return "projection"  # distinct plain columns: selecting one twice makes Power BI group the rows  # columns named in pairs; a constant beside them makes Power BI sort the rows
+        elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1:
+            if arguments[0][0] == "call" and arguments[0][1] == "ALLEXCEPT" and len(arguments) == 3 and arguments[1][0] == "string" and arguments[2][0] == "reference":
+                return "dictionary"
+            if arguments[0][0] == "table" and all(argument[0] == "string" for argument in arguments[1::2]):
+                references = [(argument[1] or "").casefold() + "\0" + str(argument[2]).casefold() for argument in arguments[2::2] if argument[0] == "reference"]
+                if len(references) == len(arguments[2::2]) == len(set(references)):
+                    return "projection"
+                elif dax_iteration_order.plan(node) is not None:
+                    return "projection_walk"
         elif function == "TOPN" and len(arguments) == 3 and arguments[0][0] == "number" and arguments[2][0] == "reference":
             if arguments[1][0] == "table" or (arguments[1][0] == "table_call" and arguments[1][1] == "VALUES" and arguments[1][2][0] == "reference"):
                 return "topn"
@@ -11055,8 +11062,10 @@ def _evaluate_measures_once(
                     types[name] = "whole_number"
                 elif col_st == "double":
                     types[name] = "decimal_number"
+            certain = [k for k, v in types.items() if k in headers and v in {"whole_number", "decimal_number", "currency", "boolean", "date"}]
             selected_context, selected_rows = derived_table(
                 headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers}, row_identity=add and not context.get("derived", False) or add and bool(context.get("row_identity")),
+                certain_types=certain,
             )
             if rows:
                 for name, expression in zip(names, expressions):
@@ -13219,9 +13228,12 @@ def _evaluate_measures_once(
             )
         if kind == "boolean":  # BLANK, FALSE, TRUE
             return sorted(value_rows, key=lambda row: (row[column] is not None, typed_cell(context, column, row[column]) if row[column] is not None else False))
+        base_ctx, base_col = context, column
+        if column in (context.get("lineage") or {}):
+            base_ctx, base_col = context["lineage"][column]
         first_seen: dict[Any, int] = {}
-        for position, base in enumerate(context["rows"]):
-            value = base.get(column)
+        for position, base in enumerate(base_ctx["rows"]):
+            value = base.get(base_col)
             first_seen.setdefault(cell_key(ascii_fold(value) if isinstance(value, str) else value), position)
         return sorted(  # a BLANK is the first entry of every dictionary (Power BI, tools/parity/dax_battery_concatenatex_order.json)
             value_rows,
@@ -14172,6 +14184,9 @@ def _evaluate_measures_once(
                 if origin is not None:
                     for distinct_row in distinct_rows:  # Task 69: every source row of a distinct projected row (the walk of DISTINCT(SELECTCOLUMNS) is that of its first source row in the column's order)
                         origin[1][("group", id(distinct_row))] = seen_inner[first_key[id(distinct_row)]]
+                if len(inner_context.get("headers", ())) == 1:
+                    hdr = inner_context["headers"][0]
+                    distinct_rows = order_distinct_values(inner_context, hdr, distinct_rows)
                 return inner_context, distinct_rows
             if source[0] == "table":
                 context, source_rows = table_argument_value(source, include_unknown=argument[1] == "VALUES")
@@ -22711,6 +22726,8 @@ def _evaluate_measures_once(
             elif order_class == "projection":
                 if max_rows < 0 or total_row_count != full_row_count(table_node[2][0]) or has_column_filter(table_node[2][0]):
                     raise MeasureError("The row order of SELECTCOLUMNS over a filtered table or with every row asked for is not modelled in the local engine.")
+            elif order_class == "projection_walk":
+                iteration_rows = dictionary_ordered_rows(table_node, context, iteration_rows, [("reference", "", h) for h in context["headers"]], scan_filters=True)
             elif order_class == "topn":
                 top_count, source, key = table_node[2]
                 source_context, source_rows = table_argument_value(source)
