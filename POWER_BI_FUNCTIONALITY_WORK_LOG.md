@@ -2346,3 +2346,9 @@ TOCSV / TOJSON of GENERATE and CROSSJOIN of two column tables now answer the sha
 TOCSV / TOJSON of several-column ALL, FILTER(ALL(..), TRUE()) and SUBSTITUTEWITHINDEX over them now answer in the storage order of the distinct combinations, as Power BI does, and refuse neighbouring shapes. The Iteration 96 test that expected TOCSV(ALL(Region, Note)) and ADDMISSINGITEMS over it to stay refused now asserts the live Power BI answer (Opus probe 2026-11-10). 0 wrong on 533 and 503 hidden fresh Power BI probes (501 exact), first try. Spec 180/180, holdout 59/59.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4416 passed; replay 540401: 535839 match, 4562 refused, 0 DIFF, 0 CRASH; locked 535573 to 535819. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-10 — Iteration 213 (Task 124 dax-sumnum-114: group order of SUMMARIZE over a numeric column under a filter)
+
+TOCSV / TOJSON of SUMMARIZE (also with ROLLUP, ROLLUPGROUP and under ADDMISSINGITEMS) grouped by a numeric column under an outer filter now answer the shapes whose group order is derived and refuse the rest (bare tables, several columns, sliced TOCSV, several filters, decimal group columns such as Sales). The first version got 37 of 538 fresh Power BI probes wrong, mostly with Sales as a group column; the fix gets 0 wrong on 538 and 519 hidden fresh probes. Spec 107/107, holdout 35/35.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4416 passed; replay 540401: 535981 match, 4420 refused, 0 DIFF, 0 CRASH; locked 535819 to 535961. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
