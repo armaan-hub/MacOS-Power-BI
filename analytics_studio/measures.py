@@ -4539,10 +4539,13 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                 return "constant"  # live Power BI adds a fractional step in a double (0.1, 0.2, then 0.30000000000000004 passes 0.3)
         elif function in _TOCSV_CONSTANT_TABLES:
             return "constant"
-        elif function == "TREATAS" and len(arguments) >= 2 and arguments[0][0] == "tableconstructor" and _tocsv_is_constant(arguments[0]):
-            members = [repr(member) for member in arguments[0][1]] if isinstance(arguments[0][1], (list, tuple)) else None
-            if members is not None and len(members) == len(set(members)):
-                return "dictionary"  # live Power BI keeps a repeated member as a repeated row; the local engine would merge them
+        elif function == "TREATAS":
+            if len(arguments) >= 2 and arguments[0][0] == "tableconstructor" and _tocsv_is_constant(arguments[0]):
+                members = [repr(member) for member in arguments[0][1]] if isinstance(arguments[0][1], (list, tuple)) else None
+                if members is not None and len(members) == len(set(members)):
+                    return "dictionary"  # live Power BI keeps a repeated member as a repeated row; the local engine would merge them
+            elif len(arguments) == 2 and arguments[0][0] == "table_call" and arguments[0][1] == "VALUES" and arguments[0][2][0] == "reference" and arguments[1][0] == "reference":
+                return "dictionary"
         elif function in _TOCSV_DICTIONARY_TABLES:
             if function != "ALLEXCEPT" and len(arguments) > 1:
                 raise MeasureError("The row order of a table of several columns is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # Power BI lists their combinations like SUMMARIZE
@@ -4617,8 +4620,13 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                     return "projection"
                 elif dax_iteration_order.plan(node) is not None:
                     return "projection_walk"
-        elif function == "TOPN" and len(arguments) == 3 and arguments[0][0] == "number" and arguments[2][0] == "reference":
-            if arguments[1][0] == "table" or (arguments[1][0] == "table_call" and arguments[1][1] == "VALUES" and arguments[1][2][0] == "reference"):
+        elif function == "SAMPLE" and len(arguments) in {3, 4} and arguments[0][0] == "number" and arguments[2][0] == "reference":
+            if arguments[1][0] == "call" and arguments[1][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[1][2]) == 1 and arguments[1][2][0][0] == "reference":
+                return "scan_forward"
+        elif function == "TOPN" and len(arguments) in {3, 4} and arguments[0][0] == "number" and arguments[2][0] == "reference":
+            if arguments[1][0] == "call" and arguments[1][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[1][2]) == 1 and arguments[1][2][0][0] == "reference":
+                return "scan_forward"
+            if len(arguments) == 3 and (arguments[1][0] == "table" or (arguments[1][0] == "table_call" and arguments[1][1] == "VALUES" and arguments[1][2][0] == "reference")):
                 return "topn"
         elif function == "UNION" and arguments:
             def _union_arm_order(arm: tuple[Any, ...]) -> str | None:
@@ -22653,12 +22661,17 @@ def _evaluate_measures_once(
                     table_node = _tocsv_inline_vars(table_node)  # the rows of the held table, in its own order
             order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
             max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
-            topn_walk_nodes[id(table_node)] = []
+            if table_node[0] == "call" and table_node[1] == "TOPN" and len(table_node[2]) >= 3:
+                topn_walk_nodes[id(table_node)] = [table_node[2][2]]
+                topn_walk_under_filter.add(id(table_node))
+            else:
+                topn_walk_nodes[id(table_node)] = []
             bare_rollup_allowed.add(id(table_node))
             try:
                 context, iteration_rows = table_argument_value(table_node)
             finally:
                 topn_walk_nodes.pop(id(table_node), None)
+                topn_walk_under_filter.discard(id(table_node))
                 bare_rollup_allowed.discard(id(table_node))
             headers = list(context.get("headers", []))
             if len({h.casefold() for h in headers}) != len(headers):
@@ -22751,6 +22764,12 @@ def _evaluate_measures_once(
                         _arm_ctx, arm_rows = table_argument_value(a)
                         if len(arm_rows) > 1:
                             raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            elif table_node[0] == "call" and table_node[1] == "SAMPLE" and len(table_node[2]) in {3, 4} and table_node[2][2][0] == "reference":
+                sample_context, sample_rows = table_argument_value(table_node[2][1])
+                sample_key = next((h for h in sample_context["headers"] if h.casefold() == str(table_node[2][2][2]).casefold()), None)
+                if sample_key is not None and any(isinstance(typed_cell(sample_context, sample_key, row.get(sample_key)), str) for row in sample_rows):
+                    if len(iteration_rows) == len(sample_rows):
+                        iteration_rows = dictionary_ordered_rows(table_node[2][1], sample_context, sample_rows, [("reference", "", h) for h in context["headers"]])
             for header in headers:  # Power BI converts a column that holds numbers with dates, Booleans or text; the local rows keep their own values
                 value_kinds = {
                     "date" if dax_dates.is_date(value) else "bool" if isinstance(value, bool) else "text" if isinstance(value, str) else "number"

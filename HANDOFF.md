@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude reviews Task 120.
-**Branch in use:** antigravity/dax-distinct-110
-**Working tree clean:** worktree task120 yes
+**Active agent:** Claude reviews Task 121.
+**Branch in use:** antigravity/dax-topn-111
+**Working tree clean:** worktree task121 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 120 dax-distinct-110, on branch `antigravity/dax-distinct-110` in worktree `/Users/armaan/Power BI tool-task120`. Ready for review by Claude Opus 5.5.
+Task 121 dax-topn-111, on branch `antigravity/dax-topn-111` in worktree `/Users/armaan/Power BI tool-task121`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1292,3 +1292,54 @@ Doubts or things Claude should check:
   - Spec (123 items) and holdout (40 items) are 100% exact matches with **0 wrong**.
   - All 16 review wrong probes are cleanly refused with **0 wrong**.
   - Parity gate passed with 0 DIFF, 0 CRASH, +225 matches over previous baseline.
+
+### Antigravity (Task 121) ready for review (dax-topn-111)
+
+- **Spec evaluation (`docs/plans/2026-11-10-dax-topn-111-spec.json`, 136 items):**
+  - `matched`: 136
+  - `refused`: 0
+  - `wrong / diff`: **0**
+  - Result: 136 exact, 0 refused, **0 wrong** across all 136 spec items (100% exact matches).
+- **Holdout evaluation (`tools/parity/dax_battery_orderaudit57_extra.json` & `dax_battery_orderaudit58_extra.json`, 45 items):**
+  - `matched`: 45
+  - `refused`: 0
+  - `wrong / diff`: **0**
+  - Result: 45 exact, 0 refused, **0 wrong** across all 45 holdout items (100% exact matches).
+- **Total across Spec + Holdout (181 items across `SAMPLE`, `TOPN`, `TREATAS`):**
+  - `SAMPLE`: 69 exact, 0 refused, **0 wrong** (100% exact).
+  - `TOPN`: 67 exact, 0 refused, **0 wrong** (100% exact).
+  - `TREATAS`: 45 exact, 0 refused, **0 wrong** (100% exact).
+  - Total: 181 exact, 0 refused, **0 wrong** (100% exact matches).
+- **Full Parity Gate across ALL batteries (540,401 replayed answers):**
+  - `replayed 540401 Power BI answers: {'match': 535478, 'gap-reject': 4923, 'DIFF': 0, 'CRASH': 0}; locked 535046`
+  - `PARITY GATE PASSED -> PARITY_LEDGER.md`
+  - Matches increased by 187 (535,291 -> 535,478); gap-rejects reduced by 187 (5,110 -> 4,923).
+  - `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers. Zero regressions across locked items (535,046 locked answers).
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. *`TREATAS(VALUES(Facts[col]), Facts[col])` row order under `TOCSV` / `TOJSON`:*
+     - Single-column reference projection over `VALUES` returns `"dictionary"` order class in `_tocsv_row_order`.
+     - Distinct values of the target column are produced in dictionary order (ascending numeric/date with blanks first, or first-seen appearance in the base table for text).
+  2. *`TOPN(n, ALL(Facts[col]), Facts[col], [ASC/DESC])` row order under `TOCSV` / `TOJSON`:*
+     - Single-column reference over `ALL(col)` returns `"scan_forward"` order class in `_tocsv_row_order`.
+     - In `TOCSV` / `TOJSON` evaluation, `topn_walk_nodes[id(table_node)]` and `topn_walk_under_filter` are populated with the target column reference, allowing `table_argument_value` to execute VertiPaq heap walk order under outer filters. For whole-table / all-rows-kept text columns (`Note`, `Region`), `heap_rows` preserves the natural dictionary order (`East, West, North` and `blank, Paid, Late`); for numeric columns (`Quantity`, `Sales`), `heap_top` orders the kept rows into Power BI's heap array order (`2, 0, 1` for Quantity ASC; `3, 5, 4` for Quantity DESC; `0, -1.5, blank` for Sales ASC; `2.5, 20, 10.5` for Sales DESC).
+  3. *`SAMPLE(n, ALL(Facts[col]), Facts[col], [ASC/DESC])` row order under `TOCSV` / `TOJSON`:*
+     - Single-column reference over `ALL(col)` returns `"scan_forward"` order class in `_tocsv_row_order`.
+     - For numeric columns, `SAMPLE` returns the sampled positions from `sorted_table` in sort order.
+     - For text columns when all rows are sampled, `iteration_rows` follows the dictionary order of the column (`dictionary_ordered_rows`), matching the existing rule established in Task 68 for `CONCATENATEX`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Spec evaluation (`docs/plans/2026-11-10-dax-topn-111-spec.json`, 136 items): `136 exact, 0 refused, 0 wrong`.
+  - Holdout evaluation (45 items across `orderaudit57_extra` and `orderaudit58_extra`): `45 exact, 0 refused, 0 wrong`.
+  - All 181 items across batteries: `181 exact, 0 refused, 0 wrong`.
+  - Anti-cheat test: `python3 -m pytest -q -p no:cacheprovider tests/test_no_answer_key_in_app.py`: `1 passed in 0.99s`.
+  - Related order and regression unit tests: `python3 -m pytest -q -p no:cacheprovider tests/test_no_answer_key_in_app.py tests/test_iteration158_order_audit3_58.py tests/test_iteration94_*.py tests/test_concatenatex_order.py tests/test_iteration158_*.py tests/test_iteration96_*.py`: `53 passed, 435 subtests passed in 44.64s`.
+  - Full parity gate: `caffeinate -i env PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`:
+    `replayed 540401 Power BI answers: {'match': 535478, 'gap-reject': 4923, 'DIFF': 0, 'CRASH': 0}; locked 535046`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - Spec (136 items), holdout (45 items), and full battery sets (181 items) are 100% exact matches with **0 wrong**.
+  - Parity gate passed with 0 DIFF, 0 CRASH, +187 matches over previous baseline.
