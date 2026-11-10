@@ -1,0 +1,72 @@
+[
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Region]),TOPN(1,ALL(Facts),Facts[Quantity]),CALCULATETABLE(Facts,ALL(Facts))),2),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n0,0,West,Paid\n20,3,West,",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(4,ALL(Facts),Facts[Region],ASC),ALL(Facts),CALCULATETABLE(Facts,Facts[Region]<>\"West\")),3),Facts[Region]<>\"West\",Facts[Sales]>50)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n-1.5,1,East,Paid",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(ALLSELECTED(Facts),FILTER(ALL(Facts),Facts[Quantity]<4),TOPN(2,ALL(Facts),Facts[Region],ASC))),ISBLANK(Facts[Note]))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 9,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts),Facts[Note]=\"Paid\"),TOPN(3,ALL(Facts),Facts[Region]))),Facts[Region]=\"East\",Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[0.0, 0, \"West\", \"Paid\"]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,Facts[Note]=\"Paid\"),TOPN(4,ALL(Facts),Facts[Note],DESC),TOPN(2,ALL(Facts),Facts[Region],ASC)),4),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 10,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(FILTER(ALL(Facts),Facts[Sales]>50),TOPN(2,ALL(Facts),Facts[Note],ASC),CALCULATETABLE(Facts,ALL(Facts),Facts[Note]=\"Paid\")),100),Facts[Region]=\"East\",Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[0.0, 0, \"West\", \"Paid\"]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(3,ALL(Facts),Facts[Quantity]),ALL(Facts))),Facts[Sales]>50)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 9,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[2.5, 5, \"East\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(4,ALL(Facts),Facts[Note],DESC),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 10,\n\t\"data\": [\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(4,ALL(Facts),Facts[Region]),ALLSELECTED(Facts),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]=\"East\",Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 14,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(4,ALL(Facts),Facts[Sales],DESC),ALL(Facts))),Facts[Note]=\"Paid\",Facts[Sales]>50)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 10,\n\t\"data\": [\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "TOCSV(UNION(ALL(Facts),TOPN(3,ALL(Facts),Facts[Quantity],ASC),CALCULATETABLE(Facts,ALL(Facts))))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n0,0,West,Paid\n-1.5,1,East,Paid\n10.5,2,East,Paid",
+  "group": "review118"
+ },
+ {
+  "expr": "TOCSV(UNION(ALL(Facts),TOPN(4,ALL(Facts),Facts[Sales],ASC)),100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n2.5,5,East,\n0,0,West,Paid\n-1.5,1,East,Paid\n,4,North,Late",
+  "group": "review118"
+ },
+ {
+  "expr": "TOJSON(UNION(TOPN(3,ALL(Facts),Facts[Note],DESC),ALLSELECTED(Facts)))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 9,\n\t\"data\": [\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "review118"
+ },
+ {
+  "expr": "TOJSON(UNION(TOPN(4,ALL(Facts),Facts[Note],DESC),CALCULATETABLE(ALL(Facts),Facts[Note]=\"Paid\"),Facts))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 16,\n\t\"data\": [\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "review118"
+ }
+]
