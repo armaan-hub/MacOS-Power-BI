@@ -2334,3 +2334,9 @@ TOCSV / TOJSON of DISTINCT and SELECTCOLUMNS now answer the shapes whose row ord
 TOCSV / TOJSON of SAMPLE, TOPN and TREATAS now answer the shapes whose row order is derived and refuse the rest. TREATAS of a text value onto a numeric or date column now raises Power BI's conversion error (Cannot convert value of type Text to type Number / Integer) instead of returning an empty table; main was wrong on those 5 fresh probes. The fix gets 0 wrong on 540 and 521 hidden fresh Power BI probes. Spec 136/136, holdout 45/45.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4415 passed; replay 540401: 535478 match, 4923 refused, 0 DIFF, 0 CRASH; locked 535271 to 535458. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-10 — Iteration 211 (Task 122 dax-generate-112: row order of GENERATE and CROSSJOIN results)
+
+TOCSV / TOJSON of GENERATE and CROSSJOIN of two column tables now answer the shapes whose row order is derived (outer row major) and refuse the rest. GENERATEALL now keeps the outer row major order as Power BI does; main interleaved the outer rows and was wrong on 34 of 540 fresh probes. The fix gets 0 wrong on 540 and 531 hidden fresh Power BI probes (961 exact). Spec 87/87, holdout 28/28.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4415 passed; replay 540401: 535593 match, 4808 refused, 0 DIFF, 0 CRASH; locked 535458 to 535573. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
