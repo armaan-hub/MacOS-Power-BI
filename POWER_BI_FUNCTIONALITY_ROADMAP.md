@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-11, after Iteration 217 / Task 128 dax-typefail-118, IS* type tests of failing values answered by static type, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4417 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536501 match, 3900 refused, 0 DIFF, 0 CRASH, locked 536481. Next: Task 129 dax-nanmax-119 (MAXX/MINX with NaN), already with Antigravity.
+**Latest status (2026-11-11, after Iteration 218 / Task 129 dax-nanmax-119, MAXX/MINX with NaN over ALLNOBLANKROW, INTERSECT and EXCEPT where the row walk is known, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4417 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536512 match, 3889 refused, 0 DIFF, 0 CRASH, locked 536492. Next: Task 130 dax-pre1900-120 (times of day before 1899-12-30), already with Antigravity.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
