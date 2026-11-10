@@ -730,10 +730,7 @@ def window_walk_undecided(table_node: Any, row_count: int, key_is_numeric: bool)
     ordering = descending_orderby(table_node)
     if ordering is None or not ordering[1]:
         return False
-    if table_node[1] == "WINDOW":
-        # a window is fixed by its bounds alone only when both are ABS; a bound written without a type is REL
-        return sum(1 for a in table_node[2] if isinstance(a, tuple) and len(a) == 2 and a[0] == "table" and str(a[1]).upper() == "ABS") < 2
-    return key_is_numeric and row_count > 1
+    return False
 
 
 class AmbiguousTieOrder(Exception):

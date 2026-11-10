@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus reviews Task 116.
-**Branch in use:** antigravity/dax-rank-106
-**Working tree clean:** worktree task116 yes
+**Active agent:** Claude Opus reviews Task 117.
+**Branch in use:** antigravity/dax-window-107
+**Working tree clean:** worktree task117 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 116 dax-rank-106, on branch `antigravity/dax-rank-106` in worktree `/Users/armaan/Power BI tool-task116`. Ready for review by Claude Opus 5.5.
+Task 117 dax-window-107, on branch `antigravity/dax-window-107` in worktree `/Users/armaan/Power BI tool-task117`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1085,3 +1085,60 @@ Doubts or things Claude should check:
   - All 11 review 1 probes in `docs/plans/2026-11-10-dax-rank-106-review-wrong.json` resolved: 4 exact, 7 refused, 0 wrong.
   - All 900 spec items scored with 0 wrong (861 exact, 39 refused).
   - Parity gate passed with 0 DIFF, 0 CRASH, +1,070 matches.
+
+### Antigravity (Task 117) ready for review
+- **Scorecards:**
+  - **`docs/plans/2026-11-10-dax-window-107-spec.json` (1,073 items):**
+    - `exact`: 1,073
+    - `refused`: 0
+    - `wrong / diff`: **0**
+    - Result: 1,073 exact, 0 refused, **0 wrong** across all 1,073 spec items (100% exact matches).
+    - By group: `orderaudit59` (841 items): 841 exact, 0 wrong; `orderaudit58` (232 items): 232 exact, 0 wrong.
+  - **`docs/plans/2026-11-10-dax-window-107-review.json` (38 review probes):**
+    - `exact`: 31
+    - `refused`: 7
+    - `wrong / diff`: **0**
+    - Result: 31 exact, 7 refused, **0 wrong** across all 38 review probe items (0 wrong).
+    - By group: `review117` (31 items): 31 exact, 0 refused, 0 wrong; `review117b` (7 items): 0 exact, 7 refused, 0 wrong.
+- **Full Parity Gate across ALL batteries (540,401 replayed answers):**
+  - `replayed 540401 Power BI answers: {'match': 534498, 'gap-reject': 5903, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+  - `PARITY GATE PASSED -> PARITY_LEDGER.md`
+  - Matches increased by 1,341 (533,157 -> 534,498); gap-rejects reduced by 1,341 (7,244 -> 5,903).
+  - `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers. Zero regressions across locked items.
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. *Row order class for `WINDOW`, `INDEX`, `OFFSET` in `_tocsv_row_order`:*
+     - Registered `WINDOW`, `INDEX`, and `OFFSET` in `_tocsv_row_order` to return `"window_order"`, and allowed `"window_order"` through `FILTER` and `CALCULATETABLE`.
+     - In `TOCSV` / `TOJSON`, table expressions evaluated by `window_table` already construct and order the resulting rows (`[window.rows[i] for i in emitted]`), sorting picked rows by the walk key of the current rows in `window.walk_key` order and listing each current row's pick in ORDERBY order. Returning `"window_order"` preserves this exact order without unneeded re-sorting or reversals.
+  2. *Relative `WINDOW` and `OFFSET` over `ORDERBY(..., DESC)`:*
+     - In `dax_iteration_order.window_walk_undecided`: removed the old refusal from Task 68. The row-walk ordering algorithm implemented in Task 69 in `window_table` already correctly models the row emission order for relative WINDOW and OFFSET over DESC order, matching live Power BI Desktop across all 152 DESC shapes with 0 wrong.
+  3. *Column deduplication in `all_table_value`:*
+     - In `all_table_value`: when column references are passed to `ALL(col1, col2, ...)` (such as `ALL(Facts[Region], Facts[Region])`), duplicate references to the same column are deduplicated preserving the first occurrence. In DAX semantics, a table schema cannot hold duplicate columns from the same base table; this aligns table headers and row dictionaries with Power BI Desktop's single-column result.
+  4. *Blanks parameter rejection in `WINDOW`, `INDEX`, and `OFFSET`:*
+     - In `window_table`: when `FIRST` or `LAST` is passed as a blanks parameter to `WINDOW`, `INDEX`, or `OFFSET`, Power BI raises `MeasureRuntimeError("Blanks parameter is not allowed in this context in <function> function.")`. Added check across all three functions. `KEEP` remains permitted. Resolves all 23 probe failures in `review.json`.
+  5. *Natural order for absolute WINDOW covering the entire single-column relation; refusal for multi-column relation:*
+     - In `window_table`: when an absolute window (`"REL" not in (from_type, to_type)`) covers every row of the relation (`len(selected) == len(window.rows)`):
+       - If the relation has a single column, VertiPaq returns the relation in its own natural order (`list(window.rows)`: Region: `East,West,North`; Note: `blank,Paid,Late`) rather than the ORDERBY sort order.
+       - If the relation has several columns (`len(headers) > 1`), multi-column row order is unmodelled in the local engine, so it raises `MeasureError("The row order of a table of several columns is not modelled in the local engine, so TOCSV / TOJSON refuse it.")` matching `TOCSV(ALL(c1, c2))` behavior.
+       - If partition columns are present, it refuses cleanly with `MeasureError`. Strict subsets (`len(selected) < len(window.rows)`) retain their ORDERBY order.
+       - Resolves all 8 covering probe failures in `review.json` (round 1) and all 7 multi-column covering probe failures in `review117b` (round 2).
+  6. *Updated `test_iteration158_order_audit3_58.py`:*
+     - Updated `test_part_a_relative_window_over_desc_is_refused` to assert live Power BI values (`1,0,2,3,4,5`, `Late,,Paid`, `,10.5`) as authorized by Opus.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `analytics_studio/dax_iteration_order.py`
+  - `tests/test_iteration158_order_audit3_58.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Review probes evaluation (`docs/plans/2026-11-10-dax-window-107-review.json`, 38 items): `31 exact, 7 refused, 0 wrong`.
+  - Spec evaluation (`docs/plans/2026-11-10-dax-window-107-spec.json`, 1,073 items): `1,073 exact, 0 refused, 0 wrong`.
+  - Anti-cheat test: `QT_QPA_PLATFORM=offscreen python3 -m pytest -q tests/test_no_answer_key_in_app.py`: `1 passed in 0.89s`.
+  - Unit test `tests/test_iteration158_order_audit3_58.py`: `11 passed, 18 subtests passed in 0.15s`.
+  - Regression unit tests: `python3 -m pytest -q -p no:cacheprovider tests/test_iteration160_rankx_audit_60.py tests/test_iteration161_rank_audit_61.py tests/test_iteration174_rankx_sets_75.py tests/test_concatenatex_order.py tests/test_iteration94_tocsv_tojson_*.py`: `122 passed, 444 subtests passed in 9.83s`.
+  - Full parity gate: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`:
+    `replayed 540401 Power BI answers: {'match': 534498, 'gap-reject': 5903, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+    `PARITY GATE PASSED`
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - Both spec (`1,073`) and review (`38`) have 0 wrong answers.
+  - Parity gate passed with 0 DIFF, 0 CRASH, +1,341 matches.
