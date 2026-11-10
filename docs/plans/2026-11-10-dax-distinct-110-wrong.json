@@ -1,0 +1,98 @@
+[
+ {
+  "expr": "CALCULATE(TOCSV(DISTINCT(SELECTCOLUMNS(ALL(Facts),\"c0\",Facts[Region]&\"-\"&Facts[Note])),100),Facts[Quantity]>=2)",
+  "powerbi": "[c0]\nEast-\nWest-\nEast-Paid\nWest-Paid\nNorth-Late",
+  "group": "fresh120",
+  "local_now": "[c0]\nEast-Paid\nWest-\nNorth-Late\nWest-Paid\nEast-"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(DISTINCT(SELECTCOLUMNS(ALLEXCEPT(Facts,Facts[Region]),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))),1),Facts[Region]<>\"West\")",
+  "powerbi": "[c0]\nn",
+  "group": "fresh120",
+  "local_now": "[c0]\np"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(DISTINCT(SELECTCOLUMNS(Facts,\"c0\",Facts[Region]&\"-\"&Facts[Note]))),Facts[Sales]>0)",
+  "powerbi": "[c0]\nEast-\nWest-\nEast-Paid",
+  "group": "fresh120",
+  "local_now": "[c0]\nEast-Paid\nWest-\nEast-"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(DISTINCT(SELECTCOLUMNS(FILTER(Facts,Facts[Note]=\"Paid\"),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))),100),Facts[Region]=\"East\")",
+  "powerbi": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"n\"],\n\t\t[\"p\"]\n\t]\n}",
+  "group": "fresh120",
+  "local_now": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"p\"],\n\t\t[\"n\"]\n\t]\n}"
+ },
+ {
+  "expr": "TOCSV(DISTINCT(SELECTCOLUMNS(ALL(Facts),\"c0\",Facts[Region]&\"-\"&Facts[Note])),100)",
+  "powerbi": "[c0]\nEast-\nWest-\nEast-Paid\nWest-Paid\nNorth-Late",
+  "group": "fresh120",
+  "local_now": "[c0]\nEast-Paid\nWest-\nNorth-Late\nWest-Paid\nEast-"
+ },
+ {
+  "expr": "TOCSV(DISTINCT(SELECTCOLUMNS(Facts,\"c0\",Facts[Region]&\"-\"&Facts[Note])))",
+  "powerbi": "[c0]\nEast-\nWest-\nEast-Paid\nWest-Paid\nNorth-Late",
+  "group": "fresh120",
+  "local_now": "[c0]\nEast-Paid\nWest-\nNorth-Late\nWest-Paid\nEast-"
+ },
+ {
+  "expr": "TOJSON(DISTINCT(SELECTCOLUMNS(CALCULATETABLE(Facts,Facts[Quantity]<>3),\"c0\",Facts[Region]&\"-\"&Facts[Note])),100)",
+  "powerbi": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[\"East-\"],\n\t\t[\"East-Paid\"],\n\t\t[\"West-Paid\"],\n\t\t[\"North-Late\"]\n\t]\n}",
+  "group": "fresh120",
+  "local_now": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[\"East-Paid\"],\n\t\t[\"North-Late\"],\n\t\t[\"West-Paid\"],\n\t\t[\"East-\"]\n\t]\n}"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(DISTINCT(SELECTCOLUMNS(Facts,\"c0\",Facts[Region]&\"-\"&Facts[Note]))),Facts[Quantity]>=2)",
+  "powerbi": "[c0]\nEast-\nWest-\nEast-Paid\nNorth-Late",
+  "group": "fresh120",
+  "local_now": "[c0]\nEast-Paid\nWest-\nNorth-Late\nEast-"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(DISTINCT(SELECTCOLUMNS(FILTER(ALL(Facts),ISBLANK(Facts[Note])),\"c0\",UPPER(Facts[Region])))),Facts[Sales]>0,Facts[Note]<>\"Late\")",
+  "powerbi": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"EAST\"],\n\t\t[\"WEST\"]\n\t]\n}",
+  "group": "fresh120",
+  "local_now": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"WEST\"],\n\t\t[\"EAST\"]\n\t]\n}"
+ },
+ {
+  "expr": "TOCSV(DISTINCT(SELECTCOLUMNS(CALCULATETABLE(Facts,Facts[Quantity]<4),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))),100)",
+  "powerbi": "[c0]\nn\np",
+  "group": "fresh120",
+  "local_now": "[c0]\np\nn"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(DISTINCT(SELECTCOLUMNS(CALCULATETABLE(Facts,Facts[Quantity]<4),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))),5),Facts[Note]=\"Paid\",Facts[Quantity]>=2)",
+  "powerbi": "[c0]\nn\np",
+  "group": "fresh120",
+  "local_now": "[c0]\np\nn"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(DISTINCT(SELECTCOLUMNS(FILTER(ALL(Facts),Facts[Quantity]<4),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))),5),Facts[Sales]>0)",
+  "powerbi": "[c0]\nn\np",
+  "group": "fresh120",
+  "local_now": "[c0]\np\nn"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(DISTINCT(SELECTCOLUMNS(FILTER(ALL(Facts),Facts[Region]=\"East\"),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\")))),Facts[Quantity]<4,Facts[Sales]>50)",
+  "powerbi": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"n\"],\n\t\t[\"p\"]\n\t]\n}",
+  "group": "fresh120",
+  "local_now": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"p\"],\n\t\t[\"n\"]\n\t]\n}"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(DISTINCT(SELECTCOLUMNS(FILTER(Facts,Facts[Quantity]<4),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))),100),Facts[Note]=\"Paid\",Facts[Quantity]<4)",
+  "powerbi": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"n\"],\n\t\t[\"p\"]\n\t]\n}",
+  "group": "fresh120",
+  "local_now": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"p\"],\n\t\t[\"n\"]\n\t]\n}"
+ },
+ {
+  "expr": "TOCSV(DISTINCT(SELECTCOLUMNS(Facts,\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))),100)",
+  "powerbi": "[c0]\nn\np",
+  "group": "fresh120",
+  "local_now": "[c0]\np\nn"
+ },
+ {
+  "expr": "TOJSON(DISTINCT(SELECTCOLUMNS(ALL(Facts),\"c0\",IF(Facts[Sales]>0,\"p\",\"n\"))))",
+  "powerbi": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"n\"],\n\t\t[\"p\"]\n\t]\n}",
+  "group": "fresh120",
+  "local_now": "{\n\t\"header\": [\"[c0]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[\"p\"],\n\t\t[\"n\"]\n\t]\n}"
+ }
+]
