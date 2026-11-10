@@ -2328,3 +2328,9 @@ TOCSV / TOJSON of SUMMARIZECOLUMNS and GROUPBY now answer the shapes whose row o
 TOCSV / TOJSON of DISTINCT and SELECTCOLUMNS now answer the shapes whose row order is derived (column references and typed numeric, date or boolean columns over the listed bases) and refuse the rest; DISTINCT over a SELECTCOLUMNS of a computed text expression stays refused (16 of 540 fresh probes showed a different Power BI order there). The fix gets 0 wrong on 540 and 506 hidden fresh Power BI probes. Spec 123/123, holdout 40/40.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4415 passed; replay 540401: 535291 match, 5110 refused, 0 DIFF, 0 CRASH; locked 535046 to 535271. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-10 — Iteration 210 (Task 121 dax-topn-111: row order of SAMPLE, TOPN and TREATAS results)
+
+TOCSV / TOJSON of SAMPLE, TOPN and TREATAS now answer the shapes whose row order is derived and refuse the rest. TREATAS of a text value onto a numeric or date column now raises Power BI's conversion error (Cannot convert value of type Text to type Number / Integer) instead of returning an empty table; main was wrong on those 5 fresh probes. The fix gets 0 wrong on 540 and 521 hidden fresh Power BI probes. Spec 136/136, holdout 45/45.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4415 passed; replay 540401: 535478 match, 4923 refused, 0 DIFF, 0 CRASH; locked 535271 to 535458. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

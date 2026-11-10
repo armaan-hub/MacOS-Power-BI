@@ -4539,10 +4539,13 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                 return "constant"  # live Power BI adds a fractional step in a double (0.1, 0.2, then 0.30000000000000004 passes 0.3)
         elif function in _TOCSV_CONSTANT_TABLES:
             return "constant"
-        elif function == "TREATAS" and len(arguments) >= 2 and arguments[0][0] == "tableconstructor" and _tocsv_is_constant(arguments[0]):
-            members = [repr(member) for member in arguments[0][1]] if isinstance(arguments[0][1], (list, tuple)) else None
-            if members is not None and len(members) == len(set(members)):
-                return "dictionary"  # live Power BI keeps a repeated member as a repeated row; the local engine would merge them
+        elif function == "TREATAS":
+            if len(arguments) >= 2 and arguments[0][0] == "tableconstructor" and _tocsv_is_constant(arguments[0]):
+                members = [repr(member) for member in arguments[0][1]] if isinstance(arguments[0][1], (list, tuple)) else None
+                if members is not None and len(members) == len(set(members)):
+                    return "dictionary"  # live Power BI keeps a repeated member as a repeated row; the local engine would merge them
+            elif len(arguments) == 2 and arguments[0][0] == "table_call" and arguments[0][1] == "VALUES" and arguments[0][2][0] == "reference" and arguments[1][0] == "reference":
+                return "dictionary"
         elif function in _TOCSV_DICTIONARY_TABLES:
             if function != "ALLEXCEPT" and len(arguments) > 1:
                 raise MeasureError("The row order of a table of several columns is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # Power BI lists their combinations like SUMMARIZE
@@ -4617,8 +4620,13 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                     return "projection"
                 elif dax_iteration_order.plan(node) is not None:
                     return "projection_walk"
-        elif function == "TOPN" and len(arguments) == 3 and arguments[0][0] == "number" and arguments[2][0] == "reference":
-            if arguments[1][0] == "table" or (arguments[1][0] == "table_call" and arguments[1][1] == "VALUES" and arguments[1][2][0] == "reference"):
+        elif function == "SAMPLE" and len(arguments) in {3, 4} and arguments[0][0] == "number" and arguments[2][0] == "reference":
+            if arguments[1][0] == "call" and arguments[1][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[1][2]) == 1 and arguments[1][2][0][0] == "reference":
+                return "scan_forward"
+        elif function == "TOPN" and len(arguments) in {3, 4} and arguments[0][0] == "number" and arguments[2][0] == "reference":
+            if arguments[1][0] == "call" and arguments[1][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[1][2]) == 1 and arguments[1][2][0][0] == "reference":
+                return "scan_forward"
+            if len(arguments) == 3 and (arguments[1][0] == "table" or (arguments[1][0] == "table_call" and arguments[1][1] == "VALUES" and arguments[1][2][0] == "reference")):
                 return "topn"
         elif function == "UNION" and arguments:
             def _union_arm_order(arm: tuple[Any, ...]) -> str | None:
@@ -12228,24 +12236,65 @@ def _evaluate_measures_once(
             if value is None:
                 return None
             kind = str(target_context.get("column_types", {}).get(column, "text")).casefold()
+            table_name = str(target_context.get("name", "Table"))
             if kind in _COLUMN_NUMBER_TYPES:
-                number = dax_typed.to_number(value) if not isinstance(value, str) else dax_typed.text_to_number(value)
+                target_type = "Integer" if kind in {"whole_number", "int64"} else "Number"
+                if isinstance(value, str):
+                    try:
+                        number = dax_typed.text_to_number(value)
+                    except MeasureRuntimeError:
+                        raise MeasureRuntimeError(
+                            f"Cannot convert value '{value}' of type Text to type {target_type} "
+                            f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                        ) from None
+                elif isinstance(value, bool):
+                    number = Decimal(1 if value else 0)
+                elif isinstance(value, (int, float, Decimal)):
+                    number = Decimal(value)
+                else:
+                    raise MeasureRuntimeError(
+                        f"Cannot convert value '{value}' to type {target_type} "
+                        f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                    )
                 return number.quantize(Decimal(1), rounding=ROUND_HALF_UP) if kind in {"whole_number", "int64"} else number
             if kind == "boolean":
+                if isinstance(value, str):
+                    lowered = value.strip().casefold()
+                    if lowered not in {"true", "false"}:
+                        try:
+                            return dax_typed.to_number(value) != 0
+                        except MeasureRuntimeError:
+                            raise MeasureRuntimeError(
+                                f"Cannot convert value '{value}' of type Text to type True/False "
+                                f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                            ) from None
+                    return lowered == "true"
                 return dax_typed.to_boolean(value)
             if kind in {"date", "datetime"}:
+                if isinstance(value, str):
+                    parsed_dt = dax_dates.parse_date_text(value)
+                    if parsed_dt is None:
+                        serial = dax_dates.text_serial(value)
+                        if serial is None:
+                            raise MeasureRuntimeError(
+                                f"Cannot convert value '{value}' of type Text to type Date "
+                                f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                            )
+                        return serial
+                    return parsed_dt
                 return value
-            return value if isinstance(value, str) else dax_typed.to_text(value)
+            if kind in {"text", "string"}:
+                if isinstance(value, (int, float, Decimal)) and not isinstance(value, bool):
+                    raise MeasureError("TREATAS of numeric values onto a text column is not modelled by the local engine.")
+                return value if isinstance(value, str) else dax_typed.to_text(value)
+            return value
 
         existing: dict[str, set[tuple[Any, ...]]] = {}
         output: list[dict[str, Any]] = []
         seen: set[tuple[Any, ...]] = set()
         for row in rows:
             typed = typed_row(context, row)
-            try:
-                values = [coerce(tc, column, typed[source]) for (tc, column), source in zip(targets, context["headers"])]
-            except MeasureRuntimeError:
-                continue  # a value that cannot become the column's type matches nothing
+            values = [coerce(tc, column, typed[source]) for (tc, column), source in zip(targets, context["headers"])]
             ok = True
             for table_id in {tc["id"] for tc, _column in targets}:
                 tc = next(t for t, _c in targets if t["id"] == table_id)
@@ -22653,12 +22702,17 @@ def _evaluate_measures_once(
                     table_node = _tocsv_inline_vars(table_node)  # the rows of the held table, in its own order
             order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
             max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
-            topn_walk_nodes[id(table_node)] = []
+            if table_node[0] == "call" and table_node[1] == "TOPN" and len(table_node[2]) >= 3:
+                topn_walk_nodes[id(table_node)] = [table_node[2][2]]
+                topn_walk_under_filter.add(id(table_node))
+            else:
+                topn_walk_nodes[id(table_node)] = []
             bare_rollup_allowed.add(id(table_node))
             try:
                 context, iteration_rows = table_argument_value(table_node)
             finally:
                 topn_walk_nodes.pop(id(table_node), None)
+                topn_walk_under_filter.discard(id(table_node))
                 bare_rollup_allowed.discard(id(table_node))
             headers = list(context.get("headers", []))
             if len({h.casefold() for h in headers}) != len(headers):
@@ -22751,6 +22805,12 @@ def _evaluate_measures_once(
                         _arm_ctx, arm_rows = table_argument_value(a)
                         if len(arm_rows) > 1:
                             raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            elif table_node[0] == "call" and table_node[1] == "SAMPLE" and len(table_node[2]) in {3, 4} and table_node[2][2][0] == "reference":
+                sample_context, sample_rows = table_argument_value(table_node[2][1])
+                sample_key = next((h for h in sample_context["headers"] if h.casefold() == str(table_node[2][2][2]).casefold()), None)
+                if sample_key is not None and any(isinstance(typed_cell(sample_context, sample_key, row.get(sample_key)), str) for row in sample_rows):
+                    if len(iteration_rows) == len(sample_rows):
+                        iteration_rows = dictionary_ordered_rows(table_node[2][1], sample_context, sample_rows, [("reference", "", h) for h in context["headers"]])
             for header in headers:  # Power BI converts a column that holds numbers with dates, Booleans or text; the local rows keep their own values
                 value_kinds = {
                     "date" if dax_dates.is_date(value) else "bool" if isinstance(value, bool) else "text" if isinstance(value, str) else "number"
