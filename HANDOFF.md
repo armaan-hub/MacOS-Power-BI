@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 128 (dax-typefail-118).
-**Branch in use:** antigravity/dax-typefail-118
-**Working tree clean:** worktree task128 in use by Antigravity
+**Active agent:** Antigravity (Task 129 dax-nanmax-119 in worktree task129); Claude shipped Task 128 as Iteration 217.
+**Branch in use:** antigravity/dax-nanmax-119
+**Working tree clean:** main yes; worktree task129 in progress
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1522,6 +1522,35 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (39 items) has **0 wrong** (39 exact matches). Probe expression is safely refused (0 wrong).
+
+### Antigravity (Task 128) ready for review
+- **What was built:**
+  - Resolved DAX refusal backlog for `IS*` type tests around non-error failing expressions (`typeerr54`, `convert9`, `blank8`, `logic4`, `failtype47`):
+    - In `analytics_studio/measures.py`, added static type fallback in `evaluate_typed_function` when expression evaluation fails without raising runtime errors.
+    - Protected runtime errors: strictly excluded expressions containing `_TASK128_FORBIDDEN_CALLS` (`VALUE`, `FORMAT`, `SQRT`, `LN`, `LOG`, `LOG10`, `DIVIDE`, `QUOTIENT`, `ERROR`, `LEFT`, `RIGHT`, `MID`, `REPT`, `REPLACE`, `SELECTEDVALUE`, `DATEVALUE`, `TIMEVALUE`, `WEEKDAY`, `UNICHAR`, `SIN`, `FLOOR`, `CEILING`, `FIND`, `SEARCH`, `EDATE`, `EOMONTH`, `DATE`, `TIME`), division `/` outside let, `FACT`, comparisons, `let` concatenations, `CONVERT` with `CONCATENATE`/`UPPER`, `NOT`, non-bare `^`, `AND`/`OR` with concatenated table columns, `*` with let, and numeric tests (`ISNUMBER`, `ISDOUBLE`, etc.) with data reads or `let`/`IF`/`SWITCH`/`COALESCE`.
+    - Protected Currency multiplication overflow: checked `getattr(failure, "reads_rows", False)` and references / aggregations (`SUMX`, `MAXX`, `MINX`, `AVERAGE`, `SUM`, `MAX`, `MIN`, `COUNTROWS`, `CALCULATE`) for `function in {"ISCURRENCY", "ISNUMBER"}`, preserving Power BI run-time error semantics.
+    - Protected `CONVERT` target types: avoided static answering when `CONVERT` fails on its target type.
+  - Add-on fixes (Opus probes):
+    - Probe 1 (`ISDOUBLE(("Paid")*(MAX(Facts[Quantity])))` and `CALCULATE(ISDOUBLE(("a")*(MAX(Facts[Quantity]))),Facts[Quantity]>1)`): Removed `'ISDOUBLE'` from `_ARITHMETIC_EVIDENCE[('*', 'Text', 'Int64')]`, causing text * whole-number column to raise conversion error (`Cannot convert value ... of type Text to type Number`), matching Power BI runtime error.
+    - Probe 2 (`ISBOOLEAN(TRUE()&&(""))`): Exempted `ISBOOLEAN` from `dax_ext.ARITY` delegation and routed to `if function in {"ISLOGICAL", "ISBOOLEAN"}:` in `measures.py`, unifying `ISBOOLEAN` and `ISLOGICAL` handling for logical BLANK and returning `True` (matching Power BI). Also updated `_structural_type_answer` and datetime conversion handlers to include `ISBOOLEAN`.
+    - Probes 3 & 4 (`ISDECIMAL(CURRENCY(MIN(Facts[Region])))` and `ISDECIMAL(IF(1=0,MAX(Facts[Quantity]),CURRENCY(""))` from `2026-11-10-dax-typefail-118-wrong.json`): Prevented static typing for conversions of text (`CURRENCY`, `INT`, `CONVERT` with string literals, text columns, or text-typed subexpressions). These raise the conversion runtime error (`Cannot convert value ... of type Text to type Currency/Number`) matching Power BI.
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-typefail-118-spec.json`, 607 items): **160 match, 447 refused, 0 wrong** (0 wrong).
+  - All 5 Opus add-on probes (including both items in `docs/plans/2026-11-10-dax-typefail-118-wrong.json`) match Power BI (0 wrong).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.96s`).
+  - Unit regression tests:
+    - `tests/test_iteration140_type_tests_errors_40.py`, `tests/test_iteration147_failing_type_tests_47.py`, `tests/test_iteration150_type_tests_columns_50.py`, `tests/test_iteration154_typeerr_fail_54.py`: 22 passed, 40 subtests passed in 0.38s.
+  - Parity check (`--tests`):
+    `replayed 540401 Power BI answers: {'match': 536501, 'gap-reject': 3900, 'DIFF': 0, 'CRASH': 0}; locked 536193`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+308 matches over locked).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (607 items) and all 5 fresh probes have **0 wrong**. All locked answers match.
+
 
 
 

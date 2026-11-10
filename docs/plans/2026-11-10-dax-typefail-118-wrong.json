@@ -1,0 +1,15 @@
+{
+ "note": "fresh Power BI probes; Power BI raises the conversion error (CURRENCY of text, including in an untaken IF branch whose static type is still text->currency). Main raised/refused these; Task 128 now answers True.",
+ "items": [
+  {
+   "expr": "ISDECIMAL(CURRENCY(MIN(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'East' of type Text to type Currency.\"",
+   "local_now": "True"
+  },
+  {
+   "expr": "ISDECIMAL(IF(1=0,MAX(Facts[Quantity]),CURRENCY(\"\")))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 66) Cannot convert value '' of type Text to type Currency.\"",
+   "local_now": "True"
+  }
+ ]
+}
