@@ -2340,3 +2340,9 @@ TOCSV / TOJSON of SAMPLE, TOPN and TREATAS now answer the shapes whose row order
 TOCSV / TOJSON of GENERATE and CROSSJOIN of two column tables now answer the shapes whose row order is derived (outer row major) and refuse the rest. GENERATEALL now keeps the outer row major order as Power BI does; main interleaved the outer rows and was wrong on 34 of 540 fresh probes. The fix gets 0 wrong on 540 and 531 hidden fresh Power BI probes (961 exact). Spec 87/87, holdout 28/28.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4415 passed; replay 540401: 535593 match, 4808 refused, 0 DIFF, 0 CRASH; locked 535458 to 535573. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-10 — Iteration 212 (Task 123 dax-multicol-113: row order of multi-column ALL, FILTER and SUBSTITUTEWITHINDEX results)
+
+TOCSV / TOJSON of several-column ALL, FILTER(ALL(..), TRUE()) and SUBSTITUTEWITHINDEX over them now answer in the storage order of the distinct combinations, as Power BI does, and refuse neighbouring shapes. The Iteration 96 test that expected TOCSV(ALL(Region, Note)) and ADDMISSINGITEMS over it to stay refused now asserts the live Power BI answer (Opus probe 2026-11-10). 0 wrong on 533 and 503 hidden fresh Power BI probes (501 exact), first try. Spec 180/180, holdout 59/59.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4416 passed; replay 540401: 535839 match, 4562 refused, 0 DIFF, 0 CRASH; locked 535573 to 535819. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

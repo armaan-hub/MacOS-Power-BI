@@ -4548,11 +4548,23 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                 return "dictionary"
         elif function in _TOCSV_DICTIONARY_TABLES:
             if function != "ALLEXCEPT" and len(arguments) > 1:
+                if (
+                    function in {"ALL", "ALLNOBLANKROW"}
+                    and len(arguments) == 2
+                    and all(isinstance(arg, tuple) and arg[0] == "reference" for arg in arguments)
+                ):
+                    return "dictionary"
                 raise MeasureError("The row order of a table of several columns is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # Power BI lists their combinations like SUMMARIZE
             return "dictionary"
         if function in {"FILTER", "CALCULATETABLE"} and arguments:
             if arguments[0][0] == "call" and arguments[0][1] in {"ALL", "ALLNOBLANKROW", "ALLSELECTED"} and len(arguments[0][2]) == 1 and arguments[0][2][0][0] == "table":
                 return "scan"  # live Power BI: FILTER(ALL(table), condition) comes back in reverse storage order like FILTER(table, condition); Task 66: so does FILTER(ALLSELECTED(table), condition) (21 of 21 grid shapes)
+            if arguments[0][0] == "call" and arguments[0][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[0][2]) > 1:
+                if len(arguments) != 2 or not (
+                    arguments[1][0] == "call" and arguments[1][1] == "TRUE" and not arguments[1][2]
+                    or (arguments[1][0] == "boolean" and arguments[1][1] is True)
+                ):
+                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             base = _tocsv_row_order(arguments[0])
             if base in {"scan", "constant", "dictionary", "grouped", "window_order"}:
                 return base
@@ -4603,7 +4615,18 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         elif function == "SUBSTITUTEWITHINDEX" and arguments:
             base = _tocsv_row_order(arguments[0])
             if arguments[0][0] == "call" and arguments[0][1] in _TOCSV_DICTIONARY_TABLES and len(arguments[0][2]) != 1:
-                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+                is_valid_multicol = (
+                    arguments[0][1] in {"ALL", "ALLNOBLANKROW"}
+                    and len(arguments[0][2]) == 2
+                    and len(arguments) >= 4
+                    and arguments[2][0] == "call"
+                    and arguments[2][1] in {"ALL", "ALLNOBLANKROW"}
+                    and len(arguments[2][2]) == 1
+                    and arguments[2][2][0] == arguments[0][2][0]
+                    and arguments[3] == arguments[0][2][0]
+                )
+                if not is_valid_multicol:
+                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             if base in {"constant", "dictionary", "grouped", "scan_forward", "scan"}:
                 return base
         elif function == "ADDMISSINGITEMS" and arguments:
@@ -10099,6 +10122,13 @@ def _evaluate_measures_once(
 
         if len(arguments) == 1 and arguments[0][0] != "table" and (function != "ALLSELECTED" or allselected_rows is not None or shadowed_rows is not None):
             output_rows = order_distinct_values(source_context, output_headers[0], output_rows)
+        elif len(arguments) == 2 and function in {"ALL", "ALLNOBLANKROW"} and all(arg[0] == "reference" for arg in arguments):
+            headers_lower = [h.casefold() for h in source_context["headers"]]
+            major_first = sorted(output_headers, key=lambda c: -headers_lower.index(c.casefold()))
+            profiles = {c: source_profile(source_context, c) for c in output_headers}
+            def row_walk_key(row: dict[str, Any]) -> tuple[Any, ...]:
+                return tuple(profiles[c].key(row.get(c) if source_context.get("derived") else typed_cell(source_context, c, row.get(c))) for c in major_first)
+            output_rows.sort(key=row_walk_key)
         value_context = dict(source_context)
         value_context["headers"] = output_headers
         value_context["rows"] = output_rows

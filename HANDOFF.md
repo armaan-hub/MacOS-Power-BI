@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude reviews Task 123 (dax-multicol-113).
-**Branch in use:** antigravity/dax-multicol-113
-**Working tree clean:** worktree task123 in use
+**Active agent:** Antigravity codes Task 124 (dax-sumnum-114).
+**Branch in use:** antigravity/dax-sumnum-114
+**Working tree clean:** worktree task124 in use by Antigravity
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1409,3 +1409,33 @@ Doubts or things Claude should check:
   - `analytics_studio/measures.py`
   - `docs/plans/2026-11-10-dax-generate-112-wrong.json`
   - `HANDOFF.md`
+
+### Antigravity (Task 123) ready for review
+- **What was built:**
+  - Implemented dictionary row order for multi-column `ALL(col1, col2)` and `ALLNOBLANKROW(col1, col2)` under `TOCSV` / `TOJSON` (group `orderaudit58`).
+  - Followed Power BI's exact dictionary order semantics (as detailed in `dax_iteration_order.py`):
+    - With several columns, the later table column in Facts (`source_context["headers"]`) is the major key, and earlier table column is minor key.
+    - Inside each column, values are ordered by dictionary profile: `BLANK` first, non-blank numbers ascending, non-blank text in first-seen appearance order.
+  - In `all_table_value`, sorted `output_rows` by `(profiles[c].key(...) for c in major_first)` when `len(arguments) == 2` and both arguments are column references.
+  - In `_tocsv_row_order`, permitted `ALL` / `ALLNOBLANKROW` with 2 column references as `order_class = "dictionary"`.
+  - Refused neighbouring unmodeled shapes:
+    - Multi-column tables with >2 columns or non-reference columns remain refused.
+    - In `FILTER`, multi-column `ALL` is only allowed when predicate is `TRUE()`; other predicates remain refused.
+    - In `SUBSTITUTEWITHINDEX`, only allowed when the index table matches `ALL(c1)` where `c1` is the first column of `ALL(c1, c2)`.
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-multicol-113-spec.json`, 180 items): **180 match, 0 refused, 0 wrong** (100% exact match).
+  - Holdout in `orderaudit58` (59 items in `tools/parity/dax_battery_orderaudit58_extra.json`): **59 match, 0 refused, 0 wrong** (100% exact match).
+  - All 239 target items across spec and battery: **239 match, 0 refused, 0 wrong**.
+  - All 2,722 items in `dax_battery_orderaudit58_extra.json`: **1,626 matched, 1,096 refused, 0 diff, 0 crash** (239 new matches from previously refused; 0 diff, 0 crash).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes green (`1 passed in 0.97s`).
+  - Unit regression tests: `tests/test_concatenatex_order.py`, `tests/test_iteration94_tocsv_tojson_1.py`, `tests/test_iteration94_tocsv_tojson_review.py`, `tests/test_iteration158_order_audit3_58.py`, etc.: **28 passed, 451 subtests passed in 10.12s**.
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 535839, 'gap-reject': 4562, 'DIFF': 0, 'CRASH': 0}; locked 535458`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+246 matches).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (180 items), holdout (59 items), and entire battery (2,722 items) have **0 wrong**.
