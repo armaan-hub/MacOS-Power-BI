@@ -22782,13 +22782,16 @@ def _evaluate_measures_once(
             # The order of the rows (live Power BI, iteration 94): a filtered scan of a loaded table comes back in reverse
             # storage order after the first `max_rows` rows were cut off; a negative limit keeps the storage order.
             reverse = False
-            if order_class == "grouped" and total_row_count > 1 and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
+            if order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
                 filtered_scan_columns(group_source)
             ):
-                # Task 68 (live Power BI, order audit 3 grid): the groups of a SUMMARIZE under filters on other columns come out in the order of the scan over
-                # the group columns plus the filtered columns; where that key space is a measured storage-order one (multi_column_order False: 792 over 6 rows)
-                # the groups keep the storage order of their first row, where no measured point covers it the order is not modelled
-                iteration_rows = rows_in_storage_scan(group_source, context, iteration_rows)
+                if table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS":
+                    # Task 68 (live Power BI, order audit 3 grid): the groups of a SUMMARIZE under filters on other columns come out in the order of the scan over
+                    # the group columns plus the filtered columns; where that key space is a measured storage-order one (multi_column_order False: 792 over 6 rows)
+                    # the groups keep the storage order of their first row, where no measured point covers it the order is not modelled
+                    iteration_rows = rows_in_storage_scan(group_source, context, iteration_rows)
+                elif table_node[0] == "call" and table_node[1] == "SUMMARIZE":
+                    iteration_rows = dictionary_ordered_rows(table_node, context, iteration_rows, [("reference", "", h) for h in context["headers"] if h in (context.get("lineage") or {})], scan_filters=True, keep_undecided=True)
             if order_class == "scan":
                 scan_table, via_all = _tocsv_scan_table_node(table_node)
                 reverse = _tocsv_scan_filtered(table_node)
@@ -22811,12 +22814,20 @@ def _evaluate_measures_once(
                 if (removed or filtered_here) and (arguments[0][0] == "let" or (removed and max_rows < 0) or not removed):
                     raise MeasureError("The row order of ALLSELECTED(table) under an outer filter is not modelled in the local engine for this shape.")
                 reverse = removed
-            elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
-                group_filtered or has_column_filter(group_source[2][0])
-            ) and any(
+            elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and any(
                 str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values()
             ):
-                raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
+                if group_filtered:
+                    raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
+                if has_column_filter(group_source[2][0]):
+                    group_split = next((i for i, a in enumerate(group_source[2][1:], 1) if a[0] == "string"), len(group_source[2]))
+                    group_args = group_source[2][1:group_split]
+                    has_extension = group_split < len(group_source[2])
+                    has_rollup = any(a[0] == "call" and a[1] in {"ROLLUP", "ROLLUPGROUP"} for a in group_args)
+                    if not has_extension or (0 < max_rows < total_row_count):
+                        raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
+                    if not has_rollup and (len(group_args) > 1 or (table_node[0] == "call" and table_node[1] == "SUMMARIZE" and len(filtered_scan_columns(group_source)) > 1)):
+                        raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
             elif order_class == "grouped" and total_row_count > 1 and not (table_node[0] == "call" and table_node[1] in {"ADDMISSINGITEMS", "SUBSTITUTEWITHINDEX"}):
                 # live Power BI: groups whose computed columns are all BLANK come back in first-seen order, not the sorted order the local engine uses
                 lineage = context.get("lineage") or {}

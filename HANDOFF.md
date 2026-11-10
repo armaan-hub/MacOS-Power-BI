@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 124 (dax-sumnum-114).
-**Branch in use:** antigravity/dax-sumnum-114
-**Working tree clean:** worktree task124 in use by Antigravity
+**Active agent:** Antigravity codes Task 125 (dax-uniontopn-115).
+**Branch in use:** antigravity/dax-uniontopn-115
+**Working tree clean:** worktree task125 in use by Antigravity
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1439,3 +1439,31 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (180 items), holdout (59 items), and entire battery (2,722 items) have **0 wrong**.
+
+### Antigravity (Task 124 fix) ready for review
+- **What was built:**
+  - Fixed the 37 wrong probes in `docs/plans/2026-11-10-dax-sumnum-114-wrong.json` by strictly scoping numeric `SUMMARIZE` group ordering under outer filters to modelled shapes and refusing unmodelled ones:
+    - In `analytics_studio/measures.py`, when a numeric column (Sales or Quantity) is a group column of `SUMMARIZE`:
+      1. Preserved refusal for `group_filtered` (inner `CALCULATETABLE` inside `ADDMISSINGITEMS` or `SUMMARIZE`).
+      2. Refused bare `SUMMARIZE` without added extension columns (`not has_extension`).
+      3. Refused sliced/truncated row limits in `TOCSV` (`0 < max_rows < total_row_count`).
+      4. Refused plain multi-column `SUMMARIZE` without `ROLLUP`/`ROLLUPGROUP` (`not has_rollup and len(group_args) > 1`).
+      5. Refused plain single-column `SUMMARIZE` under outer filters on more than one column (`len(filtered_scan_columns(group_source)) > 1`).
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-sumnum-114-spec.json`, 107 items): **107 match, 0 refused, 0 wrong** (100% exact match).
+  - Holdout (35 items from `orderaudit57_extra` / `orderaudit58_extra`): **35 match, 0 refused, 0 wrong** (100% exact match).
+  - Wrong probes (`docs/plans/2026-11-10-dax-sumnum-114-wrong.json`, 37 items): **0 wrong** (all 37 refused).
+  - Batteries `orderaudit57_extra` and `orderaudit58_extra`: **+142 newly matched answers, 0 wrong**.
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.96s`).
+  - Unit regression tests:
+    - `tests/test_iteration158_order_audit3_58.py`, `tests/test_iteration157_order_audit2_57.py`, `tests/test_iteration156_order_audit_56.py`, `tests/test_iteration94_tocsv_tojson_1.py`, `tests/test_iteration94_tocsv_tojson_review.py`, `tests/test_iteration96_table_fns_2_b_review.py`: 36 passed, 72 subtests passed in 16.72s.
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {match: 535981, gap-reject: 4420, DIFF: 0, CRASH: 0}; locked 535573`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+408 matches over locked).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (107 items), holdout (35 items), wrong probes (37 items), and batteries have **0 wrong**.

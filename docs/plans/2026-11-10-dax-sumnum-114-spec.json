@@ -1,0 +1,537 @@
+[
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Sales])),Facts[Quantity]),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n1,-1.5\n2,10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Sales])),Facts[Quantity]),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n1,-1.5\n2,10.5\n4,\n5,2.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Sales])),Facts[Quantity]),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,10.5\n3,20\n4,\n5,2.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Sales])),Facts[Quantity]),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n3,20",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Sales])),Facts[Quantity]),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,10.5\n3,20\n5,2.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Sales])),Facts[Sales]),100),Facts[Note]=\"Paid\",Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],[s]\n-1.5,-1.5\n0,0\n10.5,10.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Sales])),Facts[Sales]),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n-1.5,-1.5\n10.5,10.5\n,\n2.5,2.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Sales])),Facts[Sales]),100),Facts[Quantity]<>3,Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,10.5\n,\n2.5,2.5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Sales])),Facts[Sales]),100),Facts[Quantity]>1,Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],[s]\n20,20\n,",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Sales])),Facts[Sales]),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n20,20",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Sales])),Facts[Sales]),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],[s]\n2.5,2.5\n10.5,10.5\n20,20",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Note],ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\nPaid,0,0\nPaid,1,1\nPaid,2,2\nPaid,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Note],ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\nPaid,2,2\n,3,3\n,5,5\n,,8\nPaid,,2",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,2\n3,3\n4,4\n5,5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2,Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,2\n3,3\n4,4\n5,5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n3,3\n4,4",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n3,3",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,2\n3,3\n5,5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],[s]\n3,,3\n5,,5\n2,Paid,2\n4,Late,4\n2,,2\n3,,3\n4,,4\n5,,5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],[s]\n3,,3\n5,,5\n2,Paid,2\n4,Late,4\n2,,2\n3,,3\n4,,4\n5,,5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],[s]\n3,,3\n0,Paid,0\n4,Late,4\n0,,0\n3,,3\n4,,4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],[s]\n2,Paid,2\n3,,3\n5,,5\n2,,2\n3,,3\n5,,5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n2,East,2\n5,East,5\n3,West,3\n4,North,4\n2,,2\n3,,3\n4,,4\n5,,5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\",Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n0,West,0\n3,West,3\n4,North,4\n0,,0\n3,,3\n4,,4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n0,West,0\n3,West,3\n0,,0\n3,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1,Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Sales],[s]\n3,20,3\n3,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Sales],[s]\n3,20,3\n4,,4\n0,0,0\n0,,0\n3,,3\n4,,4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Region],ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nWest,0,0\nWest,3,3\nNorth,4,4\nWest,,3\nNorth,,4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Region],ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Region],'Facts'[Sales],[s]\nWest,0,0\nWest,20,3\nNorth,,4\nWest,,3\nNorth,,4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\",Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],[s]\n-1.5,1\n0,0\n10.5,2",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n-1.5,1\n10.5,2\n,4\n2.5,5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,2\n20,3\n,4\n2.5,5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,2\n20,3\n,4\n2.5,5",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n20,3\n,4",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n20,3",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\",Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n20,3",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],[s]\n2.5,5\n10.5,2\n20,3",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],[s]\n10.5,Paid,2\n20,,3\n,Late,4\n2.5,,5\n10.5,,2\n20,,3\n,,4\n2.5,,5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],[s]\n20,,3\n0,Paid,0\n,Late,4\n0,,0\n20,,3\n,,4",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],[s]\n20,,3\n0,Paid,0\n0,,0\n20,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],[s]\n0,0,0\n-1.5,1,1\n10.5,2,2\n,4,4\n2.5,5,5\n0,,0\n-1.5,,1\n10.5,,2\n,,4\n2.5,,5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Region],[s]\n-1.5,East,1\n10.5,East,2\n0,West,0\n-1.5,,1\n0,,0\n10.5,,2",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Region],[s]\n10.5,East,2\n-1.5,East,1\n,North,4\n0,West,0\n2.5,East,5\n0,,0\n-1.5,,1\n10.5,,2\n,,4\n2.5,,5",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n1,1\n2,2\n,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\",Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n,0",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,2\n3,3\n4,4\n5,5\n,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1,Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity],[s]\n3,3\n,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,2\n3,3\n4,4\n5,5\n,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Quantity],[s]\n2,2\n3,3\n5,5\n,10",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],[s]\n-1.5,1\n0,0\n10.5,2\n,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n-1.5,1\n10.5,2\n,4\n2.5,5\n,12",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3,Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,2\n,4\n2.5,5\n,11",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,2\n20,3\n,4\n2.5,5\n,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1,Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,2\n20,3\n,4\n2.5,5\n,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,2\n20,3\n,4\n2.5,5\n,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2,Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],[s]\n10.5,2\n,4\n2.5,5\n,11",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n20,3\n,4\n,7",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\",Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],[s]\n20,3\n,4\n,7",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],[s]\n2.5,5\n10.5,2\n20,3\n,10",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Note],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\nPaid,0,0\nPaid,1,1\nPaid,2,2\nPaid,,3\n,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Note],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\n,3,3\n,5,5\nPaid,2,2\nLate,4,4\n,,8\nPaid,,2\nLate,,4\n,,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Note],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\n,3,3\n,5,5\nPaid,2,2\nLate,4,4\n,,8\nPaid,,2\nLate,,4\n,,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Note],Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3,Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Note],'Facts'[Sales],[s]\nPaid,10.5,2\nLate,,4\n,2.5,5\n,,5\nPaid,,2\nLate,,4\n,,11",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Note],Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Note],'Facts'[Sales],[s]\n,2.5,5\n,20,3\nPaid,10.5,2\n,,8\nPaid,,2\n,,10",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],[s]\n0,Paid,0\n1,Paid,1\n2,Paid,2\n0,,0\n1,,1\n2,,2\n,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0,Facts[Sales]>0)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],[s]\n2,Paid,2\n3,,3\n5,,5\n2,,2\n3,,3\n5,,5\n,,10",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n1,East,1\n2,East,2\n5,East,5\n0,West,0\n4,North,4\n0,,0\n1,,1\n2,,2\n4,,4\n5,,5\n,,12",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n0,West,0\n3,West,3\n4,North,4\n0,,0\n3,,3\n4,,4\n,,7",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n0,West,0\n3,West,3\n0,,0\n3,,3\n,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Sales],[s]\n0,0,0\n1,-1.5,1\n2,10.5,2\n4,,4\n5,2.5,5\n0,,0\n1,,1\n2,,2\n4,,4\n5,,5\n,,12",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nEast,2,2\nEast,5,5\nWest,3,3\nNorth,4,4\nEast,,7\nWest,,3\nNorth,,4\n,,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nEast,2,2\nWest,3,3\nEast,5,5\nEast,,7\nWest,,3\n,,10",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Region],'Facts'[Sales],[s]\nEast,-1.5,1\nEast,10.5,2\nWest,0,0\nEast,,3\nWest,,0\n,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Region],'Facts'[Sales],[s]\nEast,10.5,2\nEast,-1.5,1\nNorth,,4\nWest,0,0\nEast,2.5,5\nEast,,8\nWest,,0\nNorth,,4\n,,12",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Sales]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Region],'Facts'[Sales],[s]\nEast,10.5,2\nWest,20,3\nNorth,,4\nEast,2.5,5\nEast,,7\nWest,,3\nNorth,,4\n,,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Note]=\"Paid\",Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],[s]\n10.5,Paid,2\n10.5,,2\n,,2",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],[s]\n10.5,Paid,2\n-1.5,Paid,1\n,Late,4\n0,Paid,0\n2.5,,5\n0,,0\n-1.5,,1\n10.5,,2\n,,4\n2.5,,5\n,,12",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],[s]\n10.5,Paid,2\n20,,3\n,Late,4\n2.5,,5\n10.5,,2\n20,,3\n,,4\n2.5,,5\n,,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Note]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],[s]\n10.5,Paid,2\n20,,3\n,Late,4\n2.5,,5\n10.5,,2\n20,,3\n,,4\n2.5,,5\n,,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\",Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],[s]\n20,3,3\n20,,3\n,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Region]=\"West\",Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],[s]\n0,0,0\n20,3,3\n0,,0\n20,,3\n,,3",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Quantity]),\"s\",SUM(Facts[Quantity])),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],[s]\n10.5,2,2\n20,3,3\n2.5,5,5\n2.5,,5\n10.5,,2\n20,,3\n,,10",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Region],[s]\n10.5,East,2\n-1.5,East,1\n,North,4\n0,West,0\n2.5,East,5\n0,,0\n-1.5,,1\n10.5,,2\n,,4\n2.5,,5\n,,12",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Region]),\"s\",SUM(Facts[Quantity])),100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Region],[s]\n10.5,East,2\n20,West,3\n,North,4\n2.5,East,5\n10.5,,2\n20,,3\n,,4\n2.5,,5\n,,14",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Sales])),Facts[Quantity])),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"[s]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[0, 0.0],\n\t\t[1, -1.5],\n\t\t[2, 10.5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Sales])),Facts[Quantity])),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"[s]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2, 10.5],\n\t\t[3, 20.0],\n\t\t[4, null],\n\t\t[5, 2.5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(ADDMISSINGITEMS(Facts[Sales],SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Sales])),Facts[Sales])),Facts[Quantity]<>3)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[0.0, 0.0],\n\t\t[-1.5, -1.5],\n\t\t[10.5, 10.5],\n\t\t[null, null],\n\t\t[2.5, 2.5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,Facts[Note],ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity]))),Facts[Region]=\"West\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\", \"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[null, 20.0, 3],\n\t\t[\"Paid\", 0.0, 0],\n\t\t[null, null, 3],\n\t\t[\"Paid\", null, 0]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"[s]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2, 2],\n\t\t[3, 3],\n\t\t[4, 4],\n\t\t[5, 5]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Note]\", \"[s]\"],\n\t\"rowCount\": 8,\n\t\"data\": [\n\t\t[3, null, 3],\n\t\t[5, null, 5],\n\t\t[2, \"Paid\", 2],\n\t\t[4, \"Late\", 4],\n\t\t[2, null, 2],\n\t\t[3, null, 3],\n\t\t[4, null, 4],\n\t\t[5, null, 5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,Facts[Quantity],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Region]\", \"[s]\"],\n\t\"rowCount\": 8,\n\t\"data\": [\n\t\t[2, \"East\", 2],\n\t\t[5, \"East\", 5],\n\t\t[3, \"West\", 3],\n\t\t[4, \"North\", 4],\n\t\t[2, null, 2],\n\t\t[3, null, 3],\n\t\t[4, null, 4],\n\t\t[5, null, 5]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[10.5, 2],\n\t\t[20.0, 3],\n\t\t[null, 4],\n\t\t[2.5, 5]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity]))),Facts[Region]=\"West\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[0.0, 0],\n\t\t[20.0, 3]\n\t]\n}",
+  "group": "orderaudit57"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,Facts[Sales],ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity]))),Facts[Region]=\"West\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Region]\", \"[s]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[0.0, \"West\", 0],\n\t\t[20.0, \"West\", 3],\n\t\t[0.0, null, 0],\n\t\t[20.0, null, 3]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[10.5, 2],\n\t\t[20.0, 3],\n\t\t[null, 4],\n\t\t[2.5, 5],\n\t\t[null, 14]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[10.5, 2],\n\t\t[20.0, 3],\n\t\t[null, 4],\n\t\t[2.5, 5],\n\t\t[null, 14]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUP(Facts[Sales]),\"s\",SUM(Facts[Quantity]))),Facts[Sales]>0)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2.5, 5],\n\t\t[10.5, 2],\n\t\t[20.0, 3],\n\t\t[null, 10]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Note]),\"s\",SUM(Facts[Quantity]))),Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Note]\", \"[s]\"],\n\t\"rowCount\": 7,\n\t\"data\": [\n\t\t[3, null, 3],\n\t\t[0, \"Paid\", 0],\n\t\t[4, \"Late\", 4],\n\t\t[0, null, 0],\n\t\t[3, null, 3],\n\t\t[4, null, 4],\n\t\t[null, null, 7]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Region]),\"s\",SUM(Facts[Quantity]))),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Region]\", \"[s]\"],\n\t\"rowCount\": 7,\n\t\"data\": [\n\t\t[1, \"East\", 1],\n\t\t[2, \"East\", 2],\n\t\t[0, \"West\", 0],\n\t\t[0, null, 0],\n\t\t[1, null, 1],\n\t\t[2, null, 2],\n\t\t[null, null, 3]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Region]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>=2)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Region]\", \"[s]\"],\n\t\"rowCount\": 9,\n\t\"data\": [\n\t\t[2, \"East\", 2],\n\t\t[5, \"East\", 5],\n\t\t[3, \"West\", 3],\n\t\t[4, \"North\", 4],\n\t\t[2, null, 2],\n\t\t[3, null, 3],\n\t\t[4, null, 4],\n\t\t[5, null, 5],\n\t\t[null, null, 14]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Sales]),\"s\",SUM(Facts[Quantity]))),Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 7,\n\t\"data\": [\n\t\t[3, 20.0, 3],\n\t\t[4, null, 4],\n\t\t[0, 0.0, 0],\n\t\t[0, null, 0],\n\t\t[3, null, 3],\n\t\t[4, null, 4],\n\t\t[null, null, 7]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Quantity],Facts[Sales]),\"s\",SUM(Facts[Quantity]))),Facts[Sales]>0,Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\", \"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3, 20.0, 3],\n\t\t[3, null, 3],\n\t\t[null, null, 3]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Quantity]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Quantity]\", \"[s]\"],\n\t\"rowCount\": 8,\n\t\"data\": [\n\t\t[\"East\", 2, 2],\n\t\t[\"East\", 5, 5],\n\t\t[\"West\", 3, 3],\n\t\t[\"North\", 4, 4],\n\t\t[\"East\", null, 7],\n\t\t[\"West\", null, 3],\n\t\t[\"North\", null, 4],\n\t\t[null, null, 14]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Sales]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]<>3)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Sales]\", \"[s]\"],\n\t\"rowCount\": 9,\n\t\"data\": [\n\t\t[\"East\", 10.5, 2],\n\t\t[\"East\", -1.5, 1],\n\t\t[\"North\", null, 4],\n\t\t[\"West\", 0.0, 0],\n\t\t[\"East\", 2.5, 5],\n\t\t[\"East\", null, 8],\n\t\t[\"West\", null, 0],\n\t\t[\"North\", null, 4],\n\t\t[null, null, 12]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Note]),\"s\",SUM(Facts[Quantity]))),Facts[Note]=\"Paid\",Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Note]\", \"[s]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[10.5, \"Paid\", 2],\n\t\t[10.5, null, 2],\n\t\t[null, null, 2]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Quantity]),\"s\",SUM(Facts[Quantity]))),Facts[Quantity]>=2,Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"[s]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[10.5, 2, 2],\n\t\t[10.5, null, 2],\n\t\t[null, null, 2]\n\t]\n}",
+  "group": "orderaudit58"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Sales],Facts[Quantity]),\"s\",SUM(Facts[Quantity]))),Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"[s]\"],\n\t\"rowCount\": 7,\n\t\"data\": [\n\t\t[20.0, 3, 3],\n\t\t[null, 4, 4],\n\t\t[0.0, 0, 0],\n\t\t[0.0, null, 0],\n\t\t[20.0, null, 3],\n\t\t[null, null, 4],\n\t\t[null, null, 7]\n\t]\n}",
+  "group": "orderaudit58"
+ }
+]
