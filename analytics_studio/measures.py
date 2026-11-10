@@ -12236,24 +12236,65 @@ def _evaluate_measures_once(
             if value is None:
                 return None
             kind = str(target_context.get("column_types", {}).get(column, "text")).casefold()
+            table_name = str(target_context.get("name", "Table"))
             if kind in _COLUMN_NUMBER_TYPES:
-                number = dax_typed.to_number(value) if not isinstance(value, str) else dax_typed.text_to_number(value)
+                target_type = "Integer" if kind in {"whole_number", "int64"} else "Number"
+                if isinstance(value, str):
+                    try:
+                        number = dax_typed.text_to_number(value)
+                    except MeasureRuntimeError:
+                        raise MeasureRuntimeError(
+                            f"Cannot convert value '{value}' of type Text to type {target_type} "
+                            f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                        ) from None
+                elif isinstance(value, bool):
+                    number = Decimal(1 if value else 0)
+                elif isinstance(value, (int, float, Decimal)):
+                    number = Decimal(value)
+                else:
+                    raise MeasureRuntimeError(
+                        f"Cannot convert value '{value}' to type {target_type} "
+                        f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                    )
                 return number.quantize(Decimal(1), rounding=ROUND_HALF_UP) if kind in {"whole_number", "int64"} else number
             if kind == "boolean":
+                if isinstance(value, str):
+                    lowered = value.strip().casefold()
+                    if lowered not in {"true", "false"}:
+                        try:
+                            return dax_typed.to_number(value) != 0
+                        except MeasureRuntimeError:
+                            raise MeasureRuntimeError(
+                                f"Cannot convert value '{value}' of type Text to type True/False "
+                                f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                            ) from None
+                    return lowered == "true"
                 return dax_typed.to_boolean(value)
             if kind in {"date", "datetime"}:
+                if isinstance(value, str):
+                    parsed_dt = dax_dates.parse_date_text(value)
+                    if parsed_dt is None:
+                        serial = dax_dates.text_serial(value)
+                        if serial is None:
+                            raise MeasureRuntimeError(
+                                f"Cannot convert value '{value}' of type Text to type Date "
+                                f"while processing column - [StaticColumn] -> {table_name}[{column}]."
+                            )
+                        return serial
+                    return parsed_dt
                 return value
-            return value if isinstance(value, str) else dax_typed.to_text(value)
+            if kind in {"text", "string"}:
+                if isinstance(value, (int, float, Decimal)) and not isinstance(value, bool):
+                    raise MeasureError("TREATAS of numeric values onto a text column is not modelled by the local engine.")
+                return value if isinstance(value, str) else dax_typed.to_text(value)
+            return value
 
         existing: dict[str, set[tuple[Any, ...]]] = {}
         output: list[dict[str, Any]] = []
         seen: set[tuple[Any, ...]] = set()
         for row in rows:
             typed = typed_row(context, row)
-            try:
-                values = [coerce(tc, column, typed[source]) for (tc, column), source in zip(targets, context["headers"])]
-            except MeasureRuntimeError:
-                continue  # a value that cannot become the column's type matches nothing
+            values = [coerce(tc, column, typed[source]) for (tc, column), source in zip(targets, context["headers"])]
             ok = True
             for table_id in {tc["id"] for tc, _column in targets}:
                 tc = next(t for t, _c in targets if t["id"] == table_id)

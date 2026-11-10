@@ -1343,3 +1343,25 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (136 items), holdout (45 items), and full battery sets (181 items) are 100% exact matches with **0 wrong**.
   - Parity gate passed with 0 DIFF, 0 CRASH, +187 matches over previous baseline.
+
+### Antigravity (Task 121 review fix) ready for review
+- **Fix applied:**
+  - Fixed old bug where `TREATAS({"East","North"}, Facts[Sales] or Facts[Quantity])` (text values onto a numeric/date column) returned an empty table due to `except MeasureRuntimeError: continue` in `treat_as`.
+  - Removed `except MeasureRuntimeError: continue` so conversion errors bubble up.
+  - In `coerce`, explicitly raise `MeasureRuntimeError` with the Power BI error message format `Cannot convert value '{value}' of type Text to type {target_type} while processing column - [StaticColumn] -> {table_name}[{column}].` for numeric columns (`Integer` for whole_number/int64, `Number` for decimal_number/double), `Date` for date/datetime columns, and `True/False` for boolean columns.
+  - Refused numeric values onto text columns (`raise MeasureError(...)`) as instructed ("keep refusing if unsure").
+- **Results:**
+  - 5 previously wrong review probes (`docs/plans/2026-11-10-dax-topn-111-wrong.json`): **5 match, 0 refused, 0 wrong** (100% match).
+  - Spec (`docs/plans/2026-11-10-dax-topn-111-spec.json`, 136 items): **136 match, 0 refused, 0 wrong** (100% exact match).
+  - Holdout (`orderaudit57_extra` and `orderaudit58_extra`, 45 items): **45 match, 0 refused, 0 wrong** (100% exact match).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes green (`1 passed in 0.89s`).
+  - Unit regression tests: `57 passed, 78 subtests passed in 144.97s`.
+  - Parity gate:
+    `replayed 540401 Power BI answers: {'match': 535478, 'gap-reject': 4923, 'DIFF': 0, 'CRASH': 0}; locked 535046`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0`.
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `docs/plans/2026-11-10-dax-topn-111-wrong.json`
+  - `HANDOFF.md`

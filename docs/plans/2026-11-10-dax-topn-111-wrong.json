@@ -1,0 +1,32 @@
+[
+ {
+  "expr": "CALCULATE(TOCSV(TREATAS({\"East\",\"North\"},Facts[Sales]),100),ISBLANK(Facts[Note]),Facts[Sales]>0)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Cannot convert value 'East' of type Text to type Number while processing column - [StaticColumn] -> Facts[Sales].\"",
+  "group": "fresh121",
+  "local_now": "'Facts'[Sales]\n"
+ },
+ {
+  "expr": "TOCSV(TREATAS({\"East\",\"North\"},Facts[Quantity]),100)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Cannot convert value 'East' of type Text to type Integer while processing column - [StaticColumn] -> Facts[Quantity].\"",
+  "group": "fresh121",
+  "local_now": "'Facts'[Quantity]\n"
+ },
+ {
+  "expr": "TOJSON(TREATAS({\"East\",\"North\"},Facts[Sales]),100)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Cannot convert value 'East' of type Text to type Number while processing column - [StaticColumn] -> Facts[Sales].\"",
+  "group": "fresh121",
+  "local_now": "BLANK"
+ },
+ {
+  "expr": "TOCSV(TREATAS({\"East\",\"North\"},Facts[Quantity]),1)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Cannot convert value 'East' of type Text to type Integer while processing column - [StaticColumn] -> Facts[Quantity].\"",
+  "group": "fresh121",
+  "local_now": "'Facts'[Quantity]\n"
+ },
+ {
+  "expr": "TOCSV(TREATAS({\"East\",\"North\"},Facts[Quantity]),100)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Cannot convert value 'East' of type Text to type Integer while processing column - [StaticColumn] -> Facts[Quantity].\"",
+  "group": "fresh121",
+  "local_now": "'Facts'[Quantity]\n"
+ }
+]
