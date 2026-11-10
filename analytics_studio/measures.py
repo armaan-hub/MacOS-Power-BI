@@ -10262,8 +10262,11 @@ def _evaluate_measures_once(
         plan = dax_iteration_order.plan(table_node, variable_nodes.get)
         header_by_key = {h.casefold(): h for h in context["headers"]}
         # Task 70: a RANKX over ALL / ALLSELECTED of the walked table reads its expression's columns in the walk (live Power BI, rankx audit grid)
-        walk_nodes, ranked_bodies = dax_iteration_order.rankx_walk(nodes, table_node[1]) if table_node[0] == "table" else (list(nodes), [])
-        ranked_whole = dax_iteration_order.rankx_over_whole_table(nodes, table_node[1]) if table_node[0] == "table" else False  # Task 78 Part B
+        walk_table_name = table_node[1] if table_node[0] == "table" else (
+            table_node[2][0][1] if table_node[0] == "call" and table_node[1] in {"ALL", "ALLSELECTED"} and len(table_node[2]) == 1 and table_node[2][0][0] == "table" else None
+        )
+        walk_nodes, ranked_bodies = dax_iteration_order.rankx_walk(nodes, walk_table_name) if walk_table_name is not None else (list(nodes), [])
+        ranked_whole = dax_iteration_order.rankx_over_whole_table(nodes, walk_table_name) if walk_table_name is not None else False  # Task 78 Part B
         read = dax_iteration_order.columns_read(
             [*walk_nodes, *ranked_bodies],
             lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS,
@@ -12831,6 +12834,23 @@ def _evaluate_measures_once(
                 relation = argument
             else:
                 raise MeasureError(f"{function} has an argument the local engine does not support.")
+        if relation is None and function in {"RANK", "ROWNUMBER"}:
+            cols = []
+            seen_col = set()
+            for expression, _desc in order_spec:
+                for ref in _iter_reference_nodes(expression):
+                    key = (str(ref[1]).upper() if ref[1] else "", str(ref[2]).upper())
+                    if key not in seen_col:
+                        seen_col.add(key)
+                        cols.append(ref)
+            for ref_node in partition_refs + match_refs:
+                for ref in _iter_reference_nodes(ref_node):
+                    key = (str(ref[1]).upper() if ref[1] else "", str(ref[2]).upper())
+                    if key not in seen_col:
+                        seen_col.add(key)
+                        cols.append(ref)
+            if cols:
+                relation = ("call", "ALLSELECTED", tuple(cols))
         if relation is None:
             raise MeasureError(f"{function}'s relation parameter must be a table in non-visual calculation mode.")
         if function in {"INDEX", "OFFSET", "WINDOW"} and relation_may_have_duplicates(relation):
@@ -12854,8 +12874,12 @@ def _evaluate_measures_once(
 
         window.partition_columns = [column(reference) for reference in partition_refs]
         keys: list[list[Any]] = []
-        for frame in iterate_rows(window.context, window.rows):
-            keys.append([evaluate(expression, frame, allow_text=True) for expression, _desc in order_spec])
+        outer_before = outer_row_reads[0]
+        try:
+            for frame in iterate_rows(window.context, window.rows):
+                keys.append([evaluate(expression, frame, allow_text=True) for expression, _desc in order_spec])
+        finally:
+            outer_row_reads[0] = outer_before
         window.order_keys = keys
         window.order_desc = [desc for _expression, desc in order_spec]
         # Task 71 (live Power BI, rank audit grid t71a, 1,500 probes, 260 ROWNUMBER answers and 54 errors): ROWNUMBER over ALL(table) or ALLSELECTED(table)
@@ -12902,6 +12926,7 @@ def _evaluate_measures_once(
             ordered_pairs = sorted(pairs, key=lambda pair: -base_context["headers"].index(pair[1]))
             walk_profiles = [(header, source_profile(base_context, column)) for header, column in ordered_pairs]
             window.walk_key = {i: tuple(profile.key(window.typed[i][header]) for header, profile in walk_profiles) for i in total}
+        has_row_context = False
         visible: dict[str, set[tuple[Any, ...]]] = {}
         for table_id, (base_context, pairs) in groups.items():
             # Power BI also reads the row contexts on the stack as filters on the base table (columns that carry lineage).
@@ -12922,13 +12947,20 @@ def _evaluate_measures_once(
                     )
                 if constraint:
                     constraints.append(constraint)
+            if constraints:
+                has_row_context = True
             if len(constraints) > 1:
                 # live Power BI (iteration 88, fresh probes): under two row contexts of the relation's table (SUMX(Facts, SUMX(VALUES(Region), OFFSET(..))))
                 # the answer is not the intersection of both; which of them Power BI reads was not established
                 raise MeasureError(f"{function} under several row contexts of its relation's table is not supported in the local engine.")
+            source_rows = (
+                base_context["rows"]
+                if (constraints and window.relation[0] == "call" and window.relation[1] in {"ALL", "ALLEXCEPT", "ALLNOBLANKROW"})
+                else rows_by_table_id[table_id]
+            )
             visible[table_id] = {
                 row_key(typed_cell(base_context, column_name, vrow.get(column_name)) for _h, column_name in pairs)
-                for vrow in rows_by_table_id[table_id]
+                for vrow in source_rows
                 if all(
                     all(typed_cell(base_context, name, vrow.get(name)) == value for name, value in constraint.items())
                     for constraint in constraints
@@ -12941,6 +12973,7 @@ def _evaluate_measures_once(
                 for table_id, (_b, pairs) in groups.items()
             )
         ]
+        window.has_row_context = has_row_context
         window.order_equal = lambda a, b: row_key(window.order_keys[a]) == row_key(window.order_keys[b])
         return window
 
@@ -13058,6 +13091,8 @@ def _evaluate_measures_once(
         window = window_setup(tuple(rest), function)
         current = window.current
         if len(current) != 1:
+            if not current and window.has_row_context and window.relation[0] == "call" and window.relation[1] == "ALLSELECTED":
+                raise MeasureError(f"{function} over ALLSELECTED where the current row is filtered out is not modelled in the local engine.")
             return None
         row = current[0]
         members = window.partitions[window.partition_of[row]]
@@ -18709,9 +18744,13 @@ def _evaluate_measures_once(
         finally:
             eff_rank_table = saved_rank_table
         expression = arguments[1]
-        scores = [
-            in_row_expression(lambda frame=frame: evaluate(expression, frame, allow_text=True)) for frame in iterate_rows(context, rows)
-        ]
+        outer_before = outer_row_reads[0]
+        try:
+            scores = [
+                in_row_expression(lambda frame=frame: evaluate(expression, frame, allow_text=True)) for frame in iterate_rows(context, rows)
+            ]
+        finally:
+            outer_row_reads[0] = outer_before
         if len(arguments) > 2 and arguments[2][0] != "omitted":
             wanted = evaluate(arguments[2], row_context, allow_text=True)
         else:
@@ -22665,7 +22704,9 @@ def _evaluate_measures_once(
                 kind = column_kind(header)
                 if header in negative_zero_headers:
                     return "-0" + suffix
-                if context.get("derived") and kind not in {"int64", "currency"} and signed_zero_risk:
+                link = (context.get("lineage") or {}).get(header)
+                from_base = link is not None and not link[0].get("derived")
+                if context.get("derived") and not from_base and kind not in {"int64", "currency"} and signed_zero_risk:
                     raise MeasureError("A zero that arithmetic produced may be a negative zero in Power BI; that is not modelled in the local engine.")
                 if suffix and kind is None:
                     raise MeasureError("TOJSON needs to know whether a column is whole numbers or doubles; the local engine does not for this one.")
