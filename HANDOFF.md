@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 126 (dax-allsel-116).
-**Branch in use:** antigravity/dax-allsel-116
-**Working tree clean:** worktree task126 in use by Antigravity
+**Active agent:** Antigravity codes Task 127 (dax-negzero-117).
+**Branch in use:** antigravity/dax-negzero-117
+**Working tree clean:** worktree task127 in use by Antigravity
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1495,4 +1495,31 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (118 items) and all 613 Task 118 probes have **0 wrong**.
+
+### Antigravity (Task 126) ready for review
+- **What was built:**
+  - Modelled row order of `ALLSELECTED`, `FILTER(ALLSELECTED(...))`, and `ADDCOLUMNS(FILTER(...), "r", RANKX(...))` results under `TOCSV` / `TOJSON`:
+    - `ADDCOLUMNS`: updated `_tocsv_row_order` so that `ADDCOLUMNS` over a scan (including `FILTER(table, ...)`) returns `"scan_forward"`, matching Power BI's forward storage order evaluation.
+    - `ALLSELECTED(table)` under outer filter: for direct `TOCSV(ALLSELECTED(table))` under an outer filter (`removed or filtered_here`), when `max_rows >= 0` Power BI returns reverse storage order (`reverse = True`), and when `max_rows < 0` (e.g. `max_rows = -1`) it returns forward storage order (`reverse = False`). When whole and unfiltered, it keeps forward storage order.
+    - VAR-held table variables in `TOCSV(T, 100)`:
+      - `VAR T = ALLSELECTED(table)`: when under an outer filter, returns reverse storage order for `max_rows >= 0`; when whole and unfiltered, keeps forward storage order.
+      - `VAR T = FILTER(ALLSELECTED(table), ...)`: returns reverse storage order for `max_rows >= 0`.
+      - `VAR T = ALLSELECTED(table[col])`: returns dictionary order.
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-allsel-116-spec.json`, 56 items): **56 match, 0 refused, 0 wrong** (100% exact match).
+  - Existing batteries (`orderaudit56_extra`, `orderaudit57_extra`, `orderaudit58_extra`, `orderaudit59_extra`, 11,414 items total): **11,357 match, 57 refused, 0 wrong** (0 wrong across all 11,414 items; +75 newly matched).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 1.02s`).
+  - Unit regression tests:
+    - `tests/test_iteration94_tocsv_tojson*.py`, `tests/test_allselected*.py`: 12 passed, 1920 subtests passed in 40.37s.
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 536213, 'gap-reject': 4188, 'DIFF': 0, 'CRASH': 0}; locked 535819`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+394 matches over locked).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (56 items) and all 11,414 orderaudit battery items have **0 wrong**.
+
 
