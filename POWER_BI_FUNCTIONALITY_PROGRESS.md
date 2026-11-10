@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-10, after Iteration 208 / Task 119 dax-groupcols-109, row order of SUMMARIZECOLUMNS and GROUPBY results, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 535066 match, 5335 refused, 0 DIFF, 0 CRASH, locked 535046. Next: Task 120 dax-distinct-110: row order of DISTINCT and SELECTCOLUMNS results (163 refused), being coded by Antigravity.
+**Latest status (2026-11-10, after Iteration 209 / Task 120 dax-distinct-110, row order of DISTINCT and SELECTCOLUMNS results, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 535291 match, 5110 refused, 0 DIFF, 0 CRASH, locked 535271. Next: Task 121 dax-topn-111: row order of SAMPLE, TOPN and TREATAS results (181 refused), being coded by Antigravity.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
