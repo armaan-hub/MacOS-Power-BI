@@ -31,3 +31,6 @@ LESSON FROM TASKS 119-124: first versions fitted the spec 100% but got fresh pro
   Score the spec with `tools/dax_oracle_diff.local`.
 - Commit on the branch. Report at the end of `HANDOFF.md` under "Antigravity (Task 125) ready for review": exact /
   refused / wrong on the spec (wrong must be 0), the rules, files changed. Then stop.
+
+## Review outcome (2026-11-10)
+Shipped as Iteration 214. Locked 536119.
