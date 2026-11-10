@@ -4553,11 +4553,38 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             arguments[0][0] == "table" or not any(argument[0] == "string" for argument in arguments[1:])
         ):
             return "grouped"  # over a FILTER the local engine computes the added columns on the unfiltered rows, so only a bare table is trusted with them  # CALCULATE in a computed column intersects the group's filter in Power BI, not replaces it as the local engine does
-        elif function == "SUMMARIZECOLUMNS" and any(
-            isinstance(arg, tuple) and arg[0] == "call" and arg[1] == "ROLLUPADDISSUBTOTAL"
-            for arg in arguments
-        ):
+        elif function == "SUMMARIZECOLUMNS" and arguments:
+            if any(isinstance(arg, tuple) and arg[0] == "call" and arg[1] == "ROLLUPADDISSUBTOTAL" for arg in arguments):
+                return "grouped"
+            group_cols = [arg for arg in arguments if isinstance(arg, tuple) and arg[0] == "reference"]
+            group_tables = {arg[1] for arg in group_cols if arg[1]}
+            if len(group_tables) > 1 or len(group_cols) > 2:
+                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            exts = [arguments[i + 1] for i in range(len(arguments) - 1) if isinstance(arguments[i], tuple) and arguments[i][0] == "string"]
+            if len(exts) > 1:
+                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            if len(exts) == 1:
+                call_fn = exts[0][1] if isinstance(exts[0], tuple) and exts[0][0] == "call" else None
+                if call_fn not in {"SUM", "AVERAGE", "COUNTROWS", "MAX", "MIN"}:
+                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             return "grouped"
+        elif function == "GROUPBY" and arguments:
+            group_cols = [arg for arg in arguments[1:] if isinstance(arg, tuple) and arg[0] == "reference"]
+            group_tables = {arg[1] for arg in group_cols if arg[1]}
+            if len(group_tables) > 1 or len(group_cols) > 2:
+                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            exts = [arguments[i + 1] for i in range(1, len(arguments) - 1) if isinstance(arguments[i], tuple) and arguments[i][0] == "string"]
+            if len(exts) == 0:
+                return "grouped"
+            if len(group_cols) == 1 and len(exts) == 1:
+                tbl = arguments[0]
+                tbl_type = tbl[0] if tbl[0] != "call" else tbl[1]
+                call_fn = exts[0][1] if isinstance(exts[0], tuple) and exts[0][0] == "call" else None
+                if tbl_type == "FILTER" and call_fn == "COUNTX":
+                    return "grouped"
+                if tbl_type == "table" and call_fn in {"MAXX", "MINX", "AVERAGEX"}:
+                    return "grouped"
+            raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
         elif function == "ADDCOLUMNS" and arguments:
             base = _tocsv_row_order(arguments[0])
             if base == "scan" and arguments[0][0] == "table":
@@ -4575,7 +4602,7 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         elif function == "ADDMISSINGITEMS" and arguments:
             # the table keeps its own row order and the missing rows follow it (live Power BI, iteration 96): only a table whose own order is modelled
             inner = next((argument for argument in arguments if argument[0] != "reference"), None)
-            if inner is not None and _tocsv_row_order(inner) in {"dictionary", "grouped"}:
+            if inner is not None and not (inner[0] == "call" and inner[1] == "SUMMARIZECOLUMNS") and _tocsv_row_order(inner) in {"dictionary", "grouped"}:
                 return "grouped"
         elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1 and arguments[0][0] == "table":
             references = [(argument[1] or "").casefold() + "\0" + str(argument[2]).casefold() for argument in arguments[2::2] if argument[0] == "reference"]
@@ -11944,10 +11971,21 @@ def _evaluate_measures_once(
                         seen.setdefault(row_key([None] * len(columns)), {column: None for column in columns})
                     combos = [{**left, **right} for left in combos for right in seen.values()]
 
-                def order_key(row: dict[str, Any]) -> tuple[Any, ...]:
-                    return tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers))
                 try:
-                    combos.sort(key=order_key)
+                    t_ids = {c["id"] for c, _col in resolved}
+                    if len(t_ids) == 1:
+                        base_t = contexts_by_id.get(next(iter(t_ids)))
+                        if base_t is not None:
+                            profiles = {h: source_profile(base_t, h) for h in headers if h in base_t["headers"]}
+                            if len(profiles) == len(headers):
+                                major_first = sorted(headers, key=lambda h: -base_t["headers"].index(h))
+                                combos.sort(key=lambda row: tuple(profiles[h].key(row.get(h)) for h in major_first))
+                            else:
+                                combos.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers)))
+                        else:
+                            combos.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers)))
+                    else:
+                        combos.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers)))
                 except TypeError as error:
                     raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
                 group_context, group_rows = derived_table(list(headers), combos, lineage, types)
@@ -11965,7 +12003,14 @@ def _evaluate_measures_once(
                     if names and not all(skip for skip in ignored) and all(value is None for value in counted):
                         continue  # a row whose expressions are all blank is dropped
                     output.append(row)
-                return derived_table(list(headers) + names, output, lineage, types)
+                sc_types = dict(types)
+                sc_certain = set()
+                for name, expression in zip(names, stripped):
+                    st = _static_numeric_type(expression, table_context, variable_kinds)
+                    if st is not None:
+                        sc_types[name] = st
+                        sc_certain.add(name)
+                return derived_table(list(headers) + names, output, lineage, sc_types, certain_types=sc_certain)
 
             def detail_combinations() -> list[dict[str, Any]]:
                 by_table_h: dict[str, tuple[dict[str, Any], list[str]]] = {}
@@ -12062,7 +12107,14 @@ def _evaluate_measures_once(
                             pass
                     for level_row in level_list:
                         emit({**level_row, **level_flags}, kept_headers)
-            return derived_table(all_headers + names, output, lineage, types)
+            sc_types = dict(types)
+            sc_certain = set()
+            for name, expression in zip(names, stripped):
+                st = _static_numeric_type(expression, table_context, variable_kinds)
+                if st is not None:
+                    sc_types[name] = st
+                    sc_certain.add(name)
+            return derived_table(all_headers + names, output, lineage, sc_types, certain_types=sc_certain)
 
         if not added:
             return compute()
@@ -12131,8 +12183,9 @@ def _evaluate_measures_once(
         lineage_all = base_lineage(context)
         lineage = {column: lineage_all[column] for column in columns if column in lineage_all and column not in readers}
         lineage.update(reader_lineage)  # a related column is the column of the table it reads (as SUMMARIZE's related groups are)
+        group_items = list(groups.values())
         output = []
-        for values, group_rows in groups.values():
+        for values, group_rows in group_items:
             row = dict(values)
             group_stack.append((context, group_rows))
             try:

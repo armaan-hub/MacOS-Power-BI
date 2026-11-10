@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-10, after Iteration 207 / Task 118 dax-union-108, row order of UNION results, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 534796 match, 5605 refused, 0 DIFF, 0 CRASH, locked 534776. Next: Task 119 dax-groupcols-109 (row order of SUMMARIZECOLUMNS and GROUPBY results, 270 refused), coded by Antigravity.
+**Latest status (2026-11-10, after Iteration 208 / Task 119 dax-groupcols-109, row order of SUMMARIZECOLUMNS and GROUPBY results, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4415 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 535066 match, 5335 refused, 0 DIFF, 0 CRASH, locked 535046. Next: Task 120 dax-distinct-110: row order of DISTINCT and SELECTCOLUMNS results (163 refused), being coded by Antigravity.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

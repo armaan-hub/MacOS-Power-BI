@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 119 (dax-groupcols-109) in its worktree; Iteration 207 (Task 118) shipped.
-**Branch in use:** antigravity/dax-groupcols-109
-**Working tree clean:** worktree task119 (Antigravity working)
+**Active agent:** Antigravity codes Task 120 (dax-distinct-110).
+**Branch in use:** antigravity/dax-distinct-110
+**Working tree clean:** worktree task120 in use by Antigravity
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1178,3 +1178,61 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Both spec (`296` items) and review (`14` items) have 0 wrong answers.
   - Parity gate passed with 0 DIFF, 0 CRASH, +298 matches over main baseline.
+
+### Antigravity (Task 119) ready for review
+- **Scorecard:**
+  - **`docs/plans/2026-11-10-dax-groupcols-109-probes.json` (540 items):**
+    - `match`: 130
+    - `refused`: 410
+    - `wrong / diff`: **0**
+  - **`docs/plans/2026-11-10-dax-groupcols-109-wrong.json` (227 items):**
+    - `match`: 0
+    - `refused`: 227
+    - `wrong / diff`: **0**
+  - **`docs/plans/2026-11-10-dax-groupcols-109-spec.json` (216 items):**
+    - `match`: 216
+    - `refused`: 0
+    - `wrong / diff`: **0**
+    - Result: 216 exact, 0 refused, **0 wrong** across all 216 spec items (100% exact matches).
+  - **Holdout (`tools/parity/dax_battery_orderaudit57_extra.json`, 54 items):**
+    - `match`: 54
+    - `refused`: 0
+    - `wrong / diff`: **0**
+    - Result: 54 exact, 0 refused, **0 wrong** across all 54 holdout items (100% exact matches).
+- **Full Parity Gate across ALL batteries (540,401 replayed answers):**
+  - `replayed 540401 Power BI answers: {'match': 535066, 'gap-reject': 5335, 'DIFF': 0, 'CRASH': 0}; locked 534776`
+  - `PARITY GATE PASSED`
+  - Matches increased by 270 (534,796 -> 535,066); gap-rejects reduced by 270 (5,605 -> 5,335).
+  - `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers. Zero regressions across locked items (534,776 locked answers).
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. *Row order for `SUMMARIZECOLUMNS` under `TOCSV` / `TOJSON`:*
+     - Single base table detail combinations: Up to 2 group columns from the same base table are modelled in dictionary order with later column as major sort key (`major_first`), matching Power BI Desktop VertiPaq.
+     - Tables with > 2 group columns have unmodelled multi-column / cross-column VertiPaq layout and are refused.
+     - Extension columns: A single standard scalar aggregate (`SUM`, `AVERAGE`, `COUNTROWS`, `MAX`, `MIN`) preserves group order.
+     - Non-standard aggregations such as `DISTINCTCOUNT` (which uses a hash aggregate in VertiPaq, scrambling the group emission order) or multiple extension columns (`> 1` extensions) alter the execution plan and are refused.
+     - Preserved existing locked contract for `ROLLUPADDISSUBTOTAL`.
+  2. *Row order for `GROUPBY` under `TOCSV` / `TOJSON`:*
+     - Up to 2 group columns from the same base table without extension columns are modelled in dictionary order.
+     - Tables with > 2 group columns or cross-table groups are refused.
+     - For 1 group column with 1 extension column: `FILTER(...)` with `COUNTX(CURRENTGROUP(), ...)` and base table with `MAXX`/`MINX`/`AVERAGEX(CURRENTGROUP(), ...)` are modelled; all other multi-column or multi-extension shapes are refused.
+     - Removed redundant sort override in `group_by`, preserving natural insertion and iteration order.
+  3. *Static numeric type annotations for `SUMMARIZECOLUMNS` extension columns:*
+     - Maintained `_static_numeric_type` inference in `summarize_columns` so `TOJSON` can determine format without runtime rejection.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Probes evaluation (`docs/plans/2026-11-10-dax-groupcols-109-probes.json`, 540 items): `130 exact, 410 refused, 0 wrong`.
+  - Wrong file evaluation (`docs/plans/2026-11-10-dax-groupcols-109-wrong.json`, 227 items): `0 exact, 227 refused, 0 wrong`.
+  - Spec evaluation (`docs/plans/2026-11-10-dax-groupcols-109-spec.json`, 216 items): `216 exact, 0 refused, 0 wrong`.
+  - Holdout evaluation (`dax_battery_orderaudit57_extra`, 54 items): `54 exact, 0 refused, 0 wrong`.
+  - Anti-cheat test: `python3 -m pytest -q -p no:cacheprovider tests/test_no_answer_key_in_app.py`: `1 passed in 0.98s`.
+  - Related order and regression tests: `python3 -m pytest -q -p no:cacheprovider tests/test_iteration158_order_audit3_58.py tests/test_iteration94_*.py tests/test_concatenatex_order.py tests/test_iteration158_*.py tests/test_iteration96_*.py`: `52 passed, 435 subtests passed in 38.41s`.
+  - Full parity gate: `caffeinate -i env PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`:
+    `replayed 540401 Power BI answers: {'match': 535066, 'gap-reject': 5335, 'DIFF': 0, 'CRASH': 0}; locked 534776`
+    `PARITY GATE PASSED`
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - All probe sets (540 fresh probes, 227 wrong file, 216 spec, 54 holdout) have **0 wrong**.
+  - Parity gate passed with 0 DIFF, 0 CRASH, +270 matches over Iteration 207 baseline.
