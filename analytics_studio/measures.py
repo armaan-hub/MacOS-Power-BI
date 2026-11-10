@@ -4584,8 +4584,21 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         elif function == "TOPN" and len(arguments) == 3 and arguments[0][0] == "number" and arguments[2][0] == "reference":
             if arguments[1][0] == "table" or (arguments[1][0] == "table_call" and arguments[1][1] == "VALUES" and arguments[1][2][0] == "reference"):
                 return "topn"
-        elif function == "UNION" and arguments and all(_tocsv_row_order(argument) == "constant" for argument in arguments) and not _tocsv_contains_blank(node):
-            return "constant"  # a BLANK() cell makes Power BI read a date or TRUE() beside it as a number
+        elif function == "UNION" and arguments:
+            def _union_arm_order(arm: tuple[Any, ...]) -> str | None:
+                try:
+                    return _tocsv_row_order(arm)
+                except MeasureError:
+                    if arm[0] == "call" and arm[1] == "TOPN" and len(arm[2]) >= 1:
+                        top_n = arm[2][0]
+                        if top_n[0] == "number" and top_n[1] == 1:
+                            return "scan_forward"
+                    return None
+            arm_orders = [_union_arm_order(a) for a in arguments]
+            if all(o == "constant" for o in arm_orders) and not _tocsv_contains_blank(node):
+                return "constant"  # a BLANK() cell makes Power BI read a date or TRUE() beside it as a number
+            if all(o in {"scan", "constant", "dictionary", "grouped", "scan_forward", "window_order"} for o in arm_orders):
+                return "scan_forward"
         elif function in _TOCSV_JOIN_TABLES and arguments and all(_tocsv_row_order(argument) in {"constant", "dictionary", "grouped"} for argument in arguments):
             return "grouped"
     raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
@@ -22658,6 +22671,12 @@ def _evaluate_measures_once(
                     raise MeasureError("The row order of a TOPN whose order column has ties or BLANKs is not modelled in the local engine.")
                 if source[0] == "table_call" and has_column_filter(("table", source_context["name"])):
                     raise MeasureError("The row order of TOPN under a filter on its table is not modelled in the local engine.")
+            elif order_class == "scan_forward" and table_node[0] == "call" and table_node[1] == "UNION":
+                for a in table_node[2]:
+                    if a[0] == "call" and a[1] == "TOPN":
+                        _arm_ctx, arm_rows = table_argument_value(a)
+                        if len(arm_rows) > 1:
+                            raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             for header in headers:  # Power BI converts a column that holds numbers with dates, Booleans or text; the local rows keep their own values
                 value_kinds = {
                     "date" if dax_dates.is_date(value) else "bool" if isinstance(value, bool) else "text" if isinstance(value, str) else "number"

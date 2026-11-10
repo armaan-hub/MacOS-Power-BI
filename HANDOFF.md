@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus reviews Task 117.
-**Branch in use:** antigravity/dax-window-107
-**Working tree clean:** worktree task117 yes
+**Active agent:** Claude reviews Task 118.
+**Branch in use:** antigravity/dax-union-108
+**Working tree clean:** worktree task118 yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1142,3 +1142,39 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Both spec (`1,073`) and review (`38`) have 0 wrong answers.
   - Parity gate passed with 0 DIFF, 0 CRASH, +1,341 matches.
+
+### Antigravity (Task 118) ready for review (Round 2)
+- **Scorecard:**
+  - **`docs/plans/2026-11-10-dax-union-108-spec.json` (296 items):**
+    - `match`: 234
+    - `refused`: 62 (TOPN with n > 1 arms)
+    - `wrong / diff`: **0**
+  - **`docs/plans/2026-11-10-dax-union-108-review.json` (14 items):**
+    - `match`: 0
+    - `refused`: 14
+    - `wrong / diff`: **0**
+- **Full Parity Gate across ALL batteries (540,401 replayed answers):**
+  - `replayed 540401 Power BI answers: {'match': 534796, 'gap-reject': 5605, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+  - `PARITY GATE PASSED`
+  - `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers. Zero regressions across locked items.
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
+  1. *Refusal of `TOPN` with n > 1 inside `UNION`:*
+     - Power BI's internal VertiPaq operator pipeline outputs multiple rows from a `TOPN` arm into `UNION` without a consistent sort or storage-order guarantee (yielding heap/internal array traversal order such as descending or tie-insertion order).
+     - In `_tocsv_row_order`: only allow `TOPN` arms in `UNION` when `n == 1` (`TOPN(1, ...)`). Refuse `UNION` whenever an arm is `TOPN` with `n > 1` (or produces > 1 rows at runtime).
+     - Removed the tentative source-order re-sort from `table_function_rows` for `UNION`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Tests run:**
+  - Spec evaluation (`docs/plans/2026-11-10-dax-union-108-spec.json`, 296 items): `234 match, 62 refused, 0 wrong`.
+  - Review evaluation (`docs/plans/2026-11-10-dax-union-108-review.json`, 14 items): `0 match, 14 refused, 0 wrong`.
+  - Anti-cheat test: `python3 -m pytest -q -p no:cacheprovider tests/test_no_answer_key_in_app.py`: `1 passed in 0.93s`.
+  - Regression unit tests: `python3 -m pytest -q -p no:cacheprovider tests/test_iteration158_order_audit3_58.py tests/test_iteration94_*.py tests/test_concatenatex_order.py tests/test_iteration158_*.py`: `21 passed, 435 subtests passed in 9.86s`.
+  - Full parity gate: `caffeinate -i env PYTHONPATH=. python tools/parity_check.py --tests`:
+    `replayed 540401 Power BI answers: {'match': 534796, 'gap-reject': 5605, 'DIFF': 0, 'CRASH': 0}; locked 531567`
+    `PARITY GATE PASSED`
+  - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
+- **Doubts or things Claude should check:**
+  - Both spec (`296` items) and review (`14` items) have 0 wrong answers.
+  - Parity gate passed with 0 DIFF, 0 CRASH, +298 matches over main baseline.
