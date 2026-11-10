@@ -4523,7 +4523,9 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         if source[0] == "reference":
             return "dictionary"
         if node[1] == "DISTINCT" and source[0] == "call" and source[1] == "SELECTCOLUMNS" and len(source[2]) == 3:
-            return "dictionary"
+            col_expr = source[2][2]
+            if col_expr[0] == "reference" or _static_numeric_type(col_expr) in {"int64", "double", "currency", "datetime"}:
+                return "dictionary"
     elif kind == "call":
         function, arguments = node[1], node[2]
         if function == "EVALUATEANDLOG" and arguments:
@@ -14186,7 +14188,9 @@ def _evaluate_measures_once(
                         origin[1][("group", id(distinct_row))] = seen_inner[first_key[id(distinct_row)]]
                 if len(inner_context.get("headers", ())) == 1:
                     hdr = inner_context["headers"][0]
-                    distinct_rows = order_distinct_values(inner_context, hdr, distinct_rows)
+                    hdr_type = str(inner_context.get("column_types", {}).get(hdr, "text")).casefold()
+                    if hdr in (inner_context.get("lineage") or {}) or hdr_type in _COLUMN_NUMBER_TYPES or hdr_type in {"date", "datetime", "boolean"}:
+                        distinct_rows = order_distinct_values(inner_context, hdr, distinct_rows)
                 return inner_context, distinct_rows
             if source[0] == "table":
                 context, source_rows = table_argument_value(source, include_unknown=argument[1] == "VALUES")

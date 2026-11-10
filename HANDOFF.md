@@ -1239,6 +1239,10 @@ Doubts or things Claude should check:
 
 ### Antigravity (Task 120) ready for review (dax-distinct-110)
 
+- **Review fix (computed text SELECTCOLUMNS under DISTINCT):**
+  - Addressed Opus review feedback on 16 wrong probes in `docs/plans/2026-11-10-dax-distinct-110-wrong.json` (`DISTINCT(SELECTCOLUMNS(..., "c0", <computed text expression>))`).
+  - Evaluated: 16/16 refused, **0 wrong**.
+  - All non-text computed projections (e.g. numeric `YEAR(...)`, dates, booleans) and column references remain exact matches.
 - **Spec evaluation (`docs/plans/2026-11-10-dax-distinct-110-spec.json`, 123 items):**
   - `matched`: 123
   - `refused`: 0
@@ -1249,8 +1253,8 @@ Doubts or things Claude should check:
   - `refused`: 0
   - `wrong / diff`: **0**
   - Result: 40 exact, 0 refused, **0 wrong** across all 40 holdout items (100% exact matches).
-- **Total across Spec + Holdout (163 items):**
-  - 163 exact, 0 refused, **0 wrong**.
+- **Total across Spec + Holdout + Wrong Probes (179 items):**
+  - 163 exact, 16 refused, **0 wrong**.
 - **Full Parity Gate across ALL batteries (540,401 replayed answers):**
   - `replayed 540401 Power BI answers: {'match': 535291, 'gap-reject': 5110, 'DIFF': 0, 'CRASH': 0}; locked 534776`
   - `PARITY GATE PASSED -> PARITY_LEDGER.md`
@@ -1260,8 +1264,8 @@ Doubts or things Claude should check:
 - **Rules derived from DAX semantics (computed, never looking up answers or reading spec/plans/parity fixtures from app code):**
   1. *`DISTINCT(SELECTCOLUMNS(...))` row order under `TOCSV` / `TOJSON`:*
      - Single projected column wrapped in `DISTINCT` walks the distinct values in the dictionary order of that column (blank first, numbers ascending, text by first appearance in the base table).
-     - In `_tocsv_row_order`, `table_call` `DISTINCT` over `SELECTCOLUMNS` with a single projection (`len(source[2]) == 3`) returns `"dictionary"` order class.
-     - In `_evaluate_measures_once` (line 14184), single-column `distinct_rows` are sorted using `order_distinct_values(inner_context, hdr, distinct_rows)`.
+     - In `_tocsv_row_order`, `table_call` `DISTINCT` over `SELECTCOLUMNS` with a single projection (`len(source[2]) == 3`) returns `"dictionary"` order class if the projected expression is a column reference or a static numeric/date/currency/boolean expression. Non-reference text expressions are unmodelled and cleanly refused with `MeasureError`.
+     - In `_evaluate_measures_once` (line 14188), single-column `distinct_rows` are sorted using `order_distinct_values(inner_context, hdr, distinct_rows)` when the column has base lineage or is numeric/date/boolean.
      - In `order_distinct_values` (line 13228), if the column has lineage to a base table, first-seen order for text uses the base table's rows rather than the filtered row slice.
      - In `table_function_rows` for `SELECTCOLUMNS` (line 11062), static numeric types (`"int64"`, `"double"`, `"currency"`, `"boolean"`, `"date"`) inferred from projected expressions are passed to `derived_table` as `certain_types`, allowing `TOJSON` to determine integer formatting for computed expressions like `YEAR(...)`.
   2. *`SELECTCOLUMNS(ALLEXCEPT(...), ...)` row order under `TOCSV` / `TOJSON`:*
@@ -1275,6 +1279,7 @@ Doubts or things Claude should check:
   - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Tests run:**
+  - Probes evaluation (`docs/plans/2026-11-10-dax-distinct-110-wrong.json`, 16 items): `16 refused, 0 wrong`.
   - Spec evaluation (`docs/plans/2026-11-10-dax-distinct-110-spec.json`, 123 items): `123 exact, 0 refused, 0 wrong`.
   - Holdout evaluation (40 items in `orderaudit57_extra` and `orderaudit59_extra`): `40 exact, 0 refused, 0 wrong`.
   - Anti-cheat test: `python3 -m pytest -q -p no:cacheprovider tests/test_no_answer_key_in_app.py`: `1 passed in 0.99s`.
@@ -1285,4 +1290,5 @@ Doubts or things Claude should check:
   - `PARITY_LEDGER.md` restored via `git checkout -- PARITY_LEDGER.md`.
 - **Doubts or things Claude should check:**
   - Spec (123 items) and holdout (40 items) are 100% exact matches with **0 wrong**.
+  - All 16 review wrong probes are cleanly refused with **0 wrong**.
   - Parity gate passed with 0 DIFF, 0 CRASH, +225 matches over previous baseline.
