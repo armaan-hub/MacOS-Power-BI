@@ -2352,3 +2352,9 @@ TOCSV / TOJSON of several-column ALL, FILTER(ALL(..), TRUE()) and SUBSTITUTEWITH
 TOCSV / TOJSON of SUMMARIZE (also with ROLLUP, ROLLUPGROUP and under ADDMISSINGITEMS) grouped by a numeric column under an outer filter now answer the shapes whose group order is derived and refuse the rest (bare tables, several columns, sliced TOCSV, several filters, decimal group columns such as Sales). The first version got 37 of 538 fresh Power BI probes wrong, mostly with Sales as a group column; the fix gets 0 wrong on 538 and 519 hidden fresh probes. Spec 107/107, holdout 35/35.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4416 passed; replay 540401: 535981 match, 4420 refused, 0 DIFF, 0 CRASH; locked 535819 to 535961. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-10 — Iteration 214 (Task 125 dax-uniontopn-115: row order of UNION results with a TOPN(n>1) arm)
+
+TOCSV / TOJSON of UNION with a TOPN(n>1) arm over ALL(Facts) by a numeric column now answer the shapes whose order is derived (the TOPN arm keeps the measured order of its selected rows) and refuse the rest (ties or blanks among the top rows, text order columns, ASC, other sources). 0 wrong on 540 hidden fresh Power BI probes and on 539 focused probes of the answered shapes (317 exact), first try. Spec 118/118, holdout 39/39.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4415 passed; replay 540401: 536139 match, 4262 refused, 0 DIFF, 0 CRASH; locked 535961 to 536119. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
