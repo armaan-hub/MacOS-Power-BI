@@ -4508,7 +4508,7 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         inner_order = _tocsv_row_order(_tocsv_inline_vars(node))  # raises for a table whose row order is not modelled
         if inner_order == "scan":
             return "constant"  # live Power BI: a VAR-held scan or FILTER of a loaded table comes back in storage order, never reversed
-        if inner_order in {"constant", "dictionary", "grouped"}:
+        if inner_order in {"constant", "dictionary", "grouped", "scan_forward"}:
             return inner_order
         raise MeasureError("The row order of a VAR-held table of this kind is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
     if kind == "table":
@@ -4660,6 +4660,17 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                         top_n = arm[2][0]
                         if top_n[0] == "number" and top_n[1] == 1:
                             return "scan_forward"
+                        if top_n[0] == "number" and top_n[1] == 2 and len(arm[2]) in {3, 4}:
+                            source = arm[2][1]
+                            if source[0] == "call" and source[1] in {"ALL", "ALLNOBLANKROW"} and len(source[2]) == 1:
+                                if len(arm[2]) == 3 or (
+                                    len(arm[2]) == 4
+                                    and (
+                                        (arm[2][3][0] == "table" and str(arm[2][3][1]).upper() == "DESC")
+                                        or (arm[2][3][0] in {"number", "boolean"} and (arm[2][3][1] == 0 or arm[2][3][1] is False))
+                                    )
+                                ):
+                                    return "scan_forward"
                     return None
             arm_orders = [_union_arm_order(a) for a in arguments]
             if all(o == "constant" for o in arm_orders) and not _tocsv_contains_blank(node):
@@ -11492,7 +11503,21 @@ def _evaluate_measures_once(
             result_context = dict(context)
             return result_context, [item[1] for item in kept]
         if function in {"UNION", "EXCEPT", "INTERSECT", "CROSSJOIN"}:
-            tables = [table_argument_value(a) for a in arguments]
+            if function == "UNION":
+                topn_union_ids = []
+                for a in arguments:
+                    if a[0] == "call" and a[1] == "TOPN" and len(a[2]) >= 3:
+                        topn_walk_nodes[id(a)] = [a[2][2]]
+                        topn_walk_under_filter.add(id(a))
+                        topn_union_ids.append(id(a))
+                try:
+                    tables = [table_argument_value(a) for a in arguments]
+                finally:
+                    for arm_id in topn_union_ids:
+                        topn_walk_nodes.pop(arm_id, None)
+                        topn_walk_under_filter.discard(arm_id)
+            else:
+                tables = [table_argument_value(a) for a in arguments]
             typed_tables = [(c, [typed_row(c, r) for r in rows]) for c, rows in tables]
             first_context, first_rows = typed_tables[0]
             headers = list(first_context["headers"])
@@ -22736,7 +22761,7 @@ def _evaluate_measures_once(
                 held_def = variable_nodes[table_node[1]]
                 while held_def and held_def[0] == "var" and held_def[1] in variable_nodes:
                     held_def = variable_nodes[held_def[1]]
-                if held_def and held_def[0] == "call" and held_def[1] in {"CROSSJOIN", "GENERATE", "GENERATEALL"}:
+                if held_def and held_def[0] == "call" and held_def[1] in {"CROSSJOIN", "GENERATE", "GENERATEALL", "UNION"}:
                     synth_let = ("let", ((table_node[1], held_def),), ("var", table_node[1]))
                     order_class = _tocsv_row_order(synth_let)
                 else:
@@ -22852,12 +22877,36 @@ def _evaluate_measures_once(
                     raise MeasureError("The row order of a TOPN whose order column has ties or BLANKs is not modelled in the local engine.")
                 if source[0] == "table_call" and has_column_filter(("table", source_context["name"])):
                     raise MeasureError("The row order of TOPN under a filter on its table is not modelled in the local engine.")
-            elif order_class == "scan_forward" and table_node[0] == "call" and table_node[1] == "UNION":
-                for a in table_node[2]:
+            elif order_class == "scan_forward" and (
+                (table_node[0] == "call" and table_node[1] == "UNION")
+                or (table_node[0] == "var" and table_node[1] in variable_nodes and (held_def := variable_nodes[table_node[1]]) and held_def[0] == "call" and held_def[1] == "UNION")
+            ):
+                union_node = table_node if table_node[0] == "call" else variable_nodes[table_node[1]]
+                for a in union_node[2]:
                     if a[0] == "call" and a[1] == "TOPN":
-                        _arm_ctx, arm_rows = table_argument_value(a)
-                        if len(arm_rows) > 1:
+                        top_count = a[2][0]
+                        if top_count[0] != "number" or top_count[1] not in {1, 2}:
                             raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+                        if top_count[1] == 2:
+                            source = a[2][1]
+                            if source[0] != "call" or source[1] not in {"ALL", "ALLNOBLANKROW"} or len(source[2]) != 1:
+                                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+                            if len(a[2]) >= 3 and a[2][2][0] == "reference":
+                                key_ref = a[2][2]
+                                source_context, source_rows = table_argument_value(source)
+                                key_header = next((h for h in source_context["headers"] if h.casefold() == str(key_ref[2]).casefold()), None)
+                                if key_header is None:
+                                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+                                col_type = source_context.get("column_types", {}).get(key_header, "")
+                                if col_type not in {"decimal_number", "whole_number"}:
+                                    raise MeasureError("The row order of a TOPN whose order column has ties or BLANKs is not modelled in the local engine.")
+                                key_vals = [r.get(key_header) for r in source_rows]
+                                non_none = [v for v in key_vals if v is not None]
+                                if len(non_none) < 2:
+                                    raise MeasureError("The row order of a TOPN whose order column has ties or BLANKs is not modelled in the local engine.")
+                                top_two = sorted(non_none, reverse=True)[:2]
+                                if top_two[0] == top_two[1]:
+                                    raise MeasureError("The row order of a TOPN whose order column has ties or BLANKs is not modelled in the local engine.")
             elif table_node[0] == "call" and table_node[1] == "SAMPLE" and len(table_node[2]) in {3, 4} and table_node[2][2][0] == "reference":
                 sample_context, sample_rows = table_argument_value(table_node[2][1])
                 sample_key = next((h for h in sample_context["headers"] if h.casefold() == str(table_node[2][2][2]).casefold()), None)

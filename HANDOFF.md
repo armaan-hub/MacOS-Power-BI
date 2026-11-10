@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 125 (dax-uniontopn-115).
-**Branch in use:** antigravity/dax-uniontopn-115
-**Working tree clean:** worktree task125 in use by Antigravity
+**Active agent:** Antigravity codes Task 126 (dax-allsel-116).
+**Branch in use:** antigravity/dax-allsel-116
+**Working tree clean:** worktree task126 in use by Antigravity
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1467,3 +1467,32 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (107 items), holdout (35 items), wrong probes (37 items), and batteries have **0 wrong**.
+
+### Antigravity (Task 125) ready for review
+- **What was built:**
+  - Modelled row order of `UNION` results with `TOPN(n > 1)` arms:
+    - In Power BI, `TOPN` maintains a min-heap during table scan and returns the array of the binary heap without sorting. For `n = 2` over whole `ALL(table)` with a numeric column (no ties, no blanks among top rows), the top 2 elements evaluate deterministically via `heap_rows` in `[worst, best]` order (e.g. Sales 10.5 then 20).
+    - Registered `topn_walk_nodes` for `TOPN` arms during `table_function_rows` for `UNION`, ensuring both top-level `UNION` and VAR-held (`VAR T = UNION(...) RETURN TOCSV(T)`) table expressions evaluate `TOPN` arms using the engine's binary heap order.
+    - Updated `_tocsv_row_order` to recognize `scan_forward` for VAR-held blocks (`kind == "let"`) and `UNION` variables (`held_def[1] == "UNION"`).
+    - Strictly refused unmodelled shapes:
+      - `top_count > 2` (multi-level heap sifting differences)
+      - `top_count == 2` with non-`ALL` source table (e.g. bare `Facts` under filter)
+      - Order column with ties or blanks among the top rows (e.g. text columns `Region`, `Note`)
+      - `ASC` order direction
+- **Results:**
+  - Spec (`docs/plans/2026-11-10-dax-uniontopn-115-spec.json`, 118 items): **118 match, 0 refused, 0 wrong** (100% exact match).
+  - Task 118 probes (`docs/plans/2026-11-10-dax-union-108-probes.json`, 613 items total, 145 with `TOPN`): **503 match, 110 refused, 0 wrong** (0 wrong across all 613 probes).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.99s`).
+  - Unit regression tests:
+    - `tests/test_iteration94_tocsv_tojson_1.py`, `tests/test_iteration94_tocsv_tojson_review.py`: 8 passed in 9.77s.
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 536139, 'gap-reject': 4262, 'DIFF': 0, 'CRASH': 0}; locked 535819`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+320 matches over locked).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (118 items) and all 613 Task 118 probes have **0 wrong**.
+
