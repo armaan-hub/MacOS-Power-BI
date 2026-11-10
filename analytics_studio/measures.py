@@ -12366,7 +12366,7 @@ def _evaluate_measures_once(
             right_types = dict(right_context.get("column_types", {}))
             right_lineage = base_lineage(right_context)
         if (
-            _independent_column_list(arguments[0]) and _independent_column_list(arguments[1]) and len(pending) > 1
+            not keep_empty and _independent_column_list(arguments[0]) and _independent_column_list(arguments[1]) and len(pending) > 1
             and all(len(matches) > 1 and matches == pending[0][1] for _left, matches in pending)
         ):
             # Task 66 (live Power BI, audit grids: 26 of 26 and 239 of 239 shapes over two lists of one column each, bare and under a CALCULATE filter): the two

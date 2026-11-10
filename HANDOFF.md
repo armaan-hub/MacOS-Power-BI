@@ -1389,3 +1389,23 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (87 items), holdout (683 items), and all 2,736 items of `orderaudit56_extra` have **0 wrong**.
   - Matches increased by 115 (+115 matches, -115 refusals). Parity gate passed with 0 DIFF, 0 CRASH.
+
+### Antigravity (Task 122 review fix) ready for review
+- **Fix applied:**
+  - Fixed row order for `GENERATEALL(t1, t2)`: in `generate(arguments, keep_empty)`, excluded `keep_empty` from the Task 66 key-flipping optimization (`not keep_empty and _independent_column_list...`). Power BI evaluates and emits `GENERATEALL` rows outer-row major (grouped by t1 row) rather than right-major/interleaved.
+- **Results:**
+  - 45 review probes (`docs/plans/2026-11-10-dax-generate-112-wrong.json`): **45 match, 0 refused, 0 wrong** (100% match).
+  - Spec (`docs/plans/2026-11-10-dax-generate-112-spec.json`, 87 items): **87 match, 0 refused, 0 wrong** (100% exact match).
+  - Holdout in `orderaudit56_extra` (683 items): **683 match, 0 refused, 0 wrong** (100% exact match).
+  - All 2,736 items in `dax_battery_orderaudit56_extra.json`: **2,518 matched, 218 refused, 0 diff** (+115 matches, 0 diff).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes green (`1 passed in 1.01s`).
+  - Unit regression tests: `tests/test_iteration87_variant_iterators.py`, `tests/test_iteration158_order_audit3_58.py`, `tests/test_concatenatex_order.py`, etc.: all passed.
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 535593, 'gap-reject': 4808, 'DIFF': 0, 'CRASH': 0}; locked 535271`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers.
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `docs/plans/2026-11-10-dax-generate-112-wrong.json`
+  - `HANDOFF.md`
