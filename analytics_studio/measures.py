@@ -4554,15 +4554,37 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         ):
             return "grouped"  # over a FILTER the local engine computes the added columns on the unfiltered rows, so only a bare table is trusted with them  # CALCULATE in a computed column intersects the group's filter in Power BI, not replaces it as the local engine does
         elif function == "SUMMARIZECOLUMNS" and arguments:
-            group_tables = {arg[1] for arg in arguments if isinstance(arg, tuple) and arg[0] == "reference" and arg[1]}
-            if len(group_tables) > 1:
+            if any(isinstance(arg, tuple) and arg[0] == "call" and arg[1] == "ROLLUPADDISSUBTOTAL" for arg in arguments):
+                return "grouped"
+            group_cols = [arg for arg in arguments if isinstance(arg, tuple) and arg[0] == "reference"]
+            group_tables = {arg[1] for arg in group_cols if arg[1]}
+            if len(group_tables) > 1 or len(group_cols) > 2:
                 raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            exts = [arguments[i + 1] for i in range(len(arguments) - 1) if isinstance(arguments[i], tuple) and arguments[i][0] == "string"]
+            if len(exts) > 1:
+                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            if len(exts) == 1:
+                call_fn = exts[0][1] if isinstance(exts[0], tuple) and exts[0][0] == "call" else None
+                if call_fn not in {"SUM", "AVERAGE", "COUNTROWS", "MAX", "MIN"}:
+                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             return "grouped"
         elif function == "GROUPBY" and arguments:
-            group_tables = {arg[1] for arg in arguments[1:] if isinstance(arg, tuple) and arg[0] == "reference" and arg[1]}
-            if len(group_tables) > 1:
+            group_cols = [arg for arg in arguments[1:] if isinstance(arg, tuple) and arg[0] == "reference"]
+            group_tables = {arg[1] for arg in group_cols if arg[1]}
+            if len(group_tables) > 1 or len(group_cols) > 2:
                 raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
-            return "grouped"
+            exts = [arguments[i + 1] for i in range(1, len(arguments) - 1) if isinstance(arguments[i], tuple) and arguments[i][0] == "string"]
+            if len(exts) == 0:
+                return "grouped"
+            if len(group_cols) == 1 and len(exts) == 1:
+                tbl = arguments[0]
+                tbl_type = tbl[0] if tbl[0] != "call" else tbl[1]
+                call_fn = exts[0][1] if isinstance(exts[0], tuple) and exts[0][0] == "call" else None
+                if tbl_type == "FILTER" and call_fn == "COUNTX":
+                    return "grouped"
+                if tbl_type == "table" and call_fn in {"MAXX", "MINX", "AVERAGEX"}:
+                    return "grouped"
+            raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
         elif function == "ADDCOLUMNS" and arguments:
             base = _tocsv_row_order(arguments[0])
             if base == "scan" and arguments[0][0] == "table":
@@ -12162,18 +12184,6 @@ def _evaluate_measures_once(
         lineage = {column: lineage_all[column] for column in columns if column in lineage_all and column not in readers}
         lineage.update(reader_lineage)  # a related column is the column of the table it reads (as SUMMARIZE's related groups are)
         group_items = list(groups.values())
-        try:
-            lineage_map = dict(lineage)
-            if columns and all(c in lineage_map for c in columns):
-                first_src = lineage_map[columns[0]][0]
-                if all(lineage_map[c][0]["id"] == first_src["id"] for c in columns):
-                    base_t = contexts_by_id.get(first_src["id"], first_src)
-                    profiles = {c: source_profile(base_t, lineage_map[c][1]) for c in columns if lineage_map[c][1] in base_t.get("headers", [])}
-                    if len(profiles) == len(columns):
-                        major_first = sorted(columns, key=lambda c: -base_t["headers"].index(lineage_map[c][1]))
-                        group_items.sort(key=lambda item: tuple(profiles[c].key(item[0].get(c)) for c in major_first))
-        except Exception:
-            pass
         output = []
         for values, group_rows in group_items:
             row = dict(values)
