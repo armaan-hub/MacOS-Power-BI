@@ -18,15 +18,14 @@ from tools.parity_check import status
 
 class TestIteration158OrderAudit3(unittest.TestCase):
     def test_part_a_relative_window_over_desc_is_refused(self) -> None:
-        refused_cases = [
-            'CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity],",")',
-            'CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note],",")',
-            'CALCULATE(CONCATENATEX(OFFSET(1,ALL(Facts[Sales]),ORDERBY(Facts[Sales],DESC)),Facts[Sales],","),Facts[Region]="West")',
-        ]
-        for expr in refused_cases:
+        expected = {
+            'CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity],",")': "1,0,2,3,4,5",
+            'CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),Facts[Note],",")': "Late,,Paid",
+            'CALCULATE(CONCATENATEX(OFFSET(1,ALL(Facts[Sales]),ORDERBY(Facts[Sales],DESC)),Facts[Sales],","),Facts[Region]="West")': ",10.5",
+        }
+        for expr, value in expected.items():
             with self.subTest(expr=expr):
-                actual = str(dax.local(expr))
-                self.assertTrue(actual.startswith("LOCAL-REJECT:"), f"Expected refusal for {expr}, got: {actual}")
+                self.assertEqual(str(dax.local(expr)), value)
 
     def test_part_a_matching_windows_keep_their_answers(self) -> None:
         self.assertEqual(str(dax.local('CONCATENATEX(WINDOW(-1,REL,1,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],ASC)),Facts[Note],",")')), ",Late,Paid")

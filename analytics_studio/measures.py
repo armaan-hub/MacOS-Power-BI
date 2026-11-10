@@ -4547,7 +4547,7 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             if arguments[0][0] == "call" and arguments[0][1] in {"ALL", "ALLNOBLANKROW", "ALLSELECTED"} and len(arguments[0][2]) == 1 and arguments[0][2][0][0] == "table":
                 return "scan"  # live Power BI: FILTER(ALL(table), condition) comes back in reverse storage order like FILTER(table, condition); Task 66: so does FILTER(ALLSELECTED(table), condition) (21 of 21 grid shapes)
             base = _tocsv_row_order(arguments[0])
-            if base in {"scan", "constant", "dictionary", "grouped"}:
+            if base in {"scan", "constant", "dictionary", "grouped", "window_order"}:
                 return base
         elif function == "SUMMARIZE" and not _contains_function_call(node, "CALCULATE") and (
             arguments[0][0] == "table" or not any(argument[0] == "string" for argument in arguments[1:])
@@ -4564,6 +4564,8 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                 return "scan_forward"
             if base in {"constant", "dictionary", "grouped", "scan_forward"}:
                 return base
+        elif function in {"WINDOW", "INDEX", "OFFSET"}:
+            return "window_order"
         elif function == "SUBSTITUTEWITHINDEX" and arguments:
             base = _tocsv_row_order(arguments[0])
             if arguments[0][0] == "call" and arguments[0][1] in _TOCSV_DICTIONARY_TABLES and len(arguments[0][2]) != 1:
@@ -9924,10 +9926,14 @@ def _evaluate_measures_once(
                 if function == "ALL" and source_context["id"] in unknown_member_ids:
                     output_rows.append({header: None for header in output_headers})
         else:
-            resolved_columns = [
-                resolve_table(reference[1], reference[2])
-                for reference in arguments
-            ]
+            seen_refs: set[tuple[str, str]] = set()
+            resolved_columns = []
+            for reference in arguments:
+                col = resolve_table(reference[1], reference[2])
+                key = (col[0]["id"], col[1].casefold())
+                if key not in seen_refs:
+                    seen_refs.add(key)
+                    resolved_columns.append(col)
             source_context = resolved_columns[0][0]
             if any(context["id"] != source_context["id"] for context, _ in resolved_columns):
                 raise MeasureError(
@@ -13018,12 +13024,12 @@ def _evaluate_measures_once(
         window = window_setup(tuple(rest), function)
         selected: set[int] = set()
         picked: dict[int, list[int]] = {}  # the rows each current row picks, in ORDERBY order (OFFSET, relative WINDOW)
+        if function in {"WINDOW", "INDEX", "OFFSET"} and ("FIRST" in window.keywords or "LAST" in window.keywords):
+            raise MeasureRuntimeError(f"Blanks parameter is not allowed in this context in {function} function.")
         if function == "INDEX":
             value = scalar(lead)
             if value is None:
                 return window.context, []
-            if "FIRST" in window.keywords or "LAST" in window.keywords:
-                raise MeasureRuntimeError("Blanks parameter is not allowed in this context in INDEX function.")
             index_value = int(dax_typed.to_number(value).quantize(Decimal(1), rounding=ROUND_HALF_UP))
             for members in window.partitions.values():
                 target = index_value - 1 if index_value > 0 else len(members) + index_value if index_value < 0 else -1
@@ -13057,6 +13063,12 @@ def _evaluate_measures_once(
                         low = max(bound(from_value, from_type, 0, len(members)), 0)
                         high = min(bound(to_value, to_type, 0, len(members)), len(members) - 1)
                         selected.update(members[low:high + 1] if low <= high else [])
+                    if len(selected) == len(window.rows):
+                        if window.partition_columns:
+                            raise MeasureError("The row order of a window covering the whole relation with partitions is not modelled in the local engine.")
+                        if len(window.context.get("headers", [])) > 1:
+                            raise MeasureError("The row order of a table of several columns is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+                        return window.context, list(window.rows)
                 else:
                     for key, current_rows in current_by_partition.items():
                         members = window.partitions[key]

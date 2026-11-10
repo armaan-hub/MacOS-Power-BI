@@ -1,0 +1,192 @@
+[
+ {
+  "expr": "CALCULATE(CONCATENATEX(OFFSET(-1,ALLSELECTED(Facts[Note],Facts[Region]),ORDERBY(Facts[Note],ASC,Facts[Region],DESC),LAST),Facts[Region],\",\"),Facts[Sales]>0)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 135) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC),LAST),Facts[Quantity],\",\"),Facts[Quantity]>=2)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 103) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(OFFSET(2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC),LAST),Facts[Quantity],\",\"),Facts[Region]<>\"East\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 102) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(OFFSET(2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC),LAST),Facts[Quantity],\",\"),Facts[Sales]>0)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 102) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(-1,ABS,-1,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC),LAST),Facts[Note],\",\"),Facts[Note]<>\"Late\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 106) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(-1,ABS,1,REL,ALLSELECTED(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC),LAST),Facts[Quantity],\",\"),Facts[Quantity]>=2)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 121) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(-2,ABS,-1,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],ASC),LAST),Facts[Note],\",\"),Facts[Quantity]>=2)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 105) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(1,ABS,-1,ABS,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC),FIRST),Facts[Note],\",\"),Facts[Region]=\"West\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 105) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(2,ABS,0,REL,ALLSELECTED(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region],DESC,Facts[Quantity],ASC),FIRST),Facts[Region],\",\"),Facts[Quantity]<4)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 152) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(2,ABS,2,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],ASC),LAST),Facts[Quantity],\",\"),Facts[Quantity]>=2)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 111) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(2,REL,2,REL,ALL(Facts[Note],Facts[Region]),ORDERBY(Facts[Note],ASC,Facts[Region],ASC),FIRST),Facts[Region],\",\"),Facts[Note]<>\"Late\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 135) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(OFFSET(2,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity],ASC,Facts[Region],DESC),FIRST)),Facts[Note]=\"Paid\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 131) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(-1,ABS,0,REL,ALLSELECTED(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC),LAST),100),Facts[Quantity]>=2)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 114) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(1,ABS,-1,ABS,ALL(Facts[Note]),ORDERBY(Facts[Note],ASC),FIRST),100),Facts[Note]<>\"Late\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 97) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(1,ABS,3,ABS,ALLSELECTED(Facts[Region]),ORDERBY(Facts[Region],DESC)),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(2,ABS,-1,REL,ALL(Facts[Sales]),ORDERBY(Facts[Sales],ASC),LAST),100),Facts[Sales]>0)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 99) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(OFFSET(-1,ALLSELECTED(Facts[Region]),ORDERBY(Facts[Region],ASC),LAST)),Facts[Note]=\"Paid\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 100) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(OFFSET(1,ALLSELECTED(Facts[Region]),ORDERBY(Facts[Region],DESC),LAST)),Facts[Quantity]<4)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 100) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(WINDOW(2,REL,-1,ABS,ALL(Facts[Region]),ORDERBY(Facts[Region],ASC),FIRST)),Facts[Region]=\"West\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 102) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CONCATENATEX(OFFSET(-1,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC),LAST),Facts[Region],\",\")",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) Blanks parameter is not allowed in this context in OFFSET function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,1,REL,ALLSELECTED(Facts[Sales]),ORDERBY(Facts[Sales],DESC),FIRST),100)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 97) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,2,REL,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC),FIRST),100)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "TOJSON(WINDOW(-2,ABS,1,REL,ALLSELECTED(Facts[Quantity]),ORDERBY(Facts[Quantity],ASC),LAST))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 104) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "TOJSON(WINDOW(2,ABS,1,ABS,ALLSELECTED(Facts[Region]),ORDERBY(Facts[Region],DESC),FIRST))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 100) Blanks parameter is not allowed in this context in WINDOW function.\"",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(1,ABS,3,ABS,ALLSELECTED(Facts[Region]),ORDERBY(Facts[Region],DESC)),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "review117"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,3,ABS,ALLSELECTED(Facts[Region]),ORDERBY(Facts[Region],DESC)),100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "review117"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,3,ABS,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC)),100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(1,ABS,3,ABS,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC)),100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "review117"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,3,ABS,ALL(Facts[Region]),ORDERBY(Facts[Region],ASC)),100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "review117"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,-1,ABS,ALL(Facts[Region]),ORDERBY(Facts[Region],DESC)),100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "review117"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,4,ABS,ALL(Facts[Note]),ORDERBY(Facts[Note],DESC)),100)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "review117"
+ },
+ {
+  "expr": "CALCULATE(CONCATENATEX(WINDOW(1,ABS,-1,ABS,ALL(Facts[Note],Facts[Region]),ORDERBY(Facts[Note],DESC,Facts[Region],ASC)),Facts[Region],\",\"),Facts[Quantity]>=2)",
+  "powerbi": "East,West,East,West,North",
+  "group": "review117b"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(-9,ABS,-1,ABS,ALLSELECTED(Facts[Quantity],Facts[Note]),ORDERBY(Facts[Quantity],ASC,Facts[Note],ASC)),100),Facts[Quantity]<4)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note]\n3,\n0,Paid\n1,Paid\n2,Paid",
+  "group": "review117b"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(WINDOW(1,ABS,-1,ABS,ALL(Facts[Sales],Facts[Note]),ORDERBY(Facts[Sales],DESC,Facts[Note],DESC),KEEP),100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Note]\n2.5,\n20,\n-1.5,Paid\n0,Paid\n10.5,Paid\n,Late",
+  "group": "review117b"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(WINDOW(-9,ABS,6,ABS,ALL(Facts[Note],Facts[Quantity]),ORDERBY(Facts[Note],DESC,Facts[Quantity],DESC))),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\", \"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[null, 3],\n\t\t[null, 5],\n\t\t[\"Paid\", 0],\n\t\t[\"Paid\", 1],\n\t\t[\"Paid\", 2],\n\t\t[\"Late\", 4]\n\t]\n}",
+  "group": "review117b"
+ },
+ {
+  "expr": "CONCATENATEX(WINDOW(-9,ABS,6,ABS,ALL(Facts[Region],Facts[Note]),ORDERBY(Facts[Region],DESC,Facts[Note],DESC),KEEP),Facts[Region],\",\")",
+  "powerbi": "East,West,East,West,North",
+  "group": "review117b"
+ },
+ {
+  "expr": "TOCSV(WINDOW(1,ABS,-1,ABS,ALLSELECTED(Facts[Quantity],Facts[Note]),ORDERBY(Facts[Quantity],DESC,Facts[Note],ASC)),100)",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note]\n3,\n5,\n0,Paid\n1,Paid\n2,Paid\n4,Late",
+  "group": "review117b"
+ },
+ {
+  "expr": "TOJSON(WINDOW(-9,ABS,9,ABS,ALL(Facts[Region],Facts[Note]),ORDERBY(Facts[Region],DESC,Facts[Note],DESC)))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "review117b"
+ }
+]
