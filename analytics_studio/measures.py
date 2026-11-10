@@ -19649,6 +19649,19 @@ def _evaluate_measures_once(
                             can_resolve_static = False
                     if getattr(failure, "reads_rows", False) and function in {"ISCURRENCY", "ISNUMBER"}:
                         can_resolve_static = False
+                    if can_resolve_static and calls & {"CURRENCY", "INT", "CONVERT"}:
+                        for n in _walk_nodes(arg0):
+                            if isinstance(n, tuple) and n and n[0] == "call":
+                                fn = str(n[1]).upper()
+                                if fn in {"CURRENCY", "INT", "CONVERT"} and len(n) > 2 and n[2]:
+                                    c_arg = n[2][0]
+                                    if isinstance(c_arg, tuple) and c_arg:
+                                        if c_arg[0] == "string" or static_type_of(c_arg) == "text":
+                                            can_resolve_static = False
+                                            break
+                                        if any(isinstance(sub, tuple) and sub and (sub[0] == "string" or (sub[0] == "reference" and static_type_of(sub) == "text")) for sub in _walk_nodes(c_arg)):
+                                            can_resolve_static = False
+                                            break
                     if can_resolve_static:
                         st = static_type_of(arg0)
                         if st in {"int64", "double", "currency", "decimal", "text", "bool", "datetime"}:
