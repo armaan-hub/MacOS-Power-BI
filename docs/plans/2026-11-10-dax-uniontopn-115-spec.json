@@ -1,0 +1,592 @@
+[
+ {
+  "expr": "CALCULATE(TOCSV(UNION(ALL(Facts),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Sales]>0,Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\")),0),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<=3))),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales])),0),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>0)),3),Facts[Quantity]>=0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]),Facts),0),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<3),TOPN(2,ALL(Facts),Facts[Sales])),1),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<4),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>=0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n0,0,West,Paid\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>1),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Quantity]<10)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>1),FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]<10)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(ALL(Facts),Facts[Quantity]>=2),Facts,TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n-1.5,1,East,Paid\n0,0,West,Paid\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),FILTER(Facts,Facts[Sales]>50),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(FILTER(Facts,Facts[Sales]>100),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"))),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(Facts,CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales])),0),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts))),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Region]=\"West\",Facts[Quantity]<10)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n0,0,West,Paid\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<3)),0),Facts[Quantity]>=0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Sales]>0,Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"))),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Sales]>0,Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=4)),100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=5))),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>0)),2),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>100)),100),Facts[Note]<>\"Late\",Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>1))),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]),Facts)),Facts[Region]<>\"East\",Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n20,3,West,\n,4,North,Late\n0,0,West,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"))),Facts[Quantity]<10)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 14,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)))),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 14,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(CALCULATETABLE(Facts,ALL(Facts)),Facts,TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]<>3)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 13,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(Facts,FILTER(ALL(Facts),Facts[Quantity]>=4),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Region]=\"West\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>0))),Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"))),Facts[Note]=\"Paid\",Facts[Note]=\"Paid\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 8,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<=4))),Facts[Note]<>\"Late\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 7,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(Facts,Facts[Sales]>100))),Facts[Region]<>\"East\")",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]<10)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales]))),Facts[Quantity]>1)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(ALL(Facts),ALL(Facts)) RETURN TOCSV(T,100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(ALL(Facts),ALL(Facts),ALL(Facts)) RETURN TOCSV(T,100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]>=3),Facts) RETURN TOCSV(T,100),Facts[Quantity]>=0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>=2,Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\")) RETURN TOCSV(T,100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),FILTER(ALL(Facts),Facts[Quantity]>5),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\")) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<2),ALL(Facts),Facts) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n-1.5,1,East,Paid\n0,0,West,Paid\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<=2),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),FILTER(Facts,Facts[Sales]>0)) RETURN TOCSV(T,100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n0,0,West,Paid\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),Facts,ALL(Facts)) RETURN TOCSV(T,100),Facts[Quantity]<10)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>2),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\")) RETURN TOCSV(T,100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>3),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>4),FILTER(Facts,Facts[Sales]>100),FILTER(ALL(Facts),Facts[Quantity]<3)) RETURN TOCSV(T,100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2.5,5,East,\n10.5,2,East,Paid\n-1.5,1,East,Paid\n0,0,West,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>5),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Quantity]>1,Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]>=4),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\")) RETURN TOCSV(T,100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Region]=\"West\",Facts[Region]=\"West\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(Facts,ALL(Facts)),Facts) RETURN TOCSV(T,100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n-1.5,1,East,Paid\n0,0,West,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>100),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\")) RETURN TOCSV(T,100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>100),FILTER(Facts,Facts[Sales]>100)) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>100),TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>50),FILTER(ALL(Facts),Facts[Quantity]>1)) RETURN TOCSV(T,100),Facts[Quantity]<10,Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>50),FILTER(ALL(Facts),Facts[Quantity]>=3),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(FILTER(Facts,Facts[Sales]>50),Facts,TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100),Facts[Sales]>0,Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(Facts,CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\")) RETURN TOCSV(T,100),Facts[Quantity]>=0)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(Facts,FILTER(Facts,Facts[Sales]>0),FILTER(Facts,Facts[Sales]>50)) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\")) RETURN TOCSV(T,100),Facts[Quantity]>1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),FILTER(Facts,Facts[Sales]>0)) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\")) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\")) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>4)) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Note]\nPaid\nPaid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]<10)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate\n\nPaid\nLate",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]<>3)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate\n\nPaid\nLate",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Quantity]>=0)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate\n\nPaid\nLate",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100),Facts[Region]<>\"East\",Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Note]\n\nPaid\n\nPaid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n3\n5\n0\n1\n2\n3\n5",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]<>\"Late\",Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n0\n1\n2",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Note]=\"Paid\")",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n0\n1\n2",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Quantity]>=2)",
+  "powerbi": "'Facts'[Quantity]\n2\n3\n4\n5\n2\n3\n4\n5",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Region]<>\"East\")",
+  "powerbi": "'Facts'[Quantity]\n0\n3\n4\n0\n3\n4",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])) RETURN TOCSV(T,100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Quantity]\n2\n3\n5\n2\n3\n5",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Note]<>\"Late\")",
+  "powerbi": "'Facts'[Sales]\n-1.5\n0\n2.5\n10.5\n20\n-1.5\n0\n2.5\n10.5\n20",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Note]<>\"Late\",Facts[Quantity]>=0)",
+  "powerbi": "'Facts'[Sales]\n-1.5\n0\n2.5\n10.5\n20\n-1.5\n0\n2.5\n10.5\n20",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "CALCULATE(VAR T=UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])) RETURN TOCSV(T,100),Facts[Sales]>0)",
+  "powerbi": "'Facts'[Sales]\n2.5\n10.5\n20\n2.5\n10.5\n20",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(CALCULATETABLE(Facts,ALL(Facts)),TOPN(2,ALL(Facts),Facts[Sales])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])),1)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(FILTER(Facts,Facts[Sales]>50),TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts)),3)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(Facts,TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(Facts,ALL(Facts))))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<1)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n0,0,West,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<=5)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOCSV(UNION(TOPN(2,ALL(Facts),Facts[Sales]),Facts,Facts),100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOJSON(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales])))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 8,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOJSON(UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 10,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOJSON(UNION(FILTER(ALL(Facts),Facts[Quantity]<=5),TOPN(2,ALL(Facts),Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>4)))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 9,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),ALL(Facts)))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 8,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),CALCULATETABLE(Facts,ALL(Facts))))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 14,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "TOJSON(UNION(TOPN(2,ALL(Facts),Facts[Sales]),Facts))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 8,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]<=5)) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(ALL(Facts),FILTER(ALL(Facts),Facts[Quantity]>=3),FILTER(Facts,Facts[Sales]>0)) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n20,3,West,\n,4,North,Late\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(ALL(Facts),FILTER(Facts,Facts[Sales]>50)) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(ALL(Facts),TOPN(2,ALL(Facts),Facts[Sales]),Facts) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(CALCULATETABLE(Facts,ALL(Facts)),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\"),CALCULATETABLE(Facts,ALL(Facts))) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<5),CALCULATETABLE(ALL(Facts),Facts[Region]=\"East\")) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(FILTER(ALL(Facts),Facts[Quantity]<=4),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(FILTER(Facts,Facts[Sales]>0),CALCULATETABLE(ALL(Facts),Facts[Region]=\"West\"),Facts) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(FILTER(Facts,Facts[Sales]>0),Facts,FILTER(ALL(Facts),Facts[Quantity]<=3)) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n0,0,West,Paid",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(TOPN(2,ALL(Facts),Facts[Sales]),TOPN(2,ALL(Facts),Facts[Sales])) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n10.5,2,East,Paid\n20,3,West,",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(VALUES(Facts[Note]),VALUES(Facts[Note])) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate\n\nPaid\nLate",
+  "group": "orderaudit56"
+ },
+ {
+  "expr": "VAR T=UNION(VALUES(Facts[Region]),VALUES(Facts[Region])) RETURN TOCSV(T,100)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth\nEast\nWest\nNorth",
+  "group": "orderaudit56"
+ }
+]
