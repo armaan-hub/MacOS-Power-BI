@@ -1533,22 +1533,23 @@ Doubts or things Claude should check:
   - Add-on fixes (Opus probes):
     - Probe 1 (`ISDOUBLE(("Paid")*(MAX(Facts[Quantity])))` and `CALCULATE(ISDOUBLE(("a")*(MAX(Facts[Quantity]))),Facts[Quantity]>1)`): Removed `'ISDOUBLE'` from `_ARITHMETIC_EVIDENCE[('*', 'Text', 'Int64')]`, causing text * whole-number column to raise conversion error (`Cannot convert value ... of type Text to type Number`), matching Power BI runtime error.
     - Probe 2 (`ISBOOLEAN(TRUE()&&(""))`): Exempted `ISBOOLEAN` from `dax_ext.ARITY` delegation and routed to `if function in {"ISLOGICAL", "ISBOOLEAN"}:` in `measures.py`, unifying `ISBOOLEAN` and `ISLOGICAL` handling for logical BLANK and returning `True` (matching Power BI). Also updated `_structural_type_answer` and datetime conversion handlers to include `ISBOOLEAN`.
+    - Probes 3 & 4 (`ISDECIMAL(CURRENCY(MIN(Facts[Region])))` and `ISDECIMAL(IF(1=0,MAX(Facts[Quantity]),CURRENCY(""))` from `2026-11-10-dax-typefail-118-wrong.json`): Prevented static typing for conversions of text (`CURRENCY`, `INT`, `CONVERT` with string literals, text columns, or text-typed subexpressions). These raise the conversion runtime error (`Cannot convert value ... of type Text to type Currency/Number`) matching Power BI.
 - **Results:**
-  - Spec (`docs/plans/2026-11-10-dax-typefail-118-spec.json`, 607 items): **206 match, 401 refused, 0 wrong** (0 wrong).
-  - All 3 Opus add-on probes match Power BI (0 wrong).
+  - Spec (`docs/plans/2026-11-10-dax-typefail-118-spec.json`, 607 items): **160 match, 447 refused, 0 wrong** (0 wrong).
+  - All 5 Opus add-on probes (including both items in `docs/plans/2026-11-10-dax-typefail-118-wrong.json`) match Power BI (0 wrong).
   - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.96s`).
   - Unit regression tests:
     - `tests/test_iteration140_type_tests_errors_40.py`, `tests/test_iteration147_failing_type_tests_47.py`, `tests/test_iteration150_type_tests_columns_50.py`, `tests/test_iteration154_typeerr_fail_54.py`: 22 passed, 40 subtests passed in 0.38s.
-  - Full parity gate:
-    `replayed 540401 Power BI answers: {'match': 536564, 'gap-reject': 3837, 'DIFF': 0, 'CRASH': 0}; locked 536193`
+  - Parity check (`--tests`):
+    `replayed 540401 Power BI answers: {'match': 536501, 'gap-reject': 3900, 'DIFF': 0, 'CRASH': 0}; locked 536193`
     `PARITY GATE PASSED -> PARITY_LEDGER.md`
-    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+371 matches over locked).
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+308 matches over locked).
   - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
 - **Files changed:**
   - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (607 items) has **0 wrong**. All locked answers and probes match.
+  - Spec (607 items) and all 5 fresh probes have **0 wrong**. All locked answers match.
 
 
 
