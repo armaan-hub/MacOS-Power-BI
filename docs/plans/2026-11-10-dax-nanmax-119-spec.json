@@ -1,0 +1,1042 @@
+[
+ {
+  "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]+1)+(Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),FALSE(),TRUE(),-Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(DIVIDE(1,0))),[q])",
+  "powerbi": "NaN",
+  "group": "dax_battery_blank8_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]=3,\"7\",-Facts[Quantity]/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "-2",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(TRUE(),Facts[Quantity]/Facts[Sales],TRUE()))+0",
+  "powerbi": "-0.666666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Sales]>=0,Facts[Sales]/Facts[Quantity],FALSE(),TRUE(),0/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Sales]/0)",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(Facts[Quantity]=3,TRUE(),Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]>=2,\"z\",Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/(CURRENCY(Facts[Quantity])))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),FALSE(),Facts[Note],(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]+1))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Quantity]>=2,\"z\",Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(1=0,\"x\"&Facts[Quantity],Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MAXX(Facts,SWITCH(TRUE(),ISBLANK(Facts[Sales]),FALSE(),Facts[Quantity]/Facts[Sales])),Facts[Region]<>\"North\")",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ALL(Facts),SWITCH(TRUE(),Facts[Region]<>\"East\",Facts[Sales]/0,Facts[Region]<>\"East\",\"z\",Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DOUBLE)),[q])",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]>=2,Facts[Region],Facts[Sales]/0))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(TRUE(),Facts[Sales]*0/Facts[Sales],\"7\"))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(TRUE(),Facts[Sales]/Facts[Sales],DATE(2021,5,5)))",
+  "powerbi": "1",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,IF(ISBLANK(Facts[Sales]),Facts[Note],(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(MAXX(Facts,IF(Facts[Sales]>0,Facts[Region],Facts[Quantity]/Facts[Quantity])),Facts[Region]<>\"North\")",
+  "powerbi": "1",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(Facts,SWITCH(TRUE(),Facts[Quantity]>2,Facts[Note],(Facts[Sales]-Facts[Sales])/Facts[Quantity])),Facts[Region]<>\"North\")",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,IF(Facts[Region]=\"East\",\"a\",(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Region]<>\"East\",Facts[Sales]/Facts[Quantity],Facts[Quantity]>=2,\"z\",0/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(ALL(Facts),SWITCH(TRUE(),FALSE(),TRUE(),(Facts[Quantity]-Facts[Quantity])/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Quantity]/0)",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(Facts,IF.EAGER(ISBLANK(Facts[Sales]),Facts[Region],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "2",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),Facts[Quantity]>=2,Facts[Sales]*0/Facts[Sales],Facts[Quantity]>=2,TRUE(),(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(SUM(Facts[Quantity])*CURRENCY(1)))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(Facts,SWITCH(TRUE(),Facts[Quantity]=3,\"7\",Facts[Sales]*0/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),Facts[Sales]>0,\"5\",Facts[Quantity]*0/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(SUM(Facts[Quantity])*CURRENCY(1))+(Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(TRUE(),-Facts[Quantity]/Facts[Sales],\"x\"&Facts[Quantity]))",
+  "powerbi": "0.666666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),FALSE(),-Facts[Quantity]/Facts[Sales],Facts[Quantity]>=2,Facts[Note],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "-1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]=3,0/Facts[Quantity],FALSE(),Facts[Region],Facts[Sales]*0/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Quantity]/0)",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,Facts[Note],Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),Facts[Sales]/Facts[Quantity],Facts[Quantity]=3,TRUE(),-Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DATETIME)),[q])",
+  "powerbi": "12/31/9999 23:59:59",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(UNION(Facts,Facts),Facts[Sales]/0)",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(FALSE(),Facts[Region],(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]>=2,Facts[Note],0/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Sales]>=0,Facts[Quantity]/Facts[Sales],1=0,\"x\"&Facts[Quantity],(Facts[Sales]-2.5)/Facts[Quantity]))",
+  "powerbi": "-4",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Sales]>=0,0/Facts[Quantity],Facts[Sales]>=0,Facts[Region],Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Quantity]>=2,BLANK(),Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-0.666666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(FILTER(Facts,TRUE()),SWITCH(TRUE(),Facts[Quantity]=3,Facts[Quantity]/(Facts[Sales]-10.5),FALSE(),\"x\"&Facts[Quantity],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "-1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(FILTER(Facts,TRUE()),SWITCH(TRUE(),FALSE(),Facts[Region],(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))+0",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),TRUE(),Facts[Sales]/Facts[Sales],TRUE(),Facts[Region],0/Facts[Quantity]))+0",
+  "powerbi": "1",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),Facts[Quantity]=3,(Facts[Sales]-2.5)/Facts[Quantity],1=0,\"z\",0/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Sales]>=0,Facts[Sales]/0,Facts[Quantity]=3,\"z\",Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(MAXX(Facts,IF(Facts[Quantity]>2,Facts[Note],-Facts[Sales]/Facts[Quantity])),Facts[Region]<>\"North\")",
+  "powerbi": "1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,IF(Facts[Quantity]>2,Facts[Note],(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,IF.EAGER(Facts[Region]=\"East\",\"a\",Facts[Quantity]/Facts[Sales]))&\"\"",
+  "powerbi": "inf",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(FILTER(Facts,TRUE()),SWITCH(TRUE(),Facts[Quantity]=3,\"7\",Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(UNION(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DOUBLE)),[q])",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),Facts[Quantity]>2,\"5\",Facts[Quantity]/Facts[Sales]))&\"\"",
+  "powerbi": "-nan(ind)",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),FALSE(),Facts[Region],(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(FILTER(Facts,TRUE()),SWITCH(TRUE(),TRUE(),Facts[Sales]/Facts[Sales],TRUE(),\"x\"&Facts[Quantity],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "1",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Quantity]=3,TRUE(),(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),Facts[Quantity]/Facts[Sales],Facts[Quantity]>=2,TRUE(),Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(1=0,\"z\",Facts[Sales]*0/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(UNION(Facts,Facts),Facts[Quantity]/0)",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(Facts[Region]<>\"East\",0/Facts[Quantity],Facts[Region]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]*2)+(Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(NOT(ISBLANK(Facts[Note])),Facts[Sales]/0,DATE(2021,5,5)))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]=3,Facts[Quantity]/Facts[Sales],Facts[Quantity]=3,TRUE(),-Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]=3,DATE(2021,5,5),0/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Sales]>=0,0/Facts[Quantity],Facts[Sales]>=0,Facts[Region],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-0.666666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]=3,Facts[Sales]/Facts[Quantity],1=0,DATE(2021,5,5),Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Region]<>\"East\",Facts[Quantity]/Facts[Sales],Facts[Region]))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DATETIME)),[q])",
+  "powerbi": "12/30/1899 00:00:00",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]*2))",
+  "powerbi": "0",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(ALL(Facts),SWITCH(TRUE(),TRUE(),Facts[Sales]/0,Facts[Quantity]>=2,TRUE(),Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),TRUE(),-Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(ALL(Facts),SWITCH(TRUE(),TRUE(),0/Facts[Quantity],FALSE(),\"x\"&Facts[Quantity],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(FILTER(Facts,TRUE()),SWITCH(TRUE(),1=0,\"z\",Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(FILTER(Facts,TRUE()),SWITCH(TRUE(),Facts[Quantity]=3,Facts[Quantity]/Facts[Sales],1=0,\"z\",(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0.15",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(FALSE(),TRUE(),Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),Facts[Sales]>=0,Facts[Sales]/Facts[Sales],1=0,Facts[Region],Facts[Sales]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(FALSE(),\"x\"&Facts[Quantity],-Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "0.666666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MAXX(Facts,SWITCH(TRUE(),Facts[Quantity]=3,\"z\",(Facts[Quantity]-Facts[Quantity])/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Sales]>=0,Facts[Quantity]/Facts[Sales],Facts[Sales]>=0,\"x\"&Facts[Quantity],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,IF.EAGER(Facts[Region]=\"East\",\"5\",-Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "-6.66666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(TRUE(),-Facts[Quantity]/Facts[Sales],\"7\")),Facts[Quantity]<>4)",
+  "powerbi": "-2",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(Facts,IF.EAGER(Facts[Sales]>0,Facts[Note],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-0.666666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(UNION(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(Facts,IF.EAGER(Facts[Sales]>0,Facts[Region],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(FALSE(),BLANK(),Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),NOT(ISBLANK(Facts[Note])),Facts[Sales]/Facts[Sales],1=0,BLANK(),Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "2",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Quantity]>=2,\"7\",Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "-1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Quantity]>=2,(Facts[Quantity]-Facts[Quantity])/Facts[Sales],\"x\"&Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(Facts,IF(Facts[Region]=\"East\",FALSE(),(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(1=0,Facts[Region],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Sales])))",
+  "powerbi": "1",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),1=0,(Facts[Sales]-2.5)/Facts[Quantity],FALSE(),Facts[Note],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "0.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(NOT(ISBLANK(Facts[Note])),(Facts[Quantity]-Facts[Quantity])/Facts[Sales],TRUE()))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(2.5&&\"\")),[q])",
+  "powerbi": "NaN",
+  "group": "dax_battery_blank8_extra"
+ },
+ {
+  "expr": "MINX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(FILTER(Facts,TRUE()),SWITCH(TRUE(),Facts[Quantity]>=2,\"z\",(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,Facts[Region],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "0.19047619047619",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Sales]>=0,-Facts[Quantity]/Facts[Sales],BLANK()))",
+  "powerbi": "-2",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Region]<>\"East\",Facts[Quantity]/Facts[Sales],\"x\"&Facts[Quantity]))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(ALL(Facts),SWITCH(TRUE(),Facts[Quantity]>=2,(Facts[Sales]-2.5)/Facts[Quantity],Facts[Quantity]>=2,\"z\",0/Facts[Quantity])),Facts[Quantity]<>4)",
+  "powerbi": "-0.625",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]>=2,\"7\",Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(Facts[Quantity]>=2,\"x\"&Facts[Quantity],0/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Quantity])))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(FILTER(Facts,TRUE()),SWITCH(TRUE(),Facts[Quantity]=3,(Facts[Sales]-2.5)/Facts[Quantity],Facts[Quantity]=3,\"z\",-Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Sales]))+(Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),TRUE(),Facts[Sales]/Facts[Quantity],Facts[Quantity]>=2,Facts[Note],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MAXX(ALL(Facts),SWITCH(TRUE(),FALSE(),Facts[Region],-Facts[Quantity]/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]>=2,\"x\"&Facts[Quantity],(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),FALSE(),Facts[Note],Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(UNION(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Sales]>=0,-Facts[Quantity]/Facts[Sales],Facts[Quantity]>=2,\"x\"&Facts[Quantity],(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Sales]>0,\"5\",-Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Region]<>\"East\",Facts[Sales]/Facts[Sales],Facts[Quantity]>=2,TRUE(),Facts[Sales]/Facts[Quantity]))+0",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(FILTER(Facts,TRUE()),SWITCH(TRUE(),Facts[Quantity]>=2,\"z\",Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),Facts[Quantity]>=2,(Facts[Sales]-2.5)/Facts[Quantity],1=0,BLANK(),Facts[Sales]/Facts[Sales])),Facts[Quantity]<>4)",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Quantity]>2,TRUE(),-Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Sales])))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]*2))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),FALSE(),BLANK(),Facts[Sales]*0/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(Facts,SWITCH(TRUE(),Facts[Quantity]>2,TRUE(),-Facts[Sales]/Facts[Quantity])),Facts[Region]<>\"North\")",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),1=0,-Facts[Quantity]/Facts[Sales],FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(NOT(ISBLANK(Facts[Note])),Facts[Sales]/0,DATE(2021,5,5)))",
+  "powerbi": "44321",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(FILTER(Facts,TRUE()),SWITCH(TRUE(),FALSE(),Facts[Note],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),FALSE(),FALSE(),Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Quantity])))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",COALESCE((Facts[Sales]&&\"\")/Facts[Quantity],5)),[q])",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Sales]>0,\"5\",Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(MINX(Facts,SWITCH(TRUE(),TRUE(),-Facts[Quantity]/Facts[Sales],FALSE(),\"z\",Facts[Sales]/0)),Facts[Quantity]<>4)",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),VAR x=1+1 RETURN IF(BLANK(),x,Facts[Sales]/0))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(FALSE(),\"z\",0/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]))",
+  "powerbi": "0",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),TRUE(),Facts[Sales]/Facts[Quantity],Facts[Region]<>\"East\",Facts[Region],Facts[Sales]/0))",
+  "powerbi": "0.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(ALL(Facts),SWITCH(TRUE(),Facts[Quantity]=3,Facts[Sales]/Facts[Quantity],Facts[Quantity]=3,TRUE(),-Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/([c]*2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(NOT(ISBLANK(Facts[Note])),Facts[Sales]/0,TRUE()))",
+  "powerbi": "-Infinity",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c])+(Facts[Sales]/0))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(1=0,\"z\",Facts[Sales]/Facts[Sales]))",
+  "powerbi": "1",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(Facts,IF.EAGER(Facts[Region]=\"East\",\"a\",(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,IF.EAGER(ISBLANK(Facts[Sales]),Facts[Note],Facts[Quantity]/Facts[Quantity]))",
+  "powerbi": "1",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),Facts[Region]=\"East\",FALSE(),Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "6.66666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),TRUE(),(Facts[Sales]-Facts[Sales])/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(ALL(Facts),SWITCH(TRUE(),Facts[Quantity]>=2,TRUE(),Facts[Sales]/0))+0",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Sales])))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Quantity]))+(Facts[Sales]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,Facts[Region],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "-1.5",
+  "group": "dax_battery_variant2_extra"
+ },
+ {
+  "expr": "MAXX(ALL(Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(FILTER(Facts,TRUE()),SWITCH(TRUE(),FALSE(),\"x\"&Facts[Quantity],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),\"z\",Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Quantity])))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Sales]>0,Facts[Note],-Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(Facts[Quantity]>=2,Facts[Region],(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF.EAGER(Facts[Quantity]>=2,TRUE(),0/Facts[Quantity]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),\"x\"&Facts[Quantity],Facts[Quantity]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(FILTER(Facts,TRUE()),SWITCH(TRUE(),Facts[Quantity]>=2,\"x\"&Facts[Quantity],Facts[Sales]/Facts[Sales]))",
+  "powerbi": "NaN",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+  "powerbi": "Infinity",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),FALSE(),Facts[Region],(Facts[Quantity]-Facts[Quantity])/Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),FALSE(),\"7\",Facts[Sales]/Facts[Quantity]))+0",
+  "powerbi": "-1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(DISTINCT(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),FALSE(),Facts[Sales]/0,Facts[Quantity]=3,Facts[Region],-Facts[Quantity]/Facts[Sales]))+0",
+  "powerbi": "0.666666666666667",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),IF(NOT(ISBLANK(Facts[Note])),0/Facts[Quantity],DATE(2021,5,5)))",
+  "powerbi": "44321",
+  "group": "dax_battery_maxxnan53_extra"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/(CURRENCY(Facts[Quantity])))",
+  "powerbi": "NaN",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+  "powerbi": "NaN",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "MINX(INTERSECT(FILTER(Facts,Facts[Quantity]<>2),FILTER(Facts,Facts[Sales]<>20)),SWITCH(TRUE(),1=0,(Facts[Quantity]-Facts[Quantity])/Facts[Sales],1=0,Facts[Note],Facts[Sales]/Facts[Quantity]))",
+  "powerbi": "-1.5",
+  "group": "dax_battery_maxxnan53_extra"
+ }
+]
