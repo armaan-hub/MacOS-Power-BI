@@ -4606,7 +4606,7 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
         elif function == "ADDCOLUMNS" and arguments:
             base = _tocsv_row_order(arguments[0])
-            if base == "scan" and arguments[0][0] == "table":
+            if base == "scan":
                 return "scan_forward"
             if base in {"constant", "dictionary", "grouped", "scan_forward"}:
                 return base
@@ -22761,9 +22761,25 @@ def _evaluate_measures_once(
                 held_def = variable_nodes[table_node[1]]
                 while held_def and held_def[0] == "var" and held_def[1] in variable_nodes:
                     held_def = variable_nodes[held_def[1]]
-                if held_def and held_def[0] == "call" and held_def[1] in {"CROSSJOIN", "GENERATE", "GENERATEALL", "UNION"}:
-                    synth_let = ("let", ((table_node[1], held_def),), ("var", table_node[1]))
-                    order_class = _tocsv_row_order(synth_let)
+                if held_def and held_def[0] == "call":
+                    if held_def[1] in {"CROSSJOIN", "GENERATE", "GENERATEALL", "UNION"}:
+                        synth_let = ("let", ((table_node[1], held_def),), ("var", table_node[1]))
+                        order_class = _tocsv_row_order(synth_let)
+                    elif held_def[1] == "ALLSELECTED":
+                        if len(held_def[2]) == 1 and held_def[2][0][0] == "table":
+                            order_class = "allselected_scan"
+                        elif len(held_def[2]) == 1 and held_def[2][0][0] == "reference":
+                            order_class = "dictionary"
+                        else:
+                            order_class = _tocsv_row_order(table_node)
+                    elif (
+                        held_def[1] == "FILTER" and len(held_def[2]) >= 1
+                        and held_def[2][0][0] == "call" and held_def[2][0][1] == "ALLSELECTED"
+                        and len(held_def[2][0][2]) == 1 and held_def[2][0][2][0][0] == "table"
+                    ):
+                        order_class = "allselected_scan"
+                    else:
+                        order_class = _tocsv_row_order(table_node)
                 else:
                     order_class = _tocsv_row_order(table_node)
             else:
@@ -22836,9 +22852,14 @@ def _evaluate_measures_once(
                 allselected_source = table_node[2][0]
                 removed = total_row_count < full_row_count(allselected_source)
                 filtered_here = has_column_filter(allselected_source)
-                if (removed or filtered_here) and (arguments[0][0] == "let" or (removed and max_rows < 0) or not removed):
-                    raise MeasureError("The row order of ALLSELECTED(table) under an outer filter is not modelled in the local engine for this shape.")
-                reverse = removed
+                if removed or filtered_here:
+                    reverse = max_rows >= 0
+            elif order_class == "allselected_scan":
+                allselected_source = held_def[2][0] if held_def[1] == "ALLSELECTED" else held_def[2][0][2][0]
+                removed = total_row_count < full_row_count(allselected_source)
+                filtered_here = has_column_filter(allselected_source) or (held_def[1] == "FILTER" and _tocsv_scan_filtered(held_def))
+                if removed or filtered_here:
+                    reverse = max_rows >= 0
             elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and any(
                 str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values()
             ):
