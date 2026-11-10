@@ -36,3 +36,6 @@ keep refusing. Write the rule per family (answered / refused) in your report.
   Score the spec with `tools/dax_oracle_diff.local`.
 - Report at the end of `HANDOFF.md` under "Antigravity (Task 119) ready for review": exact / refused / wrong on the
   spec (wrong must be 0), the rules, files changed. Then stop.
+
+## Review outcome (2026-11-10)
+Shipped as Iteration 208. Locked 535046.
