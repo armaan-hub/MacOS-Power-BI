@@ -53,9 +53,15 @@ MEASURED = (
 )
 
 # not measured: refused (a rejection is allowed, a wrong answer is not)
+# live Power BI (Task 126 review, Opus probe 2026-11-10): ALLSELECTED(Facts) under an outer query filter
+MEASURED_ALLSELECTED = {
+    'CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Quantity]>=2)':
+        "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+    'CALCULATE(TOCSV(ALLSELECTED(Facts)),Facts[Quantity]>=0)':
+        "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2.5,5,East,\n0,0,West,Paid\n,4,North,Late\n-1.5,1,East,Paid\n20,3,West,\n10.5,2,East,Paid",
+}
+
 REFUSED = (
-    'CALCULATE(TOCSV(ALLSELECTED(Facts),-1),Facts[Quantity]>=2)',  # every row asked for under a reversed walk
-    'CALCULATE(TOCSV(ALLSELECTED(Facts)),Facts[Quantity]>=0)',  # a filter that keeps every row
     'CALCULATE(CONCATENATEX(GENERATE(VALUES(Facts[Region]),FILTER(VALUES(Facts[Note]),Facts[Region]="East")),Facts[Note],","),Facts[Quantity]<>3)',  # a right list that reads the left row
 )
 
@@ -76,6 +82,11 @@ class MeasuredShapes(unittest.TestCase):
                     self.assertTrue(dax.local(expression).startswith("'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid"))
                 else:
                     self.assertEqual(dax.local(expression), expected)
+
+    def test_allselected_under_an_outer_filter_matches_power_bi(self):
+        for expression, expected in MEASURED_ALLSELECTED.items():
+            with self.subTest(expression=expression):
+                self.assertEqual(dax.local(expression), expected)
 
     def test_refused_shapes_are_not_answered(self):
         for expression in REFUSED:
