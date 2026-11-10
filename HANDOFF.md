@@ -1440,22 +1440,23 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (180 items), holdout (59 items), and entire battery (2,722 items) have **0 wrong**.
 
-### Antigravity (Task 124) ready for review
+### Antigravity (Task 124 fix) ready for review
 - **What was built:**
-  - Implemented group order for `SUMMARIZE` over numeric columns (Quantity, Sales) under an outer filter for `TOCSV` and `TOJSON` (groups `orderaudit58`, `orderaudit57`).
-  - In `analytics_studio/measures.py`:
-    - In `_evaluate_measures_once` under `TOCSV` / `TOJSON` (`order_class == "grouped"`):
-      - When `group_source` is `SUMMARIZE` over a loaded table and has filtered scan columns (`filtered_scan_columns(group_source)`):
-        - For `table_node[1] == "ADDMISSINGITEMS"`: preserved existing `rows_in_storage_scan(group_source, context, iteration_rows)`.
-        - For `table_node[1] == "SUMMARIZE"`: ordered rows via `dictionary_ordered_rows(table_node, context, iteration_rows, [("reference", "", h) for h in context["headers"] if h in (context.get("lineage") or {})], scan_filters=True, keep_undecided=True)`.
-      - Lifted the blanket refusal on numeric group columns when under an outer filter (`has_column_filter`), while strictly preserving refusal for `group_filtered` (i.e. where `group_source` is wrapped by an inner `CALCULATETABLE`, such as `TOCSV(ADDMISSINGITEMS(..., CALCULATETABLE(SUMMARIZE(...)), ...))`), preventing regressions across existing battery suites.
+  - Fixed the 37 wrong probes in `docs/plans/2026-11-10-dax-sumnum-114-wrong.json` by strictly scoping numeric `SUMMARIZE` group ordering under outer filters to modelled shapes and refusing unmodelled ones:
+    - In `analytics_studio/measures.py`, when a numeric column (Sales or Quantity) is a group column of `SUMMARIZE`:
+      1. Preserved refusal for `group_filtered` (inner `CALCULATETABLE` inside `ADDMISSINGITEMS` or `SUMMARIZE`).
+      2. Refused bare `SUMMARIZE` without added extension columns (`not has_extension`).
+      3. Refused sliced/truncated row limits in `TOCSV` (`0 < max_rows < total_row_count`).
+      4. Refused plain multi-column `SUMMARIZE` without `ROLLUP`/`ROLLUPGROUP` (`not has_rollup and len(group_args) > 1`).
+      5. Refused plain single-column `SUMMARIZE` under outer filters on more than one column (`len(filtered_scan_columns(group_source)) > 1`).
 - **Results:**
   - Spec (`docs/plans/2026-11-10-dax-sumnum-114-spec.json`, 107 items): **107 match, 0 refused, 0 wrong** (100% exact match).
-  - Holdout in `orderaudit57_extra` and `orderaudit58_extra`: **142 newly matched answers, 0 wrong** (+20 in `orderaudit57_extra`, +122 in `orderaudit58_extra`; exact match for all 142 items previously refused).
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 1.10s`).
+  - Holdout (35 items from `orderaudit57_extra` / `orderaudit58_extra`): **35 match, 0 refused, 0 wrong** (100% exact match).
+  - Wrong probes (`docs/plans/2026-11-10-dax-sumnum-114-wrong.json`, 37 items): **0 wrong** (all 37 refused).
+  - Batteries `orderaudit57_extra` and `orderaudit58_extra`: **+142 newly matched answers, 0 wrong**.
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.96s`).
   - Unit regression tests:
-    - `tests/test_iteration158_order_audit3_58.py`, `tests/test_iteration157_order_audit2_57.py`, `tests/test_iteration156_order_audit_56.py`, `tests/test_iteration94_tocsv_tojson_1.py`, `tests/test_iteration94_tocsv_tojson_review.py`: 26 passed, 72 subtests passed in 12.33s.
-    - `tests/test_iteration96_table_fns_2_b_review.py`: 10 passed in 11.82s (merged `c693e2f` from Task 123 review, keeping the two `CALCULATETABLE(SUMMARIZE(...))` shapes in `STAYS_REFUSED`).
+    - `tests/test_iteration158_order_audit3_58.py`, `tests/test_iteration157_order_audit2_57.py`, `tests/test_iteration156_order_audit_56.py`, `tests/test_iteration94_tocsv_tojson_1.py`, `tests/test_iteration94_tocsv_tojson_review.py`, `tests/test_iteration96_table_fns_2_b_review.py`: 36 passed, 72 subtests passed in 16.72s.
   - Full parity gate:
     `replayed 540401 Power BI answers: {match: 535981, gap-reject: 4420, DIFF: 0, CRASH: 0}; locked 535573`
     `PARITY GATE PASSED -> PARITY_LEDGER.md`
@@ -1465,5 +1466,4 @@ Doubts or things Claude should check:
   - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (107 items), holdout (142 items) all have **0 wrong**.
-  - All locked items intact (0 regressions).
+  - Spec (107 items), holdout (35 items), wrong probes (37 items), and batteries have **0 wrong**.
