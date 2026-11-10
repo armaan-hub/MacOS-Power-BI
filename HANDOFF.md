@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude (Task 127 ready for review).
-**Branch in use:** antigravity/dax-negzero-117
-**Working tree clean:** worktree task127 yes
+**Active agent:** Antigravity codes Task 128 (dax-typefail-118).
+**Branch in use:** antigravity/dax-typefail-118
+**Working tree clean:** worktree task128 in use by Antigravity
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
