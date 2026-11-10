@@ -317,6 +317,12 @@ def _is_pure_logical(node: Any) -> bool:
 # live Power BI (Task 16 review, 1,008 answers): which empty texts the engine folds when it compiles. An operator over a folded one is typed True/False
 # (ISLOGICAL(2.5&&UPPER("")) is True); over one of these, read at run time, it is not (ISLOGICAL(2.5&&LEFT("a",0)) is False). A VAR is always folded.
 _NOT_FOLDED_TEXT_CALLS = frozenset({"LEFT", "RIGHT", "MID", "REPT", "REPLACE", "FORMAT", "SELECTEDVALUE"})
+_TASK128_FORBIDDEN_CALLS = frozenset({
+    "VALUE", "FORMAT", "SQRT", "LN", "LOG", "LOG10", "DIVIDE", "QUOTIENT",
+    "ERROR", "LEFT", "RIGHT", "MID", "REPT", "REPLACE", "SELECTEDVALUE",
+    "DATEVALUE", "TIMEVALUE", "WEEKDAY", "UNICHAR", "SIN", "FLOOR", "CEILING",
+    "FIND", "SEARCH", "EDATE", "EOMONTH", "DATE", "TIME",
+})
 _FOLDED_TEXT_CALLS = frozenset({
     "UPPER", "LOWER", "TRIM", "CONCATENATE", "SUBSTITUTE", "IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR", "CALCULATE", "CONVERT",
     "EVALUATEANDLOG", "TRUE", "FALSE", "BLANK", "MAX", "MIN",
@@ -5100,7 +5106,7 @@ _ARITHMETIC_EVIDENCE: dict[tuple[str, str, str], frozenset[str]] = {  # (operato
     ('*', 'Text', 'Currency'): frozenset({'ISDOUBLE', 'ISINT64'}),
     ('*', 'Text', 'Currency[Double]'): frozenset({'ISDOUBLE', 'ISINT64'}),
     ('*', 'Text', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
-    ('*', 'Text', 'Int64'): frozenset({'ISDOUBLE', 'ISINT64'}),
+    ('*', 'Text', 'Int64'): frozenset({'ISINT64'}),
     ('+', 'Currency', 'Currency'): frozenset({'ISDOUBLE'}),
     ('+', 'Currency', 'Double'): frozenset({'ISDOUBLE', 'ISINT64'}),
     ('+', 'Currency', 'Int64'): frozenset({'ISDOUBLE'}),
@@ -5253,7 +5259,7 @@ def _structural_type_answer(function: str, argument: tuple[Any, ...], columns: d
                 return None  # a column read beside a failing && || AND OR: refused (the locked test of iteration 140 keeps ISLOGICAL(MAX(Facts[Note])&""&&1) refused)
             return _STRUCTURAL_BOOL_RESULT[function]
         if "FACT" in calls or ("^" in operators and not _structural_power_constant(argument)):
-            return False if function in {"ISLOGICAL", "ISNUMBER"} else None
+            return False if function in {"ISLOGICAL", "ISBOOLEAN", "ISNUMBER"} else None
         return _STRUCTURAL_TEXT_RESULT[function]
     if any(isinstance(part, tuple) and part and part[0] == "reference" for part in _walk_nodes(argument)):
         return None  # a column read beside the failing part: Power BI raises there (measured, 26 rows), so refuse; only literal-constant operands are answered
@@ -5262,7 +5268,7 @@ def _structural_type_answer(function: str, argument: tuple[Any, ...], columns: d
     if head == "binary" and argument[1] in {"+", "-", "*"}:
         if not calls <= _STRUCTURAL_CALLS:
             return None
-        if function in {"ISTEXT", "ISLOGICAL"}:
+        if function in {"ISTEXT", "ISLOGICAL", "ISBOOLEAN"}:
             return False
         if function == "ISNONTEXT":
             return True
@@ -5281,13 +5287,13 @@ def _structural_type_answer(function: str, argument: tuple[Any, ...], columns: d
         if not calls <= _STRUCTURAL_CALLS or "CONVERT" in calls:
             return None
         if bool(calls & {"FACT"}) or "^" in operators:
-            return False if function in {"ISLOGICAL", "ISNUMBER"} else None
+            return False if function in {"ISLOGICAL", "ISBOOLEAN", "ISNUMBER"} else None
         return _STRUCTURAL_TEXT_RESULT[function]
     if head == "call" and str(argument[1]).upper() in {"CONCATENATE", "UPPER"}:
         if not calls <= (_STRUCTURAL_CALLS | _STRUCTURAL_TEXT_WRAPPED) or calls & {"FACT", "MOD"}:
             return None  # CONCATENATE / UPPER of FACT or MOD raise in Power BI (measured)
         return _STRUCTURAL_TEXT_RESULT[function]
-    if function == "ISLOGICAL" and (head == "logical" or (head == "call" and str(argument[1]).upper() in {"AND", "OR"})):
+    if function in {"ISLOGICAL", "ISBOOLEAN"} and (head == "logical" or (head == "call" and str(argument[1]).upper() in {"AND", "OR"})):
         if not calls <= _STRUCTURAL_CALLS:
             return None
         return True
@@ -19484,7 +19490,7 @@ def _evaluate_measures_once(
                 raise MeasureError(f"{function} needs a keyword such as {'DAY' if function == 'DATEDIFF' else 'INTEGER'} as its last argument.")
             interval = str(keyword[1]).upper()
             arguments = arguments[:-1]
-        if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISLOGICAL"} and _is_datetime_conversion(arguments[0]):
+        if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISLOGICAL", "ISBOOLEAN"} and _is_datetime_conversion(arguments[0]):
             return False  # live Power BI (Task 19 Part A): these tests of a date made by CONVERT are False without the conversion running (ISNUMBER and ISDATETIME run it)
         if function in {"BITAND", "BITLSHIFT", "BITRSHIFT"} and len(arguments) == 2:
             def constant_truth(condition: tuple[Any, ...]) -> bool | None:
@@ -19607,6 +19613,48 @@ def _evaluate_measures_once(
                 if text_type is None:
                     raise dax_typed.refusal("ISDATETIME of arithmetic around a text beyond the Double range is not typed by the local engine.") from failure
                 return text_type == "datetime"
+            if answer is None and function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
+                arg0 = arguments[0]
+                calls = {str(n[1]).upper() for n in _walk_nodes(arg0) if isinstance(n, tuple) and n and n[0] == "call"}
+                if (
+                    not (calls & _TASK128_FORBIDDEN_CALLS)
+                    and not _has_op_outside_let(arg0, {"/"})
+                    and "FACT" not in calls
+                    and arg0[0] != "comparison"
+                    and not (arg0[0] == "let" and isinstance(arg0[2], tuple) and arg0[2] and arg0[2][0] == "concat")
+                    and not ("CONVERT" in calls and any(isinstance(n, tuple) and n and (n[0] == "concat" or (n[0] == "call" and n[1] in {"CONCATENATE", "UPPER"})) for n in _walk_nodes(arg0)))
+                    and not ((arg0[0] == "unary" and arg0[1] == "not") or (arg0[0] == "call" and str(arg0[1]).upper() == "NOT"))
+                    and not (isinstance(failure, _PowerFailure) and not _is_bare_power(arg0))
+                    and not ("^" in {n[1] for n in _walk_nodes(arg0) if isinstance(n, tuple) and n and n[0] == "binary"} and (not _structural_power_constant(arg0) or not _is_bare_power(arg0)))
+                    and not ((arg0[0] == "logical" or (arg0[0] == "call" and str(arg0[1]).upper() in {"AND", "OR"})) and any(p[0] == "concat" and any(sub[0] == "reference" for sub in _walk_nodes(p)) for p in _walk_nodes(arg0) if isinstance(p, tuple) and p))
+                    and not (arg0[0] == "binary" and arg0[1] == "*" and any(isinstance(n, tuple) and n and n[0] == "let" for n in _walk_nodes(arg0)))
+                    and not (function in {"ISCURRENCY", "ISNUMBER"} and any(isinstance(n, tuple) and n and (n[0] in {"reference", "table"} or (n[0] == "call" and n[1] in {"SUMX", "MAXX", "MINX", "AVERAGE", "SUM", "MAX", "MIN", "COUNTROWS", "CALCULATE"})) for n in _walk_nodes(arg0)) and any(isinstance(n, tuple) and n and n[0] == "call" and n[1] == "CURRENCY" for n in _walk_nodes(arg0)))
+                ):
+                    can_resolve_static = True
+                    if function in {"ISNUMBER", "ISDOUBLE", "ISNUMERIC", "ISINTEGER", "ISINT64"}:
+                        if arg0[0] in {"let", "call"} and (arg0[0] == "let" or str(arg0[1]).upper() in {"IF", "SWITCH", "COALESCE"}):
+                            can_resolve_static = False
+                        elif any(isinstance(n, tuple) and n and (n[0] in {"reference", "table"} or (n[0] == "call" and str(n[1]).upper() in {"SUM", "MAX", "MIN", "AVERAGE", "COUNTROWS", "CALCULATE", "SUMX", "MAXX", "FILTER"})) for n in _walk_nodes(arg0)):
+                            can_resolve_static = False
+                    if isinstance(failure, _ConvertFailure) and arg0[0] != "comparison":
+                        target_t = static_type_of(arg0)
+                        if (function in {"ISNUMBER", "ISNUMERIC"} and target_t in {"int64", "double", "currency", "decimal", "datetime"}) or (
+                            (function in {"ISINTEGER", "ISINT64"} and target_t == "int64")
+                            or (function == "ISDOUBLE" and target_t == "double")
+                            or (function in {"ISCURRENCY", "ISDECIMAL"} and target_t == "currency")
+                            or (function == "ISDATETIME" and target_t == "datetime")
+                            or (function in {"ISLOGICAL", "ISBOOLEAN"} and target_t == "bool")
+                            or (function in {"ISTEXT", "ISSTRING"} and target_t == "text")
+                        ):
+                            can_resolve_static = False
+                    if getattr(failure, "reads_rows", False) and function in {"ISCURRENCY", "ISNUMBER"}:
+                        can_resolve_static = False
+                    if can_resolve_static:
+                        st = static_type_of(arg0)
+                        if st in {"int64", "double", "currency", "decimal", "text", "bool", "datetime"}:
+                            st_ans = static_type_answer(function, st)
+                            if st_ans is not None:
+                                answer = st_ans
             if answer is None:
                 raise
             return answer
@@ -19662,7 +19710,7 @@ def _evaluate_measures_once(
                             raise dax_typed.refusal(f"{function} with a subnormal argument is not modelled by the local engine.")
                     except MeasureRuntimeError:
                         pass
-        if function in dax_ext.ARITY:
+        if function in dax_ext.ARITY and function not in {"ISBOOLEAN"}:
             return dax_ext.call(function, values)
         if function == "CURRENCY" and isinstance(values[0], str):
             try:
@@ -19746,7 +19794,7 @@ def _evaluate_measures_once(
             return isinstance(values[0], str)
         if function == "ISNONTEXT":
             return not isinstance(values[0], str)
-        if function == "ISLOGICAL":
+        if function in {"ISLOGICAL", "ISBOOLEAN"}:
             read = arguments[0]
             if values[0] is None and true_false_conditional(read, row_context):
                 def _is_logical_branch(branch: tuple[Any, ...]) -> bool:
@@ -19762,7 +19810,7 @@ def _evaluate_measures_once(
                     read_late = [_read_at_run_time(operand) for operand in operands]
                     reads_data = any(late is not True and any(True for _ in _iter_reference_nodes(operand)) for late, operand in zip(read_late, operands))
                     if (None in read_late and True not in read_late) or (True in read_late and reads_data):
-                        raise MeasureError("ISLOGICAL of a logical operator over this function is not modelled by the local engine.")
+                        raise MeasureError(f"{function} of a logical operator over this function is not modelled by the local engine.")
                     return True not in read_late
 
                 return all(_is_logical_branch(branch) for branch in read[2][1:])
@@ -19776,7 +19824,7 @@ def _evaluate_measures_once(
                 reads_data = any(late is not True and any(True for _ in _iter_reference_nodes(operand)) for late, operand in zip(read_late, operands))
                 if (None in read_late and True not in read_late) or (True in read_late and reads_data):
                     # live Power BI (Task 16 review): beside an operand that reads the data no rule was found: MAX(..)&&LEFT("a",0) is False, SUM(..)&&LEFT("a",0) True
-                    raise MeasureError("ISLOGICAL of a logical operator over this function is not modelled by the local engine.")
+                    raise MeasureError(f"{function} of a logical operator over this function is not modelled by the local engine.")
                 return True not in read_late
             return isinstance(values[0], bool)
         if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
