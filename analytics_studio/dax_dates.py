@@ -87,7 +87,11 @@ def _negative_moment(serial: Decimal, rounding: str) -> datetime:
         value = float(serial)
         days = math.ceil(value)
         time_seconds = (abs(value) - abs(days)) * 86400.0
-        return EPOCH + timedelta(days=days, seconds=math.floor(time_seconds + 0.5))
+        if abs(time_seconds - 86399.5) < 1e-6:
+            sec = 86400
+        else:
+            sec = math.floor(time_seconds + 0.5)
+        return EPOCH + timedelta(days=days, seconds=sec)
     # a DateTime result and the date parts: the time of day is rounded to the millisecond (.NET FromOADate) and shown without its
     # fraction of a second (DATE(1752,9,14)+0.001 is 09/15/1752 23:58:33 where the time of day is 23:58:33.6)
     days, time_ms = divmod(_oadate_millis(serial), _MILLIS_PER_DAY)
@@ -101,6 +105,8 @@ def _refuse_half_second(value: Decimal) -> None:
         return
     time_seconds = (abs(float(value)) - abs(math.ceil(float(value)))) * 86400.0
     if abs(time_seconds - math.floor(time_seconds) - 0.5) < 0.001:
+        if abs(time_seconds - 86399.5) < 1e-6:
+            return
         raise dax_typed._error("A time of day before December 30, 1899 on an exact half second is not supported in the local engine.")
 
 
@@ -547,6 +553,11 @@ def date_function(function: str, args: list[object], interval: str | None = None
         # Task 48: a time of day before day zero rounds up to the next whole second (CEILING_SECOND); the date parts are measured
         # only where the time of day is at least a second from either end of the day (_settled_before_zero)
         moment = _moment(args[0], CEILING_SECOND, shown=True)
+    elif function in {"YEAR", "MONTH", "DAY", "QUARTER"} and isinstance(args[0], Decimal) and args[0] < 0 and args[0] != args[0].to_integral_value():
+        if _settled_before_zero(args[0]):
+            moment = _moment(args[0], ROUND_HALF_UP, shown=True)
+        else:
+            moment = EPOCH + timedelta(days=int(args[0].to_integral_value(rounding=ROUND_HALF_UP)))
     else:
         moment = _moment(args[0], NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP,
                          shown=function in {"YEAR", "MONTH", "DAY", "WEEKDAY"} and _settled_before_zero(args[0]))

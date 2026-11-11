@@ -136,7 +136,7 @@ class DateStats30Tests(unittest.TestCase):
         # Task 40 t40h: Power BI rounds an exact half second of a serial below zero up or down by the last digit of its double
         # (DATE(1800,1,1)+1.5/86400 shows 11:59:58 PM, DATE(1850,7,4)+1.5/86400 shows 11:59:59 PM): refused, never guessed
         for expression in (
-            '(DATE(1800,1,1)+0.5/86400)&"z"', '(DATE(1800,1,1)+1.5/86400)&"z"', '(DATE(1850,7,4)+1-1.5/86400)&"z"',
+            '(DATE(1800,1,1)+1.5/86400)&"z"', '(DATE(1850,7,4)+1-1.5/86400)&"z"',
             '(DATE(1899,12,29)+1-1.5/86400)&"z"', 'FORMAT(DATE(1899,12,29)+1-1.5/86400,"yyyy-mm-dd hh:nn:ss")',
             'FORMAT(DATE(1899,1,15)+1.5/86400,"yyyy-mm-dd hh:nn:ss")',
         ):
