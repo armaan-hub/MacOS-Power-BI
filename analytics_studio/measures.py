@@ -22267,7 +22267,8 @@ def _evaluate_measures_once(
                     branch_conditions = _branch_conditions(arguments[1])
                     if branch_conditions is None:
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
-                    if branch_conditions:
+                    if branch_conditions and not all(_reads_no_data(condition, variable_nodes.get) for condition in branch_conditions):
+                        # a condition that reads no column sends every row down the same branch, so there is nothing to regroup
                         # Task 140 (live Power BI, fresh shapes): the engine evaluates an IF / SWITCH body branch by branch, so the rows that take the first branch
                         # are visited before the rows of the second, and the else rows last, each group in the order the walk above gives
                         branch_of_row: dict[int, int] = {}

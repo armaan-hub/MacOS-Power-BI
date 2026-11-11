@@ -21,6 +21,9 @@ CASES = (
     ("MINX(FILTER(Facts,Facts[Sales]<>20),SWITCH(TRUE(),FALSE(),Facts[Region],1=0,(Facts[Quantity]-3)/(Facts[Quantity]-3),Facts[Quantity]/0))", "NaN"),
     ("CALCULATE(MAXX(INTERSECT(Facts,Facts),SWITCH(TRUE(),Facts[Region]=\"East\",DATE(2021,5,5),Facts[Quantity]>=4,0/(Facts[Quantity]-3),0/(Facts[Quantity]-3))),Facts[Quantity]>2)", "44321"),
     ("MINX(FILTER(Facts,Facts[Sales]<>20),SWITCH(TRUE(),Facts[Region]=\"East\",\"a\",Facts[Quantity]>2,0/Facts[Quantity],Facts[Quantity]/0))", "0"),
+    # a condition that reads no column puts every row in one branch: answered as before (locked typed3_extra rows)
+    ("MAXX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))", "Infinity"),
+    ("MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))", "Infinity"),
     # spec rows over the other source kinds
     ("MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))", "NaN"),
     ("MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)", "-Infinity"),
@@ -45,6 +48,11 @@ class MaxxNanIteration229Tests(unittest.TestCase):
 
     def test_fresh_probes_are_exact(self):
         for expression, powerbi in CASES[:5]:
+            with self.subTest(expression=expression):
+                self.assertEqual(status(powerbi, dax.local(expression)), "match", dax.local(expression))
+
+    def test_constant_text_condition_is_exact(self):
+        for expression, powerbi in CASES[5:7]:
             with self.subTest(expression=expression):
                 self.assertEqual(status(powerbi, dax.local(expression)), "match", dax.local(expression))
 
