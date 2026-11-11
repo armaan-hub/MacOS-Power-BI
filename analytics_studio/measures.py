@@ -20046,7 +20046,7 @@ def _evaluate_measures_once(
                 return False
             static_t = static_type_of(arguments[0])
             if static_t is None:
-                raise MeasureError("Cannot determine static type for function ISDATETIME.")
+                return dax_ext.call("ISDATETIME", values)
             return static_t == "datetime"
         if function == "FORMAT":
             if isinstance(values[0], _LogicalBlankText):
