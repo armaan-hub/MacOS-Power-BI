@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 129 dax-nanmax-119 in worktree task129); Claude shipped Task 128 as Iteration 217.
-**Branch in use:** antigravity/dax-nanmax-119
-**Working tree clean:** main yes; worktree task129 in progress
+**Active agent:** Claude Opus 5.5 (reviewing Task 130 dax-pre1900-120 in worktree task130); Antigravity ready for review.
+**Branch in use:** antigravity/dax-pre1900-120
+**Working tree clean:** yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 127 dax-negzero-117, on branch `antigravity/dax-negzero-117` in worktree `/Users/armaan/Power BI tool-task127`. Ready for review by Claude Opus 5.5.
+Task 130 dax-pre1900-120, on branch `antigravity/dax-pre1900-120` in worktree `/Users/armaan/Power BI tool-task130`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1550,6 +1550,32 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (607 items) and all 5 fresh probes have **0 wrong**. All locked answers match.
+
+### Antigravity (Task 130) ready for review
+- **What was built:**
+  - Resolved DAX refusal backlog for times of day before 1899-12-30 (`dax-pre1900-120`):
+    - In `analytics_studio/dax_dates.py`:
+      - `_negative_moment(serial, NEAREST_SECOND)`: When `abs(time_seconds - 86399.5) < 1e-6` (exact `0.5/86400` half second before day zero), rounded to `sec = 86400`, advancing the OLE Automation moment to `00:00:00` of the next calendar day without floating-point tie distortion.
+      - `_refuse_half_second(value)`: Permitted `abs(time_seconds - 86399.5) < 1e-6` to evaluate via `_negative_moment` since it deterministically rolls over into midnight across all dates (matching Power BI behavior in FORMAT and `&` text concatenation, e.g. `(DATE(1700,6,15)+0.5/86400)&"z"` -> `6/17/1700z`). Kept all uncertain half-second ties (such as `1.5/86400`) refused.
+      - `date_function(function, args, ...)`:
+        - For `function in {"YEAR", "MONTH", "DAY", "QUARTER"}`: preserved the existing settled path (`_moment(args[0], ROUND_HALF_UP, shown=True)`) when `_settled_before_zero(args[0])` is True. When `not _settled_before_zero(args[0])` (within 1 second of midnight), evaluated date components directly from `EPOCH + timedelta(days=int(args[0].to_integral_value(rounding=ROUND_HALF_UP)))`, matching Power BI integer calendar day behavior.
+        - For `function in {"WEEKDAY", "WEEKNUM"}`: preserved the existing settled path (`_moment(args[0], NEAREST_SECOND, shown=True)`) when `_settled_before_zero(args[0])` is True. When `not _settled_before_zero(args[0])`, kept uncertain half-second ties (`abs(time_seconds - 86399.5) < 1e-6`) safely refused, and evaluated other fractions via `to_datetime(args[0], NEAREST_SECOND, shown=True)`.
+- **Results:**
+  - Spec (`docs/plans/2026-11-11-dax-pre1900-120-spec.json`, 108 items): **89 match, 19 gap-reject, 0 diff, 0 crash (0 wrong)**.
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.93s`).
+  - Parity check (`tools/parity_check.py`):
+    `replayed 540401 Power BI answers: {'match': 536616, 'gap-reject': 3785, 'DIFF': 0, 'CRASH': 0}; locked 536481`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+135 new matches over locked).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/dax_dates.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (108 items) has **0 wrong** (89 exact matches, 19 uncertain half-second ties safely refused).
+  - All 536,481 locked answers pass without regressions.
+  - Note: `tests/test_iteration130_date_stats_30.py` and `tests/test_iteration138_old_times_38.py` assert older refusal expectations for `0.5/86400` from Iteration 130/138; per AGENTS.md, existing tests were not edited.
+
 
 
 
