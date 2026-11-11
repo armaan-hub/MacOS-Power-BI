@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-11, after Iteration 220 / Task 131 dax-floatnoise-121, PRODUCTX over Currency in a conditional, STDEVX/VARX over a repeated inexact date, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536665 match, 3736 refused, 0 DIFF, 0 CRASH, locked 536645. Next: Task 132 dax-bigxirr-122 (fixing EXP digits), then Task 133 dax-errtype-123.
+**Latest status (2026-11-11, after Iteration 222 / Task 133 dax-errtype-123, ERROR() and failing values under static type tests, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536780 match, 3621 refused, 0 DIFF, 0 CRASH, locked 536760. Next: Task 134 non-ASCII text comparison (dax-collate-124), then the next refusal families.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
