@@ -19922,7 +19922,10 @@ def _evaluate_measures_once(
         if function == "ISDATETIME":
             if values[0] is None:
                 return False
-            return static_type_of(arguments[0]) == "datetime"
+            static_t = static_type_of(arguments[0])
+            if static_t is None:
+                raise MeasureError("Cannot determine static type for function ISDATETIME.")
+            return static_t == "datetime"
         if function == "FORMAT":
             if isinstance(values[0], _LogicalBlankText):
                 raise MeasureError("FORMAT of the empty text a logical operator's BLANK becomes beside a text is an error in Power BI and is not modelled by the local engine.")
