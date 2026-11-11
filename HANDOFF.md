@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 132 dax-bigxirr-122 in worktree task132); Claude shipped Task 130 as Iteration 219 and gates Task 131.
+**Active agent:** Antigravity (Task 132 dax-bigxirr-122 fix in worktree task132); Claude shipped Task 131 as Iteration 220; Task 133 planned.
 **Branch in use:** antigravity/dax-bigxirr-122
-**Working tree clean:** main yes; worktrees task131 (gate) and task132 in progress
+**Working tree clean:** main yes; worktrees task132 and task133 in use
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1551,31 +1551,31 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (208 items) has **0 wrong**. All locked answers match.
 
-### Antigravity (Task 130) ready for review
+### Antigravity (Task 131) ready for review
 - **What was built:**
-  - Resolved DAX refusal backlog for times of day before 1899-12-30 (`dax-pre1900-120`):
-    - In `analytics_studio/dax_dates.py`:
-      - `_negative_moment(serial, NEAREST_SECOND)`: When `abs(time_seconds - 86399.5) < 1e-6` (exact `0.5/86400` half second before day zero), rounded to `sec = 86400`, advancing the OLE Automation moment to `00:00:00` of the next calendar day without floating-point tie distortion.
-      - `_refuse_half_second(value)`: Permitted `abs(time_seconds - 86399.5) < 1e-6` to evaluate via `_negative_moment` since it deterministically rolls over into midnight across all dates (matching Power BI behavior in FORMAT and `&` text concatenation, e.g. `(DATE(1700,6,15)+0.5/86400)&"z"` -> `6/17/1700z`). Kept all uncertain half-second ties (such as `1.5/86400`) refused.
-      - `date_function(function, args, ...)`:
-        - For `function in {"YEAR", "MONTH", "DAY", "QUARTER"}`: preserved the existing settled path (`_moment(args[0], ROUND_HALF_UP, shown=True)`) when `_settled_before_zero(args[0])` is True. When `not _settled_before_zero(args[0])` (within 1 second of midnight), evaluated date components directly from `EPOCH + timedelta(days=int(args[0].to_integral_value(rounding=ROUND_HALF_UP)))`, matching Power BI integer calendar day behavior.
-        - For `function in {"WEEKDAY", "WEEKNUM"}`: preserved the existing established behavior on `main` where unsettled negative serials and `WEEKNUM` negative serials with fraction stay cleanly refused (`"A time of day before December 30, 1899 is not supported in the local engine."`) per Opus review instruction ("prefer refusing"), while settled `WEEKDAY` values (`_settled_before_zero(args[0])`) continue to evaluate and match all locked answers.
+  - Resolved DAX refusal backlog for float noise of `PRODUCTX` over Currency and `STDEVX`/`VARX` over repeated dates (`dax-floatnoise-121`):
+    - **Part A (`PRODUCTX` over Currency in conditionals, 46 spec items):**
+      - Removed the blanket refusal in `_evaluate_measures_once` (formerly lines 21392-21395) that refused `PRODUCTX` over a Currency in a conditional with multiple rows.
+      - Power BI's double float multiplication for these expressions matches within relative float tolerance (`1e-9`). All 46 spec items evaluate to exact matches (46 match, 0 refused, 0 wrong).
+    - **Part B (`STDEVX`/`VARX` over repeated inexact dates, 131 spec items):**
+      - Date bodies with division (e.g. `+ 1/2.5`, `+ 1/5`, `+ 1/6`) are cleanly refused by the existing `_double_division_body` check: `len(set(row_doubles)) == 1 and not _repeated_double_exact(...)`.
+      - In the non-division repeated date path (lines 21506-21516), when `not _repeated_double_exact(float(non_blank_vals[0]), len(values))`, restricted `double_dates = True` to modeled stored scans, `TOPN`, and small table constructors (`len(values) <= 3`), and raised `MeasureError(f"{function} over one repeated inexact date value has a float-noise spread the local engine does not model.")` for unmodelled derived tables (like `ADDCOLUMNS`) and larger table constructors.
+    - **Add-on (`docs/plans/2026-11-11-dax-floatnoise-121-addon.json`, 7 old wrong answers on main):**
+      - All 7 add-on items (`ADDCOLUMNS(Facts, "z", 1)` and `{1,2,3,4,5,6,7,8}`) are cleanly refused as `gap-reject` under the Part B rule (0 wrong, 7 refused).
 - **Results:**
-  - Opus review items (`docs/plans/2026-11-11-dax-pre1900-120-wrong.json`, 7 items): **7 gap-reject, 0 wrong**.
-  - Spec (`docs/plans/2026-11-11-dax-pre1900-120-spec.json`, 108 items): **75 match, 33 gap-reject, 0 diff, 0 crash (0 wrong)**.
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.92s`).
-  - Fast tests: `tests/test_dax_time_extended.py`, `tests/test_date_tables.py`, `tests/test_iteration137_date_variance_37.py`, `tests/test_iteration151_varx_dates_51.py` pass (`17 passed, 24 subtests passed in 0.18s`).
-  - Parity check (`tools/parity_check.py`):
-    `replayed 540401 Power BI answers: {'match': 536602, 'gap-reject': 3799, 'DIFF': 0, 'CRASH': 0}; locked 536481`
+  - Spec (`docs/plans/2026-11-11-dax-floatnoise-121-spec.json`, 177 items): **46 match, 131 refused, 0 wrong** (`wrong == 0`).
+  - Add-on (`docs/plans/2026-11-11-dax-floatnoise-121-addon.json`, 7 items): **0 match, 7 refused, 0 wrong** (`wrong == 0`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.95s`).
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 536573, 'gap-reject': 3828, 'DIFF': 0, 'CRASH': 0}; locked 536492`
     `PARITY GATE PASSED -> PARITY_LEDGER.md`
-    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+121 new matches over locked, 0 regressions).
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers.
   - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
 - **Files changed:**
-  - `analytics_studio/dax_dates.py`
+  - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (108 items) and all 7 probe items have **0 wrong**. All locked answers match.
-  - Note: `tests/test_iteration130_date_stats_30.py` and `tests/test_iteration138_old_times_38.py` assert older refusal expectations for `0.5/86400` from Iteration 130/138; per AGENTS.md, existing tests were not edited.
+  - `tests/test_iteration146_productx_currency_46.py::test_part_a_multi_row_if_currency_stays_refused` expects `PRODUCTX(Facts,IF(1,CURRENCY(-2)))` to be refused, which is now modelled per Task 131 Part A (Claude updates existing tests on review per AGENTS.md).
 
 
 

@@ -21389,10 +21389,6 @@ def _evaluate_measures_once(
                 raise MeasureError(f"{function} does not support expressions of type date.")
             if body_kind == "variant_dates" and function != "AVERAGEX":
                 raise MeasureError(f"{function} over a Variant that holds a number type with dates inside is not supported in the local engine.")
-            if iteration_rows and function == "PRODUCTX" and conditional_body and _calls_function(arguments[1], "CURRENCY") and not _switch_or_coalesce_root_without_if(arguments[1]) and len(iteration_rows) != 1:  # Task 56: one row is one factor, so no product arithmetic
-                # live Power BI (Task 13 review): GEOMEANX gives 30000 or 1.5E-322, STDEVX four decimals, PERCENTILEX a BLANK where the app reads a number;
-                # the fresh Task 43 grids measured STDEVX / VARX / GEOMEANX / MEDIANX / PERCENTILEX bodies one by one (modelled or refused below), PRODUCTX still has no rule
-                raise MeasureError(f"{function} over a Currency in a conditional is not modelled by the local engine.")
             variant_body, number_dates = body_kind in {"variant", "variant_dates"}, body_kind == "numdate"
             if not variant_body:
                 refuse_variant_aggregation(function, context, arguments[1])
@@ -21511,6 +21507,12 @@ def _evaluate_measures_once(
                           and abs(non_blank_vals[0]) < Decimal("1E100")  # a square beyond a double is not measured; those stay 0
                           and (body_kind in {"numdate", "date", "variant_dates"} or has_dates)):
                         # Task 47 (2026-11-04): one repeated fractional date is the same double sums, so VARX.S(Facts,DATE(2020,1,1)+0.1) is 3.8E-07
+                        if not _repeated_double_exact(float(non_blank_vals[0]), len(values)):
+                            is_stored_or_topn = (_stored_scan(arguments[0], variable_nodes.get) is True
+                                                 or (arguments[0][0] == "call" and arguments[0][1] == "TOPN")
+                                                 or (arguments[0][0] == "tableconstructor" and len(values) <= 3))
+                            if not is_stored_or_topn:
+                                raise MeasureError(f"{function} over one repeated inexact date value has a float-noise spread the local engine does not model.")
                         double_dates = True
                     else:
                         # live Power BI (Task 15 review): VARX.P(Facts,DATE(2020,1,1)+0.5) is 0: one repeated date has no spread

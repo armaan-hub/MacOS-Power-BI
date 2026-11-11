@@ -1,0 +1,40 @@
+{
+ "note": "OLD wrong answers on main (before Task 131), from fresh Power BI probes: STDEVX/VARX over ADDCOLUMNS(Facts,...) of one repeated inexact date. Fix with the Part B rule or refuse them.",
+ "items": [
+  {
+   "expr": "VARX.P(ADDCOLUMNS(Facts,\"z\",1),DATE(1999,12,31)+0.3)+1",
+   "powerbi": "1.00000047683716",
+   "local_now": "1"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),DATE(1999,12,31)+0.1)",
+   "powerbi": "0",
+   "local_now": "0.00043673202685542766"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),TIME(7,2,7)+0.1)",
+   "powerbi": "0",
+   "local_now": "6.664001874625056E-9"
+  },
+  {
+   "expr": "VARX.P({1,2,3,4,5,6,7,8},DATE(2020,1,1)+0.1)",
+   "powerbi": "2.38418579101563E-07",
+   "local_now": "0"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),DATE(2001,9,9)+0.1)",
+   "powerbi": "0",
+   "local_now": "1.9073486328125E-7"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),DATE(2001,9,9)+0.3)",
+   "powerbi": "3.814697265625E-07",
+   "local_now": "0"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),DATE(2020,1,1)+0.3)+1",
+   "powerbi": "1.00000038146973",
+   "local_now": "1"
+  }
+ ]
+}
