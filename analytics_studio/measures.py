@@ -4645,7 +4645,10 @@ def _plain_summarize_ok(summarize: tuple[Any, ...]) -> bool:
 
 def _single_column_all_filter(add_missing: tuple[Any, ...]) -> bool:
     """Task 138: an ADDMISSINGITEMS domain table ALL(table[column]) (one column): its added rows came back in an order not modelled (wrong probe)."""
-    return any(a[0] == "call" and a[1] == "ALL" and len(a[2]) == 1 and a[2][0][0] == "reference" for a in add_missing[2])
+    def one_column_all(node: tuple[Any, ...]) -> bool:
+        return node[0] == "call" and node[1] == "ALL" and len(node[2]) == 1 and node[2][0][0] == "reference"
+    # Task 138: FILTER(ALL(table[column]), ...) is the same one-column domain (wrong probe, gaps grid)
+    return any(one_column_all(a) or (a[0] == "call" and a[1] == "FILTER" and a[2] and a[2][0][0] == "call" and one_column_all(a[2][0])) for a in add_missing[2])
 
 
 def _filtered_domain_refused(add_missing: tuple[Any, ...], summarize: tuple[Any, ...], calc_filters: tuple[Any, ...]) -> bool:
@@ -23469,15 +23472,18 @@ def _evaluate_measures_once(
             # the table whose groups are listed: ADDMISSINGITEMS keeps its table's order, CALCULATETABLE hands the filter to the SUMMARIZE inside
             group_source, group_filtered = table_node, False
             calc_filters: tuple[Any, ...] = ()  # Task 138: the filter arguments of the CALCULATETABLE that holds the SUMMARIZE
-            while group_source[0] == "call" and group_source[1] in {"ADDMISSINGITEMS", "CALCULATETABLE"} and group_source[2]:
+            calc_tables = 0  # Task 138: nested CALCULATETABLE filters are not modelled (only one level is read)
+            while group_source[0] == "call" and group_source[1] in {"ADDMISSINGITEMS", "CALCULATETABLE", "ADDCOLUMNS"} and group_source[2]:
                 if group_source[1] == "CALCULATETABLE":
                     group_filtered = True
+                    calc_tables += 1
                     calc_filters = tuple(group_source[2][1:])
+                # Task 138 (gaps grid): ADDCOLUMNS over ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE)) skipped the group-order guard and came back in the wrong order
                 group_source = next((a for a in group_source[2] if a[0] != "reference"), group_source[2][0])
             numeric_group = any(str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values())
             # Task 138 (live Power BI, dax-rowpos-128 grid): ADDMISSINGITEMS over CALCULATETABLE(SUMMARIZE(table, columns, ...), comparisons): the groups come out in the
             # scan order of the group columns and the filter columns (later table column the major key), as an outer-filtered SUMMARIZE does (Task 67/68)
-            calc_scan = bool(calc_filters) and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and numeric_group and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2] and group_source[2][0][0] == "table" and all(_calc_scan_filter_ok(a) for a in calc_filters) and _plain_summarize_ok(group_source) and not _single_column_all_filter(table_node) and not _filtered_domain_refused(table_node, group_source, calc_filters) and not filtered_scan_columns(group_source) and not has_column_filter(group_source[2][0])
+            calc_scan = bool(calc_filters) and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and numeric_group and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2] and group_source[2][0][0] == "table" and calc_tables == 1 and all(_calc_scan_filter_ok(a) for a in calc_filters) and _plain_summarize_ok(group_source) and not _single_column_all_filter(table_node) and not _filtered_domain_refused(table_node, group_source, calc_filters) and not filtered_scan_columns(group_source) and not has_column_filter(group_source[2][0])
 
             # The order of the rows (live Power BI, iteration 94): a filtered scan of a loaded table comes back in reverse
             # storage order after the first `max_rows` rows were cut off; a negative limit keeps the storage order.
