@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 133 dax-errtype-123 in worktree task133); Claude shipped Task 132 as Iteration 221; Task 134 planned.
-**Branch in use:** antigravity/dax-errtype-123
-**Working tree clean:** main yes; worktrees task133 and task134 in use
+**Active agent:** Claude Opus 5.5 (Task 133 shipped as Iteration 222; Antigravity on Task 134)
+**Branch in use:** main (Task 134 on antigravity/dax-collate-124)
+**Working tree clean:** yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 130 dax-pre1900-120, on branch `antigravity/dax-pre1900-120` in worktree `/Users/armaan/Power BI tool-task130`. Ready for review by Claude Opus 5.5.
+Task 133 dax-errtype-123, on branch `antigravity/dax-errtype-123` in worktree `/Users/armaan/Power BI tool-task133`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1581,9 +1581,48 @@ Doubts or things Claude should check:
   - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (75 items) has **0 wrong**.
-  - All 5 probe items in `wrong.json` are safely refused (0 wrong).
-  - Add-on item is fixed/refused (0 wrong). All locked answers match with 0 regressions.
+  - Spec (108 items) and all 7 probe items have **0 wrong**. All locked answers match.
+  - Note: `tests/test_iteration130_date_stats_30.py` and `tests/test_iteration138_old_times_38.py` assert older refusal expectations for `0.5/86400` from Iteration 130/138; per AGENTS.md, existing tests were not edited.
+
+### Antigravity (Task 133) ready for review
+- **What was built:**
+  - Resolved DAX refusal backlog for `ERROR()` and failing values under type tests (`dax-errtype-123`):
+    - In `analytics_studio/measures.py`:
+      - `static_type_answer`: Added `"ISNUMBER"` and `"ISNUMERIC"` to variant/unknown (`None`) static type handler, returning `False` (all specific type tests on unknown/variant static types return `False`, while `ISNONTEXT` returns `True`).
+      - In `evaluate_typed_function`:
+        - Short-circuited type tests on expressions containing `let` bindings (`VAR`) where static analysis proves type incompatibility:
+          - Only safe directions are returned: `st_ans is True` if `function == "ISNONTEXT"` else `st_ans is False`. When the static type matches the test's subject (e.g. `ISTEXT` on text, `ISNUMBER` on number, or `ISNONTEXT` on text), execution continues to evaluate runtime errors and raise/refuse.
+          - Guarded against forbidden outer calls (`_TASK128_FORBIDDEN_CALLS` such as `CURRENCY`, `INT`, `VALUE`, `DATEVALUE`, `CONVERT`), naked column references outside aggregations (`_has_naked_column_reference`), outer division (`/`), and branching calls (`COALESCE`, `IF`, `IF.EAGER`, `IFERROR`, `SWITCH`).
+        - Fixed `ISDATETIME`:
+          - Excluded `ISDATETIME` from `dax_ext.ARITY` delegation so it does not evaluate arbitrary decimal dates into timestamps.
+          - Handled `ISDATETIME` statically in `evaluate_typed_function`: returns `False` for `None`/blank or when `static_type_of(arguments[0]) != "datetime"`.
+        - Fixed `ISINTEGER`/`ISINT64`/`ISDOUBLE`/`ISDECIMAL`/`ISCURRENCY`:
+          - Preserved `if values[0] is None: return False` when `static_t is None`.
+    - Fixed 4 OLD wrong `ISDATETIME` answers on `main`:
+      - `CALCULATE(ISDATETIME(COALESCE(DATE(2020,1,1),MAX(1,ERROR("x")))),Facts[Quantity]>1)` -> False
+      - `ISDATETIME(IFERROR(MAX(1,ERROR("x")),DATE(2020,1,1)))` -> False
+      - `ISDATETIME(COALESCE(DATE(2020,1,1),MAX(1,ERROR("x"))))` -> False
+      - `CALCULATE(ISDATETIME(IF(1=0,(VAR y=ERROR("x") RETURN y),DATE(2020,1,1))),Facts[Quantity]>1)` -> False
+- **Results:**
+  - Spec (`docs/plans/2026-11-11-dax-errtype-123-spec.json`, 186 items): **29 match, 157 gap-reject, 0 wrong** (`wrong == 0`).
+  - Add-ons (4 old wrong answers on main): **4 match, 0 wrong** (100% exact match).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.90s`).
+  - Unit regression tests:
+    - `tests/test_iteration120_static_types_20.py`, `tests/test_iteration131_type_tests_errors_31.py`, `tests/test_iteration140_type_tests_errors_40.py`, `tests/test_iteration147_failing_type_tests_47.py`, `tests/test_iteration150_type_tests_columns_50.py`, `tests/test_iteration154_typeerr_fail_54.py`, `tests/test_iteration93_type_tests_1.py`, `tests/test_iferror_hard_errors.py`: 43 passed in 1.44s.
+    - `tests/test_iteration108_convert_currency_9_review.py`: 1 passed in 38.11s.
+    - `tests/test_parity_ledger.py`: 4 passed in 403.90s.
+  - Parity check replay:
+    `replayed 540401 Power BI answers: {'match': 536682, 'gap-reject': 3719, 'DIFF': 0, 'CRASH': 0}; locked 536584`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+98 new matches over locked, 0 regressions).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (186 items) and 4 add-ons have **0 wrong**. All locked answers match.
+
+
 
 
 
