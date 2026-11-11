@@ -350,6 +350,8 @@ _SPECIAL_EXPANSIONS = {
     "þ": "th", "Þ": "th", "ð": "d", "Ð": "d", "đ": "d", "Đ": "d", "ı": "i",
     "ŀ": "l", "Ŀ": "l", "ł": "l", "Ł": "l", "ŉ": "n", "ø": "o", "Ø": "o",
     "ſ": "ſ",
+    "ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬃ": "ffi", "ﬄ": "ffl",
+    "ﬅ": "st", "ﬆ": "st",
 }
 
 
@@ -475,6 +477,44 @@ def _stacked_marks(text: str) -> bool:
     return False
 
 
+def _is_pinned_post_latin_char(c: str) -> bool:
+    """A pinned-script letter (category Lu, Ll, Lt or Lo). Punctuation, symbols, numbers and marks are not."""
+    o = ord(c)
+    in_pinned_range = (
+        (0x0370 <= o <= 0x03FF) or (0x1F00 <= o <= 0x1FFF) or  # Greek & Greek Extended
+        (0x0400 <= o <= 0x052F) or                              # Cyrillic & Cyrillic Supplement
+        (0x0590 <= o <= 0x05FF) or                              # Hebrew
+        (0x4E00 <= o <= 0x9FFF) or (0x3400 <= o <= 0x4DBF) or  # CJK Unified & Ext A
+        (0x3040 <= o <= 0x30FF) or (0xF900 <= o <= 0xFAFF)     # Hiragana, Katakana & CJK Compat
+    )
+    return in_pinned_range and unicodedata.category(c) in ("Lu", "Ll", "Lt", "Lo")
+
+
+def _is_pinned_post_latin_text(text: str) -> bool:
+    """Return True only if the text is entirely composed of pinned-script characters
+    (Greek/Cyrillic/Hebrew/CJK) plus characters that are ignorable at the word level
+    (apostrophe, modifier-apostrophe, hyphen from _IGNORED_AT_FIRST), AND the very first
+    character is itself a pinned-script letter.
+
+    Strings like " 東" (leading space) or "1α" (leading digit) do NOT qualify: the
+    script rule is only safe when the FIRST character of the non-Latin text is itself
+    a pinned-script letter. A leading space, digit or punctuation makes it refuse
+    as before.
+    """
+    if not text:
+        return False
+    if not _is_pinned_post_latin_char(text[0]):
+        return False
+    for c in text:
+        if _is_pinned_post_latin_char(c):
+            continue
+        elif c in _IGNORED_AT_FIRST:
+            continue
+        else:
+            return False
+    return True
+
+
 def compare(operator: str, left: object, right: object, *, allow_variant: bool = False) -> bool:
     """DAX comparison: blank takes the other side's type, text ignores case, mixed types are an error."""
     if left is None and right is None:
@@ -525,6 +565,21 @@ def compare(operator: str, left: object, right: object, *, allow_variant: bool =
             if not (is_classifiable_latin(left) and is_classifiable_latin(right)):  # type: ignore[arg-type]
                 from .measures import MeasureError  # imported late: measures imports this module
 
+                if is_classifiable_latin(left) and _is_pinned_post_latin_text(right):  # type: ignore[arg-type]
+                    if operator in {"<", "<="}:
+                        return True
+                    if operator in {">", ">=", "=", "=="}:
+                        return False
+                    if operator == "<>":
+                        return True
+                if _is_pinned_post_latin_text(left) and is_classifiable_latin(right):  # type: ignore[arg-type]
+                    if operator in {"<", "<=", "=", "=="}:
+                        return False
+                    if operator in {">", ">="}:
+                        return True
+                    if operator == "<>":
+                        return True
+
                 if operator in {"<", "<=", ">", ">="}:
                     raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
                 # identical texts are always equal; otherwise (as before the collation) texts that cannot be told apart by case fold alone are refused
@@ -556,10 +611,6 @@ def compare(operator: str, left: object, right: object, *, allow_variant: bool =
         return a > b  # type: ignore[operator]
     if operator == ">=":
         return a >= b  # type: ignore[operator]
-        return a <= b  # type: ignore[operator]
-    if operator == ">":
-        return a > b  # type: ignore[operator]
-    return a >= b  # type: ignore[operator]
 
 
 def _blank_like(other: object) -> object:

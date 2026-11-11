@@ -1,0 +1,107 @@
+[
+ {
+  "expr": "\"  я\"<\"Å\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\"  я\">\"99\"",
+  "powerbi": "False",
+  "ours": "True"
+ },
+ {
+  "expr": "\"  я\">\"ǅ\"",
+  "powerbi": "False",
+  "ours": "True"
+ },
+ {
+  "expr": "\" 東\"<\"Zürich\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\" 東\"<\"Å\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\" 東\"<=\"o'\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\" 東\"<=\"x y\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\" 東\">=\"ÿ\"",
+  "powerbi": "False",
+  "ours": "True"
+ },
+ {
+  "expr": "\"99\">\"1α\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\"café\">\"1α\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\"x y\">=\"1α\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\"Ø\"<=\" 東\"",
+  "powerbi": "False",
+  "ours": "True"
+ },
+ {
+  "expr": "\"ı\">\"1α\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\"ı\">=\"1α\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "\"Ž\"<=\"1α\"",
+  "powerbi": "False",
+  "ours": "True"
+ },
+ {
+  "expr": "\"ž\">\"  я\"",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "CALCULATE(\"  я\">=\"A1\",Facts[Quantity]>1)",
+  "powerbi": "False",
+  "ours": "True"
+ },
+ {
+  "expr": "CALCULATE(\"Z\">=\"  я\",Facts[Quantity]>1)",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "IF(\" 東\"<\"Z\",1,2)",
+  "powerbi": "1",
+  "ours": "2"
+ },
+ {
+  "expr": "IF(\"a-b\"<\"1α\",1,2)",
+  "powerbi": "2",
+  "ours": "1"
+ },
+ {
+  "expr": "IF(\"œuvre\"<\"  я\",1,2)",
+  "powerbi": "2",
+  "ours": "1"
+ }
+]

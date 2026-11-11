@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-11, after Iteration 222 / Task 133 dax-errtype-123, ERROR() and failing values under static type tests, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536780 match, 3621 refused, 0 DIFF, 0 CRASH, locked 536760. Next: Task 134 non-ASCII text comparison (dax-collate-124), then the next refusal families.
+**Latest status (2026-11-11, after Iteration 223 / Task 134 dax-collate-124, non-ASCII text comparison and ordering, mix workflow: Antigravity coded, Haiku 5.5 finished the fix, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536889 match, 3512 refused, 0 DIFF, 0 CRASH, locked 536869. Next: Task 135 type tests over failed conversions (dax-convtype-125), coded by Haiku while Antigravity is out of quota.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
