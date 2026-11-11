@@ -27,3 +27,6 @@ refuse.
 - Check with `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py` (DIFF 0, CRASH 0, no locked
   change), then `git checkout -- PARITY_LEDGER.md`; pytest with `-p no:cacheprovider` (never `-n`).
 - Commit on the branch; report spec and add-on scores, the rule, files changed.
+
+## Review outcome (2026-11-11)
+Shipped as Iteration 226. Locked 536878.
