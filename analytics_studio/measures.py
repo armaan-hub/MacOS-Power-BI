@@ -4662,6 +4662,53 @@ def _filtered_domain_refused(add_missing: tuple[Any, ...], summarize: tuple[Any,
     return len(groups) >= 2 and bool(names(calc_filters) - groups) and not any(a[0] == "string" for a in summarize[2])
 
 
+def _addmissing_inner_order_ok(inner: tuple[Any, ...]) -> bool:
+    """Task 139 (live Power BI, dax-amiorder-129 grid, 153 shapes): the table ADDMISSINGITEMS completes keeps its own row order and the rows it
+    adds follow it, so TOCSV / TOJSON can print it when the table's own order is one of these: SUMMARIZECOLUMNS over one table with plain
+    group columns and SUM / AVERAGE / COUNTROWS / MAX / MIN extensions; a bare table or FILTER over a bare table or ALL(table); UNION of
+    SUMMARIZE arms over one table; TOPN of a bare table, VALUES(column) or a plain SUMMARIZE (see _addmissing_topn_ok)."""
+    kind = inner[0]
+    if kind == "call" and inner[1] == "SUMMARIZECOLUMNS":
+        args = inner[2]
+        group_cols = [a for a in args if isinstance(a, tuple) and a[0] == "reference"]
+        group_tables = {a[1] for a in group_cols if a[1]}
+        if not group_cols or len(group_tables) != 1:
+            return False
+        if any(isinstance(a, tuple) and a[0] == "call" and a[1] == "ROLLUPADDISSUBTOTAL" for a in args):
+            return False
+        exts = [args[i + 1] for i in range(len(args) - 1) if args[i][0] == "string"]
+        return all(e[0] == "call" and e[1] in {"SUM", "AVERAGE", "COUNTROWS", "MAX", "MIN"} for e in exts)
+    if kind == "table":
+        return True
+    if kind == "call" and inner[1] == "FILTER" and inner[2]:
+        source = inner[2][0]
+        return source[0] == "table" or (source[0] == "call" and source[1] in {"ALL", "ALLNOBLANKROW"} and len(source[2]) == 1 and source[2][0][0] == "table")
+    if kind == "call" and inner[1] == "UNION" and len(inner[2]) >= 2:
+        return all(a[0] == "call" and a[1] == "SUMMARIZE" and a[2] and a[2][0][0] == "table" and _plain_summarize_ok(a) for a in inner[2])
+    if kind == "call" and inner[1] == "TOPN":
+        return _addmissing_topn_ok(inner)
+    return False
+
+
+def _addmissing_topn_ok(topn: tuple[Any, ...]) -> bool:
+    """Task 139: TOPN(n, source, key, order) under ADDMISSINGITEMS. TOPN(1, ...) keeps one row, so its order is trivial. TOPN(2, ..., DESC) keeps
+    two rows that TOCSV prints in ascending key order (live Power BI, 19 spec items). No other TOPN count or order is measured."""
+    args = topn[2]
+    if len(args) != 4 or args[0][0] != "number" or args[2][0] != "reference" or args[3][0] != "table":
+        return False
+    source = args[1]
+    plain_source = (
+        source[0] == "table"
+        or (source[0] == "table_call" and source[1] == "VALUES" and source[2][0] == "reference")
+        or (source[0] == "call" and source[1] == "SUMMARIZE" and _plain_summarize_ok(source))
+    )
+    if not plain_source:
+        return False
+    if args[0][1] == 1:
+        return True
+    return args[0][1] == 2 and str(args[3][1]).upper() == "DESC"
+
+
 def _tocsv_row_order(node: tuple[Any, ...]) -> str:
     """How Power BI orders the rows TOCSV / TOJSON print for a table expression (live probes, iteration 94).
 
@@ -4800,6 +4847,10 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         elif function == "ADDMISSINGITEMS" and arguments:
             # the table keeps its own row order and the missing rows follow it (live Power BI, iteration 96): only a table whose own order is modelled
             inner = next((argument for argument in arguments if argument[0] != "reference"), None)
+            if inner is not None and _addmissing_inner_order_ok(inner):  # Task 139: the shapes measured in dax-amiorder-129
+                if inner[0] == "call" and inner[1] == "TOPN" and inner[2][0][1] == 2 and not any(a[0] == "reference" for a in arguments[:1]):
+                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # TOPN(2) completed with no ShowAll column is not measured
+                return "grouped"
             if inner is not None and not (inner[0] == "call" and inner[1] == "SUMMARIZECOLUMNS") and _tocsv_row_order(inner) in {"dictionary", "grouped"}:
                 return "grouped"
         elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1:
@@ -23608,6 +23659,20 @@ def _evaluate_measures_once(
                 }
                 if len(value_kinds) > 1:
                     raise MeasureError("A column that holds values of different types is not modelled in the local engine.")
+            topn_inner = next((a for a in table_node[2] if a[0] != "reference"), None) if table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and table_node[2] else None
+            if topn_inner is not None and topn_inner[0] == "call" and topn_inner[1] == "TOPN" and topn_inner[2][0][1] == 2 and str(topn_inner[2][3][1]).upper() == "DESC":
+                # Task 139 (live Power BI, dax-amiorder-129 grid): ADDMISSINGITEMS over TOPN(2, source, key, DESC) prints the two kept rows in ascending key
+                # order, then the added rows; a BLANK or a tie at the cut (or between the two kept rows) would make that order a storage order: refused
+                topn_context, topn_rows = table_argument_value(topn_inner[2][1])
+                topn_key = next((h for h in topn_context["headers"] if h.casefold() == str(topn_inner[2][2][2]).casefold()), None)
+                if topn_key is None:
+                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+                topn_values = [row.get(topn_key) if topn_context.get("derived") else typed_cell(topn_context, topn_key, row.get(topn_key)) for row in topn_rows]
+                ranked = sorted((v for v in topn_values if v is not None), reverse=True)
+                if len(topn_rows) >= 2 and (len(ranked) < 2 or ranked[0] == ranked[1] or (len(ranked) > 2 and ranked[2] == ranked[1])):
+                    raise MeasureError("The row order of a TOPN whose order column has ties or BLANKs is not modelled in the local engine.")
+                if len(iteration_rows) >= 2:
+                    iteration_rows = list(reversed(iteration_rows[:2])) + list(iteration_rows[2:])
             if max_rows < 0:
                 shown_rows = list(iteration_rows)
             else:
