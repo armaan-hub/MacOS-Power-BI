@@ -6231,7 +6231,7 @@ def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...], legac
             return False  # these keep their dedicated paths
         if _is_general_table_filter(node):
             continue
-        if node[0] in {"comparison", "logical", "in", "unary", "reference"} or node[0] == "call":
+        if node[0] in {"comparison", "strict_equal", "logical", "in", "unary", "reference"} or node[0] == "call":
             continue  # any expression over the columns of one table: it is checked when evaluated
         return False
     return True
