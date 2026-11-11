@@ -49,3 +49,6 @@ two families (PRODUCTX over plain numbers, STDEVX over distinct values must stay
   Score the spec with `tools/dax_oracle_diff.local`.
 - Commit on the branch. Report at the end of `HANDOFF.md` under "Antigravity (Task 131) ready for review": exact /
   refused / wrong on the spec (wrong must be 0), the rules, files changed. Then stop.
+
+## Review outcome (2026-11-11)
+Shipped as Iteration 220. Locked 536645.
