@@ -19408,10 +19408,17 @@ def _evaluate_measures_once(
                     return None
                 if _task136_zero_division(second) or task137_raises(second, row_context):
                     return None  # the fallback is evaluated too, and it raises: Power BI raises (a NaN fallback is only a value)
+                if any(isinstance(sub, tuple) and len(sub) == 3 and sub[0] == "call" and str(sub[1]).upper() == "IFERROR" and isinstance(sub[2], tuple) and len(sub[2]) == 2 and not task137_fails(sub[2][0], row_context) for sub in _walk_nodes(second)):
+                    return None  # a failing first operand with a fallback IFERROR whose own first operand cannot fail: main refuses this shape (measured as a refusal)
                 if any(isinstance(sub, tuple) and len(sub) == 3 and sub[0] == "call" and str(sub[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"} for sub in _walk_nodes(first)):
                     return None
                 second_t = task137_branch_type(second, row_context)
                 return task137_supertype(static_type_of(first), second_t) if second_t is not None else None
+            if isinstance(first, tuple) and len(first) == 3 and first[0] == "call" and str(first[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE"}:
+                results = [sub for sub in (first[2][1:] if str(first[1]).upper() in {"IF", "IF.EAGER"} else first[2]) if isinstance(sub, tuple) and not _is_blank_node(sub)]
+                kinds = {static_type_of(sub) for sub in results}
+                if len(kinds) != 1 or None in kinds:
+                    return None  # a clean conditional with branches of mixed types is a Variant that is not modelled (COALESCE(DATE,1.5) is double, not datetime)
             return task137_branch_type(first, row_context)  # a clean first operand is the value returned: its type is the type the test follows (Variant rule)
         if node[0] == "call" and str(node[1]).upper() in {"IF", "IF.EAGER"} and isinstance(node[2], tuple) and len(node[2]) in {2, 3}:
             try:
@@ -19943,6 +19950,8 @@ def _evaluate_measures_once(
                 # a BLANK that Power BI knows without a scan (BLANK(), SELECTEDVALUE, X*BLANK(), IF(1=2,x) ...) is the answer; the other operand is not looked at
                 if _static_blank(arguments[index], variable_nodes.get, constant_truth) and evaluate(arguments[index], row_context, allow_text=True) is None:
                     return None
+        if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and arguments[0][:2] == ("call", "IFERROR") and len(arguments[0][2]) == 2 and _reads_no_data(arguments[0], variable_nodes.get) and task137_raises(arguments[0][2][0], row_context) and task137_raises(arguments[0][2][1], row_context):
+            raise dax_typed.refusal("A type test of an IFERROR whose first and fallback both raise is not modelled by the local engine.")  # Task 137: Power BI raises the fallback that IFERROR evaluates
         if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _task137_nested_shape(arguments[0]) and _reads_no_data(arguments[0], variable_nodes.get) and task137_partb_inner(arguments[0]):
             # Task 137: a type test of an IFERROR with a nested IFERROR / IF / COALESCE / SWITCH in an operand is answered by the result type of
             # each branch (a nested IFERROR is typed by its own failing branch, not by the Double of its first operand, measured on the Task 137 rows)
