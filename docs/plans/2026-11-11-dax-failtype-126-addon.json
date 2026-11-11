@@ -1,0 +1,81 @@
+[
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,\"x\"))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,FORMAT(1,\"0\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,\"x\"))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,FORMAT(1,\"0\")))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(CONVERT(MAX(Facts[Note]),DOUBLE),MAX(Facts[Region])))",
+  "powerbi": "False"
+ },
+ {
+  "expr": "ISINTEGER(IF(1=1,CONVERT(MAX(Facts[Note]),DOUBLE),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value 'Paid' of type Text to type Number.\""
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT((BLANK())&(CONVERT(MAX(Facts[Region]),INTEGER))),Facts[Quantity]>1)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 58) Cannot convert value 'West' of type Text to type Integer.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISCURRENCY(IF(1=0,SELECTEDVALUE(Facts[Quantity]),CONVERT(MAX(Facts[Region]),INTEGER)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 76) Cannot convert value 'West' of type Text to type Integer.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISDATETIME(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 47) Cannot convert value 'y' of type Text to type Integer.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISDOUBLE(IF(1=0,SELECTEDVALUE(Facts[Quantity]),CONVERT(MAX(Facts[Region]),INTEGER)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 74) Cannot convert value 'West' of type Text to type Integer.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISINT64(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'y' of type Text to type Integer.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISLOGICAL(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value 'y' of type Text to type Integer.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISTEXT(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'y' of type Text to type Integer.\"",
+  "ours": "True"
+ },
+ {
+  "expr": "CALCULATE(ISSTRING(UPPER(OR(0,\"\"))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "ours": "False"
+ },
+ {
+  "expr": "ISDECIMAL(ABS((CONVERT(MAX(Facts[Note]),DOUBLE))+(SELECTEDVALUE(Facts[Quantity]))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'Paid' of type Text to type Number.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISDOUBLE(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'y' of type Text to type Integer.\"",
+  "ours": "False"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SIGN(\"s\"),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "ours": "True"
+ }
+]
