@@ -9296,6 +9296,72 @@ def _nan_walk_measured(table_node: Any, body: Any) -> bool:
     return bool((plain or all_of_table or filter_of_table) and conditional)
 
 
+def _branch_conditions(body: Any) -> list[Any] | None:
+    """Task 140: the conditions, in order, of a MAXX / MINX body that is itself an IF / IF.EAGER / SWITCH(TRUE(), ...); [] when the body has no IF / SWITCH
+    anywhere (nothing groups its rows); None when a conditional sits somewhere this does not model (inside arithmetic, nested in a branch, SWITCH on a value)."""
+    names = ("IF", "IF.EAGER", "SWITCH")
+    if not any(_calls_function(body, name) for name in names):
+        return []
+    if not (isinstance(body, tuple) and len(body) == 3 and body[0] == "call" and body[1] in names):
+        return None
+    arguments = body[2]
+    if body[1] == "SWITCH":
+        first = arguments[0] if arguments else None
+        if not (isinstance(first, tuple) and first[:2] == ("call", "TRUE")) and first != ("boolean", True):
+            return None
+        conditions = [arguments[i] for i in range(1, len(arguments) - 1, 2)]
+    else:
+        conditions = arguments[:1]
+    if any(_calls_function(argument, name) for argument in arguments for name in names):
+        return None
+    return conditions
+
+
+def _constant_truth(node: Any) -> bool | None:
+    """Task 140: the truth of a condition made only of literals (TRUE(), FALSE(), 1, 0, 1=0), else None."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "boolean":
+        return bool(node[1])
+    if node[0] == "number":
+        return node[1] != 0
+    if node[0] == "comparison" and len(node) == 4 and node[2][0] == "number" and node[3][0] == "number":
+        left, right = node[2][1], node[3][1]
+        return {"=": left == right, "<>": left != right, "<": left < right, "<=": left <= right, ">": left > right, ">=": left >= right}.get(node[1])
+    return None
+
+
+def _live_branches(body: Any) -> Any:
+    """Task 140: an IF / SWITCH(TRUE(), ...) body without the branches its literal conditions rule out: the engine folds them away before it walks,
+    so the columns they read do not shape the walk (MINX(FILTER(Facts,..),SWITCH(TRUE(),FALSE(),Facts[Region],..,Facts[Quantity]/0) walks by Quantity alone)."""
+    if not (isinstance(body, tuple) and len(body) == 3 and body[0] == "call" and body[1] in {"IF", "IF.EAGER", "SWITCH"}):
+        return body
+    arguments = body[2]
+    if body[1] == "SWITCH":
+        if not arguments or arguments[0] != ("boolean", True) or len(arguments) < 3:
+            return body
+        kept: list[Any] = [arguments[0]]
+        pairs = [(arguments[i], arguments[i + 1]) for i in range(1, len(arguments) - 1, 2)]
+        for condition, result in pairs:
+            truth = _constant_truth(condition)
+            if truth is False:
+                continue
+            kept += [condition, result]
+            if truth is True:
+                return ("call", "SWITCH", tuple(kept))
+        if len(arguments) % 2 == 0:
+            kept.append(arguments[-1])
+        return ("call", "SWITCH", tuple(kept)) if len(kept) > 1 else (arguments[-1] if len(arguments) % 2 == 0 else body)
+    if len(arguments) < 2:
+        return body
+    truth = _constant_truth(arguments[0])
+    if truth is True:
+        return arguments[1]
+    if truth is False and len(arguments) >= 3:
+        return arguments[2]
+    return body
+
+
 def _has_literal_zero_division(node: Any) -> bool:
     if not isinstance(node, tuple) or not node:
         return False
@@ -22193,11 +22259,29 @@ def _evaluate_measures_once(
                     if is_intersect and (arguments[0][2][0][0] == "call" and arguments[0][2][0][1] == "FILTER" and arguments[0][2][1][0] == "call" and arguments[0][2][1][1] == "FILTER"):
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
                     if is_stored:
-                        walked = dictionary_ordered_rows(arguments[0], context, iteration_rows, [arguments[1]], beside_doubles=_nan_walk_measured(arguments[0], arguments[1]))
+                        walked = dictionary_ordered_rows(arguments[0], context, iteration_rows, [_live_branches(arguments[1])], beside_doubles=_nan_walk_measured(arguments[0], arguments[1]))
                         if walked is iteration_rows:
                             raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
                     else:
                         walked = iteration_rows
+                    branch_conditions = _branch_conditions(arguments[1])
+                    if branch_conditions is None:
+                        raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                    if branch_conditions:
+                        # Task 140 (live Power BI, fresh shapes): the engine evaluates an IF / SWITCH body branch by branch, so the rows that take the first branch
+                        # are visited before the rows of the second, and the else rows last, each group in the order the walk above gives
+                        branch_of_row: dict[int, int] = {}
+                        for frame in iterate_rows(context, iteration_rows, "install"):
+                            taken = len(branch_conditions)
+                            for number, condition in enumerate(branch_conditions):
+                                chosen = in_row_expression(lambda frame=frame, condition=condition: evaluate(condition, frame))
+                                if chosen is not None and not isinstance(chosen, (bool, int, Decimal)):
+                                    raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
+                                if chosen is True or (chosen is not None and chosen is not False and chosen != 0):
+                                    taken = number
+                                    break
+                            branch_of_row[id(frame[1])] = taken
+                        walked = sorted(walked, key=lambda row: branch_of_row[id(row)])
                     slot_of_position = {position: index for index, position in enumerate(value_positions)}
                     index_of_row = {id(row): index for index, row in enumerate(iteration_rows)}
                     walked_values = [values[slot_of_position[index_of_row[id(row)]]] for row in walked if index_of_row[id(row)] in slot_of_position]
