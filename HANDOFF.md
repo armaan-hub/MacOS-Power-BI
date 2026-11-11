@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (reviewing Task 130 dax-pre1900-120 in worktree task130); Antigravity ready for review.
-**Branch in use:** antigravity/dax-pre1900-120
-**Working tree clean:** yes
+**Active agent:** Antigravity (Task 132 dax-bigxirr-122 in worktree task132); Claude shipped Task 130 as Iteration 219 and gates Task 131.
+**Branch in use:** antigravity/dax-bigxirr-122
+**Working tree clean:** main yes; worktrees task131 (gate) and task132 in progress
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
