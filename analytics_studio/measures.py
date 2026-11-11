@@ -4622,6 +4622,39 @@ def _tocsv_inline_vars(node: tuple[Any, ...]) -> tuple[Any, ...]:
     return node
 
 
+def _walk_nodes(node: Any) -> list[Any]:
+    """Task 138: every node of a parsed expression (tuples and lists), depth first."""
+    if isinstance(node, (tuple, list)):
+        return [node, *(child for item in node for child in _walk_nodes(item))]
+    return []
+
+
+def _calc_scan_filter_ok(node: tuple[Any, ...]) -> bool:
+    """Task 138: a CALCULATETABLE filter argument that is one comparison of a column with a literal (the shape the scan order was measured on)."""
+    if node[0] != "comparison" or len(node) != 4:
+        return False
+    kinds = {node[2][0], node[3][0]}
+    return kinds == {"reference", "string"} or kinds == {"reference", "number"}
+
+
+def _plain_summarize_ok(summarize: tuple[Any, ...]) -> bool:
+    """Task 138: SUMMARIZE(table, column, ..., [name, expression, ...]) with plain group columns and named extension pairs only."""
+    args = summarize[2]
+    if len(args) < 2 or args[0][0] != "table" or args[1][0] != "reference":
+        return False
+    rest = args[2:]
+    first_name = next((i for i, a in enumerate(rest) if a[0] == "string"), len(rest))
+    groups, extension = rest[:first_name], rest[first_name:]
+    if any(a[0] != "reference" for a in groups) or len(extension) % 2:
+        return False
+    return all(extension[i][0] == "string" and extension[i + 1][0] == "call" for i in range(0, len(extension), 2))
+
+
+def _single_column_all_filter(add_missing: tuple[Any, ...]) -> bool:
+    """Task 138: an ADDMISSINGITEMS domain table ALL(table[column]) (one column): its added rows came back in an order not modelled (wrong probe)."""
+    return any(a[0] == "call" and a[1] == "ALL" and len(a[2]) == 1 and a[2][0][0] == "reference" for a in add_missing[2])
+
+
 def _tocsv_row_order(node: tuple[Any, ...]) -> str:
     """How Power BI orders the rows TOCSV / TOJSON print for a table expression (live probes, iteration 94).
 
@@ -10878,18 +10911,26 @@ def _evaluate_measures_once(
             and len({row_key([typed_cell(base, column, base["rows"][i].get(column))]) for i in held[column]}) >= 2
         ] if base is not None else []
 
-    def rows_in_storage_scan(summarize: tuple[Any, ...], walked: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def rows_in_storage_scan(summarize: tuple[Any, ...], walked: dict[str, Any], rows: list[dict[str, Any]], calc_filters: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
         base = contexts_by_id.get(resolve_table_context(str(summarize[2][0][1]))["id"])
         group_names = [a[2] for a in summarize[2][1:] if a[0] == "reference"]
         source_columns = [next((h for h in base["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
         walked_columns = [next((h for h in walked["headers"] if h.casefold() == str(n).casefold()), None) for n in group_names]
         if None in source_columns or None in walked_columns or not source_columns:
             raise MeasureError("The row order of a SUMMARIZE under filters on other columns is not modelled in the local engine for this shape.")
-        scan = [*source_columns, *filtered_scan_columns(summarize)]
+        # Task 138: the columns of a CALCULATETABLE filter inside the SUMMARIZE are scanned as the outer filter's columns are
+        calc_columns = [h for h in base["headers"] if any(isinstance(n, tuple) and len(n) == 3 and n[0] == "reference" and str(n[2]).casefold() == h.casefold() for n in _walk_nodes(calc_filters))] if calc_filters else []
+        scan = [*source_columns, *filtered_scan_columns(summarize), *[c for c in calc_columns if c not in source_columns and c not in filtered_scan_columns(summarize)]]
         decided = dax_iteration_order.multi_column_order(len(base["rows"]), [source_profile(base, c) for c in scan], True)
         if decided is None:
             raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
-        _scanned_context, scanned_rows = table_argument_value(summarize[2][0])
+        if calc_filters and not decided:
+            raise MeasureError("The storage order of a SUMMARIZE under a CALCULATETABLE filter is not modelled in the local engine.")  # Task 138: storage-order probes were wrong
+        _scanned_context, scanned_rows = table_argument_value(("call", "CALCULATETABLE", (summarize[2][0], *calc_filters))) if calc_filters else table_argument_value(summarize[2][0])
+        if calc_filters and not any(a[0] == "string" for a in summarize[2]):
+            # Task 138: without a named aggregate, a filter column that varies over the filtered rows was wrong on 11 + 6 probes; a constant one is harmless
+            if any(len({row_key([typed_cell(base, c, scanned.get(c))]) for scanned in scanned_rows}) > 1 for c in calc_columns):
+                raise MeasureError("The row order of a SUMMARIZE without a named aggregate under a varying CALCULATETABLE filter is not modelled in the local engine.")
         first: dict[tuple[Any, ...], Any] = {}
         if decided:  # a measured sorted space: a group comes where its first combination does in the dictionary-ordered scan (later table column the major key)
             scan_profiles = {c: source_profile(base, c) for c in scan}
@@ -23423,22 +23464,28 @@ def _evaluate_measures_once(
 
             # the table whose groups are listed: ADDMISSINGITEMS keeps its table's order, CALCULATETABLE hands the filter to the SUMMARIZE inside
             group_source, group_filtered = table_node, False
+            calc_filters: tuple[Any, ...] = ()  # Task 138: the filter arguments of the CALCULATETABLE that holds the SUMMARIZE
             while group_source[0] == "call" and group_source[1] in {"ADDMISSINGITEMS", "CALCULATETABLE"} and group_source[2]:
                 if group_source[1] == "CALCULATETABLE":
                     group_filtered = True
+                    calc_filters = tuple(group_source[2][1:])
                 group_source = next((a for a in group_source[2] if a[0] != "reference"), group_source[2][0])
+            numeric_group = any(str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values())
+            # Task 138 (live Power BI, dax-rowpos-128 grid): ADDMISSINGITEMS over CALCULATETABLE(SUMMARIZE(table, columns, ...), comparisons): the groups come out in the
+            # scan order of the group columns and the filter columns (later table column the major key), as an outer-filtered SUMMARIZE does (Task 67/68)
+            calc_scan = bool(calc_filters) and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and numeric_group and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2] and group_source[2][0][0] == "table" and all(_calc_scan_filter_ok(a) for a in calc_filters) and _plain_summarize_ok(group_source) and not _single_column_all_filter(table_node) and not filtered_scan_columns(group_source) and not has_column_filter(group_source[2][0])
 
             # The order of the rows (live Power BI, iteration 94): a filtered scan of a loaded table comes back in reverse
             # storage order after the first `max_rows` rows were cut off; a negative limit keeps the storage order.
             reverse = False
             if order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
-                filtered_scan_columns(group_source)
+                filtered_scan_columns(group_source) or calc_scan
             ):
                 if table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS":
                     # Task 68 (live Power BI, order audit 3 grid): the groups of a SUMMARIZE under filters on other columns come out in the order of the scan over
                     # the group columns plus the filtered columns; where that key space is a measured storage-order one (multi_column_order False: 792 over 6 rows)
                     # the groups keep the storage order of their first row, where no measured point covers it the order is not modelled
-                    iteration_rows = rows_in_storage_scan(group_source, context, iteration_rows)
+                    iteration_rows = rows_in_storage_scan(group_source, context, iteration_rows, calc_filters if calc_scan else ())
                 elif table_node[0] == "call" and table_node[1] == "SUMMARIZE":
                     iteration_rows = dictionary_ordered_rows(table_node, context, iteration_rows, [("reference", "", h) for h in context["headers"] if h in (context.get("lineage") or {})], scan_filters=True, keep_undecided=True)
             if order_class == "scan":
@@ -23471,7 +23518,9 @@ def _evaluate_measures_once(
             elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and any(
                 str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values()
             ):
-                if group_filtered:
+                if group_filtered and not calc_scan:
+                    raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
+                if calc_scan and 0 < max_rows < total_row_count:
                     raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
                 if has_column_filter(group_source[2][0]):
                     group_split = next((i for i, a in enumerate(group_source[2][1:], 1) if a[0] == "string"), len(group_source[2]))
