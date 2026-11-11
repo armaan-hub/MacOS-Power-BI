@@ -1,0 +1,1472 @@
+[
+ {
+  "expr": "ISBLANK(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(1/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(MOD(1,0),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(SQRT(-1),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(MOD(1,0),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(SQRT(-1),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(INT(\"x\")&\"\")",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(LOWER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(UPPER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISBLANK(UPPER(VALUE(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(1/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(MOD(1,0),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(SQRT(-1),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(MOD(1,0),SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(SQRT(-1),SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(INT(\"x\")&\"\")",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(LOWER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(UPPER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISDOUBLE(UPPER(VALUE(\"x\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'x' of type Text to type Number.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(1/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(MOD(1,0),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(SQRT(-1),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(MOD(1,0),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(IFERROR(SQRT(-1),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(INT(\"x\")&\"\")",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(LOWER(INT(\"x\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(UPPER(INT(\"x\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISERROR(UPPER(VALUE(\"x\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(0/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(1/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(MOD(1,0),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(SQRT(-1),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(IFERROR(SQRT(-1),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(INT(\"x\")&\"\")",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(LOWER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(UPPER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISINT64(UPPER(VALUE(\"x\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'x' of type Text to type Number.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(0/0,SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1/0,SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(1/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(MOD(1,0),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(SQRT(-1),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(MOD(1,0),SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(INT(\"x\")&\"\")",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(LOWER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(UPPER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNONTEXT(UPPER(VALUE(\"x\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 35) Cannot convert value 'x' of type Text to type Number.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(1/0,SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(1/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(MOD(1,0),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(SQRT(-1),\"b\"),2))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(MOD(1,0),SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),0/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),1/0))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),MAX(Facts[Quantity])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),MAX(Facts[Region])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(SQRT(-1),SUM(Facts[Sales])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(INT(\"x\")&\"\")",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(LOWER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(UPPER(INT(\"x\")))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISNUMBER(UPPER(VALUE(\"x\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'x' of type Text to type Number.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(CONCATENATE(DATE(\"y\",1,1),\"t\"))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,MAX(Facts[Note])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,MAX(Facts[Region])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(0/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,IFERROR(1/0,\"a\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,MAX(Facts[Note])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,MAX(Facts[Region])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(1/0,\"b\"),2))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(MOD(1,0),\"b\"),2))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(SQRT(-1),\"b\"),2))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),IFERROR(1/0,\"a\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),MAX(Facts[Note])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),MAX(Facts[Region])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),0/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),1/0))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),IFERROR(1/0,\"a\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),MAX(Facts[Note])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),MAX(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),MAX(Facts[Region])))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),SELECTEDVALUE(Facts[Quantity])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(SQRT(-1),SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(INT(\"x\")&\"\")",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(LOWER(INT(\"x\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(UPPER(DATE(\"y\",1,1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value 'y' of type Text to type Integer.\"",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(UPPER(INT(\"x\")))",
+  "powerbi": "True",
+  "group": "suspect136"
+ },
+ {
+  "expr": "ISTEXT(UPPER(VALUE(\"x\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'x' of type Text to type Number.\"",
+  "group": "suspect136"
+ }
+]
