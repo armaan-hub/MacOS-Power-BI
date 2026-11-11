@@ -1,0 +1,40 @@
+{
+ "note": "fresh Power BI probes; main refused all of these, Task 130 answers them wrongly. WEEKDAY/WEEKNUM of a negative serial plus a fraction: e.g. 1776-07-04 was a Thursday, Power BI WEEKDAY=5.",
+ "items": [
+  {
+   "expr": "WEEKDAY(-1+0.4/86400)",
+   "powerbi": "6",
+   "local_now": "1"
+  },
+  {
+   "expr": "WEEKDAY(DATE(1899,12,30)-1+0.4/86400)",
+   "powerbi": "6",
+   "local_now": "1"
+  },
+  {
+   "expr": "WEEKNUM(DATE(1899,1,1)-2.5/86400)",
+   "powerbi": "53",
+   "local_now": "1"
+  },
+  {
+   "expr": "WEEKNUM(DATE(1899,12,30)-1+0.4/86400)",
+   "powerbi": "52",
+   "local_now": "53"
+  },
+  {
+   "expr": "WEEKDAY(DATE(1776,7,4)+0.4/86400)",
+   "powerbi": "5",
+   "local_now": "7"
+  },
+  {
+   "expr": "WEEKDAY(DATE(1899,12,30)-2+0.4/86400)",
+   "powerbi": "5",
+   "local_now": "7"
+  },
+  {
+   "expr": "WEEKNUM(DATE(1899,1,1)-TIME(6,0,0))",
+   "powerbi": "53",
+   "local_now": "1"
+  }
+ ]
+}

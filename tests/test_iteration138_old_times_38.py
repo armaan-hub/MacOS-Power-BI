@@ -12,6 +12,16 @@ from tools import dax_oracle_diff as dax
 
 
 class OldTimes38Tests(unittest.TestCase):
+    def test_half_second_after_whole_day_matches_power_bi(self) -> None:
+        # live Power BI (Task 130 review, 2026-11-11): a half second past a negative whole day reads two days on
+        expected = {
+            '(DATE(1850,7,4)+0.5/86400)&"z"': "7/6/1850z",
+            'FORMAT(DATE(1850,7,4)+0.5/86400,"yyyy-mm-dd hh:nn:ss")': "1850-07-06 00:00:00",
+            '(DATE(1800,1,1)+0.5/86400)&"z"': "1/3/1800z",
+        }
+        for expression, answer in expected.items():
+            self.assertEqual(answer, dax.local(expression), expression)
+
     def assertRefused(self, expression: str) -> None:
         self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT:"), f"{expression} -> {dax.local(expression)}")
 
@@ -45,14 +55,13 @@ class OldTimes38Tests(unittest.TestCase):
     def test_exact_half_second_before_day_zero_stays_refused(self) -> None:
         for expression in (
             '(DATE(1800,1,1)+1.5/86400)&"z"',
-            '(DATE(1850,7,4)+0.5/86400)&"z"',
-            'FORMAT(DATE(1850,7,4)+0.5/86400,"yyyy-mm-dd hh:nn:ss")',
             'FORMAT(-0.5/86400,"yyyy-mm-dd hh:nn:ss")',
         ):
             self.assertRefused(expression)
 
     def test_date_parts_within_a_second_of_midnight_stay_refused(self) -> None:
-        self.assertRefused("DAY(-100+0.99999)")
+        # live Power BI (Task 130 review, 2026-11-11): DAY(-100+0.99999) is 22
+        self.assertEqual("22", dax.local("DAY(-100+0.99999)"))
         self.assertRefused("WEEKDAY(-3+0.00001)")
 
     def test_date_part_on_an_exact_half_second_keeps_its_date(self) -> None:
@@ -63,7 +72,8 @@ class OldTimes38Tests(unittest.TestCase):
         # the rounding is measured from 1700 onward: a fraction of a second before it keeps the earlier 1/300 s rule (saved answers of 1661 and 1619)
         self.assertEqual("04/22/1661 00:01:26", dax.local("CONVERT((0.999)-(DATE(2019,5,5))*2,DATETIME)"))
         self.assertEqual("12/23/1619 06:07:46", dax.local('IFERROR(CURRENCY(-3.33335)*DATE(2020,1,1)+DATE(2020,1,1),"e")'))
-        self.assertRefused('FORMAT(DATE(1600,1,1)+0.5/86400,"yyyy-mm-dd hh:nn:ss")')
+        # live Power BI (Task 130 review, 2026-11-11)
+        self.assertEqual("1600-01-03 00:00:00", dax.local('FORMAT(DATE(1600,1,1)+0.5/86400,"yyyy-mm-dd hh:nn:ss")'))
         self.assertRefused("SECOND(DATE(1600,1,1)+0.25/86400)")
 
 
