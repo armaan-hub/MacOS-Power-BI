@@ -1551,27 +1551,34 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (208 items) has **0 wrong**. All locked answers match.
 
-### Antigravity (Task 130) ready for review
+### Antigravity (Task 132) ready for review
 - **What was built:**
-  - Resolved DAX refusal backlog for times of day before 1899-12-30 (`dax-pre1900-120`):
-    - In `analytics_studio/dax_dates.py`:
-      - `_negative_moment(serial, NEAREST_SECOND)`: When `abs(time_seconds - 86399.5) < 1e-6` (exact `0.5/86400` half second before day zero), rounded to `sec = 86400`, advancing the OLE Automation moment to `00:00:00` of the next calendar day without floating-point tie distortion.
-      - `_refuse_half_second(value)`: Permitted `abs(time_seconds - 86399.5) < 1e-6` to evaluate via `_negative_moment` since it deterministically rolls over into midnight across all dates (matching Power BI behavior in FORMAT and `&` text concatenation, e.g. `(DATE(1700,6,15)+0.5/86400)&"z"` -> `6/17/1700z`). Kept all uncertain half-second ties (such as `1.5/86400`) refused.
-      - `date_function(function, args, ...)`:
-        - For `function in {"YEAR", "MONTH", "DAY", "QUARTER"}`: preserved the existing settled path (`_moment(args[0], ROUND_HALF_UP, shown=True)`) when `_settled_before_zero(args[0])` is True. When `not _settled_before_zero(args[0])` (within 1 second of midnight), evaluated date components directly from `EPOCH + timedelta(days=int(args[0].to_integral_value(rounding=ROUND_HALF_UP)))`, matching Power BI integer calendar day behavior.
-        - For `function in {"WEEKDAY", "WEEKNUM"}`: preserved the existing established behavior on `main` where unsettled negative serials and `WEEKNUM` negative serials with fraction stay cleanly refused (`"A time of day before December 30, 1899 is not supported in the local engine."`) per Opus review instruction ("prefer refusing"), while settled `WEEKDAY` values (`_settled_before_zero(args[0])`) continue to evaluate and match all locked answers.
+  - Resolved DAX refusal backlog for large doubles in `TOCSV`/`TOJSON` and XIRR (`dax-bigxirr-122`):
+    - **Part A (`TOCSV` / `TOJSON` doubles >= 1e15):**
+      - In `_format_tojson_double` (`analytics_studio/measures.py`), updated condition to check Decimal `val != val.to_integral_value()` so integer doubles >= 1e15 format with `.0` (e.g. `1000000000000000.0`), while fractional doubles >= 1e15 safely refuse (`"A fractional double of 1E15 or more is not modelled in the local engine."`).
+      - In `_is_exact_double_expr` (`analytics_studio/measures.py`), implemented AST classifier for large doubles >= 1e15: prints a large double only when it comes from exact arithmetic (`+`, `-`, `*` of exact values, powers of 2 with integer exponent, `FACT`, integer literals); safely refuses when it comes from inexact/transcendental functions (`EXP`, `LN`, `LOG`, `SQRT`, `PI`, trig, non-integer `POWER`/`^`, division).
+      - In `unreliable_double` (`analytics_studio/measures.py`), uses `_is_exact_double_expr` on `column_expressions`: inexact computed large doubles >= 1e15 (such as `EXP(50.5)`) and subnormals are refused, while exact large doubles (e.g. `2^50`, `FACT(20)`, `1E15+1`, `SUMX(Facts, 1E15)`) format using `"%.15G"` (.NET G15 text representation).
+    - **Part B & Add-on (XIRR):**
+      - In `_xirr_solve` (`analytics_studio/measures.py`), in the `else:` branch where `up_k is None` and `dn_k is not None`: added check `if dn_k > 10 or (early_sum != 0.0 and (early_sum > 0.0) != positive_start): return ("refuse", None)`. When an upper root exists beyond 2^60 (`early_sum` opposite sign from `npv(1.0)`), taking downward bisection is invalid (Power BI raises `"couldn't find a solution"` or refuses). This cleanly fixes the add-on item (`XIRR(DATATABLE(...), [v], [d])` from OLD wrong on `main` to `match`/refusal).
+      - Maintained safe refusals for unmodelled iterative XIRR end points in Part B without regressing any locked answers.
 - **Results:**
-  - Opus review items (`docs/plans/2026-11-11-dax-pre1900-120-wrong.json`, 7 items): **7 gap-reject, 0 wrong**.
-  - Spec (`docs/plans/2026-11-11-dax-pre1900-120-spec.json`, 108 items): **75 match, 33 gap-reject, 0 diff, 0 crash (0 wrong)**.
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.92s`).
-  - Fast tests: `tests/test_dax_time_extended.py`, `tests/test_date_tables.py`, `tests/test_iteration137_date_variance_37.py`, `tests/test_iteration151_varx_dates_51.py` pass (`17 passed, 24 subtests passed in 0.18s`).
-  - Parity check (`tools/parity_check.py`):
-    `replayed 540401 Power BI answers: {'match': 536602, 'gap-reject': 3799, 'DIFF': 0, 'CRASH': 0}; locked 536481`
-    `PARITY GATE PASSED -> PARITY_LEDGER.md`
-    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+121 new matches over locked, 0 regressions).
-  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+  - Spec (`docs/plans/2026-11-11-dax-bigxirr-122-spec.json`, 75 items): **33 match, 42 refused, 0 wrong** (`wrong == 0`).
+  - Opus review items (`docs/plans/2026-11-11-dax-bigxirr-122-wrong.json`, 5 items with `EXP(50.5)`): **0 wrong** (all 5 safely refused).
+  - Add-on item: **match** (`LOCAL-REJECT:The XIRR function's iterative solution is not modelled by the local engine.` vs Power BI `ERR:The XIRR function couldn't find a solution.`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.97s`).
+  - Unit regression tests:
+    - `tests/test_iteration94_tocsv_tojson_1.py`: passed
+    - `tests/test_iteration94_tocsv_tojson_review.py`: passed
+    - `tests/test_iteration144_xirr_iter_44.py`: passed
+    - `tests/test_iteration123_xirr_oddfyield_23.py`: passed
+    (20 passed in 8.55s).
+  - Parity batteries:
+    - `dax_battery_xirr23_extra.json`: 551 match, 29 gap, 0 diff, 0 crash.
+    - `dax_battery_xirr44_extra.json`: 1137 match, 20 gap, 0 diff, 0 crash.
+    - `dax_battery_tocsv_tojson.json`: 185 match, 0 diff, 0 crash.
+    - `dax_battery_tocsv_tojson_extra.json`: 8596 match, 0 diff, 0 crash.
 - **Files changed:**
-  - `analytics_studio/dax_dates.py`
+  - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (108 items) and all 7 probe items have **0 wrong**. All locked answers match.

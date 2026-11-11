@@ -1,0 +1,887 @@
+[
+ {
+  "expr": "STDEVX.S(Facts,DATE(1900,2,28)+1/7)",
+  "powerbi": "8.52992239952007E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(SELECTEDVALUE(Facts[Region])=\"East\",1=1,CURRENCY(3)))",
+  "powerbi": "26.9999999999999",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "PRODUCTX({1,2,3},IF.EAGER(FALSE(),CURRENCY(-1.1),\"a\"))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(Facts,Facts[Sales]>0),DATE(1900,3,1)+1/9)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX({0.5,4},IF(0,DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+  "powerbi": "2.25",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.P({5,5},DATE(1900,2,28)+[Value]/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(ALL(Facts),DATE(1899,2,1)+1/3)",
+  "powerbi": "4.82525277735654E-06",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S({10,1},DATE(1900,3,1)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]<>\"East\"),DATE(1899,12,31)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(ALL(Facts),Facts[Sales]<100),DATE(1900,2,28)+1/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,2,28)+1/9),Facts[Region]<>\"West\")",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(Facts,DATE(1900,2,28)+1/1.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.P({4,5,2},DATE(1899,12,31)+1/5),Facts[Region]<>\"West\")",
+  "powerbi": "2.22044604925031E-16",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1901,5,26)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]<>\"East\"),DATE(1900,2,28)+1/2.5)",
+  "powerbi": "9.5367431640625E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(Facts,Facts[Sales]>0),DATE(1899,12,31)+1/9)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.S({-3,5},DATE(1900,3,1)+1/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),DATE(1900,2,28)+1/2.5)",
+  "powerbi": "9.09494701772928E-13",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(INT(1.5),CURRENCY(3)))",
+  "powerbi": "26.9999999999999",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "STDEVX.S({2,4},TIME(14,5,47)+1/8)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX({1,2,3},IF.EAGER(0,CURRENCY(0.33333),TRUE()))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.P(FILTER(ALL(Facts),Facts[Sales]<100),DATE(1900,3,1)+1/3),Facts[Region]<>\"West\")",
+  "powerbi": "6.74349576174305E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S({3,2,10,0.5},DATE(1900,3,1)+1/3))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]<>\"East\"),DATE(1899,12,31)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(ALL(Facts),TIME(11,56,48)+1/0.3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]<>\"East\"),DATE(1900,2,28)+1/12)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),DATE(1900,3,1)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({3,1,0.5,5,5},DATE(1899,12,31)+1/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({0.5,3},DATE(2022,4,1)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(1,DATE(2020,1,1)+Facts[Quantity],CURRENCY(7)))",
+  "powerbi": "3.69202155526736E+18",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(-1.1),\"a\"))",
+  "powerbi": "1.21",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Sales]>0),DATE(1899,12,31)+1/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(Facts,TIME(19,20,38)+1/0.7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({12,5,10},DATE(1900,2,28)+1/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.S({2,12,7},DATE(1899,12,31)+1/13))",
+  "powerbi": "2.22044604925031E-16",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.S({0.5,0.5,0.5},DATE(2010,2,22)+[Value]/8+[Value]/12))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales]),TRUE()))",
+  "powerbi": "50",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S(TOPN(3,Facts,Facts[Sales]),TIME(2,40,46)+1/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.P(FILTER(Facts,Facts[Sales]>0),DATE(1900,3,1)+1/3)&\"z\"",
+  "powerbi": "4.54747350886464E-13z",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(Facts,DATE(2024,4,8)+1/3)",
+  "powerbi": "3.814697265625E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)+Facts[Quantity]))",
+  "powerbi": "1.771561",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.P(FILTER(Facts,Facts[Sales]>0),TIME(1,32,56)+1/0.25)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(2010,8,28)+1/0.7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1900,2,28)+1/6)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),TIME(13,24,30)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(Facts,DATE(2040,9,4)+1/13)",
+  "powerbi": "0.0009765625",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(FALSE(),CURRENCY(1.23456),2.5))",
+  "powerbi": "39.0625",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.P({5,3,7},DATE(1900,2,28)+1/6)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(ALL(Facts),DATE(1900,3,1)+1/13)",
+  "powerbi": "6.74349576174305E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({3,9,10},DATE(1900,3,1)+1/2.5)+1",
+  "powerbi": "1.00000067434958",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(Facts,DATE(1900,3,1)+1/0.7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.P({10,9},DATE(1900,2,28)+1/5)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S(Facts,DATE(1900,2,28)+1/1.5))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IFERROR(Facts[Quantity]&\"\",CURRENCY(1.23456)))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.P({0.5,7,9},DATE(1900,2,28)+1/2.5))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({-3,-3,12},TIME(18,45,7)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(0,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))",
+  "powerbi": "7.09311325925216E+27",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(6,7,3)+1/9),Facts[Region]<>\"West\")",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF.EAGER(MAX(Facts[Quantity])>3,Facts[Quantity],CURRENCY(3)))",
+  "powerbi": "0",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),DATE(1900,2,28)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({5,10,4,-3,2},DATE(1900,3,1)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(ALL(Facts),DATE(1900,2,28)+1/2.5)",
+  "powerbi": "7.27595761418343E-13",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(1=1,CURRENCY(3),Facts[Region]))",
+  "powerbi": "728.999999999995",
+  "group": "dax_battery_variant2_extra"
+ },
+ {
+  "expr": "STDEVX.S(Facts,TIME(10,6,13)+1/12)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(ALL(Facts),DATE(2040,5,1)+1/13)",
+  "powerbi": "3.814697265625E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({7,4,12,5},TIME(21,35,48)+1/9)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(-2)))",
+  "powerbi": "15.9999999999999",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+1/2.5)",
+  "powerbi": "9.5367431640625E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),1))",
+  "powerbi": "49.9999999999997",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "PRODUCTX(DISTINCT(Facts),IF(SELECTEDVALUE(Facts[Region])=\"East\",CURRENCY(1.23456)))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(UPPER(\"true\"),CURRENCY(3),Facts[Quantity]>2))",
+  "powerbi": "728.999999999995",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,DATE(2020,1,1),CURRENCY(-1.1)))",
+  "powerbi": "-92626834547710.1",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.S({-3,4,5,5},DATE(2040,11,28)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.P(Facts,DATE(1900,3,1)+1/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX({1.5,2.5},IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+  "powerbi": "2.25",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),TIME(11,53,51)+1/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({3,5},DATE(1900,2,28)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S({0.5,7},DATE(1900,3,1)+1/12)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({1,12,2,0.5,5},DATE(1899,12,31)+1/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Quantity]>2),DATE(1899,12,31)+1/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({5,-3},DATE(1900,3,1)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(1,BLANK(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "PRODUCTX(ALL(Facts),IF.EAGER(Facts[Region]=\"East\",CURRENCY(3),1+1))",
+  "powerbi": "216",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "VARX.P(Facts,TIME(6,0,38)+1/11)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(0,CURRENCY(2.75),\"a\"))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.P(Facts,TIME(7,2,7)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(VALUES(Facts),TIME(13,45,49)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales])))",
+  "powerbi": "50",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.S({10,10},DATE(1900,2,28)+([Value]+1)/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+1/1.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(Facts,TIME(22,56,42)+1/7)",
+  "powerbi": "1.33280037492501E-08",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>0),DATE(1901,11,28)+1/11))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF.EAGER(FALSE(),CURRENCY(-2),Facts[Sales]))",
+  "powerbi": "0",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+1/9)&\"z\"",
+  "powerbi": "0z",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>0),DATE(1901,9,7)+1/9)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.P({1,1,1},TIME(17,0,45)*[Value]/11)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S({9,9},[Value]/11+DATE(1899,12,31))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S({3,10,2,5},DATE(1900,2,28)+1/1.5))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({2,1,12,2},DATE(1900,3,1)+1/6)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(TOPN(3,Facts,Facts[Sales]),DATE(1900,6,8)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]<>\"East\"),DATE(1900,2,28)+1/0.7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]<>\"East\"),DATE(1899,9,1)+1/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.P(ALL(Facts),DATE(1900,2,28)+1/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(VALUES(Facts),TIME(2,17,40)+1/0.25)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))",
+  "powerbi": "-350664",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.P(ALL(Facts),DATE(1899,4,27)+1/11)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>0),TIME(23,47,32)+1/4)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(FILTER(ALL(Facts),Facts[Sales]<100),DATE(1999,7,8)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(Facts[Quantity]>=3,CURRENCY(-1.1),BLANK()))",
+  "powerbi": "-1.33099999999999",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.P({2,3,7,2},TIME(7,32,17)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({10,0.5,5,4,1},DATE(1900,3,1)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(2.75),BLANK()))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S({12,-3,3,12},DATE(1900,2,28)+1/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.S(Facts,DATE(1900,2,28)+1/0.7))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(1.23456),DATE(2020,1,1)+Facts[Quantity]))",
+  "powerbi": "5.62661783146166E+18",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "PRODUCTX(TOPN(2,Facts,Facts[Quantity]),IF(TRUE()&&FALSE(),CURRENCY(1.23456)))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "STDEVX.S({3,2,5,0.5,4},DATE(2024,9,21)+1/1.5)&\"z\"",
+  "powerbi": "6.90533966002488E-04z",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(Facts[Sales]),Facts[Sales]))",
+  "powerbi": "525",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(Facts[Sales])))",
+  "powerbi": "524.999999999997",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+1/1.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),Facts[Quantity],CURRENCY(0)))",
+  "powerbi": "0",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(1,CURRENCY(-2)))",
+  "powerbi": "63.9999999999994",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>0),TIME(7,0,40)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({2,9,7,3,9},DATE(1899,12,31)+1/6)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({5,4},DATE(2040,12,28)+1/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.P({-3,-3,3,9},DATE(1900,2,28)+1/12),Facts[Region]<>\"West\")",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>0),TIME(2,20,40)+1/7))",
+  "powerbi": "2.63417803193088E-09",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S({3,-3,0.5,12,5},DATE(1900,3,1)+1/11)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(ALL(Facts),DATE(1899,12,31)+1/13)",
+  "powerbi": "1.33280037492501E-08",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),DATE(1900,3,1)+1/0.7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(ALL(Facts),DATE(1900,3,1)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.P(VALUES(Facts),DATE(1900,3,1)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(FILTER(ALL(Facts),Facts[Sales]<100),DATE(1900,2,28)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(VALUES(Facts),TIME(0,26,58)+1/2.5)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({10,9},DATE(1900,3,1)+1/7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),TIME(14,52,16)+1/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(Facts,DATE(2000,5,3)+1/3)",
+  "powerbi": "1.9073486328125E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(VALUES(Facts),DATE(2022,8,12)+1/0.7)",
+  "powerbi": "7.62939453125E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,VAR x=CURRENCY(3) RETURN IF(Facts[Quantity],x,Facts[Quantity]>2))",
+  "powerbi": "243",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S({7,10,7,4,7},DATE(1899,12,31)+1/12))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+  "powerbi": "8",
+  "group": "dax_battery_blank8_extra"
+ },
+ {
+  "expr": "STDEVX.S({-3,9},DATE(1899,12,31)+1/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.P({0.5,4,7},DATE(1900,2,3)+1/13))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(Facts[Sales])))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.P(ALL(Facts),DATE(2010,10,16)+1/0.7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S({0.5,9,10,4,12},DATE(1900,3,1)+1/5))",
+  "powerbi": "9.5367431640625E-07",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,DATE(2020,1,1)+Facts[Quantity],CURRENCY(2.75)))",
+  "powerbi": "231630490201109",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.P({12,0.5,7},DATE(1899,12,31)+1/13)+1",
+  "powerbi": "1",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>0),DATE(1900,2,28)+1/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S({12,-3},TIME(20,17,14)+1/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({-3,9,10,3,3},DATE(1899,12,31)+1/6)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(Facts,DATE(1901,11,25)+1/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,Facts[Sales],CURRENCY(1.23456)))",
+  "powerbi": "61.73",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(0,BLANK(),CURRENCY(1.5)))",
+  "powerbi": "11.390625",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.S({7,5,7,12,3},DATE(1900,12,13)+1/3)",
+  "powerbi": "5.39479660939444E-06",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]<>\"East\"),DATE(1899,12,31)+1/12)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({12,3,1,0.5,2},DATE(1899,12,31)+1/3)",
+  "powerbi": "2.1073424255447E-08",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P(TOPN(3,Facts,Facts[Sales]),TIME(4,46,35)+1/0.7)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),\"a\"))",
+  "powerbi": "50",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.S(Facts,TIME(1,39,18)+1/0.3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>0),DATE(1900,1,21)+1/11)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({3,9},DATE(1900,2,28)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(1,BLANK(),CURRENCY(2.75)))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "STDEVX.S({5,7,-3,10},DATE(1950,12,3)+1/3)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(0)))",
+  "powerbi": "0",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.P({12,12},DATE(1899,12,31)+[Value]/5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(Facts,IF.EAGER(FALSE(),Facts[Region],CURRENCY(3)))",
+  "powerbi": "728.999999999995",
+  "group": "dax_battery_variant2_extra"
+ },
+ {
+  "expr": "VARX.P({10,10},TIME(11,58,9)+[Value]*2/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "CALCULATE(STDEVX.S({1,10},DATE(1900,3,1)+1/6))",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({10,9,4},TIME(23,52,20)+1/0.25)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "VARX.S(TOPN(3,Facts,Facts[Sales]),DATE(1899,12,31)+1/5)",
+  "powerbi": "4.44089209850063E-16",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(TOPN(2,Facts,Facts[Quantity]),IF(NOT(TRUE()),CURRENCY(3)))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_typed3_extra"
+ },
+ {
+  "expr": "CALCULATE(VARX.S({-3,4},DATE(2022,4,6)+1/2.5),Facts[Region]<>\"West\")",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.P({9,0.5},TIME(8,50,9)+1/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "STDEVX.S({1,10},DATE(2010,3,27)+1/2.5)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ },
+ {
+  "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),Facts[Quantity],CURRENCY(0)))",
+  "powerbi": "120",
+  "group": "dax_battery_mixed33_extra"
+ },
+ {
+  "expr": "VARX.S({0.5,0.5},DATE(1900,2,28)+[Value]*2/13)",
+  "powerbi": "0",
+  "group": "dax_battery_varxdates51_extra"
+ }
+]

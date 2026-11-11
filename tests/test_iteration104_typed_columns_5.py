@@ -163,10 +163,9 @@ class PartBStatisticalIteratorsTest(unittest.TestCase):
     def test_currency_in_iterators(self) -> None:
         # Currency in conditionals inside statistical iterators produces mixed float/integer scales in Power BI
         # (e.g. 6.09924039791019E-320), so the local engine honestly refuses them per Rule 3.
-        res = dax.local('PRODUCTX(ALL(Facts),IF.EAGER(Facts[Region]="East",CURRENCY(3),1+1))')
-        self.assertTrue(res.startswith("LOCAL-REJECT") and "Currency in a conditional" in res, res)
-        res = dax.local('PRODUCTX(Facts,VAR x=CURRENCY(3) RETURN IF(Facts[Quantity],x,Facts[Quantity]>2))')
-        self.assertTrue(res.startswith("LOCAL-REJECT") and "Currency in a conditional" in res, res)
+        # live Power BI (Task 131 review, 2026-11-11): these are now modelled and match Power BI
+        self.assertTrue(dax.same("216", dax.local('PRODUCTX(ALL(Facts),IF.EAGER(Facts[Region]="East",CURRENCY(3),1+1))')))
+        self.assertTrue(dax.same("243", dax.local('PRODUCTX(Facts,VAR x=CURRENCY(3) RETURN IF(Facts[Quantity],x,Facts[Quantity]>2))')))
         # Empty iterations over currency conditional:
         self.assertEqual("BLANK", dax.local('PRODUCTX(TOPN(0,Facts),CURRENCY(1.23456))'))
 

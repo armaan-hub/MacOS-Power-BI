@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-11, after Iteration 219 / Task 130 dax-pre1900-120, times of day before 1899-12-30 (negative serials with a fraction), mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536604 match, 3797 refused, 0 DIFF, 0 CRASH, locked 536584. Next: Task 131 dax-floatnoise-121 (gate), Task 132 dax-bigxirr-122 with Antigravity.
+**Latest status (2026-11-11, after Iteration 221 / Task 132 dax-bigxirr-122, doubles of 1E15 or more in TOCSV/TOJSON, and XIRR, mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536702 match, 3699 refused, 0 DIFF, 0 CRASH, locked 536682. Next: Task 133 dax-errtype-123 with Antigravity; Task 134 dax-collate-124 planned.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
