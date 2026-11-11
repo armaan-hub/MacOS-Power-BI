@@ -36,7 +36,7 @@ STAYS_REFUSED_PART_A = [
 # TOCSV / TOJSON of ADDMISSINGITEMS(... SUMMARIZECOLUMNS ...): the first build matched these nine only because the three groups of the
 # saved data happened to come out in Power BI's order. Power BI lists SUMMARIZECOLUMNS groups in dictionary order (like SUMMARIZE), the local
 # engine sorts them, and a fresh probe (West before North) printed the wrong order, so the order is refused (as TOCSV of SUMMARIZECOLUMNS is).
-KNOWN_REFUSED_PART_B = 9
+KNOWN_REFUSED_PART_B = 0  # Power BI confirmed (Task 139, 2026-11-11): all nine now match their saved Power BI answers
 
 STAYS_REFUSED_PART_B = [
     # Missing table argument (too few arguments)
