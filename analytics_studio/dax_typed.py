@@ -489,17 +489,28 @@ def _is_pinned_post_latin_char(c: str) -> bool:
 
 
 def _is_pinned_post_latin_text(text: str) -> bool:
+    """Return True only if the text is entirely composed of pinned-script characters
+    (Greek/Cyrillic/Hebrew/CJK) plus characters that are ignorable at the word level
+    (apostrophe, modifier-apostrophe, hyphen from _IGNORED_AT_FIRST), AND the very first
+    character is itself a pinned-script letter.
+
+    Strings like " 東" (leading space) or "1α" (leading digit) do NOT qualify: the
+    script rule is only safe when the FIRST character of the non-Latin text is itself
+    a pinned-script letter. A leading space, digit or punctuation makes it refuse
+    as before.
+    """
     if not text:
         return False
-    has_pinned = False
+    if not _is_pinned_post_latin_char(text[0]):
+        return False
     for c in text:
         if _is_pinned_post_latin_char(c):
-            has_pinned = True
-        elif c.isspace() or c.isdigit() or c in _PUNCTUATION_ORDER or c in _IGNORED_AT_FIRST:
+            continue
+        elif c in _IGNORED_AT_FIRST:
             continue
         else:
             return False
-    return has_pinned
+    return True
 
 
 def compare(operator: str, left: object, right: object, *, allow_variant: bool = False) -> bool:
@@ -598,10 +609,6 @@ def compare(operator: str, left: object, right: object, *, allow_variant: bool =
         return a > b  # type: ignore[operator]
     if operator == ">=":
         return a >= b  # type: ignore[operator]
-        return a <= b  # type: ignore[operator]
-    if operator == ">":
-        return a > b  # type: ignore[operator]
-    return a >= b  # type: ignore[operator]
 
 
 def _blank_like(other: object) -> object:
