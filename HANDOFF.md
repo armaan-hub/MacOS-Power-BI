@@ -1631,18 +1631,19 @@ Doubts or things Claude should check:
         - `"ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "st", "ﬆ": "st"`.
         - Allows `decompose_char_stream`, `is_classifiable_char`, `is_classifiable_latin`, and `text_collation_key` to classify and collate typographic ligatures (such as `"ﬁ"`) consistently with their expanded Latin base forms (matching Power BI Desktop's en-US collation where `"ﬁ"="fi"` is True, `"æ"<"ﬁ"` is True, `"ﬁ"<"SS"` is True, etc.).
       - Cross-script ordering between Latin and pinned post-Latin scripts:
-        - Added `_is_pinned_post_latin_char(c)` and `_is_pinned_post_latin_text(text)` to classify strings belonging to the scripts pinned by the spec: Greek (`0x0370-0x03FF`, `0x1F00-0x1FFF`), Cyrillic (`0x0400-0x052F`), Hebrew (`0x0590-0x05FF`), and CJK (`0x4E00-0x9FFF`, `0x3400-0x4DBF`, `0x3040-0x30FF`, `0xF900-0xFAFF`).
+        - Added `_is_pinned_post_latin_char(c)` and `_is_pinned_post_latin_text(text)` to classify strings belonging to the scripts pinned by the spec: Greek (`0x0370-0x03FF`, `0x1F00-0x1FFF`), Cyrillic (`0x0400-0x052F`), Hebrew (`0x0590-0x05FF`), and CJK (`0x4E00-0x9FFF`, `0x3400-0x4DBF`, `0x3040-0x30FF`, `0xF900-0xFAFF`), restricted strictly to letters (`Lu`, `Ll`, `Lt`, `Lo`).
+        - Enforced that the pinned-script rule is safe ONLY when the FIRST character of the non-Latin text is itself a pinned-script letter (`text[0]`). Strings starting with spaces, digits, or punctuation (e.g. `" 東"`, `"1α"`, `"  я"`) are not treated as post-Latin text and refuse as before.
         - In `compare`, when comparing a classifiable Latin text with a pinned post-Latin text, enforced the invariant that Latin is strictly smaller than Greek, Cyrillic, Hebrew, and CJK in Windows en-US collation (e.g. `"東京"<"Tokyo"` -> False, `"Москва"<"Moscow"` -> False, `"ä"<"א"` -> True, `"Αθήνα"<"Athens"` -> False).
         - Preserved existing strict refusals for ordering within or between non-Latin scripts (e.g. Greek vs Greek `"α"<"β"` or Cyrillic vs Cyrillic `"д"<"ж"` or CJK vs CJK `"中"="文"` remain refused).
 - **Results:**
+  - Fresh review probes (`docs/plans/2026-11-11-dax-collate-124-wrong.json`, 21 items): **0 wrong** (all 21 cleanly refused as before).
   - Spec (`docs/plans/2026-11-11-dax-collate-124-spec.json`, 81 items): **81 match, 0 refused, 0 wrong** (100% exact match).
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 1.28s`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.98s`).
   - Unit regression tests:
-    - `tests/test_iteration118_text_collation_18.py`: 6 passed in 0.06s.
-    - `tests/test_iteration98_scalar_misc_3_review.py`: 7 passed in 17.43s.
-    - `tests/test_parity_ledger.py`: 4 passed in 461.96s.
+    - `tests/test_iteration118_text_collation_18.py`: 6 passed in 0.05s.
+    - `tests/test_iteration98_scalar_misc_3_review.py`: 7 passed in 12.36s.
   - Parity check replay:
-    `replayed 540401 Power BI answers: {'match': 536774, 'gap-reject': 3627, 'DIFF': 0, 'CRASH': 0}; locked 536645`
+    `replayed 540401 Power BI answers: {'match': 536889, 'gap-reject': 3512, 'DIFF': 0, 'CRASH': 0}; locked 536760`
     `PARITY GATE PASSED -> PARITY_LEDGER.md`
     `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+129 new matches over locked, 0 regressions).
   - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
@@ -1650,7 +1651,7 @@ Doubts or things Claude should check:
   - `analytics_studio/dax_typed.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (81 items) has **0 wrong** (100% exact match). All locked answers match.
+  - Spec (81 items) has **0 wrong** (100% exact match). All 21 review probes have **0 wrong**. All locked answers match.
 
 
 
