@@ -1,0 +1,1287 @@
+[
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\n,3,\n,5,\nPaid,0,\nPaid,1,\nPaid,2,\nLate,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales]),1,\";\",FALSE())",
+  "powerbi": "3.74955783516095E-02;2.30314821365405;0.109677417431646;1.01981323823361;2.83895093233614E-02;2.06174583707844;0.116876092202713;4;0.496816413158825;17.0031835868412",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],TOPN(1,SUMMARIZE(Facts,Facts[Note],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Note],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Note],[s]\nPaid,3\n,\nLate,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "LEN(TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales])))",
+  "powerbi": "358",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],TOPN(1,SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Region],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Region],[s]\nWest,3\nEast,\nNorth,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],TOPN(2,VALUES(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity]\n4\n5\n0\n1\n2",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Quantity],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity],[s]\n3,3\n4,4\n5,5\n0,\n1,\n2,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region],DESC))",
+  "powerbi": "[i]\n2\n0\n1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Quantity]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1,-4.44089209850063E-16,1.21799684846742E-16,3.68766858955201E-16,1,5.09524637778586E-16,6.74074147064981E+31,4,17.5,1.0384614260136E-30",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Quantity],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\nPaid,0,0\nPaid,1,1\nPaid,2,2\n,3,\n,5,\nLate,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],ALL(Facts)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,0,,\n,1,,\n,2,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Quantity],DESC))",
+  "powerbi": "[i]\n4\n3\n0\n5\n2\n1",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Note],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Note],[s]\n,5\nPaid,3\nLate,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(2,VALUES(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales]\n10.5\n20\n\n2.5",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.01428571428571,1.01428571428571,3.67006645104718E-02,0.164130361329658,0.998342874359747,0.194201662491045,3012.27272727273,5,113.605714285714,0.188571428571429",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Region],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Region],[s]\nEast,5\nWest,3\nNorth,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN FILTER(t,TRUE()),10)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity],\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity],[s]\nEast,,5,5\nWest,,3,3\nEast,Paid,1,1\nEast,Paid,2,2\nWest,Paid,0,0\nNorth,Late,4,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Note],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Note],[s]\n,5\nPaid,3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",\"1\"),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",CALCULATE(SUM(Facts[Quantity]))),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Region],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,4,North,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Region],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n1,East,1\n2,East,2\n5,East,5\n0,West,\n3,West,\n4,North,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Quantity],[s]\n1,\n2,\n5,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(ALL(Facts[Region]),\"k\",1,\"m\",2),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Note],[s]\nPaid,3\n,\nLate,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Region],[s]\nEast,5\nNorth,4",
+  "group": "dax_battery_table_fns2"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],\"t\",SUM(Facts[Sales])),Facts[Region],TRUE))",
+  "powerbi": "[i]\n1\n2",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()),10)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nNorth,Late,4\nWest,,",
+  "group": "dax_battery_table_fns2"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",1),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Region],Facts[Quantity],Facts[Note]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],Facts[Note],Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity]\nEast,,5\nWest,,3\nEast,Paid,1\nEast,Paid,2\nWest,Paid,0\nNorth,Late,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+  "powerbi": "'Facts'[Quantity],[i]\n1,2\n2,2\n5,2\n0,0\n3,0\n4,1",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"u\",COUNTROWS(Facts)),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Sales],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Sales],[s]\n,\n2.5,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),\"i\",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),BLANK()))",
+  "powerbi": "[i]\n",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],[s]\n,East,5\n,West,3\nLate,North,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Note]))",
+  "powerbi": "'Facts'[Note],[s]\n,8\nLate,4\nPaid,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN t,3)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Sales],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Region],[s]\nEast,8\nWest,\nNorth,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+  "powerbi": "'Facts'[Region],[s]\nEast,5\nNorth,4\nWest,",
+  "group": "dax_battery_table_fns2"
+ },
+ {
+  "expr": "TOCSV(VAR r=\"West\" RETURN FILTER(VALUES(Facts[Region]),Facts[Region]<>r))",
+  "powerbi": "'Facts'[Region]\nEast\nNorth",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,,Paid",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts[Region],Facts[Quantity]),Facts[Region]))",
+  "powerbi": "[i]\n3\n4\n5\n0\n1\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity]),Facts[Note],Facts[Quantity],Facts[Region]))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity]\n,3\n,5\nPaid,0\nPaid,1\nPaid,2\nLate,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") VAR u=t RETURN u,10)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",Facts,Facts[Region]))",
+  "powerbi": "[i]\n3\n4\n5\n0\n1\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],TRUE()))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Region],Facts[Note],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,East,Paid\n,,West,Paid",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Note],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Note],[s],[c]\n,2.5,1\nPaid,,\nLate,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Sales])),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(2,VALUES(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],ALL(Facts)))",
+  "powerbi": "'Facts'[Sales]\n10.5\n20\n\n-1.5\n0\n2.5",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],Facts,Facts[Sales]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,,\n20,,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",CALCULATE(SUM(Facts[Quantity]))),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Quantity],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Region],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nEast,1,1\nEast,2,2\nWest,0,0",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Region]),Facts[Note],Facts[Region],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Note],'Facts'[Region]\n,East\n,West\nPaid,East\nPaid,West\nLate,North",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"c\",CALCULATE(COUNTROWS(Facts))),Facts[Region],ASC))",
+  "powerbi": "[i]\n1\n2",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(1,SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Sales],FILTER(Facts,Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n-1.5,\n2.5,\n10.5,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Region],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n1,East,1\n2,East,2\n5,East,5",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.1,8.81917103688197E-02,0.994736842105263,0.483045891539648,567,3,132.3,0.7",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts,Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Region],Facts[Quantity],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Quantity],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nEast,1,\nEast,2,\nEast,5,\nWest,0,\nWest,3,\nNorth,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],TOPN(1,SUMMARIZE(Facts,Facts[Note],Facts[Region],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],[s]\nPaid,West,0\n,East,\nLate,North,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Region],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity],ASC))",
+  "powerbi": "[i]\n3\n1\n0\n2",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales]),Facts[Sales],FILTER(ALL(Facts),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Sales]\n\n-1.5\n0\n2.5\n10.5\n20",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Note],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Note],[s]\n,\nLate,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]*2))",
+  "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n5.90598472053105E-18,0.5,4.44089209850063E-16,2.39665881415884E-17,5.38486851608429E-17,3.31325981971234E-16,1,4.44089209850063E-16,4.4367771007988E+31,3,17.5,5.91645678915759E-31",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],SUMMARIZECOLUMNS(Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Region],ALL(Facts)))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],[s]\n,East,5\n,West,3\nLate,North,4\nPaid,East,\nPaid,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN FILTER(t,TRUE()))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.00000003,-5.00000005843049E-08,1.73205079857408E-08,4.74341646561931E-08,1,3.87298332609445E-08,1.33333338718173E+16,2,20.0000006,2.99999996884112E-15",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(VAR t=ALL(Facts) RETURN t)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",Facts,Facts[Region],DESC,Facts[Note],DESC))",
+  "powerbi": "[i]\n3\n4\n5\n0\n1\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.14285714285714,0.618589574131742,0.857142857142857,2.31455024943138,12,2,64.2857142857143,10.7142857142857",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],FILTER(Facts,Facts[Quantity]>2),Facts[Sales]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n-1.5,,,\n0,,,\n10.5,,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nWest,,3\nNorth,Late,4\nEast,Paid,\nWest,Paid,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",2),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()))",
+  "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.15920577617328,5.92057761732855E-02,0.232770720620969,0.232770720620969,0.997668917644179,0.567106787389508,1069.9631816447,5,688.221949458484,1.60805054151624",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Note],ASC,Facts[Quantity],ASC))",
+  "powerbi": "[i]\n4\n5\n1\n3\n0\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],SUMMARIZECOLUMNS(Facts[Note],Facts[Region]),Facts[Region],Facts[Note]))",
+  "powerbi": "'Facts'[Note],'Facts'[Region]\n,East\n,West\nPaid,East\nPaid,West\nLate,North",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Region]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,\nWest,,\nEast,Paid,\nWest,Paid,\nNorth,Late,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Sales],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Note],[s]\nPaid,3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Sales],Facts))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n-1.5,,,\n0,,,\n10.5,,,\n20,,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],TOPN(2,SUMMARIZE(Facts,Facts[Note],Facts[Region],\"s\",SUM(Facts[Quantity])),[s],DESC),Facts[Note],Facts[Region]))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],[s]\nLate,North,4\n,East,5\n,West,\nPaid,East,\nPaid,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Note],Facts[Quantity],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s],[c]\n,5,2.5,1\nPaid,0,,\nPaid,1,,\nPaid,2,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"c\",CALCULATE(COUNTROWS(Facts))),[c],ASC))",
+  "powerbi": "[i]\n0\n1",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],TOPN(1,SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Quantity],Facts[Region]))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nWest,0,0\nEast,1,\nEast,2,\nEast,5,\nWest,3,\nNorth,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,0,0,0,1,0,inf,1,8,0",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",2),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+  "powerbi": "'Facts'[Region],[s]\nEast,5\nNorth,4\nWest,",
+  "group": "dax_battery_table_fns2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2),Facts[Region],Facts[Quantity]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,1,East,\n,2,East,\n,0,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,0,,\n,3,,\n,4,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n1,1\n2,2\n3,\n4,\n5,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Sales],Facts[Region],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],[s]\n-1.5,1\n2.5,5\n10.5,2\n,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Region],Facts[Note]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s],[c]\nEast,,2.5,1\nWest,,,\nNorth,,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(ALL(Facts[Region]),\"k\",1,\"m\",2),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,3.75323885183806E-16,1,1.40433338743068E-15,2.83953734451123E+31,2,56,3.94430452610506E-30",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Region],Facts[Quantity],Facts[Sales],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s],[c]\nEast,5,2.5,1",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],TOPN(2,SUMMARIZE(Facts,Facts[Note],Facts[Quantity],\"s\",SUM(Facts[Quantity])),[s],DESC),Facts[Note],Facts[Quantity]))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\nLate,4,4\n,5,5\n,3,\nPaid,0,\nPaid,1,\nPaid,2,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity]),Facts[Note],Facts[Quantity],ALL(Facts)))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity]\n,3\n,5\nPaid,0\nPaid,1\nPaid,2\nLate,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Quantity],Facts[Note],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s],[c]\n,5,2.5,1",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Region],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n1,East,1\n2,East,2\n5,East,5\n0,West,0\n3,West,3\n4,North,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],UNION(SUMMARIZE(Facts,Facts[Note]),SUMMARIZE(Facts,Facts[Note])),Facts[Note],ALL(Facts)))",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate\n\nPaid\nLate",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Region]))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n1,East,1\n2,East,2\n5,East,5\n0,West,0\n3,West,3\n4,North,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity],[s],[c]\n5,2.5,1\n0,,\n1,,\n2,,\n3,,\n4,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\"))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"c\",CALCULATE(COUNTROWS(Facts))),IF(Facts[Region]=\"East\",1,2),ASC))",
+  "powerbi": "'Facts'[Note],[i]\n,0\n,1\nPaid,0\nPaid,1\nLate,2",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],FILTER(Facts,Facts[Region]=\"East\"),Facts[Note],Facts[Region],Facts))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,West,\n,,West,Paid\n,,North,Late",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Quantity]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,0,,\n,1,,\n,2,,\n,3,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Note],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\n,3,3\n,5,5\nLate,4,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\"),3)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts))",
+  "powerbi": "'Facts'[Region],[s]\nEast,3\nWest,0\nNorth,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],UNION(SUMMARIZE(Facts,Facts[Region]),SUMMARIZE(Facts,Facts[Region])),Facts[Region],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth\nEast\nWest\nNorth",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],UNION(SUMMARIZE(Facts,Facts[Quantity],Facts[Region]),SUMMARIZE(Facts,Facts[Quantity],Facts[Region])),Facts[Quantity],Facts[Region],Facts[Sales],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region]\n1,East\n2,East\n5,East\n0,West\n3,West\n4,North\n1,East\n2,East\n5,East\n0,West",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",DISTINCT(Facts),Facts[Region]))",
+  "powerbi": "[i]\n4\n3\n5\n1\n0\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Sales])),Facts[Quantity]))",
+  "powerbi": "'Facts'[Quantity],[s]\n1,-1.5\n2,10.5\n5,2.5\n0,\n3,\n4,",
+  "group": "dax_battery_table_fns2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Region],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n1,East,\n2,East,\n0,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Region],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s],[c]\n5,East,2.5,1\n4,North,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"u\",COUNTROWS(Facts)),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts))",
+  "powerbi": "'Facts'[Note],[s]\n,\nPaid,\nLate,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Region],Facts[Sales],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Region],[s],[c]\nEast,2.5,1",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Note],\"cnt\",COUNTROWS(Facts)),CALCULATE(COUNTROWS(Facts)),DESC,Facts[Note],ASC))",
+  "powerbi": "[i]\n1\n0\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",VALUES(Facts[Region]),IF(Facts[Region]=\"East\",1,2),ASC))",
+  "powerbi": "'Facts'[Note],[i]\n,0\n,1\nPaid,0\nPaid,1\nLate,2",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],TOPN(1,SUMMARIZE(Facts,Facts[Quantity],Facts[Region],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Quantity],Facts[Region],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n0,West,0\n5,East,\n4,North,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),FALSE()),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,\nNorth,Late,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity],[s]\nEast,,5,5\nEast,Paid,1,1\nEast,Paid,2,2\nWest,,3,\nWest,Paid,0,\nNorth,Late,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],TOPN(2,SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity])),[s],DESC),Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Quantity],[s]\n4,4\n5,5",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Note],Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s],[c]\nEast,,2.5,1\nWest,,,\nEast,Paid,,\nNorth,Late,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note]),Facts[Region],Facts[Note],Facts[Sales]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note]\nEast,\nWest,\nEast,Paid\nWest,Paid\nNorth,Late",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],\"t\",SUM(Facts[Sales])),Facts[Region],DESC))",
+  "powerbi": "[i]\n1\n0",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Quantity],Facts[Sales]))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\n,5,5\nPaid,1,1\nPaid,2,2\n,3,\nPaid,0,\nLate,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.21714285714286,0.044035390838035,0.997638755718283,0.521033770955578,2535.03315207859,6,688.201142857143,1.62885714285714",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(ALL(Facts[Region]),\"k\",1,\"m\",3),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Region]=\"East\"),Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,,Late",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Sales],FILTER(Facts,Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n-1.5,,,\n10.5,,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],FILTER(Facts,Facts[Quantity]>2),Facts[Region]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(ALL(Facts[Region]),\"k\",1,\"m\",3),Facts[Region]))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],TOPN(1,SUMMARIZE(Facts,Facts[Note],Facts[Region],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Note],Facts[Region],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],[s]\nPaid,West,0\n,East,\n,West,\nPaid,East,\nLate,North,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],Facts[Quantity],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity],[s]\nEast,,5,5\nEast,Paid,1,1\nEast,Paid,2,2\nWest,,3,\nNorth,Late,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(VAR t=ALL(Facts[Region]) RETURN t)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\"),10)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"S\",SUM(Facts[Quantity])),Facts[Region]))",
+  "powerbi": "[i]\n2\n0\n1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],[w]))",
+  "powerbi": "[Slope1],[Slope2],[Slope3],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorSlope3],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.19088785046729,-0.204439252336448,-5.53738317757009E-02,1.40250333778371,0.188121093645157,0.212726739146336,6.67474043609174E-02,0.483169242855444,0.998735332959764,0.219021979498264,789.721959365431,3,113.650373831776,0.143911882510014",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Region]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nNorth,Late,4\nWest,,\nEast,Paid,\nWest,Paid,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],TRUE()))",
+  "powerbi": "[i]\n1\n2",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(VAR t=FILTER(Facts,Facts[Quantity]>2) VAR u=t RETURN u)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.01428571428571,1.01428571428571,3.67006645104718E-02,0.164130361329658,0.998342874359747,0.194201662491045,3012.27272727273,5,113.605714285714,0.188571428571429",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,3}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.6,0.2,0.984615384615385,0.447213595499958,64,1,12.8,0.2",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts,Facts[Note],Facts[Region],ALL(Facts)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Region],[s]\nEast,3\nWest,0\nNorth,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],TOPN(1,SUMMARIZE(Facts,Facts[Quantity],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Quantity],FILTER(ALL(Facts),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity],[s]\n0,0\n1,\n2,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0.177349397590361,0.122123943237907,0.29665717415115,2.78150518323036,2.10890879417957,5,16.3161445783133,38.6838554216867",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2),Facts[Region],Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,1,East,\n,2,East,\n,0,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(VAR t=Facts RETURN t)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],Facts[Quantity],FALSE()))",
+  "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n7.79921975817575E-17,1,3.33890923927598E-17,1.02542127560854E-16,1,6.37774571658814E-16,6.76080320121722E+31,4,55,1.62702561701834E-30",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],Facts[Quantity]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity],[s]\nEast,Paid,1,1\nEast,Paid,2,2\nWest,Paid,0,0\nEast,,5,\nWest,,3,\nNorth,Late,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],FILTER(Facts,Facts[Region]=\"East\"),Facts[Note],Facts[Region],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],\"s\",SUM(Facts[Quantity])),Facts[Sales],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Sales],[s]\n,4\n-1.5,1\n0,0\n2.5,5\n10.5,2\n20,3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Region],FILTER(Facts,Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Region],[s]\nEast,8",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Quantity],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity],[s],[c]\n5,2.5,1\n0,,\n1,,\n2,,\n3,,\n4,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Sales]),Facts[Sales]),\"i\",ADDCOLUMNS(VALUES(Facts[Sales]),\"k\",1),ISBLANK(Facts[Sales]),ASC))",
+  "powerbi": "[i]\n2\n4\n3",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Sales],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Sales],[s]\n-1.5,1\n2.5,5\n10.5,2\n,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],TOPN(2,VALUES(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity]))",
+  "powerbi": "'Facts'[Quantity]\n4\n5\n0\n1\n2\n3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],\"s\",SUM(Facts[Quantity])),Facts[Sales],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Sales],[s]\n,4\n-1.5,1\n0,0\n2.5,5\n10.5,2\n20,3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],Facts))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,Paid,3\nWest,Paid,0\nEast,,\nWest,,\nNorth,Late,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Quantity],Facts[Region]))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s]\n5,East,5\n3,West,3\n4,North,4\n0,,\n1,,\n2,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Quantity],Facts[Note],Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity],[s],[c]\nEast,,5,2.5,1\nWest,,3,,\nEast,Paid,2,,\nNorth,Late,4,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Note],FILTER(Facts,Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Note],[s],[c]\n,2.5,1\nPaid,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(VAR t=Facts RETURN CALCULATETABLE(t,Facts[Region]=\"West\"))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nNorth,Late,4\nEast,Paid,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],TOPN(2,SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),[s],DESC),Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+  "powerbi": "'Facts'[Region],[s]\nNorth,4\nEast,8\nWest,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>100),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+  "powerbi": "'Facts'[Region],[s]\nEast,\nWest,\nNorth,",
+  "group": "dax_battery_table_fns2"
+ },
+ {
+  "expr": "TOCSV(VAR t=ADDCOLUMNS(Facts,\"q\",Facts[Quantity]*2) RETURN t)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note],[q]\n10.5,2,East,Paid,4\n20,3,West,,6\n-1.5,1,East,Paid,2\n,4,North,Late,8\n0,0,West,Paid,0\n2.5,5,East,,10",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],\"s\",SUM(Facts[Quantity])),Facts[Sales]))",
+  "powerbi": "'Facts'[Sales],[s]\n,4\n-1.5,1\n0,0\n2.5,5\n10.5,2\n20,3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",1),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN t)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(VAR t=TOPN(2,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC) RETURN t)",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.00000001333333,7.20082294401187E-09,1,3.94405315903606E-08,7.71428593331334E+16,3,120.0000016,4.6666665963907E-15",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],ALL(Facts)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,,Paid",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],TOPN(2,VALUES(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Quantity]\n4\n5",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],Facts[Region],FILTER(ALL(Facts),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,0,West,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,0,1,0,inf,0,4,0",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",DISTINCT(Facts[Region]),Facts[Region]))",
+  "powerbi": "[i]\n1\n0",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note]),Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Note]\n\nPaid\nLate",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],Facts[Region],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,East,Paid\n,,West,Paid",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity]),Facts[Quantity],FILTER(ALL(Facts),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n3\n4\n5",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],Facts,Facts[Region],Facts[Note],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts,Facts[Note],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Note],Facts[Region],FILTER(Facts,Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,East,Paid",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],FILTER(Facts,Facts[Region]=\"East\"),Facts[Region],ALL(Facts)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,West,\n,,North,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n-0,5,0,0,1,0,inf,1,0,0",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN FILTER(t,TRUE()),3)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],Facts,Facts[Note],Facts[Region]))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Note],Facts[Quantity]))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s],[c]\n,5,2.5,1\n,3,,\nPaid,0,,\nPaid,1,,\nPaid,2,,\nLate,4,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Quantity],Facts[Note],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s],[c]\n,5,2.5,1",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Note],Facts[Quantity],\"s\",SUM(Facts[Quantity])),Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],[s]\n,3,3\n,5,5\nPaid,0,0\nPaid,1,1\nPaid,2,2\nLate,4,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],SUMMARIZECOLUMNS(Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],[s],[c]\n,East,2.5,1\nPaid,East,,\nPaid,West,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(VAR n=2 RETURN TOPN(n,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note]),\"i\",TOPN(3,VALUES(Facts[Note]),Facts[Note]),Facts[Note],TRUE()))",
+  "powerbi": "[i]\n0\n2\n1",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN t,10)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(VAR t=DISTINCT(Facts[Quantity]) RETURN t)",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n3\n4\n5",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0,2,0,0,1,0,inf,0,0,0",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],\"t\",SUM(Facts[Sales])),1))",
+  "powerbi": "'Facts'[Note],[i]\n,0\n,1\nPaid,0\nPaid,1\nLate,2",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(VAR t=VALUES(Facts[Region]) RETURN t)",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "dax_battery_logic4_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Quantity],Facts[Note],Facts[Region],FILTER(Facts,FALSE())))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Note],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,,Paid",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"[s]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\", 5],\n\t\t[\"North\", 4],\n\t\t[\"West\", null]\n\t]\n}",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],UNION(SUMMARIZE(Facts,Facts[Quantity]),SUMMARIZE(Facts,Facts[Quantity])),Facts[Quantity],Facts[Sales],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n3\n4\n5\n0\n1\n2\n3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))",
+  "powerbi": "[i]\n3\n4\n5\n0\n1\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],SUMMARIZECOLUMNS(Facts[Region],Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nEast,1,1\nEast,2,2\nEast,5,5\nNorth,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Quantity],Facts[Region],Facts[Note],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],TOPN(1,SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nWest,0,0\nEast,5,\nNorth,4,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(1,SUMMARIZE(Facts,Facts[Sales],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Sales],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Sales],[s]\n0,0\n,\n2.5,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],UNION(SUMMARIZE(Facts,Facts[Quantity]),SUMMARIZE(Facts,Facts[Quantity])),Facts[Quantity],ALL(Facts)))",
+  "powerbi": "'Facts'[Quantity]\n0\n1\n2\n3\n4\n5\n0\n1\n2\n3",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],TOPN(1,SUMMARIZE(Facts,Facts[Note],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Note]))",
+  "powerbi": "'Facts'[Note],[s]\nPaid,3\n,\nLate,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") VAR u=t RETURN u)",
+  "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],SUMMARIZECOLUMNS(Facts[Quantity],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Quantity],Facts[Region],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],[s],[c]\n5,East,2.5,1\n1,East,,\n2,East,,\n0,West,,\n3,West,,\n4,North,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN FILTER(t,TRUE()))",
+  "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],UNION(SUMMARIZE(Facts,Facts[Sales]),SUMMARIZE(Facts,Facts[Sales])),Facts[Sales],VALUES(Facts[Region])))",
+  "powerbi": "'Facts'[Sales]\n\n-1.5\n0\n2.5\n10.5\n20\n\n-1.5\n0\n2.5",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],Facts[Note],Facts[Quantity],ALL(Facts)))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity]\nEast,,5\nWest,,3\nEast,Paid,1\nEast,Paid,2\nWest,Paid,0\nNorth,Late,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{1,3}}),[y],[x],FALSE()))",
+  "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.5,0.5,0.961538461538462,0.707106781186547,25,1,12.5,0.5",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+  "powerbi": "[i]\n2\n0\n1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nNorth,Late,4\nWest,,\nEast,Paid,\nWest,Paid,",
+  "group": "dax_battery_table_fns2"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],TOPN(1,SUMMARIZE(Facts,Facts[Note],Facts[Region],\"s\",SUM(Facts[Quantity])),[s],ASC),Facts[Note],Facts[Region],Facts[Sales]))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],[s]\nPaid,West,0\n,East,\n,West,\nPaid,East,\nLate,North,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),IF(Facts[Region]=\"East\",1,2),ASC))",
+  "powerbi": "'Facts'[Note],[i]\n,0\nPaid,0\nLate,1",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],UNION(SUMMARIZE(Facts,Facts[Region]),SUMMARIZE(Facts,Facts[Region])),Facts[Region],FILTER(ALL(Facts),Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth\nEast\nWest\nNorth",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],Facts[Sales],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nWest,,3\nNorth,Late,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region]),Facts[Region],FILTER(Facts,Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Region]\nEast\nWest\nNorth",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",ALL(Facts),Facts[Region]))",
+  "powerbi": "[i]\n3\n4\n5\n0\n1\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(LINEST(Facts[Sales],Facts[Quantity]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0.757142857142857,3.35714285714286,2.21470042199474,6.70533851687223,2.83895093233617E-02,9.26475656915573,0.116876092202714,4,10.032142857143,343.342857142857",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x]))",
+  "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.1,8.88178419700125E-16,0.264575131106459,0.724568837309472,0.969230769230769,0.591607978309961,63,2,22.05,0.7",
+  "group": "dax_battery_linest"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),1))",
+  "powerbi": "[i]\n1\n0",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),Facts[Region],DESC))",
+  "powerbi": "[i]\n2\n0\n1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Quantity])),Facts[Sales],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+  "powerbi": "'Facts'[Sales],[s]\n-1.5,1\n2.5,5\n10.5,2\n,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",\"1\"),Facts[Region],DESC))",
+  "powerbi": "[s],[i]\n8,2\n3,0\n4,1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"S\",SUM(Facts[Quantity])),Facts[Region],DESC))",
+  "powerbi": "[i]\n2\n0\n1",
+  "group": "dax_battery_swi_extra3"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),\"i\",SUMMARIZE(Facts,Facts[Region],\"t\",SUM(Facts[Quantity])),Facts[Region]&\"x\",ASC))",
+  "powerbi": "'Facts'[Note],[i]\n,0\n,2\nPaid,0\nPaid,2\nLate,1",
+  "group": "dax_battery_swi_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],TOPN(2,SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"s\",SUM(Facts[Quantity])),[s],DESC),Facts[Region]))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],[s]\nNorth,4,4\nEast,5,5\nWest,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>4),\"s\",SUM(Facts[Sales]),\"c\",COUNTROWS(Facts)),Facts[Region]))",
+  "powerbi": "'Facts'[Region],[s],[c]\nEast,2.5,1\nWest,,\nNorth,,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Sales]),Facts[Sales]),\"i\",VALUES(Facts[Sales]),BLANK()))",
+  "powerbi": "[i]\n3\n5\n4",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))",
+  "powerbi": "[i]\n4\n5\n3\n1\n0\n2",
+  "group": "dax_battery_swi_extra2"
+ },
+ {
+  "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN FILTER(t,TRUE()),10)",
+  "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}",
+  "group": "dax_battery_roworder32_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],SUMMARIZECOLUMNS(Facts[Sales],FILTER(ALL(Facts),Facts[Note]=\"Paid\"),\"s\",SUM(Facts[Quantity])),Facts[Sales],Facts))",
+  "powerbi": "'Facts'[Sales],[s]\n-1.5,1\n0,0\n10.5,2\n,\n2.5,\n20,",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity],[s]\nEast,,5,5\nWest,,3,3\nNorth,Late,4,4",
+  "group": "dax_battery_ami_extra"
+ },
+ {
+  "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]))",
+  "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.85,0.15,4.44089209850063E-16,3.72677996249961E-02,3.72677996249961E-02,7.74596669241475E-02,0.99974293059126,0.070710678118654,3889.00000000008,2,38.89,9.9999999999998E-03",
+  "group": "dax_battery_linest"
+ }
+]
