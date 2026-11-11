@@ -28,7 +28,8 @@ Hypothesis: the same value repeated n times gives a non-zero spread because of h
 exact accumulation that gives Power BI's digits on EVERY spec item, including the zeros.
 
 **Add-on (old wrong answer on main, found by a fresh probe):** `VARX.P(ADDCOLUMNS(Facts,"z",1),DATE(1999,12,31)+0.3)+1`:
-Power BI 1.00000047683716, we answer 1. Fix it with the Part B rule, or refuse it.
+Power BI 1.00000047683716, we answer 1. Fix it with the Part B rule, or refuse it. More old wrong answers of the same shape (STDEVX/VARX over
+`ADDCOLUMNS(Facts,...)`) are in `docs/plans/2026-11-11-dax-floatnoise-121-addon.json`; all must end right or refused.
 
 **Spec:** `docs/plans/2026-11-11-dax-floatnoise-121-spec.json` (177 items). Today: 0 exact, 177 refused. Opus holds out 60
 more and will check ~1,000 fresh Power BI probes you have not seen (other values, row counts, tables).
