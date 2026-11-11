@@ -4854,6 +4854,8 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             # Task 139 (live Power BI, dax-amiorder-129): the new shapes need a leading ShowAll column. Without one, Power BI prints a FILTER(table, ...)
             # source in reverse storage order (127 of 127 saved probes), which the local engine does not model; the 19 spec items with ShowAll are storage order.
             if inner is not None and _addmissing_inner_order_ok(inner) and arguments[0][0] == "reference":
+                if inner[0] == "call" and inner[1] == "TOPN" and inner[2][0][1] == 2:
+                    return "addmissing_topn"  # reversed by the direct pipeline only; every wrapper refuses this class
                 return "grouped"
         elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1:
             if arguments[0][0] == "call" and arguments[0][1] == "ALLEXCEPT" and len(arguments) == 3 and arguments[1][0] == "string" and arguments[2][0] == "reference":
@@ -13148,6 +13150,14 @@ def _evaluate_measures_once(
             raise MeasureError("No common join columns detected. The join function 'ADDMISSINGITEMS' requires at-least one common join column.")
 
         table_context, table_rows = table_argument_value(table_node)
+        source_keys = {(lin[0]["id"], lin[1].casefold()) for h, lin in base_lineage(table_context).items() if h in table_context["headers"]}
+        # Task 139 (live Power BI, gaps grid): over VALUES(column) / TOPN(n, VALUES(column), ...) a FIRST groupBy column the table does not hold is an
+        # error (3 wrong probes). A later missing groupBy column is answered (saved answers in dax_battery_ami_extra), so only the first level refuses.
+        first_values = table_node[0] == "table_call" and table_node[1] == "VALUES" or (
+            table_node[0] == "call" and table_node[1] == "TOPN" and len(table_node[2]) >= 2 and table_node[2][1][0] == "table_call" and table_node[2][1][1] == "VALUES"
+        )
+        if first_values and group_keys and group_keys[0] not in source_keys:
+            raise MeasureError(f"The column '{group_nodes[0][2]}' specified in the 'ADDMISSINGITEMS' function is not a column of the table it is applied to.")
         if not show_nodes:
             return table_context, table_rows
         table_rows = [typed_row(table_context, r) for r in table_rows]  # loaded cells are text; the domain below holds typed values
@@ -23493,6 +23503,8 @@ def _evaluate_measures_once(
                     order_class = _tocsv_row_order(table_node)
             else:
                 order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
+            if order_class == "addmissing_topn":  # Task 139: only the direct TOCSV / TOJSON argument reads this class (the reversal below)
+                order_class = "grouped"
             max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
             if table_node[0] == "call" and table_node[1] == "TOPN" and len(table_node[2]) >= 3:
                 topn_walk_nodes[id(table_node)] = [table_node[2][2]]
