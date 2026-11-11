@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-11, after Iteration 223 / Task 134 dax-collate-124, non-ASCII text comparison and ordering, mix workflow: Antigravity coded, Haiku 5.5 finished the fix, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536889 match, 3512 refused, 0 DIFF, 0 CRASH, locked 536869. Next: Task 135 type tests over failed conversions (dax-convtype-125), coded by Haiku while Antigravity is out of quota.
+**Latest status (2026-11-11, after Iteration 224 / Task 135 dax-convtype-125, type tests over failed conversions, mix workflow: Haiku 5.5 coded, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536898 match, 3503 refused, 0 DIFF, 0 CRASH, locked 536878. Next: Task 136 remaining type tests of failing values (dax-failtype-126).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
