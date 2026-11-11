@@ -1,0 +1,227 @@
+[
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Region],Facts[Quantity]),Facts[Sales]>0),Facts[Quantity],Facts[Region],Facts[Note],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],'Facts'[Quantity]\n,East,5\n,West,3\nPaid,East,2",
+  "ours": "'Facts'[Note],'Facts'[Region],'Facts'[Quantity]\nPaid,East,2\n,West,3\n,East,5"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity]),Facts[Region]<>\"West\"),Facts[Quantity]))",
+  "powerbi": "'Facts'[Quantity]\n1\n2\n4\n5",
+  "ours": "'Facts'[Quantity]\n1\n2\n5\n4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Note],Facts[Region]),Facts[Sales]>0),Facts[Quantity],Facts[Region],Facts[Note],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],'Facts'[Region]\n5,,East\n3,,West\n2,Paid,East",
+  "ours": "'Facts'[Quantity],'Facts'[Note],'Facts'[Region]\n2,Paid,East\n3,,West\n5,,East"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Sales],Facts[Quantity],\"s\",SUM(Facts[Quantity])),Facts[Region]=\"East\"),Facts[Quantity],Facts[Sales],FILTER(Facts,Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],[s]\n-1.5,1,1\n10.5,2,2\n2.5,5,5",
+  "ours": "'Facts'[Sales],'Facts'[Quantity],[s]\n10.5,2,2\n-1.5,1,1\n2.5,5,5"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region],Facts[Note]),Facts[Sales]>0),Facts[Region],Facts[Note],Facts[Quantity],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n2,East,Paid\n,West,Paid",
+  "ours": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2,East,Paid\n3,West,\n5,East,\n,West,Paid"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity]),Facts[Sales]>0),Facts[Quantity],Facts[Note],ALL(Facts)))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity]\n,3\n,5\nPaid,2\nPaid,0\nPaid,1\nLate,4",
+  "ours": "'Facts'[Note],'Facts'[Quantity]\nPaid,2\n,3\n,5\nPaid,0\nPaid,1\nLate,4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity]),Facts[Region]<>\"West\"),Facts[Quantity],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Quantity]\n1\n2\n4\n5\n0\n3",
+  "ours": "'Facts'[Quantity]\n1\n2\n5\n4\n0\n3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity]),Facts[Region]<>\"West\"),Facts[Quantity],FILTER(Facts,Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity]\n1\n2\n4\n5\n0",
+  "ours": "'Facts'[Quantity]\n1\n2\n5\n4\n0"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity]),Facts[Region]<>\"West\"),Facts[Quantity],FILTER(Facts,Facts[Quantity]>2)))",
+  "powerbi": "'Facts'[Quantity]\n1\n2\n4\n5\n3",
+  "ours": "'Facts'[Quantity]\n1\n2\n5\n4\n3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity]),Facts[Region]<>\"West\"),Facts[Quantity],Facts))",
+  "powerbi": "'Facts'[Quantity]\n1\n2\n4\n5\n0\n3",
+  "ours": "'Facts'[Quantity]\n1\n2\n5\n4\n0\n3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Note],Facts[Region]),Facts[Sales]>0),Facts[Note],Facts[Quantity],Facts[Region],FILTER(Facts,Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],'Facts'[Region]\n5,,East\n3,,West\n2,Paid,East\n1,Paid,\n0,Paid,",
+  "ours": "'Facts'[Quantity],'Facts'[Note],'Facts'[Region]\n2,Paid,East\n3,,West\n5,,East\n0,Paid,\n1,Paid,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Region],Facts[Quantity]),Facts[Note]=\"Paid\"),Facts[Region],Facts[Note],Facts[Quantity],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Note],'Facts'[Region],'Facts'[Quantity]\nPaid,East,1\nPaid,East,2\nPaid,West,0\n,West,3\n,East,5",
+  "ours": "'Facts'[Note],'Facts'[Region],'Facts'[Quantity]\nPaid,East,1\nPaid,East,2\nPaid,West,0\n,East,5\n,West,3"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region],Facts[Note]),Facts[Sales]>0),Facts[Quantity],Facts[Region],Facts[Note],ALL(Facts)))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n2,East,Paid\n1,East,Paid\n0,West,Paid\n4,North,Late",
+  "ours": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2,East,Paid\n3,West,\n5,East,\n1,East,Paid\n0,West,Paid\n4,North,Late"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region]),Facts[Sales]>0),Facts[Region],Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region]\n2,East\n5,East\n3,West\n1,East",
+  "ours": "'Facts'[Quantity],'Facts'[Region]\n2,East\n3,West\n5,East\n1,East"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region]),Facts[Sales]>0),Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2)))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region]\n2,East\n5,East\n3,West\n4,North",
+  "ours": "'Facts'[Quantity],'Facts'[Region]\n2,East\n3,West\n5,East\n4,North"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Sales]>0),Facts[Region],Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nEast,5\nWest,3\nEast,1\nWest,0\nNorth,4",
+  "ours": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nWest,3\nEast,5\nEast,1\nWest,0\nNorth,4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Sales],CALCULATETABLE(SUMMARIZE(Facts,Facts[Sales],Facts[Quantity],\"s\",SUM(Facts[Quantity])),Facts[Note]=\"Paid\"),Facts[Sales],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Quantity],[s]\n0,0,0\n-1.5,1,1\n10.5,2,2\n20,3,\n,4,\n2.5,5,",
+  "ours": "'Facts'[Sales],'Facts'[Quantity],[s]\n10.5,2,2\n-1.5,1,1\n0,0,0\n20,3,\n,4,\n2.5,5,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Sales],Facts[Note],CALCULATETABLE(SUMMARIZE(Facts,Facts[Sales],Facts[Note],Facts[Quantity]),Facts[Note]=\"Paid\"),Facts[Note],Facts[Sales],Facts[Quantity],ALL(Facts)))",
+  "powerbi": "'Facts'[Sales],'Facts'[Note],'Facts'[Quantity]\n0,Paid,0\n-1.5,Paid,1\n10.5,Paid,2\n20,,3\n,Late,4\n2.5,,5",
+  "ours": "'Facts'[Sales],'Facts'[Note],'Facts'[Quantity]\n10.5,Paid,2\n-1.5,Paid,1\n0,Paid,0\n20,,3\n2.5,,5\n,Late,4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Sales]>0),Facts[Region],Facts[Quantity],ALL(Facts)))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nEast,5\nWest,3\nNorth,",
+  "ours": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nWest,3\nEast,5\nNorth,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],Facts[Sales],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Sales]),Facts[Quantity]>1),Facts[Region],Facts[Note],Facts[Sales],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Sales]\nEast,,2.5\nWest,,20\nEast,Paid,10.5\nNorth,Late,\nEast,Paid,-1.5\nWest,Paid,0",
+  "ours": "'Facts'[Region],'Facts'[Note],'Facts'[Sales]\nEast,Paid,10.5\nWest,,20\nNorth,Late,\nEast,,2.5\nEast,Paid,-1.5\nWest,Paid,0"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region]),Facts[Sales]>0),Facts[Quantity],Facts[Region],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region]\n2,East\n5,East\n3,West\n1,East\n0,West\n4,North",
+  "ours": "'Facts'[Quantity],'Facts'[Region]\n2,East\n3,West\n5,East\n1,East\n0,West\n4,North"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Sales],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Sales]),Facts[Region]=\"East\"),Facts[Quantity],Facts[Sales],Facts[Region],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],'Facts'[Sales]\nEast,1,-1.5\nEast,2,10.5\nEast,5,2.5",
+  "ours": "'Facts'[Region],'Facts'[Quantity],'Facts'[Sales]\nEast,2,10.5\nEast,1,-1.5\nEast,5,2.5"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Sales]),Facts[Quantity]>2),Facts[Region],Facts[Sales],FILTER(ALL(Facts),Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Region],'Facts'[Sales]\nEast,2.5\nWest,20\nNorth,\nEast,10.5\nEast,-1.5",
+  "ours": "'Facts'[Region],'Facts'[Sales]\nWest,20\nNorth,\nEast,2.5\nEast,-1.5\nEast,10.5"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],CALCULATETABLE(SUMMARIZE(Facts,Facts[Sales]),Facts[Quantity]>2),Facts[Sales],Facts))",
+  "powerbi": "'Facts'[Sales]\n\n2.5\n20\n-1.5\n0\n10.5",
+  "ours": "'Facts'[Sales]\n20\n\n2.5\n-1.5\n0\n10.5"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity]),Facts[Region]<>\"West\"),Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Quantity]\n1\n2\n4\n5",
+  "ours": "'Facts'[Quantity]\n1\n2\n5\n4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region],Facts[Note]),Facts[Sales]>0),Facts[Quantity],Facts[Note],Facts[Region],FILTER(Facts,Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n2,East,Paid",
+  "ours": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2,East,Paid\n3,West,\n5,East,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Sales]>0),Facts[Quantity],Facts[Region],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nEast,5\nWest,3",
+  "ours": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nWest,3\nEast,5"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(CALCULATETABLE(SUMMARIZE(Facts,Facts[Sales]),Facts[Region]<>\"West\"),Facts[Sales],FILTER(ALL(Facts),Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Sales]\n\n-1.5\n2.5\n10.5",
+  "ours": "'Facts'[Sales]\n-1.5\n2.5\n10.5\n"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Note],Facts[Region]),Facts[Sales]>0),Facts[Quantity],Facts[Region],Facts[Note],FILTER(Facts,Facts[Quantity]>2)))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note],'Facts'[Region]\n5,,East\n3,,West\n2,Paid,East",
+  "ours": "'Facts'[Quantity],'Facts'[Note],'Facts'[Region]\n2,Paid,East\n3,,West\n5,,East"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity]),Facts[Sales]>0),Facts[Quantity],Facts[Note],ALL(Facts)))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity]\n,3\n,5\nPaid,2\nPaid,0\nPaid,1\nLate,4",
+  "ours": "'Facts'[Note],'Facts'[Quantity]\nPaid,2\n,3\n,5\nPaid,0\nPaid,1\nLate,4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity]),Facts[Sales]>0),Facts[Quantity],Facts[Note],FILTER(Facts,Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity]\n,3\n,5\nPaid,2\nPaid,0\nPaid,1",
+  "ours": "'Facts'[Note],'Facts'[Quantity]\nPaid,2\n,3\n,5\nPaid,0\nPaid,1"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Sales],Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity],Facts[Sales]),Facts[Note]=\"Paid\"),Facts[Note],Facts[Quantity],Facts[Sales]))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity],'Facts'[Sales]\nPaid,0,0\nPaid,1,-1.5\nPaid,2,10.5\n,3,20\nLate,4,\n,5,2.5",
+  "ours": "'Facts'[Note],'Facts'[Quantity],'Facts'[Sales]\nPaid,2,10.5\nPaid,1,-1.5\nPaid,0,0\n,3,20\n,5,2.5\nLate,4,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity]),Facts[Sales]>0),Facts[Note],Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity]\n,3\n,5\nPaid,2\nPaid,1\nPaid,0",
+  "ours": "'Facts'[Note],'Facts'[Quantity]\nPaid,2\n,3\n,5\nPaid,0\nPaid,1"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity]),Facts[Sales]>0),Facts[Quantity],Facts[Note],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Note],'Facts'[Quantity]\n,3\n,5\nPaid,2\n,0\n,1\n,4",
+  "ours": "'Facts'[Note],'Facts'[Quantity]\nPaid,2\n,3\n,5\n,0\n,1\n,4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity]),Facts[Region]<>\"West\"),Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\")))",
+  "powerbi": "'Facts'[Quantity]\n1\n2\n4\n5",
+  "ours": "'Facts'[Quantity]\n1\n2\n5\n4"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Note]),Facts[Sales]>0),Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Note]=\"Paid\")))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Note]\n3,\n5,\n2,Paid\n1,Paid\n0,Paid",
+  "ours": "'Facts'[Quantity],'Facts'[Note]\n2,Paid\n3,\n5,\n0,Paid\n1,Paid"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region],Facts[Note]),Facts[Quantity]>2),Facts[Region],Facts[Note],Facts[Quantity]))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n4,North,Late\n2,East,Paid\n1,East,Paid\n0,West,Paid",
+  "ours": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n4,North,Late\n1,East,Paid\n2,East,Paid\n0,West,Paid"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region],Facts[Note]),Facts[Sales]>0),Facts[Quantity],Facts[Note],Facts[Region]))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n2,East,Paid\n0,,Paid\n1,,Paid\n4,,Late",
+  "ours": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2,East,Paid\n3,West,\n5,East,\n0,,Paid\n1,,Paid\n4,,Late"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],Facts[Note],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Region],Facts[Note]),Facts[Sales]>0),Facts[Region],Facts[Quantity],Facts[Note]))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n5,East,\n3,West,\n2,East,Paid\n1,East,Paid\n0,West,Paid\n4,North,Late",
+  "ours": "'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n2,East,Paid\n3,West,\n5,East,\n1,East,Paid\n0,West,Paid\n4,North,Late"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Sales],CALCULATETABLE(SUMMARIZE(Facts,Facts[Quantity],Facts[Sales]),Facts[Note]=\"Paid\"),Facts[Sales],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2)))",
+  "powerbi": "'Facts'[Quantity],'Facts'[Sales]\n0,0\n1,-1.5\n2,10.5\n3,20\n4,\n5,2.5",
+  "ours": "'Facts'[Quantity],'Facts'[Sales]\n2,10.5\n1,-1.5\n0,0\n3,20\n4,\n5,2.5"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Sales]>0),Facts[Note],Facts[Region],Facts[Quantity],ALL(Facts[Region])))",
+  "powerbi": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity]\nEast,,5\nWest,,3\nEast,Paid,2\nWest,Paid,",
+  "ours": "'Facts'[Region],'Facts'[Note],'Facts'[Quantity]\nEast,Paid,2\nWest,,3\nEast,,5\nWest,Paid,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Sales]>0),Facts[Region],Facts[Quantity],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nEast,5\nWest,3\nNorth,",
+  "ours": "'Facts'[Region],'Facts'[Quantity]\nEast,2\nWest,3\nEast,5\nNorth,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note]),Facts[Sales]>0),Facts[Region],Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2)))",
+  "powerbi": "'Facts'[Region],'Facts'[Quantity],'Facts'[Note]\nEast,5,\nWest,3,\nEast,2,Paid\nNorth,,",
+  "ours": "'Facts'[Region],'Facts'[Quantity],'Facts'[Note]\nEast,2,Paid\nWest,3,\nEast,5,\nNorth,,"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Sales],CALCULATETABLE(SUMMARIZE(Facts,Facts[Region],Facts[Sales]),Facts[Quantity]>1),Facts[Region],Facts[Sales],Facts))",
+  "powerbi": "'Facts'[Region],'Facts'[Sales]\nEast,2.5\nEast,10.5\nWest,20\nNorth,\nEast,-1.5\nWest,0",
+  "ours": "'Facts'[Region],'Facts'[Sales]\nEast,10.5\nWest,20\nNorth,\nEast,2.5\nEast,-1.5\nWest,0"
+ },
+ {
+  "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],Facts[Quantity],Facts[Region],CALCULATETABLE(SUMMARIZE(Facts,Facts[Sales],Facts[Region],Facts[Quantity]),Facts[Region]=\"North\"),Facts[Sales],Facts[Region],Facts[Quantity],ALL(Facts[Quantity])))",
+  "powerbi": "'Facts'[Sales],'Facts'[Region],'Facts'[Quantity]\n,North,4\n10.5,East,2\n20,West,3\n-1.5,East,1\n0,West,0\n2.5,East,5",
+  "ours": "'Facts'[Sales],'Facts'[Region],'Facts'[Quantity]\n,North,4\n-1.5,East,1\n10.5,East,2\n2.5,East,5\n0,West,0\n20,West,3"
+ }
+]
