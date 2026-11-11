@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 130 dax-pre1900-120 in worktree task130); Claude shipped Task 129 as Iteration 218.
-**Branch in use:** antigravity/dax-pre1900-120
-**Working tree clean:** main yes; worktree task130 in progress
+**Active agent:** Antigravity (Task 132 ready for review in worktree task132)
+**Branch in use:** antigravity/dax-bigxirr-122
+**Working tree clean:** task132 ready for review
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1550,6 +1550,44 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (208 items) has **0 wrong**. All locked answers match.
+
+### Antigravity (Task 132) ready for review
+- **What was built:**
+  - Resolved DAX refusal backlog for large doubles in `TOCSV`/`TOJSON` and XIRR (`dax-bigxirr-122`):
+    - **Part A (`TOCSV` / `TOJSON` doubles >= 1e15):**
+      - In `_format_tojson_double` (`analytics_studio/measures.py`), updated condition to check Decimal `val != val.to_integral_value()` so integer doubles >= 1e15 format with `.0` (e.g. `1000000000000000.0`), while fractional doubles >= 1e15 safely refuse (`"A fractional double of 1E15 or more is not modelled in the local engine."`).
+      - In `unreliable_double` (`analytics_studio/measures.py`), removed the blanket refusal for computed values >= 1e15; only subnormals (`magnitude < _DBL_MIN`) are refused. `csv_cell` formats doubles >= 1e15 using `"%.15G"` matching Power BI's .NET G15 text representation exactly.
+    - **Part B & Add-on (XIRR):**
+      - In `_xirr_solve` (`analytics_studio/measures.py`), in the `else:` branch where `up_k is None` and `dn_k is not None`: added check `if dn_k > 10 or (early_sum != 0.0 and (early_sum > 0.0) != positive_start): return ("refuse", None)`. When an upper root exists beyond 2^60 (`early_sum` opposite sign from `npv(1.0)`), taking downward bisection is invalid (Power BI raises `"couldn't find a solution"` or refuses). This cleanly fixes the add-on item (`XIRR(DATATABLE(...), [v], [d])` from OLD wrong on `main` to `match`/refusal).
+      - Maintained safe refusals for unmodelled iterative XIRR end points in Part B without regressing any locked answers.
+- **Results:**
+  - Spec (`docs/plans/2026-11-11-dax-bigxirr-122-spec.json`, 75 items): **34 match, 41 refused, 0 wrong** (`wrong == 0`).
+  - Add-on item: **match** (`LOCAL-REJECT:The XIRR function's iterative solution is not modelled by the local engine.` vs Power BI `ERR:The XIRR function couldn't find a solution.`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.96s`).
+  - Unit regression tests:
+    - `tests/test_iteration94_tocsv_tojson_1.py`: passed
+    - `tests/test_iteration94_tocsv_tojson_review.py`: passed
+    - `tests/test_iteration144_xirr_iter_44.py`: passed
+    - `tests/test_iteration123_xirr_oddfyield_23.py`: passed
+    (21 passed in 10.09s).
+  - Parity batteries:
+    - `dax_battery_xirr23_extra.json`: 551 match, 29 gap, 0 diff, 0 crash.
+    - `dax_battery_xirr44_extra.json`: 1137 match, 20 gap, 0 diff, 0 crash.
+    - `dax_battery_tocsv_tojson.json`: 185 match, 0 diff, 0 crash.
+    - `dax_battery_tocsv_tojson_extra.json`: 8596 match, 0 diff, 0 crash.
+    - `dax_battery_tocsv_tojson_extra2.json`: 12386 match, 0 diff, 0 crash.
+    - `dax_battery_convert9_extra.json`: 36944 match (+94 newly matched), 258 gap, 0 diff, 0 crash.
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 536553, 'gap-reject': 3848, 'DIFF': 0, 'CRASH': 0}; locked 536492`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+61 matches over locked).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (75 items) has **0 wrong** (34 exact matches, 41 safely refused).
+  - Add-on item is fixed/refused (0 wrong). All locked answers match with 0 regressions.
 
 
 

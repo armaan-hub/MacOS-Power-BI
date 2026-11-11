@@ -2526,8 +2526,8 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
             return ("refuse", None)  # measured: up first (k <= 5 with a lower root too), roots up to 2^26 answered
         lo, hi, upward = 2.0 ** (up_k - 1), 2.0 ** up_k, True
     else:
-        if dn_k > 10:
-            return ("refuse", None)  # measured: a root at 2^-28 is not found, a root at 2^-10 is
+        if dn_k > 10 or (early_sum != 0.0 and (early_sum > 0.0) != positive_start):
+            return ("refuse", None)  # measured: a root at 2^-28 is not found, a root at 2^-10 is; an upper root beyond 2^60 makes downward bisection wrong (Task 132)
         lo, hi, upward = 2.0 ** -dn_k, 2.0 ** -(dn_k - 1), False
     variants = [(w, t, f) for w in range(3) for t in (1e-8, 0.995e-8, 1.01e-8) for f in (1e-8, 1.005e-8)]
     answers: dict[int, float] = {}
@@ -4225,7 +4225,7 @@ def _format_tojson_double(val: Decimal) -> str:
     """A double cell of TOJSON (live Power BI, iteration 94): the shortest digits that read back as the double, cut (not
     rounded) after 4 decimals with at least one kept ("0.3", "1.0", "-0.0"); from 1e21 on an exponent form ("1.5e300")."""
     double = float(val)
-    if abs(double) >= 1e15 and double != int(double):
+    if abs(val) >= 1e15 and val != val.to_integral_value():
         raise MeasureError("A fractional double of 1E15 or more is not modelled in the local engine.")
     if abs(double) >= 1e21:
         shortest = repr(double)
@@ -23117,12 +23117,11 @@ def _evaluate_measures_once(
                 return value if context.get("derived") else typed_cell(context, header, value)
 
             def unreliable_double(value: Decimal, header: str) -> bool:
-                """A double the local decimals cannot reproduce digit for digit: a computed one beyond 1E15 (EXP(50), PI()*1E20) or a subnormal."""
+                """A double the local decimals cannot reproduce digit for digit: a subnormal."""
                 magnitude = abs(value)
                 if magnitude != 0 and magnitude < _DBL_MIN:
                     return True
-                computed = context.get("derived") and header not in (context.get("lineage") or {}) and header not in literal_headers
-                return bool(computed and magnitude >= Decimal("1e15") and column_kind(header) in {None, "double"})
+                return False
 
             if is_csv:
                 delimiter = ","
