@@ -19265,6 +19265,13 @@ def _evaluate_measures_once(
             better = list({row_key([Decimal(0) if numeric and value is None else value]): value for value in better}.values())
         return Decimal(len(better) + 1)
 
+    def task135_fallback_has_value(node: Any, row_context: Any) -> bool:
+        """Task 135: a fallback that evaluates to a value (not BLANK) in this row context."""
+        try:
+            return evaluate(node, row_context, allow_text=True, allow_boolean=True) is not None
+        except (MeasureRuntimeError, DecimalException, OverflowError):
+            return False
+
     def task135_failed_iferror(node: Any, row_context: Any) -> Any:
         """Task 135: the first IFERROR in the argument whose first operand fails at run time (IFERROR catches it), or None."""
         for part in _walk_nodes(node):
@@ -19780,11 +19787,12 @@ def _evaluate_measures_once(
         if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
             failed_iferror = task135_failed_iferror(arguments[0], row_context)  # Task 135: an IFERROR whose first operand fails is typed by both branches
             if failed_iferror is not None and failed_iferror is arguments[0]:
+                iferror_answer = None
                 if _is_blank_node(failed_iferror[2][1]):
                     iferror_answer = (function == "ISNONTEXT") if function != "ISBLANK" else None  # the failing row is a BLANK (a value of no type)
-                else:
+                elif _reads_no_data(failed_iferror[2][1], variable_nodes.get) and task135_fallback_has_value(failed_iferror[2][1], row_context):
                     answer_t = _task135_supertype(static_type_of(failed_iferror[2][0]), static_type_of(failed_iferror[2][1]))
-                    iferror_answer = static_type_answer(function, answer_t) if answer_t is not None else None
+                    iferror_answer = static_type_answer(function, answer_t) if answer_t is not None else None  # a fallback that reads data may be BLANK at run time: not typed here
                 if iferror_answer is not None:
                     return iferror_answer  # Task 135: the static type of IFERROR is the common type of its two branches (measured on the locked IFERROR rows)
         try:
