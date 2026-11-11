@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 130 dax-pre1900-120 in worktree task130); Claude shipped Task 129 as Iteration 218.
-**Branch in use:** antigravity/dax-pre1900-120
-**Working tree clean:** main yes; worktree task130 in progress
+**Active agent:** Claude Opus 5.5 (Reviewing Task 131 dax-floatnoise-121)
+**Branch in use:** antigravity/dax-floatnoise-121
+**Working tree clean:** main yes; worktree task131 in progress
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1550,6 +1550,33 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - Spec (208 items) has **0 wrong**. All locked answers match.
+
+### Antigravity (Task 131) ready for review
+- **What was built:**
+  - Resolved DAX refusal backlog for float noise of `PRODUCTX` over Currency and `STDEVX`/`VARX` over repeated dates (`dax-floatnoise-121`):
+    - **Part A (`PRODUCTX` over Currency in conditionals, 46 spec items):**
+      - Removed the blanket refusal in `_evaluate_measures_once` (formerly lines 21392-21395) that refused `PRODUCTX` over a Currency in a conditional with multiple rows.
+      - Power BI's double float multiplication for these expressions matches within relative float tolerance (`1e-9`). All 46 spec items evaluate to exact matches (46 match, 0 refused, 0 wrong).
+    - **Part B (`STDEVX`/`VARX` over repeated inexact dates, 131 spec items):**
+      - Date bodies with division (e.g. `+ 1/2.5`, `+ 1/5`, `+ 1/6`) are cleanly refused by the existing `_double_division_body` check: `len(set(row_doubles)) == 1 and not _repeated_double_exact(...)`.
+      - In the non-division repeated date path (lines 21506-21516), when `not _repeated_double_exact(float(non_blank_vals[0]), len(values))`, restricted `double_dates = True` to modeled stored scans, `TOPN`, and small table constructors (`len(values) <= 3`), and raised `MeasureError(f"{function} over one repeated inexact date value has a float-noise spread the local engine does not model.")` for unmodelled derived tables (like `ADDCOLUMNS`) and larger table constructors.
+    - **Add-on (`docs/plans/2026-11-11-dax-floatnoise-121-addon.json`, 7 old wrong answers on main):**
+      - All 7 add-on items (`ADDCOLUMNS(Facts, "z", 1)` and `{1,2,3,4,5,6,7,8}`) are cleanly refused as `gap-reject` under the Part B rule (0 wrong, 7 refused).
+- **Results:**
+  - Spec (`docs/plans/2026-11-11-dax-floatnoise-121-spec.json`, 177 items): **46 match, 131 refused, 0 wrong** (`wrong == 0`).
+  - Add-on (`docs/plans/2026-11-11-dax-floatnoise-121-addon.json`, 7 items): **0 match, 7 refused, 0 wrong** (`wrong == 0`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.95s`).
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 536573, 'gap-reject': 3828, 'DIFF': 0, 'CRASH': 0}; locked 536492`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers.
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/measures.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - `tests/test_iteration146_productx_currency_46.py::test_part_a_multi_row_if_currency_stays_refused` expects `PRODUCTX(Facts,IF(1,CURRENCY(-2)))` to be refused, which is now modelled per Task 131 Part A (Claude updates existing tests on review per AGENTS.md).
+
 
 
 
