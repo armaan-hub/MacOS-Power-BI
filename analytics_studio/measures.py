@@ -5424,6 +5424,29 @@ def _has_op_outside_let(node: Any, ops: set[str] | frozenset[str]) -> bool:
     return any(_has_op_outside_let(c, ops) for c in (node[1:] if isinstance(node[0], str) else node))
 
 
+def _walk_outside_let(node: Any):
+    if not isinstance(node, tuple) or not node:
+        return
+    if node[0] == "let":
+        return
+    yield node
+    for child in (node[1:] if isinstance(node[0], str) else node):
+        yield from _walk_outside_let(child)
+
+
+def _has_naked_column_reference(node: Any, in_agg: bool = False) -> bool:
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind in {"reference", "table"}:
+        return not in_agg
+    if kind == "call":
+        fn = str(node[1]).upper()
+        if fn in _AGGREGATING_CALLS or fn in {"COUNTROWS", "SELECTEDVALUE", "CALCULATE", "CALCULATETABLE", "FILTER"}:
+            return False
+    return any(_has_naked_column_reference(c, in_agg) for c in (node[1:] if isinstance(node[0], str) else node))
+
+
 def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
     """Corrections rule 1: True when an operand reads no data (BLANK(), IF(1=2,1), ABS(BLANK()), CALCULATE(BLANK()), a VAR of those).
 
@@ -19034,7 +19057,7 @@ def _evaluate_measures_once(
         """A type test answered by the static type of its argument; None when that type is not known well enough to answer."""
         if static_t not in {"int64", "double", "currency", "decimal", "text", "bool", "datetime"}:
             if static_t is None:
-                if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISLOGICAL", "ISBOOLEAN", "ISSTRING", "ISDATETIME"}:
+                if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISLOGICAL", "ISBOOLEAN", "ISSTRING", "ISDATETIME", "ISNUMBER", "ISNUMERIC"}:
                     return False
                 if function == "ISNONTEXT":
                     return True
@@ -19695,6 +19718,20 @@ def _evaluate_measures_once(
                             st_ans = static_type_answer(function, st)
                             if st_ans is not None:
                                 answer = st_ans
+            if answer is None and function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
+                arg0 = arguments[0]
+                out_calls = {str(n[1]).upper() for n in _walk_outside_let(arg0) if isinstance(n, tuple) and n and n[0] == "call"}
+                if (
+                    not (out_calls & _TASK128_FORBIDDEN_CALLS)
+                    and not _has_op_outside_let(arg0, {"/"})
+                    and not _has_naked_column_reference(arg0)
+                    and not any(isinstance(n, tuple) and n and n[0] == "call" and str(n[1]).upper() in {"COALESCE", "IF", "IF.EAGER", "IFERROR", "SWITCH"} for n in _walk_nodes(arg0))
+                    and any(isinstance(n, tuple) and n and n[0] == "let" for n in _walk_nodes(arg0))
+                ):
+                    st = static_type_of(arg0)
+                    st_ans = static_type_answer(function, st)
+                    if st_ans is True if function == "ISNONTEXT" else st_ans is False:
+                        answer = st_ans
             if answer is None:
                 raise
             return answer
@@ -19750,7 +19787,7 @@ def _evaluate_measures_once(
                             raise dax_typed.refusal(f"{function} with a subnormal argument is not modelled by the local engine.")
                     except MeasureRuntimeError:
                         pass
-        if function in dax_ext.ARITY and function not in {"ISBOOLEAN"}:
+        if function in dax_ext.ARITY and function not in {"ISBOOLEAN", "ISDATETIME"}:
             return dax_ext.call(function, values)
         if function == "CURRENCY" and isinstance(values[0], str):
             try:
@@ -19870,6 +19907,8 @@ def _evaluate_measures_once(
         if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
             static_t = static_type_of(arguments[0])
             if static_t is None:
+                if values[0] is None:
+                    return False
                 raise MeasureError(f"Cannot determine static type for function {function}.")
             if values[0] is None and _has_error_or_data_or_blank(arguments[0]):
                 return False
@@ -19880,6 +19919,10 @@ def _evaluate_measures_once(
             if function in {"ISDECIMAL", "ISCURRENCY"}:
                 return static_t in {"currency", "decimal"}
             return False
+        if function == "ISDATETIME":
+            if values[0] is None:
+                return False
+            return static_type_of(arguments[0]) == "datetime"
         if function == "FORMAT":
             if isinstance(values[0], _LogicalBlankText):
                 raise MeasureError("FORMAT of the empty text a logical operator's BLANK becomes beside a text is an error in Power BI and is not modelled by the local engine.")
