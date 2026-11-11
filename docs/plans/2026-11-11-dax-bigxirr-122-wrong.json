@@ -1,0 +1,30 @@
+{
+ "note": "fresh Power BI probes; main refused these, Task 132 answers them wrongly. Power BI EXP of a large argument differs from ours in the last digits, so the printed 15 digits differ.",
+ "items": [
+  {
+   "expr": "TOCSV(ROW(\"a\",-(EXP(50.5))))",
+   "powerbi": "[a]\n-8.54813428729802E+21",
+   "local_now": "[a]\n-8.54813428729806E+21"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",EXP(50.5)))",
+   "powerbi": "[a]\n8.54813428729802E+21",
+   "local_now": "[a]\n8.54813428729806E+21"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",EXP(50.5),\"b\",1))",
+   "powerbi": "[a],[b]\n8.54813428729802E+21,1",
+   "local_now": "[a],[b]\n8.54813428729806E+21,1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",-(EXP(50.5))))",
+   "powerbi": "[a]\n-8.54813428729802E+21",
+   "local_now": "[a]\n-8.54813428729806E+21"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",EXP(50.5),\"b\",1))",
+   "powerbi": "[a],[b]\n8.54813428729802E+21,1",
+   "local_now": "[a],[b]\n8.54813428729806E+21,1"
+  }
+ ]
+}
