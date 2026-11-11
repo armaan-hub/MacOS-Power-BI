@@ -13151,13 +13151,11 @@ def _evaluate_measures_once(
 
         table_context, table_rows = table_argument_value(table_node)
         source_keys = {(lin[0]["id"], lin[1].casefold()) for h, lin in base_lineage(table_context).items() if h in table_context["headers"]}
-        # Task 139 (live Power BI, gaps grid): over VALUES(column) / TOPN(n, VALUES(column), ...) a FIRST groupBy column the table does not hold is an
-        # error (3 wrong probes). A later missing groupBy column is answered (saved answers in dax_battery_ami_extra), so only the first level refuses.
-        first_values = table_node[0] == "table_call" and table_node[1] == "VALUES" or (
-            table_node[0] == "call" and table_node[1] == "TOPN" and len(table_node[2]) >= 2 and table_node[2][1][0] == "table_call" and table_node[2][1][1] == "VALUES"
-        )
-        if first_values and group_keys and group_keys[0] not in source_keys:
+        # Task 139 (live Power BI, missing.json grid): a FIRST groupBy column the table does not hold is an error for every source and wrapper.
+        # A later missing groupBy column is answered (saved answers in dax_battery_ami_extra), so only the first level refuses.
+        if group_keys and group_keys[0] not in source_keys:
             raise MeasureError(f"The column '{group_nodes[0][2]}' specified in the 'ADDMISSINGITEMS' function is not a column of the table it is applied to.")
+            raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # Task 139: the reversal is measured for TOCSV / TOJSON only
         if not show_nodes:
             return table_context, table_rows
         table_rows = [typed_row(table_context, r) for r in table_rows]  # loaded cells are text; the domain below holds typed values
