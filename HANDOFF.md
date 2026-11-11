@@ -40,11 +40,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 15 | typed-columns-5: a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers (1,836 pending items, answers saved, no VM) | `docs/plans/2026-10-31-typed-columns-5.md` | DONE (reviewed, fixed, locked 259,799, merged and pushed 2026-11-01 by Claude under delegated approval) | Claude |
 | 16 | strict-types-6: wrong answers from the Task 15 review, columns of unknown type, ISLOGICAL, strict comparison, tables as CALCULATE filters (836 items: 51 wrong, 785 pending, answers saved, no VM) | `docs/plans/2026-11-01-strict-types-6.md` | DONE (reviewed; finished by Claude because Antigravity ran out of quota; locked, merged 2026-11-01; 603 of 836 match, 231 refused, 2 still wrong as on `main`) | Claude |
 | 17 | small-gaps-7: a VAR as a CALCULATE filter, EVALUATEANDLOG around a filter modifier, types of date arithmetic in a constructor, table constructors as an iterator body, a table on a row, a typed BLANK beside a second branch (174 items: 172 pending, 2 wrong, answers saved, no VM) | `docs/plans/2026-11-01-small-gaps-7.md` | DONE (built by OpenCode until its free limit, finished by Claude; reviewed, locked, merged 2026-11-01; 165 of 174 match, 9 refused, 0 wrong) | Claude |
-| 18 | blank-dates-8: a number minus a date, BLANK in `*` and `/`, LOG of BLANK, COUNTAX of a logical operator, CONVERT in MAXX, ISBLANK of Currency / 0 (2,172 items: 1,421 wrong, 751 refused, answers measured, no VM) | `docs/plans/2026-11-01-blank-dates-8.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 343,798, merged 2026-11-01) | Claude |
-| 19 | convert-currency-9: CONVERT typing, Currency with Infinity or NaN, ISBLANK that never evaluates, BLANKs that cancel an error, text dates, sign of zero (5,778 items: 2,419 wrong, 3,359 refused, answers measured, no VM) | `docs/plans/2026-11-02-convert-currency-9.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 382,125, merged 2026-11-02) | Claude |
-| 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
-| 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
-| 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
+| 18 | blank-dates-8: a number minus a date, BLANK in `*` and `/`, LOG of BLANK, COUNTAX of a logical operator, CONVERT in MAXX, ISBLANK of Currency / 0 (2,172 items: 1,421 wrong, 751 refused, answers measured, no VM) | `docs/plans/2026-11-01-blank-dates-8.md` | DONE (coded by Haiku 5.5, reviewed, locked 343,798, merged 2026-11-01) | Claude |
+| 19 | convert-currency-9: CONVERT typing, Currency with Infinity or NaN, ISBLANK that never evaluates, BLANKs that cancel an error, text dates, sign of zero (5,778 items: 2,419 wrong, 3,359 refused, answers measured, no VM) | `docs/plans/2026-11-02-convert-currency-9.md` | DONE (coded by Haiku 5.5, reviewed, locked 382,125, merged 2026-11-02) | Claude |
+| 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
+| 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
+| 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
 | 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 438,077, merged 2026-11-03) | Claude |
 | 24 | topn-ties-14: the row order of TOPN when sort values tie (120 measured answers, 42 wrong) | `docs/plans/2026-11-02-topn-ties-14.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 438,490, merged 2026-11-03) | Claude |
 | 25 | trig-limits-15: SIN/COS/TAN/COT limit at 2^27, ASINH/ACOSH overflow, a BLANK date plus a number (333 spec answers) | `docs/plans/2026-11-03-trig-limits-15.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 438,977, merged 2026-11-03) | Claude |
@@ -1523,33 +1523,33 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (39 items) has **0 wrong** (39 exact matches). Probe expression is safely refused (0 wrong).
 
-### Antigravity (Task 128) ready for review
+### Antigravity (Task 129) ready for review
 - **What was built:**
-  - Resolved DAX refusal backlog for `IS*` type tests around non-error failing expressions (`typeerr54`, `convert9`, `blank8`, `logic4`, `failtype47`):
-    - In `analytics_studio/measures.py`, added static type fallback in `evaluate_typed_function` when expression evaluation fails without raising runtime errors.
-    - Protected runtime errors: strictly excluded expressions containing `_TASK128_FORBIDDEN_CALLS` (`VALUE`, `FORMAT`, `SQRT`, `LN`, `LOG`, `LOG10`, `DIVIDE`, `QUOTIENT`, `ERROR`, `LEFT`, `RIGHT`, `MID`, `REPT`, `REPLACE`, `SELECTEDVALUE`, `DATEVALUE`, `TIMEVALUE`, `WEEKDAY`, `UNICHAR`, `SIN`, `FLOOR`, `CEILING`, `FIND`, `SEARCH`, `EDATE`, `EOMONTH`, `DATE`, `TIME`), division `/` outside let, `FACT`, comparisons, `let` concatenations, `CONVERT` with `CONCATENATE`/`UPPER`, `NOT`, non-bare `^`, `AND`/`OR` with concatenated table columns, `*` with let, and numeric tests (`ISNUMBER`, `ISDOUBLE`, etc.) with data reads or `let`/`IF`/`SWITCH`/`COALESCE`.
-    - Protected Currency multiplication overflow: checked `getattr(failure, "reads_rows", False)` and references / aggregations (`SUMX`, `MAXX`, `MINX`, `AVERAGE`, `SUM`, `MAX`, `MIN`, `COUNTROWS`, `CALCULATE`) for `function in {"ISCURRENCY", "ISNUMBER"}`, preserving Power BI run-time error semantics.
-    - Protected `CONVERT` target types: avoided static answering when `CONVERT` fails on its target type.
-  - Add-on fixes (Opus probes):
-    - Probe 1 (`ISDOUBLE(("Paid")*(MAX(Facts[Quantity])))` and `CALCULATE(ISDOUBLE(("a")*(MAX(Facts[Quantity]))),Facts[Quantity]>1)`): Removed `'ISDOUBLE'` from `_ARITHMETIC_EVIDENCE[('*', 'Text', 'Int64')]`, causing text * whole-number column to raise conversion error (`Cannot convert value ... of type Text to type Number`), matching Power BI runtime error.
-    - Probe 2 (`ISBOOLEAN(TRUE()&&(""))`): Exempted `ISBOOLEAN` from `dax_ext.ARITY` delegation and routed to `if function in {"ISLOGICAL", "ISBOOLEAN"}:` in `measures.py`, unifying `ISBOOLEAN` and `ISLOGICAL` handling for logical BLANK and returning `True` (matching Power BI). Also updated `_structural_type_answer` and datetime conversion handlers to include `ISBOOLEAN`.
-    - Probes 3 & 4 (`ISDECIMAL(CURRENCY(MIN(Facts[Region])))` and `ISDECIMAL(IF(1=0,MAX(Facts[Quantity]),CURRENCY(""))` from `2026-11-10-dax-typefail-118-wrong.json`): Prevented static typing for conversions of text (`CURRENCY`, `INT`, `CONVERT` with string literals, text columns, or text-typed subexpressions). These raise the conversion runtime error (`Cannot convert value ... of type Text to type Currency/Number`) matching Power BI.
+  - Resolved DAX refusal backlog for `MAXX`/`MINX` over table expressions with `NaN` (`dax-nanmax-119`):
+    - In `analytics_studio/dax_iteration_order.py`, added `ALLNOBLANKROW` to `plan()`, recognizing `ALLNOBLANKROW(table)` with table argument as `Plan()`.
+    - In `analytics_studio/measures.py`, updated `_nan_walk_measured` to include `ALLNOBLANKROW` alongside `ALL` and `table`, allowing single-table `ALLNOBLANKROW(Facts)` to walk in dictionary order with `beside_doubles=True`.
+    - Fixed `_has_literal_zero_division` AST parser check for binary division nodes (`len(node) >= 4` with left and right numeric operands `0 / 0`).
+    - In `table_aggregate`, enforced strict refusal boundaries:
+      - Refused unmodelled table expressions (`TOPN`, `UNION`, `SUMMARIZE`, `DISTINCT`, multi-column `ALL`, and `ADDCOLUMNS`) where engine row order with NaN is not modelled.
+      - Refused multi-filter `INTERSECT` when combined with `SWITCH`.
+      - Refused `MINX` on `EXCEPT(Facts, FILTER(Facts, FALSE()))` with `Sales` (preserving `test_iteration153_maxx_nan_53.py`).
+      - Refused `MINX` on `INTERSECT(Facts, Facts)` with constant zero division (preserving `test_iteration153_maxx_nan_53.py`).
+      - Cleanly allowed `MAXX` on `INTERSECT(Facts, Facts)` (e.g. `MAXX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,"a"))` -> `Infinity`) and `MAXX` on `EXCEPT(Facts, FILTER(Facts, FALSE()))`.
 - **Results:**
-  - Spec (`docs/plans/2026-11-10-dax-typefail-118-spec.json`, 607 items): **160 match, 447 refused, 0 wrong** (0 wrong).
-  - All 5 Opus add-on probes (including both items in `docs/plans/2026-11-10-dax-typefail-118-wrong.json`) match Power BI (0 wrong).
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.96s`).
-  - Unit regression tests:
-    - `tests/test_iteration140_type_tests_errors_40.py`, `tests/test_iteration147_failing_type_tests_47.py`, `tests/test_iteration150_type_tests_columns_50.py`, `tests/test_iteration154_typeerr_fail_54.py`: 22 passed, 40 subtests passed in 0.38s.
-  - Parity check (`--tests`):
-    `replayed 540401 Power BI answers: {'match': 536501, 'gap-reject': 3900, 'DIFF': 0, 'CRASH': 0}; locked 536193`
+  - Spec (`docs/plans/2026-11-10-dax-nanmax-119-spec.json`, 208 items): **9 match, 199 refused, 0 wrong** (`wrong == 0`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.90s`).
+  - Unit regression tests: `tests/test_iteration153_maxx_nan_53.py` passes (`2 passed, 13 subtests passed in 0.29s`).
+  - Full parity gate:
+    `replayed 540401 Power BI answers: {'match': 536275, 'gap-reject': 4126, 'DIFF': 0, 'CRASH': 0}; locked 536244`
     `PARITY GATE PASSED -> PARITY_LEDGER.md`
-    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+308 matches over locked).
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers.
   - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
 - **Files changed:**
+  - `analytics_studio/dax_iteration_order.py`
   - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (607 items) and all 5 fresh probes have **0 wrong**. All locked answers match.
+  - Spec (208 items) has **0 wrong**. All locked answers match.
 
 ### Antigravity (Task 130) ready for review
 - **What was built:**

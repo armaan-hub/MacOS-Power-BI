@@ -141,7 +141,7 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         # Task 78 (live Power BI, walk-data-68 grid t78e, Part C): DISTINCT(Facts) and DISTINCT(ALL(Facts)) list the distinct rows in the dictionary order of
         # all the table's columns inside a measured key space (see distinct_walk_order); storage order beyond it
         return Plan(dedup=True, whole_distinct=True)
-    if name in {"VALUES", "ALL", "DISTINCT"}:
+    if name in {"VALUES", "ALL", "DISTINCT", "ALLNOBLANKROW"}:
         if all(argument[0] == "reference" for argument in arguments):
             return Plan(dedup=True)
         if name != "DISTINCT" and len(arguments) == 1 and arguments[0][0] == "table":

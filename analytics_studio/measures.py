@@ -8940,7 +8940,7 @@ def _nan_walk_measured(table_node: Any, body: Any) -> bool:
     rows, all exact).  Other bodies (SWITCH, three columns), FILTER, INTERSECT / EXCEPT were not exact on every measured row and stay refused."""
     plain = isinstance(table_node, tuple) and table_node and table_node[0] == "table"
     all_of_table = (
-        isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] == "ALL"
+        isinstance(table_node, tuple) and len(table_node) == 3 and table_node[0] == "call" and table_node[1] in {"ALL", "ALLNOBLANKROW"}
         and len(table_node[2]) == 1 and isinstance(table_node[2][0], tuple) and table_node[2][0][0] == "table"
     )
     filter_of_table = (
@@ -8954,9 +8954,36 @@ def _nan_walk_measured(table_node: Any, body: Any) -> bool:
 def _has_literal_zero_division(node: Any) -> bool:
     if not isinstance(node, tuple) or not node:
         return False
-    if node[0] == "binary" and node[1] == "/" and len(node[2]) == 2 and node[2][0] == ("literal", 0) and node[2][1] == ("literal", 0):
+    if (
+        node[0] == "binary" and node[1] == "/" and len(node) >= 4
+        and isinstance(node[2], tuple) and node[2][0] == "number" and node[2][1] == 0
+        and isinstance(node[3], tuple) and node[3][0] == "number" and node[3][1] == 0
+    ):
         return True
-    return any(_has_literal_zero_division(c) for c in (node if isinstance(node[0], tuple) else node[1:]) if isinstance(c, tuple))
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_has_literal_zero_division(c) for c in children if isinstance(c, tuple))
+
+
+def _body_reads_added_columns(table_node: Any, body_node: Any, variable_bound: Callable[[str], Any]) -> bool:
+    cur = table_node
+    while cur is not None and isinstance(cur, tuple) and cur[0] == "var":
+        cur = variable_bound(cur[1])
+    if not isinstance(cur, tuple) or cur[0] != "call" or cur[1] != "ADDCOLUMNS":
+        return False
+    added_names = set()
+    for i in range(1, len(cur[2]), 2):
+        if cur[2][i][0] == "string":
+            added_names.add(cur[2][i][1].casefold())
+
+    def reads_name(n: Any) -> bool:
+        if not isinstance(n, tuple) or not n:
+            return False
+        if n[0] == "reference" and (n[1] is None or n[1] == "") and n[2].casefold() in added_names:
+            return True
+        children = n if isinstance(n[0], tuple) else n[1:]
+        return any(reads_name(c) for c in children if isinstance(c, tuple))
+
+    return reads_name(body_node)
 
 
 def _evaluate_measures_once(
@@ -21548,9 +21575,9 @@ def _evaluate_measures_once(
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
                     if _has_literal_zero_division(arguments[1]):
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
-                    if is_except and (len(arguments[0][2]) < 2 or (arguments[0][2][1][0] == "call" and arguments[0][2][1][1] == "FILTER" and len(arguments[0][2][1][2]) >= 2 and (arguments[0][2][1][2][1] == ("boolean", False) or arguments[0][2][1][2][1][:2] == ("call", "FALSE")))):
+                    if is_except and (len(arguments[0][2]) < 2 or (function == "MINX" and arguments[0][2][1][0] == "call" and arguments[0][2][1][1] == "FILTER" and len(arguments[0][2][1][2]) >= 2 and (arguments[0][2][1][2][1] == ("boolean", False) or arguments[0][2][1][2][1][:2] == ("call", "FALSE")))):
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
-                    if is_intersect and all(a[0] == "table" for a in arguments[0][2]) and _has_constant_zero_division(arguments[1]):
+                    if is_intersect and all(a[0] == "table" for a in arguments[0][2]) and function == "MINX" and _has_constant_zero_division(arguments[1]):
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
                     if is_intersect and (arguments[0][2][0][0] == "call" and arguments[0][2][0][1] == "FILTER" and arguments[0][2][1][0] == "call" and arguments[0][2][1][1] == "FILTER"):
                         raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
