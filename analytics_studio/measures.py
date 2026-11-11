@@ -5353,6 +5353,96 @@ def _measured_column_arithmetic_answer(function: str, argument: Any, columns: di
     return function in {"ISNUMBER", "ISNUMERIC", "ISNONTEXT"}  # every result is a number: ISTEXT / ISSTRING / ISLOGICAL / ISBOOLEAN are False
 
 
+def _task135_failing_literal(node: Any) -> bool:
+    """Task 135: a text literal that is neither a number nor a date or time (the conversion of it fails in every reading)."""
+    if not isinstance(node, tuple) or len(node) != 2 or node[0] != "string":
+        return False
+    try:
+        dax_typed.text_to_number(str(node[1]), dates=True)
+    except Exception:
+        return True
+    return False
+
+
+def _task135_bare_type(node: Any) -> str | None:
+    """Task 135: the static type of a bare conversion of a text literal: CURRENCY("c") is a currency, INT("a") and CONVERT("z",INTEGER) an int64,
+    and INT of one of those an int64. The type is fixed by the function, whatever the text is; None for any other shape."""
+    if not isinstance(node, tuple) or len(node) != 3 or node[0] != "call" or not isinstance(node[2], tuple):
+        return None
+    name = str(node[1]).upper()
+    args = node[2]
+    if name == "CURRENCY" and len(args) == 1 and _task135_failing_literal(args[0]):
+        return "currency"
+    if name == "INT" and len(args) == 1 and _task135_failing_literal(args[0]):
+        return "int64"
+    return None
+
+
+def _task135_bare_answer(function: str, node: Any) -> bool | None:
+    """Task 135: a type test of a bare conversion of a text literal, answered by the static type of the conversion (the same table as
+    static_type_answer). Power BI answers ISNUMBER(CURRENCY("a")) True and ISLOGICAL(CURRENCY("a")) False without raising."""
+    static_t = _task135_bare_type(node)
+    if static_t is None:
+        return None
+    if function in {"ISNUMBER", "ISNUMERIC"}:
+        return static_t in {"int64", "double", "currency", "decimal"}
+    if function in {"ISTEXT", "ISSTRING", "ISLOGICAL", "ISBOOLEAN", "ISDATETIME"}:
+        return False
+    if function == "ISNONTEXT":
+        return True
+    if function in {"ISINTEGER", "ISINT64"}:
+        return static_t == "int64"
+    if function == "ISDOUBLE":
+        return static_t == "double"
+    if function in {"ISDECIMAL", "ISCURRENCY"}:
+        return static_t in {"currency", "decimal"}
+    return None
+
+
+_TASK135_VALUE_TESTS = frozenset({"ISNUMBER", "ISNUMERIC", "ISLOGICAL", "ISBOOLEAN"}) | set(_TASK64_OWN_TYPE)
+_TASK135_FIXED_TYPES = frozenset({"int64", "double", "currency", "decimal", "bool", "datetime", "text"})
+
+
+def _task135_bare_wrapper(node: Any) -> bool:
+    """Task 135: the argument is itself a VAR block or an IF / SWITCH / COALESCE call (its result is the failing value, not an operator over it)."""
+    return isinstance(node, tuple) and bool(node) and (node[0] == "let" or (node[0] == "call" and str(node[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE"}))
+
+
+def _task135_branch_shape(node: Any) -> bool:
+    """Task 135: an IF / SWITCH / COALESCE / IFERROR call or a VAR block anywhere in the argument."""
+    for part in _walk_nodes(node):
+        if isinstance(part, tuple) and part:
+            if part[0] == "let":
+                return True
+            if part[0] == "call" and str(part[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}:
+                return True
+    return False
+
+
+def _is_blank_node(node: Any) -> bool:
+    """Task 135: a BLANK() call or the BLANK literal."""
+    return isinstance(node, tuple) and bool(node) and (node == ("blank",) or (node[0] == "call" and str(node[1]).upper() == "BLANK"))
+
+
+def _task135_supertype(first: str | None, second: str | None) -> str | None:
+    """Task 135: the static type of IFERROR(x, y) when x fails: the common type of the two branches, as the measured IFERROR answers show
+    (a numeric x with a text y is text; an int64 with a currency is a currency; a double with a currency is a double). None when not settled."""
+    if first is None or second is None:
+        return None
+    if first == second:
+        return first
+    numeric = {"int64", "double", "currency", "decimal"}
+    if first in numeric and second in numeric:
+        if "double" in {first, second}:
+            return "double"
+        if {first, second} == {"int64", "currency"}:
+            return "currency"
+        return None
+    if "text" in {first, second} and (first in numeric or second in numeric):
+        return "text"
+    return None
+
+
 def _structural_type_answer(function: str, argument: tuple[Any, ...], columns: dict[str, dict[str, str]] | None = None) -> bool | None:
     """Task 50: a type test of an argument whose evaluation failed, answered by the argument's static type alone.
     Measured on Power BI: only the families below answered (every other failing shape raised or is unmeasured, so None: the caller keeps its old behaviour).
@@ -19175,6 +19265,23 @@ def _evaluate_measures_once(
             better = list({row_key([Decimal(0) if numeric and value is None else value]): value for value in better}.values())
         return Decimal(len(better) + 1)
 
+    def task135_fallback_has_value(node: Any, row_context: Any) -> bool:
+        """Task 135: a fallback that evaluates to a value (not BLANK) in this row context."""
+        try:
+            return evaluate(node, row_context, allow_text=True, allow_boolean=True) is not None
+        except (MeasureRuntimeError, DecimalException, OverflowError):
+            return False
+
+    def task135_failed_iferror(node: Any, row_context: Any) -> Any:
+        """Task 135: the first IFERROR in the argument whose first operand fails at run time (IFERROR catches it), or None."""
+        for part in _walk_nodes(node):
+            if isinstance(part, tuple) and len(part) == 3 and part[0] == "call" and str(part[1]).upper() == "IFERROR" and isinstance(part[2], tuple) and len(part[2]) == 2:
+                try:
+                    evaluate(part[2][0], row_context, allow_text=True, allow_boolean=True)
+                except (MeasureRuntimeError, DecimalException, OverflowError):
+                    return part
+        return None
+
     def static_type_answer(function: str, static_t: str | None) -> bool | None:
         """A type test answered by the static type of its argument; None when that type is not known well enough to answer."""
         if static_t not in {"int64", "double", "currency", "decimal", "text", "bool", "datetime"}:
@@ -19677,13 +19784,31 @@ def _evaluate_measures_once(
                 # a BLANK that Power BI knows without a scan (BLANK(), SELECTEDVALUE, X*BLANK(), IF(1=2,x) ...) is the answer; the other operand is not looked at
                 if _static_blank(arguments[index], variable_nodes.get, constant_truth) and evaluate(arguments[index], row_context, allow_text=True) is None:
                     return None
+        if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
+            failed_iferror = task135_failed_iferror(arguments[0], row_context)  # Task 135: an IFERROR whose first operand fails is typed by both branches
+            if failed_iferror is not None and failed_iferror is arguments[0]:
+                iferror_answer = None
+                if _is_blank_node(failed_iferror[2][1]):
+                    iferror_answer = (function == "ISNONTEXT") if function != "ISBLANK" else None  # the failing row is a BLANK (a value of no type)
+                elif _reads_no_data(failed_iferror[2][1], variable_nodes.get) and task135_fallback_has_value(failed_iferror[2][1], row_context):
+                    answer_t = _task135_supertype(static_type_of(failed_iferror[2][0]), static_type_of(failed_iferror[2][1]))
+                    iferror_answer = static_type_answer(function, answer_t) if answer_t is not None else None  # a fallback that reads data may be BLANK at run time: not typed here
+                if iferror_answer is not None:
+                    return iferror_answer  # Task 135: the static type of IFERROR is the common type of its two branches (measured on the locked IFERROR rows)
         try:
             values = [evaluate(argument, row_context, allow_text=True) for argument in arguments]
         except _CurrencyConversionError:
+            bare = _task135_bare_answer(function, arguments[0]) if function in _TYPE_TESTS and len(arguments) == 1 else None
+            if bare is not None:
+                return bare  # Task 135: ISNUMBER(CURRENCY("a")) is answered by the static type of the bare conversion
             if function not in _TYPE_TESTS or len(arguments) != 1 or arguments[0][:2] != ("call", "CURRENCY") or not _reads_no_data(arguments[0], variable_nodes.get):
                 raise
             values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
         except (MeasureRuntimeError, _HardError) as failure:
+            if function in _TYPE_TESTS and len(arguments) == 1:
+                bare = _task135_bare_answer(function, arguments[0])  # Task 135: a bare conversion of a text literal is answered by its static type
+                if bare is not None:
+                    return bare
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _both_operands_fail_with_date_text(arguments[0], row_context):
                 # Task 57: a type test over a binary / logical operator where one operand holds a DATEVALUE / TIMEVALUE of an unparsable text and the
                 # other operand fails as well: Power BI raised the conversion error in every live row (the static type does not hide it)
@@ -19700,6 +19825,13 @@ def _evaluate_measures_once(
                     raise dax_typed.refusal("A type test of a failing value in this shape is not modelled by the local engine.") from failure
                 if task64 == "error":
                     raise  # Power BI raises the failure in every measured row of this family
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _task135_bare_wrapper(arguments[0]) and (
+                (function in {"ISLOGICAL", "ISBOOLEAN"} and static_type_of(arguments[0]) == "bool")
+                or (function in {"ISNUMBER", "ISNUMERIC"} and static_type_of(arguments[0]) is None)
+            ):
+                raise dax_typed.refusal("A type test of a failing value held by a VAR or chosen by IF / SWITCH / COALESCE is not modelled by the local engine.") from failure  # Task 135: Power BI raises for these (add-on)
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and isinstance(failure, _ConvertFailure) and _has_op_outside_let(arguments[0], {"/"}):
+                raise dax_typed.refusal("A type test of a failing conversion beside a division is not modelled by the local engine.") from failure  # Task 135: Power BI raises here (add-on)
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
                 structural = _structural_type_answer(function, arguments[0], static_scope()[0])  # Task 50: a failing argument answered by its static type
                 if structural is not None:

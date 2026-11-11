@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 134 shipped as Iteration 223; Haiku 5.5 coding Task 135 while Antigravity is out of quota)
-**Branch in use:** main (Task 135 on antigravity/dax-convtype-125)
+**Active agent:** Claude Opus 5.5 (Task 135 shipped as Iteration 224; Task 136 next)
+**Branch in use:** main
 **Working tree clean:** yes
 
 ## Status values
