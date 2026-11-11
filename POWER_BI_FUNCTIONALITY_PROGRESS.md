@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-11, after Iteration 227 / Task 138 dax-rowpos-128, row order of ADDMISSINGITEMS over CALCULATETABLE(SUMMARIZE), mix workflow: Haiku 5.5 coded, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536995 match, 3406 refused, 0 DIFF, 0 CRASH, locked 536975. Next: Task 139 TOCSV row order of ADDMISSINGITEMS with filter tables (Antigravity).
+**Latest status (2026-11-11, after Iteration 228 / Task 139 dax-amiorder-129, TOCSV row order of ADDMISSINGITEMS with filter tables, mix workflow: Haiku 5.5 coded, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4420 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537171 match, 3230 refused, 0 DIFF, 0 CRASH, locked 537151. Next: Next DAX refusal families with Haiku while Antigravity is out of quota.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
