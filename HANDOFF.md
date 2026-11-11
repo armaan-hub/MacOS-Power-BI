@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude (Task 133 ready for review by Claude/Opus); worktrees task131 and task132 gating
-**Branch in use:** antigravity/dax-errtype-123
+**Active agent:** Claude Opus 5.5 (Task 133 shipped as Iteration 222; Antigravity on Task 134)
+**Branch in use:** main (Task 134 on antigravity/dax-collate-124)
 **Working tree clean:** yes
 
 ## Status values
