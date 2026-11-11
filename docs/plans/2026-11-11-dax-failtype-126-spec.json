@@ -1,0 +1,677 @@
+[
+ {
+  "expr": "ISTEXT(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISSTRING(((-1)^0.5)^(1))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER((1)+((-1)^0.5))",
+  "powerbi": "True",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))+((-1)^0.5))",
+  "powerbi": "True",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISLOGICAL((MAX(Facts[Note]))*((-1)^0.5))",
+  "powerbi": "False",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISNUMBER(0.5*- 0^- CURRENCY(2))",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISNUMERIC((COUNTROWS(FILTER(Facts,FALSE())))+((-1)^0.5))",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(VAR v=SQRT(-1) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISDECIMAL(VAR v=DIVIDE(\"a\",2) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNONTEXT(SWITCH(1,1,SIGN(\"s\"),CURRENCY(1)))",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISLOGICAL(((-1)^0.5)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+  "powerbi": "False",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISNUMERIC(VAR v=CONVERT(MAX(Facts[Region]),INTEGER) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(VAR v=WEEKDAY(\"w\") RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=ABS(\"g\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNONTEXT(VAR v=DATE(\"y\",1,1) RETURN v+1)",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(VAR v=LN(\"l\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(SWITCH(1,1,SIGN(\"s\"),BLANK()))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(AND(INT(\"a\"),TRUE()))",
+  "powerbi": "False",
+  "group": "dax_battery_failtype47_extra"
+ },
+ {
+  "expr": "ISLOGICAL((MAX(Facts[Note]))+((-1)^0.5))",
+  "powerbi": "False",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISSTRING(ABS(((\"b\")*1)+(DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER(VAR v=TIME(\"h\",1,1) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(-CURRENCY(2)-0^+1.5*0.0^-1E-200)",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISDOUBLE(VAR v=VALUE(\"n\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(VAR v=VALUE(\"x\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINTEGER(VAR v=ABS(\"g\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(- DATE(2020,1,1)*(1-1)^-MAX(Facts[Quantity])*\"2\")",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISNUMBER(2^0^- 0.5+0.5)",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISINTEGER(SWITCH(1,1,SIGN(\"s\"),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINTEGER(AND(INT(\"a\"),2.5))",
+  "powerbi": "False",
+  "group": "dax_battery_failtype47_extra"
+ },
+ {
+  "expr": "ISSTRING(VAR v=DATE(\"y\",1,1) RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(CONCATENATE((-1)^0.5,MAX(Facts[Note])))",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr40_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(VAR v=MOD(\"a\",2) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(ABS((DATE(2020,1,1)+\"a\")+(\"t\")))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISLOGICAL(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMERIC((CURRENCY(1))+(DATE(2020,1,1)+\"a\"))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISTEXT(VAR v=DATEVALUE(\"q\") RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISCURRENCY(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),\"t\"))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMERIC((1)+(DATE(2020,1,1)+\"a\"))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISSTRING(VAR v=SQRT(-1) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(VAR v=WEEKDAY(\"w\") RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=DATEVALUE(\"q\") RETURN v*2)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDECIMAL(VAR v=ROUND(\"r\",2) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=DATE(\"y\",1,1) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDECIMAL(VAR v=DATE(\"y\",1,1) RETURN v*2)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMERIC(CONCATENATE((-1)^0.5,SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr40_extra"
+ },
+ {
+  "expr": "ISDATETIME(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMERIC(DATE(2020,1,1)+\"a\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=INT(\"a\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMERIC(UPPER((VAR y=VALUE(\"x\") RETURN y)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISTEXT((MAX(Facts[Note]))*((-1)^0.5))",
+  "powerbi": "False",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISNUMBER((2.5)+((-1)^0.5))",
+  "powerbi": "True",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISLOGICAL(VAR v=DATE(\"y\",1,1) RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=CONVERT(MAX(Facts[Region]),INTEGER) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=EXP(\"e\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISCURRENCY(VAR v=CURRENCY(\"c\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(VAR v=FACT(\"f\") RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(VAR v=DIVIDE(\"a\",2) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER(((-1)^0.5)+(1))",
+  "powerbi": "True",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISNUMERIC(NOT(DATE(2020,1,1)+\"a\"))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER(1.5^+MIN(Facts[Sales])^MIN(Facts[Sales])+-DATE(2020,1,1))",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISINT64(VAR v=SIGN(\"s\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMERIC(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISDATETIME(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMERIC((INT(\"a\"))+(DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDOUBLE(VAR v=CONVERT(MAX(Facts[Region]),INTEGER) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(- (1-1)^BLANK()*-(0.0*-1)-1)",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISNUMBER(VAR v=INT(\"b\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMERIC(VAR v=POWER(\"p\",2) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDECIMAL(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=INT(MAX(Facts[Region])) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(SWITCH(TRUE(),1=1,SIGN(\"s\"),2.5))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINTEGER(VAR v=CONVERT(\"z\",INTEGER) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(MIN(Facts[Sales])^-1E15^-CURRENCY(2)+-\"2\")",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(SWITCH(1,1,SIGN(\"s\"),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDECIMAL(VAR v=CURRENCY(\"d\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINT64(VAR v=CURRENCY(\"d\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(COALESCE((VAR y=SIGN(\"s\") RETURN y),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(ABS((DATE(2020,1,1)+\"a\")+(DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISLOGICAL(VAR v=CONVERT(\"w\",DOUBLE) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMERIC(IF(1=1,DATE(2020,1,1)+\"a\",DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISINTEGER(VAR v=CONVERT(MAX(Facts[Note]),DOUBLE) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINT64(VAR v=VALUE(\"x\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISSTRING(VAR v=TIMEVALUE(\"t\") RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNONTEXT(VAR v=EDATE(\"e\",1) RETURN v)",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISCURRENCY(UPPER(CONVERT(MAX(Facts[Region]),INTEGER)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISINTEGER(VAR v=CURRENCY(\"d\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDECIMAL(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),MAX(Facts[Note])))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISCURRENCY(VAR v=DATE(\"y\",1,1) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISTEXT(IFERROR((VAR y=VALUE(\"x\") RETURN y),BLANK()))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER(((-1)^0.5)*(\"b\"))",
+  "powerbi": "True",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISINTEGER(SWITCH(TRUE(),1=1,SIGN(\"s\"),2.5))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMERIC((DATE(2020,1,1))+(\"a\"+0))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER(VAR v=CONVERT(\"w\",DOUBLE) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNONTEXT(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNONTEXT(VAR v=DATE(\"y\",1,1) RETURN v)",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDATETIME(VAR v=CONVERT(MAX(Facts[Region]),CURRENCY) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISLOGICAL(VAR v=EDATE(\"e\",1) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISLOGICAL(VAR v=CONVERT(MAX(Facts[Region]),INTEGER) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR((VAR y=VALUE(\"x\") RETURN y),DATE(2020,1,1)))",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER((1-1)^(0.0*-1)-+1.5)",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISBOOLEAN(VAR v=TIME(\"h\",1,1) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISLOGICAL(VAR v=ROUND(\"r\",2) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(CONCATENATE(CONVERT(\"z\",INTEGER),MAX(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISCURRENCY(VAR v=DATE(\"y\",1,1) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(VAR v=CONVERT(MAX(Facts[Region]),CURRENCY) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDATETIME(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISSTRING(VAR v=DATE(\"y\",1,1) RETURN v*2)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDOUBLE(VAR v=ABS(\"g\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDOUBLE(VAR v=ROUND(\"c\",1) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINT64(SWITCH(TRUE(),1=1,SIGN(\"s\"),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISCURRENCY(COALESCE((VAR y=SIGN(\"s\") RETURN y),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINT64(VAR v=TIME(\"h\",1,1) RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER(MIN(Facts[Sales])^+1E-200*2*COUNTROWS(Facts)-+(0*-1))",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISTEXT(VAR v=SQRT(-1) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISTEXT(SWITCH(1,1,SIGN(\"s\"),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISLOGICAL(VAR v=FACT(\"f\") RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISDOUBLE(VAR v=EDATE(\"e\",1) RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNUMBER((0.0*-1)^SUM(Facts[Sales])^1E15)",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISINTEGER(CONCATENATE((VAR y=VALUE(\"x\") RETURN y),1.5))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISSTRING(VAR v=DATEVALUE(\"q\") RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISTEXT((((-1)^0.5)||(MAX(Facts[Region])))*(SUM(Facts[Sales])))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr40_extra"
+ },
+ {
+  "expr": "ISNUMBER(+1.5+0^+COUNTROWS(Facts)^1*-0)",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISINTEGER(VAR v=ROUND(\"c\",1) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDECIMAL(VAR v=EXP(\"e\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISINT64(VAR v=DATE(\"y\",1,1) RETURN v+1)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISNUMBER(+(1-1)^(0*-1)^- (0*-1))",
+  "powerbi": "True",
+  "group": "dax_battery_never10_extra"
+ },
+ {
+  "expr": "ISDECIMAL(VAR v=ABS(\"m\") RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISDECIMAL(VAR v=CONVERT(MAX(Facts[Region]),INTEGER) RETURN v&\"\")",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr54_extra"
+ },
+ {
+  "expr": "ISLOGICAL((MAX(Facts[Sales]))+((-1)^0.5))",
+  "powerbi": "False",
+  "group": "dax_battery_convert9_extra"
+ },
+ {
+  "expr": "ISCURRENCY(ABS(((VAR y=VALUE(\"x\") RETURN y))+(BLANK())))",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISTEXT(VAR v=DIVIDE(\"a\",2) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISNONTEXT(VAR v=TIME(\"h\",1,1) RETURN v)",
+  "powerbi": "True",
+  "group": "dax_battery_typeerr31_extra"
+ },
+ {
+  "expr": "ISLOGICAL(VAR v=TIME(\"h\",1,1) RETURN v)",
+  "powerbi": "False",
+  "group": "dax_battery_typeerr31_extra"
+ }
+]

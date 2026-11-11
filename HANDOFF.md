@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 135 shipped as Iteration 224; Task 136 next)
+**Active agent:** Claude Opus 5.5 (Task 136 shipped as Iteration 225; Task 137 next)
 **Branch in use:** main
 **Working tree clean:** yes
 

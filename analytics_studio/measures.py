@@ -5353,6 +5353,11 @@ def _measured_column_arithmetic_answer(function: str, argument: Any, columns: di
     return function in {"ISNUMBER", "ISNUMERIC", "ISNONTEXT"}  # every result is a number: ISTEXT / ISSTRING / ISLOGICAL / ISBOOLEAN are False
 
 
+def _task136_zero_division(node: Any) -> bool:
+    """Task 136: a division whose divisor is the literal 0 (1/0, 0/0): Power BI raises it (IFERROR catches it), whatever the dividend."""
+    return isinstance(node, tuple) and len(node) == 4 and node[0] == "binary" and node[1] == "/" and isinstance(node[3], tuple) and len(node[3]) >= 2 and node[3][0] == "number" and node[3][1] == 0
+
+
 def _task135_failing_literal(node: Any) -> bool:
     """Task 135: a text literal that is neither a number nor a date or time (the conversion of it fails in every reading)."""
     if not isinstance(node, tuple) or len(node) != 2 or node[0] != "string":
@@ -19272,6 +19277,65 @@ def _evaluate_measures_once(
         except (MeasureRuntimeError, DecimalException, OverflowError):
             return False
 
+    def task136_fails(node: Any, row_context: Any) -> bool:
+        """Task 136: the node raises when evaluated alone in this row context."""
+        try:
+            evaluate(node, row_context, allow_text=True, allow_boolean=True)
+        except Exception:
+            return True
+        return False
+
+    def task136_failing_convert_in(node: Any, row_context: Any, protected: bool = False) -> bool:
+        """Task 136: a CONVERT of a value that reads data and fails in this row, anywhere under the node, not counting one that the first
+        operand of an IFERROR around it catches."""
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and str(node[1]).upper() == "IFERROR" and isinstance(node[2], tuple) and len(node[2]) == 2:
+            return task136_failing_convert_in(node[2][0], row_context, True) or task136_failing_convert_in(node[2][1], row_context, protected)
+        if node[0] == "call" and str(node[1]).upper() == "CONVERT" and isinstance(node[2], tuple) and node[2] and isinstance(node[2][0], tuple):
+            if not protected and not _reads_no_data(node[2][0], variable_nodes.get) and task136_fails(node, row_context):
+                return True
+        items = node if isinstance(node[0], tuple) else node[1:]
+        return any(task136_failing_convert_in(item, row_context, protected) for item in items if isinstance(item, tuple) and item)
+
+    def task136_failing_data_convert(node: Any, row_context: Any) -> bool:
+        """Task 136: Power BI raises a failing conversion of data (CONVERT of a column or measure) that sits in a concatenation (&), in a
+        chosen IF / SWITCH branch, or in + - * beside a SELECTEDVALUE: the add-on rows measured in the Task 136 probes. Other places are unchanged."""
+        for part in _walk_nodes(node):
+            if not isinstance(part, tuple) or not part or not isinstance(part[0], str):
+                continue
+            if part[0] == "concat" and len(part) >= 3 and any(_is_blank_node(side) for side in part[1:3] if isinstance(side, tuple)) and task136_failing_convert_in(part, row_context):
+                return True  # BLANK() & a failing CONVERT of data (the measured add-on shape; a concatenation beside a value is not raised, measured)
+            if part[0] == "call" and len(part) == 3 and str(part[1]).upper() in {"IF", "IF.EAGER", "SWITCH"} and isinstance(part[2], tuple):
+                if any(sub[:2] == ("call", "SELECTEDVALUE") for sub in _walk_nodes(part) if isinstance(sub, tuple) and sub) and any(
+                    task136_failing_convert_in(branch, row_context) for branch in part[2][1:] if isinstance(branch, tuple)
+                ):
+                    return True  # a failing CONVERT of data in a chosen branch beside a row-level SELECTEDVALUE: raised (measured); a constant or aggregate branch is not
+            if part[0] == "binary" and len(part) == 4 and part[1] in {"+", "-", "*"}:
+                sides = [part[2], part[3]]
+                if any(task136_failing_convert_in(side, row_context) and any(isinstance(sub, tuple) and sub[:2] == ("call", "SELECTEDVALUE") for sub in _walk_nodes(other)) for side, other in ((sides[0], sides[1]), (sides[1], sides[0]))):
+                    return True
+        return False
+
+    def task136_text_over_failing_date(node: Any, row_context: Any) -> bool:
+        """Task 136: a DATE call that fails (a text year or month) written directly inside CONCATENATE / UPPER / LOWER: Power BI raises it."""
+        for part in _walk_nodes(node):
+            if isinstance(part, tuple) and len(part) == 3 and part[0] == "call" and str(part[1]).upper() in {"CONCATENATE", "UPPER", "LOWER"} and isinstance(part[2], tuple):
+                for argument in part[2]:
+                    if isinstance(argument, tuple) and len(argument) == 3 and argument[0] == "call" and str(argument[1]).upper() == "DATE" and task136_fails(argument, row_context):
+                        return True
+        return False
+
+    def task136_text_over_logical_literal(node: Any) -> bool:
+        """Task 136: a text function (UPPER / LOWER / CONCATENATE) over an AND / OR call holding a text literal (OR(0,"")): not measured."""
+        for part in _walk_nodes(node):
+            if isinstance(part, tuple) and len(part) == 3 and part[0] == "call" and str(part[1]).upper() in {"UPPER", "LOWER", "CONCATENATE"} and isinstance(part[2], tuple):
+                for argument in part[2]:
+                    if isinstance(argument, tuple) and len(argument) == 3 and argument[0] == "call" and str(argument[1]).upper() in {"AND", "OR"}:
+                        if any(isinstance(sub, tuple) and sub and sub[0] == "string" for sub in _walk_nodes(argument)):
+                            return True
+        return False
+
     def task135_failed_iferror(node: Any, row_context: Any) -> Any:
         """Task 135: the first IFERROR in the argument whose first operand fails at run time (IFERROR catches it), or None."""
         for part in _walk_nodes(node):
@@ -19793,8 +19857,32 @@ def _evaluate_measures_once(
                 elif _reads_no_data(failed_iferror[2][1], variable_nodes.get) and task135_fallback_has_value(failed_iferror[2][1], row_context):
                     answer_t = _task135_supertype(static_type_of(failed_iferror[2][0]), static_type_of(failed_iferror[2][1]))
                     iferror_answer = static_type_answer(function, answer_t) if answer_t is not None else None  # a fallback that reads data may be BLANK at run time: not typed here
+                if iferror_answer is None and failed_iferror[2][0][:2] == ("call", "CONVERT") and not _reads_no_data(failed_iferror[2][0], variable_nodes.get) and _reads_no_data(failed_iferror[2][1], variable_nodes.get) is False:
+                    raise dax_typed.refusal("A type test of an IFERROR whose failing operand reads data and whose fallback reads data is not modelled by the local engine.")  # Task 136: the type depends on the row
                 if iferror_answer is not None:
                     return iferror_answer  # Task 135: the static type of IFERROR is the common type of its two branches (measured on the locked IFERROR rows)
+            direct = arguments[0]
+            if (
+                function != "ISBLANK" and isinstance(direct, tuple) and len(direct) == 3 and direct[0] == "call" and str(direct[1]).upper() == "IFERROR"
+                and isinstance(direct[2], tuple) and len(direct[2]) == 2 and _reads_no_data(direct[2][0], variable_nodes.get)
+                and (task136_fails(direct[2][0], row_context) or _task136_zero_division(direct[2][0])) and task135_fallback_has_value(direct[2][1], row_context)
+            ):
+                nested = any(
+                    isinstance(sub, tuple) and len(sub) == 3 and sub[0] == "call" and str(sub[1]).upper() in {"IFERROR", "IF", "IF.EAGER", "SWITCH", "COALESCE"}
+                    for branch in direct[2] for sub in _walk_nodes(branch)
+                )
+                if nested:
+                    raise dax_typed.refusal("A type test of IFERROR whose branch is itself a conditional is not modelled by the local engine.")  # Task 136 fix: a nested conditional fallback is not typed by its two branches (live probes)
+                answer_t = _task135_supertype(static_type_of(direct[2][0]), static_type_of(direct[2][1]))  # Task 136: a failing operand that reads no data is typed by both branches (ISDOUBLE(IFERROR(0/0,"x")) is False, ISDOUBLE(IFERROR(1/0,2)) is True)
+                answer = static_type_answer(function, answer_t) if answer_t is not None else None
+                if answer is not None:
+                    return answer
+        if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and (
+            task136_failing_data_convert(arguments[0], row_context)
+            or task136_text_over_failing_date(arguments[0], row_context)
+            or task136_text_over_logical_literal(arguments[0])
+        ):
+            raise dax_typed.refusal("A type test over a failing conversion of data, a failing DATE in a text function or a text function over a logical literal is not modelled by the local engine.")  # Task 136: Power BI raises these (add-on) or is not measured
         try:
             values = [evaluate(argument, row_context, allow_text=True) for argument in arguments]
         except _CurrencyConversionError:
