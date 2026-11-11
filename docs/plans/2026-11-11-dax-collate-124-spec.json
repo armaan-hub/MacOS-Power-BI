@@ -1,0 +1,407 @@
+[
+ {
+  "expr": "\"\ufb01\"<\"\u00c4\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"ae\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"SS\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"\ufb01\",BLANK(),1,\"9\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"Strasse\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"Strasse\",\"abc\",1,\"\ufb01\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"E\u0301\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"fi\"<\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"e\u0301\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u6771\u4eac\"<\"Tokyo\"",
+  "powerbi": "False",
+  "group": "dax_battery_collation18_extra"
+ },
+ {
+  "expr": "\"\u041c\u043e\u0441\u043a\u0432\u0430\"<\"Moscow\"",
+  "powerbi": "False",
+  "group": "dax_battery_collation18_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<BLANK()",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u00e6\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\u00e9\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\u00df\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"fi\"=\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"10\",\"\ufb01\",1,\"abc\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"\ufb01\",\"ABC\",1,\"\u01c5\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"\u0130\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\u00e6\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"a\u0308\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u01c5\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"a\u0308\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"ae\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\u0130\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"STRASSE\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"\u00e6\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u00c9\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u00df\"<\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"e\u0301\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"stra\u00dfe\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"9\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u00e4\"<\"\u05d0\"",
+  "powerbi": "True",
+  "group": "dax_battery_collation18_extra"
+ },
+ {
+  "expr": "\"ss\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\u01c5\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"  x \"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"ae\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"ae\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"fi\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"\ufb01\",\"abc\",1,\"a b\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u0391\u03b8\u03ae\u03bd\u03b1\"<\"Athens\"",
+  "powerbi": "False",
+  "group": "dax_battery_collation18_extra"
+ },
+ {
+  "expr": "\"\u00e9\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"1e3\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"\ufb01\",\"ABC\",1,\"\u00c4\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u01c5\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"STRASSE\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"D\u017e\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"Strasse\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"e\u0301\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"Strasse\"<\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"e\u0301\",\"\ufb01\",1,\"Strasse\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u00df\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"\ufb01\",\"ABC\",1,\"ABC\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"abc\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"stra\u00dfe\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"ABC\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"SS\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"STRASSE\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"E\u0301\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u00e9\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=BLANK()",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "BLANK()=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"D\u017e\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "SWITCH(\"\u0130\",\"\ufb01\",1,\"10\",2,3)",
+  "powerbi": "3",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\"<\"\ufb01\"",
+  "powerbi": "True",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u00e6\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"\u00e9\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"ss\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\u00c9\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"E\u0301\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"\u00c4\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"STRASSE\"<\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"a b\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"a\u0308\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\u0130\"=\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"<\"\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"stra\u00dfe\"<\"\ufb01\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ },
+ {
+  "expr": "\"\ufb01\"=\"SS\"",
+  "powerbi": "False",
+  "group": "dax_battery_text63_extra"
+ }
+]
