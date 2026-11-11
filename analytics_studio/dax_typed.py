@@ -478,14 +478,16 @@ def _stacked_marks(text: str) -> bool:
 
 
 def _is_pinned_post_latin_char(c: str) -> bool:
+    """A pinned-script letter (category Lu, Ll, Lt or Lo). Punctuation, symbols, numbers and marks are not."""
     o = ord(c)
-    return (
+    in_pinned_range = (
         (0x0370 <= o <= 0x03FF) or (0x1F00 <= o <= 0x1FFF) or  # Greek & Greek Extended
         (0x0400 <= o <= 0x052F) or                              # Cyrillic & Cyrillic Supplement
         (0x0590 <= o <= 0x05FF) or                              # Hebrew
         (0x4E00 <= o <= 0x9FFF) or (0x3400 <= o <= 0x4DBF) or  # CJK Unified & Ext A
         (0x3040 <= o <= 0x30FF) or (0xF900 <= o <= 0xFAFF)     # Hiragana, Katakana & CJK Compat
     )
+    return in_pinned_range and unicodedata.category(c) in ("Lu", "Ll", "Lt", "Lo")
 
 
 def _is_pinned_post_latin_text(text: str) -> bool:
