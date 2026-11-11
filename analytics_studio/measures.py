@@ -19867,6 +19867,12 @@ def _evaluate_measures_once(
                 and isinstance(direct[2], tuple) and len(direct[2]) == 2 and _reads_no_data(direct[2][0], variable_nodes.get)
                 and (task136_fails(direct[2][0], row_context) or _task136_zero_division(direct[2][0])) and task135_fallback_has_value(direct[2][1], row_context)
             ):
+                nested = any(
+                    isinstance(sub, tuple) and len(sub) == 3 and sub[0] == "call" and str(sub[1]).upper() in {"IFERROR", "IF", "IF.EAGER", "SWITCH", "COALESCE"}
+                    for branch in direct[2] for sub in _walk_nodes(branch)
+                )
+                if nested:
+                    raise dax_typed.refusal("A type test of IFERROR whose branch is itself a conditional is not modelled by the local engine.")  # Task 136 fix: a nested conditional fallback is not typed by its two branches (live probes)
                 answer_t = _task135_supertype(static_type_of(direct[2][0]), static_type_of(direct[2][1]))  # Task 136: a failing operand that reads no data is typed by both branches (ISDOUBLE(IFERROR(0/0,"x")) is False, ISDOUBLE(IFERROR(1/0,2)) is True)
                 answer = static_type_answer(function, answer_t) if answer_t is not None else None
                 if answer is not None:
