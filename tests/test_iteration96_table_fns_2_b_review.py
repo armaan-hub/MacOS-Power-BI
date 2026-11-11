@@ -32,7 +32,6 @@ STAYS_REFUSED = [
     # the order of SUMMARIZECOLUMNS groups is not the order the local engine produces
     f'TOCSV(ADDMISSINGITEMS({R},SUMMARIZECOLUMNS({R},FILTER(ALL(Facts),{Q}>2),"s",SUM({Q})),{R}))',
     # the group order of SUMMARIZE over a numeric column under a filter is not modelled
-    f'TOCSV(ADDMISSINGITEMS({Q},CALCULATETABLE(SUMMARIZE(Facts,{Q},"s",SUM({Q})),{R}<>"West"),{Q}))',
     f'TOCSV(CALCULATETABLE(SUMMARIZE(Facts,{Q},"s",SUM({Q})),{R}<>"West"))',
     # TOPN lists its rows in an order that is not modelled for the added rows
     f"TOCSV(ADDMISSINGITEMS({R},TOPN(2,VALUES({R}),{R},DESC),{R}))",
@@ -146,6 +145,14 @@ class AddMissingItemsReviewTest(unittest.TestCase):
         for expression in STAYS_REFUSED:
             outcome = dax.local(expression)
             self.assertTrue(outcome.startswith("LOCAL-REJECT"), f"{expression} -> {outcome}")
+
+    def test_addmissingitems_calculatetable_summarize_matches_power_bi(self) -> None:
+        # Power BI Desktop confirmed this answer on 2026-11-11 (Task 138).
+        expression = f'TOCSV(ADDMISSINGITEMS({Q},CALCULATETABLE(SUMMARIZE(Facts,{Q},"s",SUM({Q})),{R}<>"West"),{Q}))'
+        powerbi = "'Facts'[Quantity],[s]\n1,1\n2,2\n5,5\n4,4\n0,\n3,"
+        actual = dax.local(expression)
+        self.assertEqual(powerbi, actual, expression)
+        self.assertTrue(dax.same(powerbi, actual), expression)
 
     def test_columns_of_two_tables_are_refused(self) -> None:
         tables = [
