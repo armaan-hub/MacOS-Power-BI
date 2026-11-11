@@ -558,14 +558,6 @@ def date_function(function: str, args: list[object], interval: str | None = None
             moment = _moment(args[0], ROUND_HALF_UP, shown=True)
         else:
             moment = EPOCH + timedelta(days=int(args[0].to_integral_value(rounding=ROUND_HALF_UP)))
-    elif function in {"WEEKDAY", "WEEKNUM"} and isinstance(args[0], Decimal) and args[0] < 0 and args[0] != args[0].to_integral_value():
-        if _settled_before_zero(args[0]):
-            moment = _moment(args[0], NEAREST_SECOND, shown=True)
-        else:
-            time_seconds = (abs(float(args[0])) - abs(math.ceil(float(args[0])))) * 86400.0
-            if abs(time_seconds - 86399.5) < 1e-6:
-                raise dax_typed._error("A time of day before December 30, 1899 on an exact half second is not supported in the local engine.")
-            moment = to_datetime(args[0], NEAREST_SECOND, shown=True)
     else:
         moment = _moment(args[0], NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP,
                          shown=function in {"YEAR", "MONTH", "DAY", "WEEKDAY"} and _settled_before_zero(args[0]))

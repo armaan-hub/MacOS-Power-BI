@@ -1559,21 +1559,22 @@ Doubts or things Claude should check:
       - `_refuse_half_second(value)`: Permitted `abs(time_seconds - 86399.5) < 1e-6` to evaluate via `_negative_moment` since it deterministically rolls over into midnight across all dates (matching Power BI behavior in FORMAT and `&` text concatenation, e.g. `(DATE(1700,6,15)+0.5/86400)&"z"` -> `6/17/1700z`). Kept all uncertain half-second ties (such as `1.5/86400`) refused.
       - `date_function(function, args, ...)`:
         - For `function in {"YEAR", "MONTH", "DAY", "QUARTER"}`: preserved the existing settled path (`_moment(args[0], ROUND_HALF_UP, shown=True)`) when `_settled_before_zero(args[0])` is True. When `not _settled_before_zero(args[0])` (within 1 second of midnight), evaluated date components directly from `EPOCH + timedelta(days=int(args[0].to_integral_value(rounding=ROUND_HALF_UP)))`, matching Power BI integer calendar day behavior.
-        - For `function in {"WEEKDAY", "WEEKNUM"}`: preserved the existing settled path (`_moment(args[0], NEAREST_SECOND, shown=True)`) when `_settled_before_zero(args[0])` is True. When `not _settled_before_zero(args[0])`, kept uncertain half-second ties (`abs(time_seconds - 86399.5) < 1e-6`) safely refused, and evaluated other fractions via `to_datetime(args[0], NEAREST_SECOND, shown=True)`.
+        - For `function in {"WEEKDAY", "WEEKNUM"}`: preserved the existing established behavior on `main` where unsettled negative serials and `WEEKNUM` negative serials with fraction stay cleanly refused (`"A time of day before December 30, 1899 is not supported in the local engine."`) per Opus review instruction ("prefer refusing"), while settled `WEEKDAY` values (`_settled_before_zero(args[0])`) continue to evaluate and match all locked answers.
 - **Results:**
-  - Spec (`docs/plans/2026-11-11-dax-pre1900-120-spec.json`, 108 items): **89 match, 19 gap-reject, 0 diff, 0 crash (0 wrong)**.
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.93s`).
+  - Opus review items (`docs/plans/2026-11-11-dax-pre1900-120-wrong.json`, 7 items): **7 gap-reject, 0 wrong**.
+  - Spec (`docs/plans/2026-11-11-dax-pre1900-120-spec.json`, 108 items): **75 match, 33 gap-reject, 0 diff, 0 crash (0 wrong)**.
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.92s`).
+  - Fast tests: `tests/test_dax_time_extended.py`, `tests/test_date_tables.py`, `tests/test_iteration137_date_variance_37.py`, `tests/test_iteration151_varx_dates_51.py` pass (`17 passed, 24 subtests passed in 0.18s`).
   - Parity check (`tools/parity_check.py`):
-    `replayed 540401 Power BI answers: {'match': 536616, 'gap-reject': 3785, 'DIFF': 0, 'CRASH': 0}; locked 536481`
+    `replayed 540401 Power BI answers: {'match': 536602, 'gap-reject': 3799, 'DIFF': 0, 'CRASH': 0}; locked 536481`
     `PARITY GATE PASSED -> PARITY_LEDGER.md`
-    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+135 new matches over locked).
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+121 new matches over locked, 0 regressions).
   - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
 - **Files changed:**
   - `analytics_studio/dax_dates.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - Spec (108 items) has **0 wrong** (89 exact matches, 19 uncertain half-second ties safely refused).
-  - All 536,481 locked answers pass without regressions.
+  - Spec (108 items) and all 7 probe items have **0 wrong**. All locked answers match.
   - Note: `tests/test_iteration130_date_stats_30.py` and `tests/test_iteration138_old_times_38.py` assert older refusal expectations for `0.5/86400` from Iteration 130/138; per AGENTS.md, existing tests were not edited.
 
 
