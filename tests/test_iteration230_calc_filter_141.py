@@ -28,10 +28,35 @@ CASES = (
     ("CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\",KEEPFILTERS(Facts[Region]==BLANK()))", "BLANK"),
 )
 
+# Overwriting or clearing one column of a table filter that other filters share (the sets of whole rows stay separate;
+# a changed set keeps constraining the other columns through its projection; a filter beside the sets on a column is
+# remembered next to them), and a Boolean filter beside ALLSELECTED over such a set. Power BI answers.
+SHAPE_CASES = (
+    ('CALCULATE(CALCULATE(CALCULATE(DISTINCTCOUNT(Facts[Quantity]),Facts[Note]=="Late"),KEEPFILTERS(FILTER(ALL(Facts),NOT(Facts[Note]=="Paid")))),KEEPFILTERS(Facts[Quantity]==2))', 'BLANK'),
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(Facts[Quantity])),KEEPFILTERS(FILTER(ALL(Facts),Facts[Quantity]<>3))),KEEPFILTERS(FILTER(ALL(Facts),Facts[Quantity]=4)),Facts[Note]=BLANK())', 'BLANK'),
+    ('CALCULATE(CALCULATE(HASONEVALUE(Facts[Note]),Facts[Quantity]<>2),KEEPFILTERS(FILTER(Facts,Facts[Quantity]<>BLANK())),FILTER(ALL(Facts),ISBLANK(Facts[Note])))', 'True'),
+    ('CALCULATE(CALCULATE(CALCULATE(CONCATENATEX(VALUES(Facts[Region]),Facts[Region],",",Facts[Region],ASC),KEEPFILTERS(Facts[Quantity]>0),Facts[Region]="East"||Facts[Quantity]=BLANK()),KEEPFILTERS(FILTER(Facts,Facts[Quantity]=BLANK())),Facts[Sales]==BLANK()),KEEPFILTERS(FILTER(ALL(Facts),Facts[Region]<>BLANK()&&Facts[Region]=="East")),KEEPFILTERS(FILTER(ALL(Facts),Facts[Note]="Paid")))', 'BLANK'),
+    ('CALCULATE(CALCULATE(CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Sales]),FILTER(ALL(Facts),Facts[Sales]<0&&Facts[Note]=="Paid")),FILTER(Facts,Facts[Quantity]=3),KEEPFILTERS(FILTER(Facts,Facts[Sales]==0))),KEEPFILTERS(Facts[Sales]=BLANK()))', '1'),
+    ('CALCULATE(CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Quantity]<>3,ALLEXCEPT(Facts,Facts[Region]),KEEPFILTERS(NOT(Facts[Quantity]==0))),ISBLANK(Facts[Quantity]),Facts[Quantity]=3||Facts[Sales]<20,KEEPFILTERS(Facts[Sales]<20)),Facts[Quantity]>4||Facts[Sales]==10.5,Facts[Region]=="North"||Facts[Sales]=BLANK())', 'BLANK'),
+    ('CALCULATE(CALCULATE(CALCULATE(COUNTROWS(VALUES(Facts[Region])),Facts[Note]=="Paid",TREATAS({"North","West"},Facts[Region]),KEEPFILTERS(FILTER(ALL(Facts),Facts[Quantity]==BLANK()))),Facts[Sales]<10.5&&Facts[Quantity]<>2,KEEPFILTERS(NOT(Facts[Sales]=0)),Facts[Region]=="West"),Facts[Quantity] IN {BLANK(),3},Facts[Quantity] IN {3,BLANK()},KEEPFILTERS(FILTER(Facts,ISBLANK(Facts[Region]))))', 'BLANK'),
+    ('CALCULATE(CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Note]==BLANK(),ALLEXCEPT(Facts,Facts[Quantity])),TREATAS({10.5,20},Facts[Sales]),KEEPFILTERS(NOT(Facts[Sales]==0))),KEEPFILTERS(FILTER(ALL(Facts),Facts[Quantity] IN {3,4})),VALUES(Facts[Note]))', '20'),
+    ('CALCULATE(CALCULATE(ISFILTERED(Facts[Region]),ALLSELECTED(),NOT(Facts[Region]="East")),TREATAS({"East","West"},Facts[Region]))', 'True'),
+    ('CALCULATE(CALCULATE(CALCULATE(COUNTROWS(FILTERS(Facts[Sales])),ALLSELECTED(),Facts[Quantity]=2),FILTER(Facts,Facts[Region]<>"East")),ALLSELECTED())', '3'),
+    ('CALCULATE(CALCULATE(COUNTROWS(FILTERS(Facts[Sales])),KEEPFILTERS(Facts[Note]="Paid"),ALLSELECTED()),FILTER(Facts,ISBLANK(Facts[Quantity])))', 'BLANK'),
+    ('CALCULATE(CALCULATE(COUNTROWS(VALUES(Facts[Sales])),ALLSELECTED(Facts[Sales]),NOT(Facts[Quantity]==BLANK())),KEEPFILTERS(FILTER(Facts,Facts[Sales]==10.5)))', '1'),
+)
+
 
 class CalculateFilter141Test(unittest.TestCase):
     def test_power_bi_answers(self):
         for expression, expected in CASES:
+            with self.subTest(expression=expression):
+                local = dax.local(expression)
+                self.assertFalse(local.startswith("LOCAL-"), f"refused or crashed: {local}")
+                self.assertTrue(dax.same(expected, local), f"Power BI {expected}, local {local}")
+
+    def test_shared_table_filter_columns(self):
+        for expression, expected in SHAPE_CASES:
             with self.subTest(expression=expression):
                 local = dax.local(expression)
                 self.assertFalse(local.startswith("LOCAL-"), f"refused or crashed: {local}")

@@ -16600,7 +16600,10 @@ def _evaluate_measures_once(
         expression: tuple[Any, ...],
         filter_arguments: tuple[tuple[Any, ...], ...],
         extra_date_filters: dict[tuple[str, str], tuple[dict, str, frozenset[int]]] | None = None,
+        shapes_ok: bool = False,
     ) -> Decimal | None:
+        """shapes_ok: the filters sit beside an ALLSELECTED modifier, which no other path evaluates, so a context that holds
+        sets of whole rows (a FILTER table, TREATAS) is handled here: a replacing filter drops its column from them."""
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids, eff_layers, eff_touched
         filters_by_column: dict[
@@ -16636,7 +16639,9 @@ def _evaluate_measures_once(
                     )
             assert target_context is not None
             table_id = target_context["id"]
-            if "filter_table_rows" in target_context or _context_shapes(target_context):
+            if "filter_table_rows" in target_context and "filter_shapes" not in target_context or (
+                _context_shapes(target_context) and not shapes_ok
+            ):
                 raise MeasureError(
                     "Boolean CALCULATE filters cannot replace a table-valued FILTER rowset yet."
                 )
@@ -16698,6 +16703,7 @@ def _evaluate_measures_once(
             new_rows = set(filter_sets[0][0])
             for allowed_rows, _keep, _blank_allowed in filter_sets[1:]:
                 new_rows.intersection_update(allowed_rows)
+            pure_rows = frozenset(new_rows)
             new_blank_allowed = all(
                 blank_allowed
                 for _allowed_rows, _keep, blank_allowed in filter_sets
@@ -16734,6 +16740,20 @@ def _evaluate_measures_once(
                     new_blank_allowed = new_blank_allowed and previous_blank_allowed
             if existing_key is not None:
                 del column_filters[existing_key]
+            if _context_shapes(updated):
+                # sets of whole rows (a FILTER table, TREATAS) filter this table: a replacing filter drops its column from
+                # each of them (they keep constraining the other columns through their rows' values there); KEEPFILTERS
+                # leaves them whole and stays beside them
+                shape_extra = dict(updated.get("filter_column_extra", {}))
+                if keep:
+                    shape_extra[actual_column] = pure_rows if actual_column not in shape_extra else pure_rows & shape_extra[actual_column]
+                else:
+                    shape_extra = {name: rows for name, rows in shape_extra.items() if name.casefold() != actual_column.casefold()}
+                    left_shapes, projected_rows = project_shapes_without(updated, {actual_column.casefold()}, shape_extra)
+                    column_filters.update({name: set(rows) for name, rows in projected_rows.items()})
+                    updated["filter_shapes"] = tuple(left_shapes)
+                updated["filter_column_extra"] = shape_extra
+                updated.pop("filter_table_rows", None)
             column_filters[actual_column] = new_rows
             explicit_here.append((table_id, actual_column, keep, new_rows, target_context, new_blank_allowed))
 
@@ -16875,7 +16895,7 @@ def _evaluate_measures_once(
                             expression, filter_arguments[0]
                         )
                     return evaluate_with_boolean_filters(
-                        expression, filter_arguments
+                        expression, filter_arguments, shapes_ok=True
                     )
                 return evaluate(expression)
             finally:
@@ -16890,7 +16910,7 @@ def _evaluate_measures_once(
                 if filter_arguments:
                     if len(filter_arguments) == 1 and filter_arguments[0][0] == "call" and filter_arguments[0][1] == "FILTER":
                         return evaluate_with_table_filter(expression, filter_arguments[0])
-                    return evaluate_with_boolean_filters(expression, filter_arguments)
+                    return evaluate_with_boolean_filters(expression, filter_arguments, shapes_ok=True)
                 return evaluate(expression)
 
             return evaluate_with_filter_clear(("thunk", with_the_other_filters), modifier, "ALLSELECTED")
@@ -16901,7 +16921,7 @@ def _evaluate_measures_once(
                 and filter_arguments[0][1] == "FILTER"
             ):
                 return evaluate_with_table_filter(expression, filter_arguments[0])
-            return evaluate_with_boolean_filters(expression, filter_arguments)
+            return evaluate_with_boolean_filters(expression, filter_arguments, shapes_ok=True)
         return evaluate(expression)
 
     def evaluate_with_userelationships(
@@ -17852,6 +17872,46 @@ def _evaluate_measures_once(
             return [{"columns": columns, "rows": frozenset(context["filter_table_rows"]), "active": columns, "dirty": False}]
         return []
 
+    def project_shapes_without(
+        context: dict[str, Any], cleared: set[str], extra: dict[str, frozenset[int]],
+    ) -> tuple[list[dict[str, Any]], dict[str, frozenset[int]]]:
+        """Drop columns (lower case) from the sets of whole rows that filter a table.
+
+        A set that loses some of its columns keeps constraining the others by the rows' values there (its projection).
+        Every column a changed set still covers gets the intersection of all the sets covering it, as they now stand,
+        and of the filter that sits beside them on that column (extra). Returns the sets left and those column rows."""
+        surviving: list[dict[str, Any]] = []
+        projections: dict[int, frozenset[int]] = {}
+        touched: set[str] = set()
+        for shape in _context_shapes(context):
+            remaining = tuple(column for column in shape["active"] if column.casefold() not in cleared)
+            if len(remaining) == len(shape["active"]):
+                surviving.append(shape)
+                continue
+            if not remaining:
+                continue  # every column of the set is replaced, so nothing of it is left
+            changed = {**shape, "active": remaining}
+            projections[id(changed)] = shape_projection_rows(context, shape["rows"], remaining)
+            surviving.append(changed)
+            touched.update(remaining)
+        column_rows: dict[str, frozenset[int]] = {}
+        for column in touched:
+            rows: frozenset[int] | None = None
+            for shape in surviving:
+                if column not in shape["active"]:
+                    continue
+                if id(shape) in projections:
+                    part = projections[id(shape)]
+                elif tuple(shape["active"]) == tuple(shape["columns"]):
+                    part = shape["rows"]
+                else:
+                    part = shape_projection_rows(context, shape["rows"], tuple(shape["active"]))
+                rows = part if rows is None else rows & part
+            if column in extra:
+                rows = extra[column] if rows is None else rows & extra[column]
+            column_rows[column] = rows
+        return surviving, column_rows
+
     def clear_columns_from_shapes(context: dict[str, Any], cleared: set[str], column_rows: dict[str, frozenset[int]]) -> None:
         """Remove columns (lower case) from the sets of whole rows that filter a table.
 
@@ -17861,23 +17921,8 @@ def _evaluate_measures_once(
             column: rows for column, rows in context.get("filter_column_extra", {}).items()
             if column.casefold() not in cleared
         }
-        shapes: list[dict[str, Any]] = []
-        for shape in _context_shapes(context):
-            remaining = tuple(column for column in shape["active"] if column.casefold() not in cleared)
-            if len(remaining) == len(shape["active"]):
-                shapes.append(shape)
-                continue
-            if not remaining:
-                continue
-            if shape["dirty"]:
-                raise MeasureError(
-                    "Clearing one column of a FILTER table that was combined with other filters on the same "
-                    "columns is not supported yet."
-                )
-            projected = shape_projection_rows(context, shape["rows"], remaining)
-            for column in remaining:
-                column_rows[column] = projected & extra[column] if column in extra else projected
-            shapes.append({**shape, "active": remaining})
+        shapes, projected_rows = project_shapes_without(context, cleared, extra)
+        column_rows.update(projected_rows)
         context["filter_shapes"] = tuple(shapes)
         context["filter_column_extra"] = extra
         context.pop("filter_table_rows", None)  # the shapes now carry the rows of that FILTER table
@@ -17986,23 +18031,21 @@ def _evaluate_measures_once(
             }
             for column, rows in kept_columns.items():  # a KEEPFILTERS filter stays on top of whatever shape there is
                 extra[column] = rows if column not in extra else rows & extra[column]
-            surviving: list[dict[str, Any]] = []
-            for shape in _context_shapes(target_context):
-                remaining = tuple(column for column in shape["active"] if column.casefold() not in overridden)
-                if len(remaining) == len(shape["active"]):
-                    surviving.append(shape)
-                    continue
-                if not remaining:
-                    continue  # every column of the shape is replaced, so nothing of it is left
-                if shape["dirty"]:
-                    raise MeasureError(
-                        "A filter on one column of a FILTER table that was combined with other filters on the same "
-                        "columns is not supported yet."
-                    )
-                projected = shape_projection_rows(target_context, shape["rows"], remaining)
-                for column in remaining:
-                    updated_column_rows[column] = projected & extra[column] if column in extra else projected
-                surviving.append({**shape, "active": remaining})
+            new_shape_columns = {column for shape in new_shapes for column in shape["active"]}
+            existing_shapes = _context_shapes(target_context)
+            for column in new_shape_columns:
+                # a filter on the column that is not part of any set of whole rows (a plain Boolean filter) must survive
+                # the later projection of the new set onto the other columns, so it is remembered next to the sets:
+                # the one this call applied beside the set (entry[4]) and the one the column already had when the set
+                # intersects with it (KEEPFILTERS)
+                standalone = (entry[4] if len(entry) > 4 else {}).get(column)
+                if standalone is None and column in kept_columns and column in target_context.get("filter_column_rows", {}) \
+                        and not any(column in shape["active"] for shape in existing_shapes):
+                    standalone = target_context["filter_column_rows"][column]
+                if standalone is not None:
+                    extra[column] = standalone if column not in extra else meet_rows(standalone, extra[column])
+            surviving, projected_rows = project_shapes_without(target_context, overridden, extra)
+            updated_column_rows.update(projected_rows)
             updated_column_rows.update(column_rows)
             blank_flags = dict(target_context.get("filter_column_blank_allowed", {}))
             for column, rows in column_rows.items():
@@ -18918,14 +18961,17 @@ def _evaluate_measures_once(
             transition = all_row_context_filters(row_context) if row_context is not None else {}
 
             def apply_additions() -> Any:
-                merged: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]], dict[str, frozenset[int]]]] = {}
+                merged: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]], dict[str, frozenset[int]], dict[str, frozenset[int]]]] = {}
                 replaced_by_table: dict[str, set[str]] = {}
                 for keep_pass in (False, True):  # replacing filters first, KEEPFILTERS then intersects with the result
                     for keep, filters in additions:
                         if keep != keep_pass:
                             continue
                         for table_id, (context, column_rows, shapes) in filters.items():
-                            _context, target, target_shapes, kept = merged.setdefault(table_id, (context, {}, [], {}))
+                            _context, target, target_shapes, kept, standalone = merged.setdefault(table_id, (context, {}, [], {}, {}))
+                            if not shapes:  # a filter on columns that no set of whole rows covers
+                                for column, allowed in column_rows.items():
+                                    standalone[column] = allowed if column not in standalone else meet_rows(allowed, standalone[column])
                             table_state = evaluation_contexts_by_id.get(table_id, context)
                             existing = table_state.get("filter_column_rows", {})
                             overlap = {column for column in column_rows if column in target}
@@ -18937,14 +18983,12 @@ def _evaluate_measures_once(
                                     if not covering:
                                         previous = existing.get(column)
                                     for shape in covering:  # the rows of an enclosing FILTER table, as the replacing filters leave them
-                                        if shape["dirty"]:
-                                            raise MeasureError(
-                                                "KEEPFILTERS over a column of a FILTER table that was combined with other "
-                                                "filters on the same columns is not supported yet."
-                                            )
                                         active_after = tuple(name for name in shape["active"] if name not in replaced_here)
                                         rows = shape_projection_rows(table_state, shape["rows"], active_after)
                                         previous = rows if previous is None else previous & rows
+                                    kept_before = table_state.get("filter_column_extra", {}).get(column)
+                                    if covering and kept_before is not None:  # a filter on the column beside those sets
+                                        previous = kept_before if previous is None else previous & kept_before
                                 target[column] = allowed if previous is None else meet_rows(allowed, previous)
                             if keep:
                                 # intersected with what is there, so nothing is replaced - unless a replacing filter
