@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 132 dax-bigxirr-122 fix in worktree task132); Claude shipped Task 131 as Iteration 220; Task 133 planned.
-**Branch in use:** antigravity/dax-bigxirr-122
-**Working tree clean:** main yes; worktrees task132 and task133 in use
+**Active agent:** Claude (Task 134 ready for review by Claude/Opus); worktrees task132 and task133 gating
+**Branch in use:** antigravity/dax-collate-124
+**Working tree clean:** yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -70,7 +70,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Haiku, fixed by Sonnet, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
-Task 130 dax-pre1900-120, on branch `antigravity/dax-pre1900-120` in worktree `/Users/armaan/Power BI tool-task130`. Ready for review by Claude Opus 5.5.
+Task 134 dax-collate-124, on branch `antigravity/dax-collate-124` in worktree `/Users/armaan/Power BI tool-task134`. Ready for review by Claude Opus 5.5.
 
 ## Open questions (either agent writes here instead of guessing)
 - CALENDARAUTO over a model with dates and PATH over a parent-child table are documented behaviour, not yet measured: needs a date table and a parent-child table in the guest Power BI model (user's OK required).
@@ -1576,6 +1576,36 @@ Doubts or things Claude should check:
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
   - `tests/test_iteration146_productx_currency_46.py::test_part_a_multi_row_if_currency_stays_refused` expects `PRODUCTX(Facts,IF(1,CURRENCY(-2)))` to be refused, which is now modelled per Task 131 Part A (Claude updates existing tests on review per AGENTS.md).
+
+### Antigravity (Task 134) ready for review
+- **What was built:**
+  - Resolved DAX refusal backlog for comparing and ordering non-ASCII text (`dax-collate-124`):
+    - In `analytics_studio/dax_typed.py`:
+      - `_SPECIAL_EXPANSIONS`: Added Latin typographic ligatures:
+        - `"ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "st", "ﬆ": "st"`.
+        - Allows `decompose_char_stream`, `is_classifiable_char`, `is_classifiable_latin`, and `text_collation_key` to classify and collate typographic ligatures (such as `"ﬁ"`) consistently with their expanded Latin base forms (matching Power BI Desktop's en-US collation where `"ﬁ"="fi"` is True, `"æ"<"ﬁ"` is True, `"ﬁ"<"SS"` is True, etc.).
+      - Cross-script ordering between Latin and pinned post-Latin scripts:
+        - Added `_is_pinned_post_latin_char(c)` and `_is_pinned_post_latin_text(text)` to classify strings belonging to the scripts pinned by the spec: Greek (`0x0370-0x03FF`, `0x1F00-0x1FFF`), Cyrillic (`0x0400-0x052F`), Hebrew (`0x0590-0x05FF`), and CJK (`0x4E00-0x9FFF`, `0x3400-0x4DBF`, `0x3040-0x30FF`, `0xF900-0xFAFF`).
+        - In `compare`, when comparing a classifiable Latin text with a pinned post-Latin text, enforced the invariant that Latin is strictly smaller than Greek, Cyrillic, Hebrew, and CJK in Windows en-US collation (e.g. `"東京"<"Tokyo"` -> False, `"Москва"<"Moscow"` -> False, `"ä"<"א"` -> True, `"Αθήνα"<"Athens"` -> False).
+        - Preserved existing strict refusals for ordering within or between non-Latin scripts (e.g. Greek vs Greek `"α"<"β"` or Cyrillic vs Cyrillic `"д"<"ж"` or CJK vs CJK `"中"="文"` remain refused).
+- **Results:**
+  - Spec (`docs/plans/2026-11-11-dax-collate-124-spec.json`, 81 items): **81 match, 0 refused, 0 wrong** (100% exact match).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 1.28s`).
+  - Unit regression tests:
+    - `tests/test_iteration118_text_collation_18.py`: 6 passed in 0.06s.
+    - `tests/test_iteration98_scalar_misc_3_review.py`: 7 passed in 17.43s.
+    - `tests/test_parity_ledger.py`: 4 passed in 461.96s.
+  - Parity check replay:
+    `replayed 540401 Power BI answers: {'match': 536774, 'gap-reject': 3627, 'DIFF': 0, 'CRASH': 0}; locked 536645`
+    `PARITY GATE PASSED -> PARITY_LEDGER.md`
+    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers (+129 new matches over locked, 0 regressions).
+  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+- **Files changed:**
+  - `analytics_studio/dax_typed.py`
+  - `HANDOFF.md`
+- **Doubts or things Claude should check:**
+  - Spec (81 items) has **0 wrong** (100% exact match). All locked answers match.
+
 
 
 

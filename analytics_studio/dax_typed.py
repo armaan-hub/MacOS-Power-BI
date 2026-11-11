@@ -350,6 +350,8 @@ _SPECIAL_EXPANSIONS = {
     "þ": "th", "Þ": "th", "ð": "d", "Ð": "d", "đ": "d", "Đ": "d", "ı": "i",
     "ŀ": "l", "Ŀ": "l", "ł": "l", "Ł": "l", "ŉ": "n", "ø": "o", "Ø": "o",
     "ſ": "ſ",
+    "ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬃ": "ffi", "ﬄ": "ffl",
+    "ﬅ": "st", "ﬆ": "st",
 }
 
 
@@ -475,6 +477,31 @@ def _stacked_marks(text: str) -> bool:
     return False
 
 
+def _is_pinned_post_latin_char(c: str) -> bool:
+    o = ord(c)
+    return (
+        (0x0370 <= o <= 0x03FF) or (0x1F00 <= o <= 0x1FFF) or  # Greek & Greek Extended
+        (0x0400 <= o <= 0x052F) or                              # Cyrillic & Cyrillic Supplement
+        (0x0590 <= o <= 0x05FF) or                              # Hebrew
+        (0x4E00 <= o <= 0x9FFF) or (0x3400 <= o <= 0x4DBF) or  # CJK Unified & Ext A
+        (0x3040 <= o <= 0x30FF) or (0xF900 <= o <= 0xFAFF)     # Hiragana, Katakana & CJK Compat
+    )
+
+
+def _is_pinned_post_latin_text(text: str) -> bool:
+    if not text:
+        return False
+    has_pinned = False
+    for c in text:
+        if _is_pinned_post_latin_char(c):
+            has_pinned = True
+        elif c.isspace() or c.isdigit() or c in _PUNCTUATION_ORDER or c in _IGNORED_AT_FIRST:
+            continue
+        else:
+            return False
+    return has_pinned
+
+
 def compare(operator: str, left: object, right: object, *, allow_variant: bool = False) -> bool:
     """DAX comparison: blank takes the other side's type, text ignores case, mixed types are an error."""
     if left is None and right is None:
@@ -524,6 +551,21 @@ def compare(operator: str, left: object, right: object, *, allow_variant: bool =
         if has_culture:
             if not (is_classifiable_latin(left) and is_classifiable_latin(right)):  # type: ignore[arg-type]
                 from .measures import MeasureError  # imported late: measures imports this module
+
+                if is_classifiable_latin(left) and _is_pinned_post_latin_text(right):  # type: ignore[arg-type]
+                    if operator in {"<", "<="}:
+                        return True
+                    if operator in {">", ">=", "=", "=="}:
+                        return False
+                    if operator == "<>":
+                        return True
+                if _is_pinned_post_latin_text(left) and is_classifiable_latin(right):  # type: ignore[arg-type]
+                    if operator in {"<", "<=", "=", "=="}:
+                        return False
+                    if operator in {">", ">="}:
+                        return True
+                    if operator == "<>":
+                        return True
 
                 if operator in {"<", "<=", ">", ">="}:
                     raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
