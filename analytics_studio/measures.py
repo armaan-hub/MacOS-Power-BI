@@ -5424,6 +5424,16 @@ def _task135_branch_shape(node: Any) -> bool:
     return False
 
 
+def _task137_nested_shape(node: Any) -> bool:
+    """Task 137: a two-argument IFERROR whose first or second operand holds another IFERROR / IF / IF.EAGER / SWITCH / COALESCE call."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() == "IFERROR" and isinstance(node[2], tuple) and len(node[2]) == 2):
+        return False
+    return any(
+        isinstance(sub, tuple) and len(sub) == 3 and sub[0] == "call" and str(sub[1]).upper() in {"IFERROR", "IF", "IF.EAGER", "SWITCH", "COALESCE"}
+        for operand in node[2] for sub in _walk_nodes(operand)
+    )
+
+
 def _is_blank_node(node: Any) -> bool:
     """Task 135: a BLANK() call or the BLANK literal."""
     return isinstance(node, tuple) and bool(node) and (node == ("blank",) or (node[0] == "call" and str(node[1]).upper() == "BLANK"))
@@ -19346,6 +19356,86 @@ def _evaluate_measures_once(
                     return part
         return None
 
+    def task137_fails(node: Any, row_context: Any) -> bool:
+        """Task 137: a branch that IFERROR catches for the purpose of its result type: it raises, a division by the literal 0, or a NaN / Infinity
+        (measured: SQRT(-1) beside a text fallback is typed as a text, LOG(-1) raises)."""
+        if _task136_zero_division(node):
+            return True
+        try:
+            value = evaluate(node, row_context, allow_text=True, allow_boolean=True)
+        except Exception:
+            return True
+        return isinstance(value, Decimal) and not value.is_finite()
+
+    def task137_supertype(first: str | None, second: str | None) -> str | None:
+        """Task 137: the Task 135 common type, and a Double beside a date is a Double (measured: ISDOUBLE(IFERROR(SQRT(-1),DATE(2020,1,1))) is True)."""
+        if {first, second} == {"double", "datetime"}:
+            return "double"
+        return _task135_supertype(first, second)
+
+    def task137_raises(node: Any, row_context: Any) -> bool:
+        """Task 137: the node raises when evaluated alone in this row context (a NaN is a value, not a raise)."""
+        try:
+            evaluate(node, row_context, allow_text=True, allow_boolean=True)
+        except Exception:
+            return True
+        return False
+
+    def task137_branch_type(node: Any, row_context: Any) -> str | None:
+        """Task 137: the static type of a branch of an IFERROR, as a value, or None when it is not settled (the caller refuses).
+        A failing first operand gives the common type of it and the second operand (the Task 135 rule). A clean first operand keeps its type
+        beside a second operand of the same type, or beside a text second operand when it is a number (measured: Part B). A second operand
+        that fails is not typed here. IF and COALESCE are typed by the branch their constant condition or first non-BLANK value chooses."""
+        if not isinstance(node, tuple) or not node:
+            return None
+        if node[0] == "call" and str(node[1]).upper() == "IFERROR" and isinstance(node[2], tuple) and len(node[2]) == 2:
+            first, second = node[2]
+            if _is_blank_node(first) or _is_blank_node(second):
+                return None
+            if task137_fails(first, row_context):
+                if _task136_zero_division(second) or task137_raises(second, row_context):
+                    return None  # the fallback is evaluated too, and it raises: Power BI raises (a NaN fallback is only a value)
+                if any(isinstance(sub, tuple) and len(sub) == 3 and sub[0] == "call" and str(sub[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"} for sub in _walk_nodes(first)):
+                    return None
+                second_t = task137_branch_type(second, row_context)
+                return task137_supertype(static_type_of(first), second_t) if second_t is not None else None
+            first_t = task137_branch_type(first, row_context)
+            second_t = task137_branch_type(second, row_context)
+            if first_t is None or second_t is None:
+                return None
+            if first_t == second_t:
+                return first_t
+            if second_t == "text" and first_t in {"int64", "double", "currency", "decimal"}:
+                return first_t
+            return None
+        if node[0] == "call" and str(node[1]).upper() in {"IF", "IF.EAGER"} and isinstance(node[2], tuple) and len(node[2]) in {2, 3}:
+            try:
+                condition = evaluate(node[2][0], row_context, allow_text=True, allow_boolean=True)
+            except Exception:
+                return None
+            if condition is True:
+                return task137_branch_type(node[2][1], row_context)
+            if condition is False and len(node[2]) == 3:
+                return task137_branch_type(node[2][2], row_context)
+            return None
+        if node[0] == "call" and str(node[1]).upper() == "COALESCE" and isinstance(node[2], tuple) and node[2]:
+            for argument in node[2]:
+                if _is_blank_node(argument):
+                    continue
+                try:
+                    value = evaluate(argument, row_context, allow_text=True, allow_boolean=True)
+                except Exception:
+                    return None
+                if value is None:
+                    continue
+                return task137_branch_type(argument, row_context)
+            return None
+        if node[0] == "call" and str(node[1]).upper() in {"SWITCH"}:
+            return None
+        if _is_blank_node(node):
+            return None
+        return static_type_of(node)
+
     def static_type_answer(function: str, static_t: str | None) -> bool | None:
         """A type test answered by the static type of its argument; None when that type is not known well enough to answer."""
         if static_t not in {"int64", "double", "currency", "decimal", "text", "bool", "datetime"}:
@@ -19848,6 +19938,14 @@ def _evaluate_measures_once(
                 # a BLANK that Power BI knows without a scan (BLANK(), SELECTEDVALUE, X*BLANK(), IF(1=2,x) ...) is the answer; the other operand is not looked at
                 if _static_blank(arguments[index], variable_nodes.get, constant_truth) and evaluate(arguments[index], row_context, allow_text=True) is None:
                     return None
+        if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and _task137_nested_shape(arguments[0]) and _reads_no_data(arguments[0], variable_nodes.get):
+            # Task 137: a type test of an IFERROR with a nested IFERROR / IF / COALESCE / SWITCH in an operand is answered by the result type of
+            # each branch (a nested IFERROR is typed by its own failing branch, not by the Double of its first operand, measured on the Task 137 rows)
+            nested_t = task137_branch_type(arguments[0], row_context)
+            nested_answer = static_type_answer(function, nested_t) if nested_t is not None else None
+            if nested_answer is None:
+                raise dax_typed.refusal("A type test of an IFERROR with a nested conditional is not modelled by the local engine.")  # Task 137: refused rather than guessed
+            return nested_answer
         if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
             failed_iferror = task135_failed_iferror(arguments[0], row_context)  # Task 135: an IFERROR whose first operand fails is typed by both branches
             if failed_iferror is not None and failed_iferror is arguments[0]:
