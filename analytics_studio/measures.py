@@ -4622,13 +4622,6 @@ def _tocsv_inline_vars(node: tuple[Any, ...]) -> tuple[Any, ...]:
     return node
 
 
-def _walk_nodes(node: Any) -> list[Any]:
-    """Task 138: every node of a parsed expression (tuples and lists), depth first."""
-    if isinstance(node, (tuple, list)):
-        return [node, *(child for item in node for child in _walk_nodes(item))]
-    return []
-
-
 def _calc_scan_filter_ok(node: tuple[Any, ...]) -> bool:
     """Task 138: a CALCULATETABLE filter argument that is one comparison of a column with a literal (the shape the scan order was measured on)."""
     if node[0] != "comparison" or len(node) != 4:
@@ -4653,6 +4646,17 @@ def _plain_summarize_ok(summarize: tuple[Any, ...]) -> bool:
 def _single_column_all_filter(add_missing: tuple[Any, ...]) -> bool:
     """Task 138: an ADDMISSINGITEMS domain table ALL(table[column]) (one column): its added rows came back in an order not modelled (wrong probe)."""
     return any(a[0] == "call" and a[1] == "ALL" and len(a[2]) == 1 and a[2][0][0] == "reference" for a in add_missing[2])
+
+
+def _filtered_domain_refused(add_missing: tuple[Any, ...], summarize: tuple[Any, ...], calc_filters: tuple[Any, ...]) -> bool:
+    """Task 138 fix (wrong probe): ADDMISSINGITEMS with a FILTER(table, ...) domain, a CALCULATETABLE filter on a column outside two or more
+    SUMMARIZE group columns, and no named aggregate: the added rows came back in the storage order of the domain, not the one modelled."""
+    domain = [a for a in add_missing[2] if a[0] != "reference" and not (a[0] == "call" and a[1] == "CALCULATETABLE")]
+    if not any(a[0] == "call" and a[1] == "FILTER" and a[2] and a[2][0][0] == "table" for a in domain):
+        return False
+    names = lambda nodes: {str(n[2]).casefold() for n in _walk_nodes(tuple(nodes)) if isinstance(n, tuple) and len(n) == 3 and n[0] == "reference"}
+    groups = names(a for a in summarize[2][1:] if a[0] == "reference")
+    return len(groups) >= 2 and bool(names(calc_filters) - groups) and not any(a[0] == "string" for a in summarize[2])
 
 
 def _tocsv_row_order(node: tuple[Any, ...]) -> str:
@@ -23473,7 +23477,7 @@ def _evaluate_measures_once(
             numeric_group = any(str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values())
             # Task 138 (live Power BI, dax-rowpos-128 grid): ADDMISSINGITEMS over CALCULATETABLE(SUMMARIZE(table, columns, ...), comparisons): the groups come out in the
             # scan order of the group columns and the filter columns (later table column the major key), as an outer-filtered SUMMARIZE does (Task 67/68)
-            calc_scan = bool(calc_filters) and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and numeric_group and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2] and group_source[2][0][0] == "table" and all(_calc_scan_filter_ok(a) for a in calc_filters) and _plain_summarize_ok(group_source) and not _single_column_all_filter(table_node) and not filtered_scan_columns(group_source) and not has_column_filter(group_source[2][0])
+            calc_scan = bool(calc_filters) and table_node[0] == "call" and table_node[1] == "ADDMISSINGITEMS" and numeric_group and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2] and group_source[2][0][0] == "table" and all(_calc_scan_filter_ok(a) for a in calc_filters) and _plain_summarize_ok(group_source) and not _single_column_all_filter(table_node) and not _filtered_domain_refused(table_node, group_source, calc_filters) and not filtered_scan_columns(group_source) and not has_column_filter(group_source[2][0])
 
             # The order of the rows (live Power BI, iteration 94): a filtered scan of a loaded table comes back in reverse
             # storage order after the first `max_rows` rows were cut off; a negative limit keeps the storage order.
