@@ -23,9 +23,10 @@ class ProductxCurrency46Tests(unittest.TestCase):
         self.assertTrue(dax.same("1.2346", dax.local("PRODUCTX({TRUE()},IF(0,\"a\",CURRENCY(1.23456)))")))
         self.assertTrue(dax.same("1.5", dax.local("PRODUCTX(ROW(\"Value\",1),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))")))
 
-    def test_part_a_multi_row_if_currency_stays_refused(self) -> None:
-        self.assertTrue(str(dax.local("PRODUCTX(Facts,IF(1,CURRENCY(-2)))")).startswith("LOCAL-REJECT"))
-        self.assertTrue(str(dax.local("PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(7)))")).startswith("LOCAL-REJECT"))
+    def test_part_a_multi_row_if_currency_matches_power_bi(self) -> None:
+        # live Power BI (Task 131 review, 2026-11-11)
+        self.assertTrue(dax.same("63.9999999999994", dax.local("PRODUCTX(Facts,IF(1,CURRENCY(-2)))")))
+        self.assertTrue(dax.same("49", dax.local("PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(7)))")))
 
     def test_part_b_text_first_coalesce_stays_refused(self) -> None:
         self.assertTrue(str(dax.local("COUNTX({1,2},COALESCE(LASTNONBLANK(Facts[Region],1),DATE(2020,1,1),LOG(-1)))")).startswith("LOCAL-REJECT"))
