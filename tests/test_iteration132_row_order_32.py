@@ -60,7 +60,8 @@ class TestIteration132RowOrder32(unittest.TestCase):
             # Negative cases stay refused
             ('TOCSV(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN t)', 'LOCAL-REJECT'),
             ('TOCSV(LINEST(Facts[Quantity],Facts[Sales]))', 'LOCAL-REJECT'),
-            ('TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts,Facts[Quantity],Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))', 'LOCAL-REJECT'),
+            # Power BI confirmed (Task 139, 2026-11-11): saved answer in tools/parity/task51_row_order_spec.json
+            ('TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts,Facts[Quantity],Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))', "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,"),
         ]
         for expr, expected in cases:
             with self.subTest(expr=expr):
