@@ -1,0 +1,3002 @@
+[
+ {
+  "expr": "CALCULATE(ISBLANK(IFERROR(ERROR(\"e\"),IFERROR(VALUE(\"x\"),2))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISBLANK(IFERROR(IFERROR(CURRENCY(\"c\"),TRUE()),IFERROR(ERROR(\"e\"),DATE(2020,1,1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISBLANK(IFERROR(IFERROR(INT(\"a\"),CURRENCY(1)),IFERROR(INT(\"a\"),FORMAT(1,\"0\")))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISBLANK(IFERROR(IFERROR(INT(\"a\"),TRUE()),IFERROR(\"b\",FORMAT(1,\"0\")))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISBLANK(IFERROR(IFERROR(LOG(-1),DATE(2020,1,1)),IFERROR(VALUE(\"x\"),2))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISCURRENCY(IFERROR(\"b\",\"a\")),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISCURRENCY(IFERROR(BLANK(),ERROR(\"e\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISCURRENCY(IFERROR(IFERROR(0/0,\"a\"),LOG(-1))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISCURRENCY(IFERROR(IFERROR(CURRENCY(\"c\"),DATE(2020,1,1)),IFERROR(LOG(-1),CURRENCY(1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISCURRENCY(IFERROR(IFERROR(LOG(-1),\"a\"),IFERROR(ERROR(\"e\"),\"a\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISCURRENCY(IFERROR(IFERROR(MOD(1,0),BLANK()),COALESCE(DATE(2020,1,1),BLANK()))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISCURRENCY(IFERROR(LOG(-1),1/0)),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDATETIME(IFERROR(COALESCE(\"a\",DATE(2020,1,1)),IF(1=1,MOD(1,0),0/0))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDATETIME(IFERROR(IFERROR((-2)^0.5,DATE(2020,1,1)),IFERROR(INT(\"a\"),\"a\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(COALESCE(ERROR(\"e\"),BLANK()),COALESCE((-2)^0.5,1.5))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(IF(1=0,0/0,CURRENCY(1)),(-2)^0.5)),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(IF(1=1,SQRT(-1),CURRENCY(1)),0/0)),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(IFERROR((-2)^0.5,\"a\"),IFERROR(1/0,1.5))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(IFERROR(0/0,CURRENCY(1)),CURRENCY(1))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(IFERROR(DATE(2020,1,1),(-2)^0.5),IFERROR(INT(\"a\"),INT(\"a\")))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(IFERROR(LOG(-1),\"b\"),2)),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDECIMAL(IFERROR(IFERROR(SQRT(-1),DATE(2020,1,1)),IFERROR(SQRT(-1),1/0))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDOUBLE(IFERROR(1.5,DATE(2020,1,1))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDOUBLE(IFERROR(2,(-2)^0.5)),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDOUBLE(IFERROR(DATE(2020,1,1),IFERROR(VALUE(\"x\"),DATE(2020,1,1)))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDOUBLE(IFERROR(IF(1=1,(-2)^0.5,SQRT(-1)),0/0)),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDOUBLE(IFERROR(IFERROR(LOG(-1),INT(\"a\")),IFERROR(SQRT(-1),\"a\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISDOUBLE(IFERROR(INT(\"a\"),IF(1=0,SQRT(-1),LOG(-1)))),Facts[Quantity]>1)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 71) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISERROR(IFERROR(0/0,IF(1=0,1.5,FORMAT(1,\"0\")))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISERROR(IFERROR(BLANK(),IF(1=0,(-2)^0.5,LOG(-1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISERROR(IFERROR(CURRENCY(\"c\"),IFERROR(TRUE(),DATE(2020,1,1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISERROR(IFERROR(IFERROR(ERROR(\"e\"),1.5),IFERROR(CURRENCY(\"c\"),CURRENCY(1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISINT64(IFERROR(IFERROR(BLANK(),2),IFERROR((-2)^0.5,1.5))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISINT64(IFERROR(IFERROR(CURRENCY(1),\"b\"),IF(1=0,ERROR(\"e\"),TRUE()))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISINT64(IFERROR(IFERROR(INT(\"a\"),CURRENCY(1)),IFERROR(ERROR(\"e\"),2))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISLOGICAL(IFERROR(COALESCE(DATE(2020,1,1),DATE(2020,1,1)),MOD(1,0))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISLOGICAL(IFERROR(CURRENCY(\"c\"),COALESCE((-2)^0.5,2))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISLOGICAL(IFERROR(ERROR(\"e\"),CURRENCY(\"c\"))),Facts[Quantity]>1)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 67) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISLOGICAL(IFERROR(IF(1=0,TRUE(),INT(\"a\")),2)),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISLOGICAL(IFERROR(IFERROR(0/0,1.5),IFERROR(VALUE(\"x\"),1.5))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISLOGICAL(IFERROR(IFERROR(0/0,BLANK()),IFERROR(ERROR(\"e\"),FORMAT(1,\"0\")))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISLOGICAL(IFERROR(IFERROR(BLANK(),CURRENCY(\"c\")),IFERROR(LOG(-1),INT(\"a\")))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT(IFERROR(\"a\",MOD(1,0))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT(IFERROR(COALESCE(MOD(1,0),2),COALESCE(INT(\"a\"),\"a\"))),Facts[Quantity]>1)",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 56) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT(IFERROR(COALESCE(TRUE(),CURRENCY(1)),IFERROR(SQRT(-1),TRUE()))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT(IFERROR(IF(1=0,DATE(2020,1,1),\"a\"),COALESCE(CURRENCY(\"c\"),DATE(2020,1,1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),1.5),INT(\"a\"))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT(IFERROR(MOD(1,0),CURRENCY(\"c\"))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNONTEXT(IFERROR(TRUE(),IFERROR(VALUE(\"x\"),1.5))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNUMBER(IFERROR(BLANK(),IFERROR(ERROR(\"e\"),CURRENCY(1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNUMBER(IFERROR(IF(1=1,CURRENCY(\"c\"),BLANK()),TRUE())),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNUMBER(IFERROR(IF(1=1,INT(\"a\"),DATE(2020,1,1)),IF(1=1,DATE(2020,1,1),2))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNUMBER(IFERROR(IFERROR(1/0,\"b\"),IF(1=0,FORMAT(1,\"0\"),VALUE(\"x\")))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNUMBER(IFERROR(IFERROR(LOG(-1),FORMAT(1,\"0\")),IFERROR(1/0,TRUE()))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNUMBER(IFERROR(IFERROR(MOD(1,0),DATE(2020,1,1)),COALESCE(1.5,\"b\"))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISNUMBER(IFERROR(INT(\"a\"),IFERROR((-2)^0.5,\"b\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(0/0,COALESCE(1/0,DATE(2020,1,1)))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(COALESCE(0/0,\"a\"),MOD(1,0))),Facts[Quantity]>1)",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 62) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(IFERROR(2,FORMAT(1,\"0\")),IFERROR((-2)^0.5,\"a\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(IFERROR(CURRENCY(1),(-2)^0.5),FORMAT(1,\"0\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(IFERROR(SQRT(-1),2),IFERROR(0/0,2))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(IFERROR(VALUE(\"x\"),DATE(2020,1,1)),IFERROR(FORMAT(1,\"0\"),\"b\"))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(LOG(-1),FORMAT(1,\"0\"))),Facts[Quantity]>1)",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "CALCULATE(ISTEXT(IFERROR(VALUE(\"x\"),IFERROR(VALUE(\"x\"),TRUE()))),Facts[Quantity]>1)",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(\"b\",1.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR((-2)^0.5,IFERROR(1/0,\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(0/0,1.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,IFERROR(0/0,BLANK())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(1/0,IFERROR(BLANK(),0/0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(2,COALESCE((-2)^0.5,FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(\"b\",\"a\"),COALESCE(FORMAT(1,\"0\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(\"b\",\"a\"),IF(1=0,VALUE(\"x\"),CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(\"b\",1.5),IFERROR(MOD(1,0),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(0/0,DATE(2020,1,1)),(-2)^0.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 64) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(1/0,BLANK()),COALESCE(INT(\"a\"),DATE(2020,1,1))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(BLANK(),BLANK()),COALESCE(SQRT(-1),\"a\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(DATE(2020,1,1),\"a\"),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(ERROR(\"e\"),\"b\"),IF(1=1,VALUE(\"x\"),MOD(1,0))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) e\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(MOD(1,0),CURRENCY(1)),BLANK()))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(COALESCE(TRUE(),TRUE()),IFERROR(VALUE(\"x\"),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(CURRENCY(1),IFERROR(\"a\",DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(DATE(2020,1,1),VALUE(\"x\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(ERROR(\"e\"),(-2)^0.5))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 46) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IF(1=0,\"a\",CURRENCY(1)),1/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IF(1=0,\"a\",VALUE(\"x\")),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IF(1=0,1.5,FORMAT(1,\"0\")),IFERROR(BLANK(),1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IF(1=0,FORMAT(1,\"0\"),1.5),ERROR(\"e\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IF(1=0,SQRT(-1),CURRENCY(1)),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IF(1=1,(-2)^0.5,(-2)^0.5),IF(1=1,CURRENCY(1),SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IF(1=1,2,2),IF(1=0,VALUE(\"x\"),VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(\"a\",FORMAT(1,\"0\")),IFERROR(SQRT(-1),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(\"b\",0/0),IFERROR(CURRENCY(\"c\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(\"b\",DATE(2020,1,1)),IF(1=1,TRUE(),VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR((-2)^0.5,2),IFERROR(BLANK(),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR((-2)^0.5,DATE(2020,1,1)),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR((-2)^0.5,FORMAT(1,\"0\")),IFERROR(0/0,\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR((-2)^0.5,LOG(-1)),IFERROR(VALUE(\"x\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(0/0,\"a\"),IF(1=1,\"b\",0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(0/0,\"a\"),IFERROR(CURRENCY(\"c\"),ERROR(\"e\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(0/0,SQRT(-1)),IFERROR(LOG(-1),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(1.5,FORMAT(1,\"0\")),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(1/0,1.5),IFERROR(CURRENCY(1),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(CURRENCY(\"c\"),CURRENCY(1)),IFERROR(\"a\",\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(DATE(2020,1,1),DATE(2020,1,1)),COALESCE(VALUE(\"x\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(DATE(2020,1,1),MOD(1,0)),IF(1=0,LOG(-1),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(FORMAT(1,\"0\"),\"a\"),1/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(FORMAT(1,\"0\"),1.5),IF(1=0,\"a\",TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(INT(\"a\"),\"a\"),COALESCE(ERROR(\"e\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(INT(\"a\"),2),IFERROR(ERROR(\"e\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(LOG(-1),1.5),(-2)^0.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(LOG(-1),1.5),MOD(1,0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(LOG(-1),BLANK()),(-2)^0.5))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(LOG(-1),CURRENCY(1)),IFERROR(ERROR(\"e\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(LOG(-1),TRUE()),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(MOD(1,0),0/0),0/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(MOD(1,0),1.5),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(MOD(1,0),DATE(2020,1,1)),IFERROR(VALUE(\"x\"),INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(SQRT(-1),CURRENCY(\"c\")),IFERROR(DATE(2020,1,1),INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(SQRT(-1),MOD(1,0)),IFERROR(BLANK(),1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(TRUE(),VALUE(\"x\")),IFERROR(LOG(-1),VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(VALUE(\"x\"),2),IFERROR(\"b\",\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(IFERROR(VALUE(\"x\"),LOG(-1)),IFERROR(\"b\",1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(INT(\"a\"),0/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISBLANK(IFERROR(TRUE(),INT(\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(\"a\",IFERROR(CURRENCY(\"c\"),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(\"b\",1.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(\"b\",IFERROR(BLANK(),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(\"b\",IFERROR(CURRENCY(\"c\"),ERROR(\"e\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR((-2)^0.5,\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(1.5,LOG(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(BLANK(),IF(1=0,TRUE(),1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(BLANK(),IFERROR((-2)^0.5,FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(BLANK(),IFERROR(0/0,\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(COALESCE((-2)^0.5,\"a\"),FORMAT(1,\"0\")))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(COALESCE(1/0,\"b\"),CURRENCY(\"c\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 65) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(COALESCE(DATE(2020,1,1),FORMAT(1,\"0\")),IF(1=0,VALUE(\"x\"),INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(COALESCE(INT(\"a\"),FORMAT(1,\"0\")),IF(1=1,DATE(2020,1,1),DATE(2020,1,1))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(CURRENCY(\"c\"),COALESCE(ERROR(\"e\"),FORMAT(1,\"0\"))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) e\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(CURRENCY(1),MOD(1,0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(DATE(2020,1,1),CURRENCY(\"c\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(DATE(2020,1,1),IF(1=0,LOG(-1),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(DATE(2020,1,1),IFERROR(\"a\",SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(ERROR(\"e\"),1/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(ERROR(\"e\"),IFERROR(FORMAT(1,\"0\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IF(1=0,\"a\",DATE(2020,1,1)),IFERROR(LOG(-1),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IF(1=0,0/0,TRUE()),IFERROR(LOG(-1),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IF(1=0,1.5,2),IFERROR(1/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IF(1=0,CURRENCY(\"c\"),DATE(2020,1,1)),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IF(1=0,CURRENCY(\"c\"),VALUE(\"x\")),IF(1=0,TRUE(),SQRT(-1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 85) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IF(1=1,0/0,0/0),IFERROR(VALUE(\"x\"),LOG(-1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 73) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IF(1=1,INT(\"a\"),(-2)^0.5),IFERROR(INT(\"a\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(\"a\",TRUE()),IFERROR(1/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR((-2)^0.5,\"a\"),IFERROR((-2)^0.5,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR((-2)^0.5,DATE(2020,1,1)),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR((-2)^0.5,ERROR(\"e\")),IFERROR(2,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(0/0,\"a\"),IFERROR(TRUE(),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(0/0,2),SQRT(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(1.5,\"a\"),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(1/0,1.5),COALESCE(DATE(2020,1,1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(2,2),IFERROR(1.5,FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(BLANK(),VALUE(\"x\")),IFERROR((-2)^0.5,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(CURRENCY(\"c\"),DATE(2020,1,1)),IFERROR(0/0,INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(ERROR(\"e\"),\"b\"),INT(\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(ERROR(\"e\"),1.5),IFERROR(FORMAT(1,\"0\"),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(ERROR(\"e\"),2),IFERROR(SQRT(-1),INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(ERROR(\"e\"),ERROR(\"e\")),IFERROR(CURRENCY(\"c\"),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(INT(\"a\"),\"a\"),IF(1=1,INT(\"a\"),SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(MOD(1,0),1.5),0/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(MOD(1,0),CURRENCY(\"c\")),IF(1=0,VALUE(\"x\"),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(MOD(1,0),ERROR(\"e\")),1.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(MOD(1,0),INT(\"a\")),IF(1=1,DATE(2020,1,1),1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(MOD(1,0),LOG(-1)),IFERROR(LOG(-1),SQRT(-1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 80) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(SQRT(-1),TRUE()),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(VALUE(\"x\"),DATE(2020,1,1)),IF(1=0,1/0,1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(IFERROR(VALUE(\"x\"),INT(\"a\")),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(INT(\"a\"),CURRENCY(1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(LOG(-1),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(LOG(-1),IFERROR(TRUE(),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(VALUE(\"x\"),2))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(VALUE(\"x\"),IFERROR(0/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISCURRENCY(IFERROR(VALUE(\"x\"),INT(\"a\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 53) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(\"b\",COALESCE(1/0,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR((-2)^0.5,\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(1.5,\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(1.5,LOG(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(1/0,DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(BLANK(),IFERROR(BLANK(),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(COALESCE(0/0,DATE(2020,1,1)),IF(1=1,LOG(-1),2)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 74) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(COALESCE(2,TRUE()),IFERROR(BLANK(),MOD(1,0))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(COALESCE(DATE(2020,1,1),2),IF(1=1,TRUE(),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(COALESCE(LOG(-1),1.5),IFERROR(ERROR(\"e\"),\"a\")))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(COALESCE(TRUE(),DATE(2020,1,1)),IFERROR(INT(\"a\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(CURRENCY(\"c\"),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(CURRENCY(\"c\"),IFERROR(\"b\",(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(CURRENCY(\"c\"),IFERROR(1.5,SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(CURRENCY(1),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(CURRENCY(1),(-2)^0.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(CURRENCY(1),1/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(CURRENCY(1),COALESCE(INT(\"a\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(DATE(2020,1,1),IF(1=1,BLANK(),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(ERROR(\"e\"),IF(1=1,CURRENCY(\"c\"),DATE(2020,1,1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 65) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IF(1=0,\"a\",DATE(2020,1,1)),IFERROR(CURRENCY(1),(-2)^0.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IF(1=0,LOG(-1),(-2)^0.5),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IF(1=1,1/0,\"a\"),1/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR((-2)^0.5,ERROR(\"e\")),IFERROR(LOG(-1),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(0/0,\"b\"),2))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(0/0,CURRENCY(1)),IFERROR(ERROR(\"e\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(1.5,MOD(1,0)),IFERROR((-2)^0.5,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(CURRENCY(\"c\"),(-2)^0.5),(-2)^0.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(CURRENCY(\"c\"),BLANK()),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(ERROR(\"e\"),FORMAT(1,\"0\")),COALESCE(DATE(2020,1,1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(INT(\"a\"),(-2)^0.5),IFERROR(ERROR(\"e\"),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(INT(\"a\"),1.5),IF(1=1,1.5,MOD(1,0))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(LOG(-1),TRUE()),INT(\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(MOD(1,0),\"a\"),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(MOD(1,0),\"a\"),IFERROR((-2)^0.5,SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(MOD(1,0),ERROR(\"e\")),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(MOD(1,0),TRUE()),BLANK()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(SQRT(-1),\"a\"),IF(1=0,CURRENCY(1),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(SQRT(-1),CURRENCY(1)),IFERROR(VALUE(\"x\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(IFERROR(VALUE(\"x\"),SQRT(-1)),IFERROR(SQRT(-1),ERROR(\"e\"))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 84) e\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(LOG(-1),IFERROR(\"a\",1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(LOG(-1),IFERROR(ERROR(\"e\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(MOD(1,0),IFERROR((-2)^0.5,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(TRUE(),IFERROR(LOG(-1),ERROR(\"e\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(VALUE(\"x\"),IFERROR(DATE(2020,1,1),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDATETIME(IFERROR(VALUE(\"x\"),IFERROR(ERROR(\"e\"),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(\"b\",ERROR(\"e\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(\"b\",IFERROR(LOG(-1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR((-2)^0.5,IFERROR(1/0,CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR((-2)^0.5,LOG(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 46) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(0/0,IFERROR(SQRT(-1),MOD(1,0))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 58) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(2,CURRENCY(\"c\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(BLANK(),IFERROR(BLANK(),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(BLANK(),IFERROR(LOG(-1),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(BLANK(),IFERROR(SQRT(-1),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(BLANK(),MOD(1,0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(COALESCE(0/0,FORMAT(1,\"0\")),VALUE(\"x\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 65) Cannot convert value 'x' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(COALESCE(1/0,2),IF(1=0,\"a\",LOG(-1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 64) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(COALESCE(DATE(2020,1,1),\"a\"),IFERROR(INT(\"a\"),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(COALESCE(INT(\"a\"),\"b\"),COALESCE(INT(\"a\"),TRUE())))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(COALESCE(INT(\"a\"),BLANK()),SQRT(-1)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(COALESCE(TRUE(),TRUE()),BLANK()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(CURRENCY(1),COALESCE(0/0,\"b\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(DATE(2020,1,1),IFERROR(\"b\",BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(ERROR(\"e\"),COALESCE(SQRT(-1),BLANK())))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IF(1=0,TRUE(),\"a\"),IFERROR(1.5,BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IF(1=1,2,DATE(2020,1,1)),IFERROR(BLANK(),SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IF(1=1,BLANK(),VALUE(\"x\")),IFERROR(0/0,\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IF(1=1,DATE(2020,1,1),CURRENCY(\"c\")),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IF(1=1,VALUE(\"x\"),SQRT(-1)),IFERROR(ERROR(\"e\"),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(\"a\",CURRENCY(1)),VALUE(\"x\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(\"a\",FORMAT(1,\"0\")),IF(1=0,FORMAT(1,\"0\"),VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(\"b\",\"b\"),BLANK()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR((-2)^0.5,1.5),IF(1=0,TRUE(),SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(0/0,\"b\"),IFERROR(LOG(-1),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(0/0,2),IFERROR(LOG(-1),SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(0/0,DATE(2020,1,1)),IFERROR((-2)^0.5,\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(1.5,\"a\"),IFERROR(ERROR(\"e\"),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(1.5,1.5),COALESCE(SQRT(-1),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(1.5,ERROR(\"e\")),IF(1=0,CURRENCY(\"c\"),CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(1/0,\"a\"),IF(1=0,\"b\",1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(1/0,CURRENCY(1)),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(2,DATE(2020,1,1)),LOG(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(BLANK(),1.5),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(CURRENCY(\"c\"),DATE(2020,1,1)),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(CURRENCY(\"c\"),TRUE()),IFERROR(VALUE(\"x\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(CURRENCY(1),\"a\"),IFERROR(0/0,2)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(DATE(2020,1,1),2),COALESCE((-2)^0.5,2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(ERROR(\"e\"),BLANK()),IFERROR(LOG(-1),1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(INT(\"a\"),1.5),IFERROR(1/0,BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(INT(\"a\"),BLANK()),IFERROR(SQRT(-1),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(INT(\"a\"),DATE(2020,1,1)),IF(1=1,CURRENCY(1),VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(LOG(-1),\"b\"),IFERROR(SQRT(-1),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(LOG(-1),1.5),COALESCE(INT(\"a\"),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(LOG(-1),1.5),COALESCE(LOG(-1),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(LOG(-1),ERROR(\"e\")),LOG(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 65) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(MOD(1,0),1/0),ERROR(\"e\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 59) e\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(MOD(1,0),BLANK()),0/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(MOD(1,0),MOD(1,0)),IFERROR(ERROR(\"e\"),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(SQRT(-1),\"b\"),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(SQRT(-1),(-2)^0.5),IF(1=1,DATE(2020,1,1),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(SQRT(-1),2),IF(1=0,BLANK(),LOG(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(IFERROR(SQRT(-1),CURRENCY(1)),CURRENCY(\"c\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(INT(\"a\"),(-2)^0.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(SQRT(-1),IFERROR(LOG(-1),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(TRUE(),IF(1=0,FORMAT(1,\"0\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDECIMAL(IFERROR(TRUE(),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(\"a\",IFERROR(ERROR(\"e\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(0/0,IF(1=0,CURRENCY(1),1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1.5,IF(1=1,1/0,MOD(1,0))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,IFERROR(FORMAT(1,\"0\"),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(1/0,IFERROR(MOD(1,0),1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(COALESCE(LOG(-1),FORMAT(1,\"0\")),FORMAT(1,\"0\")))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(CURRENCY(\"c\"),CURRENCY(\"c\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(CURRENCY(1),BLANK()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(CURRENCY(1),COALESCE(CURRENCY(\"c\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(DATE(2020,1,1),(-2)^0.5))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(DATE(2020,1,1),IFERROR(VALUE(\"x\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IF(1=0,0/0,0/0),COALESCE(CURRENCY(1),DATE(2020,1,1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IF(1=0,0/0,FORMAT(1,\"0\")),IFERROR(SQRT(-1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IF(1=0,MOD(1,0),DATE(2020,1,1)),IFERROR(1/0,0/0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IF(1=0,VALUE(\"x\"),MOD(1,0)),SQRT(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 64) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IF(1=1,DATE(2020,1,1),(-2)^0.5),0/0))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IF(1=1,TRUE(),VALUE(\"x\")),IF(1=0,FORMAT(1,\"0\"),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(\"b\",FORMAT(1,\"0\")),IFERROR(CURRENCY(\"c\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(0/0,BLANK()),IFERROR(ERROR(\"e\"),LOG(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(1.5,1/0),IFERROR(ERROR(\"e\"),BLANK())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(2,CURRENCY(1)),IFERROR(ERROR(\"e\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(BLANK(),1/0),IFERROR(0/0,1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(CURRENCY(\"c\"),2),IF(1=1,\"a\",\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(CURRENCY(\"c\"),BLANK()),IFERROR(ERROR(\"e\"),MOD(1,0))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(FORMAT(1,\"0\"),TRUE()),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(INT(\"a\"),INT(\"a\")),MOD(1,0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(LOG(-1),INT(\"a\")),IFERROR(TRUE(),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(MOD(1,0),CURRENCY(1)),IFERROR(\"b\",SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(MOD(1,0),LOG(-1)),CURRENCY(\"c\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 71) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(MOD(1,0),TRUE()),IFERROR(\"b\",CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(SQRT(-1),SQRT(-1)),IF(1=0,SQRT(-1),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(VALUE(\"x\"),TRUE()),IFERROR(LOG(-1),VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(VALUE(\"x\"),TRUE()),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(IFERROR(VALUE(\"x\"),VALUE(\"x\")),SQRT(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 67) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(INT(\"a\"),0/0))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(VALUE(\"x\"),IFERROR(1/0,1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISDOUBLE(IFERROR(VALUE(\"x\"),IFERROR(LOG(-1),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(0/0,IFERROR(SQRT(-1),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1.5,IFERROR(CURRENCY(1),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1.5,IFERROR(VALUE(\"x\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(1/0,IFERROR(1/0,BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(COALESCE(2,FORMAT(1,\"0\")),IF(1=1,2,BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(COALESCE(CURRENCY(\"c\"),\"b\"),IFERROR(0/0,0/0)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(COALESCE(CURRENCY(\"c\"),2),IFERROR(MOD(1,0),2)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(COALESCE(FORMAT(1,\"0\"),\"b\"),IF(1=0,(-2)^0.5,CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(COALESCE(INT(\"a\"),\"a\"),IFERROR(CURRENCY(\"c\"),TRUE())))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(COALESCE(MOD(1,0),2),IF(1=1,BLANK(),INT(\"a\"))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(CURRENCY(\"c\"),IFERROR(MOD(1,0),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(DATE(2020,1,1),BLANK()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(FORMAT(1,\"0\"),IFERROR(LOG(-1),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IF(1=0,LOG(-1),ERROR(\"e\")),BLANK()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IF(1=0,SQRT(-1),MOD(1,0)),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IF(1=1,2,0/0),IFERROR(VALUE(\"x\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IF(1=1,BLANK(),\"a\"),IFERROR(BLANK(),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IF(1=1,CURRENCY(1),BLANK()),IFERROR(MOD(1,0),1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IF(1=1,FORMAT(1,\"0\"),1.5),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IF(1=1,TRUE(),DATE(2020,1,1)),IFERROR(0/0,2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(0/0,2),IFERROR(BLANK(),0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(0/0,DATE(2020,1,1)),1.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(BLANK(),VALUE(\"x\")),CURRENCY(\"c\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(CURRENCY(\"c\"),2),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(CURRENCY(\"c\"),BLANK()),IFERROR(1.5,\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(DATE(2020,1,1),1.5),IFERROR(INT(\"a\"),ERROR(\"e\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(ERROR(\"e\"),CURRENCY(\"c\")),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(INT(\"a\"),BLANK()),IFERROR(INT(\"a\"),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(LOG(-1),CURRENCY(1)),COALESCE(2,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(LOG(-1),TRUE()),IFERROR(VALUE(\"x\"),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(MOD(1,0),1.5),IFERROR(CURRENCY(\"c\"),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(MOD(1,0),TRUE()),IF(1=1,INT(\"a\"),CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(VALUE(\"x\"),1.5),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(IFERROR(VALUE(\"x\"),FORMAT(1,\"0\")),IFERROR(CURRENCY(\"c\"),LOG(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(INT(\"a\"),IFERROR(\"b\",DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(INT(\"a\"),IFERROR(0/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(LOG(-1),IFERROR(\"b\",0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISERROR(IFERROR(VALUE(\"x\"),IFERROR(TRUE(),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(\"a\",COALESCE(2,2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(\"a\",COALESCE(2,BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(\"a\",IFERROR(INT(\"a\"),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(\"b\",IFERROR(\"a\",\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR((-2)^0.5,COALESCE(DATE(2020,1,1),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(1.5,IFERROR(MOD(1,0),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(COALESCE(CURRENCY(\"c\"),\"b\"),COALESCE(1.5,DATE(2020,1,1))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(COALESCE(CURRENCY(1),2),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(COALESCE(INT(\"a\"),\"b\"),IFERROR(2,2)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(COALESCE(LOG(-1),\"a\"),IFERROR(MOD(1,0),CURRENCY(1))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(CURRENCY(\"c\"),IFERROR(SQRT(-1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(DATE(2020,1,1),IFERROR(1.5,BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(DATE(2020,1,1),IFERROR(CURRENCY(\"c\"),VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(ERROR(\"e\"),MOD(1,0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 46) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(FORMAT(1,\"0\"),CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IF(1=0,MOD(1,0),TRUE()),COALESCE(DATE(2020,1,1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IF(1=0,TRUE(),\"b\"),IFERROR(SQRT(-1),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IF(1=1,(-2)^0.5,INT(\"a\")),ERROR(\"e\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 61) e\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IF(1=1,2,SQRT(-1)),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IF(1=1,CURRENCY(\"c\"),VALUE(\"x\")),IFERROR(CURRENCY(\"c\"),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(\"b\",1.5),IFERROR(INT(\"a\"),SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(0/0,\"b\"),IF(1=1,DATE(2020,1,1),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(0/0,1.5),COALESCE(1.5,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(0/0,2),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(0/0,CURRENCY(1)),IF(1=1,LOG(-1),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(1.5,TRUE()),IF(1=1,1.5,ERROR(\"e\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(1/0,DATE(2020,1,1)),IF(1=0,LOG(-1),CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(2,2),2))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(CURRENCY(\"c\"),\"b\"),IFERROR(VALUE(\"x\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(CURRENCY(\"c\"),1.5),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(ERROR(\"e\"),1/0),IF(1=0,FORMAT(1,\"0\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(INT(\"a\"),1.5),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(INT(\"a\"),BLANK()),IFERROR(ERROR(\"e\"),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(LOG(-1),BLANK()),IFERROR(CURRENCY(\"c\"),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(LOG(-1),SQRT(-1)),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(MOD(1,0),\"b\"),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(MOD(1,0),DATE(2020,1,1)),IFERROR(CURRENCY(\"c\"),SQRT(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(SQRT(-1),1.5),COALESCE(0/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(TRUE(),\"a\"),IFERROR(INT(\"a\"),CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(VALUE(\"x\"),2),IF(1=1,CURRENCY(\"c\"),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(IFERROR(VALUE(\"x\"),BLANK()),IF(1=1,DATE(2020,1,1),0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(LOG(-1),IFERROR(TRUE(),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(MOD(1,0),IF(1=0,FORMAT(1,\"0\"),2)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISINT64(IFERROR(VALUE(\"x\"),CURRENCY(\"c\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 55) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(\"a\",COALESCE(CURRENCY(\"c\"),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(0/0,CURRENCY(\"c\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(2,COALESCE(1.5,2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(2,IF(1=0,2,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(COALESCE(\"b\",\"a\"),IFERROR(1.5,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(COALESCE(1.5,FORMAT(1,\"0\")),IFERROR(MOD(1,0),LOG(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(COALESCE(CURRENCY(\"c\"),TRUE()),COALESCE(1.5,CURRENCY(1))))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(COALESCE(FORMAT(1,\"0\"),1.5),IFERROR(TRUE(),0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(COALESCE(LOG(-1),1.5),IF(1=1,1.5,2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(COALESCE(TRUE(),2),IF(1=0,1/0,1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(CURRENCY(\"c\"),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(CURRENCY(\"c\"),IF(1=1,0/0,INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(CURRENCY(1),IFERROR((-2)^0.5,CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(FORMAT(1,\"0\"),LOG(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IF(1=0,FORMAT(1,\"0\"),0/0),IFERROR(BLANK(),0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IF(1=1,2,CURRENCY(\"c\")),IFERROR(VALUE(\"x\"),INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IF(1=1,CURRENCY(\"c\"),(-2)^0.5),DATE(2020,1,1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(\"a\",INT(\"a\")),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR((-2)^0.5,\"a\"),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR((-2)^0.5,(-2)^0.5),IFERROR(1/0,2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR((-2)^0.5,1.5),COALESCE(INT(\"a\"),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(0/0,1/0),IF(1=0,BLANK(),LOG(-1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 69) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(1.5,\"b\"),IFERROR(MOD(1,0),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(1.5,2),IF(1=1,MOD(1,0),INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(1/0,\"a\"),IFERROR(MOD(1,0),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(1/0,DATE(2020,1,1)),LOG(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(1/0,FORMAT(1,\"0\")),IFERROR(\"a\",\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(2,1/0),IFERROR(0/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(CURRENCY(\"c\"),1.5),2))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(CURRENCY(\"c\"),2),COALESCE(TRUE(),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(FORMAT(1,\"0\"),CURRENCY(1)),IFERROR(\"b\",CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(FORMAT(1,\"0\"),FORMAT(1,\"0\")),IFERROR((-2)^0.5,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(INT(\"a\"),\"b\"),IFERROR(CURRENCY(\"c\"),INT(\"a\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(INT(\"a\"),BLANK()),IFERROR(1/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(INT(\"a\"),CURRENCY(1)),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(INT(\"a\"),FORMAT(1,\"0\")),IF(1=1,2,1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(INT(\"a\"),TRUE()),IFERROR(CURRENCY(1),BLANK())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(LOG(-1),2),IFERROR(MOD(1,0),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(LOG(-1),SQRT(-1)),IFERROR(LOG(-1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(MOD(1,0),DATE(2020,1,1)),IFERROR(TRUE(),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(SQRT(-1),1.5),IF(1=0,FORMAT(1,\"0\"),1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(SQRT(-1),BLANK()),IFERROR((-2)^0.5,CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(TRUE(),2),IFERROR(INT(\"a\"),LOG(-1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(IFERROR(VALUE(\"x\"),\"a\"),2))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(INT(\"a\"),IFERROR(CURRENCY(\"c\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(LOG(-1),IFERROR(ERROR(\"e\"),LOG(-1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 64) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(SQRT(-1),COALESCE(CURRENCY(\"c\"),\"a\")))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 64) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISLOGICAL(IFERROR(SQRT(-1),TRUE()))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(\"b\",CURRENCY(1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR((-2)^0.5,\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(1.5,IFERROR(2,BLANK())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(BLANK(),\"a\"))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(BLANK(),BLANK()))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(COALESCE(CURRENCY(1),2),CURRENCY(1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(COALESCE(FORMAT(1,\"0\"),CURRENCY(1)),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(COALESCE(FORMAT(1,\"0\"),FORMAT(1,\"0\")),IFERROR(2,1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(COALESCE(VALUE(\"x\"),\"b\"),COALESCE(1.5,BLANK())))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value 'x' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(DATE(2020,1,1),IF(1=0,CURRENCY(\"c\"),1/0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=0,\"a\",CURRENCY(\"c\")),IFERROR(CURRENCY(1),TRUE())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=0,(-2)^0.5,FORMAT(1,\"0\")),IFERROR(2,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=0,0/0,MOD(1,0)),COALESCE(CURRENCY(\"c\"),2)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 76) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=0,BLANK(),0/0),IF(1=0,LOG(-1),CURRENCY(\"c\"))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 81) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=1,\"b\",LOG(-1)),MOD(1,0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=1,(-2)^0.5,BLANK()),IFERROR(CURRENCY(\"c\"),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=1,1.5,BLANK()),IFERROR(1/0,1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=1,TRUE(),SQRT(-1)),IF(1=0,SQRT(-1),1/0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IF(1=1,VALUE(\"x\"),1/0),LOG(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 60) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR((-2)^0.5,TRUE()),IFERROR(SQRT(-1),2)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(0/0,\"b\"),IF(1=1,TRUE(),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(0/0,1.5),TRUE()))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(0/0,1/0),IFERROR(ERROR(\"e\"),1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(1.5,2),TRUE()))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(1/0,2),COALESCE(CURRENCY(\"c\"),1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(BLANK(),ERROR(\"e\")),IFERROR(\"b\",\"b\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),DATE(2020,1,1)),CURRENCY(1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),ERROR(\"e\")),BLANK()))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(CURRENCY(1),0/0),IFERROR(ERROR(\"e\"),CURRENCY(1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(ERROR(\"e\"),1.5),\"b\"))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(FORMAT(1,\"0\"),MOD(1,0)),VALUE(\"x\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(FORMAT(1,\"0\"),TRUE()),VALUE(\"x\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(LOG(-1),\"b\"),ERROR(\"e\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(LOG(-1),1.5),\"b\"))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(LOG(-1),TRUE()),TRUE()))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(MOD(1,0),BLANK()),IFERROR(2,VALUE(\"x\"))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(SQRT(-1),LOG(-1)),IF(1=0,SQRT(-1),0/0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(IFERROR(VALUE(\"x\"),\"b\"),IFERROR(BLANK(),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(INT(\"a\"),IFERROR(CURRENCY(\"c\"),BLANK())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(LOG(-1),CURRENCY(1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(LOG(-1),IF(1=0,1/0,BLANK())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(SQRT(-1),IFERROR(SQRT(-1),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNONTEXT(IFERROR(TRUE(),IFERROR(\"b\",CURRENCY(1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(\"a\",COALESCE(\"b\",CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(\"a\",IFERROR(\"a\",CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(\"a\",IFERROR(BLANK(),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(\"a\",IFERROR(INT(\"a\"),0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,COALESCE(0/0,\"b\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,IF(1=0,(-2)^0.5,CURRENCY(1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(0/0,IFERROR(MOD(1,0),DATE(2020,1,1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(COALESCE(\"a\",1.5),IFERROR(SQRT(-1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(COALESCE((-2)^0.5,\"b\"),ERROR(\"e\")))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(COALESCE(2,\"a\"),IFERROR(INT(\"a\"),CURRENCY(1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(COALESCE(ERROR(\"e\"),FORMAT(1,\"0\")),FORMAT(1,\"0\")))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) e\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(COALESCE(ERROR(\"e\"),TRUE()),IFERROR(0/0,2)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) e\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(COALESCE(LOG(-1),BLANK()),IFERROR(INT(\"a\"),1/0)))",
+  "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(CURRENCY(1),COALESCE(INT(\"a\"),FORMAT(1,\"0\"))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(CURRENCY(1),IFERROR(MOD(1,0),CURRENCY(\"c\"))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(CURRENCY(1),MOD(1,0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(ERROR(\"e\"),INT(\"a\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'a' of type Text to type Number.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=0,1.5,ERROR(\"e\")),CURRENCY(1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=0,BLANK(),CURRENCY(\"c\")),IFERROR(\"a\",ERROR(\"e\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=0,DATE(2020,1,1),CURRENCY(\"c\")),IF(1=0,\"b\",FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=0,DATE(2020,1,1),VALUE(\"x\")),IFERROR((-2)^0.5,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=0,LOG(-1),SQRT(-1)),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=0,VALUE(\"x\"),1/0),IFERROR(VALUE(\"x\"),\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=1,\"a\",\"a\"),IFERROR(VALUE(\"x\"),0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=1,\"a\",ERROR(\"e\")),BLANK()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=1,\"b\",\"a\"),COALESCE(SQRT(-1),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=1,1.5,\"b\"),SQRT(-1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=1,1/0,VALUE(\"x\")),1.5))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=1,ERROR(\"e\"),1.5),CURRENCY(\"c\")))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 68) Cannot convert value 'c' of type Text to type Currency.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IF(1=1,MOD(1,0),LOG(-1)),IFERROR(1/0,\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(\"a\",0/0),1/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(\"a\",MOD(1,0)),IFERROR(DATE(2020,1,1),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(\"b\",DATE(2020,1,1)),IFERROR(VALUE(\"x\"),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(2,FORMAT(1,\"0\")),SQRT(-1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(BLANK(),1.5),(-2)^0.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(CURRENCY(1),BLANK()),INT(\"a\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(CURRENCY(1),CURRENCY(1)),ERROR(\"e\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(ERROR(\"e\"),TRUE()),IFERROR(DATE(2020,1,1),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(INT(\"a\"),BLANK()),IFERROR(SQRT(-1),BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(LOG(-1),1/0),IF(1=0,TRUE(),MOD(1,0))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 71) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(LOG(-1),DATE(2020,1,1)),IF(1=0,DATE(2020,1,1),TRUE())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(LOG(-1),FORMAT(1,\"0\")),COALESCE(0/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(MOD(1,0),1.5),COALESCE(DATE(2020,1,1),\"a\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(MOD(1,0),2),COALESCE(DATE(2020,1,1),1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(SQRT(-1),2),IFERROR(ERROR(\"e\"),1.5)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(TRUE(),1.5),IFERROR(SQRT(-1),0/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(VALUE(\"x\"),\"b\"),INT(\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(VALUE(\"x\"),2),IFERROR(VALUE(\"x\"),LOG(-1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(VALUE(\"x\"),BLANK()),IF(1=1,CURRENCY(\"c\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(VALUE(\"x\"),DATE(2020,1,1)),MOD(1,0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(IFERROR(VALUE(\"x\"),FORMAT(1,\"0\")),IF(1=1,(-2)^0.5,VALUE(\"x\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(INT(\"a\"),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(INT(\"a\"),1.5))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(LOG(-1),IFERROR(LOG(-1),CURRENCY(1))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISNUMBER(IFERROR(VALUE(\"x\"),CURRENCY(1)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(\"b\",IFERROR(1/0,\"b\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR((-2)^0.5,IF(1=0,CURRENCY(1),CURRENCY(\"c\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(1/0,IFERROR(0/0,1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(COALESCE(BLANK(),\"b\"),ERROR(\"e\")))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(COALESCE(CURRENCY(1),\"a\"),TRUE()))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(CURRENCY(\"c\"),2))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(CURRENCY(1),IFERROR(FORMAT(1,\"0\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(DATE(2020,1,1),IF(1=1,1.5,1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(DATE(2020,1,1),IFERROR(0/0,\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(ERROR(\"e\"),LOG(-1)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 45) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=0,0/0,2),\"a\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=0,1.5,CURRENCY(\"c\")),IFERROR(VALUE(\"x\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=0,BLANK(),\"b\"),0/0))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=0,CURRENCY(\"c\"),CURRENCY(\"c\")),IFERROR(LOG(-1),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=0,MOD(1,0),DATE(2020,1,1)),FORMAT(1,\"0\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=1,(-2)^0.5,1.5),(-2)^0.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=1,2,CURRENCY(\"c\")),IFERROR(TRUE(),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=1,2,DATE(2020,1,1)),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IF(1=1,ERROR(\"e\"),DATE(2020,1,1)),MOD(1,0)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 68) Division by zero has occurred when evaluating function 'MOD'.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR((-2)^0.5,CURRENCY(1)),IFERROR(ERROR(\"e\"),TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(0/0,2),IF(1=0,VALUE(\"x\"),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(0/0,ERROR(\"e\")),IFERROR(SQRT(-1),SQRT(-1))))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 75) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(0/0,TRUE()),IFERROR(1/0,TRUE())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(1.5,TRUE()),SQRT(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(1/0,(-2)^0.5),IF(1=0,SQRT(-1),(-2)^0.5)))",
+  "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 72) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\"",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(1/0,TRUE()),SQRT(-1)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),(-2)^0.5),IFERROR(0/0,DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),2),1/0))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),DATE(2020,1,1)),IFERROR(SQRT(-1),(-2)^0.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),INT(\"a\")),COALESCE(TRUE(),FORMAT(1,\"0\"))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(CURRENCY(\"c\"),VALUE(\"x\")),IFERROR(1/0,FORMAT(1,\"0\"))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(ERROR(\"e\"),LOG(-1)),IFERROR(BLANK(),CURRENCY(1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(INT(\"a\"),\"b\"),IFERROR(CURRENCY(1),CURRENCY(\"c\"))))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(INT(\"a\"),BLANK()),IFERROR(MOD(1,0),DATE(2020,1,1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(MOD(1,0),\"b\"),IFERROR(INT(\"a\"),1/0)))",
+  "powerbi": "True",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(MOD(1,0),BLANK()),IFERROR(\"b\",1/0)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(MOD(1,0),SQRT(-1)),IFERROR(SQRT(-1),1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(MOD(1,0),TRUE()),IFERROR(0/0,BLANK())))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(SQRT(-1),BLANK()),\"b\"))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(SQRT(-1),BLANK()),COALESCE(1/0,1.5)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(SQRT(-1),CURRENCY(1)),IFERROR(1/0,\"a\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(TRUE(),2),IFERROR(INT(\"a\"),2)))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(IFERROR(VALUE(\"x\"),1.5),2))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(LOG(-1),IF(1=1,0/0,LOG(-1))))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),(-2)^0.5))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(MOD(1,0),IFERROR(DATE(2020,1,1),\"b\")))",
+  "powerbi": "False",
+  "group": "fresh137"
+ },
+ {
+  "expr": "ISTEXT(IFERROR(VALUE(\"x\"),COALESCE(\"a\",BLANK())))",
+  "powerbi": "True",
+  "group": "fresh137"
+ }
+]

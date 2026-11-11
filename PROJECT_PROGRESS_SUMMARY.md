@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-11, after Iteration 225 / Task 136 dax-failtype-126, old wrong type tests of failing values fixed, mix workflow: Haiku 5.5 coded, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536898 match, 3503 refused, 0 DIFF, 0 CRASH, locked 536878. Next: Task 137 row order of SUMMARIZE / ADDMISSINGITEMS / TOPN (Antigravity when its quota returns), and the 12 nested-IFERROR old wrong answers.
+**Latest status (2026-11-11, after Iteration 226 / Task 137 dax-nestiferr-127, nested IFERROR inside type tests, mix workflow: Haiku 5.5 coded, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4418 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 536898 match, 3503 refused, 0 DIFF, 0 CRASH, locked 536878. Next: Task 138 row order of ADDMISSINGITEMS / SUMMARIZE / TOPN (Antigravity), remaining old IFERROR wrong answers.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
