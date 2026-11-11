@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-11, after Iteration 228 / Task 139 dax-amiorder-129, TOCSV row order of ADDMISSINGITEMS with filter tables, mix workflow: Haiku 5.5 coded, Sonnet 5.5 reviewed, Claude Opus 5.5 planned, gated and shipped under the user's delegated approval):** pytest 4420 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537171 match, 3230 refused, 0 DIFF, 0 CRASH, locked 537151. Next: Next DAX refusal families with Haiku while Antigravity is out of quota.
+**Latest status (2026-11-11, after Iteration 229 / Task 140 dax-maxxnan-130, MAXX / MINX over a Variant with NaN beside numbers walks IF / SWITCH rows by branch; 6 old wrong answers fixed, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and fixed, Opus shipped under the user's delegated approval):** pytest 4424 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537176 match, 3225 refused, 0 DIFF, 0 CRASH, locked 537156. Next: Next DAX refusal family (LINEST perfect fit, SUBSTITUTEWITHINDEX row order or STDEVX date noise).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
