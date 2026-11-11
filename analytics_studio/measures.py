@@ -4665,7 +4665,7 @@ def _filtered_domain_refused(add_missing: tuple[Any, ...], summarize: tuple[Any,
 def _addmissing_inner_order_ok(inner: tuple[Any, ...]) -> bool:
     """Task 139 (live Power BI, dax-amiorder-129 grid, 153 shapes): the table ADDMISSINGITEMS completes keeps its own row order and the rows it
     adds follow it, so TOCSV / TOJSON can print it when the table's own order is one of these: SUMMARIZECOLUMNS over one table with plain
-    group columns and SUM / AVERAGE / COUNTROWS / MAX / MIN extensions; a bare table or FILTER over a bare table or ALL(table); UNION of
+    group columns and SUM / AVERAGE / COUNTROWS / MAX / MIN extensions; a bare table; UNION of
     SUMMARIZE arms over one table; TOPN of a bare table, VALUES(column) or a plain SUMMARIZE (see _addmissing_topn_ok)."""
     kind = inner[0]
     if kind == "call" and inner[1] == "SUMMARIZECOLUMNS":
@@ -4680,9 +4680,6 @@ def _addmissing_inner_order_ok(inner: tuple[Any, ...]) -> bool:
         return all(e[0] == "call" and e[1] in {"SUM", "AVERAGE", "COUNTROWS", "MAX", "MIN"} for e in exts)
     if kind == "table":
         return True
-    if kind == "call" and inner[1] == "FILTER" and inner[2]:
-        source = inner[2][0]
-        return source[0] == "table" or (source[0] == "call" and source[1] in {"ALL", "ALLNOBLANKROW"} and len(source[2]) == 1 and source[2][0][0] == "table")
     if kind == "call" and inner[1] == "UNION" and len(inner[2]) >= 2:
         return all(a[0] == "call" and a[1] == "SUMMARIZE" and a[2] and a[2][0][0] == "table" and _plain_summarize_ok(a) for a in inner[2])
     if kind == "call" and inner[1] == "TOPN":
@@ -4847,11 +4844,16 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
         elif function == "ADDMISSINGITEMS" and arguments:
             # the table keeps its own row order and the missing rows follow it (live Power BI, iteration 96): only a table whose own order is modelled
             inner = next((argument for argument in arguments if argument[0] != "reference"), None)
-            if inner is not None and _addmissing_inner_order_ok(inner):  # Task 139: the shapes measured in dax-amiorder-129
-                if inner[0] == "call" and inner[1] == "TOPN" and inner[2][0][1] == 2 and not any(a[0] == "reference" for a in arguments[:1]):
-                    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # TOPN(2) completed with no ShowAll column is not measured
-                return "grouped"
-            if inner is not None and not (inner[0] == "call" and inner[1] == "SUMMARIZECOLUMNS") and _tocsv_row_order(inner) in {"dictionary", "grouped"}:
+            if inner is not None and not (inner[0] == "call" and inner[1] == "SUMMARIZECOLUMNS"):
+                try:
+                    inner_order = _tocsv_row_order(inner)
+                except MeasureError:
+                    inner_order = None
+                if inner_order in {"dictionary", "grouped"}:
+                    return "grouped"
+            # Task 139 (live Power BI, dax-amiorder-129): the new shapes need a leading ShowAll column. Without one, Power BI prints a FILTER(table, ...)
+            # source in reverse storage order (127 of 127 saved probes), which the local engine does not model; the 19 spec items with ShowAll are storage order.
+            if inner is not None and _addmissing_inner_order_ok(inner) and arguments[0][0] == "reference":
                 return "grouped"
         elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1:
             if arguments[0][0] == "call" and arguments[0][1] == "ALLEXCEPT" and len(arguments) == 3 and arguments[1][0] == "string" and arguments[2][0] == "reference":
