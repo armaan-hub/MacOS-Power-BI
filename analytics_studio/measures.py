@@ -2526,8 +2526,8 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
             return ("refuse", None)  # measured: up first (k <= 5 with a lower root too), roots up to 2^26 answered
         lo, hi, upward = 2.0 ** (up_k - 1), 2.0 ** up_k, True
     else:
-        if dn_k > 10:
-            return ("refuse", None)  # measured: a root at 2^-28 is not found, a root at 2^-10 is
+        if dn_k > 10 or (early_sum != 0.0 and (early_sum > 0.0) != positive_start):
+            return ("refuse", None)  # measured: a root at 2^-28 is not found, a root at 2^-10 is; an upper root beyond 2^60 makes downward bisection wrong (Task 132)
         lo, hi, upward = 2.0 ** -dn_k, 2.0 ** -(dn_k - 1), False
     variants = [(w, t, f) for w in range(3) for t in (1e-8, 0.995e-8, 1.01e-8) for f in (1e-8, 1.005e-8)]
     answers: dict[int, float] = {}
@@ -4225,7 +4225,7 @@ def _format_tojson_double(val: Decimal) -> str:
     """A double cell of TOJSON (live Power BI, iteration 94): the shortest digits that read back as the double, cut (not
     rounded) after 4 decimals with at least one kept ("0.3", "1.0", "-0.0"); from 1e21 on an exponent form ("1.5e300")."""
     double = float(val)
-    if abs(double) >= 1e15 and double != int(double):
+    if abs(val) >= 1e15 and val != val.to_integral_value():
         raise MeasureError("A fractional double of 1E15 or more is not modelled in the local engine.")
     if abs(double) >= 1e21:
         shortest = repr(double)
@@ -4241,6 +4241,128 @@ def _format_tojson_double(val: Decimal) -> str:
         text = "-0"
     whole, _, fraction = text.partition(".")
     return f"{whole}.{fraction[:4].rstrip('0') or '0'}"
+
+
+_INEXACT_DOUBLE_FUNCTIONS = frozenset({
+    "EXP", "LN", "LOG", "LOG10", "SQRT", "PI", "DIVIDE",
+    "SIN", "COS", "TAN", "COT", "ASIN", "ACOS", "ATAN", "ATAN2",
+    "SINH", "COSH", "TANH", "DEGREES", "RADIANS",
+    "RAND", "RANDBETWEEN",
+    "NORM.DIST", "NORM.INV", "NORM.S.DIST", "NORM.S.INV",
+    "T.DIST", "T.INV", "CHISQ.DIST", "CHISQ.INV",
+})
+
+
+def _is_exact_double_expr(node: Any) -> bool:
+    """Whether an expression computes a double using only exact arithmetic (+, -, *, powers of 2, FACT, integer literals).
+    Refuses when it comes from EXP, LN, SQRT, POWER with non-integer results, PI, trig or division (Opus review Task 132)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind == "number":
+        return True
+    if kind == "string":
+        return True
+    if kind == "unary":
+        op, child = node[1], node[2]
+        if op in {"+", "-"}:
+            return _is_exact_double_expr(child)
+        return False
+    if kind == "binary":
+        op, left, right = node[1], node[2], node[3]
+        if op in {"+", "-", "*"}:
+            return _is_exact_double_expr(left) and _is_exact_double_expr(right)
+        if op == "/":
+            def _node_val(n: Any) -> Decimal | None:
+                if not isinstance(n, tuple) or not n:
+                    return None
+                if n[0] == "number":
+                    return n[1]
+                if n[0] == "unary" and n[1] == "+":
+                    return _node_val(n[2])
+                if n[0] == "unary" and n[1] == "-":
+                    v = _node_val(n[2])
+                    return -v if v is not None else None
+                return None
+            return _node_val(right) == Decimal(1) and _is_exact_double_expr(left)
+        if op == "^":
+            def _is_int(n: Any) -> bool:
+                if not isinstance(n, tuple) or not n:
+                    return False
+                if n[0] == "number":
+                    return n[1] == n[1].to_integral_value()
+                if n[0] == "unary" and n[1] in {"+", "-"}:
+                    return _is_int(n[2])
+                return False
+            def _node_val(n: Any) -> Decimal | None:
+                if not isinstance(n, tuple) or not n:
+                    return None
+                if n[0] == "number":
+                    return n[1]
+                if n[0] == "unary" and n[1] == "+":
+                    return _node_val(n[2])
+                if n[0] == "unary" and n[1] == "-":
+                    v = _node_val(n[2])
+                    return -v if v is not None else None
+                return None
+            if _node_val(left) in {Decimal(2), Decimal(-2)} and _is_int(right):
+                return True
+            return False
+        return False
+    if kind == "call":
+        fn = node[1]
+        args = node[2]
+        if fn in _INEXACT_DOUBLE_FUNCTIONS:
+            return False
+        if fn == "FACT":
+            return True
+        if fn == "POWER":
+            def _is_int(n: Any) -> bool:
+                if not isinstance(n, tuple) or not n:
+                    return False
+                if n[0] == "number":
+                    return n[1] == n[1].to_integral_value()
+                if n[0] == "unary" and n[1] in {"+", "-"}:
+                    return _is_int(n[2])
+                return False
+            def _node_val(n: Any) -> Decimal | None:
+                if not isinstance(n, tuple) or not n:
+                    return None
+                if n[0] == "number":
+                    return n[1]
+                if n[0] == "unary" and n[1] == "+":
+                    return _node_val(n[2])
+                if n[0] == "unary" and n[1] == "-":
+                    v = _node_val(n[2])
+                    return -v if v is not None else None
+                return None
+            if _node_val(args[0]) in {Decimal(2), Decimal(-2)} and _is_int(args[1]):
+                return True
+            return False
+        if fn in {"ROUND", "ROUNDUP", "ROUNDDOWN", "INT", "TRUNC"}:
+            return _is_exact_double_expr(args[0])
+        if fn in {"MAX", "MIN"}:
+            return all(_is_exact_double_expr(a) for a in args)
+        if fn in {"SUM", "SUMX", "MAXX", "MINX", "COUNTROWS"}:
+            if len(args) == 1:
+                return True
+            if len(args) >= 2:
+                return _is_exact_double_expr(args[1])
+            return True
+        if fn in {"IF", "COALESCE"}:
+            return all(_is_exact_double_expr(a) for a in args[1:])
+        if fn == "SWITCH":
+            return all(_is_exact_double_expr(args[i]) for i in range(2, len(args), 2))
+        if fn in {"CONVERT", "VALUE", "DATE"}:
+            return True
+        return False
+    if kind == "reference":
+        return True
+    if kind == "let":
+        return _is_exact_double_expr(node[2])
+    if kind == "var":
+        return True
+    return False
 
 
 # Column types the declared type of a loaded column or the static type of a computed one say something sure about.
@@ -23073,6 +23195,37 @@ def _evaluate_measures_once(
             negative_zero_literals: list[tuple[Any, ...]] = []
             double_cells: dict[str, Decimal] = {}
             literal_headers: set[str] = set()
+            column_expressions: dict[str, Any] = {}
+            node_for_exprs = table_node
+            while node_for_exprs and node_for_exprs[0] == "var" and node_for_exprs[1] in variable_nodes:
+                node_for_exprs = variable_nodes[node_for_exprs[1]]
+            if node_for_exprs and node_for_exprs[0] == "let":
+                node_for_exprs = node_for_exprs[2]
+                while node_for_exprs and node_for_exprs[0] == "var" and node_for_exprs[1] in variable_nodes:
+                    node_for_exprs = variable_nodes[node_for_exprs[1]]
+            while node_for_exprs and node_for_exprs[0] == "call" and node_for_exprs[1] in {"FILTER", "CALCULATETABLE"} and len(node_for_exprs[2]) >= 1:
+                node_for_exprs = node_for_exprs[2][0]
+            if node_for_exprs and node_for_exprs[0] == "call" and node_for_exprs[1] == "TOPN" and len(node_for_exprs[2]) >= 2:
+                node_for_exprs = node_for_exprs[2][1]
+
+            if node_for_exprs and node_for_exprs[0] == "call":
+                fn = node_for_exprs[1]
+                args = node_for_exprs[2]
+                if fn == "ROW":
+                    for pos in range(0, len(args), 2):
+                        if pos // 2 < len(headers):
+                            column_expressions[headers[pos // 2]] = args[pos + 1]
+                elif fn in {"SELECTCOLUMNS", "ADDCOLUMNS"} and len(args) > 1:
+                    pairs = args[1:]
+                    for pos in range(0, len(pairs), 2):
+                        col_name = pairs[pos][1] if pairs[pos][0] == "string" else None
+                        if col_name:
+                            column_expressions[col_name] = pairs[pos + 1]
+                elif fn == "SUMMARIZE" and len(args) > 1:
+                    for pos in range(1, len(args) - 1, 2):
+                        if args[pos][0] == "string":
+                            column_expressions[args[pos][1]] = args[pos + 1]
+
             if table_node[0] == "call" and table_node[1] == "ROW":
                 pairs = table_node[2]
                 for position in range(1, len(pairs), 2):
@@ -23119,12 +23272,18 @@ def _evaluate_measures_once(
                 return value if context.get("derived") else typed_cell(context, header, value)
 
             def unreliable_double(value: Decimal, header: str) -> bool:
-                """A double the local decimals cannot reproduce digit for digit: a computed one beyond 1E15 (EXP(50), PI()*1E20) or a subnormal."""
+                """A double the local decimals cannot reproduce digit for digit: a subnormal or an inexact large double."""
                 magnitude = abs(value)
                 if magnitude != 0 and magnitude < _DBL_MIN:
                     return True
-                computed = context.get("derived") and header not in (context.get("lineage") or {}) and header not in literal_headers
-                return bool(computed and magnitude >= Decimal("1e15") and column_kind(header) in {None, "double"})
+                if magnitude >= Decimal("1e15") and column_kind(header) in {None, "double"}:
+                    expr_node = column_expressions.get(header)
+                    if expr_node is not None:
+                        return not _is_exact_double_expr(expr_node)
+                    computed = context.get("derived") and header not in (context.get("lineage") or {}) and header not in literal_headers
+                    if computed:
+                        return True
+                return False
 
             if is_csv:
                 delimiter = ","

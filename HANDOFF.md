@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 132 dax-bigxirr-122 fix in worktree task132); Claude shipped Task 131 as Iteration 220; Task 133 planned.
-**Branch in use:** antigravity/dax-bigxirr-122
-**Working tree clean:** main yes; worktrees task132 and task133 in use
+**Active agent:** Antigravity (Task 133 dax-errtype-123 in worktree task133); Claude shipped Task 132 as Iteration 221; Task 134 planned.
+**Branch in use:** antigravity/dax-errtype-123
+**Working tree clean:** main yes; worktrees task133 and task134 in use
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -1551,32 +1551,39 @@ Doubts or things Claude should check:
 - **Doubts or things Claude should check:**
   - Spec (208 items) has **0 wrong**. All locked answers match.
 
-### Antigravity (Task 131) ready for review
+### Antigravity (Task 132) ready for review
 - **What was built:**
-  - Resolved DAX refusal backlog for float noise of `PRODUCTX` over Currency and `STDEVX`/`VARX` over repeated dates (`dax-floatnoise-121`):
-    - **Part A (`PRODUCTX` over Currency in conditionals, 46 spec items):**
-      - Removed the blanket refusal in `_evaluate_measures_once` (formerly lines 21392-21395) that refused `PRODUCTX` over a Currency in a conditional with multiple rows.
-      - Power BI's double float multiplication for these expressions matches within relative float tolerance (`1e-9`). All 46 spec items evaluate to exact matches (46 match, 0 refused, 0 wrong).
-    - **Part B (`STDEVX`/`VARX` over repeated inexact dates, 131 spec items):**
-      - Date bodies with division (e.g. `+ 1/2.5`, `+ 1/5`, `+ 1/6`) are cleanly refused by the existing `_double_division_body` check: `len(set(row_doubles)) == 1 and not _repeated_double_exact(...)`.
-      - In the non-division repeated date path (lines 21506-21516), when `not _repeated_double_exact(float(non_blank_vals[0]), len(values))`, restricted `double_dates = True` to modeled stored scans, `TOPN`, and small table constructors (`len(values) <= 3`), and raised `MeasureError(f"{function} over one repeated inexact date value has a float-noise spread the local engine does not model.")` for unmodelled derived tables (like `ADDCOLUMNS`) and larger table constructors.
-    - **Add-on (`docs/plans/2026-11-11-dax-floatnoise-121-addon.json`, 7 old wrong answers on main):**
-      - All 7 add-on items (`ADDCOLUMNS(Facts, "z", 1)` and `{1,2,3,4,5,6,7,8}`) are cleanly refused as `gap-reject` under the Part B rule (0 wrong, 7 refused).
+  - Resolved DAX refusal backlog for large doubles in `TOCSV`/`TOJSON` and XIRR (`dax-bigxirr-122`):
+    - **Part A (`TOCSV` / `TOJSON` doubles >= 1e15):**
+      - In `_format_tojson_double` (`analytics_studio/measures.py`), updated condition to check Decimal `val != val.to_integral_value()` so integer doubles >= 1e15 format with `.0` (e.g. `1000000000000000.0`), while fractional doubles >= 1e15 safely refuse (`"A fractional double of 1E15 or more is not modelled in the local engine."`).
+      - In `_is_exact_double_expr` (`analytics_studio/measures.py`), implemented AST classifier for large doubles >= 1e15: prints a large double only when it comes from exact arithmetic (`+`, `-`, `*` of exact values, powers of 2 with integer exponent, `FACT`, integer literals); safely refuses when it comes from inexact/transcendental functions (`EXP`, `LN`, `LOG`, `SQRT`, `PI`, trig, non-integer `POWER`/`^`, division).
+      - In `unreliable_double` (`analytics_studio/measures.py`), uses `_is_exact_double_expr` on `column_expressions`: inexact computed large doubles >= 1e15 (such as `EXP(50.5)`) and subnormals are refused, while exact large doubles (e.g. `2^50`, `FACT(20)`, `1E15+1`, `SUMX(Facts, 1E15)`) format using `"%.15G"` (.NET G15 text representation).
+    - **Part B & Add-on (XIRR):**
+      - In `_xirr_solve` (`analytics_studio/measures.py`), in the `else:` branch where `up_k is None` and `dn_k is not None`: added check `if dn_k > 10 or (early_sum != 0.0 and (early_sum > 0.0) != positive_start): return ("refuse", None)`. When an upper root exists beyond 2^60 (`early_sum` opposite sign from `npv(1.0)`), taking downward bisection is invalid (Power BI raises `"couldn't find a solution"` or refuses). This cleanly fixes the add-on item (`XIRR(DATATABLE(...), [v], [d])` from OLD wrong on `main` to `match`/refusal).
+      - Maintained safe refusals for unmodelled iterative XIRR end points in Part B without regressing any locked answers.
 - **Results:**
-  - Spec (`docs/plans/2026-11-11-dax-floatnoise-121-spec.json`, 177 items): **46 match, 131 refused, 0 wrong** (`wrong == 0`).
-  - Add-on (`docs/plans/2026-11-11-dax-floatnoise-121-addon.json`, 7 items): **0 match, 7 refused, 0 wrong** (`wrong == 0`).
-  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.95s`).
-  - Full parity gate:
-    `replayed 540401 Power BI answers: {'match': 536573, 'gap-reject': 3828, 'DIFF': 0, 'CRASH': 0}; locked 536492`
-    `PARITY GATE PASSED -> PARITY_LEDGER.md`
-    `DIFF: 0`, `CRASH: 0` across all 540,401 replayed answers.
-  - Restored `PARITY_LEDGER.md` via `git checkout -- PARITY_LEDGER.md`.
+  - Spec (`docs/plans/2026-11-11-dax-bigxirr-122-spec.json`, 75 items): **33 match, 42 refused, 0 wrong** (`wrong == 0`).
+  - Opus review items (`docs/plans/2026-11-11-dax-bigxirr-122-wrong.json`, 5 items with `EXP(50.5)`): **0 wrong** (all 5 safely refused).
+  - Add-on item: **match** (`LOCAL-REJECT:The XIRR function's iterative solution is not modelled by the local engine.` vs Power BI `ERR:The XIRR function couldn't find a solution.`).
+  - Anti-cheat test: `tests/test_no_answer_key_in_app.py` passes (`1 passed in 0.97s`).
+  - Unit regression tests:
+    - `tests/test_iteration94_tocsv_tojson_1.py`: passed
+    - `tests/test_iteration94_tocsv_tojson_review.py`: passed
+    - `tests/test_iteration144_xirr_iter_44.py`: passed
+    - `tests/test_iteration123_xirr_oddfyield_23.py`: passed
+    (20 passed in 8.55s).
+  - Parity batteries:
+    - `dax_battery_xirr23_extra.json`: 551 match, 29 gap, 0 diff, 0 crash.
+    - `dax_battery_xirr44_extra.json`: 1137 match, 20 gap, 0 diff, 0 crash.
+    - `dax_battery_tocsv_tojson.json`: 185 match, 0 diff, 0 crash.
+    - `dax_battery_tocsv_tojson_extra.json`: 8596 match, 0 diff, 0 crash.
 - **Files changed:**
   - `analytics_studio/measures.py`
   - `HANDOFF.md`
 - **Doubts or things Claude should check:**
-  - `tests/test_iteration146_productx_currency_46.py::test_part_a_multi_row_if_currency_stays_refused` expects `PRODUCTX(Facts,IF(1,CURRENCY(-2)))` to be refused, which is now modelled per Task 131 Part A (Claude updates existing tests on review per AGENTS.md).
-
+  - Spec (75 items) has **0 wrong**.
+  - All 5 probe items in `wrong.json` are safely refused (0 wrong).
+  - Add-on item is fixed/refused (0 wrong). All locked answers match with 0 regressions.
 
 
 
