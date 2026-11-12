@@ -13406,6 +13406,23 @@ def _evaluate_measures_once(
             # Task 143 (live Power BI, holdout): TOPNSKIP with two or more ORDER BY columns is an error for every n and skip measured
             # ("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows ...")
             raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
+        # Task 143 review: only the shapes measured in Power BI are answered: Table, ALL(Table) or FILTER(Table, ...), ordered by a
+        # column of that same table, or VALUES/ALL(column) ordered by itself. CALCULATETABLE, a variable table or another table's column are refused.
+        shape_node = arguments[2]
+        if shape_node[0] == "call" and shape_node[1] in {"ALL", "FILTER"} and shape_node[2] and shape_node[2][0][0] == "table":
+            shape_node = shape_node[2][0] if shape_node[1] == "ALL" and len(shape_node[2]) == 1 else (
+                shape_node[2][0] if shape_node[1] == "FILTER" else ("unmodelled",))
+        column_node = None
+        if arguments[2][0] == "table_call" and arguments[2][1] == "VALUES" and arguments[2][2][0] == "reference":
+            column_node = arguments[2][2]
+        elif arguments[2][0] == "call" and arguments[2][1] == "ALL" and len(arguments[2][2]) == 1 and arguments[2][2][0][0] == "reference":
+            column_node = arguments[2][2][0]
+        column_shape = column_node is not None and bool(keys_spec) and all(
+            key[0][1].upper() == column_node[1].upper() and key[0][2].upper() == column_node[2].upper() for key in keys_spec)
+        if column_shape:
+            pass  # VALUES(col) / ALL(col) ordered by that same column: distinct values, no ties (ASC n=2 skip 0 over Region is locked)
+        elif shape_node[0] != "table" or any(str(key[0][1]).upper() != str(shape_node[1]).upper() for key in keys_spec):
+            raise MeasureError("TOPNSKIP over this table shape or ordered by a column of another table is not modelled in the local engine.")
         count_value = in_row_expression(lambda: evaluate(arguments[0]))
         skip_value = in_row_expression(lambda: evaluate(arguments[1]))
         context, rows = table_argument_value(arguments[2])
@@ -13450,6 +13467,9 @@ def _evaluate_measures_once(
         if outer_row_reads[0] != outer_reads_before:
             raise MeasureError("The tie order of a TOPNSKIP whose ORDER BY reads an enclosing row context is not modelled in the local engine.")
         ranked = list(found)
+        if keys_spec[0][1] and sum(1 for item in found if item[0][0] is None) > 1:
+            # Task 143 review: ASC ties of several BLANK keys were measured (table order); DESC ones were not, so they are refused
+            raise MeasureError("The tie order of several BLANK TOPNSKIP keys is not modelled in the local engine.")
         try:
             # BLANK is the lowest key: (0,) sorts before every (1, value); equal keys keep the table's order in this ASC sort
             ranked.sort(key=lambda item: (0,) if item[0][0] is None else (1, column_order_key(item[0][0])))

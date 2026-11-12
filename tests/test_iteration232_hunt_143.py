@@ -553,6 +553,8 @@ class Task143Spec2Ties(unittest.TestCase):
         self._pbi('TOPNSKIP(1.5,BLANK(),Facts,Facts[Region],DESC', "0Paid;3")
         self._pbi('TOPNSKIP(5,-5,Facts,Facts[Region],DESC', "0Paid;3;4Late;5;1Paid")
         self._pbi('TOPNSKIP(5,2,FILTER(Facts,Facts[Quantity]>0),Facts[Region],DESC', "5;1Paid;2Paid")
+        self._rejects("CONCATENATEX(TOPNSKIP(3,1,Facts,Facts[Note],DESC)" + self.CONCAT)
+        self.assertEqual(dax.local("COUNTROWS(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region]))"), "2")
         self._pbi('TOPNSKIP(5,BLANK(),ALL(Facts),Facts[Region],DESC', "0Paid;3;4Late;5;1Paid")
         self._pbi('TOPNSKIP(TRUE(),-5,ALL(Facts),Facts[Region],DESC', "0Paid")
         self._pbi('TOPNSKIP(-5,1,ALL(Facts),Facts[Region],DESC', "3;4Late;5;1Paid;2Paid")
@@ -579,6 +581,20 @@ class Task143Spec2Ties(unittest.TestCase):
         self._rejects('CONCATENATEX(TOPNSKIP(-1,-1,FILTER(Facts,Facts[Quantity]>0),Facts[Region],DESC)' + self.CONCAT)
         self._rejects('CONCATENATEX(TOPNSKIP(-5,2.5,FILTER(Facts,Facts[Quantity]>0),Facts[Quantity])' + self.CONCAT)
         self._rejects('CONCATENATEX(TOPNSKIP(-1,-5,FILTER(Facts,Facts[Quantity]>0),Facts[Note],ASC)' + self.CONCAT)
+
+    def test_unmeasured_table_shapes_and_blank_ties_are_refused(self):
+        """Review: only Table / ALL(Table) / FILTER(Table, ...) ordered by a column of that table was measured in Power BI."""
+        for call in (
+            "TOPNSKIP(3,1,VALUES(Facts[Region]),Facts[Quantity],DESC)",
+            "TOPNSKIP(3,1,ALL(Facts[Region]),Facts[Quantity],DESC)",
+            "TOPNSKIP(3,1,CALCULATETABLE(Facts,Facts[Quantity]>0),Facts[Region],DESC)",
+            "TOPNSKIP(3,1,Facts,Other[Region],DESC)",
+        ):
+            self._rejects("CONCATENATEX(" + call + self.CONCAT)
+        self._rejects("VAR t=FILTER(Facts,Facts[Quantity]>0) RETURN CONCATENATEX(TOPNSKIP(3,1,t,Facts[Region],DESC)" + self.CONCAT)
+        self._pbi('TOPNSKIP(5,2,FILTER(Facts,Facts[Quantity]>0),Facts[Region],DESC', "5;1Paid;2Paid")
+        self._rejects("CONCATENATEX(TOPNSKIP(3,1,Facts,Facts[Note],DESC)" + self.CONCAT)
+        self.assertEqual(dax.local("COUNTROWS(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region]))"), "2")
 
 
 if __name__ == "__main__":
