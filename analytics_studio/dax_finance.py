@@ -79,7 +79,7 @@ def _integer(value: object, function: str) -> int:
 def _result(value: float, function: str) -> Decimal:
     if math.isnan(value) or math.isinf(value):
         raise _fail(function)
-    return Decimal(repr(value)) if value != 0 else Decimal(0)
+    return Decimal(value) if value != 0 else Decimal(0)  # Task 145 family E (measured): the exact binary value of the double, not its shortest text (FV(0.05,1,6)+6 is -5.32907051820075E-15)
 
 
 def _power(base: float, exponent: float) -> float:

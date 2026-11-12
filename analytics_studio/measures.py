@@ -3746,6 +3746,11 @@ def _round_to_multiple(
         if significance == significance.to_integral_value():
             return Decimal(int(prod))
         return Decimal(prod)
+    if number < 0 and significance < 0 and significance != significance.to_integral_value() and abs(number) < 2 ** 53:
+        # Task 145 family A (measured): a negative number with a negative fractional significance rounds its magnitude in doubles, then takes the sign back
+        # (FLOOR(-7,-1E-5)+7, CEILING(-7,-1E-5)+7 and MROUND(-7,-1E-5)+7 are all -8.88178419700125E-16)
+        magnitude_answer = _round_to_multiple(function, -number, -significance)
+        return -magnitude_answer if magnitude_answer != 0 else Decimal(0)
     if significance > 0 and significance != significance.to_integral_value() and abs(number) < 2 ** 53:
         # Task 144 family K (measured): a fractional significance is worked in binary doubles: the quotient number/significance rounded to a double,
         # cut to a whole, then times the significance rounded again (FLOOR(7,1E-5)-7 is 8.88178419700125E-16, FLOOR(7,0.3)-7 is -0.100000000000001).
@@ -19446,7 +19451,9 @@ def _evaluate_measures_once(
         if target == "DATETIME":
             if not number.is_finite():
                 return dax_dates.DaxDateTime(number)  # live Power BI: Infinity and NaN stay what they are (they only print as a date); no clamp
-            return dax_dates.DaxDateTime(max(number, _DATETIME_CLAMP_LOW))  # Task 19 Part A: a finite number too small is 01/01/0100
+            if number < _DATETIME_CLAMP_LOW:  # Task 145 family C (measured): a finite number too small keeps its value (CONVERT(CONVERT(-1E15,DATETIME),DOUBLE) is -1E+15) and shows as 01/01/0100
+                return dax_dates.ClampedDaxDateTime(number)
+            return dax_dates.DaxDateTime(number)
         raise MeasureError(f"CONVERT does not support the type {target}.")
 
     def column_order_key(value: Any) -> Any:
@@ -23530,6 +23537,12 @@ def _evaluate_measures_once(
                     "DIVIDE with text or Boolean alternate result and non-zero denominator is not supported in the local engine."
                 )
             quotient = numerator / denominator
+            if quotient.is_finite() and (isinstance(numerator_value, str) or isinstance(denominator_value, str)):
+                if quotient.is_finite() and numerator.is_finite() and denominator.is_finite() and not currency_typed(arguments[0]) and not currency_typed(arguments[1]):
+                    # Task 145 family B (measured): a text number in DIVIDE is a Double, so the quotient is the double of the two Doubles (DIVIDE("12",123456789.123) is 9.72000007876797E-08)
+                    as_double = float(numerator) / float(denominator)
+                    if math.isfinite(as_double):
+                        quotient = Decimal(as_double)
             if quotient.is_finite() and float(quotient) in (float('inf'), float('-inf')):
                 quotient = Decimal("Infinity") if quotient > 0 else Decimal("-Infinity")
             if quotient.is_finite() and currency_typed(arguments[0]) and not currency_typed(arguments[1]):
