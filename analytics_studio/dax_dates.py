@@ -31,6 +31,13 @@ class DaxDateTime(Decimal):
     __slots__ = ()
 
 
+class ClampedDaxDateTime(DaxDateTime):
+    """Task 145 family C (measured): a CONVERT to DATETIME of a number before 01/01/0100. The value keeps its number (converted back to a Double it is
+    the number itself), but it is shown as 01/01/0100. Arithmetic on it gives a plain number again, which is not clamped."""
+
+    __slots__ = ()
+
+
 def from_datetime(moment: datetime | date) -> DaxDateTime:
     if not isinstance(moment, datetime):
         moment = datetime(moment.year, moment.month, moment.day)
@@ -183,6 +190,8 @@ def _shown_moment(value: Decimal, rounding: str = ROUND_HALF_UP) -> datetime:
         if value.is_nan():
             return EPOCH
         return datetime(9999, 12, 31, 23, 59, 59) if value > 0 else datetime(100, 1, 1)
+    if isinstance(value, ClampedDaxDateTime) and value < Decimal(-657434):  # Task 145 family C (measured, Task 19 Part A): a CONVERT before 01/01/0100 shows as 01/01/0100
+        return datetime(100, 1, 1)
     return to_datetime(value, rounding, shown=True)
 
 

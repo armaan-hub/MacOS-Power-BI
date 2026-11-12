@@ -6,7 +6,7 @@ Scalar functions take already-evaluated arguments (``None`` is BLANK).  Compared
 
 from __future__ import annotations
 
-from decimal import Context, Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
+from decimal import Context, Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP, localcontext
 import math
 import random
 
@@ -81,6 +81,33 @@ def _next_multiple(value: Decimal, base: int) -> Decimal:
     return -magnitude if value < 0 else magnitude
 
 
+def _mround_fraction(number: Decimal, multiple: Decimal) -> Decimal:
+    """Task 145 family A (measured): MROUND with a fractional multiple of either sign is worked in binary doubles, as Task 144 does for FLOOR and CEILING.
+    The magnitudes: the quotient rounded to a double, then to 15 significant digits, a tie away from zero, then the whole step times the multiple in double
+    (MROUND(7,1E-5)-7 is 8.88178419700125E-16, MROUND(0.3,0.1)-0.3 is 5.55111512312578E-17, MROUND(3,0.1)-3 is 0). The exact Decimal is kept only when it is the very same double."""
+    if number == 0:
+        return Decimal(0)
+    sign = -1 if number < 0 else 1  # the result takes the sign of the number (a negative multiple goes with a negative number)
+    magnitude, step = abs(number), abs(multiple)
+    quotient = float(magnitude) / float(step)
+    if not math.isfinite(quotient) or float(step) == 0:
+        raise dax_typed.refusal("MROUND with a fractional multiple beyond the Double range is not modelled by the local engine.")
+    with localcontext() as fifteen:  # the quotient at 15 significant digits, a tie away from zero
+        fifteen.prec = 60
+        exact_q = Decimal(quotient)
+        quantum = Decimal(1).scaleb(exact_q.adjusted() - 14)
+        quotient15 = (exact_q / quantum).to_integral_value(rounding=ROUND_HALF_UP) * quantum
+    steps = quotient15.to_integral_value(rounding=ROUND_HALF_UP)
+    doubled = float(steps) * float(step)
+    with localcontext() as exact:
+        exact.prec = 100
+        exact_answer = (magnitude / step).to_integral_value(rounding=ROUND_HALF_UP) * step
+    value = exact_answer if float(exact_answer) == doubled else Decimal(doubled)
+    if value == 0:
+        return Decimal(0)
+    return -value if sign < 0 else value
+
+
 _BLANK_IN_BLANK_OUT = {"ASIN", "ASINH", "ATAN", "ATANH", "DEGREES", "RADIANS", "SIN", "SINH", "TAN", "TANH", "SQRTPI", "EVEN"}
 
 
@@ -150,8 +177,11 @@ def math_function(function: str, args: list[object]) -> object:
             if abs(result) >= 2 ** 63:
                 raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
             return Decimal(0) if result == 0 else result
-        steps = (number / multiple).quantize(Decimal(1), rounding=ROUND_HALF_UP)
-        result = steps * multiple
+        if multiple != multiple.to_integral_value() and abs(number) / abs(multiple) < Decimal("1E15"):
+            result = _mround_fraction(number, multiple)  # Task 145 family A: a fractional multiple is worked in doubles (a quotient from 1E15 up keeps the exact path, measured by the locked MROUND(4E15,1.5) answers)
+        else:
+            steps = (number / multiple).quantize(Decimal(1), rounding=ROUND_HALF_UP)
+            result = steps * multiple
         if abs(result) >= 2 ** 63:  # Part D: an Integer result beyond the 64-bit range is the conversion error
             raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
         return Decimal(0) if result == 0 else result
