@@ -5724,15 +5724,6 @@ def _blank_product_hides_failure(node: Any, is_empty: Callable[[Any], bool]) -> 
     return seen_empty
 
 
-def _currency_of_column(node: Any) -> bool:
-    """Task 144 family O: True when a CURRENCY(...) call inside the node reads a column (a reference node in its argument)."""
-    for part in _walk_nodes(node):
-        if isinstance(part, tuple) and len(part) >= 3 and part[0] == "call" and part[1] == "CURRENCY" and isinstance(part[2], (list, tuple)):
-            if any(isinstance(inner, tuple) and inner and inner[0] == "reference" for inner in _walk_nodes(part[2])):
-                return True
-    return False
-
-
 def _walk_nodes(node: Any) -> Iterable[Any]:
     if isinstance(node, tuple) and node:
         yield node
@@ -22534,8 +22525,9 @@ def _evaluate_measures_once(
                     # live Power BI (Task 40 review): the product of a date body is neither the exact product nor the row-order double product; the digits past the 14th
                     # follow no rule the local engine reproduces, and arithmetic or IF around the product can hide it from a text conversion, so it is refused outright
                     raise MeasureError("PRODUCTX over a date body whose product depends on the multiplication order is not modelled by the local engine.")
-                if function == "PRODUCTX" and iteration_rows and _currency_of_column(arguments[1]) and _static_numeric_type(arguments[1]) == "currency" and isinstance(answer, Decimal) and answer.is_finite() and len(answer.normalize().as_tuple().digits) > 12:
-                    raise MeasureError("PRODUCTX over CURRENCY values with a long exact product is not modelled by the local engine.")
+                if function == "PRODUCTX" and iteration_rows and (_static_numeric_type(arguments[1]) == "currency" or _builds_currency(arguments[1])) and isinstance(answer, Decimal) and sum(1 for value in values if value is not None) > 1:
+                    # Task 144 family O (held-back set, measured): Power BI's product of CURRENCY values follows no double method the local engine reproduces, at any digit count
+                    raise MeasureError("PRODUCTX over CURRENCY values with more than one row is not modelled by the local engine.")
                 if _static_numeric_type(arguments[1]) == "currency" and function in {"STDEVX.S", "STDEVX.P"} and isinstance(answer, Decimal) and answer.is_finite():
                     answer = answer.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Task 19 Part A: a Currency result has four decimals
                 elif (function[:4] in {"VARX", "STDE"} or function in {"GEOMEANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}) and isinstance(answer, Decimal) and answer.is_finite() and iteration_rows and _builds_currency(arguments[1]) and (lambda shown: shown != shown.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP))(Decimal(f"{float(answer):.14g}")):
@@ -23832,11 +23824,14 @@ def _evaluate_measures_once(
                 if d_val is None:
                     raise MeasureRuntimeError("One or more values for the Dates argument passed to XIRR is blank.")
                 elif isinstance(d_val, str):
-                    parsed_dt = dax_dates.parse_date_text(d_val)
+                    try:
+                        parsed_dt = dax_dates.parse_date_text(d_val)
+                    except MeasureRuntimeError as error:
+                        raise _HardError(str(error)) from error  # Task 144 family J (held-back set, measured): a text date fails the whole query, IFERROR cannot catch it
                     if parsed_dt is not None:
                         day = math.floor(float(parsed_dt))
                     else:
-                        raise MeasureRuntimeError(f"Cannot convert value '{d_val}' of type Text to type Date.")
+                        raise _HardError(f"Cannot convert value '{d_val}' of type Text to type Date.")  # Task 144 family J (held-back set): a text date fails the whole query, IFERROR cannot catch it
                 elif isinstance(d_val, bool):
                     day = 1.0 if d_val else 0.0
                 elif isinstance(d_val, (int, float, Decimal)):
