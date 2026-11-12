@@ -597,5 +597,122 @@ class Task143Spec2Ties(unittest.TestCase):
         self.assertEqual(dax.local("COUNTROWS(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region]))"), "2")
 
 
+
+class Task143SingleColumnTopnskip(unittest.TestCase):
+    """Task 143 (follow-up 3, spec3): TOPNSKIP over a single-column table (VALUES(col) or ALL(col)).
+
+    Live Power BI: a skip of 1 or more over such a table is an error (DirectQuery message) for every n. With skip 0 the rows kept
+    match, but the order CONCATENATEX (with no order argument) lists them is not derivable, so it is refused. A source column that
+    holds a BLANK is refused. COUNTROWS of a skip-0 single-column TOPNSKIP keeps answering (order-independent).
+    """
+
+    def _rejects(self, expr):
+        self.assertTrue(dax.local(expr).startswith("LOCAL-REJECT"), expr)
+
+    def _answers(self, expr, expected):
+        self.assertEqual(dax.local(expr), expected, expr)
+
+    def test_skip_of_one_or_more_over_a_single_column_is_an_error(self):
+        for expr in (
+            'CONCATENATEX(TOPNSKIP(1,1,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,VALUES(Facts[Region]),Facts[Region],ASC))',
+            'CONCATENATEX(TOPNSKIP(1,1,VALUES(Facts[Region]),Facts[Region],DESC),Facts[Region]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,VALUES(Facts[Region]),Facts[Region],DESC))',
+            'CONCATENATEX(TOPNSKIP(2,1,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,VALUES(Facts[Region]),Facts[Region],ASC))',
+            'CONCATENATEX(TOPNSKIP(2,1,VALUES(Facts[Region]),Facts[Region],DESC),Facts[Region]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,VALUES(Facts[Region]),Facts[Region],DESC))',
+            'CONCATENATEX(TOPNSKIP(5,1,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,VALUES(Facts[Region]),Facts[Region],ASC))',
+            'CONCATENATEX(TOPNSKIP(5,1,VALUES(Facts[Region]),Facts[Region],DESC),Facts[Region]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,VALUES(Facts[Region]),Facts[Region],DESC))',
+            'CONCATENATEX(TOPNSKIP(1,1,ALL(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,ALL(Facts[Quantity]),Facts[Quantity],ASC))',
+            'CONCATENATEX(TOPNSKIP(1,1,ALL(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,ALL(Facts[Quantity]),Facts[Quantity],DESC))',
+            'CONCATENATEX(TOPNSKIP(2,1,ALL(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,ALL(Facts[Quantity]),Facts[Quantity],ASC))',
+            'CONCATENATEX(TOPNSKIP(2,1,ALL(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,ALL(Facts[Quantity]),Facts[Quantity],DESC))',
+            'CONCATENATEX(TOPNSKIP(5,1,ALL(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,ALL(Facts[Quantity]),Facts[Quantity],ASC))',
+            'CONCATENATEX(TOPNSKIP(5,1,ALL(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,ALL(Facts[Quantity]),Facts[Quantity],DESC))',
+            'CONCATENATEX(TOPNSKIP(1,1,VALUES(Facts[Note]),Facts[Note],ASC),Facts[Note]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,VALUES(Facts[Note]),Facts[Note],ASC))',
+            'CONCATENATEX(TOPNSKIP(1,1,VALUES(Facts[Note]),Facts[Note],DESC),Facts[Note]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,VALUES(Facts[Note]),Facts[Note],DESC))',
+            'CONCATENATEX(TOPNSKIP(2,1,VALUES(Facts[Note]),Facts[Note],ASC),Facts[Note]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,VALUES(Facts[Note]),Facts[Note],ASC))',
+            'CONCATENATEX(TOPNSKIP(2,1,VALUES(Facts[Note]),Facts[Note],DESC),Facts[Note]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,VALUES(Facts[Note]),Facts[Note],DESC))',
+            'CONCATENATEX(TOPNSKIP(5,1,VALUES(Facts[Note]),Facts[Note],ASC),Facts[Note]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,VALUES(Facts[Note]),Facts[Note],ASC))',
+            'CONCATENATEX(TOPNSKIP(5,1,VALUES(Facts[Note]),Facts[Note],DESC),Facts[Note]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,VALUES(Facts[Note]),Facts[Note],DESC))',
+            'CONCATENATEX(TOPNSKIP(1,1,ALL(Facts[Sales]),Facts[Sales],ASC),Facts[Sales]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,ALL(Facts[Sales]),Facts[Sales],ASC))',
+            'CONCATENATEX(TOPNSKIP(1,1,ALL(Facts[Sales]),Facts[Sales],DESC),Facts[Sales]&"","|")',
+            'COUNTROWS(TOPNSKIP(1,1,ALL(Facts[Sales]),Facts[Sales],DESC))',
+            'CONCATENATEX(TOPNSKIP(2,1,ALL(Facts[Sales]),Facts[Sales],ASC),Facts[Sales]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,ALL(Facts[Sales]),Facts[Sales],ASC))',
+            'CONCATENATEX(TOPNSKIP(2,1,ALL(Facts[Sales]),Facts[Sales],DESC),Facts[Sales]&"","|")',
+            'COUNTROWS(TOPNSKIP(2,1,ALL(Facts[Sales]),Facts[Sales],DESC))',
+            'CONCATENATEX(TOPNSKIP(5,1,ALL(Facts[Sales]),Facts[Sales],ASC),Facts[Sales]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,ALL(Facts[Sales]),Facts[Sales],ASC))',
+            'CONCATENATEX(TOPNSKIP(5,1,ALL(Facts[Sales]),Facts[Sales],DESC),Facts[Sales]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,1,ALL(Facts[Sales]),Facts[Sales],DESC))',
+        ):
+            self._rejects(expr)
+
+    def test_concatenatex_without_order_over_single_column_skip_zero_is_refused(self):
+        for expr in (
+            'CONCATENATEX(TOPNSKIP(1,0,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region]&"","|")',
+            'CONCATENATEX(TOPNSKIP(1,0,VALUES(Facts[Region]),Facts[Region],DESC),Facts[Region]&"","|")',
+            'CONCATENATEX(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region]&"","|")',
+            'CONCATENATEX(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region],DESC),Facts[Region]&"","|")',
+            'CONCATENATEX(TOPNSKIP(5,0,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region]&"","|")',
+            'CONCATENATEX(TOPNSKIP(5,0,VALUES(Facts[Region]),Facts[Region],DESC),Facts[Region]&"","|")',
+            'CONCATENATEX(TOPNSKIP(1,0,ALL(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity]&"","|")',
+            'CONCATENATEX(TOPNSKIP(1,0,ALL(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity]&"","|")',
+            'CONCATENATEX(TOPNSKIP(2,0,ALL(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity]&"","|")',
+            'CONCATENATEX(TOPNSKIP(2,0,ALL(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity]&"","|")',
+            'CONCATENATEX(TOPNSKIP(5,0,ALL(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity]&"","|")',
+            'CONCATENATEX(TOPNSKIP(5,0,ALL(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity]&"","|")',
+        ):
+            self._rejects(expr)
+
+    def test_single_column_source_holding_a_blank_is_refused(self):
+        for expr in (
+            'CONCATENATEX(TOPNSKIP(1,0,VALUES(Facts[Note]),Facts[Note],ASC),Facts[Note]&"","|")',
+            'CONCATENATEX(TOPNSKIP(2,0,VALUES(Facts[Note]),Facts[Note],DESC),Facts[Note]&"","|")',
+            'CONCATENATEX(TOPNSKIP(5,0,VALUES(Facts[Note]),Facts[Note],ASC),Facts[Note]&"","|")',
+            'COUNTROWS(TOPNSKIP(5,0,VALUES(Facts[Note]),Facts[Note],ASC))',
+            'CONCATENATEX(TOPNSKIP(1,0,ALL(Facts[Sales]),Facts[Sales],ASC),Facts[Sales]&"","|")',
+            'CONCATENATEX(TOPNSKIP(1,0,ALL(Facts[Sales]),Facts[Sales],DESC),Facts[Sales]&"","|")',
+            'CONCATENATEX(TOPNSKIP(2,0,ALL(Facts[Sales]),Facts[Sales],ASC),Facts[Sales]&"","|")',
+            'CONCATENATEX(TOPNSKIP(2,0,ALL(Facts[Sales]),Facts[Sales],DESC),Facts[Sales]&"","|")',
+            'CONCATENATEX(TOPNSKIP(5,0,ALL(Facts[Sales]),Facts[Sales],ASC),Facts[Sales]&"","|")',
+            'CONCATENATEX(TOPNSKIP(5,0,ALL(Facts[Sales]),Facts[Sales],DESC),Facts[Sales]&"","|")',
+        ):
+            self._rejects(expr)
+
+    def test_order_independent_counts_over_single_column_skip_zero_keep_answering(self):
+        self._answers('COUNTROWS(TOPNSKIP(1,0,VALUES(Facts[Region]),Facts[Region],ASC))', "1")
+        self._answers('COUNTROWS(TOPNSKIP(1,0,VALUES(Facts[Region]),Facts[Region],DESC))', "1")
+        self._answers('COUNTROWS(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region],ASC))', "2")
+        self._answers('COUNTROWS(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region],DESC))', "2")
+        self._answers('COUNTROWS(TOPNSKIP(5,0,VALUES(Facts[Region]),Facts[Region],ASC))', "3")
+        self._answers('COUNTROWS(TOPNSKIP(5,0,VALUES(Facts[Region]),Facts[Region],DESC))', "3")
+        self._answers('COUNTROWS(TOPNSKIP(1,0,ALL(Facts[Quantity]),Facts[Quantity],ASC))', "1")
+        self._answers('COUNTROWS(TOPNSKIP(1,0,ALL(Facts[Quantity]),Facts[Quantity],DESC))', "1")
+        self._answers('COUNTROWS(TOPNSKIP(2,0,ALL(Facts[Quantity]),Facts[Quantity],ASC))', "2")
+        self._answers('COUNTROWS(TOPNSKIP(2,0,ALL(Facts[Quantity]),Facts[Quantity],DESC))', "2")
+        self._answers('COUNTROWS(TOPNSKIP(5,0,ALL(Facts[Quantity]),Facts[Quantity],ASC))', "5")
+        self._answers('COUNTROWS(TOPNSKIP(5,0,ALL(Facts[Quantity]),Facts[Quantity],DESC))', "5")
+        self._answers('COUNTROWS(SUBSTITUTEWITHINDEX(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region]))', "2")
+        self._answers('MAXX(SUBSTITUTEWITHINDEX(TOPNSKIP(2,0,VALUES(Facts[Region]),Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region]),[i])', "1")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -2570,6 +2570,23 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
     return ("ok", answers[0])
 
 
+def _single_column_table(node: Any) -> Any:
+    """Task 143: the column reference of VALUES(column) or ALL(column), else None (the shapes TOPNSKIP was measured over)."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "table_call" and node[1] == "VALUES" and node[2] and node[2][0] == "reference":
+        return node[2]
+    if node[0] == "call" and node[1] == "ALL" and node[2] and len(node[2]) == 1 and node[2][0][0] == "reference":
+        return node[2][0]
+    return None
+
+
+def _topnskip_over_single_column(node: Any) -> bool:
+    """Task 143: a TOPNSKIP call whose table is VALUES(column) or ALL(column) (CONCATENATEX without an order refuses these)."""
+    return (isinstance(node, tuple) and len(node) >= 3 and node[0] in {"call", "table_call"} and node[1] == "TOPNSKIP"
+            and len(node[2]) >= 3 and _single_column_table(node[2][2]) is not None)
+
+
 def _is_all_table_value_argument(node: Any) -> bool:
     """Return whether a node is a supported filter-function table value."""
     if not isinstance(node, tuple) or not node:
@@ -13445,6 +13462,14 @@ def _evaluate_measures_once(
             if skip_number.is_finite() and skip_number > 0 and skip_number != skip_number.to_integral_value():
                 return context, []
             skip = max(0, dax_typed.whole(skip_value, "TOPNSKIP"))
+        if column_node is not None and skip >= 1:
+            # Task 143 (live Power BI, spec3): a skip over VALUES(column) or ALL(column) is an error whatever n (the DirectQuery message)
+            raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
+        if column_node is not None:
+            # Task 143 (live Power BI, spec3): a single-column source holding a BLANK is not ordered the way Power BI keeps its rows
+            column_name = str(column_node[2]).casefold()
+            if any(str(key).casefold() == column_name and value is None for row in rows for key, value in row.items()):
+                raise MeasureError("TOPNSKIP over a single column that holds a BLANK is not modelled in the local engine.")
         if count == 0 or not rows or skip >= len(rows):
             return context, []
         ranked_rows = [row for _keys, row in topn_skip_order(context, rows, keys_spec)] if keys_spec else list(rows)
@@ -24255,6 +24280,9 @@ def _evaluate_measures_once(
             refuse_column_no_row_holds(*table_argument_value(arguments[0], allow_keepfilters=True), arguments[1])
             if len(arguments) <= 3 and concatenate_walk_is_unmodelled(arguments[0], arguments[1]):
                 walk_refusal = walk_refusal or "CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+            if len(arguments) <= 3 and _topnskip_over_single_column(arguments[0]):
+                # Task 143 (live Power BI, spec3): the order of a single-column TOPNSKIP (VALUES / ALL of one column) is not derivable without an ORDER
+                walk_refusal = walk_refusal or "CONCATENATEX over a TOPNSKIP of a single column without an order walks the rows in an order the local engine does not model."
             delimiter = "" if len(arguments) < 3 else dax_typed.to_text(evaluate(arguments[2], row_context, allow_text=True))
             order_spec: list[tuple[Any, bool]] = []  # (expression, descending); ASC is the default here
             position = 3
