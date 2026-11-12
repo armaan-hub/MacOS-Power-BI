@@ -722,9 +722,11 @@ def text_function(function: str, args: list[object]) -> object:
         return _from_units(text[start - 1:start - 1 + count])
     if function == "SUBSTITUTE":
         old, new = _units(to_text(args[1])), _units(to_text(args[2]))
+        if len(args) > 3 and args[3] is None:  # Task 143: a BLANK() instance_num is an error (as 0 is), not "replace all"
+            raise _error(f"An argument of function '{function}' has the wrong data type or has an invalid value.")
+        instance = whole(args[3], function, minimum=1) if len(args) > 3 else None  # the instance is checked before an empty old text
         if not old:
             return _from_units(text)
-        instance = whole(args[3], function, minimum=1) if len(args) > 3 and args[3] is not None else None
         from . import dax_misc  # late import: dax_misc imports this module
         pieces, last = [], 0
         for begin, finish in dax_misc.linguistic_spans(text, old, instance):  # Task 73: linguistic matching, case-sensitive
@@ -817,5 +819,7 @@ def _fixed(args: list[object]) -> str:
     rounded = with_context.quantize(number, quantum) if decimals >= 0 else (
         with_context.quantize(number, Decimal(1).scaleb(-decimals)).quantize(Decimal(1))
     )
+    if rounded.is_zero():
+        rounded = abs(rounded)  # Task 143: FIXED never shows a negative zero (FIXED(-0.4,0) is "0", FIXED(-0.0001,2) is "0.00")
     text = f"{rounded:{'' if no_commas else ','}.{max(decimals, 0)}f}"
     return text

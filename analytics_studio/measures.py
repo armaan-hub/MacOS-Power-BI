@@ -2570,6 +2570,39 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
     return ("ok", answers[0])
 
 
+def _single_column_table(node: Any) -> Any:
+    """Task 143: the column reference of VALUES(column) or ALL(column), else None (the shapes TOPNSKIP was measured over)."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "table_call" and node[1] == "VALUES" and node[2] and node[2][0] == "reference":
+        return node[2]
+    if node[0] == "call" and node[1] == "ALL" and node[2] and len(node[2]) == 1 and node[2][0][0] == "reference":
+        return node[2][0]
+    return None
+
+
+def _topnskip_over_single_column(node: Any) -> bool:
+    """Task 143: a TOPNSKIP call whose table is VALUES(column) or ALL(column) (CONCATENATEX without an order refuses these)."""
+    return (isinstance(node, tuple) and len(node) >= 3 and node[0] in {"call", "table_call"} and node[1] == "TOPNSKIP"
+            and len(node[2]) >= 3 and _single_column_table(node[2][2]) is not None)
+
+
+def _holds_single_column_topnskip(node: Any, variable_nodes: dict[str, Any] | None = None, seen: set[int] | None = None) -> bool:
+    """Task 143 review: True when the expression holds, anywhere inside it or inside a VAR it reads, a TOPNSKIP over VALUES(column) / ALL(column).
+    The rows of such a TOPNSKIP come out in an order Power BI chooses (live Power BI, spec3), so every consumer that shows or depends on that
+    order (CONCATENATEX, TOPN, SAMPLE, INDEX, OFFSET, WINDOW, a nested TOPNSKIP) must refuse the shape."""
+    seen = set() if seen is None else seen
+    if not isinstance(node, (tuple, list)) or id(node) in seen:
+        return False
+    seen.add(id(node))
+    if isinstance(node, tuple) and _topnskip_over_single_column(node):
+        return True
+    if isinstance(node, tuple) and len(node) > 1 and node[0] == "var" and variable_nodes and node[1] in variable_nodes:
+        if _holds_single_column_topnskip(variable_nodes[node[1]], variable_nodes, seen):
+            return True
+    return any(_holds_single_column_topnskip(part, variable_nodes, seen) for part in node)
+
+
 def _is_all_table_value_argument(node: Any) -> bool:
     """Return whether a node is a supported filter-function table value."""
     if not isinstance(node, tuple) or not node:
@@ -3312,6 +3345,10 @@ def _earlier_too_deep(node: Any, frames: int) -> bool:
                 or any(_earlier_too_deep(arg, frames) for arg in node[2][3:])
             )
         return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
+    if node[0] == "call" and node[1] in {"CALCULATE", "CALCULATETABLE"} and node[2]:
+        # Task 143: a Boolean filter argument is a FILTER over its column, which opens a row context of its own (EARLIER inside it reaches the row outside)
+        return _earlier_too_deep(node[2][0], frames) or any(
+            _earlier_too_deep(argument, frames + 1 if _is_boolean_filter_value(argument) else frames) for argument in node[2][1:])
     return any(_earlier_too_deep(child, frames) for child in node if isinstance(child, tuple))
 
 
@@ -5370,6 +5407,25 @@ _ARITHMETIC_EVIDENCE: dict[tuple[str, str, str], frozenset[str]] = {  # (operato
     ('/', 'Int64', 'Int64'): frozenset({'ISBOOLEAN', 'ISDOUBLE', 'ISINT64', 'ISSTRING'}),
     ('/', 'Text', 'Currency'): frozenset({'ISINT64'}),
 }
+
+
+def _rank_over_whole_table(node: Any) -> bool:
+    """Whether a RANK / ROWNUMBER in this expression takes ALL(Facts) or ALLSELECTED(Facts) (a whole table, not a column) as its relation."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2]:
+        args = node[2]
+        index = 1 if node[1] == "RANK" and args[0][0] == "table" and str(args[0][1]).upper() in {"DENSE", "SKIP"} else 0
+        relation = args[index] if len(args) > index else None
+        if isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table":
+            return True
+    return any(_rank_over_whole_table(child) for child in node if isinstance(child, tuple))
+
+
+def _is_blank_date_shift(node: Any) -> bool:
+    """EDATE(...) or EOMONTH(...) as an operand: Task 143 (live Power BI): with a BLANK date it is day zero beside + or -
+    (EOMONTH(BLANK(),-3)+2 is 01/01/1900), while x*1 or a lone EOMONTH(BLANK(),0) stays BLANK."""
+    return isinstance(node, tuple) and len(node) >= 3 and node[0] == "call" and node[1] in {"EDATE", "EOMONTH"}
 
 
 def _arithmetic_result_type(operator: str, left: str, right: str) -> str | None:
@@ -10727,6 +10783,8 @@ def _evaluate_measures_once(
         shadow="clear": CONCATENATEX only removes the outer filters on the columns it iterates."""
         nonlocal selected_iteration_depth
         saved_state = push_shadow(context, rows, shadow)
+        if shadow == "install":
+            install_states.append((context.get("id"), saved_state))  # Task 143: the filter state outside this iterator
         selected = bool(context.get("selected_columns"))
         selected_iteration_depth += selected
         try:
@@ -10739,7 +10797,29 @@ def _evaluate_measures_once(
                     row_stack.pop()
         finally:
             selected_iteration_depth -= selected
+            if shadow == "install":
+                install_states.pop()
             pop_shadow(saved_state)
+
+    def window_relation_rows(relation: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """Task 143 (live Power BI): RANK / ROWNUMBER / INDEX over a whole table (Facts, ALL(Facts)) inside an iterator over FILTER(Facts, ...)
+        ranks the whole table under the filter context outside that iterator, not the rows the iterator keeps; the row itself is matched in it."""
+        nonlocal eff_layers, eff_suppressed, eff_blocked
+        whole_table = relation[0] == "table" or (
+            relation[0] == "call" and relation[1] == "ALL" and len(relation[2]) == 1 and relation[2][0][0] == "table")
+        # ALLSELECTED(Facts) is not widened: it keeps the rows the enclosing iterator selects (SUMX(FILTER(Facts,Note="Paid"),ROWNUMBER(ALLSELECTED(Facts),...)) ranks 3 rows)
+        if whole_table and install_states:
+            table_name = relation[1] if relation[0] == "table" else relation[2][0][1]
+            target_id = resolve_table_context(str(table_name))["id"]
+            saved = next((state for context_id, state in reversed(install_states) if context_id == target_id), None)
+            if saved is not None:
+                current = (eff_layers, eff_suppressed, eff_blocked)
+                eff_layers, eff_suppressed, eff_blocked = saved
+                try:
+                    return table_argument_value(relation)
+                finally:
+                    eff_layers, eff_suppressed, eff_blocked = current
+        return table_argument_value(relation)
 
     def column_in_row_context(frame: tuple[dict[str, Any], dict[str, Any], int], table: str, name: str) -> bool:
         """Whether this row context holds the column (the rules a column reference follows in the innermost row context)."""
@@ -10761,6 +10841,7 @@ def _evaluate_measures_once(
         return any(str(header).casefold() == name.casefold() for header in context["headers"])
 
     outer_row_reads = [0]  # how many column reads were answered by an enclosing row context (the walk order of such an iteration is not modelled)
+    install_states: list[tuple[Any, tuple[Any, ...]]] = []  # Task 143: (table id, filter state outside it) of each open iterator over a table value
 
     def enclosing_row_context_for(
         row_context: tuple[dict[str, Any], dict[str, Any], int], table: str, name: str, count: bool = True,
@@ -10992,6 +11073,10 @@ def _evaluate_measures_once(
                         raise _KeySpaceUndecided()
                     if window_order is not None:
                         in_dictionary_order = window_order
+                if in_dictionary_order and table_node[0] == "call" and table_node[1] == "FILTER" and any(_rank_over_whole_table(node) for node in nodes):
+                    # Task 143 (live Power BI): a FILTER(Facts, ...) walked beside RANK / ROWNUMBER over ALL(Facts) comes out in the table's own row
+                    # order (CONCATENATEX(FILTER(Facts,..), ROWNUMBER(ALL(Facts),ORDERBY(Sales)),",") is "5,6,2,4"), not in dictionary order
+                    in_dictionary_order = False
                 major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
                 def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
@@ -11360,6 +11445,10 @@ def _evaluate_measures_once(
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal eff_touched
         function, arguments = argument[1], argument[2]
+        if function in {"TOPN", "SAMPLE", "TOPNSKIP", "INDEX", "OFFSET", "WINDOW"} and any(_holds_single_column_topnskip(part, variable_nodes) for part in arguments):
+            # Task 143 review (live Power BI, spec3): the rows of a TOPNSKIP over VALUES / ALL of one column come in an order the local engine cannot derive;
+            # a tie in TOPN / SAMPLE / TOPNSKIP / INDEX / OFFSET / WINDOW over them would be decided by that order
+            raise MeasureError(f"{function} over a TOPNSKIP of a single column depends on the order of its rows, which the local engine does not model.")
         if function in {"LINEST", "LINESTX"}:
             const_after = 3 if function == "LINESTX" else 2  # arguments that cannot be the optional const
             has_const = len(arguments) > const_after and _linest_is_const_literal(arguments[-1])
@@ -11474,6 +11563,11 @@ def _evaluate_measures_once(
             return res_context, res_rows
         if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
             context, rows = table_argument_value(arguments[0], allow_keepfilters=True)
+            if any(_earlier_too_deep(item, len(row_stack) + 1) for item in arguments[1:]):
+                # Task 143 (live Power BI): EARLIER(c, n) needs n + 1 open row contexts; in ADDCOLUMNS / SELECTCOLUMNS over a table with no outer row context
+                # it is an error even when the rows are only counted (COUNTROWS(ADDCOLUMNS(Facts,"a",EARLIER(Facts[Quantity]))) is ERR), not caught by IFERROR.
+                # A Boolean CALCULATE filter opens its own row context, so SUMX(ADDCOLUMNS(Facts,"n",CALCULATE(COUNTROWS(Facts),Facts[Region]=EARLIER(Facts[Region]))),[n]) is 6.
+                raise MeasureError("EARLIER/EARLIEST refers to an earlier row context which doesn't exist.")
             implicit_flags: list[bool] = []
             explicit_taken: set[tuple[str, str]] = set()
             if function == "SELECTCOLUMNS":
@@ -13314,6 +13408,131 @@ def _evaluate_measures_once(
             certain_types=table_context.get("explicit_types", ()),
         )
 
+    def topn_skip(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """TOPNSKIP(n, skip, table, [expression, [order]]...) (Task 143, measured on the Facts grid).
+
+        Exactly n rows come back after the skip, whatever the ties; an ASC tie keeps the table's row order, a DESC tie comes in
+        reverse table order; an ORDER BY that is not a plain column is refused; BLANK sorts below every
+        number (last in DESC, first in ASC). n rounds half away from zero, TRUE is 1, text is read as a number; BLANK, 0, or no
+        row left gives an empty table; a negative n keeps every row after the skip. skip: BLANK or a negative number is 0; a
+        text, a Boolean or a fraction gives an empty table."""
+        keys_spec: list[tuple[Any, bool]] = []
+        index = 3
+        while index < len(arguments):
+            descending = True
+            expression = arguments[index]
+            index += 1
+            if index < len(arguments):
+                order = arguments[index]
+                if order[0] == "table" and str(order[1]).upper() in {"ASC", "DESC"}:
+                    descending = str(order[1]).upper() == "DESC"
+                    index += 1
+                elif order[0] in {"number", "boolean"}:
+                    if order[1] not in (0, 1):
+                        raise MeasureError("Unexpected value for the ORDER argument. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
+                    descending = order[1] == 0 or order[1] is False
+                    index += 1
+                else:
+                    raise MeasureError("Unexpected value for the ORDER argument in the TOPNSKIP function. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
+            keys_spec.append((expression, descending))
+        if any(expression[0] != "reference" for expression, _descending in keys_spec):
+            # Task 143 (live Power BI, spec2): an ORDER BY that is an expression (Facts[Sales]*-1) is refused for every n and skip;
+            # Power BI answers only some of them and errors with the same DirectQuery message for the rest.
+            raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
+        if len(keys_spec) > 1:
+            # Task 143 (live Power BI, holdout): TOPNSKIP with two or more ORDER BY columns is an error for every n and skip measured
+            # ("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows ...")
+            raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
+        # Task 143 review: only the shapes measured in Power BI are answered: Table, ALL(Table) or FILTER(Table, ...), ordered by a
+        # column of that same table, or VALUES/ALL(column) ordered by itself. CALCULATETABLE, a variable table or another table's column are refused.
+        shape_node = arguments[2]
+        if shape_node[0] == "call" and shape_node[1] in {"ALL", "FILTER"} and shape_node[2] and shape_node[2][0][0] == "table":
+            shape_node = shape_node[2][0] if shape_node[1] == "ALL" and len(shape_node[2]) == 1 else (
+                shape_node[2][0] if shape_node[1] == "FILTER" else ("unmodelled",))
+        column_node = None
+        if arguments[2][0] == "table_call" and arguments[2][1] == "VALUES" and arguments[2][2][0] == "reference":
+            column_node = arguments[2][2]
+        elif arguments[2][0] == "call" and arguments[2][1] == "ALL" and len(arguments[2][2]) == 1 and arguments[2][2][0][0] == "reference":
+            column_node = arguments[2][2][0]
+        column_shape = column_node is not None and bool(keys_spec) and all(
+            key[0][1].upper() == column_node[1].upper() and key[0][2].upper() == column_node[2].upper() for key in keys_spec)
+        if column_shape:
+            pass  # VALUES(col) / ALL(col) ordered by that same column: distinct values, no ties (ASC n=2 skip 0 over Region is locked)
+        elif shape_node[0] != "table" or any(str(key[0][1]).upper() != str(shape_node[1]).upper() for key in keys_spec):
+            raise MeasureError("TOPNSKIP over this table shape or ordered by a column of another table is not modelled in the local engine.")
+        count_value = in_row_expression(lambda: evaluate(arguments[0]))
+        skip_value = in_row_expression(lambda: evaluate(arguments[1]))
+        if column_node is not None:
+            # Task 143 review: over VALUES(column) / ALL(column) only a whole n of 1 or more and a whole skip were measured (spec3: n 1, 2, 5; skip 0, 1).
+            # A BLANK, negative, fractional, text or Boolean n or skip is refused, never answered from the Facts rules.
+            def whole_number_at_least(value: Any, least: int) -> bool:
+                if value is None or isinstance(value, (bool, str)):
+                    return False
+                number = dax_typed.to_number(value)
+                return number.is_finite() and number == number.to_integral_value() and number >= least
+            if not whole_number_at_least(count_value, 1) or not whole_number_at_least(skip_value, 0):
+                raise MeasureError("TOPNSKIP over VALUES(column) or ALL(column) is modelled only for a whole count of 1 or more and a whole skip.")
+        context, rows = table_argument_value(arguments[2])
+        if count_value is None:
+            return context, []
+        count = (1 if count_value else 0) if isinstance(count_value, bool) else dax_typed.whole(count_value, "TOPNSKIP")
+        if count < 0:
+            # Task 143 (live Power BI, spec2): a negative n over FILTER(...) gave "An unexpected error"; only a bare table or ALL(table) is answered
+            table_node = arguments[2]
+            bare_or_all = table_node[0] == "table" or (
+                table_node[0] == "call" and table_node[1] == "ALL" and len(table_node[2]) == 1 and table_node[2][0][0] == "table")
+            if not bare_or_all:
+                raise MeasureError("TOPNSKIP with a negative count over a FILTER table is not modelled in the local engine.")
+        if skip_value is None:
+            skip = 0
+        elif isinstance(skip_value, (bool, str)):
+            return context, []
+        else:
+            skip_number = dax_typed.to_number(skip_value)
+            if skip_number.is_finite() and skip_number > 0 and skip_number != skip_number.to_integral_value():
+                return context, []
+            skip = max(0, dax_typed.whole(skip_value, "TOPNSKIP"))
+        if column_node is not None and skip >= 1:
+            # Task 143 (live Power BI, spec3): a skip over VALUES(column) or ALL(column) is an error whatever n (the DirectQuery message)
+            raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
+        if column_node is not None:
+            # Task 143 (live Power BI, spec3): a single-column source holding a BLANK is not ordered the way Power BI keeps its rows
+            if any(value is None or (isinstance(value, str) and value == "") for row in rows for value in row.values()):
+                raise MeasureError("TOPNSKIP over a single column that holds a BLANK or an empty text is not modelled in the local engine.")
+        if count == 0 or not rows or skip >= len(rows):
+            return context, []
+        ranked_rows = [row for _keys, row in topn_skip_order(context, rows, keys_spec)] if keys_spec else list(rows)
+        remaining = ranked_rows[skip:]
+        return context, remaining if count < 0 else remaining[:count]
+
+    def topn_skip_order(
+        context: dict[str, Any], rows: list[dict[str, Any]], keys_spec: list[tuple[Any, bool]]
+    ) -> list[tuple[list[Any], dict[str, Any]]]:
+        """Each row with its ORDER keys, sorted (one key: two or more are refused by topn_skip). ASC is a stable sort, so a tie keeps
+        the table's row order; DESC is the exact reverse of that ASC order, so a tie comes in reverse table order (Task 143, spec2)."""
+        found: list[tuple[list[Any], dict[str, Any]]] = []
+        outer_reads_before = outer_row_reads[0]
+        for frame in iterate_rows(context, rows, "install"):
+            keys = [
+                in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
+                for expression, _descending in keys_spec
+            ]
+            found.append((keys, frame[1]))
+        if outer_row_reads[0] != outer_reads_before:
+            raise MeasureError("The tie order of a TOPNSKIP whose ORDER BY reads an enclosing row context is not modelled in the local engine.")
+        ranked = list(found)
+        if keys_spec[0][1] and sum(1 for item in found if item[0][0] is None) > 1:
+            # Task 143 review: ASC ties of several BLANK keys were measured (table order); DESC ones were not, so they are refused
+            raise MeasureError("The tie order of several BLANK TOPNSKIP keys is not modelled in the local engine.")
+        try:
+            # BLANK is the lowest key: (0,) sorts before every (1, value); equal keys keep the table's order in this ASC sort
+            ranked.sort(key=lambda item: (0,) if item[0][0] is None else (1, column_order_key(item[0][0])))
+        except TypeError as error:
+            raise MeasureError("TOPNSKIP keys of different types (a number beside text) are not ordered by the local engine.") from error
+        if keys_spec[0][1]:
+            ranked.reverse()
+        return ranked
+
     def new_table_function(function: str, arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         if function in dax_sampling_fns.TABLE_ARITY:  # Task 91
             return dax_sampling_fns.table_rows(function, arguments, table_argument_value, evaluate)
@@ -13349,15 +13568,7 @@ def _evaluate_measures_once(
             positions = [int((step * i).quantize(Decimal(1), rounding=ROUND_HALF_UP)) for i in range(size)]
             return context, [ordered[position] for position in positions]
         if function == "TOPNSKIP":
-            count = dax_typed.whole(evaluate(arguments[0]), "TOPNSKIP")
-            skip = max(0, dax_typed.whole(evaluate(arguments[1]), "TOPNSKIP"))
-            context, rows = table_argument_value(arguments[2])
-            if count <= 0 or not rows:
-                return context, []
-            _ranked_context, ranked = table_function_value(
-                ("call", "TOPN", (("number", Decimal(count + skip)), arguments[2], *arguments[3:]))
-            )
-            return context, ranked[skip:]
+            return topn_skip(arguments)
         if function == "FILTERS":
             reference = arguments[0]
             if reference[0] != "reference":
@@ -13487,7 +13698,9 @@ def _evaluate_measures_once(
         for argument in arguments:
             if argument[0] == "omitted":
                 continue
-            if argument[0] == "table":
+            # Task 143: a bare model table (RANK(DENSE, Facts, ...)) is the relation, not a keyword; DENSE / SKIP and the like stay keywords
+            if argument[0] == "table" and not (relation is None and any(
+                    str(ctx.get("name", "")).casefold() == str(argument[1]).casefold() for ctx in contexts_by_id.values())):
                 keywords.append(str(argument[1]).upper())
             elif argument[0] == "call" and argument[1] == "ORDERBY":
                 order_spec = order_arguments_asc(argument[2])
@@ -13522,7 +13735,7 @@ def _evaluate_measures_once(
             raise MeasureRuntimeError(f"{function}'s Relation parameter may have duplicate rows. This is not allowed.")
         window = _Window()
         window.relation = relation
-        window.context, window.rows = table_argument_value(relation)
+        window.context, window.rows = window_relation_rows(relation)
         window.typed = [typed_row(window.context, row) for row in window.rows]
         window.keywords = keywords
         # Task 71 (live Power BI, rank audit grid t71a, Part B): RANK's blanks argument FIRST / LAST puts every BLANK ahead of / behind the other values
@@ -21881,10 +22094,12 @@ def _evaluate_measures_once(
                     raise
             if node[1] in {"+", "-"} and (left is None) != (right is None):
                 # live Power BI: MAX / MIN of an empty date column is a typed BLANK date, which counts as day zero in + and -
-                if left is None and (is_date_aggregate(node[2]) or _is_datetime_conversion(node[2])):  # Part E: CONVERT(BLANK(),DATETIME)+1 is a date too
+                if left is None and (is_date_aggregate(node[2]) or _is_datetime_conversion(node[2]) or _is_blank_date_shift(node[2])):  # Part E: CONVERT(BLANK(),DATETIME)+1 is a date too
                     left = dax_dates.DaxDateTime(Decimal(0))
-                elif right is None and node[1] == "+" and (is_date_aggregate(node[3]) or _is_datetime_conversion(node[3])):
+                elif right is None and node[1] == "+" and (is_date_aggregate(node[3]) or _is_datetime_conversion(node[3]) or _is_blank_date_shift(node[3])):
                     right = dax_dates.DaxDateTime(Decimal(0))
+                elif right is None and node[1] == "-" and _is_blank_date_shift(node[3]):
+                    raise dax_typed.refusal("A number minus an EDATE or EOMONTH of a BLANK date is not settled by the local engine.")
             for text_value in (left, right):
                 if isinstance(text_value, str) and node[1] in {"/", "^"} and dax_subnormal.as_subnormal_text(text_value) is not None:
                     continue  # Task 142: a subnormal text beside / or ^ is read as its double below
@@ -22051,6 +22266,8 @@ def _evaluate_measures_once(
         if node[0] == "table_call" or (node[0] == "call" and node[1] in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}):
             return single_value_of(table_argument_value(node))
         _, function, arguments = node
+        if function == "CURRENTGROUP" and not group_stack:  # Task 143: outside GROUPBY it is an error, not a crash (not caught by IFERROR)
+            raise MeasureError("CURRENTGROUP can only be used inside the aggregations of GROUPBY.")
         if function in dax_subnormal.HANDLED and dax_subnormal.holds_subnormal(arguments):  # Task 142: a subnormal literal argument follows the measured table
             outcome = dax_subnormal.call(lambda argument: evaluate(argument, row_context, allow_text=True), function, arguments)
             if isinstance(outcome, dax_subnormal.Rewrite):
@@ -24092,6 +24309,10 @@ def _evaluate_measures_once(
             refuse_column_no_row_holds(*table_argument_value(arguments[0], allow_keepfilters=True), arguments[1])
             if len(arguments) <= 3 and concatenate_walk_is_unmodelled(arguments[0], arguments[1]):
                 walk_refusal = walk_refusal or "CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+            single_column_topnskip_source = _holds_single_column_topnskip(arguments[0], variable_nodes)
+            if len(arguments) <= 3 and single_column_topnskip_source:
+                # Task 143 (live Power BI, spec3): the order of a single-column TOPNSKIP (VALUES / ALL of one column) is not derivable without an ORDER
+                walk_refusal = walk_refusal or "CONCATENATEX over a TOPNSKIP of a single column without an order walks the rows in an order the local engine does not model."
             delimiter = "" if len(arguments) < 3 else dax_typed.to_text(evaluate(arguments[2], row_context, allow_text=True))
             order_spec: list[tuple[Any, bool]] = []  # (expression, descending); ASC is the default here
             position = 3
@@ -24260,6 +24481,12 @@ def _evaluate_measures_once(
                     for item in entries:
                         if tied_texts.setdefault(row_key(item[0]), item[1]) != item[1]:
                             raise MeasureError("The order of CONCATENATEX rows that tie on every ORDER BY key, with different text, is not modelled in the local engine.")
+            if order_spec and single_column_topnskip_source and len(entries) > 1:
+                # Task 143 review: rows of a single-column TOPNSKIP that tie on every ORDER BY key come out in the order Power BI chose for them
+                tied_single_column: dict[tuple[Any, ...], str] = {}
+                for item in entries:
+                    if tied_single_column.setdefault(row_key(item[0]), item[1]) != item[1]:
+                        raise MeasureError("The order of CONCATENATEX rows of a single-column TOPNSKIP that tie on every ORDER BY key, with different text, is not modelled in the local engine.")
             for key_index in range(len(order_spec) - 1, -1, -1):
                 column_keys = blank_aware_keys([item[0][key_index] for item in entries])
                 try:
