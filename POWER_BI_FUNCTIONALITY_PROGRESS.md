@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-12, after Iteration 233 / Task 144 dax-hunt-144, hunt backlog batch 2: uncatchable query errors, FLOOR/CEILING/EFFECT/PRICEDISC/VARX/STDEVX in Power BI doubles, ISPMT currency, ODDFYIELD long first coupon refused, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4487 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 145, fresh hunts with new seeds across all groups until 0 wrong, then M functions
+**Latest status (2026-11-13, after Iteration 234 / Task 145 dax-hunt-145, MROUND/FLOOR/CEILING fractional doubles, DIVIDE text doubles, CONVERT DATETIME value, exact-double FV/PV/PMT/NPER/RATE, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4493 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 146 (fresh hunt: whole number plus double literal, NETWORKDAYS weekend query error, trig of |x|>200 refused, LN/LOG doubles), then M functions
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
