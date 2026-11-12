@@ -576,9 +576,11 @@ def _workdays_up_to(serial: int, weekend: tuple[int, ...]) -> int:
 
 
 def _networkdays(args: list[object]) -> object:
+    # Task 146 family B (measured): a weekend outside 1..7 and 11..17 fails the whole query, so IFERROR cannot catch it: a refusal.
+    # A fraction rounds half up (1.5 counts as 2, 11.5 as 12: 44 and 52, measured). Text weekends keep their answers (locked).
     code = 1 if len(args) < 3 else _whole_argument(args[2], "NETWORKDAYS")
     if code not in _WEEKEND_DAYS:
-        raise _error("The third argument of NETWORKDAYS function (Weekend) can only be 1 ~ 7 or 11 ~ 17.")
+        raise dax_typed.refusal("The third argument of NETWORKDAYS function (Weekend) can only be 1 ~ 7 or 11 ~ 17.")
     if args[0] is None and args[1] is None:
         return None
     start, end = _serial(args[0], "NETWORKDAYS"), _serial(args[1], "NETWORKDAYS")
