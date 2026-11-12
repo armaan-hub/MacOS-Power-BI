@@ -601,7 +601,12 @@ def _effect(args: list[object]) -> object:
     periods = _integer(args[1], f)
     if nominal <= 0 or periods < 1:
         raise _fail(f)
-    return _result(_power(1 + nominal / periods, float(periods)) - 1, f)
+    # Task 144 family L (measured): EFFECT is a Double, so the exact binary value is kept (EFFECT(0.05,1)-0.05 is 4.16333634234434E-17, the
+    # double difference), not the 17-digit repr that Decimal arithmetic would subtract exactly (4.4E-17)
+    value = _power(1 + nominal / periods, float(periods)) - 1
+    if math.isnan(value) or math.isinf(value):
+        raise _fail(f)
+    return Decimal(value) if value != 0 else Decimal(0)
 
 
 def _nominal(args: list[object]) -> object:

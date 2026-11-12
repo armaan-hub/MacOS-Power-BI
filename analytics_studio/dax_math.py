@@ -6,7 +6,7 @@ Scalar functions take already-evaluated arguments (``None`` is BLANK).  Compared
 
 from __future__ import annotations
 
-from decimal import Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
+from decimal import Context, Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
 import math
 import random
 
@@ -562,15 +562,25 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None, bl
             return double_statistic(name, values)  # name is already the VAR.S / STDEV.P form here
         mean = sum(values, Decimal(0)) / count
         variance = sum(((value - mean) ** 2 for value in values), Decimal(0)) / (count - 1 if sample else count)
-        return variance if name.startswith("VAR") else variance.sqrt()
+        answer = variance if name.startswith("VAR") else variance.sqrt()
+        if function in {"VARX.P", "VARX.S", "STDEVX.P", "STDEVX.S"}:
+            # Task 144 family M (measured): the iterator forms are Power BI doubles; the double answer replaces the exact one only where they differ at 15 digits
+            double_answer = double_statistic(name, values)
+            if double_answer.is_finite() and Context(prec=15).plus(double_answer) != Context(prec=15).plus(answer):
+                return double_answer
+        return answer
     if name in {"PERCENTILE.INC", "PERCENTILE.EXC"}:
+        # Task 144 family J (measured): a percentile outside its range, or a BLANK one for EXC, fails the whole query: IFERROR cannot catch it,
+        # so it is a refusal (a MeasureError), not a MeasureRuntimeError that IFERROR would turn into its fallback
         if k is None:
+            if name == "PERCENTILE.EXC":
+                raise dax_typed.refusal("PERCENTILE.EXC with a BLANK percentile fails the query; the local engine does not return its IFERROR fallback.")
             raise _fail(function)
         if name == "PERCENTILE.INC":
             if not Decimal(0) <= k <= Decimal(1):
-                raise dax_typed._error("The percentile value should be in the range 0..1, inclusive.")
+                raise dax_typed.refusal("The percentile value should be in the range 0..1, inclusive.")
         elif not Decimal(1) / (count + 1) <= k <= Decimal(count) / (count + 1):
-            raise dax_typed._error(
+            raise dax_typed.refusal(
                 "The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values."
             )
         nans = [value for value in values if value.is_nan()]
