@@ -2587,6 +2587,22 @@ def _topnskip_over_single_column(node: Any) -> bool:
             and len(node[2]) >= 3 and _single_column_table(node[2][2]) is not None)
 
 
+def _holds_single_column_topnskip(node: Any, variable_nodes: dict[str, Any] | None = None, seen: set[int] | None = None) -> bool:
+    """Task 143 review: True when the expression holds, anywhere inside it or inside a VAR it reads, a TOPNSKIP over VALUES(column) / ALL(column).
+    The rows of such a TOPNSKIP come out in an order Power BI chooses (live Power BI, spec3), so every consumer that shows or depends on that
+    order (CONCATENATEX, TOPN, SAMPLE, INDEX, OFFSET, WINDOW, a nested TOPNSKIP) must refuse the shape."""
+    seen = set() if seen is None else seen
+    if not isinstance(node, (tuple, list)) or id(node) in seen:
+        return False
+    seen.add(id(node))
+    if isinstance(node, tuple) and _topnskip_over_single_column(node):
+        return True
+    if isinstance(node, tuple) and len(node) > 1 and node[0] == "var" and variable_nodes and node[1] in variable_nodes:
+        if _holds_single_column_topnskip(variable_nodes[node[1]], variable_nodes, seen):
+            return True
+    return any(_holds_single_column_topnskip(part, variable_nodes, seen) for part in node)
+
+
 def _is_all_table_value_argument(node: Any) -> bool:
     """Return whether a node is a supported filter-function table value."""
     if not isinstance(node, tuple) or not node:
@@ -11429,6 +11445,10 @@ def _evaluate_measures_once(
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal eff_touched
         function, arguments = argument[1], argument[2]
+        if function in {"TOPN", "SAMPLE", "TOPNSKIP", "INDEX", "OFFSET", "WINDOW"} and any(_holds_single_column_topnskip(part, variable_nodes) for part in arguments):
+            # Task 143 review (live Power BI, spec3): the rows of a TOPNSKIP over VALUES / ALL of one column come in an order the local engine cannot derive;
+            # a tie in TOPN / SAMPLE / TOPNSKIP / INDEX / OFFSET / WINDOW over them would be decided by that order
+            raise MeasureError(f"{function} over a TOPNSKIP of a single column depends on the order of its rows, which the local engine does not model.")
         if function in {"LINEST", "LINESTX"}:
             const_after = 3 if function == "LINESTX" else 2  # arguments that cannot be the optional const
             has_const = len(arguments) > const_after and _linest_is_const_literal(arguments[-1])
@@ -13442,6 +13462,16 @@ def _evaluate_measures_once(
             raise MeasureError("TOPNSKIP over this table shape or ordered by a column of another table is not modelled in the local engine.")
         count_value = in_row_expression(lambda: evaluate(arguments[0]))
         skip_value = in_row_expression(lambda: evaluate(arguments[1]))
+        if column_node is not None:
+            # Task 143 review: over VALUES(column) / ALL(column) only a whole n of 1 or more and a whole skip were measured (spec3: n 1, 2, 5; skip 0, 1).
+            # A BLANK, negative, fractional, text or Boolean n or skip is refused, never answered from the Facts rules.
+            def whole_number_at_least(value: Any, least: int) -> bool:
+                if value is None or isinstance(value, (bool, str)):
+                    return False
+                number = dax_typed.to_number(value)
+                return number.is_finite() and number == number.to_integral_value() and number >= least
+            if not whole_number_at_least(count_value, 1) or not whole_number_at_least(skip_value, 0):
+                raise MeasureError("TOPNSKIP over VALUES(column) or ALL(column) is modelled only for a whole count of 1 or more and a whole skip.")
         context, rows = table_argument_value(arguments[2])
         if count_value is None:
             return context, []
@@ -13467,9 +13497,8 @@ def _evaluate_measures_once(
             raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
         if column_node is not None:
             # Task 143 (live Power BI, spec3): a single-column source holding a BLANK is not ordered the way Power BI keeps its rows
-            column_name = str(column_node[2]).casefold()
-            if any(str(key).casefold() == column_name and value is None for row in rows for key, value in row.items()):
-                raise MeasureError("TOPNSKIP over a single column that holds a BLANK is not modelled in the local engine.")
+            if any(value is None or (isinstance(value, str) and value == "") for row in rows for value in row.values()):
+                raise MeasureError("TOPNSKIP over a single column that holds a BLANK or an empty text is not modelled in the local engine.")
         if count == 0 or not rows or skip >= len(rows):
             return context, []
         ranked_rows = [row for _keys, row in topn_skip_order(context, rows, keys_spec)] if keys_spec else list(rows)
@@ -24280,7 +24309,8 @@ def _evaluate_measures_once(
             refuse_column_no_row_holds(*table_argument_value(arguments[0], allow_keepfilters=True), arguments[1])
             if len(arguments) <= 3 and concatenate_walk_is_unmodelled(arguments[0], arguments[1]):
                 walk_refusal = walk_refusal or "CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
-            if len(arguments) <= 3 and _topnskip_over_single_column(arguments[0]):
+            single_column_topnskip_source = _holds_single_column_topnskip(arguments[0], variable_nodes)
+            if len(arguments) <= 3 and single_column_topnskip_source:
                 # Task 143 (live Power BI, spec3): the order of a single-column TOPNSKIP (VALUES / ALL of one column) is not derivable without an ORDER
                 walk_refusal = walk_refusal or "CONCATENATEX over a TOPNSKIP of a single column without an order walks the rows in an order the local engine does not model."
             delimiter = "" if len(arguments) < 3 else dax_typed.to_text(evaluate(arguments[2], row_context, allow_text=True))
@@ -24451,6 +24481,12 @@ def _evaluate_measures_once(
                     for item in entries:
                         if tied_texts.setdefault(row_key(item[0]), item[1]) != item[1]:
                             raise MeasureError("The order of CONCATENATEX rows that tie on every ORDER BY key, with different text, is not modelled in the local engine.")
+            if order_spec and single_column_topnskip_source and len(entries) > 1:
+                # Task 143 review: rows of a single-column TOPNSKIP that tie on every ORDER BY key come out in the order Power BI chose for them
+                tied_single_column: dict[tuple[Any, ...], str] = {}
+                for item in entries:
+                    if tied_single_column.setdefault(row_key(item[0]), item[1]) != item[1]:
+                        raise MeasureError("The order of CONCATENATEX rows of a single-column TOPNSKIP that tie on every ORDER BY key, with different text, is not modelled in the local engine.")
             for key_index in range(len(order_spec) - 1, -1, -1):
                 column_keys = blank_aware_keys([item[0][key_index] for item in entries])
                 try:
