@@ -317,7 +317,8 @@ def _discount_family(function: str, args: list[object], ctx: _Ctx) -> object:
     if function == "PRICEDISC":  # discount, redemption
         if first <= 0 or second <= 0:
             raise ctx.fail()
-        return _out(second * (1.0 - first * fraction), function)
+        days = float(_days_between(settlement, maturity, basis, ctx))
+        return _out(second - second * first * days / _year_length(settlement, maturity, basis, ctx), function)
     # YIELDDISC: price, redemption
     if first <= 0 or second <= 0:
         raise ctx.fail()
@@ -737,6 +738,10 @@ def _odd_first(function: str, args: list[object], ctx: _Ctx) -> object:
                 total += coupon / x ** (k + nq + y)
             return total - coupon * anl
 
+    if function == "ODDFYIELD" and dfc > e:
+        # Task 144 family H (measured): Power BI's iterative solver for a long odd first coupon (issue more than one period before the first
+        # coupon) differs from this one after about 12 digits on every measured row, so that shape is refused rather than guessed
+        raise dax_typed.refusal("ODDFYIELD with a long odd first coupon is not modelled: the local solver differs from Power BI's after about 12 digits.")
     if function == "ODDFPRICE":
         return _out(price_at(third), function)
     return _out(_solve_yield(price_at, third, function, frequency), function)
@@ -797,6 +802,10 @@ def call(function: str, args: list[object]) -> object:
     try:
         return _dispatch(function, args)
     except (OverflowError, ZeroDivisionError, ValueError) as exc:  # arithmetic that leaves the double range is a DAX error
+        from analytics_studio.measures import MeasureError  # late: measures imports this module (Task 144: a refusal is not a DAX error)
+
+        if isinstance(exc, MeasureError):
+            raise
         raise _fail(function) from exc
 
 

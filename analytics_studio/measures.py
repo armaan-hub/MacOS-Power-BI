@@ -3746,6 +3746,17 @@ def _round_to_multiple(
         if significance == significance.to_integral_value():
             return Decimal(int(prod))
         return Decimal(prod)
+    if significance > 0 and significance != significance.to_integral_value() and abs(number) < 2 ** 53:
+        # Task 144 family K (measured): a fractional significance is worked in binary doubles: the quotient number/significance rounded to a double,
+        # cut to a whole, then times the significance rounded again (FLOOR(7,1E-5)-7 is 8.88178419700125E-16, FLOOR(7,0.3)-7 is -0.100000000000001).
+        quotient = _to_15_digits_half_up(float(number) / float(significance))  # the quotient is then read at 15 digits (FLOOR(0.5,1E-5)-0.5 is 0)
+        whole = math.ceil(quotient) if function == "CEILING" else math.floor(quotient)
+        doubled = float(whole) * float(significance)
+        with localcontext() as exact:  # the exact decimal answer: kept when it is the very same double (CEILING(1.1,0.1) stays 1.1, FLOOR(2.5,0.3) stays 2.4)
+            exact.prec = max(_EXACT_PRECISION, number.adjusted() + 30)
+            step = abs(significance)
+            decimal_answer = (number / step).to_integral_value(rounding=ROUND_CEILING if function == "CEILING" else ROUND_FLOOR) * step
+        return decimal_answer if float(decimal_answer) == doubled else Decimal(doubled)
     rounding = ROUND_CEILING if function == "CEILING" else ROUND_FLOOR
     with localcontext() as exact:
         exact.prec = max(_EXACT_PRECISION, number.adjusted() + 30)  # keep every integer digit
@@ -8367,6 +8378,7 @@ _STATIC_ALWAYS_DOUBLE = frozenset({
     "COMBIN", "FACT", "AVERAGE", "VALUE",
     "SIN", "COS", "TAN", "ASIN", "DEGREES", "RADIANS", "MEDIAN", "MEDIANX", "PERCENTILE.INC", "PERCENTILEX.INC",
     "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "VARX.S", "VARX.P", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "XIRR", "RAND",
+    "EFFECT",  # Task 144 family L (measured): EFFECT is a Double, so EFFECT(0.05,1)-0.05 is the double difference 4.16333634234434E-17
 })
 
 _STATIC_ALWAYS_INT64 = frozenset({
@@ -13556,7 +13568,7 @@ def _evaluate_measures_once(
                 return table_argument_value(arguments[1])[0], []
             size = int(dax_typed.to_number(size_value).quantize(Decimal(1), rounding=ROUND_HALF_UP))
             if size < 0:
-                raise MeasureRuntimeError("SAMPLE function can only be used with a non-negative sample size argument.")
+                raise _HardError("SAMPLE function can only be used with a non-negative sample size argument.")  # Task 144 J: fails the query, IFERROR cannot catch it
             context, ordered = sorted_table(arguments[1], tuple(arguments[2:]))
             if size == 0 or not ordered:
                 return context, []
@@ -13611,14 +13623,19 @@ def _evaluate_measures_once(
         if function == "CALENDAR":
             bounds = []
             for argument in arguments:
-                value = evaluate(argument, None, allow_text=True)
+                try:
+                    value = evaluate(argument, None, allow_text=True)
+                except MeasureRuntimeError as error:
+                    if isinstance(argument, tuple) and argument[:2] == ("call", "DATE"):
+                        raise _HardError(str(error)) from error  # Task 144 J (measured): an out-of-range DATE fails the query, IFERROR cannot catch it
+                    raise
                 if value is None:
                     raise MeasureRuntimeError("The start date or end date in Calendar function can not be Blank value.")
                 if isinstance(value, str):
                     value = dax_dates.parse_date_text(value)
                 bounds.append(int(dax_typed.to_number(value).to_integral_value(rounding=ROUND_FLOOR)))
             if bounds[0] > bounds[1]:
-                raise MeasureRuntimeError("The start date in Calendar function can not be later than the end date.")
+                raise _HardError("The start date in Calendar function can not be later than the end date.")  # Task 144 J: fails the query
             if bounds[1] - bounds[0] > 3_700_000:
                 raise MeasureRuntimeError("The Calendar function range is too large.")
             return derived_table(["Date"], [{"Date": dax_dates.DaxDateTime(Decimal(day))} for day in range(bounds[0], bounds[1] + 1)], None, {"Date": "date"})
@@ -20680,6 +20697,10 @@ def _evaluate_measures_once(
                     except MeasureRuntimeError:
                         pass
         if function in dax_ext.ARITY and function not in {"ISBOOLEAN", "ISDATETIME"}:
+            if function == "ISPMT" and len(arguments) == 4 and static_type_of(arguments[3]) == "currency":
+                # Task 144 family N (measured): ISPMT with a CURRENCY principal returns a Currency, 4 decimal places (ISPMT(0.1,1,12,CURRENCY(1.23456)) is -0.1132)
+                paid = dax_ext.call(function, values)
+                return paid.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP) if isinstance(paid, Decimal) and paid.is_finite() else paid
             return dax_ext.call(function, values)
         if function == "CURRENCY" and isinstance(values[0], str):
             try:
@@ -23800,11 +23821,14 @@ def _evaluate_measures_once(
                 if d_val is None:
                     raise MeasureRuntimeError("One or more values for the Dates argument passed to XIRR is blank.")
                 elif isinstance(d_val, str):
-                    parsed_dt = dax_dates.parse_date_text(d_val)
+                    try:
+                        parsed_dt = dax_dates.parse_date_text(d_val)
+                    except MeasureRuntimeError as error:
+                        raise _HardError(str(error)) from error  # Task 144 family J (held-back set, measured): a text date fails the whole query, IFERROR cannot catch it
                     if parsed_dt is not None:
                         day = math.floor(float(parsed_dt))
                     else:
-                        raise MeasureRuntimeError(f"Cannot convert value '{d_val}' of type Text to type Date.")
+                        raise _HardError(f"Cannot convert value '{d_val}' of type Text to type Date.")  # Task 144 family J (held-back set): a text date fails the whole query, IFERROR cannot catch it
                 elif isinstance(d_val, bool):
                     day = 1.0 if d_val else 0.0
                 elif isinstance(d_val, (int, float, Decimal)):

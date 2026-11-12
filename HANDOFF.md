@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 143 shipped as Iteration 232; next Task 144, the next DAX hunt batch, then M functions; Haiku codes / Sonnet reviews)
+**Active agent:** Claude Opus 5.5 (Task 144 shipped as Iteration 233; next Task 145, fresh DAX hunts until 0 wrong, then M functions; Haiku codes / Sonnet reviews)
 **Branch in use:** main
 **Working tree clean:** yes
 
