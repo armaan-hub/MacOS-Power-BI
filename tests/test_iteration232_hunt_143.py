@@ -533,5 +533,53 @@ class Task143ReviewFixes(unittest.TestCase):
         self.assertEqual(dax.local('MINX(FILTER(Facts,Facts[Note]="Paid"),ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Sales],DESC)))'), "1")
 
 
+class Task143Spec2Ties(unittest.TestCase):
+    """Task 143 spec2 (fresh Power BI probe): DESC ties come in reverse table order, ASC ties in table order; an expression ORDER BY,
+    a negative count over FILTER, and a text or fractional skip are handled as measured. Values are the Power BI rows."""
+
+    CONCAT = ',Facts[Quantity]&Facts[Note],";")'
+
+    def _pbi(self, call, expected):
+        self.assertEqual(dax.local("CONCATENATEX(" + call + ")" + self.CONCAT), expected, call)
+
+    def _rejects(self, expr):
+        self.assertTrue(dax.local(expr).startswith("LOCAL-REJECT"), expr)
+
+    def test_desc_ties_come_in_reverse_table_order(self):
+        self._pbi('TOPNSKIP("3",1,Facts,Facts[Region],DESC', "3;4Late;5")
+        self._pbi('TOPNSKIP("3",3,ALL(Facts),Facts[Region],DESC', "5;1Paid;2Paid")
+        self._pbi('TOPNSKIP(1.5,1,ALL(Facts),Facts[Region],DESC', "3;4Late")
+        self._pbi('TOPNSKIP(1.5,5,Facts,Facts[Region],DESC', "2Paid")
+        self._pbi('TOPNSKIP(1.5,BLANK(),Facts,Facts[Region],DESC', "0Paid;3")
+        self._pbi('TOPNSKIP(5,-5,Facts,Facts[Region],DESC', "0Paid;3;4Late;5;1Paid")
+        self._pbi('TOPNSKIP(5,2,FILTER(Facts,Facts[Quantity]>0),Facts[Region],DESC', "5;1Paid;2Paid")
+        self._pbi('TOPNSKIP(5,BLANK(),ALL(Facts),Facts[Region],DESC', "0Paid;3;4Late;5;1Paid")
+        self._pbi('TOPNSKIP(TRUE(),-5,ALL(Facts),Facts[Region],DESC', "0Paid")
+        self._pbi('TOPNSKIP(-5,1,ALL(Facts),Facts[Region],DESC', "3;4Late;5;1Paid;2Paid")
+        self._pbi('TOPNSKIP(-1,3,Facts,Facts[Region],DESC', "5;1Paid;2Paid")
+
+    def test_asc_ties_keep_table_order(self):
+        self._pbi('TOPNSKIP(3,1,ALL(Facts),Facts[Note],ASC', "5;4Late;2Paid")
+        self._pbi('TOPNSKIP(0.7,1,Facts,Facts[Note],ASC', "5")
+        self._pbi('TOPNSKIP(1.5,BLANK(),Facts,Facts[Note],ASC', "3;5")
+        self._pbi('TOPNSKIP(2.5,2,Facts,Facts[Note],ASC', "4Late;2Paid;1Paid")
+
+    def test_expression_order_by_is_refused(self):
+        for call in (
+            "TOPNSKIP(3,-5,FILTER(Facts,Facts[Quantity]>0),Facts[Sales]*-1)",
+            "TOPNSKIP(5,0,ALL(Facts),Facts[Sales]*-1)",
+            "TOPNSKIP(-1,0,FILTER(Facts,Facts[Quantity]>0),Facts[Sales]*-1)",
+            "TOPNSKIP(0.7,-5,FILTER(Facts,Facts[Quantity]>0),Facts[Sales]*-1)",
+            "TOPNSKIP(1,2,FILTER(Facts,Facts[Quantity]>0),Facts[Sales]*-1)",
+        ):
+            self._rejects("CONCATENATEX(" + call + self.CONCAT)
+
+    def test_negative_count_over_filter_is_refused(self):
+        self._rejects('CONCATENATEX(TOPNSKIP(-5,"3",FILTER(Facts,Facts[Quantity]>0),Facts[Region],DESC)' + self.CONCAT)
+        self._rejects('CONCATENATEX(TOPNSKIP(-1,-1,FILTER(Facts,Facts[Quantity]>0),Facts[Region],DESC)' + self.CONCAT)
+        self._rejects('CONCATENATEX(TOPNSKIP(-5,2.5,FILTER(Facts,Facts[Quantity]>0),Facts[Quantity])' + self.CONCAT)
+        self._rejects('CONCATENATEX(TOPNSKIP(-1,-5,FILTER(Facts,Facts[Quantity]>0),Facts[Note],ASC)' + self.CONCAT)
+
+
 if __name__ == "__main__":
     unittest.main()

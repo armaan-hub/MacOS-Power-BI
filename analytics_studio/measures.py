@@ -13374,7 +13374,8 @@ def _evaluate_measures_once(
     def topn_skip(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """TOPNSKIP(n, skip, table, [expression, [order]]...) (Task 143, measured on the Facts grid).
 
-        Exactly n rows come back after the skip, whatever the ties; a tie keeps the table's row order; BLANK sorts below every
+        Exactly n rows come back after the skip, whatever the ties; an ASC tie keeps the table's row order, a DESC tie comes in
+        reverse table order; an ORDER BY that is not a plain column is refused; BLANK sorts below every
         number (last in DESC, first in ASC). n rounds half away from zero, TRUE is 1, text is read as a number; BLANK, 0, or no
         row left gives an empty table; a negative n keeps every row after the skip. skip: BLANK or a negative number is 0; a
         text, a Boolean or a fraction gives an empty table."""
@@ -13397,6 +13398,10 @@ def _evaluate_measures_once(
                 else:
                     raise MeasureError("Unexpected value for the ORDER argument in the TOPNSKIP function. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
             keys_spec.append((expression, descending))
+        if any(expression[0] != "reference" for expression, _descending in keys_spec):
+            # Task 143 (live Power BI, spec2): an ORDER BY that is an expression (Facts[Sales]*-1) is refused for every n and skip;
+            # Power BI answers only some of them and errors with the same DirectQuery message for the rest.
+            raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
         if len(keys_spec) > 1:
             # Task 143 (live Power BI, holdout): TOPNSKIP with two or more ORDER BY columns is an error for every n and skip measured
             # ("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows ...")
@@ -13407,6 +13412,13 @@ def _evaluate_measures_once(
         if count_value is None:
             return context, []
         count = (1 if count_value else 0) if isinstance(count_value, bool) else dax_typed.whole(count_value, "TOPNSKIP")
+        if count < 0:
+            # Task 143 (live Power BI, spec2): a negative n over FILTER(...) gave "An unexpected error"; only a bare table or ALL(table) is answered
+            table_node = arguments[2]
+            bare_or_all = table_node[0] == "table" or (
+                table_node[0] == "call" and table_node[1] == "ALL" and len(table_node[2]) == 1 and table_node[2][0][0] == "table")
+            if not bare_or_all:
+                raise MeasureError("TOPNSKIP with a negative count over a FILTER table is not modelled in the local engine.")
         if skip_value is None:
             skip = 0
         elif isinstance(skip_value, (bool, str)):
@@ -13425,7 +13437,8 @@ def _evaluate_measures_once(
     def topn_skip_order(
         context: dict[str, Any], rows: list[dict[str, Any]], keys_spec: list[tuple[Any, bool]]
     ) -> list[tuple[list[Any], dict[str, Any]]]:
-        """Each row with its ORDER keys, sorted: a stable sort per key from the last to the first, so a tie keeps the table's row order."""
+        """Each row with its ORDER keys, sorted (one key: two or more are refused by topn_skip). ASC is a stable sort, so a tie keeps
+        the table's row order; DESC is the exact reverse of that ASC order, so a tie comes in reverse table order (Task 143, spec2)."""
         found: list[tuple[list[Any], dict[str, Any]]] = []
         outer_reads_before = outer_row_reads[0]
         for frame in iterate_rows(context, rows, "install"):
@@ -13437,15 +13450,13 @@ def _evaluate_measures_once(
         if outer_row_reads[0] != outer_reads_before:
             raise MeasureError("The tie order of a TOPNSKIP whose ORDER BY reads an enclosing row context is not modelled in the local engine.")
         ranked = list(found)
-        for position in range(len(keys_spec) - 1, -1, -1):
-            try:
-                # BLANK is the lowest key: (0,) sorts before every (1, value); reverse=True keeps equal keys in the table's order
-                ranked.sort(
-                    key=lambda item, p=position: (0,) if item[0][p] is None else (1, column_order_key(item[0][p])),
-                    reverse=keys_spec[position][1],
-                )
-            except TypeError as error:
-                raise MeasureError("TOPNSKIP keys of different types (a number beside text) are not ordered by the local engine.") from error
+        try:
+            # BLANK is the lowest key: (0,) sorts before every (1, value); equal keys keep the table's order in this ASC sort
+            ranked.sort(key=lambda item: (0,) if item[0][0] is None else (1, column_order_key(item[0][0])))
+        except TypeError as error:
+            raise MeasureError("TOPNSKIP keys of different types (a number beside text) are not ordered by the local engine.") from error
+        if keys_spec[0][1]:
+            ranked.reverse()
         return ranked
 
     def new_table_function(function: str, arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
