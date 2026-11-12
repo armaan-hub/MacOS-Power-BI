@@ -234,6 +234,8 @@ def math_function(function: str, args: list[object]) -> object:
             quotient = Decimal(int(q))
         else:
             quotient = (numerator / denominator).to_integral_value(rounding=ROUND_DOWN)
+        if quotient.is_zero():
+            quotient = Decimal(0)  # an Integer has no negative zero (SIGN(QUOTIENT(5E-320,-1)) is 0, measured)
         if abs(quotient) >= 2 ** 63:  # Part D: an Integer result beyond the 64-bit range is the conversion error
             raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
         return quotient

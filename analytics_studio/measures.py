@@ -56,7 +56,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_swi_ties, dax_time_sets, dax_typed, dax_visual_calc_fns
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_subnormal, dax_swi_ties, dax_time_sets, dax_typed, dax_visual_calc_fns
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -20412,6 +20412,12 @@ def _evaluate_measures_once(
             double_as_text(argument, value, row_context) if index in dax_typed.TEXT_ARGUMENTS.get(function, ()) else value
             for index, (argument, value) in enumerate(zip(arguments, values))
         ]
+        if function in dax_subnormal.HANDLED:  # Task 142: a subnormal argument follows the measured table (other arguments are not touched)
+            subnormal_answer = dax_subnormal.function_answer(function, values, interval)
+            if isinstance(subnormal_answer, dax_subnormal.Substitute):
+                values = subnormal_answer.values  # the subnormal argument reads as zero here (INT, FIXED, ...)
+            elif subnormal_answer is not dax_subnormal.NOT_SUBNORMAL:
+                return subnormal_answer
         if function == "CONVERT":
             if values[0] is None and interval == "BOOLEAN":
                 # Task 19 Part A: a plain BLANK is False; a logical operator's own BLANK (1&&"") stays a BLANK (locked items)
@@ -21752,7 +21758,7 @@ def _evaluate_measures_once(
                 return None
             if node[1] == "+" and isinstance(operand, bool):
                 return operand  # unary plus leaves a True/False value alone (-TRUE() is a number)
-            value = as_number(operand)
+            value = as_number(dax_subnormal.operand(operand))  # Task 142: a subnormal text is read as its double (copy_negate is exact)
             if node[1] == "-" and value == -_INT64_RANGE and not dax_dates.is_date(value) and left_static_type(node[2], row_context) == "int64":
                 return value  # Part C: the negation of the Int64 minimum wraps to itself (-(9223372036854775807+1) is -9223372036854775808, measured)
             return typed_zero(value if node[1] == "+" else value.copy_negate(), node, row_context)  # copy_negate keeps a zero's sign; -x would round -0 to 0
@@ -21856,6 +21862,7 @@ def _evaluate_measures_once(
                     raise _CurrencyDivisionError("A division by zero has been encountered.")  # Part F
                 raise _DivisionError("A division by zero has been encountered.")
             if node[1] == "^":
+                left, right = dax_subnormal.operand(left), dax_subnormal.operand(right)  # Task 142: a subnormal text is read as its double
                 try:
                     left_num = None if left is None else as_number(left)
                     right_num = None if right is None else as_number(right)
@@ -21864,6 +21871,10 @@ def _evaluate_measures_once(
                         raise _TextConversionFailure(str(error)) from error
                     raise
                 try:
+                    if dax_subnormal.is_subnormal(left_num) or dax_subnormal.is_subnormal(right_num):
+                        subnormal_power = dax_subnormal.binary_answer("^", left_num, right_num)  # Task 142: a subnormal base or exponent follows the measured table
+                        if subnormal_power is not dax_subnormal.NOT_SUBNORMAL:
+                            return subnormal_power
                     return _power(left_num, right_num)
                 except _PowerFailure as failure:
                     _stamp_row_dependence(failure, node[2:4], variable_nodes.get, row_scans_model(row_context))
@@ -21875,6 +21886,8 @@ def _evaluate_measures_once(
                 elif right is None and node[1] == "+" and (is_date_aggregate(node[3]) or _is_datetime_conversion(node[3])):
                     right = dax_dates.DaxDateTime(Decimal(0))
             for text_value in (left, right):
+                if isinstance(text_value, str) and node[1] in {"/", "^"} and dax_subnormal.as_subnormal_text(text_value) is not None:
+                    continue  # Task 142: a subnormal text beside / or ^ is read as its double below
                 if isinstance(text_value, str):
                     if dax_typed.beyond_double(text_value):  # Task 74 Part A: as before, + - * answer a type test by its type; / shows the error
                         text_message = f"Cannot convert value '{text_value}' of type Text to type Number."
@@ -21895,17 +21908,25 @@ def _evaluate_measures_once(
                         if node[1] == "/":
                             raise MeasureRuntimeError(text_message)
                         raise _TextRangeFailure(text_message)
+            if node[1] in {"/", "^"}:
+                left, right = dax_subnormal.operand(left), dax_subnormal.operand(right)  # Task 142: a subnormal text is read as its double (other texts are as before)
             if node[1] in {"+", "-", "*"}:
                 # Task 74: + - * answer a subnormal text (the four held-out grids agree with the double), so it becomes its number here; every other
                 # conversion of a subnormal text is refused
                 with dax_typed.subnormal_text_allowed():
                     left, right = (_subnormal_text_as_number(side, as_number) for side in (left, right))
             try:
-                result = _binary_value(
-                    node[1],
-                    None if left is None else as_number(left),
-                    None if right is None else as_number(right),
-                )
+                result = dax_subnormal.NOT_SUBNORMAL
+                if node[1] in dax_subnormal.OPERATORS and (dax_subnormal.is_subnormal(left) or dax_subnormal.is_subnormal(right)):
+                    result = dax_subnormal.binary_answer(  # Task 142: an operator with a subnormal operand follows the measured table
+                        node[1], None if left is None else as_number(left), None if right is None else as_number(right),
+                    )
+                if result is dax_subnormal.NOT_SUBNORMAL:
+                    result = _binary_value(
+                        node[1],
+                        None if left is None else as_number(left),
+                        None if right is None else as_number(right),
+                    )
             except MeasureRuntimeError as error:
                 if "Cannot convert value" in str(error) and node[1] != "/" and _reads_no_data(node, variable_nodes.get):
                     raise _TextConversionFailure(str(error)) from error
@@ -22030,6 +22051,12 @@ def _evaluate_measures_once(
         if node[0] == "table_call" or (node[0] == "call" and node[1] in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}):
             return single_value_of(table_argument_value(node))
         _, function, arguments = node
+        if function in dax_subnormal.HANDLED and dax_subnormal.holds_subnormal(arguments):  # Task 142: a subnormal literal argument follows the measured table
+            outcome = dax_subnormal.call(lambda argument: evaluate(argument, row_context, allow_text=True), function, arguments)
+            if isinstance(outcome, dax_subnormal.Rewrite):
+                return evaluate(("call", function, outcome.arguments), row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+            if outcome is not dax_subnormal.NOT_SUBNORMAL:
+                return outcome
         if (function in _TEXT_MAKING_CALLS or (function == "CONVERT" and len(arguments) == 2 and arguments[1][-1] == "STRING")) and id(node) not in text_context_walked:
             text_context_walked.add(id(node))
             _mark_calls(node, "PRODUCTX", text_context_products, variable_nodes)  # Task 40: a product turned into text by a text function
@@ -23296,6 +23323,12 @@ def _evaluate_measures_once(
                     if function in {"INT", "EXP", "ROUND", "ABS", "ROUNDUP", "ROUNDDOWN", "TRUNC", "SIGN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
                         raise _TextConversionFailure(str(error)) from error
                     raise
+                if function in dax_subnormal.HANDLED and any(dax_subnormal.is_subnormal(v) for v in values):  # Task 142: a computed subnormal argument follows the measured table
+                    subnormal_answer = dax_subnormal.function_answer(function, list(values))
+                    if isinstance(subnormal_answer, dax_subnormal.Substitute):
+                        values = subnormal_answer.values
+                    elif subnormal_answer is not dax_subnormal.NOT_SUBNORMAL:
+                        return subnormal_answer
                 if function in {"SIGN", "INT", "MOD", "CEILING", "FLOOR"}:
                     if any(v is not None and v.is_finite() and 0 < abs(v) < _DBL_MIN for v in values):
                         raise dax_typed.refusal(f"{function} with a subnormal argument is not modelled by the local engine.")

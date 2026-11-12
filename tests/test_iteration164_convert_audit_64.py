@@ -138,10 +138,19 @@ class TestIteration164ConvertAudit64(unittest.TestCase):
 
     # Rounds 3 and 4 (grids t74c, t74d): a text that reads as a subnormal Double is refused, except in + - * and in ABS, VALUE and LN
     def test_round4_subnormal_text_is_refused_outside_the_answered_functions(self) -> None:
-        for expression in ('SIGN("2e-310")', 'SIGN("-7e-315")', 'DIVIDE(1,"2e-310")', 'POWER("4.9e-324",0)', 'INT("-7e-315")', 'MOD("2e-310",2)',
-                           'ROUND("2e-310",-1)', 'FIXED("2e-310",0)', 'CURRENCY("3e-320")', 'CONVERT("2e-310",BOOLEAN)', '"2e-310"/2'):
+        # Task 142: these were refused; Power BI Desktop (probed 2026-11-12) answers each one, and so does the local engine now
+        answers = {
+            'SIGN("2e-310")': "0", 'SIGN("-7e-315")': "-1", 'DIVIDE(1,"2e-310")': "BLANK", 'INT("-7e-315")': "0",
+            'ROUND("2e-310",-1)': "1.99999999999999E-310", 'FIXED("2e-310",0)': "0", 'CURRENCY("3e-320")': "0",
+            'CONVERT("2e-310",BOOLEAN)': "True", '"2e-310"/2': "9.99999999999997E-311",
+        }
+        for expression, expected in answers.items():
             with self.subTest(expression=expression):
-                self.assertIn("subnormal text conversion", _rejected(expression))
+                self.assertEqual(str(dax.local(expression)), expected)
+        wrong_type = "An argument of function '%s' has the wrong data type or the result is too large or too small."
+        for expression, function in (('POWER("4.9e-324",0)', "POWER"), ('MOD("2e-310",2)', "MOD")):
+            with self.subTest(expression=expression):
+                self.assertEqual(_rejected(expression), wrong_type % function)
 
     def test_round4_subnormal_text_is_answered_in_plus_minus_times_abs_value_and_ln(self) -> None:
         self.assertTrue(dax.same("-744.440071921381", dax.local('LN("4.9e-324")')))
