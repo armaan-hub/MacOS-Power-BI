@@ -508,5 +508,30 @@ class HuntBatchOneFamilies(unittest.TestCase):
         self.assertTrue(dax.local("CURRENTGROUP()").startswith("LOCAL-REJECT"))
 
 
+class Task143ReviewFixes(unittest.TestCase):
+    """Review fixes (values from the hidden Power BI hold-out set)."""
+
+    def _rejects(self, expr):
+        self.assertTrue(dax.local(expr).startswith("LOCAL-REJECT"), expr)
+
+    def test_topnskip_two_order_columns_is_an_error(self):
+        for n in ("4", "6", "10", "0.49", "-4", "FALSE()", '"-1"'):
+            self._rejects(f"COUNTROWS(TOPNSKIP({n},1,Facts,Facts[Note],DESC,Facts[Quantity],ASC))")
+        self.assertEqual(dax.local("COUNTROWS(TOPNSKIP(4,1,Facts,Facts[Quantity],DESC))"), "4")
+
+    def test_earlier_in_addcolumns_without_outer_row(self):
+        self._rejects('COUNTROWS(ADDCOLUMNS(Facts,"a",EARLIER(Facts[Quantity])))')
+        self._rejects('COUNTROWS(ADDCOLUMNS(Facts,"a",EARLIEST(Facts[Quantity])))')
+        self._rejects('COUNTROWS(ADDCOLUMNS(Facts,"a",CALCULATE(COUNTROWS(Facts),Facts[Region]=EARLIER(Facts[Region],2))))')
+        self.assertEqual(dax.local('SUMX(ADDCOLUMNS(Facts,"n",CALCULATE(COUNTROWS(Facts),Facts[Region]=EARLIER(Facts[Region]))),[n])'), "6")
+        self.assertEqual(dax.local('COUNTROWS(ADDCOLUMNS(Facts,"a",SUMX(Facts,EARLIER(Facts[Quantity]))))'), "6")
+
+    def test_allselected_rank_keeps_the_iterated_rows(self):
+        self.assertEqual(dax.local('SUMX(FILTER(Facts,Facts[Note]="Paid"),ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Sales],DESC)))'), "6")
+        self.assertEqual(dax.local('SUMX(FILTER(Facts,Facts[Quantity]<4),ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Sales],DESC)))'), "10")
+        self.assertEqual(dax.local('PRODUCTX(FILTER(Facts,Facts[Region]<>"East"),ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Sales],DESC)))'), "6")
+        self.assertEqual(dax.local('MINX(FILTER(Facts,Facts[Note]="Paid"),ROWNUMBER(ALLSELECTED(Facts),ORDERBY(Facts[Sales],DESC)))'), "1")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -3312,6 +3312,10 @@ def _earlier_too_deep(node: Any, frames: int) -> bool:
                 or any(_earlier_too_deep(arg, frames) for arg in node[2][3:])
             )
         return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
+    if node[0] == "call" and node[1] in {"CALCULATE", "CALCULATETABLE"} and node[2]:
+        # Task 143: a Boolean filter argument is a FILTER over its column, which opens a row context of its own (EARLIER inside it reaches the row outside)
+        return _earlier_too_deep(node[2][0], frames) or any(
+            _earlier_too_deep(argument, frames + 1 if _is_boolean_filter_value(argument) else frames) for argument in node[2][1:])
     return any(_earlier_too_deep(child, frames) for child in node if isinstance(child, tuple))
 
 
@@ -10769,7 +10773,8 @@ def _evaluate_measures_once(
         ranks the whole table under the filter context outside that iterator, not the rows the iterator keeps; the row itself is matched in it."""
         nonlocal eff_layers, eff_suppressed, eff_blocked
         whole_table = relation[0] == "table" or (
-            relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table")
+            relation[0] == "call" and relation[1] == "ALL" and len(relation[2]) == 1 and relation[2][0][0] == "table")
+        # ALLSELECTED(Facts) is not widened: it keeps the rows the enclosing iterator selects (SUMX(FILTER(Facts,Note="Paid"),ROWNUMBER(ALLSELECTED(Facts),...)) ranks 3 rows)
         if whole_table and install_states:
             table_name = relation[1] if relation[0] == "table" else relation[2][0][1]
             target_id = resolve_table_context(str(table_name))["id"]
@@ -11521,10 +11526,10 @@ def _evaluate_measures_once(
             return res_context, res_rows
         if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
             context, rows = table_argument_value(arguments[0], allow_keepfilters=True)
-            if function == "SELECTCOLUMNS" and any(_earlier_too_deep(item, len(row_stack) + 1) for item in arguments[1:]):
-                # Task 143 (live Power BI): an EARLIER with no outer row context in SELECTCOLUMNS is an error even when the rows are only counted
-                # (COUNTROWS(SELECTCOLUMNS(Facts,"a",EARLIER(Facts[Sales]))) is ERR); not caught by IFERROR. ADDCOLUMNS is left as it was:
-                # SUMX(ADDCOLUMNS(Facts,"n",CALCULATE(COUNTROWS(Facts),Facts[Region]=EARLIER(Facts[Region]))),[n]) is 6 (parity battery)
+            if any(_earlier_too_deep(item, len(row_stack) + 1) for item in arguments[1:]):
+                # Task 143 (live Power BI): EARLIER(c, n) needs n + 1 open row contexts; in ADDCOLUMNS / SELECTCOLUMNS over a table with no outer row context
+                # it is an error even when the rows are only counted (COUNTROWS(ADDCOLUMNS(Facts,"a",EARLIER(Facts[Quantity]))) is ERR), not caught by IFERROR.
+                # A Boolean CALCULATE filter opens its own row context, so SUMX(ADDCOLUMNS(Facts,"n",CALCULATE(COUNTROWS(Facts),Facts[Region]=EARLIER(Facts[Region]))),[n]) is 6.
                 raise MeasureError("EARLIER/EARLIEST refers to an earlier row context which doesn't exist.")
             implicit_flags: list[bool] = []
             explicit_taken: set[tuple[str, str]] = set()
@@ -13373,23 +13378,6 @@ def _evaluate_measures_once(
         number (last in DESC, first in ASC). n rounds half away from zero, TRUE is 1, text is read as a number; BLANK, 0, or no
         row left gives an empty table; a negative n keeps every row after the skip. skip: BLANK or a negative number is 0; a
         text, a Boolean or a fraction gives an empty table."""
-        count_value = in_row_expression(lambda: evaluate(arguments[0]))
-        skip_value = in_row_expression(lambda: evaluate(arguments[1]))
-        context, rows = table_argument_value(arguments[2])
-        if count_value is None:
-            return context, []
-        count = (1 if count_value else 0) if isinstance(count_value, bool) else dax_typed.whole(count_value, "TOPNSKIP")
-        if skip_value is None:
-            skip = 0
-        elif isinstance(skip_value, (bool, str)):
-            return context, []
-        else:
-            skip_number = dax_typed.to_number(skip_value)
-            if skip_number.is_finite() and skip_number > 0 and skip_number != skip_number.to_integral_value():
-                return context, []
-            skip = max(0, dax_typed.whole(skip_value, "TOPNSKIP"))
-        if count == 0 or not rows or skip >= len(rows):
-            return context, []
         keys_spec: list[tuple[Any, bool]] = []
         index = 3
         while index < len(arguments):
@@ -13409,6 +13397,27 @@ def _evaluate_measures_once(
                 else:
                     raise MeasureError("Unexpected value for the ORDER argument in the TOPNSKIP function. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
             keys_spec.append((expression, descending))
+        if len(keys_spec) > 1:
+            # Task 143 (live Power BI, holdout): TOPNSKIP with two or more ORDER BY columns is an error for every n and skip measured
+            # ("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows ...")
+            raise MeasureError("The TOPNSKIP function is incompatible with the DirectQuery data source, as it does not support skipping rows before returning the result rows.")
+        count_value = in_row_expression(lambda: evaluate(arguments[0]))
+        skip_value = in_row_expression(lambda: evaluate(arguments[1]))
+        context, rows = table_argument_value(arguments[2])
+        if count_value is None:
+            return context, []
+        count = (1 if count_value else 0) if isinstance(count_value, bool) else dax_typed.whole(count_value, "TOPNSKIP")
+        if skip_value is None:
+            skip = 0
+        elif isinstance(skip_value, (bool, str)):
+            return context, []
+        else:
+            skip_number = dax_typed.to_number(skip_value)
+            if skip_number.is_finite() and skip_number > 0 and skip_number != skip_number.to_integral_value():
+                return context, []
+            skip = max(0, dax_typed.whole(skip_value, "TOPNSKIP"))
+        if count == 0 or not rows or skip >= len(rows):
+            return context, []
         ranked_rows = [row for _keys, row in topn_skip_order(context, rows, keys_spec)] if keys_spec else list(rows)
         remaining = ranked_rows[skip:]
         return context, remaining if count < 0 else remaining[:count]
