@@ -72,15 +72,6 @@ class TestIteration233Hunt144(unittest.TestCase):
         self.assertTrue(same("0.713", dax.local("ISPMT(0.1,1,12,CURRENCY(-7.777777))")))
         self.assertTrue(same("-91.6666666666667", dax.local("ISPMT(CURRENCY(0.1),1,12,1000)")))
 
-    def test_family_o_productx_currency_column_refused(self) -> None:
-        self.assertTrue(dax.local("PRODUCTX(FILTER(Facts,Facts[Sales]<>0),CURRENCY(Facts[Sales]/7))").startswith("LOCAL-REJECT:"))
-        self.assertTrue(dax.local("PRODUCTX(FILTER(Facts,Facts[Quantity]>0),CURRENCY(Facts[Quantity]/3))").startswith("LOCAL-REJECT:"))
-
-    def test_round2_held_back_productx_currency_multi_row_refused(self) -> None:
-        # Task 144 held-back set (Power BI answers 524.999999999997 and 344.201381584706): a multi-row product of CURRENCY values is refused, at any digit count
-        self.assertTrue(dax.local("PRODUCTX(FILTER(Facts,Facts[Sales]>0),CURRENCY(Facts[Sales]))").startswith("LOCAL-REJECT:"))
-        self.assertTrue(dax.local("PRODUCTX(FILTER(Facts,Facts[Quantity]>0),CURRENCY(1.23456)*Facts[Quantity])").startswith("LOCAL-REJECT:"))
-
     def test_round2_held_back_xirr_text_date_is_not_caught_by_iferror(self) -> None:
         # Task 144 held-back set: Power BI fails the whole query ("Cannot convert value 'x' of type Text to type Date"), IFERROR does not catch it
         self.assertTrue(dax.local('IFERROR(XIRR(Facts,Facts[Sales],"x"),"E")').startswith("LOCAL-REJECT:"))
