@@ -5372,6 +5372,25 @@ _ARITHMETIC_EVIDENCE: dict[tuple[str, str, str], frozenset[str]] = {  # (operato
 }
 
 
+def _rank_over_whole_table(node: Any) -> bool:
+    """Whether a RANK / ROWNUMBER in this expression takes ALL(Facts) or ALLSELECTED(Facts) (a whole table, not a column) as its relation."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in {"RANK", "ROWNUMBER"} and isinstance(node[2], tuple) and node[2]:
+        args = node[2]
+        index = 1 if node[1] == "RANK" and args[0][0] == "table" and str(args[0][1]).upper() in {"DENSE", "SKIP"} else 0
+        relation = args[index] if len(args) > index else None
+        if isinstance(relation, tuple) and len(relation) == 3 and relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table":
+            return True
+    return any(_rank_over_whole_table(child) for child in node if isinstance(child, tuple))
+
+
+def _is_blank_date_shift(node: Any) -> bool:
+    """EDATE(...) or EOMONTH(...) as an operand: Task 143 (live Power BI): with a BLANK date it is day zero beside + or -
+    (EOMONTH(BLANK(),-3)+2 is 01/01/1900), while x*1 or a lone EOMONTH(BLANK(),0) stays BLANK."""
+    return isinstance(node, tuple) and len(node) >= 3 and node[0] == "call" and node[1] in {"EDATE", "EOMONTH"}
+
+
 def _arithmetic_result_type(operator: str, left: str, right: str) -> str | None:
     """Task 60: the promotion table of + - * / over the leaf types Int64, Double, Currency and Text (a text operand is read as a number).
       + -  : Int64 with Int64; Currency with Currency or Int64; any Double, or a Text, or Currency against Double or Text, gives Double.
@@ -10727,6 +10746,8 @@ def _evaluate_measures_once(
         shadow="clear": CONCATENATEX only removes the outer filters on the columns it iterates."""
         nonlocal selected_iteration_depth
         saved_state = push_shadow(context, rows, shadow)
+        if shadow == "install":
+            install_states.append((context.get("id"), saved_state))  # Task 143: the filter state outside this iterator
         selected = bool(context.get("selected_columns"))
         selected_iteration_depth += selected
         try:
@@ -10739,7 +10760,28 @@ def _evaluate_measures_once(
                     row_stack.pop()
         finally:
             selected_iteration_depth -= selected
+            if shadow == "install":
+                install_states.pop()
             pop_shadow(saved_state)
+
+    def window_relation_rows(relation: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """Task 143 (live Power BI): RANK / ROWNUMBER / INDEX over a whole table (Facts, ALL(Facts)) inside an iterator over FILTER(Facts, ...)
+        ranks the whole table under the filter context outside that iterator, not the rows the iterator keeps; the row itself is matched in it."""
+        nonlocal eff_layers, eff_suppressed, eff_blocked
+        whole_table = relation[0] == "table" or (
+            relation[0] == "call" and relation[1] in {"ALL", "ALLSELECTED"} and len(relation[2]) == 1 and relation[2][0][0] == "table")
+        if whole_table and install_states:
+            table_name = relation[1] if relation[0] == "table" else relation[2][0][1]
+            target_id = resolve_table_context(str(table_name))["id"]
+            saved = next((state for context_id, state in reversed(install_states) if context_id == target_id), None)
+            if saved is not None:
+                current = (eff_layers, eff_suppressed, eff_blocked)
+                eff_layers, eff_suppressed, eff_blocked = saved
+                try:
+                    return table_argument_value(relation)
+                finally:
+                    eff_layers, eff_suppressed, eff_blocked = current
+        return table_argument_value(relation)
 
     def column_in_row_context(frame: tuple[dict[str, Any], dict[str, Any], int], table: str, name: str) -> bool:
         """Whether this row context holds the column (the rules a column reference follows in the innermost row context)."""
@@ -10761,6 +10803,7 @@ def _evaluate_measures_once(
         return any(str(header).casefold() == name.casefold() for header in context["headers"])
 
     outer_row_reads = [0]  # how many column reads were answered by an enclosing row context (the walk order of such an iteration is not modelled)
+    install_states: list[tuple[Any, tuple[Any, ...]]] = []  # Task 143: (table id, filter state outside it) of each open iterator over a table value
 
     def enclosing_row_context_for(
         row_context: tuple[dict[str, Any], dict[str, Any], int], table: str, name: str, count: bool = True,
@@ -10992,6 +11035,10 @@ def _evaluate_measures_once(
                         raise _KeySpaceUndecided()
                     if window_order is not None:
                         in_dictionary_order = window_order
+                if in_dictionary_order and table_node[0] == "call" and table_node[1] == "FILTER" and any(_rank_over_whole_table(node) for node in nodes):
+                    # Task 143 (live Power BI): a FILTER(Facts, ...) walked beside RANK / ROWNUMBER over ALL(Facts) comes out in the table's own row
+                    # order (CONCATENATEX(FILTER(Facts,..), ROWNUMBER(ALL(Facts),ORDERBY(Sales)),",") is "5,6,2,4"), not in dictionary order
+                    in_dictionary_order = False
                 major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
 
                 def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
@@ -11474,6 +11521,11 @@ def _evaluate_measures_once(
             return res_context, res_rows
         if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
             context, rows = table_argument_value(arguments[0], allow_keepfilters=True)
+            if function == "SELECTCOLUMNS" and any(_earlier_too_deep(item, len(row_stack) + 1) for item in arguments[1:]):
+                # Task 143 (live Power BI): an EARLIER with no outer row context in SELECTCOLUMNS is an error even when the rows are only counted
+                # (COUNTROWS(SELECTCOLUMNS(Facts,"a",EARLIER(Facts[Sales]))) is ERR); not caught by IFERROR. ADDCOLUMNS is left as it was:
+                # SUMX(ADDCOLUMNS(Facts,"n",CALCULATE(COUNTROWS(Facts),Facts[Region]=EARLIER(Facts[Region]))),[n]) is 6 (parity battery)
+                raise MeasureError("EARLIER/EARLIEST refers to an earlier row context which doesn't exist.")
             implicit_flags: list[bool] = []
             explicit_taken: set[tuple[str, str]] = set()
             if function == "SELECTCOLUMNS":
@@ -13314,6 +13366,79 @@ def _evaluate_measures_once(
             certain_types=table_context.get("explicit_types", ()),
         )
 
+    def topn_skip(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """TOPNSKIP(n, skip, table, [expression, [order]]...) (Task 143, measured on the Facts grid).
+
+        Exactly n rows come back after the skip, whatever the ties; a tie keeps the table's row order; BLANK sorts below every
+        number (last in DESC, first in ASC). n rounds half away from zero, TRUE is 1, text is read as a number; BLANK, 0, or no
+        row left gives an empty table; a negative n keeps every row after the skip. skip: BLANK or a negative number is 0; a
+        text, a Boolean or a fraction gives an empty table."""
+        count_value = in_row_expression(lambda: evaluate(arguments[0]))
+        skip_value = in_row_expression(lambda: evaluate(arguments[1]))
+        context, rows = table_argument_value(arguments[2])
+        if count_value is None:
+            return context, []
+        count = (1 if count_value else 0) if isinstance(count_value, bool) else dax_typed.whole(count_value, "TOPNSKIP")
+        if skip_value is None:
+            skip = 0
+        elif isinstance(skip_value, (bool, str)):
+            return context, []
+        else:
+            skip_number = dax_typed.to_number(skip_value)
+            if skip_number.is_finite() and skip_number > 0 and skip_number != skip_number.to_integral_value():
+                return context, []
+            skip = max(0, dax_typed.whole(skip_value, "TOPNSKIP"))
+        if count == 0 or not rows or skip >= len(rows):
+            return context, []
+        keys_spec: list[tuple[Any, bool]] = []
+        index = 3
+        while index < len(arguments):
+            descending = True
+            expression = arguments[index]
+            index += 1
+            if index < len(arguments):
+                order = arguments[index]
+                if order[0] == "table" and str(order[1]).upper() in {"ASC", "DESC"}:
+                    descending = str(order[1]).upper() == "DESC"
+                    index += 1
+                elif order[0] in {"number", "boolean"}:
+                    if order[1] not in (0, 1):
+                        raise MeasureError("Unexpected value for the ORDER argument. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
+                    descending = order[1] == 0 or order[1] is False
+                    index += 1
+                else:
+                    raise MeasureError("Unexpected value for the ORDER argument in the TOPNSKIP function. Use 0/FALSE/DESC for descending or 1/TRUE/ASC for ascending.")
+            keys_spec.append((expression, descending))
+        ranked_rows = [row for _keys, row in topn_skip_order(context, rows, keys_spec)] if keys_spec else list(rows)
+        remaining = ranked_rows[skip:]
+        return context, remaining if count < 0 else remaining[:count]
+
+    def topn_skip_order(
+        context: dict[str, Any], rows: list[dict[str, Any]], keys_spec: list[tuple[Any, bool]]
+    ) -> list[tuple[list[Any], dict[str, Any]]]:
+        """Each row with its ORDER keys, sorted: a stable sort per key from the last to the first, so a tie keeps the table's row order."""
+        found: list[tuple[list[Any], dict[str, Any]]] = []
+        outer_reads_before = outer_row_reads[0]
+        for frame in iterate_rows(context, rows, "install"):
+            keys = [
+                in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
+                for expression, _descending in keys_spec
+            ]
+            found.append((keys, frame[1]))
+        if outer_row_reads[0] != outer_reads_before:
+            raise MeasureError("The tie order of a TOPNSKIP whose ORDER BY reads an enclosing row context is not modelled in the local engine.")
+        ranked = list(found)
+        for position in range(len(keys_spec) - 1, -1, -1):
+            try:
+                # BLANK is the lowest key: (0,) sorts before every (1, value); reverse=True keeps equal keys in the table's order
+                ranked.sort(
+                    key=lambda item, p=position: (0,) if item[0][p] is None else (1, column_order_key(item[0][p])),
+                    reverse=keys_spec[position][1],
+                )
+            except TypeError as error:
+                raise MeasureError("TOPNSKIP keys of different types (a number beside text) are not ordered by the local engine.") from error
+        return ranked
+
     def new_table_function(function: str, arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         if function in dax_sampling_fns.TABLE_ARITY:  # Task 91
             return dax_sampling_fns.table_rows(function, arguments, table_argument_value, evaluate)
@@ -13349,15 +13474,7 @@ def _evaluate_measures_once(
             positions = [int((step * i).quantize(Decimal(1), rounding=ROUND_HALF_UP)) for i in range(size)]
             return context, [ordered[position] for position in positions]
         if function == "TOPNSKIP":
-            count = dax_typed.whole(evaluate(arguments[0]), "TOPNSKIP")
-            skip = max(0, dax_typed.whole(evaluate(arguments[1]), "TOPNSKIP"))
-            context, rows = table_argument_value(arguments[2])
-            if count <= 0 or not rows:
-                return context, []
-            _ranked_context, ranked = table_function_value(
-                ("call", "TOPN", (("number", Decimal(count + skip)), arguments[2], *arguments[3:]))
-            )
-            return context, ranked[skip:]
+            return topn_skip(arguments)
         if function == "FILTERS":
             reference = arguments[0]
             if reference[0] != "reference":
@@ -13487,7 +13604,9 @@ def _evaluate_measures_once(
         for argument in arguments:
             if argument[0] == "omitted":
                 continue
-            if argument[0] == "table":
+            # Task 143: a bare model table (RANK(DENSE, Facts, ...)) is the relation, not a keyword; DENSE / SKIP and the like stay keywords
+            if argument[0] == "table" and not (relation is None and any(
+                    str(ctx.get("name", "")).casefold() == str(argument[1]).casefold() for ctx in contexts_by_id.values())):
                 keywords.append(str(argument[1]).upper())
             elif argument[0] == "call" and argument[1] == "ORDERBY":
                 order_spec = order_arguments_asc(argument[2])
@@ -13522,7 +13641,7 @@ def _evaluate_measures_once(
             raise MeasureRuntimeError(f"{function}'s Relation parameter may have duplicate rows. This is not allowed.")
         window = _Window()
         window.relation = relation
-        window.context, window.rows = table_argument_value(relation)
+        window.context, window.rows = window_relation_rows(relation)
         window.typed = [typed_row(window.context, row) for row in window.rows]
         window.keywords = keywords
         # Task 71 (live Power BI, rank audit grid t71a, Part B): RANK's blanks argument FIRST / LAST puts every BLANK ahead of / behind the other values
@@ -21881,10 +22000,12 @@ def _evaluate_measures_once(
                     raise
             if node[1] in {"+", "-"} and (left is None) != (right is None):
                 # live Power BI: MAX / MIN of an empty date column is a typed BLANK date, which counts as day zero in + and -
-                if left is None and (is_date_aggregate(node[2]) or _is_datetime_conversion(node[2])):  # Part E: CONVERT(BLANK(),DATETIME)+1 is a date too
+                if left is None and (is_date_aggregate(node[2]) or _is_datetime_conversion(node[2]) or _is_blank_date_shift(node[2])):  # Part E: CONVERT(BLANK(),DATETIME)+1 is a date too
                     left = dax_dates.DaxDateTime(Decimal(0))
-                elif right is None and node[1] == "+" and (is_date_aggregate(node[3]) or _is_datetime_conversion(node[3])):
+                elif right is None and node[1] == "+" and (is_date_aggregate(node[3]) or _is_datetime_conversion(node[3]) or _is_blank_date_shift(node[3])):
                     right = dax_dates.DaxDateTime(Decimal(0))
+                elif right is None and node[1] == "-" and _is_blank_date_shift(node[3]):
+                    raise dax_typed.refusal("A number minus an EDATE or EOMONTH of a BLANK date is not settled by the local engine.")
             for text_value in (left, right):
                 if isinstance(text_value, str) and node[1] in {"/", "^"} and dax_subnormal.as_subnormal_text(text_value) is not None:
                     continue  # Task 142: a subnormal text beside / or ^ is read as its double below
@@ -22051,6 +22172,8 @@ def _evaluate_measures_once(
         if node[0] == "table_call" or (node[0] == "call" and node[1] in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}):
             return single_value_of(table_argument_value(node))
         _, function, arguments = node
+        if function == "CURRENTGROUP" and not group_stack:  # Task 143: outside GROUPBY it is an error, not a crash (not caught by IFERROR)
+            raise MeasureError("CURRENTGROUP can only be used inside the aggregations of GROUPBY.")
         if function in dax_subnormal.HANDLED and dax_subnormal.holds_subnormal(arguments):  # Task 142: a subnormal literal argument follows the measured table
             outcome = dax_subnormal.call(lambda argument: evaluate(argument, row_context, allow_text=True), function, arguments)
             if isinstance(outcome, dax_subnormal.Rewrite):
