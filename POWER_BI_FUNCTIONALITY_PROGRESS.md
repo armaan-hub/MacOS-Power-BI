@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-11, after Iteration 230 / Task 141 dax-calcfilter-141, CALCULATE filter combinations: strict == filters, KEEPFILTERS beside plain filters, filters over whole-row FILTER sets project instead of refusing; 94 refusals answered, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and fixed, Opus shipped under the user's delegated approval):** pytest 4428 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537270 match, 3131 refused, 0 DIFF, 0 CRASH, locked 537250. Next: next DAX refusal family (LINEST perfect fit, SUBSTITUTEWITHINDEX order, STDEVX date noise, type tests of failing values)
+**Latest status (2026-11-12, after Iteration 231 / Task 142 dax-subnormal-142, subnormal doubles follow the measured Power BI table, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and fixed, Opus shipped under the user's delegated approval):** pytest 4453 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: the DAX wrong-answer hunt across all function groups, then Power Query (M) functions
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
