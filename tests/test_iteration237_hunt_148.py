@@ -76,6 +76,20 @@ class TestIteration237Hunt148(unittest.TestCase):
         self.assertEqual(Decimal(local("PV(0.05,2,CURRENCY(1E14))")), Decimal("-185941043083900.288"))
         self.assertEqual(Decimal(local("SYD(1000,CURRENCY(100.12345),3,1)")), Decimal("449.9383"))
 
+    def test_family_a_currency_overflow_is_an_error_iferror_catches(self):
+        # Power BI: a CURRENCY result beyond the Currency range is "The result of a conversion or arithmetic operation is either too large or too small."
+        self.assertIn("too large or too small", local("PV(0.05,2,CURRENCY(922337203685477))"))
+        self.assertEqual(local('IFERROR(PV(0.05,2,CURRENCY(922337203685477)),"E")'), "E")
+        self.assertEqual(local('IFERROR(FV(0.05,200,CURRENCY(100000000000)),"E")'), "E")
+        self.assertEqual(local('IFERROR(FV(0.05,2,CURRENCY(-500000000000000)),"E")'), "E")
+        self.assertEqual(local('IFERROR(PMT(0.0001,1,CURRENCY(922337203685477)),"E")'), "E")
+        self.assertEqual(local('IFERROR(SLN(CURRENCY(922337203685477),CURRENCY(-922337203685477),1),"E")'), "E")
+        self.assertEqual(local('IFERROR(PV(0.05,2,CURRENCY(922337203685477))&"z","E")'), "E")
+        self.assertEqual(local('IFERROR(PV(0.05,2,CURRENCY(922337203685477))+0,"E")'), "E")
+        # in range: kept
+        self.assertTrue(_same_15("PMT(0.0001,1,CURRENCY(900000000000000))", "-900090000000000.1024"))  # 15 digits; the app gives .0000 (PMT double differs in the 4th place)
+        self.assertEqual(Decimal(local("PV(0.05,2,CURRENCY(400000000000000))")), Decimal("-743764172335601.152"))
+
     # Family B: SIN, COS and TAN at an exact multiple of the double pi/4 take the engine's octant value (TAN's is a division by zero)
     def test_family_b_trig_at_exact_quarter_pi_multiples_follows_the_octant(self):
         self.assertTrue(_same_15("SIN(PI())", "-0.707106781186548"))

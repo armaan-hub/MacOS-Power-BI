@@ -20792,6 +20792,8 @@ def _evaluate_measures_once(
                 if isinstance(paid, Decimal) and paid.is_finite() and math.isfinite(float(paid) * 10000.0):
                     # the double result times 10000 in binary doubles, rounded half away from zero to a whole count of ten-thousandths (PBI, measured)
                     ticks = Decimal(float(paid) * 10000.0).to_integral_value(rounding=ROUND_HALF_UP)
+                    if abs(ticks) > 9223372036854775807:  # Task 148 (measured): beyond the Currency range is the ordinary error, which IFERROR catches
+                        raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")
                     return Decimal(0) if ticks == 0 else ticks.scaleb(-4)
                 return paid
             return dax_ext.call(function, values)
