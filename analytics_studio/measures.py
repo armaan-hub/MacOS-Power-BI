@@ -3619,6 +3619,21 @@ def _blank_cancels_failing_operand(node: Any) -> bool:
         return True
     return node[1] == "*" and _static_blank_node(right) and failing(left)
 
+def _currency_from_double(value: Decimal) -> Decimal:
+    """Task 151 family A (measured): a result that is a Currency is its double times 10000 in doubles, rounded half away from zero to whole ten-thousandths;
+    a count beyond the 64-bit range is the overflow error (IFERROR catches it)."""
+    scaled = float(value) * 10000.0
+    if not math.isfinite(scaled):
+        raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")
+    ticks = Decimal(scaled).to_integral_value(rounding=ROUND_HALF_UP)
+    if abs(ticks) > 9223372036854775807:
+        raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")
+    return Decimal(0) if ticks == 0 else ticks.scaleb(-4)
+
+
+_CURRENCY_MULTIPLE_CALLS = frozenset({"FLOOR", "CEILING", "MROUND", "ISO.CEILING"})  # Task 151 family A: a CURRENCY significance makes these Currency results
+
+
 def _currency_midpoint(answer: Decimal) -> Decimal:
     """Task 149: the midpoint of two Currency values is rounded to four places, ties toward +infinity (MEDIANX measured: -11.48145 is -11.4814, 11.48145 is 11.4815)."""
     return (answer + Decimal("0.00005")).quantize(Decimal("0.0001"), rounding=ROUND_FLOOR)
@@ -21960,6 +21975,7 @@ def _evaluate_measures_once(
         return left == right
 
     text_context_walked: set[int] = set()
+    currency_multiple_walked: set[int] = set()  # Task 151 family A: a multiple call being evaluated plainly (its Currency conversion is applied once, outside)
     text_context_products: set[int] = set()
 
     def evaluate(
@@ -22405,6 +22421,20 @@ def _evaluate_measures_once(
         if node[0] == "table_call" or (node[0] == "call" and node[1] in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}):
             return single_value_of(table_argument_value(node))
         _, function, arguments = node
+        if function in _CURRENCY_MULTIPLE_CALLS and len(arguments) == 2 and id(node) not in currency_multiple_walked and left_static_type(arguments[1], row_context) == "currency":
+            # Task 151 family A (measured): FLOOR, CEILING, MROUND and ISO.CEILING with a Currency significance give a Currency. The numerator must itself fit a Currency
+            # (its ten-thousandths count within 64 bits), and the multiple is converted from its double.
+            numerator_value = evaluate(arguments[0], row_context)
+            if isinstance(numerator_value, Decimal) and numerator_value.is_finite() and not dax_dates.is_date(numerator_value):
+                _currency_from_double(numerator_value)
+            currency_multiple_walked.add(id(node))
+            try:
+                multiple = evaluate(node, row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+            finally:
+                currency_multiple_walked.discard(id(node))
+            if isinstance(multiple, Decimal) and multiple.is_finite() and not dax_dates.is_date(multiple):
+                return _currency_from_double(multiple)
+            return multiple
         if function == "CURRENTGROUP" and not group_stack:  # Task 143: outside GROUPBY it is an error, not a crash (not caught by IFERROR)
             raise MeasureError("CURRENTGROUP can only be used inside the aggregations of GROUPBY.")
         if function in dax_subnormal.HANDLED and dax_subnormal.holds_subnormal(arguments):  # Task 142: a subnormal literal argument follows the measured table
@@ -23659,6 +23689,8 @@ def _evaluate_measures_once(
             if quotient.is_finite() and float(quotient) in (float('inf'), float('-inf')):
                 quotient = Decimal("Infinity") if quotient > 0 else Decimal("-Infinity")
             if quotient.is_finite() and currency_typed(arguments[0], row_context) and not currency_typed(arguments[1], row_context):
+                if abs(quotient) > _CURRENCY_LIMIT:  # Task 151 family B (measured): a Currency quotient beyond the range is the overflow error, as "/" is
+                    raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")
                 return quotient.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Currency / number is a Currency, like the operator (Task 150 family C: the row's columns type the operands)
             return quotient
         if function == "ABS":
