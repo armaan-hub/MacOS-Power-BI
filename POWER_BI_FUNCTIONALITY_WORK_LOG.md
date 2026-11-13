@@ -2502,3 +2502,9 @@ Fresh 13-group hunt (780 probes, seeds 4801+) plus targeted probes of CURRENCY f
 MOD of a CURRENCY by a non-integer double divisor is a double MOD; MOD of a CURRENCY pair rounds fmod to CURRENCY; MEDIANX of a CURRENCY body with an even count rounds the midpoint ties toward +infinity. Hunt: 926 exact, 16 refused, 5 wrong (known statistical last digits); real app 987 rows, 0 different.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4500 passed, 2 xdist-only flakes passed alone passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-13 — Iteration 239 (Task 150 dax-hunt-150: CURRENCY amount rule refined: double-typed amounts give double, more CURRENCY amount positions)
+
+A financial result is CURRENCY only when every other amount argument is CURRENCY, whole number or BLANK; PRICE, PRICEDISC, ODDFPRICE, ODDLPRICE, RECEIVED, ACCRINT, ACCRINTM, DOLLARDE and DOLLARFR gained CURRENCY amount positions; DIVIDE and CONVERT keep CURRENCY in MEDIANX. Hunt: 851 exact, 3 refused, 15 wrong (known limits); review probes 51/52; real app 875 rows, 0 different.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4534 passed, 2 xdist-only flakes passed alone passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
