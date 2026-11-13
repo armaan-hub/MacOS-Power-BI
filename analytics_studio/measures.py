@@ -8445,6 +8445,12 @@ _BOOLEAN_FUNCTIONS = {
 }
 
 
+# Task 148 family A (measured): these financial functions return a Currency when an amount argument at one of these positions is a Currency
+_CURRENCY_AMOUNT_POSITIONS = {
+    "PMT": (2, 3), "PV": (2, 3), "FV": (2, 3), "IPMT": (3, 4), "PPMT": (3, 4), "CUMIPMT": (2,), "CUMPRINC": (2,),
+    "SLN": (0, 1), "SYD": (0, 1), "DB": (0, 1), "DDB": (0, 1), "VDB": (0, 1), "ISPMT": (3,),
+}
+
 _STATIC_ALWAYS_DOUBLE = frozenset({
     "POWER", "SQRT", "EXP", "LN", "LOG", "LOG10", "PI",
     "COMBIN", "FACT", "AVERAGE", "VALUE",
@@ -8843,6 +8849,8 @@ def _static_numeric_type(
         return _static_numeric_type(args[0], columns, variables)  # live Power BI (Part A): SELECTEDVALUE of a column has the column's type, so a date stays a date and a number stays a number
     if fn == "XNPV" and len(args) == 4 and _static_numeric_type(args[1], columns, variables) == "currency":
         return "currency"
+    if fn in _CURRENCY_AMOUNT_POSITIONS and any(pos < len(args) and _static_numeric_type(args[pos], columns, variables) == "currency" for pos in _CURRENCY_AMOUNT_POSITIONS[fn]):
+        return "currency"  # Task 148 family A (measured): a Currency amount argument makes the result a Currency
     if fn in _STATIC_ALWAYS_DOUBLE:
         return "double"
     if fn in _STATIC_ALWAYS_INT64:
@@ -14267,6 +14275,12 @@ def _evaluate_measures_once(
         else:
             if source[0] == "call" and source[1] in {"DATE", "TIME", "TODAY", "NOW", "UTCTODAY", "UTCNOW", "MAX", "MIN", "EDATE", "EOMONTH"}:
                 raise MeasureError(f"{function} needs a column of dates, not a single date value.")
+            added = source
+            while added[0] == "call" and added[1] in {"FILTER", "CALCULATETABLE"} and added[2]:
+                added = added[2][0]
+            if added[0] == "call" and added[1] in {"SELECTCOLUMNS", "ADDCOLUMNS", "SUMMARIZE"}:
+                # Task 148 family D (measured): a date set over a column made by SELECTCOLUMNS / ADDCOLUMNS / SUMMARIZE is an error, even when the column is a plain date column
+                raise MeasureError(f"Function '{function}' cannot be used with columns added by ADDCOLUMNS or SUMMARIZE functions.")
             table_context, visible_rows = table_argument_value(source)
             if len(table_context["headers"]) != 1:
                 raise MeasureError(f"{function} needs a table with one column of dates.")
@@ -20771,10 +20785,14 @@ def _evaluate_measures_once(
                     except MeasureRuntimeError:
                         pass
         if function in dax_ext.ARITY and function not in {"ISBOOLEAN", "ISDATETIME"}:
-            if function == "ISPMT" and len(arguments) == 4 and static_type_of(arguments[3]) == "currency":
+            if function in _CURRENCY_AMOUNT_POSITIONS and any(pos < len(arguments) and static_type_of(arguments[pos]) == "currency" for pos in _CURRENCY_AMOUNT_POSITIONS[function]):
                 # Task 144 family N (measured): ISPMT with a CURRENCY principal returns a Currency, 4 decimal places (ISPMT(0.1,1,12,CURRENCY(1.23456)) is -0.1132)
+                # Task 148 family A (measured): the same for PMT, PV, FV, IPMT, PPMT, CUMIPMT, CUMPRINC, SLN, SYD, DB, DDB and VDB; a zero result is a plain 0
                 paid = dax_ext.call(function, values)
-                return paid.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP) if isinstance(paid, Decimal) and paid.is_finite() else paid
+                if isinstance(paid, Decimal) and paid.is_finite():
+                    rounded = paid.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+                    return Decimal(0) if rounded == 0 else rounded
+                return paid
             return dax_ext.call(function, values)
         if function == "CURRENCY" and isinstance(values[0], str):
             try:

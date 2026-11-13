@@ -345,9 +345,75 @@ _TRIG = {
 }
 
 
+_PI_QUARTER_EXACT = Decimal("3.14159265358979323846264338327950288419716939937510582097494459") / 4
+_SQRT_HALF_DOUBLE = math.sqrt(0.5)
+# Task 148 family B (measured): the engine reduces by whole multiples of the double pi/4 and picks the wrong octant for k mod 8 in {1, 3, 4, 6}
+_TRIG_OCTANT_SIN = (0.0, _SQRT_HALF_DOUBLE, 1.0, _SQRT_HALF_DOUBLE, 0.0, -_SQRT_HALF_DOUBLE, -1.0, -_SQRT_HALF_DOUBLE)
+_TRIG_OCTANT_COS = (1.0, _SQRT_HALF_DOUBLE, 0.0, -_SQRT_HALF_DOUBLE, -1.0, -_SQRT_HALF_DOUBLE, 0.0, _SQRT_HALF_DOUBLE)
+_TRIG_TINY_LIMIT_ARGUMENT = 10.0  # Task 148 family C: the tiny-result refusal applies below this |x|; larger arguments are the known limits (saved answers)
+_TRIG_NEAR_ULPS = 2  # Task 148 family B: a non-exact argument this many ulps from a multiple of pi/4 is refused
+
+
+def _exact_quarter_pi_octant(function: str, value: float) -> Decimal | None:
+    """Task 148 family B: SIN, COS, TAN at an exact double multiple k * (double pi/4), k != 0, from the engine's octant choice; None otherwise."""
+    magnitude = abs(value)
+    ratio = magnitude / (math.pi / 4)
+    if ratio == 0 or ratio != math.floor(ratio):
+        return None
+    k = int(ratio)
+    octant = (k + 1 if k % 8 in (1, 3, 4, 6) else k) % 8
+    sine, cosine = _TRIG_OCTANT_SIN[octant], _TRIG_OCTANT_COS[octant]
+    if function == "SIN":
+        return _double(sine if value >= 0 else -sine, function)
+    if function == "COS":
+        return _double(cosine, function)
+    if cosine == 0:
+        raise dax_typed._error(f"Division by zero has occurred when evaluating function '{function}'.")
+    return _double((sine / cosine) * (1 if value >= 0 else -1), function)
+
+
+def _near_quarter_pi(value: float) -> bool:
+    """Task 148 family B: a non-exact argument within _TRIG_NEAR_ULPS ulps of a nonzero whole multiple of pi/4 (the true pi/4)."""
+    if value == 0:
+        return False
+    with localcontext() as ctx:
+        ctx.prec = 80
+        exact = Decimal(value)
+        multiple = round(exact / _PI_QUARTER_EXACT)
+        return multiple != 0 and abs(exact - multiple * _PI_QUARTER_EXACT) <= _TRIG_NEAR_ULPS * Decimal(math.ulp(value))
+
+
+def trig_unreliable(function: str, value: float) -> bool:
+    """Task 148 families B and C (measured): True where the local engine has no Power BI answer for SIN, COS or TAN.
+
+    Family B: a non-exact argument within a couple of ulps of a nonzero multiple of pi/4 (SIN(4.71238898038469) is -0.707106781186548).
+    Family C: pi/4 < |x| < 10 and the tiny sine or cosine behind the result is below |x| * 1E-4, where Power BI's argument reduction
+    error (about |x| * 1E-16) shows in the digits (COS(1.5707963267949) is -3.5527136788005E-15 in Power BI).
+    """
+    if not math.isfinite(value) or value == 0:
+        return False
+    if _near_quarter_pi(value):
+        return True
+    if abs(value) <= math.pi / 4 or abs(value) >= _TRIG_TINY_LIMIT_ARGUMENT:
+        return False
+    limit = abs(value) * 1e-4
+    sine, cosine = math.sin(value), math.cos(value)
+    if function == "SIN":
+        return abs(sine) < limit
+    if function == "COS":
+        return abs(cosine) < limit
+    return abs(sine) < limit or abs(cosine) < limit  # TAN: a tiny sine or a tiny cosine
+
+
 def _trig(function: str, value: float) -> Decimal:
     if function in {"SIN", "COS", "TAN"} and abs(value) >= 134217728:
         raise _fail(function)
+    if function in {"SIN", "COS", "TAN"}:
+        exact_multiple = _exact_quarter_pi_octant(function, value)
+        if exact_multiple is not None:
+            return exact_multiple  # Task 148 family B: the engine's own octant value (or its division by zero)
+        if trig_unreliable(function, value):
+            raise dax_typed.refusal(f"{function} at an argument near a multiple of pi/4 or with a tiny result is not modelled by the local engine.")
     if function in {"ASINH", "ACOSH"}:  # both square the value, which overflows above about 1.34E154
         try:
             sq = value * value
