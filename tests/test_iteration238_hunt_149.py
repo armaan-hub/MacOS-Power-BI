@@ -48,6 +48,25 @@ class TestIteration238Hunt149(unittest.TestCase):
         self.assertEqual(Decimal(local("MEDIANX({1,2},CURRENCY(-0.0003)*[Value])")), Decimal("-0.0004"))
         self.assertEqual(local('MEDIANX({1,2},CURRENCY(-7.65432)*[Value])&"z"'), "-11.4814z")
 
+    def test_task149_review_currency_pairs_and_types(self):
+        # MOD of two CURRENCY values: the Double MOD converted back to a Currency (round half away of the double times 10000)
+        self.assertEqual(Decimal(local("MOD(CURRENCY(3.3),CURRENCY(1.1))")), Decimal("1.1"))
+        self.assertEqual(Decimal(local("MOD(CURRENCY(-7.65432),CURRENCY(0.7))")), Decimal("0.0457"))
+        # MOD of a CURRENCY over an integer divisor stays exact
+        self.assertEqual(Decimal(local("MOD(CURRENCY(-7.65432),2)")), Decimal("0.3457"))
+        self.assertEqual(Decimal(local("MOD(CURRENCY(7.65432),INT(3))")), Decimal("1.6543"))
+        self.assertEqual(Decimal(local("MOD(CURRENCY(10.12345),3)")), Decimal("1.1235"))
+        self.assertEqual(Decimal(local("MOD(CURRENCY(-10.12345),-3)")), Decimal("-1.1235"))
+        # a Double divisor: the Double MOD
+        self.assertTrue(_same_15("MOD(CURRENCY(10.12345),0.25)", "0.1235"))
+        self.assertTrue(_same_15("MOD(CURRENCY(-10.12345),0.25)", "0.1265"))
+        self.assertEqual(local('MOD(CURRENCY(-10.12345),0.25)&"z"'), "0.1265z")
+        # MEDIANX: a body that is a Double (CURRENCY + 0.5) is not rounded to four places
+        self.assertTrue(_same_15("MEDIANX({1,2},CURRENCY(0.0003)*[Value]+0.5)", "0.50045"))
+        # MEDIANX: ROUND of a CURRENCY stays a CURRENCY, so the midpoint is rounded
+        self.assertEqual(Decimal(local("MEDIANX({1,2},ROUND(CURRENCY(0.0003)*[Value],4))")), Decimal("0.0005"))
+        self.assertEqual(Decimal(local("MEDIANX({1,2},CURRENCY(0.0001)*[Value]+CURRENCY(0))")), Decimal("0.0002"))
+
     def test_family_b_averagex_keeps_half_away(self):
         self.assertEqual(Decimal(local("AVERAGEX({1,2},CURRENCY(-7.65432)*[Value])")), Decimal("-11.4815"))
 

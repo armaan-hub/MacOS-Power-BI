@@ -22636,7 +22636,7 @@ def _evaluate_measures_once(
                     # live Power BI (Task 43 review): when the body can build a Currency value, a statistic with more than four decimals is sometimes rounded to four
                     # (GEOMEANX over CURRENCY, STDEVX over a COALESCE or IF.EAGER holding one) and sometimes not (IF.EAGER(1,CURRENCY(x),2.5)); no structural rule separates them
                     raise MeasureError(f"{function} over a body that can build a Currency, with a result of more than four decimals, is not modelled by the local engine.")
-                if function == "MEDIANX" and len(values) % 2 == 0 and isinstance(answer, Decimal) and answer.is_finite() and iteration_rows and _builds_currency(arguments[1]) and static_type_of(arguments[1]) != "double":
+                if function == "MEDIANX" and len(values) % 2 == 0 and isinstance(answer, Decimal) and answer.is_finite() and iteration_rows and _builds_currency(arguments[1]) and left_static_type(arguments[1], frame) == "currency":
                     answer = _currency_midpoint(answer)  # Task 149: the median of two Currency values is a Currency, the midpoint rounded toward +infinity (measured)
                 return answer
             if text_extreme:  # the largest or smallest text, compared without regard to case
@@ -23719,6 +23719,18 @@ def _evaluate_measures_once(
                     if remainder_float != 0 and (remainder_float < 0) != (divisor_float < 0):
                         remainder_float += divisor_float
                     math_result = Decimal(0) if remainder_float == 0 else Decimal(remainder_float)
+                if (
+                    function == "MOD" and math_result is not None and values[0] is not None and values[1] is not None and values[1] != 0
+                    and values[0].is_finite() and values[1].is_finite()
+                    and left_static_type(arguments[0], row_context) == "currency" and left_static_type(arguments[1], row_context) == "currency"
+                ):
+                    # Task 149: MOD of two Currency values is the Double MOD, converted back to a Currency (round half away of the double times 10000)
+                    divisor_float = float(values[1])
+                    remainder_float = math.fmod(float(values[0]), divisor_float)
+                    if remainder_float != 0 and (remainder_float < 0) != (divisor_float < 0):
+                        remainder_float += divisor_float
+                    scaled = Decimal(remainder_float * 10000.0).quantize(Decimal(1), rounding=ROUND_HALF_UP)
+                    math_result = scaled / Decimal(10000)
                 return _double_rounding_result(function, math_result, "double" if function == "MOD" and mod_reads_double(arguments, row_context) else left_static_type(arguments[0], row_context))
             except _PowerFailure as failure:
                 _stamp_row_dependence(failure, arguments, variable_nodes.get, row_scans_model(row_context))
