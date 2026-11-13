@@ -3619,6 +3619,11 @@ def _blank_cancels_failing_operand(node: Any) -> bool:
         return True
     return node[1] == "*" and _static_blank_node(right) and failing(left)
 
+def _currency_midpoint(answer: Decimal) -> Decimal:
+    """Task 149: the midpoint of two Currency values is rounded to four places, ties toward +infinity (MEDIANX measured: -11.48145 is -11.4814, 11.48145 is 11.4815)."""
+    return (answer + Decimal("0.00005")).quantize(Decimal("0.0001"), rounding=ROUND_FLOOR)
+
+
 def _builds_currency(node: Any) -> bool:
     """Whether the expression calls CURRENCY outside a CONVERT (CONVERT(CURRENCY(x),DOUBLE) is a plain double)."""
     if not isinstance(node, tuple) or not node:
@@ -21159,6 +21164,11 @@ def _evaluate_measures_once(
             return _static_numeric_type(node, cols, scope)
         return static_type_of(node)
 
+    def mod_reads_double(node_args: list, row_context: Any = None) -> bool:
+        """Task 149: MOD is computed in Doubles when the dividend is a Double, or a CURRENCY over a Double (non-CURRENCY) divisor such as 0.7; a CURRENCY over an integer or a CURRENCY divisor stays CURRENCY (measured)."""
+        dividend_type = left_static_type(node_args[0], row_context)
+        return dividend_type == "double" or (dividend_type == "currency" and left_static_type(node_args[1], row_context) == "double")
+
     def plan_constant(node: tuple[Any, ...]) -> bool:
         """True when Power BI knows the value before scanning any row (tools/parity/dax_battery_evaluation_order.json).
 
@@ -22626,6 +22636,8 @@ def _evaluate_measures_once(
                     # live Power BI (Task 43 review): when the body can build a Currency value, a statistic with more than four decimals is sometimes rounded to four
                     # (GEOMEANX over CURRENCY, STDEVX over a COALESCE or IF.EAGER holding one) and sometimes not (IF.EAGER(1,CURRENCY(x),2.5)); no structural rule separates them
                     raise MeasureError(f"{function} over a body that can build a Currency, with a result of more than four decimals, is not modelled by the local engine.")
+                if function == "MEDIANX" and len(values) % 2 == 0 and isinstance(answer, Decimal) and answer.is_finite() and iteration_rows and _builds_currency(arguments[1]) and static_type_of(arguments[1]) != "double":
+                    answer = _currency_midpoint(answer)  # Task 149: the median of two Currency values is a Currency, the midpoint rounded toward +infinity (measured)
                 return answer
             if text_extreme:  # the largest or smallest text, compared without regard to case
                 if not values:
@@ -23687,7 +23699,7 @@ def _evaluate_measures_once(
                     values[0] = values[0] if band is not None else _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike (not a power band double, Task 55)
                 if function == "TRUNC" and len(values) == 2 and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
                     values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does
-                if function == "MOD" and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
+                if function == "MOD" and values[0] is not None and values[0].is_finite() and mod_reads_double(arguments, row_context):
                     values[0] = Decimal(float(values[0]))
                 if band is not None and function in {"FLOOR", "CEILING"}:  # Task 55: FLOOR/CEILING of a power band double, rounded as beyond 2^53 is
                     if band == 0 or (band < 0 and _has_power(arguments[0], variable_nodes.get)) or values[1] is None or not values[1].is_finite() or values[1] == 0:
@@ -23699,7 +23711,7 @@ def _evaluate_measures_once(
                         math_result = _odd_band_up(math_result)  # Task 55 fix
                 if (
                     function == "MOD" and math_result is not None and values[0] is not None and values[1] is not None
-                    and values[0].is_finite() and values[1].is_finite() and left_static_type(arguments[0], row_context) == "double"
+                    and values[0].is_finite() and values[1].is_finite() and mod_reads_double(arguments, row_context)
                 ):
                     # Task 23: MOD of a Double is computed in IEEE doubles (fmod), the divisor read as a double; the result takes the divisor's sign
                     divisor_float = float(values[1])
@@ -23707,7 +23719,7 @@ def _evaluate_measures_once(
                     if remainder_float != 0 and (remainder_float < 0) != (divisor_float < 0):
                         remainder_float += divisor_float
                     math_result = Decimal(0) if remainder_float == 0 else Decimal(remainder_float)
-                return _double_rounding_result(function, math_result, left_static_type(arguments[0], row_context))
+                return _double_rounding_result(function, math_result, "double" if function == "MOD" and mod_reads_double(arguments, row_context) else left_static_type(arguments[0], row_context))
             except _PowerFailure as failure:
                 _stamp_row_dependence(failure, arguments, variable_nodes.get, row_scans_model(row_context))
                 raise
