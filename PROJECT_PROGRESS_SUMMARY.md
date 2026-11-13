@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-13, after Iteration 238 / Task 149 dax-hunt-149, CURRENCY in MOD and MEDIANX now match Power BI, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4500 passed, 2 xdist-only flakes passed alone passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 150, fresh DAX hunts until 0 wrong, then M functions
+**Latest status (2026-11-13, after Iteration 239 / Task 150 dax-hunt-150, CURRENCY amount rule refined: double-typed amounts give double, more CURRENCY amount positions, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4534 passed, 2 xdist-only flakes passed alone passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 151, fresh DAX hunts until 0 wrong, then M functions
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
