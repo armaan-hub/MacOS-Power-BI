@@ -41,6 +41,8 @@ class TestIteration243Hunt154(unittest.TestCase):
         self.assertEqual(local('IFERROR(PERCENTILEX.EXC(Facts,BLANK(),0.5),"E")'), 'BLANK', 'IFERROR(PERCENTILEX.EXC(Facts,BLANK(),0.5),"E")')
         self.assertTrue(local('PERCENTILEX.EXC({"a"},[Value],0.5)').startswith('LOCAL-REJECT'), 'PERCENTILEX.EXC({"a"},[Value],0.5)')
 
+        self.assertTrue(local('PERCENTILEX.INC(Facts,BLANK(),1/0)').startswith('LOCAL-REJECT'), 'PERCENTILEX.INC(Facts,BLANK(),1/0)')
+        self.assertTrue(local('PERCENTILEX.EXC(Facts,BLANK(),1/0)').startswith('LOCAL-REJECT'), 'PERCENTILEX.EXC(Facts,BLANK(),1/0)')
 
 if __name__ == '__main__':
     unittest.main()

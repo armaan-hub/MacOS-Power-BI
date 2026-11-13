@@ -22616,7 +22616,7 @@ def _evaluate_measures_once(
                     if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                         # Task 154 (measured): k is checked against the rows iterated before the all-BLANK result; only a valid k gives BLANK
                         percentile_k = dax_typed.to_number(evaluate(arguments[2], row_context))
-                        if percentile_k.is_finite():
+                        if not percentile_k.is_nan():  # an infinite k is out of range, the same refusal as the value path; NaN has no order to check
                             dax_math.check_percentile_k(function, len(values), percentile_k)
                     return None  # live Power BI (Task 11 review): nothing but BLANK results is BLANK, the blank-as-zero rule is for a mix
                 double_dates = False  # Task 47 Part A: set when the date rows spread in double arithmetic
