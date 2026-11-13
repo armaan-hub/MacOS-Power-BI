@@ -79,6 +79,16 @@ class TestIteration239Hunt150(unittest.TestCase):
         self.assertEqual(local('(CURRENCY(0.0003)*CURRENCY(1.5))&"z"'), "0.00045z")
         self.assertTrue(_same_15("MEDIANX({1,2},IF(TRUE(),CURRENCY(0.0003)*[Value],0.5))", "0.00045"))
 
+    # Task 150 fix (measured): ISO.CEILING with its default significance is an Int64, so a Currency amount stays a Currency
+    def test_fix_iso_ceiling_default_significance_is_int64(self):
+        self.assertEqual(Decimal(local("PMT(0.05,2,CURRENCY(1.23456),ISO.CEILING(2.2))")), Decimal("-2.1274"))
+
+    # Task 150 fix (measured): a column read in a row takes the type of the ADDCOLUMNS / ROW column it names (Currency, Int64)
+    def test_fix_currency_column_in_addcolumns_and_row_is_currency(self):
+        self.assertEqual(Decimal(local('SUMX(ADDCOLUMNS(Facts,"c",CURRENCY(1.23456)),PMT(0.05,2,[c],1))')), Decimal("-6.9108"))
+        self.assertEqual(Decimal(local('SUMX(ROW("c",CURRENCY(1.23456),"n",2),PMT(0.05,2,[c],[n]))')), Decimal("-1.6396"))
+        self.assertEqual(Decimal(local('VAR t=ROW("c",CURRENCY(1.23456),"n",2) RETURN SUMX(t,PMT(0.05,2,[c],[n]))')), Decimal("-1.6396"))
+
 
 if __name__ == "__main__":
     unittest.main()

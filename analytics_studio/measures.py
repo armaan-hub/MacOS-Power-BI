@@ -8919,11 +8919,12 @@ def _static_numeric_type(
         if at in {"int64", "double", "currency"}:
             return at
         return {"bool": "int64", "text": "double", "datetime": "double"}.get(at or "")
-    if fn in {"FLOOR", "CEILING", "MROUND", "MOD"}:
-        if len(args) != 2:
+    if fn in {"FLOOR", "CEILING", "MROUND", "MOD", "ISO.CEILING"}:
+        if len(args) != 2 and not (fn == "ISO.CEILING" and len(args) == 1):
             return None
         lt = _static_numeric_type(args[0], columns, variables)
-        rt = _static_numeric_type(args[1], columns, variables)
+        # Task 150 (measured): an omitted ISO.CEILING significance is 1, a whole number, so ISO.CEILING(x) has the type of CEILING(x,1)
+        rt = "int64" if len(args) == 1 else _static_numeric_type(args[1], columns, variables)
         if fn == "MOD":
             if (lt, rt) == ("int64", "int64"):
                 return "int64"
@@ -20802,7 +20803,7 @@ def _evaluate_measures_once(
                     except MeasureRuntimeError:
                         pass
         if function in dax_ext.ARITY and function not in {"ISBOOLEAN", "ISDATETIME"}:
-            if function in _CURRENCY_AMOUNT_POSITIONS and _currency_amount_call(function, len(arguments), lambda pos: static_type_of(arguments[pos])):
+            if function in _CURRENCY_AMOUNT_POSITIONS and _currency_amount_call(function, len(arguments), lambda pos: _row_static_type(arguments[pos], row_context) if row_context is not None else static_type_of(arguments[pos])):  # Task 150: a column read in a row takes the type of that row's column (ADDCOLUMNS / ROW)
                 # Task 144 family N (measured): ISPMT with a CURRENCY principal returns a Currency, 4 decimal places (ISPMT(0.1,1,12,CURRENCY(1.23456)) is -0.1132)
                 # Task 148 family A (measured): the same for PMT, PV, FV, IPMT, PPMT, CUMIPMT, CUMPRINC, SLN, SYD, DB, DDB and VDB; a zero result is a plain 0
                 paid = dax_ext.call(function, values)
