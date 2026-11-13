@@ -2532,3 +2532,9 @@ MOD of double operands follows Power BI's fmod residue instead of snapping to ze
 PERCENTILEX.INC/EXC over all-BLANK values validate k (including infinite k) before returning BLANK, matching Power BI's range errors; empty tables stay BLANK. Spec 817/5/4.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4547 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-13 — Iteration 244 (Task 155 dax-hunt-155: CONVERT of text to INTEGER rounds half to even)
+
+CONVERT(text, INTEGER) rounds ties to even as Power BI does; numeric CONVERT keeps half away; one hand-written test expectation corrected to the measured Power BI answer. Spec 831/4/3.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4548 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
