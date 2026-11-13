@@ -2508,3 +2508,9 @@ MOD of a CURRENCY by a non-integer double divisor is a double MOD; MOD of a CURR
 A financial result is CURRENCY only when every other amount argument is CURRENCY, whole number or BLANK; PRICE, PRICEDISC, ODDFPRICE, ODDLPRICE, RECEIVED, ACCRINT, ACCRINTM, DOLLARDE and DOLLARFR gained CURRENCY amount positions; DIVIDE and CONVERT keep CURRENCY in MEDIANX. Hunt: 851 exact, 3 refused, 15 wrong (known limits); review probes 51/52; real app 875 rows, 0 different.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4534 passed, 2 xdist-only flakes passed alone passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-13 — Iteration 240 (Task 151 dax-hunt-151: CURRENCY significance in FLOOR/CEILING/MROUND/ISO.CEILING returns Currency (static type too); DIVIDE Currency overflow)
+
+FLOOR/CEILING/MROUND/ISO.CEILING with a CURRENCY significance return a Currency built from the double result with the overflow error; they are statically Currency for later arithmetic; DIVIDE Currency overflow. Spec 855/6/6, holdout 4/4, family C 61/1/0, review probes 24/24.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4540 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
