@@ -8951,6 +8951,8 @@ def _static_numeric_type(
             return None
         if lt not in {"int64", "double", "currency"} or rt not in {"int64", "double", "currency"}:
             return None
+        if rt == "currency":
+            return "currency"  # Task 151 family C (measured): a CURRENCY significance makes the call a Currency whatever the multiple's type
         if "currency" in (lt, rt):
             return "currency" if {lt, rt} <= {"currency", "int64"} else None
         return rt
