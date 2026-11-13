@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-13, after Iteration 237 / Task 148 dax-hunt-148, financial functions return CURRENCY for a CURRENCY amount, Power BI's trig at exact multiples of pi/4, tiny trig results refused, date sets over computed columns are errors, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4520 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 149, fresh DAX hunts until 0 wrong, then M functions
+**Latest status (2026-11-13, after Iteration 238 / Task 149 dax-hunt-149, CURRENCY in MOD and MEDIANX now match Power BI, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4500 passed, 2 xdist-only flakes passed alone passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 150, fresh DAX hunts until 0 wrong, then M functions
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
