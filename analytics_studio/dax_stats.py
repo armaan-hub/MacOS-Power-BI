@@ -610,6 +610,16 @@ def _t_df_one_cdf(x: float) -> float:
     return 0.5 + s if x >= 0 else 0.5 - s
 
 
+def _t_df_two_measured(x: float, v: float) -> bool:
+    """Task 152 family B (df 2, measured live): the form is used for |x| up to 0.5, as for df 1 (T.DIST(0.01,2,TRUE()) is 0.503535445520904)."""
+    return v == 2 and abs(x) <= 0.5
+
+
+def _t_df_two_a(x: float) -> float:
+    """Task 152 family B (df 2): A = sqrt(1 - 2 / (2 + x*x)) in double, in that order."""
+    return math.sqrt(1.0 - 2.0 / (2.0 + x * x))
+
+
 def _student(function: str, args: list[object]) -> Decimal:
     if function == "T.DIST":
         x = _number(args[0], function)
@@ -627,6 +637,9 @@ def _student(function: str, args: list[object]) -> Decimal:
             return _result(0.5, function)
         if _t_df_one_measured(x, v):
             return _result(_t_df_one_cdf(x), function)
+        if _t_df_two_measured(x, v):
+            a = _t_df_two_a(x)
+            return _result(0.5 + (0.5 * a if x >= 0 else -0.5 * a), function)
         return _result(_t_cdf(x, v), function)
     if function in {"T.DIST.2T", "T.DIST.RT"}:
         x = _number(args[0], function)
@@ -638,11 +651,15 @@ def _student(function: str, args: list[object]) -> Decimal:
                 return _result(0.5, function)
             if _t_df_one_measured(x, v):
                 return _result(1.0 - _t_df_one_cdf(x), function)
+            if _t_df_two_measured(x, v):
+                return _result(0.5 - (0.5 * _t_df_two_a(x) if x >= 0 else -0.5 * _t_df_two_a(x)), function)
             return _result(1.0 - _t_cdf(x, v) if x < 0 else _t_upper(x, v), function)
         if _t_at_centre(x, v):
             return _result(1.0, function)
         if _t_df_one_measured(x, v):
             return _result(1.0 - 2.0 * _t_df_one_tail(x) / math.pi, function)
+        if _t_df_two_measured(x, v):
+            return _result(1.0 - _t_df_two_a(x), function)
         return _result(min(1.0, 2.0 * _t_upper(x, v)), function)
     p = _number(args[0], function)
     v = _t_df(args[1], function)
