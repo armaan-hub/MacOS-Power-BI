@@ -41,7 +41,7 @@ import getpass
 from collections import Counter
 from dataclasses import dataclass
 from decimal import (
-    Decimal, DecimalException, ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP,
+    Decimal, DecimalException, ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_DOWN, ROUND_HALF_EVEN, ROUND_HALF_UP,
     localcontext,
 )
 from datetime import date, datetime, time, timedelta
@@ -1566,6 +1566,9 @@ def _time_set_call_is_new_form(function: str, arguments: list[tuple[Any, ...]]) 
     return bool(arguments) and arguments[0][0] in {"call", "table_call", "var"} and _TIME_SET_ARITY[function][0] <= len(arguments) <= _TIME_SET_ARITY[function][1]
 
 
+_SCALAR_DATE_FUNCTIONS = frozenset({"DATE", "TIME", "TODAY", "NOW", "DATEVALUE", "TIMEVALUE", "EDATE", "EOMONTH", "UTCTODAY", "UTCNOW"})
+
+
 def _validate_time_set_call(function: str, arguments: list[tuple[Any, ...]]) -> None:
     """Arity and argument kinds of the date-set functions (iteration 84); the date argument is a column or a table expression."""
     low, high = _TIME_SET_ARITY[function]
@@ -1573,6 +1576,9 @@ def _validate_time_set_call(function: str, arguments: list[tuple[Any, ...]]) -> 
         raise MeasureError(f"{function} has the wrong number of arguments.")
     if arguments[0][0] in {"number", "string", "boolean", "blank", "unary", "binary", "arithmetic"}:
         raise MeasureError(f"{function} needs a date column or a table expression of dates.")
+    if arguments[0][0] == "call" and arguments[0][1] in _SCALAR_DATE_FUNCTIONS:
+        # Task 147 family B (measured): a single date is not a column, and the query is refused when compiled, even in a branch never evaluated
+        raise MeasureError(f"The first argument to '{function}' must specify a column.")
     if function == "DATESBETWEEN" and arguments[0][0] != "reference":
         # live Power BI: "DatesBetween and DatesInPeriod functions are only accepting date column reference as a first argument"
         raise MeasureError("DATESBETWEEN accepts only a date column reference as its first argument.")
@@ -2404,6 +2410,43 @@ def _mixes_table_and_scalar_branches(function: str, arguments: tuple[Any, ...] |
         for b in branches
     ]
     return any(tables) and not all(tables)
+
+
+def _is_multi_column_table_node(node: Any) -> bool:
+    """Task 147 family B (measured): a table that surely has more than one column, in a scalar position. A bare table name is refused here
+    too (a one-column table is the only legal one, and it is refused rather than guessed)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "table":
+        return True
+    if node[0] == "tableconstructor":
+        return any(isinstance(item, tuple) and item and item[0] in {"tuple", "tableconstructor"} and len(item[1]) > 1 for item in node[1])
+    if node[0] != "call" or not node[2]:
+        return False
+    if node[1] == "ROW":
+        return len(node[2]) >= 4  # ROW("a",1,"b",2) has two columns
+    if node[1] in {"FILTER", "CALCULATETABLE", "DISTINCT", "VALUES", "ALL", "ADDCOLUMNS", "ALLNOBLANKROW"}:
+        return _is_multi_column_table_node(node[2][0])  # these keep every column of their table argument
+    if node[1] == "TOPN" and len(node[2]) >= 2:
+        return _is_multi_column_table_node(node[2][1])
+    return False
+
+
+def _is_table_shaped_node(node: Any) -> bool:
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] in {"table", "table_call", "tableconstructor"}:
+        return True
+    return node[0] == "call" and (node[1] in _TABLE_FUNCTION_ARITY or node[1] in {"CALCULATETABLE", "ROW"})
+
+
+def _multi_column_scalar_branch(function: str, arguments: tuple[Any, ...] | list[Any]) -> bool:
+    """IF / SWITCH / IFERROR with a multi-column table in a value position, next to a value that is not a table: Power BI refuses the
+    expression when it is compiled, even in a branch never evaluated (IF(TRUE(),1,ROW("a",1,"b",2)), IFERROR(1,{(1,2)}))."""
+    branches = list(arguments) if function == "IFERROR" else list(arguments[1:])
+    if not any(_is_multi_column_table_node(branch) for branch in branches):
+        return False
+    return any(not _is_table_shaped_node(branch) for branch in branches)
 
 
 def _linest_is_const_literal(node: Any) -> bool:
@@ -3710,6 +3753,19 @@ def _to_15_digits_half_up(value: float) -> float:
         return float((exact / quantum).to_integral_value(rounding=ROUND_HALF_UP) * quantum)
 
 
+def _to_15_digits_signed_tie_up(value: float) -> float:
+    """Task 147 family A (measured): a signed Double at 15 significant digits, an exact tie going toward +Infinity (a positive tie goes up as
+    in _to_15_digits_half_up; CEILING(-617673396283947,2) cuts the tie -308836698141973.5 to ...973, so the answer is -617673396283946)."""
+    if not math.isfinite(value) or value == 0:
+        return value
+    exact = Decimal(value)
+    with localcontext() as context:
+        context.prec = 60
+        quantum = Decimal(1).scaleb(exact.adjusted() - 14)
+        mode = ROUND_HALF_UP if exact > 0 else ROUND_HALF_DOWN
+        return float((exact / quantum).to_integral_value(rounding=mode) * quantum)
+
+
 def _round_to_multiple(
     function: str, number: Decimal | None, significance: Decimal | None, power_band: bool = False
 ) -> Decimal | None:
@@ -3763,6 +3819,15 @@ def _round_to_multiple(
             decimal_answer = (number / step).to_integral_value(rounding=ROUND_CEILING if function == "CEILING" else ROUND_FLOOR) * step
         return decimal_answer if float(decimal_answer) == doubled else Decimal(doubled)
     rounding = ROUND_CEILING if function == "CEILING" else ROUND_FLOOR
+    if significance == significance.to_integral_value() and abs(number) < 2 ** 53:
+        # Task 147 family A (measured): the signed quotient number/significance is a double rounded to 15 significant digits (keeping any fraction),
+        # then CEILING or FLOOR takes the whole, times the significance (CEILING(-1E15,-3) is -999999999999999, CEILING(-1E14,-3) is -100000000000002,
+        # FLOOR(300000000000002,3) is 300000000000003, CEILING(-123456789012345,-7) is -123456789012347)
+        quotient = float(number) / float(significance)
+        snapped = _to_15_digits_signed_tie_up(quotient)
+        with localcontext() as exact:
+            exact.prec = max(_EXACT_PRECISION, number.adjusted() + 30)
+            return Decimal(snapped).to_integral_value(rounding=rounding) * significance
     with localcontext() as exact:
         exact.prec = max(_EXACT_PRECISION, number.adjusted() + 30)  # keep every integer digit
         step = abs(significance)
@@ -7233,6 +7298,8 @@ class _Parser:
                 raise MeasureError("ROUND needs a numeric expression and a number of digits.")
             elif function in {"IF", "SWITCH"} and len(arguments) >= 2 and _mixes_table_and_scalar_branches(function, arguments):
                 raise MeasureError(f"{function} cannot return a table in one branch and a single value in another.")
+            elif function in {"IF", "IF.EAGER", "SWITCH", "IFERROR"} and _multi_column_scalar_branch(function, arguments):
+                raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")  # Task 147 family B: compile-time, IFERROR does not catch it
             elif function == "IF" and len(arguments) not in {2, 3}:
                 raise MeasureError(
                     "IF needs a condition, a value for true, and an optional value for false."
