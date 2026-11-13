@@ -3624,16 +3624,17 @@ def _currency_midpoint(answer: Decimal) -> Decimal:
     return (answer + Decimal("0.00005")).quantize(Decimal("0.0001"), rounding=ROUND_FLOOR)
 
 
-def _builds_currency(node: Any) -> bool:
-    """Whether the expression calls CURRENCY outside a CONVERT (CONVERT(CURRENCY(x),DOUBLE) is a plain double)."""
+def _builds_currency(node: Any, convert_currency: bool = False) -> bool:
+    """Whether the expression calls CURRENCY outside a CONVERT (CONVERT(CURRENCY(x),DOUBLE) is a plain double).
+    Task 150 family C (measured): with convert_currency, CONVERT(x,CURRENCY) also builds a Currency (the MEDIANX midpoint rule); other callers keep the old answer."""
     if not isinstance(node, tuple) or not node:
         return False
     if node[0] == "call" and node[1] == "CONVERT":
-        return False
+        return convert_currency and len(node[2]) == 2 and node[2][1][0] == "table" and str(node[2][1][1]).upper() == "CURRENCY"
     if node[0] == "call" and node[1] == "CURRENCY":
         return True
     children = node if isinstance(node[0], tuple) else node[1:]
-    return any(_builds_currency(child) for child in children if isinstance(child, tuple))
+    return any(_builds_currency(child, convert_currency) for child in children if isinstance(child, tuple))
 
 
 _XNPV_LAST_DAY = 2958465  # 9999-12-31: Power BI answers erratically for later dates (probed in iteration 91), so the local engine refuses them
@@ -8454,7 +8455,18 @@ _BOOLEAN_FUNCTIONS = {
 _CURRENCY_AMOUNT_POSITIONS = {
     "PMT": (2, 3), "PV": (2, 3), "FV": (2, 3), "IPMT": (3, 4), "PPMT": (3, 4), "CUMIPMT": (2,), "CUMPRINC": (2,),
     "SLN": (0, 1), "SYD": (0, 1), "DB": (0, 1), "DDB": (0, 1), "VDB": (0, 1), "ISPMT": (3,),
+    # Task 150 family B (measured): the redemption, investment and par amounts of the bond functions, and the fractional dollar of DOLLARDE / DOLLARFR
+    "PRICE": (4,), "PRICEDISC": (3,), "ODDFPRICE": (6,), "ODDLPRICE": (5,), "RECEIVED": (2,), "ACCRINT": (4,), "ACCRINTM": (3,),
+    "DOLLARDE": (0,), "DOLLARFR": (0,),
 }
+_CURRENCY_AMOUNT_OK = frozenset({"currency", "int64", "blank"})  # Task 150 family A (measured): the other amount arguments may only be Currency, whole-number or BLANK
+
+
+def _currency_amount_call(function: str, arg_count: int, static_at: Any) -> bool:
+    """Task 150 family A (measured): the result is a Currency when an amount argument is a Currency and every other amount argument is a Currency, whole number or BLANK; a double amount makes the plain double. static_at(position) is the static type of that argument."""
+    amounts = [static_at(position) for position in _CURRENCY_AMOUNT_POSITIONS.get(function, ()) if position < arg_count]
+    return any(kind == "currency" for kind in amounts) and all(kind in _CURRENCY_AMOUNT_OK for kind in amounts)
+
 
 _STATIC_ALWAYS_DOUBLE = frozenset({
     "POWER", "SQRT", "EXP", "LN", "LOG", "LOG10", "PI",
@@ -8854,7 +8866,7 @@ def _static_numeric_type(
         return _static_numeric_type(args[0], columns, variables)  # live Power BI (Part A): SELECTEDVALUE of a column has the column's type, so a date stays a date and a number stays a number
     if fn == "XNPV" and len(args) == 4 and _static_numeric_type(args[1], columns, variables) == "currency":
         return "currency"
-    if fn in _CURRENCY_AMOUNT_POSITIONS and any(pos < len(args) and _static_numeric_type(args[pos], columns, variables) == "currency" for pos in _CURRENCY_AMOUNT_POSITIONS[fn]):
+    if fn in _CURRENCY_AMOUNT_POSITIONS and _currency_amount_call(fn, len(args), lambda pos: _static_numeric_type(args[pos], columns, variables)):
         return "currency"  # Task 148 family A (measured): a Currency amount argument makes the result a Currency
     if fn in _STATIC_ALWAYS_DOUBLE:
         return "double"
@@ -20790,7 +20802,7 @@ def _evaluate_measures_once(
                     except MeasureRuntimeError:
                         pass
         if function in dax_ext.ARITY and function not in {"ISBOOLEAN", "ISDATETIME"}:
-            if function in _CURRENCY_AMOUNT_POSITIONS and any(pos < len(arguments) and static_type_of(arguments[pos]) == "currency" for pos in _CURRENCY_AMOUNT_POSITIONS[function]):
+            if function in _CURRENCY_AMOUNT_POSITIONS and _currency_amount_call(function, len(arguments), lambda pos: static_type_of(arguments[pos])):
                 # Task 144 family N (measured): ISPMT with a CURRENCY principal returns a Currency, 4 decimal places (ISPMT(0.1,1,12,CURRENCY(1.23456)) is -0.1132)
                 # Task 148 family A (measured): the same for PMT, PV, FV, IPMT, PPMT, CUMIPMT, CUMPRINC, SLN, SYD, DB, DDB and VDB; a zero result is a plain 0
                 paid = dax_ext.call(function, values)
@@ -22636,7 +22648,7 @@ def _evaluate_measures_once(
                     # live Power BI (Task 43 review): when the body can build a Currency value, a statistic with more than four decimals is sometimes rounded to four
                     # (GEOMEANX over CURRENCY, STDEVX over a COALESCE or IF.EAGER holding one) and sometimes not (IF.EAGER(1,CURRENCY(x),2.5)); no structural rule separates them
                     raise MeasureError(f"{function} over a body that can build a Currency, with a result of more than four decimals, is not modelled by the local engine.")
-                if function == "MEDIANX" and len(values) % 2 == 0 and isinstance(answer, Decimal) and answer.is_finite() and iteration_rows and _builds_currency(arguments[1]) and left_static_type(arguments[1], frame) == "currency":
+                if function == "MEDIANX" and len(values) % 2 == 0 and isinstance(answer, Decimal) and answer.is_finite() and iteration_rows and _builds_currency(arguments[1], True) and left_static_type(arguments[1], frame) == "currency":
                     answer = _currency_midpoint(answer)  # Task 149: the median of two Currency values is a Currency, the midpoint rounded toward +infinity (measured)
                 return answer
             if text_extreme:  # the largest or smallest text, compared without regard to case
@@ -23645,8 +23657,8 @@ def _evaluate_measures_once(
                         quotient = Decimal(as_double)
             if quotient.is_finite() and float(quotient) in (float('inf'), float('-inf')):
                 quotient = Decimal("Infinity") if quotient > 0 else Decimal("-Infinity")
-            if quotient.is_finite() and currency_typed(arguments[0]) and not currency_typed(arguments[1]):
-                return quotient.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Currency / number is a Currency, like the operator
+            if quotient.is_finite() and currency_typed(arguments[0], row_context) and not currency_typed(arguments[1], row_context):
+                return quotient.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Currency / number is a Currency, like the operator (Task 150 family C: the row's columns type the operands)
             return quotient
         if function == "ABS":
             value = evaluate(arguments[0], row_context)
