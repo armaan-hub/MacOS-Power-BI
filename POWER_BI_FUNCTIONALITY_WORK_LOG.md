@@ -2526,3 +2526,9 @@ Out-of-range datetime results built from TIME or NOW follow the DATE refusal ins
 MOD of double operands follows Power BI's fmod residue instead of snapping to zero; DATEDIFF with a date outside 100-9999 is a query error IFERROR cannot catch. Spec 809/5/3, review probes 31/1/0.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4546 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-13 — Iteration 243 (Task 154 dax-hunt-154: PERCENTILEX k range checked before the all-BLANK result)
+
+PERCENTILEX.INC/EXC over all-BLANK values validate k (including infinite k) before returning BLANK, matching Power BI's range errors; empty tables stay BLANK. Spec 817/5/4.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4547 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

@@ -574,6 +574,18 @@ def _blank_percentile(name: str, values: list[Decimal], blanks: list[bool], k: D
     return _interpolate(Decimal(0) if first is None else first, Decimal(0) if second is None else second, fraction)
 
 
+def check_percentile_k(name: str, count: int, k: Decimal) -> None:
+    """The k range of PERCENTILE.INC / PERCENTILE.EXC (and their X forms) over count data values; a refusal when k is out of range.
+    Task 154: Power BI checks k against the rows iterated even when every value is BLANK, so the check does not depend on the values."""
+    if name in {"PERCENTILE.INC", "PERCENTILEX.INC"}:
+        if not Decimal(0) <= k <= Decimal(1):
+            raise dax_typed.refusal("The percentile value should be in the range 0..1, inclusive.")
+    elif not Decimal(1) / (count + 1) <= k <= Decimal(count) / (count + 1):
+        raise dax_typed.refusal(
+            "The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values."
+        )
+
+
 def statistic(function: str, values: list[Decimal], k: Decimal | None = None, blanks: list[bool] | None = None, blank_first: bool = False) -> Decimal | None:
     """Statistic over the non-blank numbers of a column or iterator; None when there is nothing to compute.  blanks (MEDIANX / PERCENTILEX only)
     marks the values that were BLANK results, which are zero here; blank_first says the values are a column reference (BLANK before a zero)."""
@@ -672,13 +684,7 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None, bl
             if name == "PERCENTILE.EXC":
                 raise dax_typed.refusal("PERCENTILE.EXC with a BLANK percentile fails the query; the local engine does not return its IFERROR fallback.")
             raise _fail(function)
-        if name == "PERCENTILE.INC":
-            if not Decimal(0) <= k <= Decimal(1):
-                raise dax_typed.refusal("The percentile value should be in the range 0..1, inclusive.")
-        elif not Decimal(1) / (count + 1) <= k <= Decimal(count) / (count + 1):
-            raise dax_typed.refusal(
-                "The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values."
-            )
+        check_percentile_k(name, count, k)
         nans = [value for value in values if value.is_nan()]
         if nans:
             if len(nans) == count:

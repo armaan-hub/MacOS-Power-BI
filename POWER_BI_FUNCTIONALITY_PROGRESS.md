@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-13, after Iteration 242 / Task 153 dax-hunt-153, Double MOD by IEEE fmod with sign fix; DATEDIFF with an out-of-range date is an uncatchable query error, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4546 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 154, fresh DAX hunts until 0 wrong, then M functions
+**Latest status (2026-11-13, after Iteration 243 / Task 154 dax-hunt-154, PERCENTILEX k range checked before the all-BLANK result, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4547 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 155, fresh DAX hunts until 0 wrong, then M functions
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
