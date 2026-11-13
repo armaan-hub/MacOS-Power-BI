@@ -468,6 +468,13 @@ def _add_months(moment: datetime, months: int) -> datetime:
     return moment.replace(year=year, month=month, day=min(moment.day, monthrange(year, month)[1]))
 
 
+_DATE_RANGE_MESSAGES = ("A date is outside the supported range.", "A date before January 1, 100 is not supported.")
+
+
+class DateRangeFailure(Exception):
+    """A date outside the supported range that Power BI throws for the whole query (the caller makes it a hard error)."""
+
+
 def _datediff(start: datetime, end: datetime, interval: str) -> Decimal:
     if interval == "YEAR":
         return Decimal(end.year - start.year)
@@ -537,7 +544,15 @@ def date_function(function: str, args: list[object], interval: str | None = None
                 raise dax_typed.refusal(f"The local engine does not model the text '{text_arg}' as a time.")
             raise
     if function == "DATEDIFF":
-        start, end = _moment(args[0], ROUND_DOWN), _moment(args[1], ROUND_DOWN)
+        from .measures import MeasureRuntimeError  # late import: measures imports this module
+
+        try:
+            start, end = _moment(args[0], ROUND_DOWN), _moment(args[1], ROUND_DOWN)
+        except MeasureRuntimeError as error:
+            # Task 153 family B (measured): a number outside 100-01-01..9999-12-31 fails the whole query (IFERROR cannot catch it)
+            if any(value is not None and not isinstance(value, str) and str(error) in _DATE_RANGE_MESSAGES for value in args[:2]):
+                raise DateRangeFailure(str(error)) from error
+            raise
         if start is None or end is None:
             return None
         return _datediff(start, end, str(interval))

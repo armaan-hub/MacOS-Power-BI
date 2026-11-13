@@ -20795,7 +20795,10 @@ def _evaluate_measures_once(
                     raise _ConvertFailure(str(error)) from error
                 raise
         if function in _DATE_FUNCTIONS:
-            return dax_dates.date_function(function, values, interval)
+            try:
+                return dax_dates.date_function(function, values, interval)
+            except dax_dates.DateRangeFailure as failure:
+                raise _HardError(str(failure)) from failure  # Task 153 family B (measured): an out-of-range DATEDIFF date fails the query, IFERROR cannot catch it
         if function == "ISO.CEILING":
             for val in values:
                 if val is not None:
@@ -21198,6 +21201,12 @@ def _evaluate_measures_once(
         """Task 149: MOD is computed in Doubles when the dividend is a Double, or a CURRENCY over a Double (non-CURRENCY) divisor such as 0.7; a CURRENCY over an integer or a CURRENCY divisor stays CURRENCY (measured)."""
         dividend_type = left_static_type(node_args[0], row_context)
         return dividend_type == "double" or (dividend_type == "currency" and left_static_type(node_args[1], row_context) == "double")
+
+    def mod_reads_fmod(node_args: list, row_context: Any = None) -> bool:
+        """Task 153 family A (measured): MOD of an Int64, Double or date operand with a Double among the two is the IEEE fmod with the sign fix (MOD(1,0.1) is 0.1, MOD(-1,1E-5) is 8.18030539140313E-17); two Int64s stay exact and CURRENCY stays with the Currency rules."""
+        dividend_type = left_static_type(node_args[0], row_context)
+        divisor_type = left_static_type(node_args[1], row_context)
+        return "double" in (dividend_type, divisor_type) and dividend_type in {"int64", "double", "datetime"} and divisor_type in {"int64", "double"}
 
     def plan_constant(node: tuple[Any, ...]) -> bool:
         """True when Power BI knows the value before scanning any row (tools/parity/dax_battery_evaluation_order.json).
@@ -23746,7 +23755,7 @@ def _evaluate_measures_once(
                     values[0] = values[0] if band is not None else _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike (not a power band double, Task 55)
                 if function == "TRUNC" and len(values) == 2 and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
                     values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does
-                if function == "MOD" and values[0] is not None and values[0].is_finite() and mod_reads_double(arguments, row_context):
+                if function == "MOD" and values[0] is not None and values[0].is_finite() and (mod_reads_double(arguments, row_context) or mod_reads_fmod(arguments, row_context)):
                     values[0] = Decimal(float(values[0]))
                 if band is not None and function in {"FLOOR", "CEILING"}:  # Task 55: FLOOR/CEILING of a power band double, rounded as beyond 2^53 is
                     if band == 0 or (band < 0 and _has_power(arguments[0], variable_nodes.get)) or values[1] is None or not values[1].is_finite() or values[1] == 0:
@@ -23758,7 +23767,7 @@ def _evaluate_measures_once(
                         math_result = _odd_band_up(math_result)  # Task 55 fix
                 if (
                     function == "MOD" and math_result is not None and values[0] is not None and values[1] is not None
-                    and values[0].is_finite() and values[1].is_finite() and mod_reads_double(arguments, row_context)
+                    and values[0].is_finite() and values[1].is_finite() and (mod_reads_double(arguments, row_context) or mod_reads_fmod(arguments, row_context))
                 ):
                     # Task 23: MOD of a Double is computed in IEEE doubles (fmod), the divisor read as a double; the result takes the divisor's sign
                     divisor_float = float(values[1])
@@ -23778,7 +23787,7 @@ def _evaluate_measures_once(
                         remainder_float += divisor_float
                     scaled = Decimal(remainder_float * 10000.0).quantize(Decimal(1), rounding=ROUND_HALF_UP)
                     math_result = scaled / Decimal(10000)
-                return _double_rounding_result(function, math_result, "double" if function == "MOD" and mod_reads_double(arguments, row_context) else left_static_type(arguments[0], row_context))
+                return _double_rounding_result(function, math_result, "double" if function == "MOD" and (mod_reads_double(arguments, row_context) or mod_reads_fmod(arguments, row_context)) else left_static_type(arguments[0], row_context))
             except _PowerFailure as failure:
                 _stamp_row_dependence(failure, arguments, variable_nodes.get, row_scans_model(row_context))
                 raise
