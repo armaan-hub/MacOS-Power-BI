@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-13, after Iteration 240 / Task 151 dax-hunt-151, CURRENCY significance in FLOOR/CEILING/MROUND/ISO.CEILING returns Currency (static type too); DIVIDE Currency overflow, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4540 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 152, fresh DAX hunts until 0 wrong, then M functions
+**Latest status (2026-11-13, after Iteration 241 / Task 152 dax-hunt-152, Out-of-range TIME/NOW datetimes refused instead of crashing; T.DIST centre, df 1 and df 2 precision rules, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4544 passed, 1 skipped, 1 xfailed (3 xdist-only failures pass alone) passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 153, fresh DAX hunts until 0 wrong, then M functions
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

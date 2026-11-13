@@ -2514,3 +2514,9 @@ A financial result is CURRENCY only when every other amount argument is CURRENCY
 FLOOR/CEILING/MROUND/ISO.CEILING with a CURRENCY significance return a Currency built from the double result with the overflow error; they are statically Currency for later arithmetic; DIVIDE Currency overflow. Spec 855/6/6, holdout 4/4, family C 61/1/0, review probes 24/24.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4540 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-13 — Iteration 241 (Task 152 dax-hunt-152: Out-of-range TIME/NOW datetimes refused instead of crashing; T.DIST centre, df 1 and df 2 precision rules)
+
+Out-of-range datetime results built from TIME or NOW follow the DATE refusal instead of crashing; T.DIST/T.DIST.RT/T.DIST.2T match Power BI's centre rule and its df 1 and df 2 precision forms. Spec 896/20/3 (0 crash), review probes 33/6/0.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4544 passed, 1 skipped, 1 xfailed (3 xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
