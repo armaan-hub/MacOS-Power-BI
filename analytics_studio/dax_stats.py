@@ -585,6 +585,31 @@ def _t_df(value: object, function: str, cumulative: bool = True) -> float:
     return float(df)
 
 
+def _t_df_one_measured(x: float, v: float) -> bool:
+    """Task 152 family B: the df 1 form is measured only for |x| up to 0.5 (T.DIST(0.5,1,TRUE()) is 0.647583617650433). For a larger x the
+    existing computation stays: the form loses the last digit for x near 31 (T.DIST(SUM(Sales),0.5,1) in a saved answer) and the 2T form
+    loses the digits of a tail near 2E-7 (T.DIST.2T(ABS(DATE(9999,12,31)),1) in a saved answer)."""
+    return v == 1 and abs(x) <= 0.5
+
+
+def _t_at_centre(x: float, v: float) -> bool:
+    """Task 152 family B (measured live): when v / (v + x*x) is exactly 1.0 in double (T.DIST(1E-8,3,TRUE()) is 0.5, T.DIST.2T(1E-15,0.5) is
+    1), the cumulative value is the centre of the distribution, whatever the df."""
+    return v / (v + x * x) == 1.0
+
+
+def _t_df_one_tail(x: float) -> float:
+    """Task 152 family B: asin(sqrt(1 - b)) with b = 1 / (1 + x*x) in double, which is atan(|x|) for the df 1 distribution."""
+    b = 1.0 / (1.0 + x * x)
+    return math.asin(math.sqrt(1.0 - b))
+
+
+def _t_df_one_cdf(x: float) -> float:
+    """Task 152 family B (measured live, df 1; a df 0.5 is read as 1): the cumulative value 0.5 + sign(x) * asin(sqrt(1 - b)) / pi."""
+    s = _t_df_one_tail(x) / math.pi
+    return 0.5 + s if x >= 0 else 0.5 - s
+
+
 def _student(function: str, args: list[object]) -> Decimal:
     if function == "T.DIST":
         x = _number(args[0], function)
@@ -598,6 +623,10 @@ def _student(function: str, args: list[object]) -> Decimal:
             if v == 1 and math.isinf(math.pi * (1.0 + x * x)):
                 raise _divide(function)
             return _result(_t_pdf(x, v), function)
+        if _t_at_centre(x, v):
+            return _result(0.5, function)
+        if _t_df_one_measured(x, v):
+            return _result(_t_df_one_cdf(x), function)
         return _result(_t_cdf(x, v), function)
     if function in {"T.DIST.2T", "T.DIST.RT"}:
         x = _number(args[0], function)
@@ -605,7 +634,15 @@ def _student(function: str, args: list[object]) -> Decimal:
         if abs(x) > _SQRT_MAX or (function == "T.DIST.2T" and x < 0):
             raise _wrong(function)
         if function == "T.DIST.RT":
+            if _t_at_centre(x, v):
+                return _result(0.5, function)
+            if _t_df_one_measured(x, v):
+                return _result(1.0 - _t_df_one_cdf(x), function)
             return _result(1.0 - _t_cdf(x, v) if x < 0 else _t_upper(x, v), function)
+        if _t_at_centre(x, v):
+            return _result(1.0, function)
+        if _t_df_one_measured(x, v):
+            return _result(1.0 - 2.0 * _t_df_one_tail(x) / math.pi, function)
         return _result(min(1.0, 2.0 * _t_upper(x, v)), function)
     p = _number(args[0], function)
     v = _t_df(args[1], function)

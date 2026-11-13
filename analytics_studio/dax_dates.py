@@ -137,10 +137,13 @@ def to_datetime(serial: Decimal, rounding: str = ROUND_HALF_UP, shown: bool = Fa
         # such a value (shown=True) and its date parts are measured (Task 48).
         raise dax_typed._error("A time of day before December 30, 1899 is not supported in the local engine.")
     if serial < 0 and serial != serial.to_integral_value():
-        if serial < _measured_earliest() and not _whole_second(serial):
-            moment = _unmeasured_negative_moment(serial, rounding)
-        else:
-            moment = _negative_moment(serial, rounding)
+        try:
+            if serial < _measured_earliest() and not _whole_second(serial):
+                moment = _unmeasured_negative_moment(serial, rounding)
+            else:
+                moment = _negative_moment(serial, rounding)
+        except OverflowError as exc:  # Task 152 family A: TIME(13,5,0)-1E8 is outside the datetime range, refused as DATE(2020,1,1)-1E8 is
+            raise dax_typed._error("A date is outside the supported range.") from exc
         if moment.year < 100:
             raise dax_typed._error("A date before January 1, 100 is not supported.")  # Power BI clamps such results to 01/01/0100
         return moment
