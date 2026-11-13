@@ -181,7 +181,7 @@ class TestIteration164ConvertAudit64(unittest.TestCase):
         self.assertEqual(str(dax.local('ISEVEN("$12")')), "True")
         self.assertEqual(str(dax.local('CONVERT("$0.5",INTEGER)')), "0")
         self.assertEqual(str(dax.local('CONVERT("$1.5",INTEGER)')), "2")
-        self.assertEqual(str(dax.local('CONVERT("0.5",INTEGER)')), "1")  # a text without the currency sign still rounds half away
+        self.assertEqual(str(dax.local('CONVERT("0.5",INTEGER)')), "0")  # Power BI rounds a text half to even whether or not it has a currency sign (measured 2026-11-13, Task 155)
         self.assertEqual(str(dax.local("ISEVEN(0.5)")), "False")
 
 

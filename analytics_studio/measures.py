@@ -19550,7 +19550,7 @@ def _evaluate_measures_once(
                 raise MeasureRuntimeError("An argument of function 'CONVERT' has the wrong data type or the result is too large or too small.")
             if abs(number) >= _INT64_RANGE:
                 raise _ConvertFailure("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: an Integer beyond the 64-bit range is the error
-            rounded = number.quantize(Decimal(1), rounding=ROUND_HALF_EVEN if isinstance(value, str) and "$" in value else ROUND_HALF_UP)  # Task 74 (t74e): a currency text rounds half to even (CONVERT("$0.5",INTEGER) is 0)
+            rounded = number.quantize(Decimal(1), rounding=ROUND_HALF_EVEN if isinstance(value, str) else ROUND_HALF_UP)  # Task 74 (t74e) and Task 155 (family A): a text rounds half to even (CONVERT("$0.5",INTEGER) and CONVERT("2.5",INTEGER) are 0 and 2); a number rounds half away from zero
             if abs(rounded) >= _INT64_RANGE:
                 raise _ConvertFailure("The result of a conversion or arithmetic operation is either too large or too small.")
             return rounded
