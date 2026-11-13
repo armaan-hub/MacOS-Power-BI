@@ -20789,9 +20789,10 @@ def _evaluate_measures_once(
                 # Task 144 family N (measured): ISPMT with a CURRENCY principal returns a Currency, 4 decimal places (ISPMT(0.1,1,12,CURRENCY(1.23456)) is -0.1132)
                 # Task 148 family A (measured): the same for PMT, PV, FV, IPMT, PPMT, CUMIPMT, CUMPRINC, SLN, SYD, DB, DDB and VDB; a zero result is a plain 0
                 paid = dax_ext.call(function, values)
-                if isinstance(paid, Decimal) and paid.is_finite():
-                    rounded = paid.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
-                    return Decimal(0) if rounded == 0 else rounded
+                if isinstance(paid, Decimal) and paid.is_finite() and math.isfinite(float(paid) * 10000.0):
+                    # the double result times 10000 in binary doubles, rounded half away from zero to a whole count of ten-thousandths (PBI, measured)
+                    ticks = Decimal(float(paid) * 10000.0).to_integral_value(rounding=ROUND_HALF_UP)
+                    return Decimal(0) if ticks == 0 else ticks.scaleb(-4)
                 return paid
             return dax_ext.call(function, values)
         if function == "CURRENCY" and isinstance(values[0], str):

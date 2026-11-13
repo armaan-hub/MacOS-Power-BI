@@ -69,6 +69,13 @@ class TestIteration237Hunt148(unittest.TestCase):
         self.assertTrue(_same_15("PMT(0.05,2,CURRENCY(1.23456))*1", "-0.664"))
         self.assertTrue(_same_15("PMT(0.05,2,CURRENCY(-922337203685477))", "496037447347921.1008"))
 
+    def test_family_a_currency_conversion_is_double_times_10000(self):
+        # Power BI: n = round_half_away(double result * 10000.0), shown as n / 10000 with 4 places
+        self.assertEqual(local("PMT(0.05,2,CURRENCY(-922337203685477))"), "496037447347921.1008")
+        self.assertEqual(local("FV(0.1,3,CURRENCY(1E14))"), "-331000000000000.3584")
+        self.assertEqual(Decimal(local("PV(0.05,2,CURRENCY(1E14))")), Decimal("-185941043083900.288"))
+        self.assertEqual(Decimal(local("SYD(1000,CURRENCY(100.12345),3,1)")), Decimal("449.9383"))
+
     # Family B: SIN, COS and TAN at an exact multiple of the double pi/4 take the engine's octant value (TAN's is a division by zero)
     def test_family_b_trig_at_exact_quarter_pi_multiples_follows_the_octant(self):
         self.assertTrue(_same_15("SIN(PI())", "-0.707106781186548"))
