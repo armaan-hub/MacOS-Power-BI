@@ -9370,6 +9370,7 @@ def _summarize_width(args: list[Any], columns: dict[str, dict[str, str]], variab
     """Task 157 family D: the number of columns SUMMARIZE returns, from its group columns and its named extension columns; None when unknown or duplicated."""
     del columns, variables  # the group columns are read from their references; a table argument is not needed for the width
     names: list[str] = []
+    groups: list[tuple[str, str]] = []
     index = 1
     while index < len(args):
         arg = args[index]
@@ -9381,8 +9382,9 @@ def _summarize_width(args: list[Any], columns: dict[str, dict[str, str]], variab
             continue
         if not (isinstance(arg, tuple) and arg and arg[0] == "reference" and len(arg) > 2 and arg[2] is not None):
             return None  # a table argument or an unknown shape: the width is not known here
-        names.append(str(arg[2]).casefold())
+        groups.append((str(arg[1]).casefold(), str(arg[2]).casefold()))  # Task 158 family C: a repeated group column is counted once; Power BI itself errors on the repeat, so this only keeps a wrong-width CONTAINSROW refused
         index += 1
+    names = [column for _table, column in dict.fromkeys(groups)] + names  # the same column of the same table counts once; the same name from two tables stays a duplicate (unknown)
     if not names or len(set(names)) != len(names):
         return None
     return len(names)
