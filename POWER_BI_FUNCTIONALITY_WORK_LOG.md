@@ -2538,3 +2538,9 @@ PERCENTILEX.INC/EXC over all-BLANK values validate k (including infinite k) befo
 CONVERT(text, INTEGER) rounds ties to even as Power BI does; numeric CONVERT keeps half away; one hand-written test expectation corrected to the measured Power BI answer. Spec 831/4/3.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4548 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-14 — Iteration 245 (Task 156 dax-hunt-156: ISEVEN/ISODD of text round half to even, CONTAINSROW argument count is a query-level error, PRODUCTX over model rows uses exp-log)
+
+ISEVEN/ISODD of text arguments use half-to-even conversion; CONTAINSROW with the wrong number of values is a static query-level error when the width is known; PRODUCTX/PRODUCT over model rows computed as exp-log with sign tracked (constructors keep the plain double product); type tests of CONVERT(FORMAT(BLANK())) propagate the error. Spec 1631/12/7.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4559 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
