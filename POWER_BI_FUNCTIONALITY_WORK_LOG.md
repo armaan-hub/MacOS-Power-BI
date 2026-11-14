@@ -2568,3 +2568,9 @@ A repeated group column, a new column named like a group/base column or a Table[
 Task 160: CONTAINSROW, IN and multi-column table-constructor comparisons now refuse value pairs whose types Power BI cannot compare (Text vs Number/Currency/Boolean/Date, Boolean vs Number), measured in Power BI Desktop 2026-11-15. ALL / ALLSELECTED / ALLNOBLANKROW / VALUES / DISTINCT table shapes are typed so the check sees their columns.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4590 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-15 — Iteration 250 (Task 161 dax-hunt-161: financial function precision)
+
+Task 161: INTRATE and YIELDDISC divide the gain before the basis so they match Power BI's last digits; annuity, depreciation and dollar functions are typed as Doubles (Currency amounts still give Currency) so wrappers compute in IEEE doubles; ABS keeps every digit of a Double. Wrong rows in the 4388-row financial spec went from 132 to 122 with no row regressing. The YIELD / ODDFYIELD solver stop rule (Task 162) and the PPMT last digit stay known limits.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4598 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
