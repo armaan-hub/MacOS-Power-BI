@@ -9049,6 +9049,39 @@ def _mark_calls_under_concat(node: Any, name: str, found: set[int], variable_nod
             _mark_calls_under_concat(part, name, found, variable_nodes)
 
 
+def _double_as_decimal(number: float) -> Decimal:
+    """A Double as the Decimal the engine carries: its shortest text, a whole number shown without the point (6, not 6.0)."""
+    if number == 0 or not math.isfinite(number):
+        return Decimal(0) if number == 0 else Decimal(repr(number))
+    if number.is_integer() and abs(number) < 1e15:
+        return Decimal(int(number))
+    return Decimal(repr(number))
+
+
+def _double_product_over_rows(table: Any, values: list[Decimal], held: Callable[[str], Any], exact_answer: Decimal) -> Decimal:
+    """Task 156 (family C): a PRODUCTX / PRODUCT result that is a Double. Over a table constructor it is the plain double product in row order (Infinity past the
+    double range, 0 when a double underflows); over the rows of a model table (a stored scan, filtered or not) it is exp of the sum of the logarithms of the
+    magnitudes with the sign tracked (measured: PRODUCTX(CALCULATETABLE(Facts,..),Facts[Sales]*5) is 65625.0000000001). Any other row set keeps its answer."""
+    if any(value == 0 for value in values):
+        return Decimal(0)
+    if table[0] == "tableconstructor":
+        product = 1.0
+        for value in values:
+            product *= float(value)
+        return _double_as_decimal(product)
+    if _stored_scan(table, held) is True:
+        total = 0.0
+        for value in values:
+            total += math.log(abs(float(value)))
+        try:
+            magnitude = math.exp(total)
+        except OverflowError:
+            magnitude = math.inf
+        negative = sum(1 for value in values if value < 0) % 2
+        return _double_as_decimal(-magnitude if negative else magnitude)
+    return exact_answer
+
+
 def _product_depends_on_multiplication_order(values: list[Decimal]) -> bool:
     """True when the exact product, the double product in row order and the product by logarithms differ at 15 significant digits."""
     if len(values) < 2 or any(v == 0 for v in values):
@@ -9326,6 +9359,34 @@ def _reject_mismatched_strict_operands(left: tuple[Any, ...], right: tuple[Any, 
         )
 
 
+def _static_row_width(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> int | None:
+    """Task 156 (family B): the number of columns of a table expression when the model or the expression alone shows it; None when it cannot be known."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    kind = node[0]
+    if kind in {"table", "var"}:
+        known = _static_table_columns(node, columns, variables)
+        return len(known) if known else None
+    if kind == "tableconstructor":
+        return len(_static_table_columns(node, columns, variables)) or None
+    if kind != "call" or not node[2]:
+        return None
+    fn, args = node[1], node[2]
+    if fn in {"FILTER", "CALCULATETABLE", "KEEPFILTERS", "ALL", "ALLSELECTED"}:
+        return _static_row_width(args[0], columns, variables)
+    if fn == "TOPN" and len(args) >= 2:
+        return _static_row_width(args[1], columns, variables)
+    if fn == "SELECTCOLUMNS" and len(args) >= 3 and len(args) % 2 == 1 and all(name[0] == "string" for name in args[1::2]):
+        return len(args[1::2])
+    if fn == "ADDCOLUMNS" and len(args) >= 3 and len(args) % 2 == 0 and all(name[0] == "string" for name in args[1::2]):
+        base = _static_table_columns(args[0], columns, variables)
+        added = {str(name[1]).casefold() for name in args[1::2]}
+        if not base or added & set(base):
+            return None
+        return len(base) + len(added)
+    return None
+
+
 def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None] | None = None, *, unevaluated: bool = False) -> None:
     variables = {} if variables is None else variables
     if not isinstance(node, tuple) or not node:
@@ -9388,6 +9449,10 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                         f"DAX comparison operations do not support comparing values of type {_type_display(left_t)} with values of type {_type_display(right_t)}. "
                         "Consider using the VALUE or FORMAT function to convert one of the values."
                     )
+    if node[0] == "call" and node[1] == "CONTAINSROW" and len(node[2]) >= 2 and columns:
+        width = _static_row_width(node[2][0], columns, variables)  # Task 156 (family B): a wrong number of values is a query-level error, IFERROR and an untaken IF branch do not catch it
+        if width is not None and len(node[2]) - 1 != width:
+            raise MeasureError("The number of arguments is invalid. Function CONTAINSROW must have a value for each column in the table expression.")
     if node[0] == "call" and node[1] in {"MAX", "MIN"} and len(node[2]) == 2:
         kinds = {_static_type(argument, columns, variables) for argument in node[2]}
         if "boolean" in kinds:
@@ -19617,8 +19682,8 @@ def _evaluate_measures_once(
             return not isempty_rows
         if function == "CONTAINSROW":
             context, rows = in_row_expression(lambda: table_argument_value(arguments[0]))
-            if len(arguments) - 1 != len(context["headers"]):
-                raise MeasureRuntimeError("The number of arguments is invalid. Function CONTAINSROW must have a value for each column in the table expression.")
+            if len(arguments) - 1 != len(context["headers"]):  # Task 156 (family B): a width the static check could not see is refused, not guessed as a catchable error
+                raise dax_typed.refusal("The number of arguments is invalid. Function CONTAINSROW must have a value for each column in the table expression (the column count is not known statically).")
             wanted_values = in_row_expression(lambda: [evaluate(argument, row_context, allow_text=True) for argument in arguments[1:]])
             return any(
                 all(
@@ -20227,6 +20292,10 @@ def _evaluate_measures_once(
         (never on the saved ones): the static type answers only for the shape families below; a failing value that changes kind under IF /
         SWITCH shows its error; a wrapper or a shape that was not measured is refused.  Returns "error" (the failure shows), "refuse" (not
         settled by the rows), or None (the static type answers).  ISBLANK is never changed."""
+        if function != "ISBLANK" and isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() == "CONVERT" and len(node[2]) == 2:
+            text = node[2][0]
+            if isinstance(text, tuple) and text[:2] == ("call", "FORMAT") and text[2] and text[2][0] == ("blank",):
+                return "error"  # Task 156 (family D, measured): FORMAT(BLANK(), ..) is a run-time "" that CONVERT(..., DOUBLE) fails on, so a type test of it shows the error; the static type of the failing CONVERT would answer False (a literal "" does, measured)
         family = task64_family(function, node, row_context)
         if family == "static":
             return None
@@ -22682,6 +22751,10 @@ def _evaluate_measures_once(
                     if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and "percentile value should be" in str(error):
                         raise _HardError(str(error)) from error  # live Power BI (Task 39 review): an out-of-range PERCENTILEX is thrown, IFERROR does not catch it
                     raise
+                if function == "PRODUCTX" and not double_dates and not product_has_dates and values and isinstance(answer, Decimal) and all(
+                    isinstance(value, Decimal) and value.is_finite() for value in values
+                ):
+                    answer = _double_product_over_rows(arguments[0], values, variable_nodes.get, answer)  # Task 156 (family C): a product is a Double
                 if blank_rule and arguments[1][0] != "reference" and (answer is None or answer == 0):
                     # live Power BI (Task 13 review): BLANK where blank-as-zero gives 0; the BLANK rule (Task 79) is measured over column references only
                     raise MeasureError(f"{function} landing on a BLANK row is not modelled by the local engine.")
