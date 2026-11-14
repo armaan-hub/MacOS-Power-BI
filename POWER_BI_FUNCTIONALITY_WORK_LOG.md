@@ -2550,3 +2550,9 @@ ISEVEN/ISODD of text arguments use half-to-even conversion; CONTAINSROW with the
 QUOTIENT truncates the double quotient; TRUNC pre-rounds to 15 significant digits; BETA.INV refuses tiny standardized results in the solver's divergent region; CONTAINSROW width is known statically for VALUES/DISTINCT/ALL/SUMMARIZE/ADDCOLUMNS; type tests of CONVERT of FORMAT(BLANK())&text propagate the error. Spec 2424/29/9.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4569 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-14 — Iteration 247 (Task 158 dax-hunt-158: SUMMARIZE width counts a repeated group column once; SIN/COS/TAN beyond 2*pi and EXP of negatives stay known limits)
+
+Haiku 5.5 coded family C (SUMMARIZE static width dedupes repeated group columns, keyed on table and column); families A (trig refusal beyond 2*pi) and B (EXP of negatives) were reverted because they broke locked answers. Sonnet 5.5 reviewed, keyed the dedupe on (table, column), and probed 42 fresh CONTAINSROW/SUMMARIZE shapes against Power BI: 16 still wrong, all wrong before (main 30). Spec: exact 3190, refused 41, wrong 66 (known limits).
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4571 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
