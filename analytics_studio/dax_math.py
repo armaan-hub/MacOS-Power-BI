@@ -213,8 +213,8 @@ def math_function(function: str, args: list[object]) -> object:
         if dax_typed.is_int64_form(number) and 2 ** 53 <= abs(number) <= dax_typed._INT64_LIMIT:
             number = Decimal(float(number))  # an Int64 from 2^53 up reads as its Double, always even: ISEVEN(9223372036854775807), ISEVEN(-9223372036854775807)
             # and ISEVEN of the wrapped -2^63 are True (measured)
-        currency_text = isinstance(args[0], str) and "$" in args[0]  # Task 74 (t74d, t74e): a currency text goes to the whole number half to even (ISEVEN("$12.5") is True, ISEVEN("$0.5") True)
-        remainder = int(number.quantize(Decimal(1), rounding=ROUND_HALF_EVEN if currency_text else ROUND_HALF_UP)) % 2  # to the nearest whole number first: ISEVEN(2.5) is False, ISEVEN(TIME(6,0,0)) True (live Power BI)
+        text_argument = isinstance(args[0], str)  # Task 74 (t74d, t74e) and Task 156 (family A): a text goes to the whole number half to even (ISEVEN("$12.5") True, ISEVEN("2.5") True, ISODD("2.5") False); a number rounds half away from zero
+        remainder = int(number.quantize(Decimal(1), rounding=ROUND_HALF_EVEN if text_argument else ROUND_HALF_UP)) % 2  # to the nearest whole number first: ISEVEN(2.5) is False, ISEVEN(TIME(6,0,0)) True (live Power BI)
         return (remainder == 0) if function == "ISEVEN" else (remainder != 0)
     if args[0] is None and function in {"EVEN", "ODD"}:
         return Decimal(0) if function == "EVEN" else Decimal(1)
