@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-14, after Iteration 247 / Task 158 dax-hunt-158, SUMMARIZE width counts a repeated group column once; SIN/COS/TAN beyond 2*pi and EXP of negatives stay known limits, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4571 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 159, SUMMARIZE/GROUPBY/ADDCOLUMNS duplicate column names as query-level errors, then fresh DAX hunts until 0 wrong, then M functions
+**Latest status (2026-11-14, after Iteration 248 / Task 159 dax-hunt-159, Duplicate column names in SUMMARIZE / SUMMARIZECOLUMNS / GROUPBY / ADDCOLUMNS / SELECTCOLUMNS are query-level errors, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4581 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 160: CONTAINSROW / IN value-type mismatch is a query-level error
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
