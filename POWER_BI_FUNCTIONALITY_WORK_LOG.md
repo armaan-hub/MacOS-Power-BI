@@ -2544,3 +2544,9 @@ CONVERT(text, INTEGER) rounds ties to even as Power BI does; numeric CONVERT kee
 ISEVEN/ISODD of text arguments use half-to-even conversion; CONTAINSROW with the wrong number of values is a static query-level error when the width is known; PRODUCTX/PRODUCT over model rows computed as exp-log with sign tracked (constructors keep the plain double product); type tests of CONVERT(FORMAT(BLANK())) propagate the error. Spec 1631/12/7.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4559 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-14 — Iteration 246 (Task 157 dax-hunt-157: QUOTIENT uses double division, TRUNC rounds to 15 digits first, BETA.INV tiny results refuse, CONTAINSROW static widths)
+
+QUOTIENT truncates the double quotient; TRUNC pre-rounds to 15 significant digits; BETA.INV refuses tiny standardized results in the solver's divergent region; CONTAINSROW width is known statically for VALUES/DISTINCT/ALL/SUMMARIZE/ADDCOLUMNS; type tests of CONVERT of FORMAT(BLANK())&text propagate the error. Spec 2424/29/9.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4569 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
