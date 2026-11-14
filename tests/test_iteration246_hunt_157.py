@@ -107,8 +107,10 @@ class TestIteration246Hunt157(unittest.TestCase):
         self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(VALUES(Facts[Region]),"East","x"))').startswith("LOCAL-REJECT"))
         self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(DISTINCT(Facts[Region]),"East","x"))').startswith("LOCAL-REJECT"))
         self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(VALUES(Facts),"East","x"))').startswith("LOCAL-REJECT"))
-        self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(ALL(Facts[Region],Facts[Sales]),"East","x"))') == "1")
-        self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(SUMMARIZE(Facts,Facts[Region],"n",COUNTROWS(Facts)),"East","x"))') == "1")
+        # Task 160: live Power BI (measured 2026-11-15) rejects this query: "Function 'CONTAINSROW' does not support comparing values of type Number with values of type Text." IFERROR does not catch it.
+        self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(ALL(Facts[Region],Facts[Sales]),"East","x"))').startswith("LOCAL-REJECT"))
+        # Task 160: live Power BI (measured by Sonnet, 2026-11-14) rejects this query: "Function 'CONTAINSROW' does not support comparing values of type Integer with values of type Text." IFERROR does not catch it.
+        self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(SUMMARIZE(Facts,Facts[Region],"n",COUNTROWS(Facts)),"East","x"))').startswith("LOCAL-REJECT"))
         self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(SUMMARIZE(Facts,Facts[Region],"n",COUNTROWS(Facts)),"East"))').startswith("LOCAL-REJECT"))
         self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(FILTER(Facts,TRUE()),"East","x"))').startswith("LOCAL-REJECT"))
         self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(SELECTCOLUMNS(Facts,"a",Facts[Region]),"East","x"))').startswith("LOCAL-REJECT"))
@@ -116,8 +118,10 @@ class TestIteration246Hunt157(unittest.TestCase):
 
     def test_family_d_matching_width_kept(self):
         self.assertEqual(local('IF(TRUE(),1,CONTAINSROW(VALUES(Facts[Region]),"East"))'), "1")
-        self.assertEqual(local('IF(TRUE(),1,CONTAINSROW(ADDCOLUMNS(Facts,"a",1),1,2,3,4,5))'), "1")
-        self.assertEqual(local('IF(TRUE(),1,CONTAINSROW(ADDCOLUMNS(Facts,"a",1,"b",2),1,2,3,4,5,6))'), "1")
+        # Task 160: live Power BI (measured 2026-11-15) rejects this query: "Function 'CONTAINSROW' does not support comparing values of type Text with values of type Integer." (first column of Facts is Text); IFERROR does not catch it.
+        self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(ADDCOLUMNS(Facts,"a",1),1,2,3,4,5))').startswith("LOCAL-REJECT"))
+        # Task 160: same first-column Text vs Integer mismatch as the 2026-11-15 measurement above (this width-6 variant itself was not measured separately).
+        self.assertTrue(local('IF(TRUE(),1,CONTAINSROW(ADDCOLUMNS(Facts,"a",1,"b",2),1,2,3,4,5,6))').startswith("LOCAL-REJECT"))
 
     # Family E: a type test of CONVERT of a & join of FORMAT(BLANK(),..) and text shows the error
     def test_family_e_convert_format_blank_concatenation(self):

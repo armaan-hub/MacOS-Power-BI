@@ -2562,3 +2562,9 @@ Haiku 5.5 coded family C (SUMMARIZE static width dedupes repeated group columns,
 A repeated group column, a new column named like a group/base column or a Table[Column] spelling, two new columns with the same name, and an empty new name are now static query-level errors as in Power BI (IFERROR does not catch them). GROUPBY same-name new columns stay refused. Spec 91 -> 67 wrong (known limits + CONTAINSROW type, Task 160).
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4581 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-15 — Iteration 249 (Task 160 dax-hunt-160: CONTAINSROW / IN value-type mismatch is a query-level error)
+
+Task 160: CONTAINSROW, IN and multi-column table-constructor comparisons now refuse value pairs whose types Power BI cannot compare (Text vs Number/Currency/Boolean/Date, Boolean vs Number), measured in Power BI Desktop 2026-11-15. ALL / ALLSELECTED / ALLNOBLANKROW / VALUES / DISTINCT table shapes are typed so the check sees their columns.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4590 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
