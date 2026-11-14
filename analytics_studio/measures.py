@@ -8592,6 +8592,9 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
     if kind == "table":
         return dict(columns.get(str(node[1]).casefold(), {}))
     if kind == "table_call":
+        arg = node[2]
+        if node[1] in {"VALUES", "DISTINCT"} and isinstance(arg, tuple) and len(arg) > 2 and arg[0] == "reference" and arg[2] is not None:
+            return {str(arg[2]).casefold(): columns.get((arg[1] or "").casefold(), {}).get(str(arg[2]).casefold(), "")}  # Task 160: VALUES(Table[Column]) is one column, not the whole table
         return _static_table_columns(node[2], columns, variables)
     if kind == "reference":
         return dict(columns.get((node[1] or "").casefold(), {}))
@@ -8687,6 +8690,11 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
             else:
                 i += 1
         return result
+    if fn in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"} and args and all(isinstance(arg, tuple) and arg and arg[0] == "reference" and len(arg) > 2 and arg[2] is not None for arg in args):
+        typed: dict[str, str] = {}  # Task 160: ALL(col1, col2, ..) is one column for each argument, not the whole table
+        for arg in args:
+            typed[str(arg[2]).casefold()] = columns.get((arg[1] or "").casefold(), {}).get(str(arg[2]).casefold(), "")
+        return typed if len(typed) == len(args) else {}
     if fn in {"FILTER", "CALCULATETABLE", "KEEPFILTERS", "ALL", "ALLSELECTED"} and args:
         return _static_table_columns(args[0], columns, variables)
     if fn == "TOPN" and len(args) >= 2:
@@ -9409,7 +9417,7 @@ def _static_row_width(node: Any, columns: dict[str, dict[str, str]], variables: 
     if kind != "call" or not node[2]:
         return None
     fn, args = node[1], node[2]
-    if fn in {"ALL", "ALLSELECTED"} and all(isinstance(arg, tuple) and arg and arg[0] == "reference" and arg[2] is not None for arg in args):
+    if fn in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"} and all(isinstance(arg, tuple) and arg and arg[0] == "reference" and arg[2] is not None for arg in args):
         return len(args)  # Task 157 family D: ALL(col1, col2, ..) is one column for each argument
     if fn in {"VALUES", "DISTINCT"} and len(args) == 1:  # Task 157 family D: VALUES(col) is one column; VALUES(table) is the table's width
         return _static_arg_width(args[0], columns, variables)
@@ -9599,6 +9607,57 @@ def _reject_duplicate_column_names(node: tuple[Any, ...], columns: dict[str, dic
             seen_names.add(name.casefold())
 
 
+_COMPARABLE_CLASS_BY_TYPE = {
+    "text": "text", "string": "text",
+    "bool": "logical", "boolean": "logical",
+    "int64": "numeric", "integer": "numeric", "int": "numeric", "whole_number": "numeric", "number": "numeric",
+    "double": "numeric", "decimal": "numeric", "decimal_number": "numeric", "fixed_decimal": "numeric", "currency": "numeric",
+    "datetime": "numeric", "date": "numeric",  # Integer, Number, Currency and Date compare with each other (Task 160, live Power BI)
+}
+_COMPARABLE_CLASS_DISPLAY = {"text": "Text", "logical": "True/False", "numeric": "Number"}
+
+
+def _row_value_class(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> str | None:
+    """Task 160: the comparison class of a value that CONTAINSROW or IN compares with a column (text, logical or numeric); None when the type is not certain (BLANK, a variant, a table)."""
+    if not isinstance(node, tuple) or not node or node[0] in {"tuple", "tableconstructor"}:
+        return None
+    return _COMPARABLE_CLASS_BY_TYPE.get(str(_static_numeric_type(node, columns, variables) or "").casefold())
+
+
+def _row_column_classes(table: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> list[str | None] | None:
+    """Task 160: the comparison class of each column of a table expression, in column order; None when the table or its width is not known."""
+    if not isinstance(table, tuple) or not table:
+        return None
+    single = None
+    if table[0] == "table_call" and len(table) == 3 and table[1] in {"VALUES", "DISTINCT"}:
+        single = table[2]
+    elif table[0] == "call" and table[1] in {"VALUES", "DISTINCT"} and len(table[2]) == 1:
+        single = table[2][0]
+    if single is not None:
+        if isinstance(single, tuple) and single and single[0] == "reference" and len(single) > 2 and single[2] is not None:
+            return [_row_value_class(single, columns, variables)]
+        return _row_column_classes(single, columns, variables)
+    width = _static_row_width(table, columns, variables)
+    types = _static_table_columns(table, columns, variables)
+    if not width or len(types) != width:
+        return None
+    return [_COMPARABLE_CLASS_BY_TYPE.get(str(column_type or "").casefold()) for column_type in types.values()]
+
+
+def _reject_mismatched_row_values(table: Any, values: list[Any], columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> None:
+    """Task 160: CONTAINSROW(table, v1, ..) and v IN table compare each value with its column. A text, logical or numeric mix is a query-level error in live Power BI: IFERROR and an untaken IF branch do not catch it. Only certain types are compared."""
+    classes = _row_column_classes(table, columns, variables)
+    if classes is None or len(classes) != len(values):
+        return  # a wrong width is refused by the width check; an unknown shape is left alone
+    for value, column_class in zip(values, classes):
+        value_class = _row_value_class(value, columns, variables)
+        if value_class and column_class and value_class != column_class:
+            raise MeasureError(
+                f"Function 'CONTAINSROW' does not support comparing values of type {_COMPARABLE_CLASS_DISPLAY[column_class]} "
+                f"with values of type {_COMPARABLE_CLASS_DISPLAY[value_class]}. Consider using the VALUE or FORMAT function to convert one of the values."
+            )
+
+
 def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None] | None = None, *, unevaluated: bool = False) -> None:
     variables = {} if variables is None else variables
     if not isinstance(node, tuple) or not node:
@@ -9667,6 +9726,7 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
         width = _static_row_width(node[2][0], columns, variables)  # Task 156 (family B): a wrong number of values is a query-level error, IFERROR and an untaken IF branch do not catch it
         if width is not None and len(node[2]) - 1 != width:
             raise MeasureError("The number of arguments is invalid. Function CONTAINSROW must have a value for each column in the table expression.")
+        _reject_mismatched_row_values(node[2][0], list(node[2][1:]), columns, variables)  # Task 160: a value of another type class than its column is a query-level error
     if node[0] == "call" and node[1] in {"MAX", "MIN"} and len(node[2]) == 2:
         kinds = {_static_type(argument, columns, variables) for argument in node[2]}
         if "boolean" in kinds:
@@ -9685,6 +9745,12 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                     f"DAX comparison operations do not support comparing values of type {_type_display(subject)} with values of type {_type_display(value_type)}. "
                     "Consider using the VALUE or FORMAT function to convert one of the values."
                 )  # live Power BI (Task 13 review): SWITCH(TRUE(), "x", ...) also over an empty table, and IFERROR does not catch it
+    if node[0] == "in" and columns:
+        _reject_mismatched_row_values(node[2], [node[1]], columns, variables)  # Task 160: v IN table compares v with the one column, as CONTAINSROW does
+    if node[0] == "comparison" and node[1] == "=" and columns is not None:
+        for operand in (node[2], node[3]):
+            if isinstance(operand, tuple) and operand and operand[0] == "tableconstructor" and (_static_row_width(operand, columns, variables) or 0) > 1:
+                raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")  # Task 160: measured in live Power BI, also in an untaken branch
     if node[0] == "comparison":
         left, right = _static_type(node[2], columns, variables), _static_type(node[3], columns, variables)
         if left and right and left != right and not ({left, right} <= {"number", "date"}):

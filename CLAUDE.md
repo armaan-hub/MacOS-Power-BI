@@ -5,6 +5,14 @@ Antigravity writes the new feature code (until its quota returns on Nov 2, Haiku
 new feature code until the user explicitly says so (and then only for that task). Full rules: `AGENTS.md`. Message board:
 `HANDOFF.md`. Read both before starting, check the "Active agent" line, update status and entries when stopping.
 
+## Team structure (set by the user 2026-11-15, all projects)
+Opus plans, verifies and merges (never writes code). Haiku writes all code, one coding agent at a time. Sonnet is the head of
+review and testing: it writes the test plan and the verdict, and a team of Haiku testers (read-only on code, may run in
+parallel) does the testing. Subagents cannot nest, so the main session dispatches the Haiku testers on Sonnet's plan and
+passes their reports back to Sonnet. The team runs as a cycle until the task ends: Haiku codes, Sonnet and its testers test and
+review, failures go back to Haiku, repeat until Sonnet's verdict is PASS and the gate passes (a second failure on the same item
+goes to Sonnet to fix). Full text: ~/.claude/CLAUDE.md.
+
 ## Parity rule (standing, set by the user 2026-10-21)
 Every function or feature we build is compared with Power BI Desktop (Windows VM oracle, `tools/*_oracle_diff.py`, REA)
 when it is completed, and from then on it is re-tested on every change so it never has to be worked on again.
