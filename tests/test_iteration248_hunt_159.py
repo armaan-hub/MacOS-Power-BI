@@ -46,6 +46,47 @@ class TestIteration248Hunt159(unittest.TestCase):
         self.assertEqual(local('COUNTROWS(SUMMARIZE(Facts,Facts[Region],"Sales",SUM(Facts[Sales])))'), "3")
         self.assertEqual(local('COUNTROWS(ALL(Facts[Region],Facts[Region]))'), "3")
 
+    def test_review_summarizecolumns_duplicates_are_static_query_errors(self):
+        """Power BI (measured): the untaken IF branch still fails, so these are query-level errors."""
+        for expression in (
+            'IF(FALSE(),COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],Facts[Region])),1)',
+            'IF(FALSE(),COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],Facts[region],"t",1)),1)',
+            'IF(FALSE(),COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],"Region",1)),1)',
+            'IF(FALSE(),COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],"t",1,"T",2)),1)',
+            'IF(FALSE(),COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],Facts[Quantity],"Quantity",1)),1)',
+            'IF(FALSE(),COUNTROWS(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],"Region"),"t",1)),1)',
+            'COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],ROLLUPADDISSUBTOTAL(Facts[Quantity],"x",Facts[Note],"X"),"t",1))',
+        ):
+            self.assertTrue(local(expression).startswith("LOCAL-REJECT"), expression)
+        self.assertEqual(local('COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],"Quantity",1))'), "3")
+        self.assertEqual(local('COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],FILTER(Facts,Facts[Sales]>0),"t",1))'), "2")
+
+    def test_review_groupby_duplicate_new_names_are_static_query_errors(self):
+        self.assertTrue(local('IF(FALSE(),COUNTROWS(GROUPBY(Facts,Facts[Region],"n",SUMX(CURRENTGROUP(),1),"N",SUMX(CURRENTGROUP(),2))),1)').startswith("LOCAL-REJECT"))
+        self.assertEqual(local('COUNTROWS(GROUPBY(Facts,Facts[Region],"Quantity",SUMX(CURRENTGROUP(),Facts[Sales])))'), "3")
+        self.assertEqual(local('SUMX(GROUPBY(Facts,Facts[Region],"Quantity",SUMX(CURRENTGROUP(),Facts[Sales])),[Quantity])'), "31.5")
+
+    def test_review_new_name_written_like_a_column_reference_clashes_with_that_column(self):
+        """Power BI (measured): the name "Facts[Region]" clashes with the column Facts[Region]; "Facts[Quantity]" does not clash with a group column Region."""
+        for expression in (
+            'COUNTROWS(SUMMARIZE(Facts,Facts[Region],"Facts[Region]",1))',
+            'COUNTROWS(SUMMARIZE(Facts,Facts[Region],"\'Facts\'[Region]",1))',
+            'COUNTROWS(ADDCOLUMNS(Facts,"Facts[Region]",1))',
+            'COUNTROWS(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Region]),"Facts[Region]",1))',
+            'COUNTROWS(ADDCOLUMNS(VALUES(Facts[Region]),"Facts[Region]",1))',
+            'COUNTROWS(SUMMARIZECOLUMNS(Facts[Region],"Facts[Region]",1))',
+            'COUNTROWS(SELECTCOLUMNS(Facts,Facts[Region],"facts[region]",1))',
+        ):
+            self.assertTrue(local(expression).startswith("LOCAL-REJECT"), expression)
+        self.assertEqual(local('COUNTROWS(SUMMARIZE(Facts,Facts[Region],"Facts[Quantity]",1))'), "3")
+        self.assertEqual(local('COUNTROWS(SUMMARIZE(Facts,Facts[Region],"[Region]",1))'), "3")
+        self.assertEqual(local('COUNTROWS(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Region]),"Facts[Quantity]",1))'), "3")
+        self.assertEqual(local('COUNTROWS(SELECTCOLUMNS(Facts,Facts[Region],"Facts[Sales]",1))'), "6")
+
+    def test_review_select_columns_after_a_plain_column_still_checks_names(self):
+        self.assertTrue(local('COUNTROWS(SELECTCOLUMNS(Facts,Facts[Region],"a",1,"A",2))').startswith("LOCAL-REJECT"))
+        self.assertEqual(local('COUNTROWS(SELECTCOLUMNS(Facts,Facts[Region],"Region",1))'), "6")
+
 
 if __name__ == "__main__":
     unittest.main()
