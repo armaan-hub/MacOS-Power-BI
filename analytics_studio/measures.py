@@ -9359,6 +9359,35 @@ def _reject_mismatched_strict_operands(left: tuple[Any, ...], right: tuple[Any, 
         )
 
 
+def _static_arg_width(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> int | None:
+    """Task 157 family D: one argument of VALUES or DISTINCT. A column (Table[Column]) is one column; a table is its width."""
+    if isinstance(node, tuple) and node and node[0] == "reference" and len(node) > 2 and node[2] is not None:
+        return 1
+    return _static_row_width(node, columns, variables)
+
+
+def _summarize_width(args: list[Any], columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> int | None:
+    """Task 157 family D: the number of columns SUMMARIZE returns, from its group columns and its named extension columns; None when unknown or duplicated."""
+    del columns, variables  # the group columns are read from their references; a table argument is not needed for the width
+    names: list[str] = []
+    index = 1
+    while index < len(args):
+        arg = args[index]
+        if isinstance(arg, tuple) and arg and arg[0] == "string":
+            if index + 1 >= len(args):
+                return None
+            names.append(str(arg[1]).casefold())
+            index += 2
+            continue
+        if not (isinstance(arg, tuple) and arg and arg[0] == "reference" and len(arg) > 2 and arg[2] is not None):
+            return None  # a table argument or an unknown shape: the width is not known here
+        names.append(str(arg[2]).casefold())
+        index += 1
+    if not names or len(set(names)) != len(names):
+        return None
+    return len(names)
+
+
 def _static_row_width(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> int | None:
     """Task 156 (family B): the number of columns of a table expression when the model or the expression alone shows it; None when it cannot be known."""
     if not isinstance(node, tuple) or not node:
@@ -9369,16 +9398,24 @@ def _static_row_width(node: Any, columns: dict[str, dict[str, str]], variables: 
         return len(known) if known else None
     if kind == "tableconstructor":
         return len(_static_table_columns(node, columns, variables)) or None
+    if kind == "table_call" and len(node) == 3 and node[1] in {"VALUES", "DISTINCT"}:  # Task 157 family D: VALUES and DISTINCT take one argument, parsed as table_call
+        return _static_arg_width(node[2], columns, variables)
     if kind != "call" or not node[2]:
         return None
     fn, args = node[1], node[2]
+    if fn in {"ALL", "ALLSELECTED"} and all(isinstance(arg, tuple) and arg and arg[0] == "reference" and arg[2] is not None for arg in args):
+        return len(args)  # Task 157 family D: ALL(col1, col2, ..) is one column for each argument
+    if fn in {"VALUES", "DISTINCT"} and len(args) == 1:  # Task 157 family D: VALUES(col) is one column; VALUES(table) is the table's width
+        return _static_arg_width(args[0], columns, variables)
+    if fn == "SUMMARIZE" and len(args) >= 2:  # Task 157 family D: SUMMARIZE(t, group columns.., "name", expr, ..) is the group columns plus the named columns
+        return _summarize_width(args, columns, variables)
     if fn in {"FILTER", "CALCULATETABLE", "KEEPFILTERS", "ALL", "ALLSELECTED"}:
         return _static_row_width(args[0], columns, variables)
     if fn == "TOPN" and len(args) >= 2:
         return _static_row_width(args[1], columns, variables)
     if fn == "SELECTCOLUMNS" and len(args) >= 3 and len(args) % 2 == 1 and all(name[0] == "string" for name in args[1::2]):
         return len(args[1::2])
-    if fn == "ADDCOLUMNS" and len(args) >= 3 and len(args) % 2 == 0 and all(name[0] == "string" for name in args[1::2]):
+    if fn == "ADDCOLUMNS" and len(args) >= 3 and len(args) % 2 == 1 and all(name[0] == "string" for name in args[1::2]):  # Task 157 family D: ADDCOLUMNS(t, name, expr[, name, expr..]) has an odd count
         base = _static_table_columns(args[0], columns, variables)
         added = {str(name[1]).casefold() for name in args[1::2]}
         if not base or added & set(base):
@@ -20292,10 +20329,21 @@ def _evaluate_measures_once(
         (never on the saved ones): the static type answers only for the shape families below; a failing value that changes kind under IF /
         SWITCH shows its error; a wrapper or a shape that was not measured is refused.  Returns "error" (the failure shows), "refuse" (not
         settled by the rows), or None (the static type answers).  ISBLANK is never changed."""
+        def blank_format_text(text: Any) -> bool:
+            """Task 157 family E: FORMAT(BLANK(), ..), or a & join of it with text literals (any order, any depth) that has at least one FORMAT."""
+            if not isinstance(text, tuple) or not text:
+                return False
+            if text[:2] == ("call", "FORMAT") and len(text) > 2 and text[2] and text[2][0] == ("blank",):
+                return True
+            if text[0] == "concat" and len(text) == 3:
+                parts = (text[1], text[2])
+                return all(part[0] == "string" or blank_format_text(part) for part in parts) and any(blank_format_text(part) for part in parts)
+            return False
+
         if function != "ISBLANK" and isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() == "CONVERT" and len(node[2]) == 2:
             text = node[2][0]
-            if isinstance(text, tuple) and text[:2] == ("call", "FORMAT") and text[2] and text[2][0] == ("blank",):
-                return "error"  # Task 156 (family D, measured): FORMAT(BLANK(), ..) is a run-time "" that CONVERT(..., DOUBLE) fails on, so a type test of it shows the error; the static type of the failing CONVERT would answer False (a literal "" does, measured)
+            if blank_format_text(text):
+                return "error"  # Task 156 (family D, measured): FORMAT(BLANK(), ..) is a run-time "" that CONVERT(..., DOUBLE) fails on, so a type test of it shows the error; the static type of the failing CONVERT would answer False (a literal "" does, measured). Task 157 family E: the same when joined by & with text literals
         family = task64_family(function, node, row_context)
         if family == "static":
             return None
@@ -23831,8 +23879,8 @@ def _evaluate_measures_once(
                     and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double"
                 ):
                     values[0] = values[0] if band is not None else _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike (not a power band double, Task 55)
-                if function == "TRUNC" and len(values) == 2 and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
-                    values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does
+                if function == "TRUNC" and values and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double" and (len(values) == 2 or abs(values[0]) < 2 ** 53):  # Task 157 family B: from 2^53 up a Double has no fraction, and an Int64 range value keeps its error
+                    values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does; Task 157 family B: TRUNC(x) without digits too, as INT does
                 if function == "MOD" and values[0] is not None and values[0].is_finite() and (mod_reads_double(arguments, row_context) or mod_reads_fmod(arguments, row_context)):
                     values[0] = Decimal(float(values[0]))
                 if band is not None and function in {"FLOOR", "CEILING"}:  # Task 55: FLOOR/CEILING of a power band double, rounded as beyond 2^53 is

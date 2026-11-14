@@ -259,11 +259,14 @@ def math_function(function: str, args: list[object]) -> object:
             raise _fail(function)
         if denominator == 0:
             raise dax_typed._error("Division by zero has occurred when evaluating function 'QUOTIENT'.")
-        if abs(numerator) >= 2 ** 53:
-            q = float(numerator) / float(denominator)
-            quotient = Decimal(int(q))
-        else:
-            quotient = (numerator / denominator).to_integral_value(rounding=ROUND_DOWN)
+        # Task 157 family A (measured): QUOTIENT divides two IEEE doubles and truncates (QUOTIENT(0.3,0.1) is 2, QUOTIENT(1,1E-5) is 99999)
+        divisor_float = float(denominator)
+        if divisor_float == 0 or not math.isfinite(float(numerator)):
+            raise dax_typed.refusal("QUOTIENT with a divisor that is zero as a Double is not modelled by the local engine.")
+        q = float(numerator) / divisor_float
+        if not math.isfinite(q):
+            raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
+        quotient = Decimal(math.trunc(q))
         if quotient.is_zero():
             quotient = Decimal(0)  # an Integer has no negative zero (SIGN(QUOTIENT(5E-320,-1)) is 0, measured)
         if abs(quotient) >= 2 ** 63:  # Part D: an Integer result beyond the 64-bit range is the conversion error

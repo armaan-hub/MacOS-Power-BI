@@ -822,7 +822,10 @@ def _beta(function: str, args: list[object]) -> Decimal | None:
     width = high - low
     if math.isinf(width):
         raise _divide(function)
-    return _result(low + width * _beta_quantile(p, a, b), function)
+    standard = _beta_quantile(p, a, b)
+    if standard < 1e-6 and (a < 0.1 or b > 1e3):  # Task 157 family C (measured): Power BI's solver gives other tiny answers when alpha is tiny or beta huge (BETA.INV(0.05,1E-5,1E15) is 1E-06, BETA.INV(0.05,1E-5,1E5) is an error); a tiny result with alpha 0.1 or more and beta up to 1000 matched and is kept (BETA.INV(1E-10,0.1,0.1) is 8.86928065554999E-98)
+        raise dax_typed.refusal("BETA.INV with a standardized result below 1E-6 is not modelled by the local engine.")
+    return _result(low + width * standard, function)
 
 
 def _beta_quantile(p: float, a: float, b: float) -> float:
