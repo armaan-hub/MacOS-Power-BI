@@ -9426,6 +9426,92 @@ def _static_row_width(node: Any, columns: dict[str, dict[str, str]], variables: 
     return None
 
 
+_DUPLICATE_NAME_FUNCTIONS = frozenset({"SUMMARIZE", "SUMMARIZECOLUMNS", "GROUPBY", "ADDCOLUMNS", "SELECTCOLUMNS"})
+
+
+def _is_string_argument(arg: Any) -> bool:
+    return isinstance(arg, tuple) and bool(arg) and arg[0] == "string"
+
+
+def _first_string_index(args: tuple[Any, ...], start: int) -> int:
+    """Index of the first name (a text argument) from start, or the length when there is none."""
+    return next((index for index in range(start, len(args)) if _is_string_argument(args[index])), len(args))
+
+
+def _group_refs(args: Any) -> list[tuple[str, str, str]]:
+    """Group column references (table, column, written column) among the arguments, reading into ROLLUP and ROLLUPGROUP (Task 159)."""
+    found: list[tuple[str, str, str]] = []
+    for arg in args:
+        if not isinstance(arg, tuple) or not arg:
+            continue
+        if arg[0] == "call" and arg[1] in {"ROLLUP", "ROLLUPGROUP"} and isinstance(arg[2], tuple):
+            found.extend(_group_refs(arg[2]))
+        elif arg[0] == "reference" and len(arg) > 2 and arg[2] is not None:
+            found.append((str(arg[1] or "").casefold(), str(arg[2]).casefold(), str(arg[2])))
+    return found
+
+
+def _name_pairs(args: tuple[Any, ...], start: int) -> list[tuple[str, int]]:
+    """The new column names read as name, expression pairs from start: (name, index of the name)."""
+    pairs: list[tuple[str, int]] = []
+    index = start
+    while index + 1 < len(args) and _is_string_argument(args[index]):
+        pairs.append((str(args[index][1]), index))
+        index += 2
+    return pairs
+
+
+def _summarize_column_names(args: tuple[Any, ...]) -> set[str]:
+    """Column names a SUMMARIZE result holds: its group columns and its new column names (casefolded)."""
+    first = _first_string_index(args, 1)
+    return {column for _table, column, _written in _group_refs(args[1:first])} | {name.casefold() for name, _index in _name_pairs(args, first)}
+
+
+def _base_column_names(node: Any, columns: dict[str, dict[str, str]]) -> set[str] | None:
+    """Column names of the base table of ADDCOLUMNS when they are known statically; None when they are not."""
+    if isinstance(node, tuple) and node and node[0] == "call" and node[1] == "SUMMARIZE" and isinstance(node[2], tuple) and node[2]:
+        return _summarize_column_names(node[2])
+    known = _static_table_columns(node, columns, {})
+    return set(known) if known else None
+
+
+def _reject_duplicate_column_names(node: tuple[Any, ...], columns: dict[str, dict[str, str]]) -> None:
+    """Task 159: duplicate column names are query-level errors in Power BI, so IFERROR and an untaken IF branch do not catch them. Raised statically, like the other query-level errors."""
+    function, args = node[1], node[2]
+    if not isinstance(args, tuple) or not args:
+        return
+    if function in {"SUMMARIZE", "SUMMARIZECOLUMNS", "GROUPBY"}:
+        first = _first_string_index(args, 1)
+        refs = _group_refs(args[1:first])
+        seen_groups: set[tuple[str, str]] = set()
+        for table, column, written in refs:
+            if (table, column) in seen_groups:
+                raise MeasureError(f"The column '{written}' was specified more than once in the '{function}' function.")
+            seen_groups.add((table, column))
+        if function != "SUMMARIZE":
+            return
+        group_names = {column for _table, column, _written in refs}
+        seen_names: set[str] = set()
+        for name, _index in _name_pairs(args, first):
+            if name == "":
+                raise MeasureError("The new column name can only be a constant non-empty string.")
+            if name.casefold() in group_names:
+                raise MeasureError(f"Function 'SUMMARIZE' cannot add column [{name}] since it already exists.")
+            if name.casefold() in seen_names:
+                raise MeasureError(f"Function 'SUMMARIZE' cannot add column [{name}], as it has the same name with an existing column.")
+            seen_names.add(name.casefold())
+        return
+    if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
+        base_names = _base_column_names(args[0], columns) if function == "ADDCOLUMNS" else None
+        seen_names: set[str] = set()
+        for name, _index in _name_pairs(args, 1):
+            if base_names and name.casefold() in base_names:
+                raise MeasureError(f"Function '{function}' cannot add column [{name}], as it has the same name as an existing column.")
+            if name.casefold() in seen_names:
+                raise MeasureError(f"Function '{function}' cannot add column [{name}], as it has the same name with an existing column.")
+            seen_names.add(name.casefold())
+
+
 def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None] | None = None, *, unevaluated: bool = False) -> None:
     variables = {} if variables is None else variables
     if not isinstance(node, tuple) or not node:
@@ -9449,6 +9535,8 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
             raise MeasureError(f"Cannot find table '{node[1]}'.")
         if str(node[2]).casefold() not in known:
             raise MeasureError(f"Column '{node[2]}' in table '{node[1]}' cannot be found or may not be used in this expression.")
+    if node[0] == "call" and node[1] in _DUPLICATE_NAME_FUNCTIONS:
+        _reject_duplicate_column_names(node, columns)  # Task 159: duplicate names are query-level errors, whatever the branch
     if node[0] == "call" and node[1] in {"EARLIER", "EARLIEST"} and len(node[2]) == 2:
         level = node[2][1]
         if level[0] != "number" or level[1] != level[1].to_integral_value() or level[1] < 1 or level[1].as_tuple().exponent > 0 or "." in str(level[1]):
