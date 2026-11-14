@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-14, after Iteration 245 / Task 156 dax-hunt-156, ISEVEN/ISODD of text round half to even, CONTAINSROW argument count is a query-level error, PRODUCTX over model rows uses exp-log, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4559 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 157, fresh DAX hunts until 0 wrong, then M functions
+**Latest status (2026-11-14, after Iteration 246 / Task 157 dax-hunt-157, QUOTIENT uses double division, TRUNC rounds to 15 digits first, BETA.INV tiny results refuse, CONTAINSROW static widths, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4569 passed, 1 skipped, 1 xfailed (2 known xdist-only failures pass alone) passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 158, fresh DAX hunts until 0 wrong, then M functions
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
