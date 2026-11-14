@@ -8489,6 +8489,10 @@ _STATIC_ALWAYS_DOUBLE = frozenset({
     "SIN", "COS", "TAN", "ASIN", "DEGREES", "RADIANS", "MEDIAN", "MEDIANX", "PERCENTILE.INC", "PERCENTILEX.INC",
     "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "VARX.S", "VARX.P", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "XIRR", "RAND",
     "EFFECT",  # Task 144 family L (measured): EFFECT is a Double, so EFFECT(0.05,1)-0.05 is the double difference 4.16333634234434E-17
+    # Task 161 family A/B (measured): the annuity and depreciation functions return a Double unless a Currency amount makes them a Currency
+    # (that check runs first), so PPMT(...)*1, ABS(PPMT(...)) and FV(0,10,PPMT(...)) compute in IEEE doubles, not in 28-digit Decimal
+    "PMT", "PV", "FV", "NPER", "RATE", "IPMT", "PPMT", "CUMIPMT", "CUMPRINC", "ISPMT", "SLN", "SYD", "DB", "DDB", "VDB",
+    "NOMINAL", "RRI", "PDURATION", "DOLLARDE", "DOLLARFR",
 })
 
 _STATIC_ALWAYS_INT64 = frozenset({
@@ -24018,7 +24022,7 @@ def _evaluate_measures_once(
                 if float(abs(value)) >= 2 ** 63:
                     raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part C: ABS of an Int64 whose double reaches 2^63 is the error (ABS(-9223372036854775807), ABS(9223372036854775807+1), measured)
                 raise dax_typed.refusal("ABS of an Int64 beyond 2^53 is not modelled by the local engine.")
-            return Decimal("NaN") if value.is_nan() else abs(value)  # Part B: ABS of nan is nan, unsigned
+            return Decimal("NaN") if value.is_nan() else value.copy_abs()  # Part B: ABS of nan is nan, unsigned; Task 161: copy_abs keeps every digit of a Double's exact value (abs() rounds to the 28-digit context)
         if function in _SCALAR_MATH_ARITY:
             try:
                 try:
