@@ -9,7 +9,9 @@ new feature code until the user explicitly says so (and then only for that task)
 Opus plans, verifies and merges (never writes code). Haiku writes all code, one coding agent at a time. Sonnet is the head of
 review and testing: it writes the test plan and the verdict, and a team of Haiku testers (read-only on code, may run in
 parallel) does the testing. Subagents cannot nest, so the main session dispatches the Haiku testers on Sonnet's plan and
-passes their reports back to Sonnet. Full text: ~/.claude/CLAUDE.md.
+passes their reports back to Sonnet. The team runs as a cycle until the task ends: Haiku codes, Sonnet and its testers test and
+review, failures go back to Haiku, repeat until Sonnet's verdict is PASS and the gate passes (a second failure on the same item
+goes to Sonnet to fix). Full text: ~/.claude/CLAUDE.md.
 
 ## Parity rule (standing, set by the user 2026-10-21)
 Every function or feature we build is compared with Power BI Desktop (Windows VM oracle, `tools/*_oracle_diff.py`, REA)
