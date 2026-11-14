@@ -309,7 +309,7 @@ def _discount_family(function: str, args: list[object], ctx: _Ctx) -> object:
     if function == "INTRATE":  # investment, redemption
         if first <= 0 or second <= 0:
             raise ctx.fail()
-        return _out(((second / first) - 1.0) / fraction, function)
+        return _out((second - first) / first / fraction, function)
     if function == "RECEIVED":  # investment, discount
         if first <= 0 or second <= 0 or second * fraction >= 1.0:
             raise ctx.fail()
@@ -322,7 +322,7 @@ def _discount_family(function: str, args: list[object], ctx: _Ctx) -> object:
     # YIELDDISC: price, redemption
     if first <= 0 or second <= 0:
         raise ctx.fail()
-    return _out((second / first - 1.0) / fraction, function)
+    return _out((second - first) / first / fraction, function)
 
 
 def _tbill(function: str, args: list[object], ctx: _Ctx) -> object:
