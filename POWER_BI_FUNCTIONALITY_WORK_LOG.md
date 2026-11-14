@@ -2556,3 +2556,9 @@ QUOTIENT truncates the double quotient; TRUNC pre-rounds to 15 significant digit
 Haiku 5.5 coded family C (SUMMARIZE static width dedupes repeated group columns, keyed on table and column); families A (trig refusal beyond 2*pi) and B (EXP of negatives) were reverted because they broke locked answers. Sonnet 5.5 reviewed, keyed the dedupe on (table, column), and probed 42 fresh CONTAINSROW/SUMMARIZE shapes against Power BI: 16 still wrong, all wrong before (main 30). Spec: exact 3190, refused 41, wrong 66 (known limits).
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4571 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-14 — Iteration 248 (Task 159 dax-hunt-159: Duplicate column names in SUMMARIZE / SUMMARIZECOLUMNS / GROUPBY / ADDCOLUMNS / SELECTCOLUMNS are query-level errors)
+
+A repeated group column, a new column named like a group/base column or a Table[Column] spelling, two new columns with the same name, and an empty new name are now static query-level errors as in Power BI (IFERROR does not catch them). GROUPBY same-name new columns stay refused. Spec 91 -> 67 wrong (known limits + CONTAINSROW type, Task 160).
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4581 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
