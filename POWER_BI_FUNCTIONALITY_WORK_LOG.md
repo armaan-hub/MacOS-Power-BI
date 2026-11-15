@@ -2586,3 +2586,9 @@ Fresh probes found that Power BI rounds FLOOR, CEILING and MROUND Double results
 ROUND(x,0) from 1E14 keeps 15 significant digits with ties toward zero; FIXED rounds to 15 digits from 1E14; FORMAT rounds to 15 digits half up at every magnitude; Currency ROUND from 1E14 refused; ISERROR/IFERROR raise Power BI's query error for an IF with a text-literal condition and a data-reading branch. Spec wrong 30 -> 12, review batch wrong 23 -> 0, 0 exact rows regressed.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4618 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-15 — Iteration 253 (Task 165 dax-hunt-165: fresh-probe batch 22: date-operand doubles, ACOSH in doubles, PV/FV half-period, BETA.INV bounds)
+
+* and / with a DATE operand take the double path; ACOSH computed as LN(x+SQRT(x*x-1)) in doubles; PV/FV with nper 0.5 use the correctly rounded square root; BETA.INV reaches its upper bound (alpha 1 refused, as Power BI errors). Spec wrong 21 -> 17, edge set 7 -> 3, PV/FV set 10 -> 7, changed-answer set 7 -> 0, 0 exact rows regressed.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4736 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
