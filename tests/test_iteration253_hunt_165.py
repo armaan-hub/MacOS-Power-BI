@@ -65,6 +65,154 @@ class TestIteration253Hunt165(unittest.TestCase):
         self.assertTrue(same15(local("BETA.INV(0.25,0.1,1E-5)"), "1"))
         self.assertEqual(local("BETA.INV(1-1E-10,0.1,0.1)"), "1")
 
+    def test_family_d_beta_inv_alpha_one_at_bound_refuses(self):
+        self.assertTrue(local("BETA.INV(0.9,1,1E-3)").startswith("LOCAL-"))
+
+
+def _numeric_same(text, expected):
+    """The hunt's number rule: a shortest float text stands for its exact double, then both are rounded to 15 significant digits."""
+    try:
+        if text.startswith("LOCAL-"):
+            return False
+        value = Decimal(text)
+        if repr(float(text)) == text:
+            value = Decimal(float(text))
+        return _FIFTEEN.plus(value) == _FIFTEEN.plus(Decimal(expected)) and value.is_signed() == Decimal(expected).is_signed()
+    except Exception:
+        return False
+
+
+class TestIteration253Hunt165Batch22(unittest.TestCase):
+    """Task 165 follow-up: every row of the coordinator's 39-row edge set (t178), measured in Power BI on 2026-11-15."""
+
+    def _check(self, expr, pbi):
+        loc = local(expr)
+        if pbi.startswith("ERR"):
+            self.assertTrue(loc.startswith("LOCAL-"), loc)
+            return
+        if loc != pbi and not _numeric_same(loc, pbi):
+            self.fail(f"{expr}: local {loc!r} != Power BI {pbi!r}")
+
+    def test_t178_00(self):
+        self._check("DATE(2020,2,29)*2", "87780")
+
+    def test_t178_01(self):
+        self._check("DATE(2020,2,29)*1.5", "65835")
+
+    def test_t178_02(self):
+        self._check("DATE(2020,2,29)/3", "14630")
+
+    def test_t178_03(self):
+        self._check("DATE(2020,2,29)/7&\"z\"", "6270z")
+
+    def test_t178_04(self):
+        self._check("3/DATE(2020,2,29)", "6.83526999316473E-05")
+
+    def test_t178_05(self):
+        self._check("DATE(2020,1,1)*SUM(Facts[Sales])", "1380676.5")
+
+    def test_t178_06(self):
+        self._check("(DATE(2020,1,1)*0.1)&\"z\"", "4383.1z")
+
+    def test_t178_07(self):
+        self._check("DATE(2020,2,29)*CURRENCY(1.5)", "65835")
+
+    def test_t178_08(self):
+        self._check("DATE(2020,2,29)/CURRENCY(3)", "14630")
+
+    def test_t178_09(self):
+        self._check("DATEVALUE(\"2020-01-01\")/3", "14610.3333333333")
+
+    def test_t178_10(self):
+        self._check("DATE(2020,2,29)*2&\"\"", "87780")
+
+    def test_t178_11(self):
+        self._check("AVERAGE(Facts[Sales])/DATE(2020,1,1)", "0.000143733886974972")
+
+    def test_t178_12(self):
+        self._check("DATE(2020,1,1)/DATE(2019,1,1)", "1.00839736805779")
+
+    def test_t178_13(self):
+        self._check("INT(DATE(2020,1,1)/7)", "6261")
+
+    def test_t178_14(self):
+        self._check("ACOSH(1.0000001)", "0.000447213591894773")
+
+    def test_t178_15(self):
+        self._check("ACOSH(2)", "1.31695789692482")
+
+    def test_t178_16(self):
+        self._check("ACOSH(1E10)", "23.7189981105004")
+
+    def test_t178_17(self):
+        self._check("ACOSH(1E200)", "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ACOSH' has the wrong data type or the result is too large or too small.\"")
+
+    def test_t178_18(self):
+        self._check("ACOSH(1.5)", "0.962423650119207")
+
+    def test_t178_19(self):
+        self._check("ACOSH(10)", "2.99322284612638")
+
+    @unittest.expectedFailure  # known limit (coordinator): ACOSH(COTH(3))
+    def test_t178_20(self):
+        self._check("ACOSH(COTH(3))", "0.0996565325164423")
+
+    def test_t178_21(self):
+        self._check("ACOSH(1+1E-12)", "1.41427642308353E-06")
+
+    def test_t178_22(self):
+        self._check("ACOSH(1E154)", "355.291251501643")
+
+    def test_t178_23(self):
+        self._check("ACOSH(1)", "0")
+
+    def test_t178_24(self):
+        self._check("PV(0.05,2.5,100)", "-229.659731612638")
+
+    def test_t178_25(self):
+        self._check("PV(0.1,0.25,-50,1000,1)", "-963.503838998281")
+
+    def test_t178_26(self):
+        self._check("FV(0.05,2.5,100)", "-259.452643894091")
+
+    def test_t178_27(self):
+        self._check("FV(0.1,0.5,-10,100,1)", "-99.5119115182985")
+
+    def test_t178_28(self):
+        self._check("PV(0.05,10,100)", "-772.173492918481")
+
+    def test_t178_29(self):
+        self._check("FV(0.02,3.7,-5)", "19.0051807898262")
+
+    def test_t178_30(self):
+        self._check("PV(-0.5,0.5,1)", "-0.82842712474619")
+
+    def test_t178_31(self):
+        self._check("BETA.INV(0.999999,2,3)", "0.993690426329795")
+
+    def test_t178_32(self):
+        self._check("BETA.INV(0.5,0.1,1E-5)", "1")
+
+    def test_t178_33(self):
+        self._check("BETA.INV(0.999,0.5,0.5)", "0.999997532600929")
+
+    def test_t178_34(self):
+        self._check("BETA.INV(0.9,1,1E-3)", "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'BETA.INV' has the wrong data type or the result is too large or too small. If the argument is expected to be a date, that date must be between March 1, 1900 and December 31, 9999.\"")
+
+    def test_t178_35(self):
+        self._check("BETA.INV(0.99999,5,1)", "0.999997999992")
+
+    @unittest.expectedFailure  # known limit (coordinator): BETA.INV(0.1,0.1,1)
+    def test_t178_36(self):
+        self._check("BETA.INV(0.1,0.1,1)", "1E-10")
+
+    @unittest.expectedFailure  # known limit (coordinator): BETA.INV(0.2,0.1,0.1)
+    def test_t178_37(self):
+        self._check("BETA.INV(0.2,0.1,0.1)", "9.08146855854956E-05")
+
+    def test_t178_38(self):
+        self._check("DATE(2020,1,1)*SUM(Facts[Sales])/2", "690338.25")
+
 
 if __name__ == "__main__":
     unittest.main()
