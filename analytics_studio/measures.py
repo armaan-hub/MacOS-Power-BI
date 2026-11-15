@@ -8549,6 +8549,7 @@ _STATIC_ALWAYS_DOUBLE = frozenset({
     "COMBIN", "FACT", "AVERAGE", "VALUE",
     "SIN", "COS", "TAN", "ASIN", "DEGREES", "RADIANS", "MEDIAN", "MEDIANX", "PERCENTILE.INC", "PERCENTILEX.INC",
     "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "VARX.S", "VARX.P", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "XIRR", "RAND",
+    "ACOS", "ATAN", "ATAN2", "COT", "COSH", "SINH", "TANH",  # Task 168 (measured): inverse and hyperbolic trig return a Double, so a Currency times them is rounded to 4 decimals like the literal path
     "EFFECT",  # Task 144 family L (measured): EFFECT is a Double, so EFFECT(0.05,1)-0.05 is the double difference 4.16333634234434E-17
     # Task 161 family A/B (measured): the annuity and depreciation functions return a Double unless a Currency amount makes them a Currency
     # (that check runs first), so PPMT(...)*1, ABS(PPMT(...)) and FV(0,10,PPMT(...)) compute in IEEE doubles, not in 28-digit Decimal
