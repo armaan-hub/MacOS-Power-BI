@@ -477,6 +477,21 @@ def _t_upper(t: float, v: float) -> float:
     return 0.5 * lower
 
 
+def _t_tail_stable(t: float, v: float) -> float:
+    """P(T > t) for t >= 0 and v >= 1, used by the right-tail and two-tailed functions (task 166). For df 2 the form
+    1 / ((r + t) r), r = sqrt(2 + t t), is used once t / r is above 0.95 (one shared threshold for both functions):
+    there 0.5 (1 - t / r) loses digits to cancellation (T.DIST.2T(1E6,2) is 9.999999999985E-13 in Power BI). Below that
+    the old complement form stays, because Power BI's answers match its cancellation noise through t = 3.5
+    (T.DIST.2T(3.5,2) = 0.0728273500544694; T.DIST.RT(2,2) is 0.0917517095361369). 0.95 is a value fitted to measured
+    rows, bracket (0.9272, 0.954] (t = 3.2 and 3.5 need the complement form; t = 4.5 needs the stable form), not a
+    derived precision limit."""
+    if v == 2 and t > 0:
+        root = math.sqrt(2.0 + t * t)
+        if t / root > 0.95:
+            return 1.0 / ((root + t) * root)
+    return _t_upper(t, v)
+
+
 def _t_cdf(x: float, v: float) -> float:
     return 1.0 - _t_upper(x, v) if x >= 0 else _t_upper(-x, v)
 
@@ -653,14 +668,14 @@ def _student(function: str, args: list[object]) -> Decimal:
                 return _result(1.0 - _t_df_one_cdf(x), function)
             if _t_df_two_measured(x, v):
                 return _result(0.5 - (0.5 * _t_df_two_a(x) if x >= 0 else -0.5 * _t_df_two_a(x)), function)
-            return _result(1.0 - _t_cdf(x, v) if x < 0 else _t_upper(x, v), function)
+            return _result(1.0 - _t_cdf(x, v) if x < 0 else _t_tail_stable(x, v), function)
         if _t_at_centre(x, v):
             return _result(1.0, function)
         if _t_df_one_measured(x, v):
             return _result(1.0 - 2.0 * _t_df_one_tail(x) / math.pi, function)
         if _t_df_two_measured(x, v):
             return _result(1.0 - _t_df_two_a(x), function)
-        return _result(min(1.0, 2.0 * _t_upper(x, v)), function)
+        return _result(min(1.0, 2.0 * _t_tail_stable(abs(x), v)), function)
     p = _number(args[0], function)
     v = _t_df(args[1], function)
     if function == "T.INV":

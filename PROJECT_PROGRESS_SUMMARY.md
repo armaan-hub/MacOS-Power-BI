@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-15, after Iteration 253 / Task 165 dax-hunt-165, fresh-probe batch 22: date-operand doubles, ACOSH in doubles, PV/FV half-period, BETA.INV bounds, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4736 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 166: fresh-probe batch 23 (new random expressions over all 14 function groups).
+**Latest status (2026-11-15, after Iteration 254 / Task 166 dax-hunt-166, df-2 Student t right and two-tailed tails without cancellation above t/r 0.95, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4740 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: a new fresh-probe batch (Task 167).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

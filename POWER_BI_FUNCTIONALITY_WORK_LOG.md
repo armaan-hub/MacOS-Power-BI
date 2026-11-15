@@ -2592,3 +2592,9 @@ ROUND(x,0) from 1E14 keeps 15 significant digits with ties toward zero; FIXED ro
 * and / with a DATE operand take the double path; ACOSH computed as LN(x+SQRT(x*x-1)) in doubles; PV/FV with nper 0.5 use the correctly rounded square root; BETA.INV reaches its upper bound (alpha 1 refused, as Power BI errors). Spec wrong 21 -> 17, edge set 7 -> 3, PV/FV set 10 -> 7, changed-answer set 7 -> 0, 0 exact rows regressed.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4736 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-15 — Iteration 254 (Task 166 dax-hunt-166: df-2 Student t right and two-tailed tails without cancellation above t/r 0.95)
+
+Haiku 5.5 coded, Sonnet 5.5 headed review and testing (refit the df-2 threshold from 0.9 to 0.95 after the t187 validation rows). T.DIST.RT and T.DIST.2T with 2 degrees of freedom use 1/((r+t)*r), r = sqrt(2+t*t), above t/r 0.95 (fitted to measured rows); Newton solvers for T.INV and CHISQ.INV were tried and reverted after fresh rows showed regressions. Fresh validation: wrong t186 21 -> 2, t187 26 -> 4, t185 24 -> 23, t183 63 -> 59, statistics corpus 48 -> 46, t182 spec 10 -> 9; 0 exact->other in every set.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4740 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
