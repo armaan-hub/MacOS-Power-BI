@@ -1165,6 +1165,9 @@ _INFO_ALL_SCHEMAS: dict[str, tuple[list[str], dict[str, str]]] = {
 # Functions whose rows come from Power Query objects the app can hold (parameters, functions, folders, load-off queries)
 _INFO_MODEL_EXPRESSION_FUNCTIONS = frozenset({"INFO.EXPRESSIONS", "INFO.QUERYGROUPS"})
 
+# Task 163 family A: Power BI holds one row in these (measured: COUNTROWS is 1); the local engine has no such row, so it refuses them
+_INFO_ONE_ROW_REFUSED = frozenset({"INFO.ANNOTATIONS", "INFO.CULTURES"})
+
 _INFO_RESTRICTION_FUNCTIONS = frozenset({
     "INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS",
     *_INFO_EMPTY_TABLE_HEADERS,
@@ -4323,6 +4326,20 @@ def _scalar_math(function: str, values: list[Decimal | None]) -> Decimal | None:
             failure.zero_base = values[0] is not None and values[0] == 0 and (values[1] or Decimal(0)) <= 0
             raise failure from error
     return _scalar_math_checked(function, values)
+
+
+def _fifteen_digit_floor(function: str, result: Decimal | None, double_args: bool = False) -> Decimal | None:
+    """Task 163 family D (measured 2026-11-15): Power BI rounds every FLOOR, CEILING and MROUND Double result to 15 significant digits,
+    half away from zero, whole or not (FIXED(FLOOR(2.5E15+0.25,1.5),3) is 2,500,000,000,000,010.000; FIXED(MROUND(9.99E14+0.5,0.25),3)
+    is 999,000,000,000,001.000). An Int64 result from 2^53 up is kept exact (FLOOR(-7.1E18,3) is -7100000000000010240, measured)."""
+    if result is None or not result.is_finite() or not double_args or function not in {"FLOOR", "CEILING", "MROUND"} or result == 0:
+        return result
+    if abs(result) < Decimal("1E14") or abs(result) >= Decimal(2 ** 53):
+        return result  # below 1E14 (16 significant digits need 15 integer digits) the full double keeps its cancellation digits (FLOOR(7,1E-5)-7 is 8.88178419700125E-16, measured)
+    with localcontext() as rounded:
+        rounded.prec = 15
+        rounded.rounding = ROUND_HALF_UP
+        return +Decimal(float(result))
 
 
 def _scalar_math_checked(function: str, values: list[Decimal | None]) -> Decimal | None:
@@ -12852,6 +12869,8 @@ def _evaluate_measures_once(
                 headers = _INFO_RELATIONSHIPS_HEADERS
                 types = _INFO_RELATIONSHIPS_TYPES
                 rows = []
+            elif function in _INFO_ONE_ROW_REFUSED:
+                raise dax_typed.refusal(f"{function} holds one row in Power BI, and the local engine does not model its values.")
             elif function in _INFO_EMPTY_SCHEMAS:
                 headers, types = _INFO_EMPTY_SCHEMAS[function]
                 rows = []
@@ -21233,7 +21252,10 @@ def _evaluate_measures_once(
                 raise dax_typed.refusal(f"{function} of -9223372036854775808 of an unknown type is not modelled by the local engine.")
         if function in dax_math.MATH_ARITY or function == "ROUND":
             try:
-                return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
+                math_result = dax_math.math_function(function, values)
+                if function == "MROUND":
+                    math_result = _fifteen_digit_floor(function, math_result, left_static_type(arguments[1], row_context) == "double" if len(arguments) > 1 else False)  # Task 163 family D
+                return _double_rounding_result(function, math_result, left_static_type(arguments[0], row_context) if arguments else None)
             except MeasureRuntimeError as error:
                 if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
                     raise _TextConversionFailure(str(error)) from error
@@ -24130,8 +24152,10 @@ def _evaluate_measures_once(
                     if band == 0 or (band < 0 and _has_power(arguments[0], variable_nodes.get)) or values[1] is None or not values[1].is_finite() or values[1] == 0:
                         raise dax_typed.refusal(_POWER_BAND_REFUSAL)
                     math_result = _round_to_multiple(function, values[0], values[1], power_band=True)
+                    math_result = _fifteen_digit_floor(function, math_result, left_static_type(arguments[1], row_context) == "double" if len(arguments) > 1 else False)  # Task 163 family D
                 else:
                     math_result = _scalar_math(function, values)  # raises the measured errors and refusals first
+                    math_result = _fifteen_digit_floor(function, math_result, left_static_type(arguments[1], row_context) == "double" if len(arguments) > 1 else False)  # Task 163 family D
                     if band is not None and function == "INT":
                         math_result = _odd_band_up(math_result)  # Task 55 fix
                 if (

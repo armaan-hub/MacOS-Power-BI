@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-15, after Iteration 250 / Task 161 dax-hunt-161, financial function precision, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4598 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: fresh DAX hunts until 0 wrong, then M functions
+**Latest status (2026-11-15, after Iteration 251 / Task 163 dax-hunt-163, 15-digit FLOOR/CEILING/MROUND/FIXED results, INFO.ANNOTATIONS/INFO.CULTURES refused, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4604 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 164: ROUND(x,0) of huge values, FIXED/FORMAT of 1E14..1E15 values with fractional parts, IF type-mix error inside ISERROR, 28-digit leak in division by CONFIDENCE.T, TAN/ODDFPRICE/CONFIDENCE.NORM last digits.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
