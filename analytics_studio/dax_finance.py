@@ -125,6 +125,17 @@ def _pow(base: float, exponent: float, function: str) -> float:
         raise _fail(function) from exc
 
 
+def _growth(base: float, exponent: float, function: str) -> float:
+    """Task 165 family A (measured, 119 PV/FV rows): PV and FV with nper 0.5 take the plain square root of 1 + rate
+    (PV(1,0.5,1) is -0.292893218813453; the cut-down NOMINAL/RRI power below would be one step off).  Every other nper keeps _pow:
+    no single rule (correct rounding, cut-down, exp/log forms) fits the other fractional nper answers, because the engine's own
+    power is not correctly rounded (PV(0.05,0.25,-10) and FV(0.05,2.5,100) need the double below the nearest one, FV(0.03,1.5,250.75)
+    needs the nearest), so those stay a known limit."""
+    if base > 0 and exponent == 0.5:
+        return math.sqrt(base)
+    return _pow(base, exponent, function)
+
+
 _TINY_LOG = 2.0 ** -55
 
 
@@ -228,7 +239,7 @@ def _pv(args: list[object]) -> object:
     if rate == 0:
         value = -(fv + pmt * nper)
     else:
-        growth = _pow(1 + rate, nper, f)
+        growth = _growth(1 + rate, nper, f)
         if growth == 0:
             raise _division(f)
         value = -(fv + pmt * (1 + rate * kind) * (growth - 1) / rate) / growth
@@ -245,7 +256,7 @@ def _fv(args: list[object]) -> object:
     if rate == 0:
         value = -(pv + pmt * nper)
     else:
-        growth = _pow(1 + rate, nper, f)
+        growth = _growth(1 + rate, nper, f)
         value = -(pv * growth + pmt * (1 + rate * kind) * (growth - 1) / rate)
     if _blank_tail(args, 2):
         return None

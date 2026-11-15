@@ -823,6 +823,10 @@ def _beta(function: str, args: list[object]) -> Decimal | None:
     if math.isinf(width):
         raise _divide(function)
     standard = _beta_quantile(p, a, b)
+    if 1.0 - standard < 1e-15:  # Task 165 family D (measured): the solver's resolution at the upper bound is the bound (BETA.INV(0.25,0.1,1E-5) is 1, not 0.9999999999999993)
+        if a == 1.0:  # Task 165 (measured): BETA.INV(0.9,1,1E-3) is an error in Power BI (its answer 1-0.1^1000 is not a double); the snap is not applied here
+            raise dax_typed.refusal("BETA.INV with alpha 1 whose result rounds to the upper bound is not modelled by the local engine.")
+        standard = 1.0
     if standard < 1e-6 and (a < 0.1 or b > 1e3):  # Task 157 family C (measured): Power BI's solver gives other tiny answers when alpha is tiny or beta huge (BETA.INV(0.05,1E-5,1E15) is 1E-06, BETA.INV(0.05,1E-5,1E5) is an error); a tiny result with alpha 0.1 or more and beta up to 1000 matched and is kept (BETA.INV(1E-10,0.1,0.1) is 8.86928065554999E-98)
         raise dax_typed.refusal("BETA.INV with a standardized result below 1E-6 is not modelled by the local engine.")
     return _result(low + width * standard, function)

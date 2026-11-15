@@ -22745,7 +22745,9 @@ def _evaluate_measures_once(
                 if "Cannot convert value" in str(error) and node[1] != "/" and _reads_no_data(node, variable_nodes.get):
                     raise _TextConversionFailure(str(error)) from error
                 raise
-            if node[1] in {"+", "-", "*", "/"} and left is not None and right is not None and isinstance(result, Decimal) and result.is_finite() and not dax_dates.is_date(left) and not dax_dates.is_date(right):
+            # Task 165 family A (measured): * and / with a date operand give a Double (AVERAGE(x)/DATE(2020,2,29) is 5.69605832763727E-05), so they are computed in doubles too
+            date_operand_double = node[1] in {"*", "/"} and not dax_dates.is_date(result)
+            if node[1] in {"+", "-", "*", "/"} and left is not None and right is not None and isinstance(result, Decimal) and result.is_finite() and (date_operand_double or (not dax_dates.is_date(left) and not dax_dates.is_date(right))):
                 double_value = double_operation(node, as_number(left), as_number(right), row_context)
                 if double_value is not None:
                     result = double_value  # Part A: a Double operation is computed in IEEE doubles
