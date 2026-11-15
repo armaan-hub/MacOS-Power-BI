@@ -477,6 +477,17 @@ def _t_upper(t: float, v: float) -> float:
     return 0.5 * lower
 
 
+def _t_tail_stable(t: float, v: float) -> float:
+    """P(T > t) for t >= 0 and v >= 1, used by the right-tail and two-tailed functions (task 166). For df 2 the form
+    1 / ((r + t) r), r = sqrt(2 + t t), is used once t / r is above 0.9: there 0.5 (1 - t / r) loses digits to cancellation
+    (T.DIST.2T(1E6,2) is 9.999999999985E-13 in Power BI); below that the complement form stays (T.DIST.RT(2,2) is 0.0917517095361369)."""
+    if v == 2 and t > 0:
+        root = math.sqrt(2.0 + t * t)
+        if t / root > 0.9:
+            return 1.0 / ((root + t) * root)
+    return _t_upper(t, v)
+
+
 def _t_cdf(x: float, v: float) -> float:
     return 1.0 - _t_upper(x, v) if x >= 0 else _t_upper(-x, v)
 
@@ -490,11 +501,28 @@ def _t_pdf(x: float, v: float) -> float:
 
 
 def _t_upper_inv(q: float, v: float) -> float:
-    """t >= 0 with P(T > t) = q for 0 < q < 0.5."""
+    """t >= 0 with P(T > t) = q for 0 < q < 0.5. Newton steps on the tail from the normal quantile (task 166); the log-scale
+    solver below is the fallback when a step leaves the finite range or the density underflows."""
     if v == 1:
         return 1.0 / math.tan(math.pi * q)
     if v == 2:
         return (1.0 - 2.0 * q) / math.sqrt(2.0 * q * (1.0 - q))
+    t = max(-_norm_inv(q), 1e-6)
+    for _ in range(100):
+        density = _t_pdf(t, v)
+        if not density > 0.0 or not math.isfinite(density):
+            break
+        step = (_t_upper(t, v) - q) / density
+        t += step
+        if not math.isfinite(t) or t < 0.0:
+            break
+        if abs(step) <= 1e-14 * t:
+            return t
+    return _t_upper_inv_log(q, v)
+
+
+def _t_upper_inv_log(q: float, v: float) -> float:
+    """Fallback for _t_upper_inv: the same tail solved on a log scale (Newton with bracketing)."""
     start = max(-_norm_inv(q), 1e-6)
     start *= 1.0 + 0.25 / v * (start * start + 1.0)
 
@@ -653,14 +681,14 @@ def _student(function: str, args: list[object]) -> Decimal:
                 return _result(1.0 - _t_df_one_cdf(x), function)
             if _t_df_two_measured(x, v):
                 return _result(0.5 - (0.5 * _t_df_two_a(x) if x >= 0 else -0.5 * _t_df_two_a(x)), function)
-            return _result(1.0 - _t_cdf(x, v) if x < 0 else _t_upper(x, v), function)
+            return _result(1.0 - _t_cdf(x, v) if x < 0 else _t_tail_stable(x, v), function)
         if _t_at_centre(x, v):
             return _result(1.0, function)
         if _t_df_one_measured(x, v):
             return _result(1.0 - 2.0 * _t_df_one_tail(x) / math.pi, function)
         if _t_df_two_measured(x, v):
             return _result(1.0 - _t_df_two_a(x), function)
-        return _result(min(1.0, 2.0 * _t_upper(x, v)), function)
+        return _result(min(1.0, 2.0 * _t_tail_stable(abs(x), v)), function)
     p = _number(args[0], function)
     v = _t_df(args[1], function)
     if function == "T.INV":
@@ -729,6 +757,18 @@ def _gamma_quantile(p: float, q: float, a: float) -> float:
         density = (a / y) * _poisson_pmf_real(a, y) if y > 0 else 0.0
         return value, -y * density
 
+    y = start
+    for _ in range(100):
+        dens = (a / y) * _poisson_pmf_real(a, y) if y > 0 else 0.0
+        if not dens > 0.0 or not math.isfinite(dens):
+            break
+        value = _gamma_pq(a, y)[0] if use_lower else _gamma_pq(a, y)[1]
+        delta = (value - p if use_lower else value - q) / dens
+        y = y - delta if use_lower else y + delta
+        if not y > 0.0 or not math.isfinite(y):
+            break
+        if abs(delta) <= 1e-14 * y:
+            return y
     if use_lower:
         s = _solve_log(lower, math.log(p), math.log(start), decreasing=False)
     else:
