@@ -434,6 +434,8 @@ def _trig(function: str, value: float) -> Decimal:
         except OverflowError:
             raise _fail(function)
     try:
+        if function == "ACOSH":  # Task 165 family C (measured): Power BI evaluates LN(x+SQRT(x*x-1)) in doubles (POWER(ACOSH(COTH(7)),1) is 0.00182376443662588; math.acosh gives ...6195813)
+            return _double(math.log(value + math.sqrt(value * value - 1.0)), function)
         return _double(_TRIG[function](value), function)
     except (ValueError, OverflowError) as exc:
         raise _fail(function) from exc

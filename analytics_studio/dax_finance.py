@@ -125,6 +125,18 @@ def _pow(base: float, exponent: float, function: str) -> float:
         raise _fail(function) from exc
 
 
+def _growth(base: float, exponent: float, function: str) -> float:
+    """Task 165 family A (measured): the growth factor (1 + rate) ^ nper of PV and FV with a fractional nper is the correctly rounded
+    double power (PV(1,0.5,1) is -0.292893218813453, FV(-0.5,2.5,-1000) is 1646.44660940673), not the cut-down NOMINAL/RRI power.
+    Whole exponents and the error rules stay as _pow."""
+    if base > 0 and exponent != math.floor(exponent):
+        try:
+            return math.pow(base, exponent)
+        except OverflowError:
+            return math.inf
+    return _pow(base, exponent, function)
+
+
 _TINY_LOG = 2.0 ** -55
 
 
@@ -228,7 +240,7 @@ def _pv(args: list[object]) -> object:
     if rate == 0:
         value = -(fv + pmt * nper)
     else:
-        growth = _pow(1 + rate, nper, f)
+        growth = _growth(1 + rate, nper, f)
         if growth == 0:
             raise _division(f)
         value = -(fv + pmt * (1 + rate * kind) * (growth - 1) / rate) / growth
@@ -245,7 +257,7 @@ def _fv(args: list[object]) -> object:
     if rate == 0:
         value = -(pv + pmt * nper)
     else:
-        growth = _pow(1 + rate, nper, f)
+        growth = _growth(1 + rate, nper, f)
         value = -(pv * growth + pmt * (1 + rate * kind) * (growth - 1) / rate)
     if _blank_tail(args, 2):
         return None
