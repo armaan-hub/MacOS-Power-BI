@@ -312,11 +312,13 @@ def _rate(args: list[object]) -> object:
         raise dax_typed._error(_INVALID.format(f))
     if nper <= 0:
         raise _fail(f)
+    if pv == 0 and fv == 0:
+        raise _fail(f)  # Power BI refuses a rate with no present or future value (RATE(0.5,-0.5,0) is too large)
     try:
         value = _rate_search(nper, pmt, pv, fv, kind, guess)
     except (OverflowError, ZeroDivisionError, ValueError):
         value = None
-    if value is None:
+    if value is None or not math.isfinite(value):
         raise _fail(f)
     return _result(value, f)
 
@@ -630,7 +632,10 @@ def _nominal(args: list[object]) -> object:
         root = _root(1 + effective, 1 / periods)
     except OverflowError as exc:
         raise _fail(f) from exc
-    return _result(periods * (root - 1), f)
+    value = periods * (root - 1)
+    if math.isnan(value) or math.isinf(value):
+        raise _fail(f)
+    return Decimal(repr(value)) if value != 0 else Decimal(0)  # the double's shortest text, as the engine shows it (not its binary expansion)
 
 
 def _rri(args: list[object]) -> object:
