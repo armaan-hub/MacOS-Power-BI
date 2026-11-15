@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 161 shipped as Iteration 250; next Task 163, fresh DAX hunts until 0 wrong, then M functions; Haiku codes / Sonnet heads review and testing)
+**Active agent:** Claude Opus 5.5 (Task 163 shipped as Iteration 251; next Task Task 164: ROUND(x,0) of huge values, FIXED/FORMAT of 1E14..1E15 values with fractional parts, IF type-mix error inside ISERROR, 28-digit leak in division by CONFIDENCE.T, TAN/ODDFPRICE/CONFIDENCE.NORM last digits., fresh DAX hunts until 0 wrong, then M functions; Haiku codes / Sonnet reviews)
 **Branch in use:** main
 **Working tree clean:** yes
 
