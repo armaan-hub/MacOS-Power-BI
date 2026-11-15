@@ -1165,6 +1165,9 @@ _INFO_ALL_SCHEMAS: dict[str, tuple[list[str], dict[str, str]]] = {
 # Functions whose rows come from Power Query objects the app can hold (parameters, functions, folders, load-off queries)
 _INFO_MODEL_EXPRESSION_FUNCTIONS = frozenset({"INFO.EXPRESSIONS", "INFO.QUERYGROUPS"})
 
+# Task 163 family A: Power BI holds one row in these (measured: COUNTROWS is 1); the local engine has no such row, so it refuses them
+_INFO_ONE_ROW_REFUSED = frozenset({"INFO.ANNOTATIONS", "INFO.CULTURES"})
+
 _INFO_RESTRICTION_FUNCTIONS = frozenset({
     "INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS",
     *_INFO_EMPTY_TABLE_HEADERS,
@@ -4325,12 +4328,24 @@ def _scalar_math(function: str, values: list[Decimal | None]) -> Decimal | None:
     return _scalar_math_checked(function, values)
 
 
+def _fifteen_digit_floor(function: str, result: Decimal | None) -> Decimal | None:
+    """Task 163 family D: a FLOOR or CEILING Double beyond 1E15 that is not a whole number is shown at 15 significant digits
+    (FLOOR(-1E15,1.5) is -1E15 and FIXED of it -1,000,000,000,000,000.000 in Power BI; FLOOR(2.7E15+0.25,3.5)&"z" is 2.7E+15z, measured).
+    A whole result is kept as it is (CEILING(-1E15,1) is -1000000000000000, measured)."""
+    if result is None or not result.is_finite() or function not in {"FLOOR", "CEILING"} or abs(result) < Decimal("1E15"):
+        return result
+    if result == result.to_integral_value():
+        return result
+    return Decimal("%.15g" % float(result))
+
+
 def _scalar_math_checked(function: str, values: list[Decimal | None]) -> Decimal | None:
     result = _scalar_math_value(function, values)
     if result is None:
         return None
     if not result.is_finite():
         return result  # an Infinity argument that the function passes through (TRUNC)
+    result = _fifteen_digit_floor(function, result)
     if function in {"INT", "FLOOR", "CEILING", "QUOTIENT", "MROUND"} and abs(result) >= _INT64_RANGE:
         if function in {"INT", "FLOOR", "CEILING"}:
             raise _IntegerRangeFailure("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: a type test of it is answered by its type
@@ -12852,6 +12867,8 @@ def _evaluate_measures_once(
                 headers = _INFO_RELATIONSHIPS_HEADERS
                 types = _INFO_RELATIONSHIPS_TYPES
                 rows = []
+            elif function in _INFO_ONE_ROW_REFUSED:
+                raise dax_typed.refusal(f"{function} holds one row in Power BI, and the local engine does not model its values.")
             elif function in _INFO_EMPTY_SCHEMAS:
                 headers, types = _INFO_EMPTY_SCHEMAS[function]
                 rows = []
@@ -24130,6 +24147,7 @@ def _evaluate_measures_once(
                     if band == 0 or (band < 0 and _has_power(arguments[0], variable_nodes.get)) or values[1] is None or not values[1].is_finite() or values[1] == 0:
                         raise dax_typed.refusal(_POWER_BAND_REFUSAL)
                     math_result = _round_to_multiple(function, values[0], values[1], power_band=True)
+                    math_result = _fifteen_digit_floor(function, math_result)  # Task 163 family D
                 else:
                     math_result = _scalar_math(function, values)  # raises the measured errors and refusals first
                     if band is not None and function == "INT":

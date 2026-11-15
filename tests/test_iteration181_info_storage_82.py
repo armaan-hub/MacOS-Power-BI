@@ -15,7 +15,7 @@ from tools.dax_oracle_diff import local, same
 
 SPEC = Path(__file__).resolve().parents[1] / "docs" / "plans" / "2026-11-08-info-storage-82-spec.json"
 
-# Group A: Power BI returns no rows (empty-table schemas)
+# Group A: Power BI holds one row (measured 2026-11-15); refused (Task 163)
 GROUP_A = {"INFO.ANNOTATIONS", "INFO.CULTURES"}
 # Group B: Power BI returns exactly one row; every value is unmodelled
 GROUP_B = {"INFO.MODEL", "INFO.CATALOGS", "INFO.CSDLMETADATA"}
@@ -70,7 +70,7 @@ class TestIteration181InfoStorage82(unittest.TestCase):
                 if power_bi.startswith("ERR:"):
                     self.assertTrue(loc.startswith("LOCAL-REJECT"), f"Power BI {power_bi[:80]} but local {loc[:120]}")
                     continue
-                if loc.startswith("LOCAL-REJECT") and name in GROUP_C:
+                if loc.startswith("LOCAL-REJECT") and name in GROUP_C | GROUP_A:  # Task 163: GROUP_A is refused (Power BI holds one row)
                     continue
                 self.assertTrue(
                     _power_bi_matches(expression, power_bi, loc),
@@ -100,11 +100,12 @@ class TestIteration181InfoStorage82(unittest.TestCase):
                 self.assertEqual(local(f'IF(ISEMPTY({name}()),"e","n")'), "n")
                 self.assertTrue(local(f"{name}()").startswith("LOCAL-REJECT"))
 
-    def test_group_a_is_empty(self):
+    def test_group_a_is_refused(self):
+        # Task 163: Power BI holds one row in each (measured COUNTROWS 1 on 2026-11-15), so the local engine refuses both
         for name in sorted(GROUP_A):
             with self.subTest(name=name):
-                self.assertEqual(local(f"COUNTROWS({name}())"), "BLANK")
-                self.assertEqual(local(f'IF(ISEMPTY({name}()),"e","n")'), "e")
+                self.assertTrue(local(f"COUNTROWS({name}())").startswith("LOCAL-REJECT"))
+                self.assertTrue(local(f'IF(ISEMPTY({name}()),"e","n")').startswith("LOCAL-REJECT"))
 
 
 if __name__ == "__main__":
