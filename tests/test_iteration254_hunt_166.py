@@ -32,6 +32,13 @@ class TestIteration254Hunt166(unittest.TestCase):
         self.assertTrue(same15("0.183503419072274", dax.local("T.DIST.2T(2,2)")))
         self.assertTrue(same15("0.0917517095361369", dax.local("T.DIST(-2,2,TRUE())")))
 
+    def test_family_a_df2_threshold_rows_fitted_to_measured_power_bi(self) -> None:
+        # measured Power BI rows that fix the df-2 switch to the stable form at t / r above 0.95 (bracket (0.9272, 0.954])
+        self.assertTrue(same15("0.0853408792399528", dax.local("T.DIST.2T(3.2,2)")))
+        self.assertTrue(same15("0.0728273500544694", dax.local("T.DIST.2T(3.5,2)")))
+        self.assertTrue(same15("0.046001907994276", dax.local("T.DIST.2T(4.5,2)")))
+        self.assertTrue(same15("0.00990197059019657", dax.local("T.DIST.RT(7,2)")))
+
     @unittest.expectedFailure
     def test_known_limit_t_inverse_last_digits_df2(self) -> None:
         # known limit (measured): Power BI's T.INV differs from the correctly rounded value in the last digits at df 2
