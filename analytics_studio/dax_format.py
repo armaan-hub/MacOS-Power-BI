@@ -234,7 +234,7 @@ def _render(scaled: Decimal, tokens: list[tuple[str, str]], exact: bool = False)
     integer_tokens = body if point_index is None else body[:point_index]
     fraction_tokens = [] if point_index is None else body[point_index + 1:]
     places = sum(1 for kind, _ in fraction_tokens if kind == "digit")
-    if scaled >= Decimal(10) ** 15 and not exact:  # Task 74 Part B: an Int64 is shown exactly, a Double with 15 significant digits
+    if scaled >= Decimal(10) ** 14 and not exact:  # Task 74 Part B: an Int64 is shown exactly, a Double with 15 significant digits (Task 164 family B: from 1E14, half up)
         scaled = Context(prec=15, rounding=ROUND_HALF_UP, traps=[]).plus(scaled)  # Part E: 15 significant digits, then zeros
     rounded = _WIDE.quantize(scaled, Decimal(1).scaleb(-places))
     digits = f"{rounded:f}"
