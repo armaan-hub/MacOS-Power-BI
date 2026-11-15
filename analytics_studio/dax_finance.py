@@ -293,6 +293,7 @@ _RATE_TOLERANCE = 1e-7
 _RATE_ITERATIONS = 200
 _RATE_GIVE_UP = 1e-4
 _RATE_FLOOR = -1 + 1e-7
+_RATE_MAX = 1e6
 
 
 def _rate_residual(rate: float, nper: float, pmt: float, pv: float, fv: float, kind: int) -> float:
@@ -316,8 +317,8 @@ def _rate(args: list[object]) -> object:
         value = _rate_search(nper, pmt, pv, fv, kind, guess)
     except (OverflowError, ZeroDivisionError, ValueError):
         value = None
-    if value is None:
-        raise _fail(f)
+    if value is None or not math.isfinite(value) or abs(value) > _RATE_MAX:
+        raise _fail(f)  # RATE(0.5,-0.5,0) converges on a rate near 1E+67, which the engine refuses
     return _result(value, f)
 
 
@@ -630,7 +631,10 @@ def _nominal(args: list[object]) -> object:
         root = _root(1 + effective, 1 / periods)
     except OverflowError as exc:
         raise _fail(f) from exc
-    return _result(periods * (root - 1), f)
+    value = periods * (root - 1)
+    if math.isnan(value) or math.isinf(value):
+        raise _fail(f)
+    return Decimal(repr(value)) if value != 0 else Decimal(0)  # the double's shortest text, as the engine shows it (not its binary expansion)
 
 
 def _rri(args: list[object]) -> object:
