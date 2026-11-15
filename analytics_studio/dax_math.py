@@ -6,7 +6,7 @@ Scalar functions take already-evaluated arguments (``None`` is BLANK).  Compared
 
 from __future__ import annotations
 
-from decimal import Context, Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP, localcontext
+from decimal import Context, Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_DOWN, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP, localcontext
 import math
 import random
 
@@ -65,6 +65,15 @@ def rounding_function(function: str, args: list[object]) -> Decimal | None:
         raise _fail(function)
     if abs(number) >= Decimal("1E16"):
         return number  # Part E: a finite value beyond 1E16 is returned unchanged by ROUND, ROUNDUP and ROUNDDOWN, any digits (measured to 1E300 and 1E308)
+    if function == "ROUND" and digits == 0 and abs(number) >= Decimal("1E14"):
+        # Task 164 family A (measured): a whole-number ROUND from 1E14 up to 1E16 first keeps 15 significant digits, a tie toward zero
+        # (ROUND(2.5E15+5,0) is 2.5E+15, ROUND(4.5E15+15,0) is 4.50000000000001E+15, ROUND(999999999999999.5,0) is 999999999999999,
+        # ROUND(1234567890123456,0) is 1234567890123460, measured)
+        with localcontext() as fifteen:
+            fifteen.prec = 15
+            fifteen.rounding = ROUND_HALF_DOWN
+            fifteen_digits = +number
+        return Decimal(int(fifteen_digits.to_integral_value(rounding=ROUND_HALF_UP)))  # 1E14 to 1E15 keeps a fraction at 15 digits: then a whole ROUND
     if digits > 40:
         return number  # nothing is left to round
     if digits < -40:

@@ -813,8 +813,9 @@ def _fixed(args: list[object]) -> str:
             raise refusal("FIXED of a number from 1E60 up with decimals other than 0 is not modelled by the local engine.")
         digits = Context(prec=15, rounding=ROUND_HALF_UP, traps=[]).plus(number)
         return f"{Decimal(digits).quantize(Decimal(1), context=Context(prec=400, traps=[])):{'' if no_commas else ','}.0f}"
-    if Decimal(10) ** 15 <= abs(number) < Decimal(2 ** 53):
+    if Decimal(10) ** 14 <= abs(number) < Decimal(2 ** 53):
         # Task 163 family D (measured 2026-11-15): FIXED shows a number from 1E15 up to 2^53 at 15 significant digits, half away from zero
+        # Task 164 family B (measured): the same from 1E14 (FIXED(9.99E14+0.5,3) is 999,000,000,000,001.000, FIXED(1.5E14+0.25,3) is 150,000,000,000,000.000)
         with localcontext() as rounded_fifteen:
             rounded_fifteen.prec = 15
             rounded_fifteen.rounding = ROUND_HALF_UP
