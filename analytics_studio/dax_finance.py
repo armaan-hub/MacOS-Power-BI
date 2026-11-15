@@ -293,7 +293,6 @@ _RATE_TOLERANCE = 1e-7
 _RATE_ITERATIONS = 200
 _RATE_GIVE_UP = 1e-4
 _RATE_FLOOR = -1 + 1e-7
-_RATE_MAX = 1e6
 
 
 def _rate_residual(rate: float, nper: float, pmt: float, pv: float, fv: float, kind: int) -> float:
@@ -313,12 +312,14 @@ def _rate(args: list[object]) -> object:
         raise dax_typed._error(_INVALID.format(f))
     if nper <= 0:
         raise _fail(f)
+    if pv == 0 and fv == 0:
+        raise _fail(f)  # Power BI refuses a rate with no present or future value (RATE(0.5,-0.5,0) is too large)
     try:
         value = _rate_search(nper, pmt, pv, fv, kind, guess)
     except (OverflowError, ZeroDivisionError, ValueError):
         value = None
-    if value is None or not math.isfinite(value) or abs(value) > _RATE_MAX:
-        raise _fail(f)  # RATE(0.5,-0.5,0) converges on a rate near 1E+67, which the engine refuses
+    if value is None or not math.isfinite(value):
+        raise _fail(f)
     return _result(value, f)
 
 

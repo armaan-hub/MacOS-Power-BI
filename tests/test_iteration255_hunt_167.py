@@ -41,9 +41,27 @@ class TestIteration255Hunt167(unittest.TestCase):
         # known limit (measured): NOMINAL(0.1,365) is 0.0953226247647621 in Power BI
         self.assertTrue(same15("0.0953226247647621", dax.local("NOMINAL(0.1,365)")))
 
-    def test_rate_refuses_root_near_1e67(self) -> None:
-        # Power BI refuses RATE(0.5,-0.5,0) (result too large); the app must refuse too
+    def test_rate_refuses_when_pv_and_fv_are_zero(self) -> None:
+        # Power BI refuses a rate with no present or future value (too large); measured rows
         self.assertTrue(dax.local("RATE(0.5,-0.5,0)").startswith("LOCAL-REJECT"))
+        self.assertTrue(dax.local("RATE(0.25,-1,0)").startswith("LOCAL-REJECT"))
+        self.assertTrue(dax.local("RATE(2,-0.5,0)").startswith("LOCAL-REJECT"))
+        self.assertTrue(dax.local("RATE(0.3,-0.3,0,0,1)").startswith("LOCAL-REJECT"))
+        self.assertTrue(dax.local("RATE(0.5,1,0)").startswith("LOCAL-REJECT"))
+        self.assertTrue(dax.local("RATE(0.7,-1,0)").startswith("LOCAL-REJECT"))
+
+    def test_rate_large_rates_stay_exact(self) -> None:
+        # measured Power BI answers for large rates (no cap on the rate)
+        self.assertEqual(dax.local("RATE(1,-1E6,1)"), "999999")
+        self.assertEqual(dax.local("RATE(1,-2E6,1)"), "1999999")
+        self.assertEqual(dax.local("RATE(1,-1E7,1)"), "9999999")
+        self.assertEqual(dax.local("RATE(1,-1E9,1)"), "999999999")
+        self.assertEqual(dax.local("RATE(1,-1E12,1)"), "999999999999")
+        self.assertEqual(dax.local("RATE(1,-1,1E-7)"), "9999999")
+        self.assertEqual(dax.local("RATE(1,-2E6,1,0,0,1E6)"), "1999999")
+
+    def test_rate_with_pv_stays_exact(self) -> None:
+        self.assertTrue(same15("2.20871215252208", dax.local("RATE(0.5,-0.5,0.1)")))
 
     def test_rate_rows_that_match_stay_exact(self) -> None:
         self.assertTrue(same15("-0.203862224011488", dax.local("RATE(1.5,-1,2)")))
