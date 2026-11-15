@@ -4,8 +4,8 @@ Family A: INFO.CULTURES and INFO.ANNOTATIONS hold one row in Power BI (measured 
 so both are refused rather than answered with an empty table.
 Family B (not changed): LN of an integer is a 28-digit Decimal in the engine; a double LN breaks the locked
 EXP(LN(3))/3-1 answer (0 in Power BI), so LN(COUNTROWS(Facts)) stays a known wrong row (1.79175946922805 in Power BI).
-Family D: a FLOOR or CEILING Double beyond 1E15 that is not whole is shown at 15 significant digits (FIXED(FLOOR(EVEN(-1E15),"1.5"),3)
-is -1,000,000,000,000,000.000 in Power BI; the local 16-digit result was wrong).
+Family D: FLOOR, CEILING and MROUND Double results (and FIXED of a number from 1E15 to 2^53) are shown at 15 significant digits,
+half away from zero, whole or not; an Int64 result from 2^53 up stays exact.
 Values copied from the measured Power BI answers.
 """
 
@@ -44,6 +44,14 @@ class TestIteration251Hunt163(unittest.TestCase):
         # Power BI 2.7E+15z and 2.25179981368526E+15z (measured)
         self.assertEqual(local('FLOOR(2.7E15+0.25,3.5)&"z"'), "2.7E+15z")
         self.assertEqual(local('FLOOR(2^51+3+7,0.25)&"z"'), "2.25179981368526E+15z")
+
+    def test_fifteen_digit_floor_ceiling_mround_results(self):
+        # Power BI 15-significant-digit results, half away from zero (measured 2026-11-15, t168 probes)
+        self.assertEqual(local("FIXED(FLOOR(2.5E15+0.25,1.5),3)"), "2,500,000,000,000,010.000")
+        self.assertEqual(local("FIXED(FLOOR(4.5E15,3.5),3)"), "4,500,000,000,000,020.000")
+        self.assertEqual(local("FIXED(FLOOR(1E15+0.3,7),3)"), "1,000,000,000,000,000.000")
+        self.assertEqual(local("FIXED(MROUND(9.99E14+0.5,0.25),3)"), "999,000,000,000,001.000")
+        self.assertEqual(local("FIXED(MROUND(1E15+0.3,0.1),3)"), "1,000,000,000,000,000.000")
 
     def test_ceiling_beyond_1e15_on_a_whole_number_stays_exact(self):
         # Power BI -1000000000000000 (measured, a 15-digit result)

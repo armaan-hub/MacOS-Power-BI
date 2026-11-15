@@ -4328,15 +4328,18 @@ def _scalar_math(function: str, values: list[Decimal | None]) -> Decimal | None:
     return _scalar_math_checked(function, values)
 
 
-def _fifteen_digit_floor(function: str, result: Decimal | None) -> Decimal | None:
-    """Task 163 family D: a FLOOR or CEILING Double beyond 1E15 that is not a whole number is shown at 15 significant digits
-    (FLOOR(-1E15,1.5) is -1E15 and FIXED of it -1,000,000,000,000,000.000 in Power BI; FLOOR(2.7E15+0.25,3.5)&"z" is 2.7E+15z, measured).
-    A whole result is kept as it is (CEILING(-1E15,1) is -1000000000000000, measured)."""
-    if result is None or not result.is_finite() or function not in {"FLOOR", "CEILING"} or abs(result) < Decimal("1E15"):
+def _fifteen_digit_floor(function: str, result: Decimal | None, double_args: bool = False) -> Decimal | None:
+    """Task 163 family D (measured 2026-11-15): Power BI rounds every FLOOR, CEILING and MROUND Double result to 15 significant digits,
+    half away from zero, whole or not (FIXED(FLOOR(2.5E15+0.25,1.5),3) is 2,500,000,000,000,010.000; FIXED(MROUND(9.99E14+0.5,0.25),3)
+    is 999,000,000,000,001.000). An Int64 result from 2^53 up is kept exact (FLOOR(-7.1E18,3) is -7100000000000010240, measured)."""
+    if result is None or not result.is_finite() or not double_args or function not in {"FLOOR", "CEILING", "MROUND"} or result == 0:
         return result
-    if result == result.to_integral_value():
-        return result
-    return Decimal("%.15g" % float(result))
+    if abs(result) < Decimal("1E14") or abs(result) >= Decimal(2 ** 53):
+        return result  # below 1E14 (16 significant digits need 15 integer digits) the full double keeps its cancellation digits (FLOOR(7,1E-5)-7 is 8.88178419700125E-16, measured)
+    with localcontext() as rounded:
+        rounded.prec = 15
+        rounded.rounding = ROUND_HALF_UP
+        return +Decimal(float(result))
 
 
 def _scalar_math_checked(function: str, values: list[Decimal | None]) -> Decimal | None:
@@ -4345,7 +4348,6 @@ def _scalar_math_checked(function: str, values: list[Decimal | None]) -> Decimal
         return None
     if not result.is_finite():
         return result  # an Infinity argument that the function passes through (TRUNC)
-    result = _fifteen_digit_floor(function, result)
     if function in {"INT", "FLOOR", "CEILING", "QUOTIENT", "MROUND"} and abs(result) >= _INT64_RANGE:
         if function in {"INT", "FLOOR", "CEILING"}:
             raise _IntegerRangeFailure("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: a type test of it is answered by its type
@@ -21250,7 +21252,10 @@ def _evaluate_measures_once(
                 raise dax_typed.refusal(f"{function} of -9223372036854775808 of an unknown type is not modelled by the local engine.")
         if function in dax_math.MATH_ARITY or function == "ROUND":
             try:
-                return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
+                math_result = dax_math.math_function(function, values)
+                if function == "MROUND":
+                    math_result = _fifteen_digit_floor(function, math_result, left_static_type(arguments[1], row_context) == "double" if len(arguments) > 1 else False)  # Task 163 family D
+                return _double_rounding_result(function, math_result, left_static_type(arguments[0], row_context) if arguments else None)
             except MeasureRuntimeError as error:
                 if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
                     raise _TextConversionFailure(str(error)) from error
@@ -24147,9 +24152,10 @@ def _evaluate_measures_once(
                     if band == 0 or (band < 0 and _has_power(arguments[0], variable_nodes.get)) or values[1] is None or not values[1].is_finite() or values[1] == 0:
                         raise dax_typed.refusal(_POWER_BAND_REFUSAL)
                     math_result = _round_to_multiple(function, values[0], values[1], power_band=True)
-                    math_result = _fifteen_digit_floor(function, math_result)  # Task 163 family D
+                    math_result = _fifteen_digit_floor(function, math_result, left_static_type(arguments[1], row_context) == "double" if len(arguments) > 1 else False)  # Task 163 family D
                 else:
                     math_result = _scalar_math(function, values)  # raises the measured errors and refusals first
+                    math_result = _fifteen_digit_floor(function, math_result, left_static_type(arguments[1], row_context) == "double" if len(arguments) > 1 else False)  # Task 163 family D
                     if band is not None and function == "INT":
                         math_result = _odd_band_up(math_result)  # Task 55 fix
                 if (
