@@ -81,5 +81,74 @@ class TestIteration252Hunt164(unittest.TestCase):
         self.assertEqual(local("1.5+2"), "3.5")
 
 
+class TestIteration252Hunt164Batch22(unittest.TestCase):
+    """Task 164 follow-up (t173): every row of the 40 measured Power BI answers, copied from the measured values.
+
+    Exact rows compare the local answer with the Power BI answer. Refused rows must be refused (LOCAL-REJECT), never another value:
+    a Currency ROUND of 1E14 or more (Power BI shows a Currency artifact), and an IF nested in another IF's condition.
+    Query-error rows (Power BI raises the query error) must be refused too.
+    """
+
+    EXACT = (
+        ('ROUND(123456789012345.5,0)&"z"', "123456789012345z"),
+        ('ROUND(-123456789012345.5,0)&"z"', "-123456789012345z"),
+        ('ROUND(123456789012344.5,0)&"z"', "123456789012344z"),
+        ('ROUND(500000000000000.5,0)&"z"', "500000000000000z"),
+        ('ROUND(999999999999998.5,0)&"z"', "999999999999998z"),
+        ('ROUND(123456789012345.5+SUM(Facts[Sales])*0,0)&"z"', "123456789012345z"),
+        ('ROUND(123456789012345.25,0)&"z"', "123456789012345z"),
+        ('ROUND(123456789012345.75,0)&"z"', "123456789012346z"),
+        ('INT(123456789012345.5)&"z"', "123456789012346z"),
+        ("FIXED(123456789012345.5,1)", "123,456,789,012,346.0"),
+        ("FIXED(-999000000000000.5,3)", "-999,000,000,000,001.000"),
+        ("FIXED(CURRENCY(123456789012345.6789),2)", "123,456,789,012,346.00"),
+        ('FORMAT(1234567890123.125,"0.000")', "1234567890123.130"),
+        ('FORMAT(1234567890123.125,"0.00")', "1234567890123.13"),
+        ('FORMAT(1234567890123.125,"#,0.000")', "1,234,567,890,123.130"),
+        ('FORMAT(12345678901.03125,"0.00000")', "12345678901.03130"),
+        ('FORMAT(123456789012.5625,"0.0000")', "123456789012.5630"),
+        ('FORMAT(-1234567890123.125,"0.000")', "-1234567890123.130"),
+        ('FORMAT(12345678901234.125,"0.000")', "12345678901234.100"),
+        ('FORMAT(1234567890123.125,"Fixed")', "1234567890123.13"),
+        ('FORMAT(1234567890123.125,"General Number")', "1234567890123.13"),
+        ('FORMAT(-9.99E14-0.5,"#,0.00")', "-999,000,000,000,001.00"),
+        ('FORMAT(9.99E14+0.5,"Currency")', "$999,000,000,000,001.00"),
+        ('ISERROR(IF("a",1,2)+SUM(Facts[Sales]))', "True"),
+        ('ISERROR(IF.EAGER("a",SUM(Facts[Sales]),1))', "True"),
+        ('IFERROR(IF("a",1,2)+SUM(Facts[Sales]),"E")', "E"),
+        ('IFERROR(SUM(Facts[Sales])*IF("a",1,2),"E")', "E"),
+        ('ISBLANK(IF("a",IF(ISBLANK(SUM(Facts[Sales])),1,2),3))', "False"),
+        ('ISERROR(IF("TRUE",SUM(Facts[Sales]),1))', "False"),
+        ('ISERROR(IF("1",SUM(Facts[Sales]),1))', "False"),
+        ('IF("TRUE",SUM(Facts[Sales]),1)', "31.5"),
+        ('ISERROR(IF("abc",1,2))', "True"),
+    )
+    REFUSED = (
+        # Power BI: 123456789012345.0112z (a Currency artifact); the local engine refuses
+        'ROUND(CURRENCY(123456789012345.5),0)&"z"',
+        # Power BI: False; an IF nested in another IF's condition is refused
+        'ISERROR(IF(IF("a",1,2),SUM(Facts[Sales]),1))',
+    )
+    QUERY_ERROR = (
+        # Power BI raises "Cannot convert value 'a' of type Text to type True/False" (the query fails)
+        'ISERROR(1+IF("a",SUM(Facts[Sales]),1))',
+        'ISERROR(IF("x",SUM(Facts[Sales]),1)&"q")',
+        'ISERROR(IF(TRUE(),IF("a",SUM(Facts[Sales]),1),2))',
+        'ISERROR(IF("a",SUM(Facts[Sales]),1))',
+        'IFERROR(IF("a",SUM(Facts[Sales]),1),"E")',
+        'ISNUMBER(IF("a",SUM(Facts[Sales]),1))',
+    )
+
+    def test_exact_rows_match_power_bi(self):
+        for expression, expected in self.EXACT:
+            with self.subTest(expression=expression):
+                self.assertEqual(local(expression), expected)
+
+    def test_refused_rows_are_refused(self):
+        for expression in self.REFUSED + self.QUERY_ERROR:
+            with self.subTest(expression=expression):
+                self.assertTrue(local(expression).startswith("LOCAL-REJECT"), expression)
+
+
 if __name__ == "__main__":
     unittest.main()

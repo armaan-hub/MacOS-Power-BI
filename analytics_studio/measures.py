@@ -4305,17 +4305,48 @@ def _power_as_double(node: Any, value: Any, held: Callable[[str], Any]) -> Any:
     return Decimal(computed[0])
 
 
-def _has_text_literal_if(node: Any) -> bool:
-    """Task 164 family C: an IF or IF.EAGER in the node whose condition is a text literal (IF("a",1,2))."""
+def _text_literal_ifs(node: Any) -> list[tuple[Any, ...]]:
+    """Task 164 family C: every IF (not IF.EAGER: ISERROR(IF.EAGER("a",SUM(..),1)) is True, measured) in the node whose condition is a text literal."""
+    found: list[tuple[Any, ...]] = []
     pending = [node]
     while pending:
         part = pending.pop()
         if not isinstance(part, tuple) or not part:
             continue
-        if part[0] == "call" and len(part) > 2 and part[1] in {"IF", "IF.EAGER"} and part[2] and isinstance(part[2][0], tuple) and part[2][0][:1] == ("string",):
+        if part[0] == "call" and len(part) > 2 and part[1] == "IF" and part[2] and isinstance(part[2][0], tuple) and part[2][0][:1] == ("string",):
+            found.append(part)
+        pending.extend(child for child in part if isinstance(child, (tuple, list)))
+    return found
+
+
+def _has_text_literal_if(node: Any) -> bool:
+    """Task 164 family C: an IF in the node whose condition is a text literal (IF("a",1,2))."""
+    return bool(_text_literal_ifs(node))
+
+
+def _text_literal_if_in_condition(node: Any) -> bool:
+    """Task 164: a text-literal IF nested inside the condition of another IF / IF.EAGER (IF(IF("a",1,2),SUM(..),1) is False in Power BI, measured)."""
+    pending = [node]
+    while pending:
+        part = pending.pop()
+        if not isinstance(part, tuple) or not part:
+            continue
+        if part[0] == "call" and len(part) > 2 and part[1] in {"IF", "IF.EAGER"} and part[2] and _has_text_literal_if(part[2][0]):
             return True
         pending.extend(child for child in part if isinstance(child, (tuple, list)))
     return False
+
+
+def _text_literal_if_outcome(node: Any, held: Callable[[str], Any], error: Exception) -> None:
+    """Task 164 family C, shared by ISERROR and IFERROR: a text-literal IF failing with 'Cannot convert value ... to type True/False'.
+    Raises the query error when a text-literal IF has a branch that reads data (Power BI fails the query; ISERROR and IFERROR do not catch it).
+    Refuses when such an IF sits in another IF's condition (not measured). Otherwise returns, and the caller treats the error as caught."""
+    if "of type Text to type True/False" not in str(error) or not _has_text_literal_if(node):
+        return
+    if _text_literal_if_in_condition(node):
+        raise dax_typed.refusal("A text-literal IF nested in the condition of another IF, failing as a text-to-logical conversion, is not modelled by the local engine.")
+    if any(not _reads_no_data(branch, held) for found in _text_literal_ifs(node) for branch in found[2][1:]):
+        raise MeasureError(str(error)) from error  # Task 164 family C (measured): a data-reading IF with a text-literal condition fails the query; a constant one is caught
 
 
 def _read_double_as_integer_source(number: Decimal) -> Decimal:
@@ -20868,8 +20899,8 @@ def _evaluate_measures_once(
             try:
                 value = evaluate(arguments[0], row_context, allow_text=True)
             except (MeasureRuntimeError, DecimalException, OverflowError) as error:
-                if isinstance(error, MeasureRuntimeError) and _has_text_literal_if(arguments[0]) and "of type Text to type True/False" in str(error) and not _reads_no_data(arguments[0], variable_nodes.get):
-                    raise MeasureError(str(error)) from error  # Task 164 family C (measured): a data-reading IF with a text-literal condition fails the query, ISERROR does not catch it; a constant one is caught (ISERROR(IF("abc",1,2)) is True, locked)
+                if isinstance(error, MeasureRuntimeError):
+                    _text_literal_if_outcome(arguments[0], variable_nodes.get, error)  # Task 164 family C: raises for a data-reading text-literal IF; a constant one is caught (ISERROR(IF("abc",1,2)) is True, locked)
                 return True
             return dax_typed.is_non_finite(value)
         if function in {"ISONORAFTER", "ISAFTER"}:  # ASC / DESC after each (value, comparand) pair become Booleans
@@ -21253,6 +21284,8 @@ def _evaluate_measures_once(
             _refuse_quotient_band(arguments, values, variable_nodes.get)
         if function == "QUOTIENT" and len(values) == 2 and all(isinstance(value, Decimal) and value.is_finite() and not dax_dates.is_date(value) for value in values) and values[1] == values[1].to_integral_value() and left_static_type(arguments[0], row_context) == "double":
             values = [_read_double_as_integer_source(values[0]), values[1]]  # Part D: QUOTIENT by a whole number reads a Double as INT does
+        if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and len(values) == 2 and isinstance(values[0], Decimal) and values[0].is_finite() and abs(values[0]) >= Decimal("1E14") and left_static_type(arguments[0], row_context) == "currency":
+            raise dax_typed.refusal("ROUND, ROUNDUP or ROUNDDOWN of a Currency value of 1E14 or more is not modelled by the local engine (Power BI shows a Currency artifact, measured).")  # Task 164 family A: ROUND(CURRENCY(123456789012345.5),0)&"z" is 123456789012345.0112z in Power BI
         if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and len(values) == 2 and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double" and not (function == "ROUND" and values[1] == 0 and abs(values[0]) >= Decimal("1E14")):  # Task 164 family A: dax_math reads a whole ROUND from 1E14 up at 15 digits itself
             values = [_read_double_as_integer_source(values[0]), values[1]]  # Task 22 fix: a Double is read at 15 significant digits before it is rounded with digits (TRUNC(66.6 as a product, 1.6) is 66.6, measured)
         if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "INT", "TRUNC", "ISEVEN", "ISODD"} and values and not dax_dates.is_date(values[0]) and (
@@ -23862,7 +23895,9 @@ def _evaluate_measures_once(
                 try:
                     value = evaluate(arguments[0], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
                     failed = dax_typed.is_non_finite(value)  # Infinity and NaN count as errors here
-                except (MeasureRuntimeError, DecimalException, OverflowError):
+                except (MeasureRuntimeError, DecimalException, OverflowError) as error:
+                    if isinstance(error, MeasureRuntimeError):
+                        _text_literal_if_outcome(arguments[0], variable_nodes.get, error)  # Task 164 family C: IFERROR(IF("a",SUM(..),1),"E") is a query error (measured); IFERROR(IF("a",1,2)+SUM(..),"E") is E
                     value, failed = None, True
             finally:
                 iferror_depth[0] -= 1
