@@ -1,5 +1,7 @@
 """Iteration 254: Task 166 (dax-hunt-166), Student-t, chi-square and percentile last digits, batch 23.
 
+The T.INV and CHISQ.INV solvers stay on main (a Newton version fitted to the search rows did not generalise to fresh rows).
+
 Values are the Power BI answers measured for the spec rows (15 significant digits). Known limits that stay wrong are marked expectedFailure.
 """
 
@@ -29,16 +31,6 @@ class TestIteration254Hunt166(unittest.TestCase):
         self.assertTrue(same15("0.136196562445501", dax.local("T.DIST.RT(1.5,2)")))
         self.assertTrue(same15("0.183503419072274", dax.local("T.DIST.2T(2,2)")))
         self.assertTrue(same15("0.0917517095361369", dax.local("T.DIST(-2,2,TRUE())")))
-
-    def test_family_a_inverse_rows_fixed_by_newton_on_the_tail(self) -> None:
-        self.assertTrue(same15("0.267180865704146", dax.local("T.INV(0.6,5)")))
-        self.assertTrue(same15("2.22813885198627", dax.local("T.INV.2T(0.05,10)")))
-
-    def test_family_b_chisq_inverse_fixed_by_newton(self) -> None:
-        self.assertTrue(same15("0.584374374155183", dax.local("CHISQ.INV(0.1,3)")))
-
-    def test_family_b_confidence_t_fixed_through_the_t_inverse(self) -> None:
-        self.assertTrue(same15("0.901849296870862", dax.local("CONFIDENCE.T(0.25,1.5,5)")))
 
     @unittest.expectedFailure
     def test_known_limit_t_inverse_last_digits_df2(self) -> None:

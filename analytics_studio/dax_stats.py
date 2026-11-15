@@ -501,28 +501,11 @@ def _t_pdf(x: float, v: float) -> float:
 
 
 def _t_upper_inv(q: float, v: float) -> float:
-    """t >= 0 with P(T > t) = q for 0 < q < 0.5. Newton steps on the tail from the normal quantile (task 166); the log-scale
-    solver below is the fallback when a step leaves the finite range or the density underflows."""
+    """t >= 0 with P(T > t) = q for 0 < q < 0.5."""
     if v == 1:
         return 1.0 / math.tan(math.pi * q)
     if v == 2:
         return (1.0 - 2.0 * q) / math.sqrt(2.0 * q * (1.0 - q))
-    t = max(-_norm_inv(q), 1e-6)
-    for _ in range(100):
-        density = _t_pdf(t, v)
-        if not density > 0.0 or not math.isfinite(density):
-            break
-        step = (_t_upper(t, v) - q) / density
-        t += step
-        if not math.isfinite(t) or t < 0.0:
-            break
-        if abs(step) <= 1e-14 * t:
-            return t
-    return _t_upper_inv_log(q, v)
-
-
-def _t_upper_inv_log(q: float, v: float) -> float:
-    """Fallback for _t_upper_inv: the same tail solved on a log scale (Newton with bracketing)."""
     start = max(-_norm_inv(q), 1e-6)
     start *= 1.0 + 0.25 / v * (start * start + 1.0)
 
@@ -757,18 +740,6 @@ def _gamma_quantile(p: float, q: float, a: float) -> float:
         density = (a / y) * _poisson_pmf_real(a, y) if y > 0 else 0.0
         return value, -y * density
 
-    y = start
-    for _ in range(100):
-        dens = (a / y) * _poisson_pmf_real(a, y) if y > 0 else 0.0
-        if not dens > 0.0 or not math.isfinite(dens):
-            break
-        value = _gamma_pq(a, y)[0] if use_lower else _gamma_pq(a, y)[1]
-        delta = (value - p if use_lower else value - q) / dens
-        y = y - delta if use_lower else y + delta
-        if not y > 0.0 or not math.isfinite(y):
-            break
-        if abs(delta) <= 1e-14 * y:
-            return y
     if use_lower:
         s = _solve_log(lower, math.log(p), math.log(start), decreasing=False)
     else:
