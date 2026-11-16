@@ -8499,6 +8499,28 @@ def _measure_references(node: Any, found: set[str]) -> None:
             _measure_references(part, found)
 
 
+def _reject_bare_columns_in_swi_table_arguments(node: Any) -> None:
+    """Task 169 (measured): a bare column as argument 1 or 3 of SUBSTITUTEWITHINDEX is a query error wherever the call sits.
+
+    Power BI compiles the whole query first, so this scans every node (any nesting, any IF/IFERROR branch, any wrapper) and
+    refuses before evaluation; a bare column is never a valid table argument, so no valid query is refused.
+    """
+    if isinstance(node, tuple):
+        if len(node) >= 3 and node[0] == "call" and node[1] == "SUBSTITUTEWITHINDEX" and isinstance(node[2], (list, tuple)):
+            for position in (0, 2):
+                argument = node[2][position] if position < len(node[2]) else None
+                if isinstance(argument, tuple) and len(argument) == 3 and argument[0] == "reference" and argument[1]:
+                    raise MeasureError(
+                        f"A single value for column '{argument[2]}' in table '{argument[1]}' cannot be determined. "
+                        "Refer to the column inside an aggregation such as MIN, MAX, COUNT or SUM, or iterate its table."
+                    )
+        for part in node:
+            _reject_bare_columns_in_swi_table_arguments(part)
+    elif isinstance(node, list):
+        for part in node:
+            _reject_bare_columns_in_swi_table_arguments(part)
+
+
 def _reject_bare_columns_without_row_context(
     selected: list[tuple[dict[str, str], tuple[Any, ...]]],
     every_expression: list[tuple[Any, ...]],
@@ -25411,6 +25433,18 @@ def _evaluate_measures_once(
     results = {item["name"]: _bare_result(resolve(item["name"].casefold())) for item in selected}
     # Power BI checks the whole query when it compiles it, also the branches that never run; the engine's own errors come first
     reject_invalid_allexcept(parsed[item["name"].casefold()] for item in selected)
+    # Task 169: Power BI validates the measures in the query and what they reference (transitively), not the whole model
+    reachable: set[str] = set()
+    pending = [item["name"].casefold() for item in selected]
+    while pending:
+        name = pending.pop()
+        if name in reachable or name not in parsed:
+            continue
+        reachable.add(name)
+        refs: set[str] = set()
+        _measure_references(parsed[name], refs)
+        pending.extend(refs - reachable)
+    _reject_bare_columns_in_swi_table_arguments([parsed[name] for name in sorted(reachable)])
     if targets is not None:
         _reject_bare_columns_without_row_context(
             [(item, parsed[item["name"].casefold()]) for item in selected],
