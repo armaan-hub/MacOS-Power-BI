@@ -123,7 +123,10 @@ class ColumnMenuTests(unittest.TestCase):
     def test_value_list_has_select_all_blank_values_and_search(self) -> None:
         panel = self.make()._build_preview_column_menu(0).panel
         labels = [panel.value_list.item(i).text() for i in range(panel.value_list.count())]
-        self.assertEqual(labels, ["(Select All)", "(Blank)", "East", "West"])
+        # Task 176 (2026-11-16): null and empty text are separate entries, as in Power BI
+        self.assertEqual(
+            labels, ["(Select All)", "(null)", "(Blank)", "East", "West"]
+        )
         for index in range(panel.value_list.count()):
             self.assertEqual(
                 panel.value_list.item(index).checkState(), Qt.CheckState.Checked
@@ -354,12 +357,14 @@ class ColumnMenuTests(unittest.TestCase):
         info = dialog._build_preview_column_menu(0)
         self._item(info.panel, "(Blank)").setCheckState(Qt.CheckState.Unchecked)
         info.panel.ok_button.click()
+        # Task 176 (2026-11-16): null and empty text are separate entries, as in Power BI
         self.assertEqual(dialog._steps[-1], {
             "op": "filter_rows", "column": "Region",
-            "operator": "is_not_blank", "value": "",
+            "operator": "not_equals", "value": "",
         })
+        # Task 176 (2026-11-16): null and empty text are separate entries, as in Power BI
         self.assertEqual([row["Region"] for row in dialog._preview_candidate.rows],
-                         ["East", "West", "East"])
+                         ["East", "West", "East", None])
 
     def test_ok_with_everything_selected_and_cancel_add_no_step(self) -> None:
         dialog = self.make()

@@ -996,10 +996,6 @@ _NUMBER_COLUMN_TYPES = frozenset({
 _DATE_COLUMN_TYPES = frozenset({"date", "datetime", "datetime_zone"})
 
 
-def _is_blank_value(value: Any) -> bool:
-    return value is None or (isinstance(value, str) and value == "")
-
-
 def _column_value_sort_key(value: Any) -> tuple[Any, ...]:
     """Order a column's distinct values the way Power BI lists them (ascending)."""
     if isinstance(value, bool):
@@ -1017,8 +1013,9 @@ def _column_distinct_values(
 ) -> tuple[list[Any], bool, bool, bool]:
     """Return (values, has_blank, truncated, has_errors) for one column.
 
-    Blank (null or empty text) is reported separately. At most
-    ``_COLUMN_MENU_VALUE_LIMIT`` distinct values are kept, in first-seen order.
+    Null is reported separately through ``has_blank``; empty text is an ordinary
+    distinct value. At most ``_COLUMN_MENU_VALUE_LIMIT`` distinct values are kept,
+    in first-seen order.
     """
     values: list[Any] = []
     seen: set[tuple[Any, ...]] = set()
@@ -1030,7 +1027,7 @@ def _column_distinct_values(
         if is_cell_error(value):
             has_errors = True
             continue
-        if _is_blank_value(value):
+        if value is None:
             has_blank = True
             continue
         if truncated:
@@ -1178,8 +1175,11 @@ class _PowerQueryColumnFilterPanel(QWidget):
         )
         self._blank_item: QListWidgetItem | None = None
         if has_blank:
-            self._blank_item = self._new_item("(Blank)", None)
-        labels = [_PowerQueryValueFilterDialog._display_value(v) for v in self._values]
+            self._blank_item = self._new_item("(null)", None)
+        labels = [
+            "(Blank)" if value == "" else _PowerQueryValueFilterDialog._display_value(value)
+            for value in self._values
+        ]
         counts: dict[str, int] = {}
         for label in labels:
             counts[label] = counts.get(label, 0) + 1
@@ -7326,7 +7326,7 @@ class TransformDataDialog(QDialog):
                 })
             if blank_excluded:
                 clauses.append({
-                    "column": column, "operator": "is_not_blank",
+                    "column": column, "operator": "is_not_null",
                     "value": "", "join": "and",
                 })
         else:
@@ -7338,7 +7338,7 @@ class TransformDataDialog(QDialog):
                 })
             if has_blank and blank_selected:
                 clauses.append({
-                    "column": column, "operator": "is_blank", "value": "",
+                    "column": column, "operator": "is_null", "value": "",
                     "join": "and" if not clauses else "or",
                 })
         if len(clauses) > MAX_FILTER_CLAUSES:
