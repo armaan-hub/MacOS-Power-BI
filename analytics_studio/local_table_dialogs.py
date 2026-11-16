@@ -22,9 +22,11 @@ from PySide6.QtCore import (
 from PySide6.QtGui import (
     QAction,
     QColor,
+    QContextMenuEvent,
     QIntValidator,
     QIcon,
     QKeySequence,
+    QMouseEvent,
     QPalette,
     QPainter,
     QPen,
@@ -584,6 +586,8 @@ class _PowerQueryProfileHeader(QHeaderView):
     """Power Query style column names with quality and distribution summaries."""
 
     filterRequested = Signal(int)
+    contextMenuRequested = Signal(int, QPoint)
+    typeIconClicked = Signal(int)
 
     _HEADER_ROW_HEIGHT = 27
     _FULL_HEIGHT = 148
@@ -651,6 +655,14 @@ class _PowerQueryProfileHeader(QHeaderView):
             3,
             self._FILTER_BUTTON_SIZE.width(),
             self._FILTER_BUTTON_SIZE.height(),
+        )
+
+    def _type_icon_rect(self, logical_index: int) -> QRect:
+        return QRect(
+            self.sectionViewportPosition(logical_index) + 6,
+            0,
+            34,
+            self._HEADER_ROW_HEIGHT,
         )
 
     def _new_filter_button(self) -> QToolButton:
@@ -800,6 +812,32 @@ class _PowerQueryProfileHeader(QHeaderView):
                     return True
         return super().eventFilter(watched, event)
 
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:  # noqa: N802
+        pos = event.pos()
+        logical_index = self.logicalIndexAt(pos)
+        self.contextMenuRequested.emit(logical_index, event.globalPos())
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # noqa: N802
+        if event.button() == Qt.MouseButton.LeftButton:
+            pos = event.position().toPoint()
+            logical_index = self.logicalIndexAt(pos)
+            if 0 <= logical_index < self.count():
+                glyph_rect = self._type_icon_rect(logical_index)
+                if glyph_rect.contains(pos):
+                    self.typeIconClicked.emit(logical_index)
+                    event.accept()
+                    return
+        super().mousePressEvent(event)
+
+    def event(self, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.MouseButtonPress and isinstance(event, QMouseEvent):
+            self.mousePressEvent(event)
+            return True
+        if event.type() == QEvent.Type.MouseButtonRelease and isinstance(event, QMouseEvent):
+            self.mouseReleaseEvent(event)
+            return True
+        return super().event(event)
+
     def resizeEvent(self, event: Any) -> None:  # noqa: N802
         super().resizeEvent(event)
         self._update_filter_buttons()
@@ -843,10 +881,28 @@ class _PowerQueryProfileHeader(QHeaderView):
             "boolean": "T/F",
         }.get(type_name, "ABC")
         painter.setFont(self.font())
+        glyph_rect = self._type_icon_rect(logical_index)
+        glyph_rect = QRect(
+            glyph_rect.left(),
+            rect.top(),
+            glyph_rect.width(),
+            self._HEADER_ROW_HEIGHT,
+        )
         painter.drawText(
-            header.adjusted(0, 1, -25, 0),
+            glyph_rect,
             Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
-            f"{type_glyph}  {str(profile.get('name', ''))}",
+            type_glyph,
+        )
+        name_left = glyph_rect.right() + 4
+        painter.drawText(
+            QRect(
+                name_left,
+                rect.top() + 1,
+                max(0, header.right() - 25 - name_left),
+                self._HEADER_ROW_HEIGHT,
+            ),
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
+            str(profile.get("name", "")),
         )
         filter_active = bool(profile.get("filter_active", False))
         dropdown = QRect(rect.right() - 28, rect.top() + 3, 23, 21)
@@ -4143,6 +4199,12 @@ class TransformDataDialog(QDialog):
         self.preview_header.filterRequested.connect(
             self._show_preview_column_menu
         )
+        self.preview_header.contextMenuRequested.connect(
+            self._show_header_context_menu
+        )
+        self.preview_header.typeIconClicked.connect(
+            self._show_change_type_menu
+        )
         self.preview.setHorizontalHeader(self.preview_header)
         self.preview.horizontalHeader().setStretchLastSection(False)
         self.preview.horizontalHeader().setDefaultSectionSize(198)
@@ -7315,6 +7377,284 @@ class TransformDataDialog(QDialog):
 
     def _show_profile_view(self, visible: bool = True) -> None:
         self.preview_header.set_distribution_visible(visible)
+
+    def _show_header_context_menu(self, logical_index: int, pos: QPoint) -> None:
+        headers = self._selected_preview_candidate().headers
+        if logical_index < 0 or logical_index >= len(headers):
+            return
+        menu = self._build_header_context_menu(logical_index)
+        menu.exec(pos)
+
+    def _show_change_type_menu(self, logical_index: int) -> None:
+        headers = self._selected_preview_candidate().headers
+        if logical_index < 0 or logical_index >= len(headers):
+            return
+        menu = self._build_change_type_menu(logical_index)
+        pos = self._preview_column_menu_position(logical_index)
+        menu.exec(pos)
+
+    def _copy_column_preview_values(self, logical_index: int) -> None:
+        candidate = self._selected_preview_candidate()
+        if logical_index < 0 or logical_index >= len(candidate.headers):
+            return
+        column = candidate.headers[logical_index]
+        vals = [
+            "" if row.get(column) is None else str(row.get(column))
+            for row in candidate.rows
+        ]
+        QApplication.clipboard().setText("\n".join(vals))
+
+    def _build_header_context_menu(self, logical_index: int) -> QMenu:
+        candidate = self._selected_preview_candidate()
+        if (
+            0 <= logical_index < len(candidate.headers)
+            and candidate.headers[logical_index] not in self._selected_preview_columns()
+        ):
+            self.preview.selectColumn(logical_index)
+        column = (
+            candidate.headers[logical_index]
+            if 0 <= logical_index < len(candidate.headers)
+            else ""
+        )
+        headers = list(candidate.headers)
+        keep_columns_supported = self.operation_combo.findData("keep_columns") >= 0
+
+        def keep_selected_columns() -> None:
+            selected = set(self._selected_preview_columns())
+            columns = [name for name in headers if name in selected]
+            if columns:
+                self._insert_step_after_selection(
+                    {"op": "keep_columns", "columns": columns}
+                )
+
+        menu = QMenu(self)
+        menu.setObjectName("powerQueryHeaderContextMenu")
+        menu.setToolTipsVisible(True)
+
+        def add_item(
+            parent_menu: QMenu,
+            text: str,
+            op: str | None,
+            *,
+            action_fn: Callable[[], None] | None = None,
+        ) -> QAction:
+            action = QAction(text, parent_menu)
+            if action_fn is not None:
+                action.triggered.connect(action_fn)
+            elif op is not None and self.operation_combo.findData(op) >= 0:
+                action.triggered.connect(lambda: self._select_ribbon_operation(op))
+            else:
+                action.setEnabled(False)
+                action.setToolTip(_NOT_SUPPORTED_YET)
+            parent_menu.addAction(action)
+            return action
+
+        # 1. Copy
+        add_item(
+            menu,
+            "Copy",
+            None,
+            action_fn=lambda: self._copy_column_preview_values(logical_index),
+        )
+
+        # 2. Remove
+        add_item(menu, "Remove", "remove_column")
+
+        # 3. Remove Other Columns
+        add_item(
+            menu,
+            "Remove Other Columns",
+            None,
+            action_fn=keep_selected_columns if keep_columns_supported else None,
+        )
+
+        # 4. Duplicate Column
+        add_item(menu, "Duplicate Column", "duplicate_column")
+
+        # 5. Add Column From Examples...
+        add_item(menu, "Add Column From Examples...", None)
+
+        # 6. Remove Duplicates
+        add_item(menu, "Remove Duplicates", "remove_duplicates")
+
+        # 7. Remove Errors
+        add_item(menu, "Remove Errors", None)
+
+        # 8. Change Type ▸
+        change_type_sub = self._build_change_type_menu(logical_index, parent=menu)
+        change_type_sub.setTitle("Change Type")
+        menu.addMenu(change_type_sub)
+
+        # 9. Transform ▸
+        transform_sub = QMenu("Transform", menu)
+        transform_sub.setObjectName("powerQueryHeaderTransformMenu")
+        transform_sub.setToolTipsVisible(True)
+        add_item(transform_sub, "Lowercase", "lowercase_text")
+        add_item(transform_sub, "Uppercase", "uppercase_text")
+        add_item(transform_sub, "Capitalize Each Word", "proper_case_text")
+        add_item(transform_sub, "Trim", "trim_text")
+        add_item(transform_sub, "Clean", "clean_text")
+        add_item(transform_sub, "Length", None)
+        add_item(transform_sub, "JSON", None)
+        add_item(transform_sub, "XML", None)
+        menu.addMenu(transform_sub)
+
+        # 10. Replace Values...
+        add_item(menu, "Replace Values...", "replace_value")
+
+        # 11. Replace Errors...
+        add_item(menu, "Replace Errors...", None)
+
+        # 12. Group By...
+        add_item(menu, "Group By...", "group_by")
+
+        # 13. Fill ▸ (Down, Up)
+        fill_sub = QMenu("Fill", menu)
+        fill_sub.setObjectName("powerQueryHeaderFillMenu")
+        fill_sub.setToolTipsVisible(True)
+        add_item(fill_sub, "Down", "fill_down")
+        add_item(fill_sub, "Up", "fill_up")
+        menu.addMenu(fill_sub)
+
+        # 14. Unpivot Columns
+        add_item(menu, "Unpivot Columns", "unpivot_columns")
+
+        # 15. Unpivot Other Columns
+        add_item(menu, "Unpivot Other Columns", "unpivot_other_columns")
+
+        # 16. Unpivot Only Selected Columns
+        add_item(menu, "Unpivot Only Selected Columns", None)
+
+        # 17. Rename...
+        add_item(menu, "Rename...", "rename_column")
+
+        # 18. Move ▸ (Left, Right, To Beginning, To End)
+        move_sub = QMenu("Move", menu)
+        move_sub.setObjectName("powerQueryHeaderMoveMenu")
+        move_sub.setToolTipsVisible(True)
+        reorder_supported = self.operation_combo.findData("reorder_columns") >= 0
+        last_index = len(headers) - 1
+
+        def move_column(target: int) -> None:
+            order = list(headers)
+            if not 0 <= logical_index < len(order):
+                return
+            order.insert(target, order.pop(logical_index))
+            self._insert_step_after_selection(
+                {"op": "reorder_columns", "columns": order}
+            )
+
+        for label, target, blocked_by_position in (
+            ("Left", logical_index - 1, logical_index <= 0),
+            ("Right", logical_index + 1, logical_index >= last_index),
+            ("To Beginning", 0, logical_index <= 0),
+            ("To End", last_index, logical_index >= last_index),
+        ):
+            action = QAction(label, move_sub)
+            if not reorder_supported:
+                action.setEnabled(False)
+                action.setToolTip(_NOT_SUPPORTED_YET)
+            elif blocked_by_position:
+                action.setEnabled(False)
+            else:
+                action.triggered.connect(
+                    lambda checked=False, target=target: move_column(target)
+                )
+            move_sub.addAction(action)
+        menu.addMenu(move_sub)
+
+        # 19. Drill Down
+        add_item(menu, "Drill Down", None)
+
+        # 20. Add as New Query
+        add_item(menu, "Add as New Query", None)
+
+        return menu
+
+    def _build_change_type_menu(
+        self, logical_index: int, parent: QWidget | None = None
+    ) -> QMenu:
+        candidate = self._selected_preview_candidate()
+        if (
+            0 <= logical_index < len(candidate.headers)
+            and candidate.headers[logical_index] not in self._selected_preview_columns()
+        ):
+            self.preview.selectColumn(logical_index)
+        profiles = self.preview_header._profiles
+        current_type = (
+            str(profiles[logical_index].get("type", ""))
+            if logical_index < len(profiles)
+            else ""
+        )
+        menu = QMenu(parent or self)
+        menu.setObjectName("powerQueryChangeTypeMenu")
+        menu.setToolTipsVisible(True)
+
+        type_specs: list[tuple[str, str | None, bool]] = [
+            ("Decimal Number", "decimal_number", False),
+            ("Fixed decimal number", "fixed_decimal", False),
+            ("Whole Number", "whole_number", False),
+            ("Percentage", "percentage", False),
+            ("Date/Time", "datetime", False),
+            ("Date", "date", False),
+            ("Time", "time", False),
+            ("Date/Time/Timezone", "datetime_zone", False),
+            ("Duration", "duration", False),
+            ("Text", "text", False),
+            ("True/False", "boolean", False),
+            ("Binary", "binary", False),
+            ("Using Locale...", "convert_type_using_locale", True),
+        ]
+
+        # Valid convert_type options from option_combo
+        saved_op = self.operation_combo.currentData()
+        convert_type_idx = self.operation_combo.findData("convert_type")
+        valid_convert_types: set[str] = set()
+        if convert_type_idx >= 0:
+            self.operation_combo.setCurrentIndex(convert_type_idx)
+            self._configure_editor()
+            for opt_idx in range(self.option_combo.count()):
+                val = self.option_combo.itemData(opt_idx)
+                if val:
+                    valid_convert_types.add(str(val))
+            if saved_op is not None:
+                restore_idx = self.operation_combo.findData(saved_op)
+                if restore_idx >= 0:
+                    self.operation_combo.setCurrentIndex(restore_idx)
+                    self._configure_editor()
+
+        for label, op_or_type, is_locale_op in type_specs:
+            action = QAction(label, menu)
+            action.setCheckable(True)
+            if not is_locale_op and op_or_type == current_type:
+                action.setChecked(True)
+
+            if is_locale_op:
+                if self.operation_combo.findData("convert_type_using_locale") >= 0:
+                    action.triggered.connect(
+                        lambda checked=False: self._select_ribbon_operation(
+                            "convert_type_using_locale"
+                        )
+                    )
+                else:
+                    action.setEnabled(False)
+                    action.setToolTip(_NOT_SUPPORTED_YET)
+            elif op_or_type == current_type:
+                # Power BI adds no step when the chosen type is the column's current type.
+                pass
+            elif op_or_type in valid_convert_types:
+                t = str(op_or_type)
+                action.triggered.connect(
+                    lambda checked=False, target_type=t: self._select_ribbon_data_type(
+                        target_type
+                    )
+                )
+            else:
+                action.setEnabled(False)
+                action.setToolTip(_NOT_SUPPORTED_YET)
+            menu.addAction(action)
+
+        return menu
 
     def _show_preview_column_menu(self, logical_index: int) -> None:
         headers = self._selected_preview_candidate().headers
