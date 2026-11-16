@@ -56,6 +56,40 @@ class TestIteration259Hunt171(unittest.TestCase):
         self.assertEqual(_fifteen(local("CONVERT(DATE(2020,1,1)+1E-5,DOUBLE)")), _fifteen("43831.0000099923"))
         self.assertEqual(_fifteen(local("CONVERT(TIME(0,0,0)+1E-5,DOUBLE)")), _fifteen("9.99228395061728E-06"))
 
+    def test_constant_sources_are_rounded_to_the_tick_whatever_the_function(self):
+        # Power BI 9.99228395061728E-06 for ABS, SQRT, DIVIDE, POWER and a VAR bound to a constant
+        for expression in (
+            "CONVERT(CONVERT(ABS(1E-5),DATETIME),DOUBLE)",
+            "CONVERT(CONVERT(SQRT(1E-10),DATETIME),DOUBLE)",
+            "CONVERT(CONVERT(DIVIDE(1,1E5),DATETIME),DOUBLE)",
+            "CONVERT(CONVERT(POWER(10,-5),DATETIME),DOUBLE)",
+            "VAR x=1E-5 RETURN CONVERT(CONVERT(x,DATETIME),DOUBLE)",
+        ):
+            self.assertEqual(_fifteen(local(expression)), _fifteen("9.99228395061728E-06"), expression)
+        # Power BI 6.01851851851852E-06 (LEN of a constant text)
+        self.assertEqual(_fifteen(local('CONVERT(CONVERT(LEN("abcdef")*1E-6,DATETIME),DOUBLE)')), _fifteen("6.01851851851852E-06"))
+
+    def test_a_non_constant_sub_tick_value_is_refused_not_guessed(self):
+        # Power BI rounds these in some query plans and not in others, so the local engine refuses them (no answer is given)
+        for expression in (
+            "CONVERT(CONVERT(COUNTROWS(Facts)*1E-5,DATETIME),DOUBLE)",
+            "CONVERT(CONVERT(MAX(Facts[Quantity])*1E-6,DATETIME),DOUBLE)",
+            "CONVERT(CONVERT(SUM(Facts[Quantity])*0+1E-5,DATETIME),DOUBLE)",
+            "CONVERT(DATE(2020,1,1)+COUNTROWS(Facts)*1E-5,DOUBLE)",
+            "CONVERT(DATE(2020,1,1)+SUM(Facts[Sales])/1E6,DOUBLE)",
+            "CONVERT(TIME(0,0,0)+COUNTROWS(Facts)*1E-5,DOUBLE)",
+        ):
+            self.assertTrue(local(expression).startswith("LOCAL-REJECT"), expression)
+
+    def test_a_value_already_on_a_tick_is_returned_as_it_is(self):
+        # 0.25 is 6480000 ticks: no rounding changes it, so even a non-constant expression keeps it
+        self.assertEqual(_fifteen(local("CONVERT(CONVERT(SUM(Facts[Sales])*0+0.25,DATETIME),DOUBLE)")), _fifteen("0.25"))
+        self.assertEqual(_fifteen(local("CONVERT(CONVERT(0.5,DATETIME),DOUBLE)")), _fifteen("0.5"))
+
+    def test_the_largest_datetime_clamps_to_the_last_tick_of_the_year_9999(self):
+        # Power BI 2958465.99999996 (the last tick of 12/31/9999, not the next day)
+        self.assertEqual(_fifteen(local("CONVERT(CONVERT(2958465.99999999,DATETIME),DOUBLE)")), _fifteen("2958465.99999996"))
+
 
 if __name__ == "__main__":
     unittest.main()
