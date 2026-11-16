@@ -13,6 +13,8 @@ Rules (from AGENTS.md; never break them):
 5. Run only the test command in the brief, once: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 -m pytest -p no:cacheprovider -q <test file>`. Never run the full suite, `tools/parity_check.py --accept` or `--freeze`.
 6. Never touch `.pytest_cache`, `.git/index.lock`, oauth or credential files.
 
+7. Never ask the user anything and never wait for approval: the user is not watching. If the brief is unclear, contradicts itself, or a test fails for a reason the brief does not cover, do not guess and do not commit; end with a message that starts with `BLOCKED:` and states the problem and the options in 3-6 lines. The Team-Planner reads it and replies.
+
 Report back only:
 - the files changed;
 - a 2–4 line summary of the logic;

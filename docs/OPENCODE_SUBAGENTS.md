@@ -115,3 +115,12 @@ sequenceDiagram
    - dump-screen is unreadable on this TUI, so watch the worktree for the commit (`git log main..HEAD`) with a 2-minute background check;
    - read replies with `opencode export <session id>` only when needed.
 5. Quota: if OpenCode reports a rate limit or quota error, give the task to Antigravity (if it has quota), or else to Team-Coder (Haiku).
+
+---
+
+## 5. OpenCode never waits for the user (user rule, 2026-11-16)
+
+The user is not watching OpenCode and must never be asked anything.
+- `opencode.jsonc` at the repo root denies the `question` tool. It also allows the worktrees (`/Users/armaan/wt-*`) and the Claude scratchpad as external directories, so reading a brief raises no prompt.
+- If a brief is unclear or contradicts itself, OpenCode does not guess and does not commit. It ends its turn with a message starting `BLOCKED:` that states the problem and the options.
+- The Team-Planner's 2-minute watcher reads OpenCode's latest messages read-only from `~/.local/share/opencode/opencode.db` (table `session_message`). It wakes on a commit, on a `BLOCKED:` message, on a pending `question` tool call, or on a quota error. The Team-Planner then answers in the pane itself: it pastes the reply, or picks the option in a question dialog. The user is never asked.
