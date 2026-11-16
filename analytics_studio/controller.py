@@ -6989,6 +6989,18 @@ class StudioController(QObject):
             return self.transform_data_dialog(
                 pending_source=(candidate, staged_source)
             )
+        checked_sheets = getattr(dialog, "checked_sheets", [])
+        if source_kind == "excel" and len(checked_sheets) > 1:
+            success = self._commit_import(path, dialog.candidate)
+            current_sheet = str(dialog.candidate.options.get("sheet_name", ""))
+            for name in checked_sheets:
+                if name == current_sheet:
+                    continue
+                opts = {**dialog.candidate.options, "sheet_name": name}
+                extra_candidate = parse_file(path, options=opts)
+                if not self._commit_import(path, extra_candidate):
+                    success = False
+            return success
         return self._commit_import(path, dialog.candidate)
 
     def _commit_import(self, path: Path, parsed: ImportCandidate) -> bool:
