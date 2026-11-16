@@ -2628,3 +2628,9 @@ The up-front bare-column check now walks ROW value arguments, COUNTROWS's table 
 CONVERT(x, DATETIME) rounds a constant off-tick value to Power BI's 1/300-second tick (25,920,000 a day), keeps on-tick values, and refuses an off-tick value that reads the model, since Power BI's rounding there depends on its query plan. VALUE of a date/time goes through its text (whole seconds). Fresh probes: t222 23 -> 0 wrong, t220 10 -> 9 (known last-digit limits).
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4804 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-16 — Iteration 260 (Task 172 dax-hunt-172: EARLIER/EARLIEST without enough outer row contexts refused at compile time, as in Power BI)
+
+Antigravity coded Task 172. analytics_studio/measures.py: _earlier_too_deep counts row contexts per argument (GENERATE, RANKX, TOPN, SUMMARIZE, GROUPBY; every CALCULATE filter argument opens one) and now runs before evaluation for top-level measures and calculated columns, so IF(FALSE(),EARLIER(..),1) and EARLIER over an empty TOPN are refused as Power BI refuses them. t226 20/20 exact, t225 wrong 14 to 13 (known limits), 21 older sets unchanged, 0 over-refusals in an 89-shape sweep. The first version refused 4 locked KEEPFILTERS/ISONORAFTER answers; the follow-up fixed it.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4808 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
