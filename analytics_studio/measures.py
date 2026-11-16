@@ -3426,9 +3426,9 @@ def _earlier_too_deep(node: Any, frames: int) -> bool:
             return res
         return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
     if node[0] == "call" and node[1] in {"CALCULATE", "CALCULATETABLE"} and node[2]:
-        # Task 143: a Boolean filter argument is a FILTER over its column, which opens a row context of its own (EARLIER inside it reaches the row outside)
+        # Filter arguments (Boolean, KEEPFILTERS, ISONORAFTER, ...) are filters over columns and open a row context
         return _earlier_too_deep(node[2][0], frames) or any(
-            _earlier_too_deep(argument, frames + 1 if _is_boolean_filter_value(argument) else frames) for argument in node[2][1:])
+            _earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
     return any(_earlier_too_deep(child, frames) for child in node if isinstance(child, tuple))
 
 

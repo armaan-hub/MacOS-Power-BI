@@ -84,6 +84,35 @@ class Iteration260Hunt172Test(unittest.TestCase):
                 "Bad2", "COUNTROWS(FILTER(Facts, Facts[Sales] <= EARLIER(Facts[Sales], 2)))"
             )
 
+    def test_calculate_filter_arguments_open_row_context_for_earlier(self) -> None:
+        """Filter arguments (Boolean, KEEPFILTERS, ISONORAFTER, ...) open a row context for EARLIER depth check."""
+        cases = [
+            ("SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALL(Facts[Quantity]),ISONORAFTER(Facts[Quantity],EARLIER(Facts[Quantity]))))", "6"),
+            ("SUMX(Facts,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]<>EARLIER(Facts[Quantity]))))", None),
+            ("SUMX(VALUES(Facts[Quantity]),CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]<>EARLIER(Facts[Quantity]))))", None),
+            ("SUMX(Facts,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>EARLIER(Facts[Quantity])*1)))", None),
+        ]
+        for expr, expected in cases:
+            with self.subTest(expr=expr):
+                result = dax.local(expr)
+                self.assertFalse(
+                    result.startswith("LOCAL-REJECT") or result.startswith("PARSER-REJECT"),
+                    f"Expression should not be rejected, got {result!r} for {expr}",
+                )
+                if expected is not None:
+                    self.assertTrue(
+                        _same(expected, result),
+                        f"Expected {expected}, got {result!r} for {expr}",
+                    )
+
+        # Also assert that IF(FALSE(),EARLIER(Facts[Sales]),1) is still refused
+        still_refused = "IF(FALSE(),EARLIER(Facts[Sales]),1)"
+        res = dax.local(still_refused)
+        self.assertTrue(
+            res.startswith("LOCAL-REJECT") or res.startswith("PARSER-REJECT"),
+            f"Expected {still_refused} to be rejected, got {res!r}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
