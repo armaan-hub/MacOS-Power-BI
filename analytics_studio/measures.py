@@ -16883,8 +16883,6 @@ def _evaluate_measures_once(
         if expression[0] == "call" and expression[1] in {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"}:
             name, args = expression[1], expression[2]
             if name in {"IF", "IF.EAGER"} and len(args) in {2, 3}:
-                if iterator_expression_category(args[0], row_context) not in {"boolean", "blank", "numeric", "text", "date/time"}:
-                    raise MeasureError("Iterator IF conditions need a Boolean expression.")
                 parts = [body_value_type(branch, row_context) for branch in args[1:]]
                 if len(args) == 2:
                     parts.append(("blank", True))
@@ -16900,13 +16898,9 @@ def _evaluate_measures_once(
                     variant_coalesce_arguments.extend(args[1:])
                 return accumulated
             if name == "SWITCH" and len(args) >= 3:
-                subject_category = iterator_expression_category(args[0], row_context)
+                # Task 173: conditions do not affect result type
                 remaining = list(args[1:])
                 fallback = remaining.pop() if len(remaining) % 2 else None
-                for candidate in remaining[::2]:
-                    candidate_category = iterator_expression_category(candidate, row_context)
-                    if "blank" not in {subject_category, candidate_category} and subject_category != candidate_category:
-                        raise MeasureError("Iterator SWITCH values need the same local data type as the expression.")
                 accumulated = body_value_type(fallback, row_context) if fallback is not None else ("blank", True)
                 for result in reversed(remaining[1::2]):  # Power BI types SWITCH as IFs nested from the right
                     accumulated = merge_value_types([body_value_type(result, row_context), accumulated])
