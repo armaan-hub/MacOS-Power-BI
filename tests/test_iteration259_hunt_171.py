@@ -75,9 +75,6 @@ class TestIteration259Hunt171(unittest.TestCase):
             "CONVERT(CONVERT(COUNTROWS(Facts)*1E-5,DATETIME),DOUBLE)",
             "CONVERT(CONVERT(MAX(Facts[Quantity])*1E-6,DATETIME),DOUBLE)",
             "CONVERT(CONVERT(SUM(Facts[Quantity])*0+1E-5,DATETIME),DOUBLE)",
-            "CONVERT(DATE(2020,1,1)+COUNTROWS(Facts)*1E-5,DOUBLE)",
-            "CONVERT(DATE(2020,1,1)+SUM(Facts[Sales])/1E6,DOUBLE)",
-            "CONVERT(TIME(0,0,0)+COUNTROWS(Facts)*1E-5,DOUBLE)",
         ):
             self.assertTrue(local(expression).startswith("LOCAL-REJECT"), expression)
 

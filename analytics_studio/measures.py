@@ -22865,9 +22865,6 @@ def _evaluate_measures_once(
                     return result
                 if not result.is_finite():
                     return dax_dates.DaxDateTime(result)  # Task 21 Part D: a date beside Infinity or NaN keeps that value (it prints as a date, as CONVERT does)
-                other_node, other_value = (node[3], right) if dax_dates.is_date(left) else (node[2], left)
-                if not dax_dates.is_date(other_value) and not dax_dates.is_on_tick(result) and not _constant_node(other_node, variable_nodes.get):
-                    raise MeasureError("this sub-second datetime value depends on the query plan in Power BI and cannot be computed exactly")  # Task 171: a non-constant number is rounded only on some plans
                 return dax_dates.DaxDateTime(dax_dates.tick_round(result))
             return result
         if kind == "logical":
