@@ -3720,7 +3720,8 @@ in
         dialog.show()
         self.app.processEvents()
         header = dialog.preview_header
-        x = header.sectionViewportPosition(0) + 14
+        # Task 182 (2026-11-16): +6..+40 is the type icon, which opens Change Type
+        x = header.sectionViewportPosition(0) + 60
         self.assertLess(x, header.sectionViewportPosition(0) + header.sectionSize(0) - 35)
         button = next(
             control
@@ -4000,7 +4001,8 @@ in
                 for button in header._filter_buttons
             )
         )
-        click_x = header.sectionViewportPosition(0) + 14
+        # Task 182 (2026-11-16): +6..+40 is the type icon, which opens Change Type
+        click_x = header.sectionViewportPosition(0) + 60
         self.assertGreaterEqual(click_x, viewport_rect.left())
         self.assertLess(click_x, viewport_rect.right())
         expected_position = viewport.mapToGlobal(
