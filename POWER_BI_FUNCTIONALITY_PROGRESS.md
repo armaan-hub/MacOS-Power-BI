@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-16, after Iteration 264 / Task 176 ux-176, Power Query filter lists (null) separately from empty text, Claude Opus 5.5 planned, OpenCode coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4818 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Tasks 177-178 (Choose Columns dialog, Custom Column help) gate, 179 Navigator follow-up, then 180-181
+**Latest status (2026-11-17, after Iteration 265 / Task 177-182 ux-batch, 4846, Claude Opus 5.5 planned, Choose Columns dialog, Custom Column formula help, Excel Navigator, CSV File Origin, column header menus coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest Antigravity and OpenCode passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 184 Data pane tree follow-up, Task 183 step menu fix, then 185-190
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
