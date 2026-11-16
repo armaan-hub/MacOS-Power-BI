@@ -2616,3 +2616,9 @@ Haiku 5.5 coded, Sonnet 5.5 headed review and testing with two parallel read-onl
 Haiku 5.5 coded, Sonnet 5.5 fixed the scope after Haiku's second miss and headed review and testing with read-only Haiku testers. A bare column at SUBSTITUTEWITHINDEX argument 1 or 3 is refused before evaluation wherever the call sits (wrappers, untaken branches, inside IFERROR/ISERROR), scanning only the queried measures and their references. Fresh validation: wrong t212 4 -> 0, t207 4 -> 0, t206 2 -> 0, t205 11 -> 10; 0 exact->other in 18 sets.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4775 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-16 — Iteration 258 (Task 170 dax-hunt-170: a bare column inside ROW, COUNTROWS or an iterator's table argument is refused before evaluation)
+
+The up-front bare-column check now walks ROW value arguments, COUNTROWS's table argument and the first (table) argument of row-context iterators, so a bare column there is a query error even in an untaken IF branch or an unreached IFERROR / COALESCE fallback, as in Power BI (t215/t216/t217 measured).
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4793 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
