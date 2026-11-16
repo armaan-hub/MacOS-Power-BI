@@ -1231,6 +1231,7 @@ class ChooseColumnsDialog(QDialog):
                 self._column_items.append(item)
         finally:
             self._guard = False
+        self._apply_search(self.search_edit.text())
         self._refresh_state()
 
     def _apply_search(self, text: str) -> None:

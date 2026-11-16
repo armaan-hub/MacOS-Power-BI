@@ -137,3 +137,27 @@ class ChooseColumnsDialogTests(unittest.TestCase):
         )
         preview_headers = dialog._preview_candidate.headers
         self.assertEqual(preview_headers, ["Region", "Day"])
+
+    def test_sort_keeps_search_filter(self) -> None:
+        dialog = ChooseColumnsDialog(["Region", "Amount", "Day"])
+        self.addCleanup(dialog.deleteLater)
+
+        dialog.search_edit.setText("am")
+        dialog._sort_items("a_to_z")
+
+        visible = [
+            dialog.column_list.item(i).text()
+            for i in range(dialog.column_list.count())
+            if not dialog.column_list.item(i).isHidden()
+        ]
+        self.assertEqual(visible, ["(Select All Columns)", "Amount"])
+
+        dialog._select_all.setCheckState(Qt.CheckState.Unchecked)
+        states = {
+            dialog.column_list.item(i).text():
+                dialog.column_list.item(i).checkState()
+            for i in range(1, dialog.column_list.count())
+        }
+        self.assertEqual(states["Amount"], Qt.CheckState.Unchecked)
+        self.assertEqual(states["Region"], Qt.CheckState.Checked)
+        self.assertEqual(states["Day"], Qt.CheckState.Checked)
