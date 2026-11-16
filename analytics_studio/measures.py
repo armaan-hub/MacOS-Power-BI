@@ -8469,6 +8469,9 @@ def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) ->
     if kind == "call":
         if node[1] == "CALCULATE" and node[2]:
             children = node[2][:1]  # the expression keeps the caller's row context (none); the filters are evaluated elsewhere
+        elif node[1] == "SUBSTITUTEWITHINDEX" and node[2]:
+            # Task 169 (measured): the table (argument 1) and the index column table (argument 3) are table positions; a bare column there is refused when the query is compiled
+            children = [part for position, part in enumerate(node[2]) if position in {0, 2}]
         elif node[1] not in _ROW_CONTEXT_FREE_CALLS:
             return None
         else:
