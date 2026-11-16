@@ -3368,7 +3368,7 @@ def _is_sample_statistic(node: Any) -> bool:
 
 _FRAME_FUNCTIONS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "RANKX",
-    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC", "XNPV", "XIRR",
+    "GENERATE", "GENERATEALL", "SUMMARIZE", "GROUPBY", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC", "XNPV", "XIRR",
 })
 
 
@@ -3390,6 +3390,40 @@ def _earlier_too_deep(node: Any, frames: int) -> bool:
                 or (len(node[2]) > 2 and _earlier_too_deep(node[2][2], frames + 1))
                 or any(_earlier_too_deep(arg, frames) for arg in node[2][3:])
             )
+        if node[1] in {"GENERATE", "GENERATEALL"}:
+            return _earlier_too_deep(node[2][0], frames) or (len(node[2]) > 1 and _earlier_too_deep(node[2][1], frames + 1))
+        if node[1] == "RANKX":
+            return (
+                _earlier_too_deep(node[2][0], frames)
+                or (len(node[2]) > 1 and _earlier_too_deep(node[2][1], frames + 1))
+                or any(_earlier_too_deep(arg, frames) for arg in node[2][2:])
+            )
+        if node[1] == "TOPN":
+            args = node[2]
+            res = False
+            if len(args) > 0:
+                res = res or _earlier_too_deep(args[0], frames)
+            if len(args) > 1:
+                res = res or _earlier_too_deep(args[1], frames)
+            idx = 2
+            while idx < len(args):
+                res = res or _earlier_too_deep(args[idx], frames + 1)
+                idx += 1
+                if idx < len(args) and args[idx][0] in {"table", "number", "boolean"}:
+                    res = res or _earlier_too_deep(args[idx], frames)
+                    idx += 1
+            return res
+        if node[1] in {"SUMMARIZE", "GROUPBY"}:
+            args = node[2]
+            res = _earlier_too_deep(args[0], frames)
+            split = next((i for i, a in enumerate(args[1:], 1) if a[0] == "string"), len(args))
+            for i in range(1, split):
+                res = res or _earlier_too_deep(args[i], frames)
+            for i in range(split, len(args), 2):
+                res = res or _earlier_too_deep(args[i], frames)
+            for i in range(split + 1, len(args), 2):
+                res = res or _earlier_too_deep(args[i], frames + 1)
+            return res
         return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
     if node[0] == "call" and node[1] in {"CALCULATE", "CALCULATETABLE"} and node[2]:
         # Task 143: a Boolean filter argument is a FILTER over its column, which opens a row context of its own (EARLIER inside it reaches the row outside)
@@ -7966,6 +8000,8 @@ def normalize_calculated_column(name: Any, expression: Any) -> dict[str, str]:
         )
     if _contains_table_call(parsed_expression):
         raise MeasureError("Table-valued functions are not supported in calculated columns.")
+    if _earlier_too_deep(parsed_expression, 1):
+        raise MeasureError("EARLIER/EARLIEST refers to an earlier row context which doesn't exist.")
     return {"name": clean_name, "expression": clean_expression}
 
 
@@ -8587,6 +8623,8 @@ def _reject_bare_columns_without_row_context(
     for item, expression in selected:
         if item["name"].casefold() in referenced:
             continue  # used inside another measure, which may supply a row context
+        if _earlier_too_deep(expression, 0):
+            raise MeasureError("EARLIER/EARLIEST refers to an earlier row context which doesn't exist.")
         found = _bare_column_outside_row_context(expression, columns)
         if found:
             raise MeasureError(
