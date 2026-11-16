@@ -8450,6 +8450,13 @@ def _spells_a_number(text: str) -> bool:
     return True
 
 
+# Task 170 follow-up: row-context iterators whose first (table) argument is evaluated in the caller's context; their expression arguments are not followed
+_ROW_CONTEXT_ITERATOR_TABLE_FIRST = frozenset({
+    "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "CONCATENATEX",
+    "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "GENERATE", "GENERATEALL",
+})
+
+
 def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) -> tuple[str, str] | None:
     """The first column reference that a measure evaluated without a row context reads directly.
 
@@ -8475,6 +8482,10 @@ def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) ->
             children = node[2][1::2]
         elif node[1] == "COUNTROWS" and node[2]:
             children = node[2][:1]  # Task 170 (measured): the table argument is evaluated in the caller's context, so a ROW inside it is validated too
+        elif node[1] in _ROW_CONTEXT_ITERATOR_TABLE_FIRST and node[2]:
+            # Task 170 follow-up (measured): the first (table) argument of a row-context iterator is evaluated in the caller's
+            # context, so SUMX(ROW("a",IF(FALSE(),Facts[Sales],2)),[a]) is a query error; the expression arguments keep their row context
+            children = node[2][:1]
         elif node[1] not in _ROW_CONTEXT_FREE_CALLS:
             return None
         else:

@@ -67,3 +67,19 @@ class TestIteration258Hunt170(unittest.TestCase):
     def test_iferror_over_countrows_filter_still_answers(self) -> None:
         # measured: IFERROR(1,COUNTROWS(FILTER(Facts,Facts[Sales]>0))) is 1 in Power BI
         self.assertEqual(dax.local('IFERROR(1,COUNTROWS(FILTER(Facts,Facts[Sales]>0)))'), "1")
+
+    def test_sumx_over_row_with_untaken_if_is_refused(self) -> None:
+        # measured (t217): SUMX(ROW("a",IF(FALSE(),Facts[Sales],2)),[a]) is a query error in Power BI (the table argument has no row context)
+        self.assertTrue(dax.local('SUMX(ROW("a",IF(FALSE(),Facts[Sales],2)),[a])').startswith("LOCAL-REJECT"))
+
+    def test_maxx_over_row_with_untaken_if_is_refused(self) -> None:
+        # measured (t217 variant): MAXX(ROW("a",IF(FALSE(),Facts[Sales],2)),[a]) is a query error in Power BI
+        self.assertTrue(dax.local('MAXX(ROW("a",IF(FALSE(),Facts[Sales],2)),[a])').startswith("LOCAL-REJECT"))
+
+    def test_averagex_over_row_with_untaken_if_is_refused(self) -> None:
+        # measured (t217 variant): AVERAGEX(ROW("a",IF(FALSE(),Facts[Sales],2)),[a]) is a query error in Power BI
+        self.assertTrue(dax.local('AVERAGEX(ROW("a",IF(FALSE(),Facts[Sales],2)),[a])').startswith("LOCAL-REJECT"))
+
+    def test_sumx_expression_countrows_of_row_still_answers(self) -> None:
+        # measured (t217): SUMX(Facts,COUNTROWS(ROW("a",Facts[Sales]))) is 6 in Power BI (the expression keeps the row context of SUMX)
+        self.assertEqual(dax.local('SUMX(Facts,COUNTROWS(ROW("a",Facts[Sales])))'), "6")
