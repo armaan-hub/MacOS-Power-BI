@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-15, after Iteration 255 / Task 167 dax-hunt-167, RATE with no cash flows is refused, NOMINAL prints a plain double, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4749 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: a new fresh-probe batch (Task 168).
+**Latest status (2026-11-16, after Iteration 256 / Task 168 dax-hunt-168, a Currency times COSH, SINH, TANH, ACOS, ATAN, ATAN2 or COT is a Currency, Claude Opus 5.5 planned, Haiku 5.5 coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4757 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: a new fresh-probe batch (Task 169).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
