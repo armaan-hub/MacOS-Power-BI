@@ -182,6 +182,34 @@ def tick_round(serial: Decimal) -> Decimal:
     return (serial * 25_920_000).quantize(Decimal(1), rounding=ROUND_HALF_UP) / 25_920_000
 
 
+_LAST_DAY_SERIAL = 2_958_465  # 12/31/9999
+_TICKS_PER_DAY = 25_920_000
+
+
+def is_on_tick(serial: Decimal) -> bool:
+    """True when the time of day of a finite value is already a whole number of 1/300 s ticks (no rounding would change it)."""
+    if not serial.is_finite() or serial == serial.to_integral_value():
+        return True
+    fraction = serial - serial.to_integral_value(rounding=ROUND_FLOOR)
+    scaled = fraction * _TICKS_PER_DAY
+    return abs(scaled - scaled.to_integral_value()) < Decimal("1E-12")  # a TIME() constant is a 28-digit quotient, so a tick is within that noise
+
+
+def number_as_datetime(serial: Decimal) -> Decimal:
+    """A number converted to DATETIME as Power BI holds it (measured, Task 171): the day is the floor, the time of day is rounded to the
+    nearest tick of 1/300 s, and the two are recombined in double arithmetic (CONVERT(-1E-5,DATETIME) is -9.99228395059948E-06, while
+    CONVERT(1E-5,DATETIME) is 9.99228395061728E-06). A value already on a tick is returned as it is. The last tick of 9999-12-31 is the
+    largest time (CONVERT(CONVERT(2958465.99999999,DATETIME),DOUBLE) is 2958465.99999996, not the next day)."""
+    if is_on_tick(serial):
+        return serial
+    value = float(serial)
+    day = math.floor(value)
+    ticks = math.floor((value - day) * _TICKS_PER_DAY + 0.5)
+    if day == _LAST_DAY_SERIAL and ticks >= _TICKS_PER_DAY:
+        ticks = _TICKS_PER_DAY - 1
+    return Decimal(repr(day + ticks / _TICKS_PER_DAY))
+
+
 def is_date(value: object) -> bool:
     return isinstance(value, DaxDateTime)
 

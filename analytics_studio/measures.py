@@ -5988,6 +5988,44 @@ def _has_naked_column_reference(node: Any, in_agg: bool = False) -> bool:
     return any(_has_naked_column_reference(c, in_agg) for c in (node[1:] if isinstance(node[0], str) else node))
 
 
+_CONSTANT_NODE_KINDS = frozenset({"number", "string", "boolean", "blank", "binary", "unary", "logical", "comparison", "concat", "currency", "double", "folded"})
+_VOLATILE_CALLS = frozenset({"TODAY", "NOW", "RAND", "RANDBETWEEN", "USERNAME", "USERPRINCIPALNAME", "SELECTEDVALUE", "ISFILTERED", "ISCROSSFILTERED", "HASONEVALUE", "HASONEFILTER", "CALCULATE", "CALCULATETABLE", "FILTER", "USERELATIONSHIP"})
+
+
+def _constant_node(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
+    """Task 171: True only when the expression is a constant (literals, operators, pure functions and VARs bound to such). Anything that reads
+    a column, a table, a measure or a data-reading function is not constant, so the query plan of Power BI decides its value and it is refused."""
+    if not isinstance(node, tuple) or not node:
+        return isinstance(node, (int, float, Decimal, str))
+    kind = node[0]
+    if kind == "let":
+        own = dict(node[1])
+        outer = held
+        inner = lambda name: own.get(name, outer(name))  # noqa: E731
+        return all(_constant_node(bound, inner, seen) for _, bound in node[1]) and _constant_node(node[2], inner, seen)
+    if kind == "var":
+        if node[1] in seen:
+            return False
+        bound = held(node[1])
+        return bound is not None and _constant_node(bound, held, seen | {node[1]})
+    if kind == "call":
+        if node[1] in _DATA_READING_CALLS or node[1] in _VOLATILE_CALLS:
+            return False
+        return all(_constant_node(arg, held, seen) for arg in node[2])
+    if kind not in _CONSTANT_NODE_KINDS:
+        return False
+    children = [child for part in node[1:] for child in (part if isinstance(part, list) else [part]) if isinstance(child, tuple)]
+    return all(_constant_node(child, held, seen) for child in children)
+
+
+def _datetime_source(value: Decimal, node: Any, held: Callable[[str], Any]) -> Decimal:
+    """Task 171 (measured): a number turned into a DATETIME is rounded to a tick only when it is constant. Power BI rounds a
+    non-constant sub-second value in some query plans and not in others, so a non-constant value off the tick is refused, never guessed."""
+    if dax_dates.is_date(value) or dax_dates.is_on_tick(value) or _constant_node(node, held):
+        return value
+    raise MeasureError("this sub-second datetime value depends on the query plan in Power BI and cannot be computed exactly")
+
+
 def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
     """Corrections rule 1: True when an operand reads no data (BLANK(), IF(1=2,1), ABS(BLANK()), CALCULATE(BLANK()), a VAR of those).
 
@@ -20017,7 +20055,7 @@ def _evaluate_measures_once(
                 return dax_dates.DaxDateTime(number)  # live Power BI: Infinity and NaN stay what they are (they only print as a date); no clamp
             if number < _DATETIME_CLAMP_LOW:  # Task 145 family C (measured): a finite number too small keeps its value (CONVERT(CONVERT(-1E15,DATETIME),DOUBLE) is -1E+15) and shows as 01/01/0100
                 return dax_dates.ClampedDaxDateTime(number)
-            return dax_dates.DaxDateTime(number)
+            return dax_dates.DaxDateTime(dax_dates.number_as_datetime(number))  # Task 171 (measured): the time of day is held in 1/300 s ticks
         raise MeasureError(f"CONVERT does not support the type {target}.")
 
     def column_order_key(value: Any) -> Any:
@@ -21253,6 +21291,8 @@ def _evaluate_measures_once(
             if interval == "INTEGER" and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
                 if abs(values[0]) >= 2 ** 53:
                     values[0] = _read_double_as_integer_source(values[0])  # Part D: CONVERT(x, INTEGER) of a Double of 2^53 or more is its exact binary value; below that it rounds the exact value, not 15 digits (CONVERT(4.5E15+0.5,INTEGER) is 4500000000000001, measured)
+            if str(interval) == "DATETIME" and isinstance(values[0], Decimal):
+                values[0] = _datetime_source(values[0], arguments[0], variable_nodes.get)  # Task 171: only a constant (or on-tick) number is rounded to the tick
             try:
                 return convert_value(double_as_text(arguments[0], values[0], row_context) if interval == "STRING" else values[0], str(interval))
             except MeasureRuntimeError as error:
