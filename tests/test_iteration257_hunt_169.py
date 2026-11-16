@@ -40,6 +40,32 @@ class TestIteration257Hunt169(unittest.TestCase):
         # measured: CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],ASC),[i],"|",[i]) is 0|1|2|3|4|5
         self.assertEqual(dax.local('CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],ASC),[i],"|",[i])'), "0|1|2|3|4|5")
 
+    def test_sqrt_error_then_countrows_of_swi_bare_table_is_refused(self) -> None:
+        # measured (t212): IFERROR(SQRT(-1)+COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",Facts[Region],1)),"E") is a query error
+        self.assertTrue(dax.local('IFERROR(SQRT(-1)+COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",Facts[Region],1)),"E")').startswith("LOCAL-REJECT"))
+
+    def test_untaken_if_branch_with_bare_swi_table_is_refused(self) -> None:
+        # measured (t212): IF(FALSE(),COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",Facts[Region],1)),1) is a query error
+        self.assertTrue(dax.local('IF(FALSE(),COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",Facts[Region],1)),1)').startswith("LOCAL-REJECT"))
+
+    def test_sqrt_error_then_sumx_of_swi_bare_table_is_refused(self) -> None:
+        # measured (t212): IFERROR(SQRT(-1)+SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",Facts[Region],1),[a]),"E") is a query error
+        self.assertTrue(dax.local('IFERROR(SQRT(-1)+SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",Facts[Region],1),[a]),"E")').startswith("LOCAL-REJECT"))
+
+    def test_bare_column_in_swi_index_table_argument_is_refused(self) -> None:
+        # measured (t212): IFERROR(SQRT(-1)+COUNTROWS(SUBSTITUTEWITHINDEX(Facts[Region],"a",VALUES(Facts[Region]),1)),"E") is a query error
+        self.assertTrue(dax.local('IFERROR(SQRT(-1)+COUNTROWS(SUBSTITUTEWITHINDEX(Facts[Region],"a",VALUES(Facts[Region]),1)),"E")').startswith("LOCAL-REJECT"))
+
+    def test_valid_swi_over_summarize_still_answers(self) -> None:
+        # measured (t212): COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),"a",VALUES(Facts[Region]),1)) is 3
+        self.assertEqual(dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),"a",VALUES(Facts[Region]),1))'), "3")
+
+    def test_valid_swi_over_filter_still_answers_and_guarded_error_stays_e(self) -> None:
+        # measured (t212): COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]="East"),"a",VALUES(Facts[Region]),1)) is 1
+        self.assertEqual(dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]="East"),"a",VALUES(Facts[Region]),1))'), "1")
+        # measured (t212): IFERROR(REPT("x",-3)&COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),"a",VALUES(Facts[Region]),1)),"E") is E
+        self.assertEqual(dax.local('IFERROR(REPT("x",-3)&COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),"a",VALUES(Facts[Region]),1)),"E")'), "E")
+
 
 if __name__ == "__main__":
     unittest.main()

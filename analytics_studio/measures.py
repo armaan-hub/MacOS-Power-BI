@@ -8469,9 +8469,6 @@ def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) ->
     if kind == "call":
         if node[1] == "CALCULATE" and node[2]:
             children = node[2][:1]  # the expression keeps the caller's row context (none); the filters are evaluated elsewhere
-        elif node[1] == "SUBSTITUTEWITHINDEX" and node[2]:
-            # Task 169 (measured): the table (argument 1) and the index column table (argument 3) are table positions; a bare column there is refused when the query is compiled
-            children = [part for position, part in enumerate(node[2]) if position in {0, 2}]
         elif node[1] not in _ROW_CONTEXT_FREE_CALLS:
             return None
         else:
@@ -8500,6 +8497,28 @@ def _measure_references(node: Any, found: set[str]) -> None:
     elif isinstance(node, (list, frozenset)):
         for part in node:
             _measure_references(part, found)
+
+
+def _reject_bare_columns_in_swi_table_arguments(node: Any) -> None:
+    """Task 169 (measured): a bare column as argument 1 or 3 of SUBSTITUTEWITHINDEX is a query error wherever the call sits.
+
+    Power BI compiles the whole query first, so this scans every node (any nesting, any IF/IFERROR branch, any wrapper) and
+    refuses before evaluation; a bare column is never a valid table argument, so no valid query is refused.
+    """
+    if isinstance(node, tuple):
+        if len(node) >= 3 and node[0] == "call" and node[1] == "SUBSTITUTEWITHINDEX" and isinstance(node[2], (list, tuple)):
+            for position in (0, 2):
+                argument = node[2][position] if position < len(node[2]) else None
+                if isinstance(argument, tuple) and len(argument) == 3 and argument[0] == "reference" and argument[1]:
+                    raise MeasureError(
+                        f"A single value for column '{argument[2]}' in table '{argument[1]}' cannot be determined. "
+                        "Refer to the column inside an aggregation such as MIN, MAX, COUNT or SUM, or iterate its table."
+                    )
+        for part in node:
+            _reject_bare_columns_in_swi_table_arguments(part)
+    elif isinstance(node, list):
+        for part in node:
+            _reject_bare_columns_in_swi_table_arguments(part)
 
 
 def _reject_bare_columns_without_row_context(
@@ -25414,6 +25433,7 @@ def _evaluate_measures_once(
     results = {item["name"]: _bare_result(resolve(item["name"].casefold())) for item in selected}
     # Power BI checks the whole query when it compiles it, also the branches that never run; the engine's own errors come first
     reject_invalid_allexcept(parsed[item["name"].casefold()] for item in selected)
+    _reject_bare_columns_in_swi_table_arguments(list(parsed.values()))  # Task 169: whole-query scan, every branch
     if targets is not None:
         _reject_bare_columns_without_row_context(
             [(item, parsed[item["name"].casefold()]) for item in selected],
