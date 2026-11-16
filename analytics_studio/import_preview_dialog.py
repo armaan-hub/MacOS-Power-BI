@@ -569,6 +569,7 @@ class FileImportPreviewDialog(QDialog):
             self.setWindowTitle("Navigator")
             self.heading.setVisible(False)
             self.file_label.setVisible(False)
+            self.options_group.setVisible(False)
             self.navigator_panel.setVisible(True)
             self.navigator_item_title.setVisible(True)
 
@@ -649,53 +650,67 @@ class FileImportPreviewDialog(QDialog):
         self.options_form.addRow("Worksheet", self.sheet_combo)
         self.options_form.setRowVisible(self.sheet_combo, False)
 
-        self.advanced_options_button = QToolButton(self)
+        nav_layout = self.navigator_panel.layout()
+
+        self.advanced_options_button = QToolButton(self.navigator_panel)
         self.advanced_options_button.setCheckable(True)
         self.advanced_options_button.setChecked(False)
         self.advanced_options_button.setText("▶ Advanced options")
         self.advanced_options_button.setStyleSheet("font-weight: 500; border: none; background: transparent; padding: 2px 0;")
-        self.options_form.addRow(self.advanced_options_button)
+        nav_layout.addWidget(self.advanced_options_button)
+
+        self.advanced_options_container = QWidget(self.navigator_panel)
+        adv_layout = QVBoxLayout(self.advanced_options_container)
+        adv_layout.setContentsMargins(4, 2, 4, 2)
+        adv_layout.setSpacing(6)
 
         header_row = self._base_options.get("header_row")
-        self.header_auto_checkbox = QCheckBox("Detect header row automatically")
+        self.header_auto_checkbox = QCheckBox("Detect header row automatically", self.advanced_options_container)
         self.header_auto_checkbox.setChecked(header_row is None)
-        self.header_row_spin = QSpinBox()
+        self.header_row_spin = QSpinBox(self.advanced_options_container)
         max_rows = 65_536 if self.path.suffix.casefold() == ".xls" else 1_048_576
         self.header_row_spin.setRange(1, max_rows)
         self.header_row_spin.setValue(int(header_row) if header_row is not None else 1)
         self.header_row_spin.setEnabled(header_row is not None)
 
-        self.header_row_widget = QWidget(self)
+        self.header_row_widget = QWidget(self.advanced_options_container)
         header_row_layout = QHBoxLayout(self.header_row_widget)
         header_row_layout.setContentsMargins(0, 0, 0, 0)
         header_row_layout.addWidget(self.header_auto_checkbox)
         header_row_layout.addWidget(QLabel("Header row"))
         header_row_layout.addWidget(self.header_row_spin)
         header_row_layout.addStretch(1)
-        self.header_row_label = QLabel("Column names")
-        self.options_form.addRow(self.header_row_label, self.header_row_widget)
+        self.header_row_label = QLabel("Column names", self.advanced_options_container)
+        adv_layout.addWidget(self.header_row_label)
+        adv_layout.addWidget(self.header_row_widget)
         self.header_auto_checkbox.toggled.connect(self.header_row_spin.setDisabled)
         self.header_auto_checkbox.toggled.connect(self._on_excel_header_mode_changed)
         self.header_row_spin.valueChanged.connect(self._refresh_preview)
 
         self.transform_raw_rows_checkbox = QCheckBox(
-            "Start Transform from raw worksheet rows (no headers)"
+            "Start Transform from raw worksheet rows (no headers)",
+            self.advanced_options_container,
         )
         self.transform_raw_rows_checkbox.setChecked(
             self.allow_transform and bool(self.initial_options.get("raw_rows", True))
         )
         self.transform_raw_rows_checkbox.setEnabled(self.allow_transform)
-        self.transform_start_label = QLabel("Transform start")
-        self.options_form.addRow(self.transform_start_label, self.transform_raw_rows_checkbox)
+        self.transform_start_label = QLabel("Transform start", self.advanced_options_container)
+        adv_layout.addWidget(self.transform_start_label)
+        adv_layout.addWidget(self.transform_raw_rows_checkbox)
         self.transform_start_note = QLabel(
-            "When selected, Transform re-reads the worksheet without promoting headers and keeps the worksheet's declared row and column extent under Column1, Column2, … names. The grid above remains the Load preview; Load keeps its current column-name setting."
+            "When selected, Transform re-reads the worksheet without promoting headers and keeps the worksheet's declared row and column extent under Column1, Column2, … names. The grid above remains the Load preview; Load keeps its current column-name setting.",
+            self.advanced_options_container,
         )
         self.transform_start_note.setWordWrap(True)
         self.transform_start_note.setStyleSheet("color: #526477; padding: 0 0 2px 0;")
-        self.options_form.addRow("", self.transform_start_note)
+        adv_layout.addWidget(self.transform_start_note)
+
+        nav_layout.addWidget(self.advanced_options_container)
 
         def _update_advanced_visibility(checked: bool) -> None:
             self.advanced_options_button.setText(("▼" if checked else "▶") + " Advanced options")
+            self.advanced_options_container.setVisible(checked)
             self.header_row_label.setVisible(checked)
             self.header_row_widget.setVisible(checked)
             self.transform_start_label.setVisible(checked and self.allow_transform)
@@ -1133,6 +1148,10 @@ class FileImportPreviewDialog(QDialog):
         model = self.table.model()
         assert isinstance(model, ImportPreviewTableModel)
         model.set_candidate(candidate)
+        self.table.resizeColumnsToContents()
+        for col in range(model.columnCount()):
+            if self.table.columnWidth(col) > 260:
+                self.table.setColumnWidth(col, 260)
         self._clear_error()
         visible_rows = min(candidate.row_count, PREVIEW_ROW_LIMIT)
         self.count_label.setText(

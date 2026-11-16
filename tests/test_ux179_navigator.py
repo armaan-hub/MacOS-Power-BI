@@ -42,6 +42,10 @@ class NavigatorExcelImportTests(unittest.TestCase):
         ws_regions.append(["North"])
         ws_regions.append(["South"])
 
+        ws_third = wb.create_sheet("Third")
+        ws_third.append(["ColA"])
+        ws_third.append(["Val1"])
+
         wb.save(self.path)
 
     def wait_for_preview(self, dialog: FileImportPreviewDialog) -> None:
@@ -62,9 +66,9 @@ class NavigatorExcelImportTests(unittest.TestCase):
         self.assertIsNotNone(root)
         self.assertTrue(root.text(0).startswith(self.path.name))
 
-        # The tree children are ["Sales", "Regions"], or in the workbook's sheet order.
+        # The tree children are ["Sales", "Regions", "Third"], in the workbook's sheet order.
         child_names = [root.child(i).text(0) for i in range(root.childCount())]
-        self.assertEqual(child_names, ["Sales", "Regions"])
+        self.assertEqual(child_names, ["Sales", "Regions", "Third"])
 
         # Clicking "Regions" sets the navigatorItemTitle text to "Regions", and the preview header contains "Region".
         regions_item = root.child(1)
@@ -98,7 +102,7 @@ class NavigatorExcelImportTests(unittest.TestCase):
         for i in range(root.childCount()):
             root.child(i).setCheckState(0, Qt.CheckState.Checked)
 
-        self.assertEqual(set(dialog.checked_sheets), {"Sales", "Regions"})
+        self.assertEqual(set(dialog.checked_sheets), {"Sales", "Regions", "Third"})
         self.assertFalse(dialog.transform_button.isEnabled())
         self.assertEqual(dialog.transform_button.toolTip(), "Select one item to transform it")
 
@@ -122,6 +126,98 @@ class NavigatorExcelImportTests(unittest.TestCase):
             self.assertTrue(success)
 
         table_names = [table["name"] for table in controller._project["model"]["tables"]]
-        self.assertIn("Sales", table_names)
-        self.assertIn("Regions", table_names)
-        self.assertGreaterEqual(len(table_names), 2)
+        self.assertEqual(table_names, ["Sales", "Regions", "Third"])
+
+    def test_multi_select_loads_only_checked_sheets_not_uncheck_previewed(self) -> None:
+        controller = StudioController()
+
+        def select_regions_check_sales_and_third(dialog: FileImportPreviewDialog) -> int:
+            self.wait_for_preview(dialog)
+            root = dialog.navigator_tree.topLevelItem(0)
+            self.assertIsNotNone(root)
+            # Select "Regions" to preview it
+            regions_item = root.child(1)
+            dialog.navigator_tree.itemClicked.emit(regions_item, 0)
+            self.wait_for_preview(dialog)
+
+            # Turn multi-select on, check only "Sales" and "Third"
+            dialog.navigator_select_multiple.setChecked(True)
+            for i in range(root.childCount()):
+                item = root.child(i)
+                item.setCheckState(
+                    0,
+                    Qt.CheckState.Checked
+                    if item.text(0) in {"Sales", "Third"}
+                    else Qt.CheckState.Unchecked,
+                )
+            dialog.import_button.click()
+            return QDialog.DialogCode.Accepted
+
+        with patch.object(FileImportPreviewDialog, "exec", new=select_regions_check_sales_and_third):
+            success = controller.import_excel_path(self.path)
+            self.assertTrue(success)
+
+        table_names = [table["name"] for table in controller._project["model"]["tables"]]
+        self.assertEqual(table_names, ["Sales", "Third"])
+
+    def test_multi_select_failure_shows_warning_and_returns_false(self) -> None:
+        controller = StudioController()
+
+        def select_regions_check_sales_and_third(dialog: FileImportPreviewDialog) -> int:
+            self.wait_for_preview(dialog)
+            root = dialog.navigator_tree.topLevelItem(0)
+            self.assertIsNotNone(root)
+            dialog.navigator_select_multiple.setChecked(True)
+            for i in range(root.childCount()):
+                item = root.child(i)
+                item.setCheckState(
+                    0,
+                    Qt.CheckState.Checked
+                    if item.text(0) in {"Sales", "Third"}
+                    else Qt.CheckState.Unchecked,
+                )
+            dialog.import_button.click()
+            return QDialog.DialogCode.Accepted
+
+        from analytics_studio import controller as controller_module
+        orig_parse_file = controller_module.parse_file
+
+        def failing_parse(path, options=None):
+            if options and options.get("sheet_name") == "Third":
+                raise RuntimeError("Corrupt sheet data")
+            return orig_parse_file(path, options=options)
+
+        with (
+            patch.object(FileImportPreviewDialog, "exec", new=select_regions_check_sales_and_third),
+            patch("analytics_studio.controller.parse_file", side_effect=failing_parse),
+            patch("analytics_studio.controller.QMessageBox.warning") as mock_warning,
+        ):
+            success = controller.import_excel_path(self.path)
+            self.assertFalse(success)
+            mock_warning.assert_called_once()
+            args, _ = mock_warning.call_args
+            self.assertEqual(args[1], "Some items were not loaded")
+            self.assertIn("Third", args[2])
+            self.assertIn("Corrupt sheet data", args[2])
+
+        table_names = [table["name"] for table in controller._project["model"]["tables"]]
+        self.assertEqual(table_names, ["Sales"])
+
+    def test_options_frame_hidden_for_excel_and_visible_for_csv(self) -> None:
+        excel_dialog = FileImportPreviewDialog(self.path, replacing=False)
+        self.wait_for_preview(excel_dialog)
+        excel_dialog.show()
+        self.app.processEvents()
+        self.assertFalse(excel_dialog.options_group.isVisible())
+        self.assertTrue(excel_dialog.options_group.isHidden())
+        excel_dialog.reject()
+
+        csv_path = self.root / "sample.csv"
+        csv_path.write_text("A,B\n1,2\n", encoding="utf-8")
+        csv_dialog = FileImportPreviewDialog(csv_path, replacing=False)
+        self.wait_for_preview(csv_dialog)
+        csv_dialog.show()
+        self.app.processEvents()
+        self.assertTrue(csv_dialog.options_group.isVisible())
+        self.assertFalse(csv_dialog.options_group.isHidden())
+        csv_dialog.reject()

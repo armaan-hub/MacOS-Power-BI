@@ -6990,16 +6990,32 @@ class StudioController(QObject):
                 pending_source=(candidate, staged_source)
             )
         checked_sheets = getattr(dialog, "checked_sheets", [])
-        if source_kind == "excel" and len(checked_sheets) > 1:
-            success = self._commit_import(path, dialog.candidate)
-            current_sheet = str(dialog.candidate.options.get("sheet_name", ""))
+        if source_kind == "excel":
+            if not checked_sheets:
+                return True
+            success = True
+            errors: list[str] = []
+            candidate_sheet = str(dialog.candidate.options.get("sheet_name", ""))
             for name in checked_sheets:
-                if name == current_sheet:
-                    continue
-                opts = {**dialog.candidate.options, "sheet_name": name}
-                extra_candidate = parse_file(path, options=opts)
-                if not self._commit_import(path, extra_candidate):
+                try:
+                    if name == candidate_sheet:
+                        cand = dialog.candidate
+                    else:
+                        opts = {**dialog.candidate.options, "sheet_name": name}
+                        cand = parse_file(path, options=opts)
+                    if not self._commit_import(path, cand):
+                        success = False
+                        errors.append(f"{name}: Could not commit table import")
+                except Exception as exc:
                     success = False
+                    errors.append(f"{name}: {exc}")
+            if errors:
+                QMessageBox.warning(
+                    None,
+                    "Some items were not loaded",
+                    "\n".join(errors),
+                )
+                return False
             return success
         return self._commit_import(path, dialog.candidate)
 
