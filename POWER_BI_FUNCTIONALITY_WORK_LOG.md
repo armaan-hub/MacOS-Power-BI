@@ -2646,3 +2646,9 @@ Antigravity coded Task 173. analytics_studio/measures.py body_value_type: IF/SWI
 OpenCode coded Task 174 (its first task). analytics_studio/dax_stats.py BETA.DIST: refuse cumulative results of 0 or 1 when max shape >= 1E12 and min shape > 20 (Power BI's irregular overflow band), and values below 1E-8 when a shape is 1E6 or more. t232 wrong 31 to 5 (rest last-digit limits), t231 wrong 6 to 5, 24 older sets unchanged; a 2500-line sweep changed no answered value.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4810 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-16 — Iteration 263 (Task 175 ux-175: DAX IntelliSense lists qualified columns for a bare name)
+
+Typing a bare name in the formula bar now lists matching columns of every table, fully qualified ('Sales Data'[Quantity]), beside functions, tables and measures, as Power BI does. dax_intellisense._complete_identifier; tests/test_ux175_intellisense_columns.py.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4815 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, OpenCode coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.

@@ -318,6 +318,18 @@ def _complete_identifier(
                 "insertText": _quote_if_needed(name), "signature": name, "doc": "",
                 "supported": True, "replaceStart": start, "replaceEnd": caret,
             }))
+    if prefix:
+        for table in model.get("tables", []):
+            table_name = str(table["name"])
+            for column in table.get("columns", []):
+                column_name = str(column["name"])
+                rank = _rank(prefix, column_name)
+                if rank is None:
+                    continue
+                insert = f"{_quote_if_needed(table_name)}[{_escape_bracket(column_name)}]"
+                item = _column_item(column, table_name, insert, start, caret)
+                item["label"] = insert
+                entries.append((rank, insert, item))
     for measure in model.get("measures", []):
         name = str(measure["name"])
         rank = _rank(prefix, name)
