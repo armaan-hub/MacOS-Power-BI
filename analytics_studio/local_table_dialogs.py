@@ -250,6 +250,13 @@ class CustomColumnDialog(QDialog):
         parameter_row.addWidget(self.insert_parameter_button)
         formula_layout.addLayout(parameter_row)
 
+        self.syntax_status_label = QLabel()
+        self.syntax_status_label.setObjectName("customColumnSyntaxStatus")
+        self.syntax_status_label.setWordWrap(True)
+        self.syntax_status_label.setMinimumHeight(24)
+        self.syntax_status_label.setStyleSheet("padding: 2px 4px; color: #425768;")
+        formula_layout.addWidget(self.syntax_status_label)
+
         self.syntax_help_label = QLabel()
         self.syntax_help_label.setObjectName("customColumnSyntaxHelp")
         self.syntax_help_label.setWordWrap(True)
@@ -260,6 +267,20 @@ class CustomColumnDialog(QDialog):
         )
         formula_layout.addWidget(self.syntax_help_label)
         editor_row.addWidget(formula_panel, 1)
+
+        self.completion_list = QListWidget(self.expression_edit)
+        self.completion_list.setObjectName("customColumnCompletionList")
+        self.completion_list.setWindowFlags(Qt.WindowType.SubWindow)
+        self.completion_list.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.completion_list.setStyleSheet(
+            "QListWidget#customColumnCompletionList { background: #ffffff; "
+            "border: 1px solid #7a929e; border-radius: 2px; } "
+            "QListWidget#customColumnCompletionList::item { padding: 3px 6px; } "
+            "QListWidget#customColumnCompletionList::item:selected { background: #e0eef9; color: #111111; }"
+        )
+        self.completion_list.setVisible(False)
+        self.completion_list.itemClicked.connect(self._accept_completion)
+        self.expression_edit.installEventFilter(self)
 
         reference_panel = QWidget()
         reference_panel.setObjectName("customColumnReferencePanel")
@@ -347,8 +368,10 @@ class CustomColumnDialog(QDialog):
         layout.addWidget(self.buttons)
 
         self.expression_edit.textChanged.connect(self._update_syntax_help)
+        self.expression_edit.textChanged.connect(self._update_syntax_status_and_completion)
         self.name_edit.textChanged.connect(self._refresh_save_state)
         self._update_syntax_help()
+        self._update_syntax_status_and_completion()
         self._refresh_save_state()
 
     @property
@@ -405,6 +428,96 @@ class CustomColumnDialog(QDialog):
             f"<code>{function}</code> · syntax: <code>{syntax}</code> · "
             "Only the displayed local form is supported."
         )
+
+    def eventFilter(self, obj: object, event: Any) -> bool:
+        if obj is self.expression_edit and event.type() == QEvent.Type.FocusOut:
+            self.completion_list.hide()
+        if obj is self.expression_edit and event.type() == QEvent.Type.KeyPress:
+            if self.completion_list.isVisible():
+                key = event.key()
+                if key == Qt.Key.Key_Down:
+                    curr = self.completion_list.currentRow()
+                    if curr < self.completion_list.count() - 1:
+                        self.completion_list.setCurrentRow(curr + 1)
+                    return True
+                if key == Qt.Key.Key_Up:
+                    curr = self.completion_list.currentRow()
+                    if curr > 0:
+                        self.completion_list.setCurrentRow(curr - 1)
+                    return True
+                if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Tab):
+                    self._accept_completion()
+                    return True
+                if key == Qt.Key.Key_Escape:
+                    self.completion_list.hide()
+                    return True
+        return super().eventFilter(obj, event)
+
+    def _accept_completion(self, *_args: object) -> None:
+        item = self.completion_list.currentItem()
+        if item is None:
+            return
+        data = item.data(Qt.ItemDataRole.UserRole)
+        if not isinstance(data, dict):
+            return
+        cursor = self.expression_edit.textCursor()
+        cursor.setPosition(int(data["replaceStart"]))
+        cursor.setPosition(int(data["replaceEnd"]), QTextCursor.MoveMode.KeepAnchor)
+        cursor.insertText(str(data["insertText"]))
+        self.expression_edit.setTextCursor(cursor)
+        self.completion_list.hide()
+
+    def _update_syntax_status_and_completion(self) -> None:
+        from analytics_studio.m_custom_column import (
+            PowerQueryExpressionError,
+            compile_m_formula,
+        )
+        from analytics_studio.m_intellisense import complete_m
+
+        text = self.expression_edit.toPlainText()
+        stripped = text.strip()
+
+        # Update syntax status
+        if not stripped:
+            status_text = ""
+        else:
+            try:
+                compile_m_formula(text)
+                status_text = "No syntax errors have been detected."
+            except PowerQueryExpressionError as exc:
+                msg = str(exc)
+                if (
+                    "is not supported by this engine yet" in msg
+                    or "app parameter or saved function" in msg
+                ):
+                    status_text = "No syntax errors have been detected."
+                else:
+                    status_text = msg
+
+        self.syntax_status_label.setText(status_text)
+
+        # Refresh completion popup
+        caret = self.expression_edit.textCursor().position()
+        completions = complete_m(text, caret, self._columns)
+        if not completions:
+            self.completion_list.hide()
+            return
+
+        self.completion_list.clear()
+        for comp in completions:
+            it = QListWidgetItem(str(comp["label"]))
+            it.setData(Qt.ItemDataRole.UserRole, comp)
+            self.completion_list.addItem(it)
+        self.completion_list.setCurrentRow(0)
+
+        cursor_rect = self.expression_edit.cursorRect()
+        x = max(0, min(cursor_rect.left(), self.expression_edit.width() - 250))
+        y = cursor_rect.bottom() + 2
+        if y + 160 > self.expression_edit.height():
+            y = max(0, cursor_rect.top() - 162)
+        self.completion_list.setGeometry(x, y, 250, 160)
+        self.completion_list.show()
+        self.completion_list.raise_()
 
     def _update_syntax_help(self) -> None:
         formula = self.expression_edit.toPlainText().strip()
