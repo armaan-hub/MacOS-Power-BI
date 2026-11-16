@@ -8,6 +8,9 @@ Values are the Power BI answers measured for the hunt rows. Refusals are checked
 """
 
 import unittest
+from decimal import Decimal
+
+from analytics_studio.measures import MeasureError, evaluate_measures, parse_expression, _reject_bare_columns_in_swi_table_arguments
 from tools import dax_oracle_diff as dax
 
 
@@ -65,6 +68,54 @@ class TestIteration257Hunt169(unittest.TestCase):
         self.assertEqual(dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]="East"),"a",VALUES(Facts[Region]),1))'), "1")
         # measured (t212): IFERROR(REPT("x",-3)&COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),"a",VALUES(Facts[Region]),1)),"E") is E
         self.assertEqual(dax.local('IFERROR(REPT("x",-3)&COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),"a",VALUES(Facts[Region]),1)),"E")'), "E")
+
+
+BAD = 'COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",Facts[Region],1))'
+
+
+def _run(measures: list[tuple[str, str]], names: list[str]):
+    headers = dax.HEADERS
+    return evaluate_measures(
+        [{"name": n, "expression": e} for n, e in measures], dax.LOCAL_ROWS, headers, "Facts", measure_names=names,
+        table_context=[{
+            "id": "facts", "name": "Facts", "headers": headers, "rows": dax.LOCAL_ROWS,
+            "column_types": {"Sales": "decimal_number", "Quantity": "whole_number", "Region": "text", "Note": "text"},
+        }],
+        active_table_id="facts",
+    )
+
+
+class TestIteration257Hunt169Scope(unittest.TestCase):
+    def test_unrelated_bad_measure_does_not_block_valid_query(self) -> None:
+        result = _run([("Bad", BAD), ("Good", "COUNTROWS(Facts)")], ["Good"])
+        self.assertEqual(result["Good"], Decimal("6"))
+
+    def test_measure_referencing_bad_measure_is_refused(self) -> None:
+        with self.assertRaises(MeasureError):
+            _run([("Bad", BAD), ("Mid", "[Bad]+1"), ("Top", "[Mid]*2")], ["Top"])
+
+    def test_querying_the_bad_measure_itself_is_refused(self) -> None:
+        with self.assertRaises(MeasureError):
+            _run([("Bad", BAD), ("Good", "COUNTROWS(Facts)")], ["Bad"])
+
+    def test_cyclic_references_terminate_in_scan(self) -> None:
+        # the engine's own cycle error comes first or the scan ends; either way it must not hang
+        try:
+            _run([("A", "[B]+1"), ("B", "[A]+1")], ["A"])
+        except MeasureError:
+            pass
+
+    def test_var_holding_table_and_table_name_are_not_refused(self) -> None:
+        self.assertEqual(dax.local('VAR t = VALUES(Facts[Region]) RETURN COUNTROWS(SUBSTITUTEWITHINDEX(t,"a",t,1))'), "3")
+        self.assertEqual(dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"a",Facts,1))'), "6")
+
+    def test_measure_reference_argument_is_not_refused_by_scan(self) -> None:
+        # a measure reference is ("reference", "", name): not a bare column, so the scan does not fire on it
+        self.assertFalse(dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"a",VALUES(Facts[Region]),1))').startswith("LOCAL-REJECT"))
+        with self.assertRaises(MeasureError):
+            _reject_bare_columns_in_swi_table_arguments(parse_expression('SUBSTITUTEWITHINDEX(Facts[Region],"a",Facts,1)'))
+        _reject_bare_columns_in_swi_table_arguments(parse_expression('SUBSTITUTEWITHINDEX([M],"a",[M],1)'))
+        _reject_bare_columns_in_swi_table_arguments(parse_expression('SUBSTITUTEWITHINDEX(Facts,"a",Facts,1)'))
 
 
 if __name__ == "__main__":

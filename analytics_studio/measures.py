@@ -25433,7 +25433,18 @@ def _evaluate_measures_once(
     results = {item["name"]: _bare_result(resolve(item["name"].casefold())) for item in selected}
     # Power BI checks the whole query when it compiles it, also the branches that never run; the engine's own errors come first
     reject_invalid_allexcept(parsed[item["name"].casefold()] for item in selected)
-    _reject_bare_columns_in_swi_table_arguments(list(parsed.values()))  # Task 169: whole-query scan, every branch
+    # Task 169: Power BI validates the measures in the query and what they reference (transitively), not the whole model
+    reachable: set[str] = set()
+    pending = [item["name"].casefold() for item in selected]
+    while pending:
+        name = pending.pop()
+        if name in reachable or name not in parsed:
+            continue
+        reachable.add(name)
+        refs: set[str] = set()
+        _measure_references(parsed[name], refs)
+        pending.extend(refs - reachable)
+    _reject_bare_columns_in_swi_table_arguments([parsed[name] for name in sorted(reachable)])
     if targets is not None:
         _reject_bare_columns_without_row_context(
             [(item, parsed[item["name"].casefold()]) for item in selected],
