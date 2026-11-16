@@ -828,6 +828,10 @@ def _beta(function: str, args: list[object]) -> Decimal | None:
         else:
             log_density = _beta_log_pdf(a, b, u)
             value = math.exp(log_density) / width if log_density < 709 else math.inf
+        if cumulative and max(a, b) >= 1e12 and min(a, b) > 20 and value in (0.0, 1.0):
+            raise dax_typed.refusal("BETA.DIST with shape parameters this large overflows in Power BI at a boundary not modelled by the local engine.")
+        if max(a, b) >= 1e6 and 0.0 < value < 1e-8:
+            raise dax_typed.refusal("BETA.DIST with a shape parameter of 1E6 or more is not modelled precisely by the local engine.")
         return None if args[0] is None and value == 0 else _result(value, function)
     p, a, b = (_number(arg, function) for arg in args[:3])
     low = _number(args[3], function) if len(args) > 3 else 0.0
