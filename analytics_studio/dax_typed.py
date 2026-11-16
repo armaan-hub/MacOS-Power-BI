@@ -679,10 +679,15 @@ def text_function(function: str, args: list[object]) -> object:
     if function == "VALUE":
         if first is None:
             return None
-        if isinstance(first, Decimal):
+        from . import dax_dates  # late import: dax_dates imports this module
+        if isinstance(first, Decimal) and not (isinstance(first, dax_dates.DaxDateTime) and first.is_finite()):
             if not first.is_finite():  # live Power BI (Task 12 review): VALUE of Infinity or NaN cannot read the text it prints
                 raise _error(f"Cannot convert value of type Number to type Number: {first} is not a number VALUE can read.")
             return Decimal(first)
+        if isinstance(first, dax_dates.DaxDateTime):
+            # Task 171 (measured): VALUE of a date or time reads its text, so the time of day is whole seconds (VALUE(CONVERT(1E-5,DATETIME)) is 1/86400)
+            with subnormal_text_allowed():
+                return text_to_number(to_text(first), dates=True)
         with subnormal_text_allowed():
             return text_to_number(to_text(first), dates=True)  # Task 19 Part E: VALUE reads a date or a time text too
     if first is None and function == "REPLACE":

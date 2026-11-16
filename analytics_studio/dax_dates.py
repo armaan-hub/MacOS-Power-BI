@@ -182,6 +182,18 @@ def tick_round(serial: Decimal) -> Decimal:
     return (serial * 25_920_000).quantize(Decimal(1), rounding=ROUND_HALF_UP) / 25_920_000
 
 
+def number_as_datetime(serial: Decimal) -> Decimal:
+    """A number converted to DATETIME as Power BI holds it (measured, Task 171): the day is the floor, the time of day is rounded to the
+    nearest tick of 1/300 s, and the two are recombined in double arithmetic (CONVERT(-1E-5,DATETIME) is -9.99228395059948E-06, while
+    CONVERT(1E-5,DATETIME) is 9.99228395061728E-06)."""
+    if not serial.is_finite() or serial == serial.to_integral_value():
+        return serial
+    value = float(serial)
+    day = math.floor(value)
+    ticks = math.floor((value - day) * 25_920_000 + 0.5)
+    return Decimal(repr(day + ticks / 25_920_000))
+
+
 def is_date(value: object) -> bool:
     return isinstance(value, DaxDateTime)
 

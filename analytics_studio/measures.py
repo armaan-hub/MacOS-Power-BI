@@ -20017,7 +20017,7 @@ def _evaluate_measures_once(
                 return dax_dates.DaxDateTime(number)  # live Power BI: Infinity and NaN stay what they are (they only print as a date); no clamp
             if number < _DATETIME_CLAMP_LOW:  # Task 145 family C (measured): a finite number too small keeps its value (CONVERT(CONVERT(-1E15,DATETIME),DOUBLE) is -1E+15) and shows as 01/01/0100
                 return dax_dates.ClampedDaxDateTime(number)
-            return dax_dates.DaxDateTime(number)
+            return dax_dates.DaxDateTime(dax_dates.number_as_datetime(number))  # Task 171 (measured): the time of day is held in 1/300 s ticks
         raise MeasureError(f"CONVERT does not support the type {target}.")
 
     def column_order_key(value: Any) -> Any:
