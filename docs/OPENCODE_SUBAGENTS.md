@@ -11,7 +11,7 @@ This document sets up how OpenCode works on **Analytics Studio**. It mirrors `do
 | **Team-Planner** | Claude Opus (main session) | Plans, writes briefs, picks the coder, verifies, runs the gate, merges. Never writes code. |
 | **Team-Thinker** | Claude Sonnet | Head of review and testing: writes the test plan and gives the verdict. Directs the junior testers. |
 | **Antigravity** | agy CLI, Gemini (zellij `Power-BI-Tool`) | Coder while it has quota. |
-| **OpenCode** | OpenCode v2, DeepSeek flash (zellij `Power-BI-Tool`, pane `terminal_6`) | Coder while it has quota. |
+| **OpenCode** | OpenCode v2, DeepSeek flash (zellij `Power-BI-Tool`, pane `terminal_11`) | Coder while it has quota. |
 | **Team-Coder / junior** | Claude Haiku | Codes when Antigravity and OpenCode are both out of quota. Also the read-only testers for Team-Thinker. |
 
 ### Routing: the Team-Planner decides
@@ -107,8 +107,8 @@ sequenceDiagram
 
    It must also state the limits: no exploring beyond the listed lines, no python experiments, run only the named test file once, commit and stop.
 3. Send it only when OpenCode is idle:
-   - `zellij -s Power-BI-Tool action paste -p terminal_6 "Read the brief at <path> and follow it exactly. Use the oc-builder subagent, then oc-checker, then commit and stop."`;
-   - then `zellij -s Power-BI-Tool action send-keys -p terminal_6 Enter`.
+   - `zellij -s Power-BI-Tool action paste -p terminal_11 "Read the brief at <path> and follow it exactly. Use the oc-builder subagent, then oc-checker, then commit and stop."`;
+   - then `zellij -s Power-BI-Tool action send-keys -p terminal_11 Enter`.
 
    Always pass `-p`.
 4. Watch cheaply:
