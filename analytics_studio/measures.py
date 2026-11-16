@@ -8469,6 +8469,12 @@ def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) ->
     if kind == "call":
         if node[1] == "CALCULATE" and node[2]:
             children = node[2][:1]  # the expression keeps the caller's row context (none); the filters are evaluated elsewhere
+        elif node[1] == "ROW" and node[2]:
+            # Task 170 (measured): ROW does not create a row context, so its value arguments (positions 2, 4, 6 ...) are
+            # validated like any scalar argument; the names (positions 1, 3, 5 ...) are strings
+            children = node[2][1::2]
+        elif node[1] == "COUNTROWS" and node[2]:
+            children = node[2][:1]  # Task 170 (measured): the table argument is evaluated in the caller's context, so a ROW inside it is validated too
         elif node[1] not in _ROW_CONTEXT_FREE_CALLS:
             return None
         else:
