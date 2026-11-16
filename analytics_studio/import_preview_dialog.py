@@ -55,12 +55,18 @@ from analytics_studio.transformations import infer_column_types
 
 PREVIEW_ROW_LIMIT = 100
 ASYNC_PREVIEW_THRESHOLD_BYTES = 256 * 1024
-_DELIMITERS = ((",", "Comma"), (";", "Semicolon"), ("\t", "Tab"), ("|", "Pipe"))
+_DELIMITERS = (
+    (",", "Comma"),
+    (";", "Semicolon"),
+    ("\t", "Tab"),
+    (":", "Colon"),
+    ("|", "Pipe"),
+)
 _ENCODINGS = (
-    ("utf-8-sig", "UTF-8 (BOM aware)"),
-    ("utf-8", "UTF-8"),
-    ("utf-16", "UTF-16"),
-    ("cp1252", "Windows-1252"),
+    ("utf-8-sig", "65001: Unicode (UTF-8)"),
+    ("utf-8", "65001: Unicode (UTF-8, no BOM)"),
+    ("utf-16", "1200: Unicode"),
+    ("cp1252", "1252: Western European (Windows)"),
 )
 
 
@@ -635,7 +641,7 @@ class FileImportPreviewDialog(QDialog):
             self.encoding_combo.addItem(encoding, encoding)
         index = self.encoding_combo.findData(encoding)
         self.encoding_combo.setCurrentIndex(max(0, index))
-        self.options_form.addRow("Encoding", self.encoding_combo)
+        self.options_form.addRow("File Origin", self.encoding_combo)
         self.encoding_combo.currentIndexChanged.connect(self._refresh_preview)
 
         self.header_checkbox = QCheckBox("First row contains column names")
