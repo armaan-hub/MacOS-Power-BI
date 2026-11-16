@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QItemSelection, QItemSelectionModel, QPoint, Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QDialog, QMenu
 
@@ -183,3 +183,72 @@ class HeaderMenusTests(unittest.TestCase):
 
         expected_clipboard = "East\nWest\nEast\n\n"
         self.assertEqual(QApplication.clipboard().text(), expected_clipboard)
+
+    def test_remove_removes_all_selected_columns(self) -> None:
+        dialog = self.make()
+        dialog.preview.selectColumn(0)
+        model = dialog.preview.model()
+        dialog.preview.selectionModel().select(
+            QItemSelection(
+                model.index(0, 1), model.index(model.rowCount() - 1, 1)
+            ),
+            QItemSelectionModel.SelectionFlag.Select,
+        )
+        self.assertEqual(dialog._selected_preview_columns(), ["Region", "Amount"])
+
+        menu = dialog._build_header_context_menu(1)
+        remove_action = next(a for a in menu.actions() if a.text() == "Remove")
+        self.assertTrue(remove_action.isEnabled())
+        remove_action.trigger()
+
+        self.assertEqual(dialog._selected_preview_candidate().headers, ["Day"])
+
+    def test_change_type_to_current_type_adds_no_step(self) -> None:
+        dialog = self.make()
+        menu = dialog._build_change_type_menu(0)
+        checked = [a for a in menu.actions() if a.isChecked()]
+        self.assertEqual(len(checked), 1)
+        self.assertTrue(checked[0].isEnabled())
+        checked[0].trigger()
+
+        self.assertEqual(dialog._steps, [])
+
+    def test_remove_other_columns_keeps_only_selected(self) -> None:
+        dialog = self.make()
+        menu = dialog._build_header_context_menu(1)
+        keep_action = next(
+            a for a in menu.actions() if a.text() == "Remove Other Columns"
+        )
+        self.assertTrue(keep_action.isEnabled())
+        keep_action.trigger()
+
+        self.assertEqual(dialog._selected_preview_candidate().headers, ["Amount"])
+        self.assertEqual(
+            dialog._steps[-1], {"op": "keep_columns", "columns": ["Amount"]}
+        )
+
+    def test_move_to_beginning_reorders_headers(self) -> None:
+        dialog = self.make()
+        menu = dialog._build_header_context_menu(2)
+        move_menu = next(a for a in menu.actions() if a.text() == "Move").menu()
+        beginning_action = next(
+            a for a in move_menu.actions() if a.text() == "To Beginning"
+        )
+        self.assertTrue(beginning_action.isEnabled())
+        beginning_action.trigger()
+
+        self.assertEqual(
+            dialog._selected_preview_candidate().headers,
+            ["Day", "Region", "Amount"],
+        )
+
+    def test_move_left_disabled_on_first_column(self) -> None:
+        dialog = self.make()
+        menu = dialog._build_header_context_menu(0)
+        move_menu = next(a for a in menu.actions() if a.text() == "Move").menu()
+        actions = {a.text(): a for a in move_menu.actions()}
+
+        self.assertFalse(actions["Left"].isEnabled())
+        self.assertFalse(actions["To Beginning"].isEnabled())
+        self.assertTrue(actions["Right"].isEnabled())
+        self.assertTrue(actions["To End"].isEnabled())

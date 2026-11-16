@@ -768,10 +768,28 @@ class _PowerQueryProfileHeader(QHeaderView):
             "boolean": "T/F",
         }.get(type_name, "ABC")
         painter.setFont(self.font())
+        glyph_rect = self._type_icon_rect(logical_index)
+        glyph_rect = QRect(
+            glyph_rect.left(),
+            rect.top(),
+            glyph_rect.width(),
+            self._HEADER_ROW_HEIGHT,
+        )
         painter.drawText(
-            header.adjusted(0, 1, -25, 0),
+            glyph_rect,
             Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
-            f"{type_glyph}  {str(profile.get('name', ''))}",
+            type_glyph,
+        )
+        name_left = glyph_rect.right() + 4
+        painter.drawText(
+            QRect(
+                name_left,
+                rect.top() + 1,
+                max(0, header.right() - 25 - name_left),
+                self._HEADER_ROW_HEIGHT,
+            ),
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
+            str(profile.get("name", "")),
         )
         filter_active = bool(profile.get("filter_active", False))
         dropdown = QRect(rect.right() - 28, rect.top() + 3, 23, 21)
@@ -7059,13 +7077,27 @@ class TransformDataDialog(QDialog):
 
     def _build_header_context_menu(self, logical_index: int) -> QMenu:
         candidate = self._selected_preview_candidate()
-        if 0 <= logical_index < len(candidate.headers):
+        if (
+            0 <= logical_index < len(candidate.headers)
+            and candidate.headers[logical_index] not in self._selected_preview_columns()
+        ):
             self.preview.selectColumn(logical_index)
         column = (
             candidate.headers[logical_index]
             if 0 <= logical_index < len(candidate.headers)
             else ""
         )
+        headers = list(candidate.headers)
+        keep_columns_supported = self.operation_combo.findData("keep_columns") >= 0
+
+        def keep_selected_columns() -> None:
+            selected = set(self._selected_preview_columns())
+            columns = [name for name in headers if name in selected]
+            if columns:
+                self._insert_step_after_selection(
+                    {"op": "keep_columns", "columns": columns}
+                )
+
         menu = QMenu(self)
         menu.setObjectName("powerQueryHeaderContextMenu")
         menu.setToolTipsVisible(True)
@@ -7100,7 +7132,12 @@ class TransformDataDialog(QDialog):
         add_item(menu, "Remove", "remove_column")
 
         # 3. Remove Other Columns
-        add_item(menu, "Remove Other Columns", None)
+        add_item(
+            menu,
+            "Remove Other Columns",
+            None,
+            action_fn=keep_selected_columns if keep_columns_supported else None,
+        )
 
         # 4. Duplicate Column
         add_item(menu, "Duplicate Column", "duplicate_column")
@@ -7166,10 +7203,35 @@ class TransformDataDialog(QDialog):
         move_sub = QMenu("Move", menu)
         move_sub.setObjectName("powerQueryHeaderMoveMenu")
         move_sub.setToolTipsVisible(True)
-        add_item(move_sub, "Left", None)
-        add_item(move_sub, "Right", None)
-        add_item(move_sub, "To Beginning", None)
-        add_item(move_sub, "To End", None)
+        reorder_supported = self.operation_combo.findData("reorder_columns") >= 0
+        last_index = len(headers) - 1
+
+        def move_column(target: int) -> None:
+            order = list(headers)
+            if not 0 <= logical_index < len(order):
+                return
+            order.insert(target, order.pop(logical_index))
+            self._insert_step_after_selection(
+                {"op": "reorder_columns", "columns": order}
+            )
+
+        for label, target, blocked_by_position in (
+            ("Left", logical_index - 1, logical_index <= 0),
+            ("Right", logical_index + 1, logical_index >= last_index),
+            ("To Beginning", 0, logical_index <= 0),
+            ("To End", last_index, logical_index >= last_index),
+        ):
+            action = QAction(label, move_sub)
+            if not reorder_supported:
+                action.setEnabled(False)
+                action.setToolTip(_NOT_SUPPORTED_YET)
+            elif blocked_by_position:
+                action.setEnabled(False)
+            else:
+                action.triggered.connect(
+                    lambda checked=False, target=target: move_column(target)
+                )
+            move_sub.addAction(action)
         menu.addMenu(move_sub)
 
         # 19. Drill Down
@@ -7184,7 +7246,10 @@ class TransformDataDialog(QDialog):
         self, logical_index: int, parent: QWidget | None = None
     ) -> QMenu:
         candidate = self._selected_preview_candidate()
-        if 0 <= logical_index < len(candidate.headers):
+        if (
+            0 <= logical_index < len(candidate.headers)
+            and candidate.headers[logical_index] not in self._selected_preview_columns()
+        ):
             self.preview.selectColumn(logical_index)
         profiles = self.preview_header._profiles
         current_type = (
@@ -7245,6 +7310,9 @@ class TransformDataDialog(QDialog):
                 else:
                     action.setEnabled(False)
                     action.setToolTip(_NOT_SUPPORTED_YET)
+            elif op_or_type == current_type:
+                # Power BI adds no step when the chosen type is the column's current type.
+                pass
             elif op_or_type in valid_convert_types:
                 t = str(op_or_type)
                 action.triggered.connect(
