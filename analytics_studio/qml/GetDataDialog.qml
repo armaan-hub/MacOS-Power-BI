@@ -383,7 +383,7 @@ Dialog {
                             if (!source.implemented)
                                 return "This connector is listed for discovery; connection support is not implemented in Analytics Studio yet."
                             if (source.iconName === "excel")
-                                return "Excel Workbook is ready. Choose an .xls, .xlsx, or .xlsm file, select a worksheet and header row, then preview the table before import."
+                                return "Excel Workbook is ready. Choose an .xls, .xlsx, or .xlsm file, then pick the sheets in the Navigator."
                             if (source.iconName === "csv")
                                 return "Text/CSV is ready. Choose a CSV file, set delimiter, encoding, and header options, then preview before import."
                             if (source.iconName === "json")

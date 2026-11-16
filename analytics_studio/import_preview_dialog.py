@@ -24,9 +24,17 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
+    QMenu,
     QProgressBar,
+    QPushButton,
     QSpinBox,
+    QSplitter,
+    QStyle,
     QTableView,
+    QToolButton,
+    QTreeWidget,
+    QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -42,16 +50,23 @@ from analytics_studio.file_import import (
     parse_file,
 )
 from analytics_studio.power_query_values import cell_to_text
+from analytics_studio.transformations import infer_column_types
 
 
 PREVIEW_ROW_LIMIT = 100
 ASYNC_PREVIEW_THRESHOLD_BYTES = 256 * 1024
-_DELIMITERS = ((",", "Comma"), (";", "Semicolon"), ("\t", "Tab"), ("|", "Pipe"))
+_DELIMITERS = (
+    (",", "Comma"),
+    (";", "Semicolon"),
+    ("\t", "Tab"),
+    (":", "Colon"),
+    ("|", "Pipe"),
+)
 _ENCODINGS = (
-    ("utf-8-sig", "UTF-8 (BOM aware)"),
-    ("utf-8", "UTF-8"),
-    ("utf-16", "UTF-16"),
-    ("cp1252", "Windows-1252"),
+    ("utf-8-sig", "65001: Unicode (UTF-8)"),
+    ("utf-8", "65001: Unicode (UTF-8, no BOM)"),
+    ("utf-16", "1200: Unicode"),
+    ("cp1252", "1252: Western European (Windows)"),
 )
 
 
@@ -156,22 +171,59 @@ class _SourceOptionsTask(QRunnable):
                 self.signals.completed.emit(self.request_id, result)
 
 
+_TYPE_MARKERS = {
+    "text": "ABC",
+    "whole_number": "123",
+    "decimal_number": "1.2",
+    "fixed_decimal": "1.2",
+    "decimal": "1.2",
+    "currency": "1.2",
+    "percentage": "%",
+    "date": "📅",
+    "datetime": "📅",
+    "datetime_zone": "📅",
+    "time": "CLK",
+    "boolean": "T/F",
+}
+
+
+class _HandBuiltButtonBox(QDialogButtonBox):
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self._ok_button: QPushButton | None = None
+        self._cancel_button: QPushButton | None = None
+
+    def button(self, which: QDialogButtonBox.StandardButton) -> QPushButton | None:
+        if which == QDialogButtonBox.StandardButton.Ok:
+            return self._ok_button
+        if which == QDialogButtonBox.StandardButton.Cancel:
+            return self._cancel_button
+        return super().button(which)
+
+
 class ImportPreviewTableModel(QAbstractTableModel):
     """Small read-only table model containing at most 100 preview records."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None, type_markers: bool = False) -> None:
         super().__init__(parent)
+        self._type_markers = type_markers
         self._headers: list[str] = []
         self._rows: list[dict[str, Any]] = []
+        self._column_types: dict[str, str] = {}
 
     def set_candidate(self, candidate: ImportCandidate | None) -> None:
         self.beginResetModel()
         if candidate is None:
             self._headers = []
             self._rows = []
+            self._column_types = {}
         else:
             self._headers = list(candidate.headers)
             self._rows = list(candidate.rows[:PREVIEW_ROW_LIMIT])
+            try:
+                self._column_types = infer_column_types(self._headers, self._rows)
+            except Exception:
+                self._column_types = {}
         self.endResetModel()
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:  # noqa: N802
@@ -201,7 +253,12 @@ class ImportPreviewTableModel(QAbstractTableModel):
         if role != Qt.ItemDataRole.DisplayRole:
             return None
         if orientation == Qt.Orientation.Horizontal and 0 <= section < len(self._headers):
-            return self._headers[section]
+            name = self._headers[section]
+            if not self._type_markers:
+                return name
+            col_type = self._column_types.get(name, "text")
+            marker = _TYPE_MARKERS.get(col_type, "ABC")
+            return f"{marker} {name}"
         if orientation == Qt.Orientation.Vertical:
             return section + 1
         return None
@@ -281,11 +338,11 @@ class FileImportPreviewDialog(QDialog):
         layout.setContentsMargins(18, 16, 18, 14)
         layout.setSpacing(10)
 
-        heading = QLabel(
+        self.heading = QLabel(
             "Review source settings" if self.source_editing else "Review source data"
         )
-        heading.setStyleSheet("font-size: 19px; font-weight: 600;")
-        layout.addWidget(heading)
+        self.heading.setStyleSheet("font-size: 19px; font-weight: 600;")
+        layout.addWidget(self.heading)
 
         self.file_label = QLabel(str(self.path))
         self.file_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
@@ -340,8 +397,73 @@ class FileImportPreviewDialog(QDialog):
         self.progress_widget.setVisible(False)
         layout.addWidget(self.progress_widget)
 
-        self.table = QTableView()
-        self.table.setModel(ImportPreviewTableModel(self.table))
+        # Main splitter holding Navigator left pane and right preview grid
+        self.main_splitter = QSplitter(Qt.Orientation.Horizontal, self)
+
+        # Left Navigator pane (shown for Excel)
+        self.navigator_panel = QWidget(self)
+        nav_layout = QVBoxLayout(self.navigator_panel)
+        nav_layout.setContentsMargins(0, 0, 8, 0)
+        nav_layout.setSpacing(6)
+
+        self.navigator_search = QLineEdit(self.navigator_panel)
+        self.navigator_search.setObjectName("navigatorSearch")
+        self.navigator_search.setPlaceholderText("Search")
+        self.navigator_search.setClearButtonEnabled(True)
+        self.navigator_search.textChanged.connect(self._on_navigator_search_changed)
+        nav_layout.addWidget(self.navigator_search)
+
+        nav_options_row = QHBoxLayout()
+        nav_options_row.setContentsMargins(0, 0, 0, 0)
+        nav_options_row.setSpacing(6)
+
+        self.navigator_display_options = QToolButton(self.navigator_panel)
+        self.navigator_display_options.setObjectName("navigatorDisplayOptions")
+        self.navigator_display_options.setText("Display Options")
+        self.navigator_display_options.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        display_menu = QMenu(self.navigator_display_options)
+        self._action_enable_previews = display_menu.addAction("Enable data previews")
+        self._action_enable_previews.setCheckable(True)
+        self._action_enable_previews.setChecked(True)
+        self._action_enable_previews.toggled.connect(self._on_enable_previews_toggled)
+        self._action_show_selected = display_menu.addAction("Show selected items only")
+        self._action_show_selected.setCheckable(True)
+        self._action_show_selected.setChecked(False)
+        self._action_show_selected.toggled.connect(self._on_show_selected_only_toggled)
+        self.navigator_display_options.setMenu(display_menu)
+        nav_options_row.addWidget(self.navigator_display_options)
+        nav_options_row.addStretch(1)
+        nav_layout.addLayout(nav_options_row)
+
+        self.navigator_select_multiple = QCheckBox("Select multiple items", self.navigator_panel)
+        self.navigator_select_multiple.setObjectName("navigatorSelectMultiple")
+        self.navigator_select_multiple.toggled.connect(self._on_select_multiple_toggled)
+        nav_layout.addWidget(self.navigator_select_multiple)
+
+        self.navigator_tree = QTreeWidget(self.navigator_panel)
+        self.navigator_tree.setObjectName("navigatorTree")
+        self.navigator_tree.setHeaderHidden(True)
+        self.navigator_tree.itemClicked.connect(self._on_tree_item_clicked)
+        self.navigator_tree.itemChanged.connect(self._on_tree_item_changed)
+        nav_layout.addWidget(self.navigator_tree, 1)
+
+        self.main_splitter.addWidget(self.navigator_panel)
+        self.navigator_panel.setVisible(False)
+
+        # Right preview pane
+        self.right_panel = QWidget(self)
+        right_layout = QVBoxLayout(self.right_panel)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(6)
+
+        self.navigator_item_title = QLabel(self.right_panel)
+        self.navigator_item_title.setObjectName("navigatorItemTitle")
+        self.navigator_item_title.setStyleSheet("font-size: 15px; font-weight: bold; color: #1e2835; padding: 2px 0;")
+        self.navigator_item_title.setVisible(False)
+        right_layout.addWidget(self.navigator_item_title)
+
+        self.table = QTableView(self.right_panel)
+        self.table.setModel(ImportPreviewTableModel(self.table, type_markers=True))
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableView.SelectionMode.SingleSelection)
@@ -350,38 +472,88 @@ class FileImportPreviewDialog(QDialog):
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().setDefaultSectionSize(145)
         self.table.verticalHeader().setDefaultSectionSize(25)
-        layout.addWidget(self.table, 1)
+        right_layout.addWidget(self.table, 1)
+
+        self.main_splitter.addWidget(self.right_panel)
+        self.main_splitter.setStretchFactor(0, 0)
+        self.main_splitter.setStretchFactor(1, 1)
+        self.main_splitter.setSizes([260, 680])
+        layout.addWidget(self.main_splitter, 1)
 
         self.count_label = QLabel("Choose a supported source to see a preview.")
         self.count_label.setStyleSheet("color: #526477;")
         layout.addWidget(self.count_label)
 
-        self.buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Cancel
-            | QDialogButtonBox.StandardButton.Ok,
-            parent=self,
-        )
-        self.import_button = self.buttons.button(QDialogButtonBox.StandardButton.Ok)
-        self.import_button.setText(
-            "Apply settings" if self.source_editing else "Load"
+        # Hand-built button box maintaining Load | Transform Data | Cancel visual order
+        self.buttons = _HandBuiltButtonBox(parent=self)
+        self.buttons.clear()
+        self.import_button = self.buttons.addButton(
+            "Apply settings" if self.source_editing else "Load",
+            QDialogButtonBox.ButtonRole.ActionRole,
         )
         self.import_button.setEnabled(False)
-        self.buttons.accepted.connect(self._accept_candidate)
-        self.buttons.rejected.connect(self.reject)
+        self.import_button.clicked.connect(lambda: self._accept_candidate("load"))
+
         self.transform_button = self.buttons.addButton(
-            "Transform data", QDialogButtonBox.ButtonRole.ActionRole
+            "Transform Data",
+            QDialogButtonBox.ButtonRole.ActionRole,
         )
         self.transform_button.setVisible(self.allow_transform)
         self.transform_button.setEnabled(False)
         self.transform_button.clicked.connect(
             lambda: self._accept_candidate("transform")
         )
+
+        self.cancel_button = self.buttons.addButton(
+            "Cancel",
+            QDialogButtonBox.ButtonRole.ActionRole,
+        )
+        self.cancel_button.clicked.connect(self.reject)
+
+        self.buttons._ok_button = self.import_button
+        self.buttons._cancel_button = self.cancel_button
+        self.buttons.accepted.connect(lambda: self._accept_candidate("load"))
+        self.buttons.rejected.connect(self.reject)
+
         self._set_action_buttons_enabled(False)
         layout.addWidget(self.buttons)
 
+    @property
+    def checked_sheets(self) -> list[str]:
+        if self._kind != "excel":
+            return []
+        root = self.navigator_tree.topLevelItem(0) if self.navigator_tree.topLevelItemCount() > 0 else None
+        if root is not None and root.childCount() > 0:
+            if self.navigator_select_multiple.isChecked():
+                checked = []
+                for i in range(root.childCount()):
+                    child = root.child(i)
+                    if child.checkState(0) == Qt.CheckState.Checked:
+                        checked.append(child.text(0))
+                return checked
+            cur = self.navigator_tree.currentItem()
+            if cur and cur != root:
+                return [cur.text(0)]
+        curr_sheet = self.sheet_combo.currentText().strip() if hasattr(self, "sheet_combo") else ""
+        return [curr_sheet] if curr_sheet else []
+
     def _set_action_buttons_enabled(self, enabled: bool) -> None:
-        self.import_button.setEnabled(enabled)
-        self.transform_button.setEnabled(enabled and self.allow_transform)
+        if self._kind == "excel":
+            checked = self.checked_sheets
+            has_selection = len(checked) > 0
+            self.import_button.setEnabled(enabled and has_selection)
+            if not self.allow_transform or not enabled or not has_selection:
+                self.transform_button.setEnabled(False)
+                self.transform_button.setToolTip("")
+            elif len(checked) > 1:
+                self.transform_button.setEnabled(False)
+                self.transform_button.setToolTip("Select one item to transform it")
+            else:
+                self.transform_button.setEnabled(True)
+                self.transform_button.setToolTip("")
+        else:
+            self.import_button.setEnabled(enabled)
+            self.transform_button.setEnabled(enabled and self.allow_transform)
 
     def _initialize_file(self) -> None:
         try:
@@ -401,6 +573,14 @@ class FileImportPreviewDialog(QDialog):
             self._show_error(str(exc) or "This file cannot be imported.")
             self.count_label.setText("No preview is available.")
             return
+
+        if self._kind == "excel":
+            self.setWindowTitle("Navigator")
+            self.heading.setVisible(False)
+            self.file_label.setVisible(False)
+            self.options_group.setVisible(False)
+            self.navigator_panel.setVisible(True)
+            self.navigator_item_title.setVisible(True)
 
         source_options_pending = False
         if self._kind == "csv":
@@ -464,7 +644,7 @@ class FileImportPreviewDialog(QDialog):
             self.encoding_combo.addItem(encoding, encoding)
         index = self.encoding_combo.findData(encoding)
         self.encoding_combo.setCurrentIndex(max(0, index))
-        self.options_form.addRow("Encoding", self.encoding_combo)
+        self.options_form.addRow("File Origin", self.encoding_combo)
         self.encoding_combo.currentIndexChanged.connect(self._refresh_preview)
 
         self.header_checkbox = QCheckBox("First row contains column names")
@@ -477,46 +657,78 @@ class FileImportPreviewDialog(QDialog):
         self.sheet_combo.addItem("Reading worksheets…", None)
         self.sheet_combo.setEnabled(False)
         self.options_form.addRow("Worksheet", self.sheet_combo)
+        self.options_form.setRowVisible(self.sheet_combo, False)
+
+        nav_layout = self.navigator_panel.layout()
+
+        self.advanced_options_button = QToolButton(self.navigator_panel)
+        self.advanced_options_button.setCheckable(True)
+        self.advanced_options_button.setChecked(False)
+        self.advanced_options_button.setText("▶ Advanced options")
+        self.advanced_options_button.setStyleSheet("font-weight: 500; border: none; background: transparent; padding: 2px 0;")
+        nav_layout.addWidget(self.advanced_options_button)
+
+        self.advanced_options_container = QWidget(self.navigator_panel)
+        adv_layout = QVBoxLayout(self.advanced_options_container)
+        adv_layout.setContentsMargins(4, 2, 4, 2)
+        adv_layout.setSpacing(6)
 
         header_row = self._base_options.get("header_row")
-        self.header_auto_checkbox = QCheckBox("Detect header row automatically")
+        self.header_auto_checkbox = QCheckBox("Detect header row automatically", self.advanced_options_container)
         self.header_auto_checkbox.setChecked(header_row is None)
-        self.header_row_spin = QSpinBox()
+        self.header_row_spin = QSpinBox(self.advanced_options_container)
         max_rows = 65_536 if self.path.suffix.casefold() == ".xls" else 1_048_576
         self.header_row_spin.setRange(1, max_rows)
         self.header_row_spin.setValue(int(header_row) if header_row is not None else 1)
         self.header_row_spin.setEnabled(header_row is not None)
 
-        header_row_widget = QWidget(self)
-        header_row_layout = QHBoxLayout(header_row_widget)
+        self.header_row_widget = QWidget(self.advanced_options_container)
+        header_row_layout = QHBoxLayout(self.header_row_widget)
         header_row_layout.setContentsMargins(0, 0, 0, 0)
         header_row_layout.addWidget(self.header_auto_checkbox)
         header_row_layout.addWidget(QLabel("Header row"))
         header_row_layout.addWidget(self.header_row_spin)
         header_row_layout.addStretch(1)
-        self.options_form.addRow("Column names", header_row_widget)
+        self.header_row_label = QLabel("Column names", self.advanced_options_container)
+        adv_layout.addWidget(self.header_row_label)
+        adv_layout.addWidget(self.header_row_widget)
         self.header_auto_checkbox.toggled.connect(self.header_row_spin.setDisabled)
         self.header_auto_checkbox.toggled.connect(self._on_excel_header_mode_changed)
         self.header_row_spin.valueChanged.connect(self._refresh_preview)
 
         self.transform_raw_rows_checkbox = QCheckBox(
-            "Start Transform from raw worksheet rows (no headers)"
+            "Start Transform from raw worksheet rows (no headers)",
+            self.advanced_options_container,
         )
         self.transform_raw_rows_checkbox.setChecked(
             self.allow_transform and bool(self.initial_options.get("raw_rows", True))
         )
         self.transform_raw_rows_checkbox.setEnabled(self.allow_transform)
-        self.options_form.addRow("Transform start", self.transform_raw_rows_checkbox)
+        self.transform_start_label = QLabel("Transform start", self.advanced_options_container)
+        adv_layout.addWidget(self.transform_start_label)
+        adv_layout.addWidget(self.transform_raw_rows_checkbox)
         self.transform_start_note = QLabel(
-            "When selected, Transform re-reads the worksheet without promoting headers and keeps the worksheet's declared row and column extent under Column1, Column2, … names. The grid above remains the Load preview; Load keeps its current column-name setting."
+            "When selected, Transform re-reads the worksheet without promoting headers and keeps the worksheet's declared row and column extent under Column1, Column2, … names. The grid above remains the Load preview; Load keeps its current column-name setting.",
+            self.advanced_options_container,
         )
         self.transform_start_note.setWordWrap(True)
         self.transform_start_note.setStyleSheet("color: #526477; padding: 0 0 2px 0;")
-        self.options_form.addRow("", self.transform_start_note)
-        self.options_form.setRowVisible(
-            self.transform_raw_rows_checkbox, self.allow_transform
-        )
-        self.options_form.setRowVisible(self.transform_start_note, self.allow_transform)
+        adv_layout.addWidget(self.transform_start_note)
+
+        nav_layout.addWidget(self.advanced_options_container)
+
+        def _update_advanced_visibility(checked: bool) -> None:
+            self.advanced_options_button.setText(("▼" if checked else "▶") + " Advanced options")
+            self.advanced_options_container.setVisible(checked)
+            self.header_row_label.setVisible(checked)
+            self.header_row_widget.setVisible(checked)
+            self.transform_start_label.setVisible(checked and self.allow_transform)
+            self.transform_raw_rows_checkbox.setVisible(checked and self.allow_transform)
+            self.transform_start_note.setVisible(checked and self.allow_transform)
+
+        self.advanced_options_button.toggled.connect(_update_advanced_visibility)
+        _update_advanced_visibility(False)
+
         self._start_background_options_discovery()
         return True
 
@@ -629,7 +841,122 @@ class FileImportPreviewDialog(QDialog):
             self.sheet_combo.setCurrentText(selected_sheet)
         self.sheet_combo.setEnabled(bool(sheets))
         self.sheet_combo.blockSignals(False)
-        self.sheet_combo.currentIndexChanged.connect(self._refresh_preview)
+        self.sheet_combo.currentIndexChanged.connect(self._on_sheet_combo_changed)
+
+        # Build Navigator tree
+        self.navigator_tree.blockSignals(True)
+        self.navigator_tree.clear()
+        root_title = f"{self.path.name} [{len(sheets)}]"
+        root_item = QTreeWidgetItem([root_title])
+        root_item.setIcon(0, self.style().standardIcon(QStyle.StandardPixmap.SP_DriveHDIcon))
+        self.navigator_tree.addTopLevelItem(root_item)
+
+        file_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileIcon)
+        multi = self.navigator_select_multiple.isChecked()
+        current_child: QTreeWidgetItem | None = None
+        current_sheet_name = self.sheet_combo.currentText()
+
+        for sheet in sheets:
+            child = QTreeWidgetItem([sheet])
+            child.setIcon(0, file_icon)
+            if multi:
+                child.setFlags(child.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                child.setCheckState(0, Qt.CheckState.Checked if sheet == current_sheet_name else Qt.CheckState.Unchecked)
+            root_item.addChild(child)
+            if sheet == current_sheet_name:
+                current_child = child
+
+        self.navigator_tree.expandAll()
+        if current_child is not None:
+            self.navigator_tree.setCurrentItem(current_child)
+            self.navigator_item_title.setText(current_child.text(0))
+        elif sheets:
+            first_child = root_item.child(0)
+            self.navigator_tree.setCurrentItem(first_child)
+            self.navigator_item_title.setText(first_child.text(0))
+
+        self.navigator_tree.blockSignals(False)
+        self._filter_tree_items()
+
+    def _on_sheet_combo_changed(self) -> None:
+        sheet = self.sheet_combo.currentText()
+        if self._kind == "excel":
+            self.navigator_item_title.setText(sheet)
+            root = self.navigator_tree.topLevelItem(0) if self.navigator_tree.topLevelItemCount() > 0 else None
+            if root is not None:
+                for i in range(root.childCount()):
+                    child = root.child(i)
+                    if child.text(0) == sheet:
+                        if self.navigator_tree.currentItem() != child:
+                            self.navigator_tree.blockSignals(True)
+                            self.navigator_tree.setCurrentItem(child)
+                            self.navigator_tree.blockSignals(False)
+                        break
+        self._refresh_preview()
+
+    def _on_tree_item_clicked(self, item: QTreeWidgetItem, column: int) -> None:
+        root = self.navigator_tree.topLevelItem(0) if self.navigator_tree.topLevelItemCount() > 0 else None
+        if item == root or item is None:
+            return
+        sheet_name = item.text(0)
+        self.navigator_item_title.setText(sheet_name)
+        if self.sheet_combo.currentText() != sheet_name:
+            self.sheet_combo.setCurrentText(sheet_name)
+        else:
+            self._set_action_buttons_enabled(self._preview_candidate is not None)
+
+    def _on_tree_item_changed(self, item: QTreeWidgetItem, column: int) -> None:
+        self._set_action_buttons_enabled(self._preview_candidate is not None)
+
+    def _on_navigator_search_changed(self, _text: str) -> None:
+        self._filter_tree_items()
+
+    def _on_enable_previews_toggled(self, enabled: bool) -> None:
+        self.table.setVisible(enabled)
+        self.count_label.setVisible(enabled)
+
+    def _on_show_selected_only_toggled(self, _checked: bool) -> None:
+        self._filter_tree_items()
+
+    def _filter_tree_items(self) -> None:
+        root = self.navigator_tree.topLevelItem(0) if self.navigator_tree.topLevelItemCount() > 0 else None
+        if root is None:
+            return
+        search_query = self.navigator_search.text().strip().casefold()
+        show_selected_only = self._action_show_selected.isChecked()
+        multi = self.navigator_select_multiple.isChecked()
+        current_child = self.navigator_tree.currentItem()
+
+        for i in range(root.childCount()):
+            child = root.child(i)
+            name = child.text(0)
+            matches_search = not search_query or search_query in name.casefold()
+            if show_selected_only:
+                if multi:
+                    is_selected = child.checkState(0) == Qt.CheckState.Checked
+                else:
+                    is_selected = (child == current_child)
+            else:
+                is_selected = True
+            child.setHidden(not (matches_search and is_selected))
+
+    def _on_select_multiple_toggled(self, checked: bool) -> None:
+        root = self.navigator_tree.topLevelItem(0) if self.navigator_tree.topLevelItemCount() > 0 else None
+        if root is None:
+            return
+        self.navigator_tree.blockSignals(True)
+        cur = self.navigator_tree.currentItem()
+        for i in range(root.childCount()):
+            child = root.child(i)
+            if checked:
+                child.setFlags(child.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                is_cur = (child == cur)
+                child.setCheckState(0, Qt.CheckState.Checked if is_cur else Qt.CheckState.Unchecked)
+            else:
+                child.setData(0, Qt.ItemDataRole.CheckStateRole, None)
+                child.setFlags(child.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+        self.navigator_tree.blockSignals(False)
+        self._set_action_buttons_enabled(self._preview_candidate is not None)
 
     def _apply_sqlite_options(self, table_names: list[str]) -> None:
         self.table_combo.blockSignals(True)
@@ -830,6 +1157,10 @@ class FileImportPreviewDialog(QDialog):
         model = self.table.model()
         assert isinstance(model, ImportPreviewTableModel)
         model.set_candidate(candidate)
+        self.table.resizeColumnsToContents()
+        for col in range(model.columnCount()):
+            if self.table.columnWidth(col) > 260:
+                self.table.setColumnWidth(col, 260)
         self._clear_error()
         visible_rows = min(candidate.row_count, PREVIEW_ROW_LIMIT)
         self.count_label.setText(
