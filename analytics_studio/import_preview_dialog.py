@@ -204,8 +204,9 @@ class _HandBuiltButtonBox(QDialogButtonBox):
 class ImportPreviewTableModel(QAbstractTableModel):
     """Small read-only table model containing at most 100 preview records."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None, type_markers: bool = False) -> None:
         super().__init__(parent)
+        self._type_markers = type_markers
         self._headers: list[str] = []
         self._rows: list[dict[str, Any]] = []
         self._column_types: dict[str, str] = {}
@@ -253,6 +254,8 @@ class ImportPreviewTableModel(QAbstractTableModel):
             return None
         if orientation == Qt.Orientation.Horizontal and 0 <= section < len(self._headers):
             name = self._headers[section]
+            if not self._type_markers:
+                return name
             col_type = self._column_types.get(name, "text")
             marker = _TYPE_MARKERS.get(col_type, "ABC")
             return f"{marker} {name}"
@@ -460,7 +463,7 @@ class FileImportPreviewDialog(QDialog):
         right_layout.addWidget(self.navigator_item_title)
 
         self.table = QTableView(self.right_panel)
-        self.table.setModel(ImportPreviewTableModel(self.table))
+        self.table.setModel(ImportPreviewTableModel(self.table, type_markers=True))
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableView.SelectionMode.SingleSelection)
