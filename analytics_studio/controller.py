@@ -1922,6 +1922,7 @@ class StudioController(QObject):
         self._sql_server_passwords: dict[str, str] = {}
         self._source_warning = ""
         self._field_query = ""
+        self._table_expanded: dict[str, bool] = {}
         self._current_region: str | None = None
         self._selected_visual = ""
         self._selected_visual_ids: list[str] = []
@@ -2390,6 +2391,281 @@ class StudioController(QObject):
             if query in f"measure {item['name']}".casefold()
         ]
         return [*fields, *measures]
+
+    @Property("QVariantList", notify=stateChanged)
+    def fieldTree(self) -> list[dict[str, Any]]:  # noqa: N802
+        active_table_id = self._active_model_table_id()
+        tables = [
+            table for table in self._table_catalog
+            if table.get("loaded") and table.get("loadEnabled")
+        ]
+        tables.sort(key=lambda t: str(t.get("displayName") or t.get("name") or "").casefold())
+
+        # Collect selected visual fields
+        selected_bindings: set[tuple[str, str]] = set()
+        selected_measures: set[str] = set()
+        page = self._active_page()
+        visual = None
+        if self._selected_visual and page:
+            visual = next((
+                item for item in page.get("visuals", [])
+                if isinstance(item, dict) and item.get("title") == self._selected_visual
+            ), None)
+        if visual is not None:
+            vis_table_id = str(visual.get("table_id") or active_table_id)
+            for well_name, well_fields in visual.get("fields", {}).items():
+                if not isinstance(well_fields, list):
+                    continue
+                for item in well_fields:
+                    m_name = _visual_measure_name(item)
+                    if m_name is not None:
+                        selected_measures.add(m_name.casefold())
+                    else:
+                        c_name = _visual_field_column(item)
+                        if isinstance(item, dict):
+                            t_id = str(item.get("table_id") or vis_table_id)
+                        else:
+                            t_id = vis_table_id
+                        selected_bindings.add((t_id, c_name))
+
+        model_measures = self._project.get("model", {}).get("measures", [])
+        has_query = bool(self._field_query.strip())
+        query = self._field_query.casefold()
+
+        result = []
+        for table in tables:
+            t_id = str(table.get("id", ""))
+            t_name = str(table.get("displayName") or table.get("name") or "")
+            is_date_table = bool(table.get("dateColumn") or table.get("date_column"))
+
+            fields: list[dict[str, Any]] = []
+
+            # Columns
+            col_types = table.get("columnTypes", {})
+            headers = list(table.get("headers", []))
+            for col in headers:
+                if has_query and query not in col.casefold():
+                    continue
+                binding = col
+                in_visual = (t_id, col) in selected_bindings
+                dtype = str(col_types.get(col, "text"))
+                fields.append({
+                    "binding": binding,
+                    "label": col,
+                    "kind": "column",
+                    "dataType": dtype,
+                    "inVisual": in_visual,
+                })
+
+            # Measures belonging to this table
+            for m in model_measures:
+                if m.get("is_hidden", False):
+                    continue
+                m_name = str(m.get("name", ""))
+                home_id = str(m.get("home_table_id") or "")
+                if home_id:
+                    if home_id != t_id and t_id != active_table_id:
+                        continue
+                else:
+                    if t_id != active_table_id:
+                        continue
+                if has_query and (query not in m_name.casefold() and query not in f"measure {m_name}".casefold()):
+                    continue
+                binding = _visual_measure_binding(m_name)
+                in_visual = m_name.casefold() in selected_measures
+                fields.append({
+                    "binding": binding,
+                    "label": m_name,
+                    "kind": "measure",
+                    "dataType": "measure",
+                    "inVisual": in_visual,
+                })
+
+            # Sort fields A-Z by label
+            fields.sort(key=lambda f: str(f.get("label", "")).casefold())
+
+            if has_query:
+                if not fields:
+                    continue
+                expanded = True
+            else:
+                if t_id in self._table_expanded:
+                    expanded = self._table_expanded[t_id]
+                else:
+                    expanded = (t_id == active_table_id)
+
+            result.append({
+                "table": t_name,
+                "tableId": t_id,
+                "expanded": bool(expanded),
+                "isDateTable": is_date_table,
+                "fields": fields,
+            })
+
+        return result
+
+
+    @Property("QVariantList", notify=stateChanged)
+    def fieldTreeFlatNodes(self) -> list[str]:  # noqa: N802
+        nodes: list[str] = []
+        for entry in self.fieldTree:
+            t_id = str(entry.get("tableId", ""))
+            t_name = str(entry.get("table", ""))
+            nodes.append(f"__table__\t{t_id}\t{t_name}")
+            if entry.get("expanded", False):
+                for f in entry.get("fields", []):
+                    nodes.append(str(f.get("binding", "")))
+        return nodes
+
+    @Slot(str, result=bool)
+    def isTableExpanded(self, table_id: str) -> bool:  # noqa: N802
+        if self._field_query.strip():
+            return True
+        if table_id in self._table_expanded:
+            return bool(self._table_expanded[table_id])
+        return (table_id == self._active_model_table_id())
+
+    @Slot(str, result=bool)
+    def isFieldInVisual(self, binding: str) -> bool:  # noqa: N802
+        page = self._active_page()
+        if not self._selected_visual or not page:
+            return False
+        visual = next((
+            item for item in page.get("visuals", [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is None:
+            return False
+        m_target = _visual_measure_name(binding)
+        for well_fields in visual.get("fields", {}).values():
+            if not isinstance(well_fields, list):
+                continue
+            for item in well_fields:
+                if m_target is not None:
+                    if _visual_measure_name(item) == m_target:
+                        return True
+                else:
+                    if _visual_field_column(item) == binding:
+                        return True
+        return False
+
+    @Slot(str, bool)
+    def setTableExpanded(self, table_id: str, expanded: bool) -> None:  # noqa: N802
+        self._table_expanded[str(table_id)] = bool(expanded)
+        self.stateChanged.emit()
+
+    @Slot()
+    def expandAllTables(self) -> None:  # noqa: N802
+        for table in self._table_catalog:
+            self._table_expanded[str(table.get("id", ""))] = True
+        self.stateChanged.emit()
+
+    @Slot()
+    def collapseAllTables(self) -> None:  # noqa: N802
+        for table in self._table_catalog:
+            self._table_expanded[str(table.get("id", ""))] = False
+        self.stateChanged.emit()
+
+    @Slot(object, bool)
+    def toggleFieldInVisual(self, binding: Any, in_visual: bool) -> None:  # noqa: N802
+        if not self._selected_visual:
+            return
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is None:
+            return
+
+        active_table_id = self._active_model_table_id()
+        vis_table_id = str(visual.get("table_id") or active_table_id)
+
+        if not in_visual:
+            # Remove field from visual
+            for well_name, well_fields in list(visual.get("fields", {}).items()):
+                if not isinstance(well_fields, list):
+                    continue
+                matching = []
+                for item in well_fields:
+                    if isinstance(binding, str) and _visual_measure_name(binding) is not None:
+                        if _visual_measure_name(item) == _visual_measure_name(binding):
+                            matching.append(item)
+                    elif isinstance(binding, dict):
+                        b_col = str(binding.get("column", ""))
+                        b_tid = str(binding.get("table_id", ""))
+                        if isinstance(item, dict):
+                            i_col = str(item.get("column", ""))
+                            i_tid = str(item.get("table_id", vis_table_id))
+                            if b_col == i_col and b_tid == i_tid:
+                                matching.append(item)
+                        elif isinstance(item, str):
+                            if b_col == item and b_tid == vis_table_id:
+                                matching.append(item)
+                    else:
+                        b_col = str(binding)
+                        if isinstance(item, dict):
+                            i_col = str(item.get("column", ""))
+                            i_tid = str(item.get("table_id", vis_table_id))
+                            if b_col == i_col and i_tid == active_table_id:
+                                matching.append(item)
+                        elif isinstance(item, str):
+                            if b_col == item:
+                                matching.append(item)
+                for match in matching:
+                    self.remove_field_from_well(well_name, match)
+        else:
+            # Add field to visual
+            options = [str(w.get("name", "")) for w in self.activeVisualWells]
+            if not options:
+                return
+
+            is_measure = _visual_measure_name(binding) is not None
+            chart_type = str(self.selectedChartType or visual.get("type", ""))
+
+            # Switch active table if needed for column from other table (unless table visual)
+            if isinstance(binding, dict):
+                col_name = str(binding.get("column", ""))
+                table_id = str(binding.get("table_id", ""))
+                if chart_type != "table" and table_id and table_id != self._active_source_id:
+                    self.selectTable(table_id)
+                binding_to_add = col_name if (self._active_source_id == table_id or chart_type == "table") else col_name
+            else:
+                binding_to_add = str(binding)
+
+            # Determine preferred well
+            if is_measure:
+                if chart_type == "matrix":
+                    preferred = ["Values"]
+                elif chart_type == "gauge":
+                    preferred = ["Value"]
+                elif chart_type == "kpi":
+                    preferred = ["Indicator"]
+                elif chart_type == "lineClusteredColumn":
+                    preferred = ["Column Y-axis", "Line Y-axis"]
+                else:
+                    preferred = ["Y-axis", "Value", "Fields", "Values", "Indicator"]
+            else:
+                if chart_type in {"slicer", "table", "card"}:
+                    preferred = ["Fields"]
+                elif chart_type == "matrix":
+                    preferred = ["Rows"]
+                elif chart_type in {"map", "filledMap", "shapeMap"}:
+                    preferred = ["Location", "Values"]
+                elif chart_type == "scatter":
+                    preferred = ["Details", "X-axis", "Legend"]
+                else:
+                    preferred = ["X-axis", "Rows", "Fields", "Location", "Details", "Legend"]
+
+            target_well = None
+            for p in preferred:
+                if p in options:
+                    target_well = p
+                    break
+            if not target_well:
+                target_well = options[0]
+
+            self.add_field_to_well(target_well, binding_to_add)
 
     @Property("QVariantList", notify=stateChanged)
     def activeVisualFieldOptions(self) -> list[str]:  # noqa: N802
@@ -4539,6 +4815,7 @@ class StudioController(QObject):
         self._install_source(path, source_id, parsed)
         self._source_warning = self._compose_source_warning()
         self._current_region = None
+        self._table_expanded = {str(source_id): True}
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
