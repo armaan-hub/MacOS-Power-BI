@@ -85,3 +85,33 @@ class TestUX178CustomColumnHelp(unittest.TestCase):
         dialog.close()
         dialog.deleteLater()
         self.app.processEvents()
+
+    def test_brackets_inside_strings_do_not_open_column_list(self) -> None:
+        labels = [x["label"] for x in complete_m('"a[b" & Text.Up', 15, ["b"])]
+        self.assertEqual(labels[0], "Text.Upper")
+
+        self.assertEqual(
+            [x["label"] for x in complete_m('"x[" & [Q', 9, ["Qty"])],
+            ["Qty"],
+        )
+
+    def test_completion_hides_on_focus_out(self) -> None:
+        dialog = CustomColumnDialog(["Quantity", "Product", "Qty"])
+        dialog.show()
+        self.app.processEvents()
+        dialog.expression_edit.setFocus()
+        self.app.processEvents()
+        QTest.keyClicks(dialog.expression_edit, "Text.Up")
+        self.app.processEvents()
+
+        completion_list = dialog.findChild(QListWidget, "customColumnCompletionList")
+        self.assertIsNotNone(completion_list)
+        self.assertTrue(completion_list.isVisible())
+
+        dialog.name_edit.setFocus()
+        self.app.processEvents()
+        self.assertFalse(completion_list.isVisible())
+
+        dialog.close()
+        dialog.deleteLater()
+        self.app.processEvents()

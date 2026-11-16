@@ -30,11 +30,18 @@ _IDENTIFIER_CHARS: frozenset[str] = frozenset(
 )
 
 
-def _is_inside_string_or_comment(text: str, caret: int) -> bool:
-    """Check if the caret is inside an M string literal ("...") or line comment (//...)."""
+def _scan_strings_and_comments(text: str, caret: int) -> tuple[bool, list[int]]:
+    """Scan `text` up to `caret`.
+
+    Returns ``(inside, code_positions)`` where ``inside`` is True when the caret
+    sits inside a string literal ("...") or a //... or /*...*/ comment, and
+    ``code_positions`` lists the indices of characters that were seen outside
+    strings and comments.
+    """
     in_string = False
     in_line_comment = False
     in_block_comment = False
+    code_positions: list[int] = []
     i = 0
     n = min(caret, len(text))
     while i < n:
@@ -73,9 +80,32 @@ def _is_inside_string_or_comment(text: str, caret: int) -> bool:
             in_block_comment = True
             i += 2
             continue
+        code_positions.append(i)
         i += 1
 
-    return in_string or in_line_comment or in_block_comment
+    return in_string or in_line_comment or in_block_comment, code_positions
+
+
+def _is_inside_string_or_comment(text: str, caret: int) -> bool:
+    """Check if the caret is inside an M string literal ("...") or line comment (//...)."""
+    inside, _code_positions = _scan_strings_and_comments(text, caret)
+    return inside
+
+
+def _last_open_bracket(text: str, caret: int) -> int:
+    """Return the index of the last '[' outside strings/comments that is still open.
+
+    A ']' outside strings/comments closes the bracket; -1 means there is none.
+    """
+    _inside, code_positions = _scan_strings_and_comments(text, caret)
+    bracket_pos = -1
+    for index in code_positions:
+        ch = text[index]
+        if ch == "[":
+            bracket_pos = index
+        elif ch == "]":
+            bracket_pos = -1
+    return bracket_pos
 
 
 def complete_m(text: str, caret: int, columns: list[str]) -> list[dict[str, Any]]:
@@ -96,7 +126,7 @@ def complete_m(text: str, caret: int, columns: list[str]) -> list[dict[str, Any]
         return []
 
     # 1. Column completion after '['
-    bracket_pos = text.rfind("[", 0, caret)
+    bracket_pos = _last_open_bracket(text, caret)
     if bracket_pos != -1:
         segment = text[bracket_pos + 1 : caret]
         if "]" not in segment and "\n" not in segment:

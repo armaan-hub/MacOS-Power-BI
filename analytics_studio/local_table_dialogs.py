@@ -430,6 +430,8 @@ class CustomColumnDialog(QDialog):
         )
 
     def eventFilter(self, obj: object, event: Any) -> bool:
+        if obj is self.expression_edit and event.type() == QEvent.Type.FocusOut:
+            self.completion_list.hide()
         if obj is self.expression_edit and event.type() == QEvent.Type.KeyPress:
             if self.completion_list.isVisible():
                 key = event.key()
