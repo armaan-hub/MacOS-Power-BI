@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-16, after Iteration 260 / Task 172 dax-hunt-172, EARLIER/EARLIEST without enough outer row contexts refused at compile time, as in Power BI, Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4808 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: hold — discuss the Antigravity/OpenCode workflow with the user, then fresh DAX hunts
+**Latest status (2026-11-16, after Iteration 261 / Task 173 dax-hunt-173, a date beside a number in IF/SWITCH branches is a number, also when a skipped condition has AND(x,text), Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4809 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: a new fresh DAX probe batch (t231)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

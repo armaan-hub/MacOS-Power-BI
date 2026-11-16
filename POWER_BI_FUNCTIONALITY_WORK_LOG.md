@@ -2634,3 +2634,9 @@ CONVERT(x, DATETIME) rounds a constant off-tick value to Power BI's 1/300-second
 Antigravity coded Task 172. analytics_studio/measures.py: _earlier_too_deep counts row contexts per argument (GENERATE, RANKX, TOPN, SUMMARIZE, GROUPBY; every CALCULATE filter argument opens one) and now runs before evaluation for top-level measures and calculated columns, so IF(FALSE(),EARLIER(..),1) and EARLIER over an empty TOPN are refused as Power BI refuses them. t226 20/20 exact, t225 wrong 14 to 13 (known limits), 21 older sets unchanged, 0 over-refusals in an 89-shape sweep. The first version refused 4 locked KEEPFILTERS/ISONORAFTER answers; the follow-up fixed it.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4808 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-16 — Iteration 261 (Task 173 dax-hunt-173: a date beside a number in IF/SWITCH branches is a number, also when a skipped condition has AND(x,text))
+
+Antigravity coded Task 173. analytics_studio/measures.py body_value_type: IF/SWITCH condition operands no longer affect the static result type (two typing-time refusals removed). t229 28/28, t228 wrong 7 to 6 (rest known limits or non-bugs), 23 older sets unchanged; a 1010-shape iterator SWITCH/IF sweep changed no answer and newly answered 21 shapes, all measured BLANK in Power BI.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4809 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
