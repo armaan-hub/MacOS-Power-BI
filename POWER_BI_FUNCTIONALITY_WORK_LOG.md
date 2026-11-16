@@ -2652,3 +2652,9 @@ OpenCode coded Task 174 (its first task). analytics_studio/dax_stats.py BETA.DIS
 Typing a bare name in the formula bar now lists matching columns of every table, fully qualified ('Sales Data'[Quantity]), beside functions, tables and measures, as Power BI does. dax_intellisense._complete_identifier; tests/test_ux175_intellisense_columns.py.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4815 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, OpenCode coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-16 — Iteration 264 (Task 176 ux-176: Power Query filter lists (null) separately from empty text)
+
+The Power Query column filter now lists (null) as its own entry (is_null / is_not_null) and empty text as a separate (Blank) value (equals / not_equals ""), as in Power BI. local_table_dialogs.py _column_distinct_values, _PowerQueryColumnFilterPanel, _apply_column_value_selection; tests/test_ux176_filter_null.py.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4818 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, OpenCode coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.

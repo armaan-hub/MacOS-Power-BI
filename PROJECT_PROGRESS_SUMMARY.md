@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-16, after Iteration 263 / Task 175 ux-175, DAX IntelliSense lists qualified columns for a bare name, Claude Opus 5.5 planned, OpenCode coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4815 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 176-178 (Power Query filter null, Choose Columns dialog, Custom Column help), then 179 Navigator
+**Latest status (2026-11-16, after Iteration 264 / Task 176 ux-176, Power Query filter lists (null) separately from empty text, Claude Opus 5.5 planned, OpenCode coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4818 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Tasks 177-178 (Choose Columns dialog, Custom Column help) gate, 179 Navigator follow-up, then 180-181
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
