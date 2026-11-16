@@ -2640,3 +2640,9 @@ Antigravity coded Task 172. analytics_studio/measures.py: _earlier_too_deep coun
 Antigravity coded Task 173. analytics_studio/measures.py body_value_type: IF/SWITCH condition operands no longer affect the static result type (two typing-time refusals removed). t229 28/28, t228 wrong 7 to 6 (rest known limits or non-bugs), 23 older sets unchanged; a 1010-shape iterator SWITCH/IF sweep changed no answer and newly answered 21 shapes, all measured BLANK in Power BI.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4809 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-16 — Iteration 262 (Task 174 dax-hunt-174: BETA.DIST refused where Power BI overflows or the app's tiny tails drift)
+
+OpenCode coded Task 174 (its first task). analytics_studio/dax_stats.py BETA.DIST: refuse cumulative results of 0 or 1 when max shape >= 1E12 and min shape > 20 (Power BI's irregular overflow band), and values below 1E-8 when a shape is 1E6 or more. t232 wrong 31 to 5 (rest last-digit limits), t231 wrong 6 to 5, 24 older sets unchanged; a 2500-line sweep changed no answered value.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4810 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
