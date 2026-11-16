@@ -1107,6 +1107,188 @@ class _PowerQueryConditionDialog(QDialog):
         return [edit.text().strip() if self._numeric else edit.text() for edit in self.edits]
 
 
+class ChooseColumnsDialog(QDialog):
+    """Power BI's Choose Columns dialog (Home > Manage Columns > Choose Columns)."""
+
+    def __init__(
+        self,
+        headers: list[str],
+        checked: set[str] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("chooseColumnsDialog")
+        self.setWindowTitle("Choose Columns")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(360)
+
+        self._headers = list(headers)
+        self._initial_checked = set(self._headers) if checked is None else set(checked)
+        self._guard = False
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 14, 16, 12)
+        layout.setSpacing(8)
+
+        caption = QLabel("Choose the columns to keep")
+        caption.setStyleSheet("font-size: 12px; color: #273b49;")
+        layout.addWidget(caption)
+
+        search_row = QHBoxLayout()
+        search_row.setSpacing(6)
+
+        self.search_edit = QLineEdit()
+        self.search_edit.setObjectName("chooseColumnsSearch")
+        self.search_edit.setPlaceholderText("Search Columns")
+        self.search_edit.setClearButtonEnabled(True)
+        search_row.addWidget(self.search_edit, 1)
+
+        self.sort_button = QToolButton()
+        self.sort_button.setObjectName("chooseColumnsSortButton")
+        self.sort_button.setText("Sort")
+        self.sort_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        sort_menu = QMenu(self.sort_button)
+        sort_a_to_z_action = sort_menu.addAction("Sort A to Z")
+        sort_orig_action = sort_menu.addAction("Sort Original Order")
+        sort_a_to_z_action.triggered.connect(lambda: self._sort_items("a_to_z"))
+        sort_orig_action.triggered.connect(lambda: self._sort_items("original"))
+        self.sort_button.setMenu(sort_menu)
+        search_row.addWidget(self.sort_button)
+
+        layout.addLayout(search_row)
+
+        self.column_list = QListWidget()
+        self.column_list.setObjectName("chooseColumnsList")
+        self.column_list.setMinimumHeight(300)
+        layout.addWidget(self.column_list, 1)
+
+        buttons = QHBoxLayout()
+        buttons.addStretch(1)
+        self.ok_button = QPushButton("OK")
+        self.ok_button.setObjectName("chooseColumnsOkButton")
+        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button.setObjectName("chooseColumnsCancelButton")
+        buttons.addWidget(self.ok_button)
+        buttons.addWidget(self.cancel_button)
+        layout.addLayout(buttons)
+
+        self._select_all = QListWidgetItem("(Select All Columns)")
+        self._select_all.setData(Qt.ItemDataRole.UserRole, None)
+        self._select_all.setFlags(
+            self._select_all.flags() | Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsUserTristate
+        )
+        self._select_all.setCheckState(Qt.CheckState.Checked)
+        self.column_list.addItem(self._select_all)
+
+        self._column_items: list[QListWidgetItem] = []
+        for index, header in enumerate(self._headers):
+            item = QListWidgetItem(header)
+            item.setData(Qt.ItemDataRole.UserRole, index)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            state = (
+                Qt.CheckState.Checked
+                if header in self._initial_checked
+                else Qt.CheckState.Unchecked
+            )
+            item.setCheckState(state)
+            self.column_list.addItem(item)
+            self._column_items.append(item)
+
+        self.search_edit.textChanged.connect(self._apply_search)
+        self.column_list.itemChanged.connect(self._item_changed)
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+        self._refresh_state()
+
+    def _sort_items(self, order: str) -> None:
+        self._guard = True
+        try:
+            current_states = {
+                int(item.data(Qt.ItemDataRole.UserRole)): (item.checkState(), item.isHidden())
+                for item in self._column_items
+            }
+            if order == "a_to_z":
+                sorted_indices = sorted(range(len(self._headers)), key=lambda i: self._headers[i].casefold())
+            else:
+                sorted_indices = list(range(len(self._headers)))
+
+            while self.column_list.count() > 1:
+                self.column_list.takeItem(1)
+
+            self._column_items.clear()
+            for index in sorted_indices:
+                header = self._headers[index]
+                item = QListWidgetItem(header)
+                item.setData(Qt.ItemDataRole.UserRole, index)
+                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                check_state, hidden = current_states.get(index, (Qt.CheckState.Checked, False))
+                item.setCheckState(check_state)
+                item.setHidden(hidden)
+                self.column_list.addItem(item)
+                self._column_items.append(item)
+        finally:
+            self._guard = False
+        self._apply_search(self.search_edit.text())
+        self._refresh_state()
+
+    def _apply_search(self, text: str) -> None:
+        needle = text.strip().casefold()
+        for item in self._column_items:
+            item.setHidden(needle not in item.text().casefold())
+        self._refresh_state()
+
+    def _item_changed(self, item: QListWidgetItem) -> None:
+        if self._guard:
+            return
+        if item is self._select_all:
+            state = item.checkState()
+            target = (
+                Qt.CheckState.Unchecked
+                if state == Qt.CheckState.Unchecked
+                else Qt.CheckState.Checked
+            )
+            self._guard = True
+            try:
+                for member in self._column_items:
+                    if not member.isHidden():
+                        member.setCheckState(target)
+            finally:
+                self._guard = False
+        self._refresh_state()
+
+    def _refresh_state(self) -> None:
+        visible = [item for item in self._column_items if not item.isHidden()]
+        checked = sum(item.checkState() == Qt.CheckState.Checked for item in visible)
+        if visible and checked == len(visible):
+            state = Qt.CheckState.Checked
+        elif checked == 0:
+            state = Qt.CheckState.Unchecked
+        else:
+            state = Qt.CheckState.PartiallyChecked
+        self._guard = True
+        try:
+            self._select_all.setCheckState(state)
+        finally:
+            self._guard = False
+        any_checked = any(
+            item.checkState() == Qt.CheckState.Checked
+            for item in self._column_items
+        )
+        self.ok_button.setEnabled(any_checked)
+
+    def columns(self) -> list[str]:
+        checked_indices = {
+            int(item.data(Qt.ItemDataRole.UserRole))
+            for item in self._column_items
+            if item.checkState() == Qt.CheckState.Checked
+        }
+        return [
+            header
+            for index, header in enumerate(self._headers)
+            if index in checked_indices
+        ]
+
+
 class _PowerQueryColumnFilterPanel(QWidget):
     """Search box, value checklist and OK / Cancel shown inside a column dropdown."""
 
@@ -5488,6 +5670,9 @@ class TransformDataDialog(QDialog):
             )
             return
         prior_row = self.step_list.currentRow()
+        if operation == "keep_columns":
+            self._open_choose_columns_dialog(prior_row=prior_row)
+            return
         if operation == "conditional_column":
             self._open_conditional_dialog(prior_row=prior_row)
             return
@@ -5678,6 +5863,37 @@ class TransformDataDialog(QDialog):
         if 0 <= row < len(self._steps) and self.step_list.currentRow() < 0:
             self.step_list.setCurrentRow(row)
             self.step_settings_toggle.setChecked(False)
+
+    def _open_choose_columns_dialog(self, *, prior_row: int = -1) -> None:
+        """Power BI's Choose Columns dialog; OK inserts the keep_columns step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+        if self.step_list.currentRow() >= 0:
+            self.step_list.setCurrentRow(-1)
+        try:
+            base = self._custom_column_base(None)
+        except TransformationError as exc:
+            self._insert_at = None
+            self._show_error(str(exc))
+            return
+        dialog = ChooseColumnsDialog(base.headers, parent=self)
+        dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = {"op": "keep_columns", "columns": dialog.columns()}
+            self._add_step(step, power_bi_name=True)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            self._insert_at = None
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            dialog.deleteLater()
+
+        dialog.accepted.connect(accepted)
+        dialog.finished.connect(finished)
+        dialog.show()
 
     def _open_conditional_dialog(
         self, editing_index: int | None = None, *, prior_row: int = -1
