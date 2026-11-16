@@ -2622,3 +2622,9 @@ Haiku 5.5 coded, Sonnet 5.5 fixed the scope after Haiku's second miss and headed
 The up-front bare-column check now walks ROW value arguments, COUNTROWS's table argument and the first (table) argument of row-context iterators, so a bare column there is a query error even in an untaken IF branch or an unreached IFERROR / COALESCE fallback, as in Power BI (t215/t216/t217 measured).
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4793 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-16 — Iteration 259 (Task 171 dax-hunt-171: CONVERT(number, DATETIME) keeps Power BI's 1/300-second ticks or is refused)
+
+CONVERT(x, DATETIME) rounds a constant off-tick value to Power BI's 1/300-second tick (25,920,000 a day), keeps on-tick values, and refuses an off-tick value that reads the model, since Power BI's rounding there depends on its query plan. VALUE of a date/time goes through its text (whole seconds). Fresh probes: t222 23 -> 0 wrong, t220 10 -> 9 (known last-digit limits).
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4804 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; locked 537342 to 537342. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
