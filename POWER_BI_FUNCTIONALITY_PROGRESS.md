@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-17, after Iteration 278 / Task 196 replace-values, Replace Values dialog matching Power BI, with typed values and Replacer.ReplaceText/ReplaceValue, Claude Opus 5.5 planned, Antigravity and Sonnet coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4962 passed, 2 known flakes passed alone passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 197 Split Column by Delimiter dialog
+**Latest status (2026-11-17, after Iteration 279 / Task 197-199 split-index-unpivot, Split Column by Delimiter dialog, Add Index Column menu and dialog, Unpivot commands like Power BI, Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4991 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 200 Pivot Column dialog
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
