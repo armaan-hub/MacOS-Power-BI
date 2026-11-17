@@ -459,10 +459,9 @@ def validate_steps(
             allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"replacer"})
             if set(step) not in allowed_shapes:
                 raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
-        elif op == "split_column":
-            if set(step) not in (
-                _STEP_FIELDS[op], _STEP_FIELDS[op] | {"from_end"}
-            ):
+        elif op in {"split_column", "split_column_by_each_delimiter"}:
+            # missing_part is present only on scripts that kept the old explicit "" default (Task 209).
+            if not (_STEP_FIELDS[op] <= set(step) <= _STEP_FIELDS[op] | {"from_end", "missing_part"}):
                 raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         elif set(step) != _STEP_FIELDS[op]:
             raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
@@ -1696,9 +1695,12 @@ def apply_transformations(
             _split_column(
                 result, column, step["delimiter"],
                 from_end=bool(step.get("from_end")),
+                missing_part=step.get("missing_part"),
             )
         elif op == "split_column_by_each_delimiter":
-            _split_column_by_each_delimiter(result, column, step["delimiter"])
+            _split_column_by_each_delimiter(
+                result, column, step["delimiter"], missing_part=step.get("missing_part"),
+            )
         elif op == "split_column_by_positions":
             _split_column_by_positions(result, column, step["positions"])
         elif op == "split_column_to_rows":
@@ -2255,8 +2257,13 @@ def _split_column(
     delimiter: str,
     *,
     from_end: bool = False,
+    missing_part: Any = None,
 ) -> None:
-    """Split at the leftmost or rightmost delimiter, replacing the source with two text columns."""
+    """Split at the leftmost or rightmost delimiter, replacing the source with two text columns.
+
+    A missing second part is null (Task 209, Power BI answer); only scripts that kept the old explicit ""
+    default pass missing_part="".
+    """
     column_index = _column_index(candidate.headers, column)
     first_name = f"{column}.1"
     second_name = f"{column}.2"
@@ -2280,10 +2287,10 @@ def _split_column(
         elif from_end:
             left, found, right = cell_to_text(value).rpartition(delimiter)
             first = left if found else right
-            second = right if found else ""
+            second = right if found else missing_part
         else:
             first, found, remainder = cell_to_text(value).partition(delimiter)
-            second = remainder if found else ""
+            second = remainder if found else missing_part
         rebuilt: dict[str, Any] = {}
         for header in candidate.headers:
             if header == column:
@@ -2376,9 +2383,12 @@ def _extract_text_between_delimiters(
 
 
 def _split_column_by_each_delimiter(
-    candidate: ImportCandidate, column: str, delimiter: str
+    candidate: ImportCandidate, column: str, delimiter: str, *, missing_part: Any = None
 ) -> None:
-    """Split at every delimiter into numbered text columns, replacing the source."""
+    """Split at every delimiter into numbered text columns, replacing the source.
+
+    Parts a row does not have are null (Task 209); missing_part="" keeps the old blank-text script behaviour.
+    """
     column_index = _column_index(candidate.headers, column)
     # Keep at least two outputs, matching the standard split-column operation;
     # rows with fewer segments receive blank values in the remaining columns.
@@ -2417,7 +2427,7 @@ def _split_column_by_each_delimiter(
             parts = [value] * output_count
         else:
             parts = cell_to_text(value).split(delimiter)
-            parts.extend([""] * (output_count - len(parts)))
+            parts.extend([missing_part] * (output_count - len(parts)))
         rebuilt: dict[str, Any] = {}
         for header in candidate.headers:
             if header == column:

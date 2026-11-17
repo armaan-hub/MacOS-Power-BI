@@ -1435,7 +1435,8 @@ in
             parse_m_script(explicitly_text, "Sales Data")[-2:],
             [
                 {"op": "add_custom_column", "name": "Calc", "expression": "[Revenue]"},
-                {"op": "split_column", "column": "Calc", "delimiter": ":"},
+                # Task 209: the old explicit "" default is kept as missing_part "" (blank text, not null).
+                {"op": "split_column", "column": "Calc", "delimiter": ":", "missing_part": ""},
             ],
         )
 
@@ -2585,7 +2586,8 @@ in
             parse_m_script(explicit_text_cast, "Sales Data")[-2:],
             [
                 {"op": "convert_type", "column": "Value", "type": "text"},
-                {"op": "split_column", "column": "Value", "delimiter": ":"},
+                # Task 209: the old explicit "" default is kept as missing_part "" (blank text, not null).
+                {"op": "split_column", "column": "Value", "delimiter": ":", "missing_part": ""},
             ],
         )
 
