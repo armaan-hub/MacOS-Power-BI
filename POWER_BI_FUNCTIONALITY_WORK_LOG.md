@@ -2748,3 +2748,9 @@ Replace Values opens Power BI's modal dialog with Value To Find, Replace With an
 Tasks 197-199 shipped together on one gate. 197: Split Column by Delimiter dialog with left-most, right-most (from_end, Splitter.SplitTextByEachDelimiter ..., true), each occurrence and rows; ribbon dropdown; right-click Split Column submenu. 198: Index Column dropdown From 0 / From 1 / Custom... with the Add Index Column dialog. 199: one Unpivot Columns dropdown; Unpivot Columns now writes Table.UnpivotOtherColumns with the non-selected columns like Power BI; Unpivot Only Selected Columns enabled; custom applied step names. Planner-authorised test edits are listed in docs/plans/2026-11-17-ux-197-199.md.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4991 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 280 (Task 200 pivot-column-dialog: Pivot Column dialog like Power BI)
+
+Transform > Pivot Column opens a modal Pivot Column dialog with Values Column and collapsed Advanced options (8 aggregations); default Sum like Power BI (was Don't aggregate); gear-edit opens it prefilled. Engine and M unchanged; no existing tests changed. Details and VM doubts in docs/plans/2026-11-17-ux-200.md.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4997 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
