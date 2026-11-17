@@ -4360,7 +4360,7 @@ class TransformDataDialog(QDialog):
 
     _STEP_OPERATIONS_WITHOUT_SETTINGS = frozenset({
         "promote_headers", "demote_headers", "transpose_table", "remove_blank_rows",
-        "remove_rows_with_errors", "remove_sparse_top_rows",
+        "remove_rows_with_errors", "keep_rows_with_errors", "remove_sparse_top_rows",
         "remove_sparse_bottom_rows", "m_sparse_boundary_helper", "count_rows",
     })
 
@@ -5891,6 +5891,21 @@ class TransformDataDialog(QDialog):
             ("Replace Values", lambda: self._select_ribbon_operation("replace_value"), True, None, "replaceValuesAction"),
             ("Replace Errors", lambda: self._open_replace_errors_dialog(), True, None, "replaceErrorsAction"),
         ]
+        keep_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
+            ("Keep Top Rows", lambda: self._select_ribbon_operation("keep_top_rows"), True, None, "keepRowsKeepTopRowsAction"),
+            ("Keep Bottom Rows", lambda: self._select_ribbon_operation("keep_bottom_rows"), True, None, "keepRowsKeepBottomRowsAction"),
+            ("Keep Range of Rows", lambda: self._select_ribbon_operation("keep_range_rows"), True, None, "keepRowsKeepRangeRowsAction"),
+            ("Keep Duplicates", lambda: self._select_ribbon_operation("keep_duplicates"), True, None, "keepRowsKeepDuplicatesAction"),
+            ("Keep Errors", lambda: self._apply_keep_errors(), True, None, "keepRowsKeepErrorsAction"),
+        ]
+        remove_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
+            ("Remove Top Rows", lambda: self._select_ribbon_operation("remove_top_rows"), True, None, "removeRowsRemoveTopRowsAction"),
+            ("Remove Bottom Rows", lambda: self._select_ribbon_operation("remove_bottom_rows"), True, None, "removeRowsRemoveBottomRowsAction"),
+            ("Remove Alternate Rows", lambda: self._select_ribbon_operation("remove_alternate_rows"), True, None, "removeRowsRemoveAlternateRowsAction"),
+            ("Remove Duplicates", lambda: self._select_ribbon_operation("remove_duplicates"), True, None, "removeRowsRemoveDuplicatesAction"),
+            ("Remove Blank Rows", lambda: self._select_ribbon_operation("remove_blank_rows"), True, None, "removeRowsRemoveBlankRowsAction"),
+            ("Remove Errors", lambda: self._select_ribbon_operation("remove_rows_with_errors"), True, None, "removeRowsRemoveErrorsAction"),
+        ]
         data_type_menu_items: list[tuple[str, Any, bool]] = []
         for label, op_or_type, is_locale_op in _POWER_BI_CHANGE_TYPE_SPECS:
             if is_locale_op:
@@ -5982,8 +5997,26 @@ class TransformDataDialog(QDialog):
                 command("Remove Columns", "remove_column", "Remove the selected column.", size="medium", slot=(0, 1, 3, 1), width=52),
             ], "office"),
             ("Reduce Rows", [
-                command("Keep Rows", "keep_top_rows", "Keep the first N rows.", size="medium", slot=(0, 0, 3, 1), width=47),
-                command("Remove Rows", "remove_top_rows", "Remove the first N rows.", size="medium", slot=(0, 1, 3, 1), width=47),
+                command(
+                    "Keep Rows",
+                    "keep_top_rows",
+                    "Keep the first N rows.",
+                    size="medium",
+                    slot=(0, 0, 3, 1),
+                    width=47,
+                    menu_items=keep_rows_menu_items,
+                    menu_button_popup=True,
+                ),
+                command(
+                    "Remove Rows",
+                    "remove_top_rows",
+                    "Remove the first N rows.",
+                    size="medium",
+                    slot=(0, 1, 3, 1),
+                    width=47,
+                    menu_items=remove_rows_menu_items,
+                    menu_button_popup=True,
+                ),
             ], "office"),
             ("Sort", [
                 action(
@@ -7157,7 +7190,7 @@ class TransformDataDialog(QDialog):
         "unpivot_other_columns",
     })
     _PARAMETERLESS_OPERATIONS = frozenset({
-        "remove_blank_rows", "remove_rows_with_errors",
+        "remove_blank_rows", "remove_rows_with_errors", "keep_rows_with_errors",
     })
 
     def _selected_preview_columns(self) -> list[str]:
@@ -7244,6 +7277,18 @@ class TransformDataDialog(QDialog):
         self._reselect_step(prior_row)
         if message:
             self._show_error(message)
+
+    def _apply_keep_errors(self) -> None:
+        """Keep only rows that contain errors (in selected columns, or in any column if none selected)."""
+        if not self._confirm_insert_step():
+            return
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+        selected = self._selected_preview_columns()
+        before = len(self._steps)
+        self._apply_direct_operation("keep_rows_with_errors", selected)
+        self._finish_insert(len(self._steps) > before, prior_row)
 
     def _select_ribbon_sort(self, direction: str) -> None:
         if not self._confirm_insert_step():
@@ -7344,7 +7389,7 @@ class TransformDataDialog(QDialog):
 
     def _apply_direct_operation(self, operation: str, selected: list[str]) -> bool:
         """Apply a command that needs no further input. False means it needs a dialog."""
-        if operation == "remove_rows_with_errors":
+        if operation in {"remove_rows_with_errors", "keep_rows_with_errors"}:
             steps: list[dict[str, Any]] = (
                 [{"op": operation, "columns": list(selected)}]
                 if selected else [{"op": operation}]
@@ -10602,6 +10647,7 @@ class TransformDataDialog(QDialog):
             "keep_duplicates",
             "remove_blank_rows",
             "remove_rows_with_errors",
+            "keep_rows_with_errors",
             "remove_sparse_top_rows",
             "remove_sparse_bottom_rows",
             "remove_top_rows",
@@ -11196,7 +11242,7 @@ class TransformDataDialog(QDialog):
                 if self.keep_columns_list.item(index).checkState() == Qt.CheckState.Checked
             ]
             return {"op": op, "columns": columns}
-        if op in {"remove_blank_rows", "remove_rows_with_errors"}:
+        if op in {"remove_blank_rows", "remove_rows_with_errors", "keep_rows_with_errors"}:
             return {"op": op}
         if op == "keep_range_rows":
             try:
@@ -12423,7 +12469,7 @@ class TransformDataDialog(QDialog):
                 detail = "entire rows"
             elif step["op"] == "remove_blank_rows":
                 detail = "all fields empty"
-            elif step["op"] == "remove_rows_with_errors":
+            elif step["op"] in {"remove_rows_with_errors", "keep_rows_with_errors"}:
                 detail = (
                     "all fields"
                     if "columns" not in step

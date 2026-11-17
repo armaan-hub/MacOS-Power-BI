@@ -372,6 +372,7 @@ _STEP_FIELDS: dict[str, set[str]] = {
     "keep_duplicates": {"op", "columns"},
     "remove_blank_rows": {"op"},
     "remove_rows_with_errors": {"op"},
+    "keep_rows_with_errors": {"op"},
     "replace_error_values": {"op", "replacements"},
     "remove_top_rows": {"op", "count"},
     "remove_bottom_rows": {"op", "count"},
@@ -424,7 +425,7 @@ def validate_steps(
                 raise TransformationError(
                     f"Transformation step {index} has missing or unsupported fields."
                 )
-        elif op == "remove_rows_with_errors":
+        elif op in {"remove_rows_with_errors", "keep_rows_with_errors"}:
             allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"columns"})
             if set(step) not in allowed_shapes:
                 raise TransformationError(
@@ -524,7 +525,7 @@ def validate_steps(
                     f"Transformation step {index} selects a duplicate key column more than once."
                 )
             step = {**step, "columns": columns}
-        elif op == "remove_rows_with_errors" and "columns" in step:
+        elif op in {"remove_rows_with_errors", "keep_rows_with_errors"} and "columns" in step:
             columns = step["columns"]
             if not isinstance(columns, list) or not columns or any(
                 not isinstance(column, str) or not column.strip() for column in columns
@@ -1432,6 +1433,19 @@ def apply_transformations(
             result.rows = [
                 row for row in result.rows
                 if not any(is_cell_error(row[column]) for column in columns)
+            ]
+            _check_candidate_limits(result.headers, result.rows)
+            continue
+        if op == "keep_rows_with_errors":
+            columns = step.get("columns", result.headers)
+            missing = next((column for column in columns if column not in result.headers), None)
+            if missing is not None:
+                raise TransformationError(
+                    f"Error-check column {missing!r} does not exist."
+                )
+            result.rows = [
+                row for row in result.rows
+                if any(is_cell_error(row[column]) for column in columns)
             ]
             _check_candidate_limits(result.headers, result.rows)
             continue
