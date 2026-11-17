@@ -155,9 +155,20 @@ from analytics_studio.transformations import (
 
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
-# Axis format cards are offered only where ChartCard.qml's drawing reads the flag.
-X_AXIS_CARD_TYPES = {"column", "lineClusteredColumn", "area"}
-Y_AXIS_CARD_TYPES = {"bar"}
+# Axis cards offered per chart type: (X-axis header key, Y-axis header key).
+# The Title switch works on every listed type; a header key is set only where it
+# changes pixels in ChartCard.qml (checked with offscreen grabs), else None.
+AXIS_CARD_TOGGLES: dict[str, tuple[str | None, str | None]] = {
+    "column": ("show_x_axis", None),
+    "bar": (None, "show_y_axis"),
+    "area": ("show_x_axis", None),
+    "lineClusteredColumn": ("show_x_axis", None),
+    "line": (None, None),
+}
+X_AXIS_CARD_TYPES = set(AXIS_CARD_TOGGLES)
+Y_AXIS_CARD_TYPES = set(AXIS_CARD_TOGGLES)
+# Gridlines draw nothing on these types.
+NO_GRIDLINES_CARD_TYPES = {"funnel"}
 CHART_VISUALS = {"Monthly revenue", "Region revenue"}
 
 
@@ -2236,12 +2247,13 @@ class StudioController(QObject):
 
         if is_chart:
             # Chart visuals: Visual tab and General tab with toggle keys
+            x_toggle, y_toggle = AXIS_CARD_TOGGLES.get(v_type, (None, None))
             visual_tab_groups = [
                 {
                     "tab": "Visual",
                     "name": "X-axis",
-                    "toggleKey": "show_x_axis",
-                    "toggleValue": bool(visual.get("show_x_axis", True)),
+                    "toggleKey": x_toggle,
+                    "toggleValue": bool(visual.get("show_x_axis", True)) if x_toggle else False,
                     "properties": [
                         {"key": "show_x_title", "label": "Title", "type": "boolean", "value": bool(visual.get("show_x_title", False))},
                     ],
@@ -2249,8 +2261,8 @@ class StudioController(QObject):
                 {
                     "tab": "Visual",
                     "name": "Y-axis",
-                    "toggleKey": "show_y_axis",
-                    "toggleValue": bool(visual.get("show_y_axis", True)),
+                    "toggleKey": y_toggle,
+                    "toggleValue": bool(visual.get("show_y_axis", True)) if y_toggle else False,
                     "properties": [
                         {"key": "show_y_title", "label": "Title", "type": "boolean", "value": bool(visual.get("show_y_title", False))},
                     ],
@@ -2341,6 +2353,8 @@ class StudioController(QObject):
                 visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "X-axis"]
             if v_type not in Y_AXIS_CARD_TYPES:
                 visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "Y-axis"]
+            if v_type in NO_GRIDLINES_CARD_TYPES:
+                visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "Gridlines"]
             return visual_tab_groups + general_tab_groups
 
         # Non-chart visuals: put under General, keep type-specific group and existing properties

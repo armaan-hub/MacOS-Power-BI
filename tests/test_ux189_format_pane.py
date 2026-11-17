@@ -48,16 +48,16 @@ def test_column_chart_groups_tabs_and_toggles(tmp_path: Path) -> None:
 
     groups = controller.activeVisualPropertyGroups
     assert [g["tab"] for g in groups] == [
-        "Visual", "Visual", "Visual", "Visual", "Visual",
+        "Visual", "Visual", "Visual", "Visual", "Visual", "Visual",
         "General", "General", "General", "General"
     ]
     assert [g["name"] for g in groups] == [
-        "X-axis", "Gridlines", "Colors", "Data labels", "Legend",
+        "X-axis", "Y-axis", "Gridlines", "Colors", "Data labels", "Legend",
         "Properties", "Title", "Effects > Background", "Effects > Visual border"
     ]
     toggles = {g["name"]: (g["toggleKey"], g["toggleValue"]) for g in groups}
     assert toggles["X-axis"] == ("show_x_axis", True)
-    assert "Y-axis" not in toggles
+    assert toggles["Y-axis"] == (None, False)
     assert toggles["Gridlines"] == ("show_gridlines", True)
     assert toggles["Colors"] == (None, False)
     assert toggles["Data labels"] == ("show_data_labels", False)
@@ -68,23 +68,51 @@ def test_column_chart_groups_tabs_and_toggles(tmp_path: Path) -> None:
     assert toggles["Effects > Visual border"] == ("show_border", True)
 
 
-def test_axis_cards_only_where_drawing_reads_the_flag(tmp_path: Path) -> None:
+# (type) -> (X-axis header toggleKey, Y-axis header toggleKey); each card always has its Title switch.
+_AXIS_CARDS = {
+    "column": ("show_x_axis", None),
+    "bar": (None, "show_y_axis"),
+    "area": ("show_x_axis", None),
+    "lineClusteredColumn": ("show_x_axis", None),
+    "line": (None, None),
+}
+
+
+def test_axis_cards_and_toggle_keys_per_type(tmp_path: Path) -> None:
     controller = _controller(tmp_path)
-    expected = {
-        "column": (True, False),
-        "lineClusteredColumn": (True, False),
-        "area": (True, False),
-        "line": (False, False),
-        "bar": (False, True),
-    }
-    for chart_type, (has_x, has_y) in expected.items():
+    for chart_type, (x_key, y_key) in _AXIS_CARDS.items():
         title = f"{chart_type} axes"
         controller.add_visual(chart_type, title, 10, 10, 400, 300)
         controller.selectVisual(title)
+        groups = {g["name"]: g for g in controller.activeVisualPropertyGroups if g["tab"] == "Visual"}
+        assert list(groups)[:2] == ["X-axis", "Y-axis"], chart_type
+        assert "Gridlines" in groups, chart_type
+        assert groups["X-axis"]["toggleKey"] == x_key, chart_type
+        assert groups["Y-axis"]["toggleKey"] == y_key, chart_type
+        assert [p["key"] for p in groups["X-axis"]["properties"]] == ["show_x_title"], chart_type
+        assert [p["key"] for p in groups["Y-axis"]["properties"]] == ["show_y_title"], chart_type
+
+
+def test_funnel_has_no_gridlines_card_but_other_types_keep_it(tmp_path: Path) -> None:
+    controller = _controller(tmp_path)
+    for chart_type, expected in [
+        ("funnel", False), ("stackedColumn", True), ("column100", True),
+        ("ribbon", True), ("waterfall", True),
+    ]:
+        title = f"{chart_type} grid"
+        controller.add_visual(chart_type, title, 10, 10, 400, 300)
+        controller.selectVisual(title)
         names = [g["name"] for g in controller.activeVisualPropertyGroups]
-        assert ("X-axis" in names) is has_x, chart_type
-        assert ("Y-axis" in names) is has_y, chart_type
-        assert "Gridlines" in names, chart_type
+        assert ("Gridlines" in names) is expected, chart_type
+        assert "X-axis" not in names and "Y-axis" not in names, chart_type
+
+
+def test_bar_axis_titles_are_swapped_relative_to_column() -> None:
+    qml = (Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "ChartCard.qml").read_text(encoding="utf-8")
+    assert 'const isBar = root.chartType === "bar"' in qml
+    assert "const xTitleText = isBar ? root.seriesLabel : root.categoryLabel" in qml
+    assert "const yTitleText = isBar ? root.categoryLabel : root.seriesLabel" in qml
+    assert "ctx.fillText(xTitleText," in qml and "ctx.fillText(yTitleText," in qml
 
 
 def _load_chart_card(chart_type: str):

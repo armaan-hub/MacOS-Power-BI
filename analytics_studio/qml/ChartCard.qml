@@ -560,17 +560,20 @@ Rectangle {
                     ctx.save()
                     ctx.fillStyle = "#647382"
                     ctx.font = "11px sans-serif"
-                    if (root.showXTitle && root.categoryLabel) {
+                    const isBar = root.chartType === "bar"
+                    const xTitleText = isBar ? root.seriesLabel : root.categoryLabel
+                    const yTitleText = isBar ? root.categoryLabel : root.seriesLabel
+                    if (root.showXTitle && xTitleText) {
                         ctx.textAlign = "center"
                         ctx.textBaseline = "bottom"
-                        ctx.fillText(root.categoryLabel, padLeft + plotW / 2, height - 2, plotW)
+                        ctx.fillText(xTitleText, padLeft + plotW / 2, height - 2, plotW)
                     }
-                    if (root.showYTitle && root.seriesLabel) {
+                    if (root.showYTitle && yTitleText) {
                         ctx.translate(9, padTop + plotH / 2)
                         ctx.rotate(-Math.PI / 2)
                         ctx.textAlign = "center"
                         ctx.textBaseline = "middle"
-                        ctx.fillText(root.seriesLabel, 0, 0, plotH)
+                        ctx.fillText(yTitleText, 0, 0, plotH)
                     }
                     ctx.restore()
                 }
