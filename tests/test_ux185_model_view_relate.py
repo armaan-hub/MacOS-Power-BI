@@ -184,7 +184,7 @@ class ModelViewRelateTests(unittest.TestCase):
         rel_id = saved[0]["id"]
 
         self.controller.setCurrentView("Model")
-        qml_dir = Path("/Users/armaan/wt-ux-185/analytics_studio/qml")
+        qml_dir = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml"
         engine = QQmlEngine()
         component = QQmlComponent(engine)
         component.loadUrl(QUrl.fromLocalFile(str(qml_dir / "Main.qml")))
@@ -224,7 +224,7 @@ class ModelViewRelateTests(unittest.TestCase):
         from PySide6.QtTest import QTest
 
         self.controller.setCurrentView("Model")
-        qml_dir = Path("/Users/armaan/wt-ux-185/analytics_studio/qml")
+        qml_dir = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml"
         engine = QQmlEngine()
         component = QQmlComponent(engine)
         component.loadUrl(QUrl.fromLocalFile(str(qml_dir / "Main.qml")))
@@ -273,7 +273,7 @@ class ModelViewRelateTests(unittest.TestCase):
         from PySide6.QtTest import QTest
 
         self.controller.setCurrentView("Model")
-        qml_dir = Path("/Users/armaan/wt-ux-185/analytics_studio/qml")
+        qml_dir = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml"
         engine = QQmlEngine()
         component = QQmlComponent(engine)
         component.loadUrl(QUrl.fromLocalFile(str(qml_dir / "Main.qml")))
