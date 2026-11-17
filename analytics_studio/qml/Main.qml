@@ -807,6 +807,56 @@ ApplicationWindow {
         }
     }
 
+
+    Menu {
+        id: tableContextMenu
+        objectName: "tableContextMenu"
+        property string tableId: ""
+        property string tableName: ""
+        MenuItem {
+            objectName: "tableMenuExpandAll"
+            text: "Expand all"
+            onTriggered: mainWindow.studioController.expandAllTables()
+        }
+        MenuItem {
+            objectName: "tableMenuCollapseAll"
+            text: "Collapse all"
+            onTriggered: mainWindow.studioController.collapseAllTables()
+        }
+        MenuSeparator {}
+        MenuItem {
+            objectName: "tableMenuNewMeasure"
+            text: "New measure"
+            enabled: mainWindow.studioController.sourceLoaded
+            onTriggered: {
+                if (tableContextMenu.tableId && String(tableContextMenu.tableId) !== String(mainWindow.studioController.activeTableId))
+                    mainWindow.studioController.selectTable(tableContextMenu.tableId)
+                mainWindow.runCommand("data.newMeasure")
+            }
+        }
+        MenuItem {
+            objectName: "tableMenuNewColumn"
+            text: "New column"
+            enabled: mainWindow.studioController.sourceLoaded
+            onTriggered: {
+                if (tableContextMenu.tableId && String(tableContextMenu.tableId) !== String(mainWindow.studioController.activeTableId))
+                    mainWindow.studioController.selectTable(tableContextMenu.tableId)
+                mainWindow.runCommand("model.newCalculatedColumn")
+            }
+        }
+        MenuItem {
+            objectName: "tableMenuMarkDateTable"
+            text: "Mark as date table"
+            enabled: mainWindow.studioController.sourceLoaded
+            onTriggered: {
+                if (tableContextMenu.tableId && String(tableContextMenu.tableId) !== String(mainWindow.studioController.activeTableId))
+                    mainWindow.studioController.selectTable(tableContextMenu.tableId)
+                mainWindow.runCommand("model.markDateTable")
+            }
+        }
+    }
+
+
     Connections {
         target: mainWindow.studioController.formulaBar
         function onCommitted(kind, name) {
@@ -2285,7 +2335,7 @@ ApplicationWindow {
                                     onActivated: function(index) {
                                         const selected = model[index]
                                         if (selected && String(selected.sourceId) !== String(mainWindow.studioController.activeTableId))
-                                            mainWindow.studioController.selectTable(String(selected.sourceId))
+                                            mainWindow.studioController.focusTable(String(selected.sourceId))
                                     }
                                 }
                             }
@@ -2347,66 +2397,149 @@ ApplicationWindow {
                                 objectName: "dataFieldsList"
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
-                                model: mainWindow.studioController.filteredFields
+                                model: mainWindow.studioController.fieldTreeFlatNodes
                                 clip: true
+                                spacing: 2
                                 delegate: ColumnLayout {
+                                    id: dataNodeDelegate
                                     required property var modelData
                                     width: ListView.view.width
                                     spacing: 2
-                                    property string bindingName: String(modelData)
-                                    property string displayName: mainWindow.studioController.visualFieldLabel(bindingName)
-                                    property string daxName: mainWindow.measureNameForBinding(bindingName)
-                                    property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
+                                    readonly property var node: modelData
+                                    readonly property bool isTableNode: Boolean(node.isTable)
+                                    readonly property string tableId: String(node.tableId || "")
+                                    readonly property string tableName: String(node.tableName || "")
+                                    readonly property bool tableExpanded: Boolean(node.expanded)
 
-                                    Button {
-                                        objectName: "dataFieldSelect_" + bindingName
+                                    readonly property string bindingName: isTableNode ? "" : String(node.binding || "")
+                                    readonly property string displayName: isTableNode ? "" : String(node.displayLabel || node.label || "")
+                                    readonly property string daxName: isTableNode ? "" : String(node.daxName || "")
+                                    readonly property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
+
+                                    // Table Header Row
+                                    Rectangle {
+                                        visible: dataNodeDelegate.isTableNode
+                                        objectName: dataNodeDelegate.isTableNode ? "fieldTable_" + dataNodeDelegate.tableName : ""
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 29
-                                        hoverEnabled: true
-                                        focusPolicy: Qt.StrongFocus
-                                        Accessible.name: "Select " + displayName
+                                        Layout.preferredHeight: dataNodeDelegate.isTableNode ? 28 : 0
+                                        radius: 4
+                                        color: dataTableMouseArea.containsMouse ? "#f2f6f7" : "transparent"
+
                                         TapHandler {
                                             acceptedButtons: Qt.RightButton
                                             onTapped: {
-                                                mainWindow.selectedFieldBinding = bindingName
-                                                fieldContextMenu.binding = bindingName
-                                                fieldContextMenu.popup()
+                                                tableContextMenu.tableId = dataNodeDelegate.tableId
+                                                tableContextMenu.tableName = dataNodeDelegate.tableName
+                                                tableContextMenu.popup()
                                             }
                                         }
-                                        Accessible.description: daxName !== ""
-                                                ? "Select this measure to inspect its saved DAX expression."
-                                                : "Select this field to inspect its column profile and type."
-                                        background: Rectangle {
-                                            radius: 4
-                                            color: mainWindow.selectedFieldBinding === bindingName ? "#e7f2ee"
-                                                   : (parent.hovered ? "#f2f6f7" : "transparent")
-                                            border.color: mainWindow.selectedFieldBinding === bindingName ? "#c6dfd5"
-                                                          : (parent.activeFocus ? "#0078d4" : "transparent")
-                                            border.width: mainWindow.selectedFieldBinding === bindingName || parent.activeFocus ? 1 : 0
+
+                                        MouseArea {
+                                            id: dataTableMouseArea
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            acceptedButtons: Qt.LeftButton
+                                            onClicked: mainWindow.studioController.setTableExpanded(dataNodeDelegate.tableId, !dataNodeDelegate.tableExpanded)
                                         }
-                                        contentItem: RowLayout {
+
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 4
+                                            anchors.rightMargin: 4
                                             spacing: 6
-                                            FieldIcon {
-                                                kind: mainWindow.fieldDataType(bindingName)
-                                                Layout.preferredWidth: 22
-                                                Layout.preferredHeight: 20
+
+                                            Text {
+                                                text: dataNodeDelegate.tableExpanded ? "▾" : "▸"
+                                                font.pixelSize: 11
+                                                color: "#5f6e78"
                                             }
+
+                                            Icon {
+                                                name: "table"
+                                                implicitWidth: 16
+                                                implicitHeight: 16
+                                                color: "#107c71"
+                                            }
+
                                             Text {
                                                 Layout.fillWidth: true
-                                                text: displayName
-                                                color: "#344553"
-                                                font.pixelSize: 10
+                                                text: dataNodeDelegate.tableName
+                                                font.pixelSize: 11
+                                                font.weight: Font.DemiBold
+                                                color: "#25333d"
                                                 elide: Text.ElideRight
                                             }
                                         }
-                                        onClicked: {
-                                            mainWindow.selectedFieldBinding = bindingName
-                                            mainWindow.expandedMeasureName = daxExpanded ? "" : daxName
+                                    }
+
+                                    // Field Row
+                                    RowLayout {
+                                        visible: !dataNodeDelegate.isTableNode
+                                        Layout.fillWidth: true
+                                        Layout.leftMargin: 18
+                                        spacing: 4
+
+                                        CheckBox {
+                                            visible: !dataNodeDelegate.isTableNode
+                                            objectName: !dataNodeDelegate.isTableNode ? (String(dataNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? "fieldCheck_" + dataNodeDelegate.bindingName : "fieldCheck_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName) : ""
+                                            checked: Boolean(dataNodeDelegate.node.inVisual)
+                                            enabled: Boolean(mainWindow.studioController.selectedVisual)
+                                            implicitWidth: 20
+                                            implicitHeight: 20
+                                            onToggled: mainWindow.studioController.toggleFieldInVisual(dataNodeDelegate.tableId, dataNodeDelegate.bindingName, checked)
+                                        }
+
+                                        Button {
+                                            visible: !dataNodeDelegate.isTableNode
+                                            objectName: !dataNodeDelegate.isTableNode ? (dataNodeDelegate.tableId === String(mainWindow.studioController.activeTableId) || String(dataNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? "dataFieldSelect_" + dataNodeDelegate.bindingName : "dataFieldSelect_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName) : ""
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 28
+                                            hoverEnabled: true
+                                            focusPolicy: Qt.StrongFocus
+                                            Accessible.name: "Select " + dataNodeDelegate.displayName
+                                            TapHandler {
+                                                acceptedButtons: Qt.RightButton
+                                                onTapped: {
+                                                    mainWindow.selectedFieldBinding = dataNodeDelegate.bindingName
+                                                    fieldContextMenu.binding = dataNodeDelegate.bindingName
+                                                    fieldContextMenu.popup()
+                                                }
+                                            }
+                                            Accessible.description: dataNodeDelegate.daxName !== ""
+                                                    ? "Select this measure to inspect its saved DAX expression."
+                                                    : "Select this field to inspect its column profile and type."
+                                            background: Rectangle {
+                                                radius: 4
+                                                color: mainWindow.selectedFieldBinding === dataNodeDelegate.bindingName ? "#e7f2ee"
+                                                       : (parent.hovered ? "#f2f6f7" : "transparent")
+                                                border.color: mainWindow.selectedFieldBinding === dataNodeDelegate.bindingName ? "#c6dfd5"
+                                                              : (parent.activeFocus ? "#0078d4" : "transparent")
+                                                border.width: mainWindow.selectedFieldBinding === dataNodeDelegate.bindingName || parent.activeFocus ? 1 : 0
+                                            }
+                                            contentItem: RowLayout {
+                                                spacing: 6
+                                                FieldIcon {
+                                                    kind: String(dataNodeDelegate.node.dataType || mainWindow.fieldDataType(dataNodeDelegate.bindingName))
+                                                    Layout.preferredWidth: 22
+                                                    Layout.preferredHeight: 20
+                                                }
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: dataNodeDelegate.displayName
+                                                    color: "#344553"
+                                                    font.pixelSize: 10
+                                                    elide: Text.ElideRight
+                                                }
+                                            }
+                                            onClicked: {
+                                                mainWindow.selectedFieldBinding = dataNodeDelegate.bindingName
+                                                mainWindow.expandedMeasureName = dataNodeDelegate.daxExpanded ? "" : dataNodeDelegate.daxName
+                                            }
                                         }
                                     }
 
                                     Rectangle {
-                                        visible: daxExpanded
+                                        visible: !dataNodeDelegate.isTableNode && dataNodeDelegate.daxExpanded
                                         Layout.fillWidth: true
                                         Layout.leftMargin: 27
                                         Layout.rightMargin: 4
@@ -2418,30 +2551,30 @@ ApplicationWindow {
                                             id: daxExpressionText
                                             anchors.fill: parent
                                             anchors.margins: 6
-                                            text: mainWindow.measureExpressionForBinding(bindingName)
+                                            text: mainWindow.measureExpressionForBinding(dataNodeDelegate.bindingName)
                                             color: "#334b5d"
                                             font.family: "monospace"
                                             font.pixelSize: 9
                                             wrapMode: Text.WrapAnywhere
                                             maximumLineCount: 6
                                             elide: Text.ElideRight
-                                            Accessible.name: "DAX expression for " + daxName
+                                            Accessible.name: "DAX expression for " + dataNodeDelegate.daxName
                                         }
                                     }
                                     Button {
-                                        visible: daxExpanded
+                                        visible: !dataNodeDelegate.isTableNode && dataNodeDelegate.daxExpanded
                                         Layout.alignment: Qt.AlignRight
                                         Layout.rightMargin: 4
                                         Layout.preferredHeight: 23
                                         text: "Edit DAX"
-                                        Accessible.name: "Edit DAX measure " + daxName
-                                        onClicked: mainWindow.studioController.formulaBar.beginEditMeasure(daxName)
+                                        Accessible.name: "Edit DAX measure " + dataNodeDelegate.daxName
+                                        onClicked: mainWindow.studioController.formulaBar.beginEditMeasure(dataNodeDelegate.daxName)
                                     }
                                 }
                                 Text {
                                     anchors.centerIn: parent
                                     width: parent.width - 20
-                                    visible: mainWindow.studioController.filteredFields.length === 0
+                                    visible: mainWindow.studioController.fieldTreeFlatNodes.length === 0
                                     text: mainWindow.studioController.sourceLoaded ? "No matching fields." : "Import a CSV, Excel, JSON, XML, or Parquet file to browse its source fields."
                                     color: "#76838d"
                                     font.pixelSize: 9
@@ -4424,7 +4557,7 @@ ApplicationWindow {
                                     onActivated: function(index) {
                                         const selected = model[index]
                                         if (selected && String(selected.sourceId) !== String(mainWindow.studioController.activeTableId))
-                                            mainWindow.studioController.selectTable(String(selected.sourceId))
+                                            mainWindow.studioController.focusTable(String(selected.sourceId))
                                     }
                                 }
                                 TextField {
@@ -4477,178 +4610,261 @@ ApplicationWindow {
                                     objectName: "reportFieldsList"
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    model: mainWindow.studioController.filteredFields
+                                    model: mainWindow.studioController.fieldTreeFlatNodes
                                     clip: true
-                                delegate: ColumnLayout {
+                                    spacing: 2
+                                    delegate: ColumnLayout {
+                                        id: reportNodeDelegate
                                         required property var modelData
                                         width: ListView.view.width
-                                    spacing: 2
-                                    property string bindingName: String(modelData)
-                                    property string displayName: mainWindow.studioController.reportFieldDisplayLabel(bindingName)
-                                    property string daxName: mainWindow.measureNameForBinding(bindingName)
-                                    property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
-
-                                    RowLayout {
-                                        Layout.fillWidth: true
                                         spacing: 2
-                                        Button {
-                                            id: reportFieldSelectButton
-                                            objectName: "reportFieldSelect_" + bindingName
+                                        readonly property var node: (modelData && typeof modelData === "object" && !Array.isArray(modelData)) ? modelData : {}
+                                        readonly property string nodeKey: (modelData && typeof modelData === "object" && !Array.isArray(modelData)) ? "" : String(modelData)
+                                        readonly property bool isTableNode: node.isTable !== undefined ? Boolean(node.isTable) : (nodeKey.indexOf("__table__\t") === 0)
+                                        readonly property var tableParts: (!node.isTable && isTableNode) ? nodeKey.split("\t") : []
+                                        readonly property string tableId: node.tableId !== undefined ? String(node.tableId) : (isTableNode ? tableParts[1] : "")
+                                        readonly property string tableName: node.tableName !== undefined ? String(node.tableName) : (isTableNode ? tableParts[2] : "")
+                                        readonly property bool tableExpanded: node.expanded !== undefined ? Boolean(node.expanded) : (isTableNode ? mainWindow.studioController.isTableExpanded(tableId) : false)
+
+                                        readonly property string bindingName: isTableNode ? "" : (node.binding !== undefined ? String(node.binding) : nodeKey)
+                                        readonly property string displayName: isTableNode ? "" : (node.reportDisplayLabel !== undefined ? String(node.reportDisplayLabel) : mainWindow.studioController.reportFieldDisplayLabel(bindingName))
+                                        readonly property string daxName: isTableNode ? "" : (node.daxName !== undefined ? String(node.daxName) : mainWindow.measureNameForBinding(bindingName))
+                                        readonly property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
+                                        readonly property bool isCurrentTable: !isTableNode && tableId !== "" && tableId === String(mainWindow.studioController.activeTableId)
+
+                                        // Table Header Row
+                                        Rectangle {
+                                            visible: reportNodeDelegate.isTableNode
+                                            objectName: reportNodeDelegate.isTableNode ? "fieldTable_" + reportNodeDelegate.tableName : ""
                                             Layout.fillWidth: true
-                                            Layout.preferredHeight: 28
-                                            hoverEnabled: true
-                                            focusPolicy: Qt.StrongFocus
-                                            Accessible.name: "Select " + displayName
+                                            Layout.preferredHeight: reportNodeDelegate.isTableNode ? 28 : 0
+                                            radius: 4
+                                            color: reportTableMouseArea.containsMouse ? "#f2f6f7" : "transparent"
+
                                             TapHandler {
                                                 acceptedButtons: Qt.RightButton
                                                 onTapped: {
-                                                    mainWindow.selectedFieldBinding = bindingName
-                                                    fieldContextMenu.binding = bindingName
-                                                    fieldContextMenu.popup()
+                                                    tableContextMenu.tableId = reportNodeDelegate.tableId
+                                                    tableContextMenu.tableName = reportNodeDelegate.tableName
+                                                    tableContextMenu.popup()
                                                 }
                                             }
-                                            Accessible.description: daxName !== ""
-                                                    ? "Select this measure to inspect its saved DAX expression."
-                                                    : "Select this field. Use Add to visual to place it in a field well."
-                                            background: Rectangle {
-                                                radius: 4
-                                                color: mainWindow.selectedFieldBinding === bindingName ? "#e7f2ee"
-                                                       : (parent.hovered ? "#f2f6f7" : "transparent")
-                                                border.color: mainWindow.selectedFieldBinding === bindingName ? "#c6dfd5"
-                                                              : (parent.activeFocus ? "#0078d4" : "transparent")
-                                                border.width: mainWindow.selectedFieldBinding === bindingName || parent.activeFocus ? 1 : 0
+
+                                            MouseArea {
+                                                id: reportTableMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                acceptedButtons: Qt.LeftButton
+                                                onClicked: mainWindow.studioController.setTableExpanded(reportNodeDelegate.tableId, !reportNodeDelegate.tableExpanded)
                                             }
-                                            contentItem: RowLayout {
-                                                spacing: 5
-                                                FieldIcon {
-                                                    kind: mainWindow.fieldDataType(bindingName)
-                                                    Layout.preferredWidth: 22
-                                                    Layout.preferredHeight: 20
+
+                                            RowLayout {
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 4
+                                                anchors.rightMargin: 4
+                                                spacing: 6
+
+                                                Text {
+                                                    text: reportNodeDelegate.tableExpanded ? "▾" : "▸"
+                                                    font.pixelSize: 11
+                                                    color: "#5f6e78"
                                                 }
+
+                                                Icon {
+                                                    name: "table"
+                                                    implicitWidth: 16
+                                                    implicitHeight: 16
+                                                    color: "#107c71"
+                                                }
+
                                                 Text {
                                                     Layout.fillWidth: true
-                                                    text: displayName
-                                                    color: "#344553"
-                                                    font.pixelSize: 9
+                                                    text: reportNodeDelegate.tableName
+                                                    font.pixelSize: 11
+                                                    font.weight: Font.DemiBold
+                                                    color: "#25333d"
                                                     elide: Text.ElideRight
                                                 }
                                             }
-                                            DragHandler {
-                                                id: reportFieldDragHandler
-                                                target: null
-                                                acceptedButtons: Qt.LeftButton
-                                                onActiveChanged: {
-                                                    if (active) {
-                                                        mainWindow.beginFieldDrag(
-                                                            bindingName,
-                                                            displayName,
-                                                            centroid.scenePosition.x,
-                                                            centroid.scenePosition.y
-                                                        )
-                                                    } else {
-                                                        mainWindow.finishFieldDrag(bindingName)
+                                        }
+
+                                        // Field Row
+                                        RowLayout {
+                                            visible: !reportNodeDelegate.isTableNode
+                                            Layout.fillWidth: true
+                                            Layout.leftMargin: 18
+                                            spacing: 2
+
+                                            CheckBox {
+                                                visible: !reportNodeDelegate.isTableNode
+                                                objectName: !reportNodeDelegate.isTableNode ? ("fieldCheck_" + ((reportNodeDelegate.tableId !== "" && !(String(reportNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0)) ? (reportNodeDelegate.tableId + "_") : "") + reportNodeDelegate.bindingName) : ""
+                                                checked: reportNodeDelegate.node.inVisual !== undefined ? Boolean(reportNodeDelegate.node.inVisual) : mainWindow.studioController.isFieldInVisual(reportNodeDelegate.bindingName)
+                                                enabled: Boolean(mainWindow.studioController.selectedVisual)
+                                                implicitWidth: 20
+                                                implicitHeight: 20
+                                                onToggled: mainWindow.studioController.toggleFieldInVisual(reportNodeDelegate.tableId, reportNodeDelegate.bindingName, checked)
+                                            }
+
+                                            Button {
+                                                id: reportFieldSelectButton
+                                                visible: !reportNodeDelegate.isTableNode
+                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" || String(reportNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? ("reportFieldSelect_" + reportNodeDelegate.bindingName) : ("reportFieldSelect_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
+                                                Layout.fillWidth: true
+                                                Layout.preferredHeight: 28
+                                                hoverEnabled: true
+                                                focusPolicy: Qt.StrongFocus
+                                                Accessible.name: "Select " + reportNodeDelegate.displayName
+                                                TapHandler {
+                                                    acceptedButtons: Qt.RightButton
+                                                    onTapped: {
+                                                        mainWindow.selectedFieldBinding = reportNodeDelegate.bindingName
+                                                        fieldContextMenu.binding = reportNodeDelegate.bindingName
+                                                        fieldContextMenu.popup()
                                                     }
                                                 }
-                                                onCentroidChanged: {
-                                                    if (active)
-                                                        mainWindow.updateFieldDragPosition(
-                                                            centroid.scenePosition.x,
-                                                            centroid.scenePosition.y
-                                                        )
+                                                Accessible.description: reportNodeDelegate.daxName !== ""
+                                                        ? "Select this measure to inspect its saved DAX expression."
+                                                        : "Select this field. Use Add to visual to place it in a field well."
+                                                background: Rectangle {
+                                                    radius: 4
+                                                    color: mainWindow.selectedFieldBinding === reportNodeDelegate.bindingName ? "#e7f2ee"
+                                                           : (parent.hovered ? "#f2f6f7" : "transparent")
+                                                    border.color: mainWindow.selectedFieldBinding === reportNodeDelegate.bindingName ? "#c6dfd5"
+                                                                  : (parent.activeFocus ? "#0078d4" : "transparent")
+                                                    border.width: mainWindow.selectedFieldBinding === reportNodeDelegate.bindingName || parent.activeFocus ? 1 : 0
+                                                }
+                                                contentItem: RowLayout {
+                                                    spacing: 5
+                                                    FieldIcon {
+                                                        kind: reportNodeDelegate.node.dataType !== undefined ? reportNodeDelegate.node.dataType : mainWindow.fieldDataType(reportNodeDelegate.bindingName)
+                                                        Layout.preferredWidth: 22
+                                                        Layout.preferredHeight: 20
+                                                    }
+                                                    Text {
+                                                        Layout.fillWidth: true
+                                                        text: reportNodeDelegate.displayName
+                                                        color: "#344553"
+                                                        font.pixelSize: 9
+                                                        elide: Text.ElideRight
+                                                    }
+                                                }
+                                                DragHandler {
+                                                    id: reportFieldDragHandler
+                                                    target: null
+                                                    onActiveChanged: {
+                                                        if (active) {
+                                                            mainWindow.beginFieldDrag(
+                                                                reportNodeDelegate.bindingName,
+                                                                reportNodeDelegate.displayName,
+                                                                centroid.scenePosition.x,
+                                                                centroid.scenePosition.y
+                                                            )
+                                                        } else {
+                                                            mainWindow.finishFieldDrag(reportNodeDelegate.bindingName)
+                                                        }
+                                                    }
+                                                    onCentroidChanged: {
+                                                        if (active)
+                                                            mainWindow.updateFieldDragPosition(
+                                                                centroid.scenePosition.x,
+                                                                centroid.scenePosition.y
+                                                            )
+                                                    }
+                                                }
+                                                onClicked: {
+                                                    mainWindow.selectedFieldBinding = reportNodeDelegate.bindingName
+                                                    mainWindow.expandedMeasureName = reportNodeDelegate.daxExpanded ? "" : reportNodeDelegate.daxName
                                                 }
                                             }
-                                            onClicked: {
-                                                mainWindow.selectedFieldBinding = bindingName
-                                                mainWindow.expandedMeasureName = daxExpanded ? "" : daxName
-                                            }
-                                        }
-                                        ToolButton {
-                                            id: fieldAddButton
-                                            objectName: "reportFieldAdd_" + bindingName
-                                            text: "+"
-                                            enabled: mainWindow.fieldWellOptions(bindingName).length > 0
-                                            Accessible.name: "Add " + displayName + " to selected visual"
-                                            Accessible.description: enabled
-                                                    ? "Choose a field well on the selected visual."
-                                                    : (mainWindow.studioController.selectedVisual
-                                                       ? "This visual has no available well for this field."
-                                                       : "Select a report visual first.")
-                                            ToolTip.visible: hovered
-                                            ToolTip.text: Accessible.description
-                                            implicitWidth: 24
-                                            implicitHeight: 25
-                                            background: Rectangle {
-                                                radius: 4
-                                                color: parent.enabled ? (parent.hovered ? "#e7f2ee" : "transparent") : "transparent"
-                                                border.color: parent.activeFocus ? "#0078d4" : "transparent"
-                                            }
-                                            contentItem: Text {
+
+                                            ToolButton {
+                                                id: fieldAddButton
+                                                visible: !reportNodeDelegate.isTableNode
+                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" || String(reportNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? ("reportFieldAdd_" + reportNodeDelegate.bindingName) : ("reportFieldAdd_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
                                                 text: "+"
-                                                color: fieldAddButton.enabled ? "#107c71" : "#a3adb4"
-                                                font.pixelSize: 16
-                                                horizontalAlignment: Text.AlignHCenter
-                                                verticalAlignment: Text.AlignVCenter
+                                                enabled: mainWindow.fieldWellOptions(reportNodeDelegate.bindingName).length > 0
+                                                Accessible.name: "Add " + reportNodeDelegate.displayName + " to selected visual"
+                                                Accessible.description: enabled
+                                                        ? "Choose a field well on the selected visual."
+                                                        : (mainWindow.studioController.selectedVisual
+                                                           ? "This visual has no available well for this field."
+                                                           : "Select a report visual first.")
+                                                ToolTip.visible: hovered
+                                                ToolTip.text: Accessible.description
+                                                implicitWidth: 24
+                                                implicitHeight: 25
+                                                background: Rectangle {
+                                                    radius: 4
+                                                    color: parent.enabled ? (parent.hovered ? "#e7f2ee" : "transparent") : "transparent"
+                                                    border.color: parent.activeFocus ? "#0078d4" : "transparent"
+                                                }
+                                                contentItem: Text {
+                                                    text: "+"
+                                                    color: fieldAddButton.enabled ? "#107c71" : "#a3adb4"
+                                                    font.pixelSize: 16
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    verticalAlignment: Text.AlignVCenter
+                                                }
+                                                onClicked: fieldWellMenu.popup()
                                             }
-                                            onClicked: fieldWellMenu.popup()
                                         }
-                                    }
 
-                                    Menu {
-                                        id: fieldWellMenu
-                                        objectName: "reportFieldWellMenu"
-                                        Repeater {
-                                            model: mainWindow.fieldWellOptions(bindingName)
-                                            delegate: MenuItem {
-                                                required property var modelData
-                                                objectName: "reportFieldWell_" + String(modelData.name)
-                                                text: "Add to " + String(modelData.name)
-                                                Accessible.name: text + " for " + displayName
-                                                onTriggered: {
-                                                    mainWindow.selectedFieldBinding = bindingName
-                                                    mainWindow.expandedMeasureName = daxName
-                                                    mainWindow.studioController.add_field_to_well(
-                                                        String(modelData.name), bindingName
-                                                    )
+                                        Menu {
+                                            id: fieldWellMenu
+                                            objectName: "reportFieldWellMenu"
+                                            Repeater {
+                                                model: mainWindow.fieldWellOptions(reportNodeDelegate.bindingName)
+                                                delegate: MenuItem {
+                                                    required property var modelData
+                                                    objectName: "reportFieldWell_" + String(modelData.name)
+                                                    text: "Add to " + String(modelData.name)
+                                                    Accessible.name: text + " for " + reportNodeDelegate.displayName
+                                                    onTriggered: {
+                                                        mainWindow.selectedFieldBinding = reportNodeDelegate.bindingName
+                                                        mainWindow.expandedMeasureName = reportNodeDelegate.daxName
+                                                        mainWindow.studioController.add_field_to_well(
+                                                            String(modelData.name), reportNodeDelegate.bindingName
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    Rectangle {
-                                        visible: daxExpanded
-                                        Layout.fillWidth: true
-                                        Layout.leftMargin: 24
-                                        Layout.rightMargin: 3
-                                        implicitHeight: Math.min(104, daxExpressionTextDetail.implicitHeight + 10)
-                                        radius: 4
-                                        color: "#f6f8fa"
-                                        border.color: "#e1e6e9"
-                                        Text {
-                                            id: daxExpressionTextDetail
-                                            anchors.fill: parent
-                                            anchors.margins: 5
-                                            text: mainWindow.measureExpressionForBinding(bindingName)
-                                            color: "#334b5d"
-                                            font.family: "monospace"
-                                            font.pixelSize: 8
-                                            wrapMode: Text.WrapAnywhere
-                                            maximumLineCount: 6
-                                            elide: Text.ElideRight
-                                            Accessible.name: "DAX expression for " + daxName
+                                        Rectangle {
+                                            visible: !reportNodeDelegate.isTableNode && reportNodeDelegate.daxExpanded
+                                            Layout.fillWidth: true
+                                            Layout.leftMargin: 24
+                                            Layout.rightMargin: 3
+                                            implicitHeight: Math.min(104, daxExpressionTextDetail.implicitHeight + 10)
+                                            radius: 4
+                                            color: "#f6f8fa"
+                                            border.color: "#e1e6e9"
+                                            Text {
+                                                id: daxExpressionTextDetail
+                                                anchors.fill: parent
+                                                anchors.margins: 5
+                                                text: mainWindow.measureExpressionForBinding(reportNodeDelegate.bindingName)
+                                                color: "#334b5d"
+                                                font.family: "monospace"
+                                                font.pixelSize: 8
+                                                wrapMode: Text.WrapAnywhere
+                                                maximumLineCount: 6
+                                                elide: Text.ElideRight
+                                                Accessible.name: "DAX expression for " + reportNodeDelegate.daxName
+                                            }
                                         }
-                                    }
-                                    Button {
-                                        visible: daxExpanded
-                                        Layout.alignment: Qt.AlignRight
-                                        Layout.preferredHeight: 22
-                                        text: "Edit DAX"
-                                        Accessible.name: "Edit DAX measure " + daxName
-                                        onClicked: mainWindow.studioController.formulaBar.beginEditMeasure(daxName)
+                                        Button {
+                                            visible: !reportNodeDelegate.isTableNode && reportNodeDelegate.daxExpanded
+                                            Layout.alignment: Qt.AlignRight
+                                            Layout.preferredHeight: 22
+                                            text: "Edit DAX"
+                                            Accessible.name: "Edit DAX measure " + reportNodeDelegate.daxName
+                                            onClicked: mainWindow.studioController.formulaBar.beginEditMeasure(reportNodeDelegate.daxName)
                                         }
                                     }
                                     Text {
                                         anchors.centerIn: parent
-                                        visible: mainWindow.studioController.filteredFields.length === 0
+                                        visible: mainWindow.studioController.fieldTreeFlatNodes.length === 0
                                         text: mainWindow.studioController.sourceLoaded ? "No matching fields" : "Import a CSV, Excel, JSON, XML, or Parquet file to browse its fields."
                                         color: "#76838d"
                                         font.pixelSize: 9
