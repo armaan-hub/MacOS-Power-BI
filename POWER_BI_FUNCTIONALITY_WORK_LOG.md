@@ -2736,3 +2736,9 @@ The read-only Advanced Editor fallback now writes Power BI's M name quoting (#".
 Group By is now Power BI's modal dialog with Basic and Advanced modes, Add grouping / Add aggregation, operations Sum, Average, Median, Min, Max, Count Rows, Count Distinct Rows (All Rows disabled), gear-edit and Insert Step After. Sonnet fixed duplicate-name validation and the operation selector while the dialog is open. Gated together with Task 194. Plan: docs/plans/2026-11-17-ux-195.md.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4944 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity and Sonnet coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 278 (Task 196 replace-values: Replace Values dialog matching Power BI, with typed values and Replacer.ReplaceText/ReplaceValue)
+
+Replace Values opens Power BI's modal dialog with Value To Find, Replace With and Match entire cell contents. Matching is exact by kind, null can be replaced, and M uses typed literals with Replacer.ReplaceText or Replacer.ReplaceValue.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4962 passed, 2 known flakes passed alone passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity and Sonnet coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
