@@ -187,8 +187,8 @@ _LIBRARY_CALL = re.compile(r"([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)
 _EDITOR_MAPPED_FUNCTIONS = frozenset({
     'Combiner.CombineTextByDelimiter', 'Date.Day', 'Date.From', 'Date.Month', 'Date.Year', 'List.Average',
     'List.Count', 'List.Distinct', 'List.Max', 'List.Median', 'List.Min', 'List.RemoveItems', 'List.Sum',
-    'List.Transform', 'Number.Abs', 'Number.From', 'Number.Round', 'Record.Field', 'Replacer.ReplaceValue',
-    'Splitter.SplitTextByDelimiter', 'Splitter.SplitTextByEachDelimiter', 'Splitter.SplitTextByPositions',
+    'List.Transform', 'Number.Abs', 'Number.From', 'Number.Round', 'Record.Field', 'Replacer.ReplaceText',
+    'Replacer.ReplaceValue', 'Splitter.SplitTextByDelimiter', 'Splitter.SplitTextByEachDelimiter', 'Splitter.SplitTextByPositions',
     'Table.AddColumn', 'Table.AddIndexColumn', 'Table.AlternateRows', 'Table.Column', 'Table.Combine',
     'Table.CombineColumns', 'Table.DemoteHeaders', 'Table.Distinct', 'Table.DuplicateColumn',
     'Table.ExpandListColumn', 'Table.FillDown', 'Table.FillUp', 'Table.FirstN', 'Table.FromValue', 'Table.Group',
@@ -927,6 +927,8 @@ def _canonical_m_steps(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         elif step["op"] == "convert_type":
             step["type"] = canonical_column_type(step["type"])
+        elif step["op"] == "replace_value":
+            step.setdefault("replacer", "value")
         elif step["op"] == "promote_headers":
             step.setdefault("promote_all_scalars", True)
         elif step["op"] == "add_custom_column":
@@ -1615,13 +1617,16 @@ def _parse_table_call(
         }]
     if function == "Table.ReplaceValue":
         _expect_count(function, args, 4)
-        old_value = _parse_string(args[0])
-        replacement = _parse_string(args[1])
-        if args[2] != "Replacer.ReplaceValue":
-            raise PowerQueryMScriptError("Only Replacer.ReplaceValue is supported by Table.ReplaceValue.")
+        old_value = _parse_m_literal(args[0])
+        replacement = _parse_m_literal(args[1])
+        replacer_arg = args[2].strip()
+        if replacer_arg not in {"Replacer.ReplaceValue", "Replacer.ReplaceText"}:
+            raise PowerQueryMScriptError("Only Replacer.ReplaceValue and Replacer.ReplaceText are supported by Table.ReplaceValue.")
+        replacer = "text" if replacer_arg == "Replacer.ReplaceText" else "value"
         return [{
             "op": "replace_value", "column": column,
             "value": old_value, "replacement": replacement,
+            "replacer": replacer,
         } for column in _parse_string_list(args[3])]
     if function == "Table.TransformColumns":
         _expect_count(function, args, 1)
@@ -2489,6 +2494,63 @@ def _m_numeric_literal(value: str) -> str:
     return str(number)
 
 
+def _m_literal(value: Any, column_type: str | None = None) -> str:
+    """Format a typed literal for Power Query M (string, number, bool, null, date/datetime)."""
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float, Decimal)):
+        return str(value)
+    if isinstance(value, (date, datetime)):
+        return _m_date_literal(value.isoformat(), column_type=column_type)
+    if isinstance(value, str):
+        # Check if this string was intended as a date/datetime literal
+        if column_type in {"date", "datetime"}:
+            try:
+                return _m_date_literal(value, column_type=column_type)
+            except PowerQueryMScriptError:
+                pass
+        return _m_string(value)
+    return _m_string(str(value))
+
+
+def _parse_m_literal(arg: str) -> Any:
+    """Parse a literal token from Table.ReplaceValue arguments."""
+    s = arg.strip()
+    if s == "null":
+        return None
+    if s == "true":
+        return True
+    if s == "false":
+        return False
+    if s.startswith('"'):
+        return _parse_string(s)
+    # Check date or datetime
+    date_m = re.fullmatch(
+        r"#(date|datetime)\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)"
+        r"(?:\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+))?\s*\)",
+        s,
+    )
+    if date_m:
+        kind, y, mo, d, h, mi, sec = date_m.groups()
+        if kind == "date":
+            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+        return f"{int(y):04d}-{int(mo):02d}-{int(d):02d} {int(h or 0):02d}:{int(mi or 0):02d}:{int(sec or 0):02d}"
+    # Check numeric
+    try:
+        if "." in s or "e" in s.lower():
+            return float(s)
+        return int(s)
+    except ValueError:
+        pass
+    try:
+        return Decimal(s)
+    except Exception:
+        pass
+    raise PowerQueryMScriptError(f"Unsupported literal value {arg!r} in Table.ReplaceValue.")
+
+
 def _step_to_m_call(
     previous: str,
     step: dict[str, Any],
@@ -2657,9 +2719,14 @@ def _step_to_m_call(
             arguments += f", {aggregation}"
         return f"Table.Pivot({arguments})"
     if op == "replace_value":
+        replacer = step.get("replacer", "value")
+        replacer_func = "Replacer.ReplaceText" if replacer == "text" else "Replacer.ReplaceValue"
+        col_type = (input_column_types or {}).get(step["column"])
+        val_lit = _m_literal(step["value"], column_type=col_type)
+        rep_lit = _m_literal(step["replacement"], column_type=col_type)
         return (
-            f"Table.ReplaceValue({previous}, {_m_string(step['value'])}, "
-            f"{_m_string(step['replacement'])}, Replacer.ReplaceValue, "
+            f"Table.ReplaceValue({previous}, {val_lit}, "
+            f"{rep_lit}, {replacer_func}, "
             f"{{{_m_string(step['column'])}}})"
         )
     if op in {"extract_text_by_delimiter", "extract_text_between_delimiters"}:
