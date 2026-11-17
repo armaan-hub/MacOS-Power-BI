@@ -211,6 +211,7 @@ Rectangle {
         return root.chartType === "stackedBar" || root.chartType === "stackedColumn"
                 || root.chartType === "bar100" || root.chartType === "column100"
                 || root.chartType === "stackedArea" || root.chartType === "area100"
+                || (root.chartType === "lineStackedColumn" && (root.series || []).length > 0 && Boolean((root.series[0] || {}).segments))
     }
     function isHundredPercent() {
         return root.chartType === "bar100" || root.chartType === "column100"
@@ -252,6 +253,27 @@ Rectangle {
             ctx.fillStyle = "#647382"
             ctx.fillText(label, legendX + 12, legendY, maxWidth)
             legendX += textWidth + 25
+        }
+        if (root.chartType === "lineStackedColumn" && (root.lineSeries || []).length > 0) {
+            const lineLabel = root.lineSeriesLabel || "Line"
+            const available = Math.max(12, canvasWidth - legendX - 18)
+            let textWidth = Math.min(ctx.measureText(lineLabel).width, 74)
+            if (textWidth + 19 > available) {
+                if (legendY < 23) {
+                    legendY = 23
+                    legendX = padLeft
+                } else {
+                    ctx.fillStyle = "#647382"
+                    ctx.fillText("…", legendX, legendY, Math.max(8, canvasWidth - legendX - 3))
+                    return
+                }
+            }
+            const maxWidth = Math.max(1, Math.min(74, canvasWidth - legendX - 19))
+            textWidth = Math.min(textWidth, maxWidth)
+            ctx.fillStyle = "#C65911"
+            ctx.fillRect(legendX, legendY - 1, 9, 2)
+            ctx.fillStyle = "#647382"
+            ctx.fillText(lineLabel, legendX + 13, legendY, maxWidth)
         }
     }
     function treemapLayout(values, x, y, width, height) {
@@ -492,13 +514,13 @@ Rectangle {
                 elide: Text.ElideRight
             }
             Rectangle {
-                visible: root.chartType === "lineClusteredColumn"
+                visible: root.chartType === "lineClusteredColumn" || root.chartType === "lineStackedColumn"
                 width: visible ? 9 : 0
                 height: 2
                 color: "#C65911"
             }
             Text {
-                visible: root.chartType === "lineClusteredColumn"
+                visible: root.chartType === "lineClusteredColumn" || root.chartType === "lineStackedColumn"
                 text: root.lineSeriesLabel || "Line"
                 color: "#647382"
                 font.pixelSize: 10
@@ -532,7 +554,7 @@ Rectangle {
                 let maxValue = 0
                 for (let i = 0; i < values.length; ++i)
                     maxValue = Math.max(maxValue, Number(values[i].value) || 0)
-                if (root.chartType === "lineClusteredColumn") {
+                if (root.chartType === "lineClusteredColumn" || root.chartType === "lineStackedColumn") {
                     for (let i = 0; i < lineValues.length; ++i)
                         maxValue = Math.max(maxValue, Number(lineValues[i].value) || 0)
                 }
@@ -556,7 +578,7 @@ Rectangle {
                     : root.chartType === "filledMap" || root.chartType === "shapeMap"
                         ? !(root.shapeRegions || []).length
                         : root.chartType === "scatter" ? !(root.scatterPoints || []).length
-                        : (root.chartType === "lineClusteredColumn"
+                        : (root.chartType === "lineClusteredColumn" || root.chartType === "lineStackedColumn"
                            ? !values.length || !lineValues.length
                            : !values.length)) {
                     ctx.fillStyle = "#5d6975"
@@ -1508,6 +1530,52 @@ Rectangle {
                                 ctx.fillText(labels[i], x + barW / 2, padTop + plotH + 5)
                             }
                         }
+                        if (root.chartType === "lineStackedColumn" && values.length) {
+                            const linePoints = []
+                            for (let i = 0; i < values.length; ++i) {
+                                let matched = null
+                                for (let j = 0; j < lineValues.length; ++j) {
+                                    if (String(lineValues[j].label) === String(values[i].label)) {
+                                        matched = lineValues[j]
+                                        break
+                                    }
+                                }
+                                if (matched) {
+                                    linePoints.push({
+                                        label: values[i].label,
+                                        value: Number(matched.value) || 0,
+                                        x: padLeft + step * (i + 0.5),
+                                    })
+                                }
+                            }
+                            ctx.strokeStyle = hasHighlights ? "#b8c2cc" : "#C65911"
+                            ctx.lineWidth = 2.5
+                            ctx.beginPath()
+                            for (let i = 0; i < linePoints.length; ++i) {
+                                const y = padTop + plotH - plotH * linePoints[i].value / maxValue
+                                if (i === 0) ctx.moveTo(linePoints[i].x, y); else ctx.lineTo(linePoints[i].x, y)
+                            }
+                            ctx.stroke()
+                            for (let i = 0; i < linePoints.length; ++i) {
+                                const point = linePoints[i]
+                                const y = padTop + plotH - plotH * point.value / maxValue
+                                ctx.fillStyle = hasHighlights ? "#b8c2cc" : "#C65911"
+                                ctx.beginPath(); ctx.arc(point.x, y, 3.5, 0, Math.PI * 2); ctx.fill()
+                                const selectedValue = root.highlightedLineValue(point.label)
+                                if (selectedValue !== null) {
+                                    const selectedY = padTop + plotH - plotH * selectedValue / maxValue
+                                    ctx.fillStyle = "#C65911"
+                                    ctx.beginPath(); ctx.arc(point.x, selectedY, 4.5, 0, Math.PI * 2); ctx.fill()
+                                }
+                                if (root.showDataLabels) {
+                                    ctx.fillStyle = "#425466"
+                                    ctx.font = "10px sans-serif"
+                                    ctx.textAlign = "center"
+                                    ctx.textBaseline = "bottom"
+                                    ctx.fillText(root.valueLabel(point.value), point.x, Math.max(10, y - 5))
+                                }
+                            }
+                        }
                     }
                 } else if (root.chartType === "line") {
                     ctx.strokeStyle = hasHighlights ? "#b8c2cc" : color
@@ -1682,7 +1750,7 @@ Rectangle {
                             ctx.fillText(root.valueLabel(values[i].value), x + barW / 2, Math.max(10, padTop + plotH - barH - 3))
                         }
                     }
-                    if (root.chartType === "lineClusteredColumn" && values.length) {
+                    if ((root.chartType === "lineClusteredColumn" || root.chartType === "lineStackedColumn") && values.length) {
                         const linePoints = []
                         for (let i = 0; i < values.length; ++i) {
                             let matched = null
@@ -1946,7 +2014,7 @@ Rectangle {
                             index = candidate
                     }
                 }
-            } else if (root.chartType === "stackedColumn" || root.chartType === "column100") {
+            } else if (root.chartType === "stackedColumn" || root.chartType === "column100" || (root.chartType === "lineStackedColumn" && (root.series || []).length > 0 && Boolean((root.series[0] || {}).segments))) {
                 const plotLeft = 38
                 const plotWidth = Math.max(12, chart.width - plotLeft - 8)
                 const plotTop = root.showLegend ? Math.max(27, root.showDataLabels ? 20 : 0) : (root.showDataLabels ? 20 : 9)

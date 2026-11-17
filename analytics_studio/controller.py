@@ -2058,6 +2058,8 @@ class StudioController(QObject):
             wells = ["Rows", "Columns", "Values", "Tooltips"]
         elif v_type == "lineClusteredColumn":
             wells = ["X-axis", "Column Y-axis", "Line Y-axis", "Tooltips"]
+        elif v_type == "lineStackedColumn":
+            wells = ["X-axis", "Column Y-axis", "Column legend", "Line Y-axis", "Tooltips"]
         elif v_type == "gauge":
             wells = ["Value", "Minimum", "Maximum", "Target", "Tooltips"]
         elif v_type == "kpi":
@@ -2770,7 +2772,7 @@ class StudioController(QObject):
                     preferred = ["Value"]
                 elif chart_type == "kpi":
                     preferred = ["Indicator"]
-                elif chart_type == "lineClusteredColumn":
+                elif chart_type in {"lineClusteredColumn", "lineStackedColumn"}:
                     preferred = ["Column Y-axis", "Line Y-axis"]
                 else:
                     preferred = ["Y-axis", "Value", "Fields", "Values", "Indicator"]
@@ -2906,7 +2908,7 @@ class StudioController(QObject):
         }
         wells = wells_by_type.get(
             visual_type,
-            ("X-axis", "Y-axis", "Column Y-axis", "Line Y-axis", "Legend"),
+            ("X-axis", "Y-axis", "Column Y-axis", "Column legend", "Line Y-axis", "Legend"),
         )
         bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
         bound_rows = rows_by_table.get(bound_table_id, [])
@@ -12855,7 +12857,7 @@ class StudioController(QObject):
         if visual.get("type") == "scatter" and well_name in {"X-axis", "Y-axis", "Legend", "Details"} and well_fields:
             self._set_status("This Scatter chart supports one field in each axis, legend, and details well.")
             return
-        if visual.get("type") == "lineClusteredColumn" and well_name in {"Column Y-axis", "Line Y-axis"} and well_fields:
+        if visual.get("type") in {"lineClusteredColumn", "lineStackedColumn"} and well_name in {"Column Y-axis", "Line Y-axis", "Column legend"} and well_fields:
             self._set_status("This Combo chart supports one field in each value well.")
             return
         if visual.get("type") == "gauge" and well_name in {"Value", "Minimum", "Maximum", "Target"} and well_fields:
@@ -12908,7 +12910,7 @@ class StudioController(QObject):
             supports_model_default = (
                 (well_name == "Y-axis" and visual_type != "scatter")
                 or (
-                    visual_type == "lineClusteredColumn"
+                    visual_type in {"lineClusteredColumn", "lineStackedColumn"}
                     and well_name in {"Column Y-axis", "Line Y-axis"}
                 )
                 or (
@@ -13068,6 +13070,7 @@ class StudioController(QObject):
             "matrix": "Matrix",
             "scatter": "Scatter chart",
             "line": "Line chart",
+            "lineStackedColumn": "Line and stacked column chart",
             "lineClusteredColumn": "Line and clustered column chart",
             "gauge": "Gauge",
             "kpi": "KPI",
@@ -14457,10 +14460,10 @@ class StudioController(QObject):
         if value_well is None:
             value_well = (
                 "Column Y-axis"
-                if visual.get("type") == "lineClusteredColumn"
+                if visual.get("type") in {"lineClusteredColumn", "lineStackedColumn"}
                 else "Indicator" if visual.get("type") == "kpi" else "Y-axis"
             )
-        if visual.get("type") == "lineClusteredColumn" and not fields.get(value_well):
+        if visual.get("type") in {"lineClusteredColumn", "lineStackedColumn"} and not fields.get(value_well):
             return []
         y_axis = fields.get(value_well, [])
         if visual.get("type") == "slicer" and not x_axis and not y_axis:
@@ -14477,7 +14480,8 @@ class StudioController(QObject):
         bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
         x_binding = _visual_well_binding(x_axis, bound_table_id)
         y_binding = _visual_well_binding(y_axis, bound_table_id)
-        legend_binding = _visual_well_binding(fields.get("Legend", []), bound_table_id)
+        legend_well_name = "Column legend" if visual.get("type") == "lineStackedColumn" else "Legend"
+        legend_binding = _visual_well_binding(fields.get(legend_well_name, []), bound_table_id)
         x_col = x_binding[1] if x_binding else None
         y_col = y_binding[1] if y_binding else None
         legend_col = legend_binding[1] if legend_binding else None
@@ -14528,11 +14532,12 @@ class StudioController(QObject):
         )
 
         measure_name = _visual_measure_name(y_col)
+        is_stacked_chart = visual.get("type") in {
+            "stackedBar", "stackedColumn", "bar100", "column100",
+            "stackedArea", "area100", "ribbon",
+        } or (visual.get("type") == "lineStackedColumn" and value_well != "Line Y-axis" and bool(legend_col))
         if measure_name:
-            stacked = visual.get("type") in {
-                "stackedBar", "stackedColumn", "bar100", "column100",
-                "stackedArea", "area100", "ribbon",
-            }
+            stacked = is_stacked_chart
             try:
                 return self._measure_visual_series(
                     measure_name,
@@ -14552,10 +14557,7 @@ class StudioController(QObject):
             except (MeasureError, KeyError, TypeError, ValueError):
                 return []
 
-        if visual.get("type") in {
-            "stackedBar", "stackedColumn", "bar100", "column100",
-            "stackedArea", "area100", "ribbon",
-        }:
+        if is_stacked_chart:
             if not x_col or not y_col:
                 return []
 
@@ -14676,7 +14678,7 @@ class StudioController(QObject):
             category_values,
         )
         if visual.get("type", "bar") in {
-            "column", "area", "line", "lineClusteredColumn", "waterfall", "ribbon", "kpi",
+            "column", "area", "line", "lineClusteredColumn", "lineStackedColumn", "waterfall", "ribbon", "kpi",
         }:
             if model_order is not None:
                 ordered_values = [

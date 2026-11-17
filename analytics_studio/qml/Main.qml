@@ -166,8 +166,8 @@ ApplicationWindow {
             preferred = numeric ? ["Values", "Rows", "Columns"] : ["Rows", "Columns", "Values"]
         else if (type === "scatter")
             preferred = numeric ? ["X-axis", "Y-axis", "Tooltips"] : ["Details", "Legend", "Tooltips"]
-        else if (type === "lineClusteredColumn")
-            preferred = numeric ? ["Column Y-axis", "Line Y-axis", "Tooltips"] : ["X-axis", "Legend", "Tooltips"]
+        else if (type === "lineClusteredColumn" || type === "lineStackedColumn")
+            preferred = numeric ? ["Column Y-axis", "Line Y-axis", "Tooltips"] : ["X-axis", "Column legend", "Legend", "Tooltips"]
         else if (type === "gauge")
             preferred = numeric ? ["Value", "Tooltips"] : ["Tooltips"]
         else if (type === "kpi")
@@ -352,7 +352,7 @@ ApplicationWindow {
             preferred = chartType === "matrix" ? ["Values"]
                         : chartType === "gauge" ? ["Value"]
                         : chartType === "kpi" ? ["Indicator"]
-                        : chartType === "lineClusteredColumn" ? ["Column Y-axis", "Line Y-axis"]
+                        : (chartType === "lineClusteredColumn" || chartType === "lineStackedColumn") ? ["Column Y-axis", "Line Y-axis"]
                         : ["Y-axis", "Value", "Fields", "Values", "Indicator"]
         } else {
             preferred = chartType === "slicer" || chartType === "table" || chartType === "card" ? ["Fields"]
@@ -1704,7 +1704,7 @@ ApplicationWindow {
                                                     showLegend: Boolean(modelData.show_legend)
                                                     seriesLabel: {
                                                         const fields = modelData.fields || {}
-                                                        const well = modelData.type === "lineClusteredColumn" ? "Column Y-axis" : "Y-axis"
+                                                        const well = (modelData.type === "lineClusteredColumn" || modelData.type === "lineStackedColumn") ? "Column Y-axis" : "Y-axis"
                                                         const measures = fields[well] || []
                                                         return measures.length ? mainWindow.studioController.visualFieldLabel(String(measures[0])) : ""
                                                     }
@@ -1737,6 +1737,7 @@ ApplicationWindow {
                                                                 && visual.type !== "treemap"
                                                                 && visual.type !== "scatter"
                                                                 && visual.type !== "lineClusteredColumn"
+                                                                && visual.type !== "lineStackedColumn"
                                                                 && visual.type !== "kpi"
                                                                 && visual.type !== "line" && visual.type !== "area"
                                                                 && visual.type !== "pie" && visual.type !== "donut"
@@ -1749,7 +1750,7 @@ ApplicationWindow {
                                                         const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
                                                             return String(item.title) === String(modelData.title)
                                                         })
-                                                        return visual && visual.type === "lineClusteredColumn"
+                                                        return visual && (visual.type === "lineClusteredColumn" || visual.type === "lineStackedColumn")
                                                             ? mainWindow.studioController.visualLineSeries(String(visual.title))
                                                             : []
                                                     }
@@ -1822,7 +1823,7 @@ ApplicationWindow {
                                                         const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
                                                             return String(item.title) === String(modelData.title)
                                                         })
-                                                        return visual && visual.type === "lineClusteredColumn"
+                                                        return visual && (visual.type === "lineClusteredColumn" || visual.type === "lineStackedColumn")
                                                             ? mainWindow.studioController.visualLineHighlightSeries(String(visual.title))
                                                             : []
                                                     }
@@ -3833,7 +3834,7 @@ ApplicationWindow {
                                                 { type: "area", name: "Area chart", icon: "area", accent: "#0078D4", active: true },
                                                 { type: "stackedArea", name: "Stacked area chart", icon: "stackedArea", accent: "#0078D4", active: true },
                                                 { type: "area100", name: "100% stacked area chart", icon: "area100", accent: "#0078D4", active: true },
-                                                { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "lineStackedColumn" },
+                                                { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "lineStackedColumn", accent: "#C65911", active: true },
                                                 { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "lineClusteredColumn", accent: "#C65911", active: true },
                                                 { type: "ribbon", name: "Ribbon chart", icon: "ribbonChart", accent: "#0078D4", active: true },
                                                 { type: "waterfall", name: "Waterfall chart", icon: "waterfall", accent: "#0078D4", active: true },
@@ -4020,7 +4021,8 @@ ApplicationWindow {
                                                                                 && mainWindow.studioController.selectedChartType !== "scatter")
                                                                             || ((visualWellDelegate.wellName === "Column Y-axis"
                                                                                  || visualWellDelegate.wellName === "Line Y-axis")
-                                                                                && mainWindow.studioController.selectedChartType === "lineClusteredColumn"))
+                                                                                && (mainWindow.studioController.selectedChartType === "lineClusteredColumn"
+                                                                                    || mainWindow.studioController.selectedChartType === "lineStackedColumn")))
                                                                             || (visualWellDelegate.wellName === "Fields"
                                                                                 && mainWindow.studioController.selectedChartType === "card")
                                                                             || ((visualWellDelegate.wellName === "Value"
