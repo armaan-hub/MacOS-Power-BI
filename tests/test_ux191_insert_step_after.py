@@ -188,6 +188,7 @@ class InsertStepAfterTests(unittest.TestCase):
         self.assertEqual(dialog._steps[1]["op"], "filter_rows")
 
     def test_insert_after_convert_type_preserves_types(self) -> None:
+        # Task 194 (2026-11-17): check step type metadata, not inferred types
         steps = [
             {"op": "convert_type", "column": "Amount", "type": "number"},
             {"op": "remove_column", "column": "Day"},
@@ -199,12 +200,10 @@ class InsertStepAfterTests(unittest.TestCase):
         self.assertEqual(dialog.step_list.item(1).text(), "Custom1")
 
         dialog.step_list.setCurrentRow(0)
-        selected_preview = dialog._selected_preview_candidate()
-        dialog.step_list.setCurrentRow(1)
-        custom_preview = dialog._selected_preview_candidate()
+        step0_types = {p["name"]: p.get("type") for p in dialog.preview_header._profiles}
+        self.assertNotIn(step0_types.get("Amount"), ("any", "text", None))
+        self.assertIn("decimal", str(step0_types.get("Amount")))
 
-        self.assertEqual(custom_preview.headers, selected_preview.headers)
-        self.assertEqual(
-            infer_column_types(custom_preview.headers, custom_preview.rows),
-            infer_column_types(selected_preview.headers, selected_preview.rows),
-        )
+        dialog.step_list.setCurrentRow(1)
+        custom1_types = {p["name"]: p.get("type") for p in dialog.preview_header._profiles}
+        self.assertEqual(custom1_types, step0_types)
