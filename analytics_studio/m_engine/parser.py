@@ -90,6 +90,18 @@ class _Parser:
         self.advance()
         return str(tok.value)
 
+    def record_field_name(self) -> str:
+        """A record literal field name: an identifier, a #"quoted" name, or a keyword (Power BI answer check
+        2026-11-17: ``[let = 1][let]`` and ``[type = 1, each = 2]`` are valid records)."""
+        tok = self.peek()
+        if tok.kind == "keyword":  # includes true, false, null
+            self.advance()
+            return tok.text
+        if tok.kind == "ident" and tok.text.startswith("#") and not tok.text.startswith('#"'):
+            # Power BI answer check 2026-11-17: [#table = 1] is "Invalid identifier."; #table, #date, #shared are not names
+            raise MSyntaxError("Invalid identifier.", tok.position, self.source)
+        return self.identifier_name()
+
     def _take_optional(self) -> bool:
         if self.at_op("?"):
             self.advance()
@@ -388,7 +400,7 @@ class _Parser:
             return A.RecordExpr(())
         fields: list[A.RecordField] = []
         while True:
-            name = self.identifier_name()
+            name = self.record_field_name()
             self.expect_op("=")
             fields.append(A.RecordField(name, self.expression()))
             if not self.at_op(","):
