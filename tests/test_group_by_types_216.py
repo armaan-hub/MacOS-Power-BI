@@ -7,8 +7,14 @@ not observed, so they keep the untyped form.
 
 from __future__ import annotations
 
+import os
 import unittest
 
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+from PySide6.QtWidgets import QApplication
+
+from analytics_studio.local_table_dialogs import GroupByDialog
 from analytics_studio.m_engine import evaluate_to_text
 from analytics_studio.power_query_m import (
     PowerQueryMScriptError,
@@ -113,6 +119,8 @@ class GroupByEmitterTypeTests(unittest.TestCase):
         # Column Z is not in the known types, so no type argument is written.
         script = self.emit({"operation": "sum", "column": "Z", "new_name": "Count"})
         self.assertIn('{"Count", each List.Sum([Z])}', script)
+        self.assertNotIn(" type ", script)
+        self.assertNotIn("Int64.Type", script)
 
     def test_date_source_emits_no_type_for_sum(self) -> None:
         script = self.emit({"operation": "sum", "column": "D", "new_name": "Count"})
@@ -127,6 +135,43 @@ class GroupByEmitterTypeTests(unittest.TestCase):
             script,
             full_script('Table.Group(Source, {"K"}, {{"Count", each List.Min([W]), Int64.Type}})'),
         )
+
+
+class GroupByDialogStoredTypeTests(unittest.TestCase):
+    """Task 216 round 3: the Group By dialog keeps a stored M type only while the aggregation is unchanged."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.app = QApplication.instance() or QApplication(["group by types 216"])
+
+    def loaded_dialog(self, expression: str) -> GroupByDialog:
+        step = parse_m_script(full_script(expression), QUERY, initial_column_types=SOURCE_TYPES)[-1]
+        dialog = GroupByDialog(list(SOURCE_TYPES), initial_step=step)
+        self.addCleanup(dialog.deleteLater)
+        return dialog
+
+    def test_unchanged_loaded_aggregation_keeps_stored_type(self) -> None:
+        dialog = self.loaded_dialog(ANSWERS[2])
+        aggregate = dialog.step()["aggregations"][0]
+        self.assertEqual(aggregate["m_type"], "type number")
+
+    def test_sum_edited_to_min_drops_stored_type_and_follows_min_rule(self) -> None:
+        dialog = self.loaded_dialog(ANSWERS[2])
+        row = dialog._agg_rows[0]
+        row["op_combo"].setCurrentIndex(row["op_combo"].findData("min"))
+        edited = dialog.step()
+        self.assertNotIn("m_type", edited["aggregations"][0])
+        script = steps_to_m_script([edited], QUERY, initial_column_types=SOURCE_TYPES)
+        self.assertEqual(
+            script,
+            full_script('Table.Group(Source, {"K"}, {{"Count", each List.Min([W])}})'),
+        )
+
+    def test_column_edited_drops_stored_type(self) -> None:
+        dialog = self.loaded_dialog(ANSWERS[2])
+        row = dialog._agg_rows[0]
+        row["col_combo"].setCurrentText("N")
+        self.assertNotIn("m_type", dialog.step()["aggregations"][0])
 
 
 class GroupByRoundTripTests(unittest.TestCase):
