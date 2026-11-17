@@ -10984,16 +10984,6 @@ class TransformDataDialog(QDialog):
             query_functions=self._query_functions,
             initial_column_types=active_state.get("source_column_types", {}),
         )
-        if issues:
-            details = "\n".join(
-                f"Step {issue['step']} ({issue['operation']}): {issue['message']}"
-                for issue in issues
-            )
-            self._show_error(
-                "Advanced Editor cannot represent every current step in its local M subset. "
-                "Remove or replace these steps in Transform Data, then retry:\n" + details
-            )
-            return
         try:
             dialog = PowerQueryMEditorDialog(
                 self._source_candidate,
@@ -11009,13 +10999,14 @@ class TransformDataDialog(QDialog):
                 query_sources=query_sources,
                 source_column_types=active_state.get("source_column_types", {}),
                 step_names=self._step_names_for(self._steps),
+                read_only_issues=issues or None,
             )
         except (PowerQueryMScriptError, TransformationError) as exc:
             self._show_error(str(exc))
             return
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
-        if dialog.candidate is None or dialog.steps is None:
+        if issues or dialog.candidate is None or dialog.steps is None:
             return
         if source_query_names is not None:
             source_candidate = dialog.source_candidate

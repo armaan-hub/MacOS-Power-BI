@@ -3960,9 +3960,12 @@ class PowerQueryMEditorDialog(QDialog):
         query_sources: list[dict[str, Any]] | None = None,
         source_column_types: dict[str, str] | None = None,
         step_names: list[str | None] | None = None,
+        *,
+        read_only_issues: list[dict[str, Any]] | None = None,
     ) -> None:
         super().__init__(parent)
         apply_light_dialog_theme(self)
+        self._read_only_issues = read_only_issues
         self._source_candidate = source_candidate
         self._query_name = query_name
         self._source_column_types = {
@@ -4041,27 +4044,55 @@ class PowerQueryMEditorDialog(QDialog):
 
         self.editor = MCodeEditor()
         self.editor.setObjectName("powerQueryMEditor")
-        try:
-            generated_script = steps_to_m_script(
-                steps, query_name,
+        if self._read_only_issues is not None:
+            issue_steps = [
+                int(issue["step"]) for issue in self._read_only_issues
+                if isinstance(issue, dict) and "step" in issue
+            ]
+            first_issue_index = min(issue_steps) - 1 if issue_steps else len(steps)
+            first_issue_index = max(0, min(first_issue_index, len(steps)))
+            prefix_steps = steps[:first_issue_index]
+            prefix_step_names = step_names[:first_issue_index] if step_names is not None else None
+            try:
+                base_script = steps_to_m_script(
+                    prefix_steps, query_name,
+                    parameter_names=self._parameter_names,
+                    query_functions=self._query_functions,
+                    source_query_names=self._source_query_names,
+                    initial_column_types=self._source_column_types,
+                    step_names=prefix_step_names,
+                )
+            except Exception:
+                base_script = f"let\n    Source = #{query_name!r}\nin\n    Source"
+            issue_lines = [
+                f"// Step {issue.get('step', '?')} ({issue.get('operation', 'operation')}): {issue.get('message', '')}"
+                for issue in self._read_only_issues
+            ]
+            comment_block = "/* Not shown in M yet: */\n" + "\n".join(issue_lines)
+            generated_script = base_script.rstrip() + "\n\n" + comment_block
+            initial_script = generated_script
+        else:
+            try:
+                generated_script = steps_to_m_script(
+                    steps, query_name,
+                    parameter_names=self._parameter_names,
+                    query_functions=self._query_functions,
+                    source_query_names=self._source_query_names,
+                    initial_column_types=self._source_column_types,
+                    step_names=step_names,
+                )
+            except (PowerQueryMScriptError, TransformationError) as exc:
+                raise PowerQueryMScriptError(
+                    f"The current applied steps cannot be represented in this M subset yet: {exc}"
+                ) from exc
+            if not isinstance(initial_script, str) or not m_script_matches_steps(
+                initial_script, query_name, steps,
                 parameter_names=self._parameter_names,
                 query_functions=self._query_functions,
                 source_query_names=self._source_query_names,
                 initial_column_types=self._source_column_types,
-                step_names=step_names,
-            )
-        except (PowerQueryMScriptError, TransformationError) as exc:
-            raise PowerQueryMScriptError(
-                f"The current applied steps cannot be represented in this M subset yet: {exc}"
-            ) from exc
-        if not isinstance(initial_script, str) or not m_script_matches_steps(
-            initial_script, query_name, steps,
-            parameter_names=self._parameter_names,
-            query_functions=self._query_functions,
-            source_query_names=self._source_query_names,
-            initial_column_types=self._source_column_types,
-        ):
-            initial_script = generated_script
+            ):
+                initial_script = generated_script
         self._initial_text = initial_script
         self.editor.setPlainText(initial_script)
         self.editor.document().clearUndoRedoStacks()
@@ -4106,7 +4137,16 @@ class PowerQueryMEditorDialog(QDialog):
         self._evaluation_timer.setInterval(300)
         self._evaluation_timer.timeout.connect(self._preview_query)
         self.editor.textChanged.connect(self._on_text_changed)
-        self._preview_query()
+        if self._read_only_issues is not None:
+            self.editor.setReadOnly(True)
+            self.done_button.setEnabled(False)
+            self.status_label.setText(
+                "Read-only: some steps cannot be shown as M yet. Edit them in Applied Steps."
+            )
+            self.status_label.setStyleSheet("color: #526477;")
+            self.status_label.setVisible(True)
+        else:
+            self._preview_query()
         self._initial_step_bindings = list(self._step_bindings)
 
     @property
@@ -4116,6 +4156,8 @@ class PowerQueryMEditorDialog(QDialog):
 
     @property
     def steps(self) -> list[dict[str, Any]] | None:
+        if self._read_only_issues is not None:
+            return None
         return [dict(step) for step in self._steps] if self._steps is not None and self.result() == QDialog.DialogCode.Accepted else None
 
     @property
@@ -4169,6 +4211,8 @@ class PowerQueryMEditorDialog(QDialog):
 
     def _on_text_changed(self) -> None:
         """Validate the text on every edit; evaluate large inputs after a pause."""
+        if self._read_only_issues is not None:
+            return
         self._evaluation_timer.stop()
         self._clear_result()
         self.done_button.setEnabled(False)
@@ -4180,6 +4224,8 @@ class PowerQueryMEditorDialog(QDialog):
 
     def _parse_current(self) -> tuple[list[str] | None, list[dict[str, Any]]] | None:
         """Syntax-check the text; show the error with its line and column."""
+        if self._read_only_issues is not None:
+            return None
         try:
             self._parsed_bindings = []
             return parse_m_query_script(
@@ -4201,6 +4247,8 @@ class PowerQueryMEditorDialog(QDialog):
 
     def _preview_query(self) -> None:
         """Parse and evaluate the current text, updating the status and preview."""
+        if self._read_only_issues is not None:
+            return
         self._evaluation_timer.stop()
         script = self.editor.toPlainText()
         self._clear_result()
