@@ -1654,6 +1654,139 @@ class ReplaceValuesDialog(QDialog):
             }
 
 
+class ReplaceErrorsDialog(QDialog):
+    """Power BI's Replace Errors dialog (Transform > Replace Values > Replace Errors)."""
+
+    def __init__(
+        self,
+        columns: list[str],
+        column_types: dict[str, str] | None = None,
+        initial_step: dict[str, Any] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQueryReplaceErrorsDialog")
+        self.setWindowTitle("Replace Errors")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(440)
+
+        self._columns = list(columns)
+        self._column_types = {
+            col: canonical_column_type((column_types or {}).get(col, "text"))
+            for col in self._columns
+        }
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(10)
+
+        caption = QLabel("Enter the value which will replace errors in the selected columns.")
+        caption.setWordWrap(True)
+        caption.setStyleSheet("font-size: 12px; color: #273b49;")
+        layout.addWidget(caption)
+
+        value_label = QLabel("Value")
+        self.value_edit = QLineEdit(self)
+        self.value_edit.setObjectName("replaceErrorsValueEdit")
+        layout.addWidget(value_label)
+        layout.addWidget(self.value_edit)
+
+        self.error_label = QLabel(self)
+        self.error_label.setObjectName("replaceErrorsError")
+        self.error_label.setWordWrap(True)
+        self.error_label.setStyleSheet("color: #a4262c;")
+        self.error_label.setVisible(False)
+        layout.addWidget(self.error_label)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch(1)
+        self.ok_button = QPushButton("OK", self)
+        self.ok_button.setObjectName("replaceErrorsOkButton")
+        self.cancel_button = QPushButton("Cancel", self)
+        self.cancel_button.setObjectName("replaceErrorsCancelButton")
+        buttons_layout.addWidget(self.ok_button)
+        buttons_layout.addWidget(self.cancel_button)
+        layout.addLayout(buttons_layout)
+
+        self.ok_button.clicked.connect(self._accept_dialog)
+        self.cancel_button.clicked.connect(self.reject)
+        self.value_edit.textChanged.connect(self._clear_error)
+
+        if initial_step is not None:
+            self._load_initial_step(initial_step)
+
+    def _clear_error(self) -> None:
+        if self.error_label.isVisible():
+            self.error_label.setVisible(False)
+            self.error_label.setText("")
+
+    def _show_error(self, message: str) -> None:
+        self.error_label.setText(message)
+        self.error_label.setVisible(True)
+
+    def _load_initial_step(self, step: dict[str, Any]) -> None:
+        replacements = step.get("replacements", [])
+        if replacements:
+            val = replacements[0][1]
+            self.value_edit.setText("null" if val is None else str(val))
+
+    def _parse_column_value(self, raw_text: str, col_type: str) -> Any:
+        if raw_text == "null":
+            return None
+        text = raw_text
+        if col_type == "text":
+            return text
+        if col_type in {"whole_number", "decimal_number"}:
+            try:
+                if col_type == "whole_number":
+                    try:
+                        return int(text)
+                    except ValueError:
+                        val = Decimal(text.strip())
+                        if not val.is_finite() or val != val.to_integral_value():
+                            raise ValueError
+                        return int(val)
+                number = float(text) if ("." in text or "e" in text.lower()) else int(text)
+                if isinstance(number, float) and not math.isfinite(number):
+                    raise ValueError
+                return number
+            except Exception as exc:
+                raise TransformationError("Value must be a valid number.") from exc
+        if col_type == "boolean":
+            lowered = text.strip().casefold()
+            if lowered == "true":
+                return True
+            if lowered == "false":
+                return False
+            raise TransformationError("Value must be true or false.")
+        if col_type in {"date", "datetime"}:
+            parsed = _parse_row_date_or_datetime(text)
+            if parsed is None:
+                raise TransformationError("Value must be a valid date or datetime.")
+            return str(parsed)
+        return text
+
+    def step(self) -> dict[str, Any]:
+        raw_text = self.value_edit.text()
+        replacements: list[list[Any]] = []
+        for col in self._columns:
+            col_type = self._column_types.get(col, "text")
+            val = self._parse_column_value(raw_text, col_type)
+            replacements.append([col, val])
+        return {
+            "op": "replace_error_values",
+            "replacements": replacements,
+        }
+
+    def _accept_dialog(self) -> None:
+        try:
+            self.step()
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            return
+        self.accept()
+
+
 class SplitColumnByDelimiterDialog(QDialog):
     """Power BI's Split Column by Delimiter dialog."""
 
@@ -5622,6 +5755,10 @@ class TransformDataDialog(QDialog):
         ribbon_locale_supported = (
             self.operation_combo.findData("convert_type_using_locale") >= 0
         )
+        replace_value_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
+            ("Replace Values", lambda: self._select_ribbon_operation("replace_value"), True, None, "replaceValuesAction"),
+            ("Replace Errors", lambda: self._open_replace_errors_dialog(), True, None, "replaceErrorsAction"),
+        ]
         data_type_menu_items: list[tuple[str, Any, bool]] = []
         for label, op_or_type, is_locale_op in _POWER_BI_CHANGE_TYPE_SPECS:
             if is_locale_op:
@@ -5755,7 +5892,16 @@ class TransformDataDialog(QDialog):
                     menu_items=data_type_menu_items,
                 ),
                 command("Use First Row as Headers", "promote_headers", "Use the first row as column names.", size="small", slot=(1, 2, 1, 1), width=150),
-                command("Replace Values", "replace_value", "Replace matching values in a column.", size="small", slot=(2, 2, 1, 1), width=145),
+                command(
+                    "Replace Values",
+                    "replace_value",
+                    "Replace matching values in a column.",
+                    size="small",
+                    slot=(2, 2, 1, 1),
+                    width=145,
+                    menu_items=replace_value_menu_items,
+                    menu_button_popup=True,
+                ),
                 action(
                     "Detect Data Types",
                     "Infer safe types for columns and add explicit conversion steps.",
@@ -7469,6 +7615,90 @@ class TransformDataDialog(QDialog):
         self._operation_dialog = sub
         sub.show()
 
+    def _open_replace_errors_dialog(
+        self,
+        editing_index: int | None = None,
+        *,
+        prior_row: int = -1,
+    ) -> None:
+        """Power BI's Replace Errors dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+        selected = self._selected_preview_columns()
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+        if existing is not None and "replacements" in existing:
+            target_columns = [pair[0] for pair in existing["replacements"]]
+        else:
+            target_columns = list(selected)
+
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._insert_at = None
+            self._show_error(str(exc))
+            return
+
+        if not target_columns:
+            if base.headers:
+                target_columns = [base.headers[0]]
+            else:
+                self._insert_at = None
+                self._show_error("Select a column in the preview first.")
+                return
+
+        col_types: dict[str, str] = {}
+        try:
+            type_map = column_types_after_steps(
+                self._source_candidate.headers,
+                self._steps[:editing_index] if editing_index is not None else self._steps[:self._insert_position()],
+                output_headers=base.headers,
+                initial_types=self._active_source_types(),
+            )
+            col_types = {col: type_map.get(col, "text") for col in target_columns}
+        except Exception:
+            profiles = getattr(self.preview_header, "_profiles", [])
+            for profile in profiles:
+                col_name = profile.get("name")
+                if col_name in target_columns:
+                    col_types[col_name] = str(profile.get("type", "text"))
+
+        sub = ReplaceErrorsDialog(
+            columns=target_columns,
+            column_types=col_types,
+            initial_step=existing,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            self._insert_at = None
+            self.step_settings_toggle.setChecked(False)
+            self.operation_settings_panel.setVisible(False)
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
+        sub.show()
+
     def _open_add_index_column_dialog(
         self,
         editing_index: int | None = None,
@@ -9069,7 +9299,12 @@ class TransformDataDialog(QDialog):
         add_item(menu, "Replace Values...", "replace_value")
 
         # 11. Replace Errors...
-        add_item(menu, "Replace Errors...", None)
+        add_item(
+            menu,
+            "Replace Errors...",
+            None,
+            action_fn=lambda: self._open_replace_errors_dialog(),
+        )
 
         # Split Column ▸ (By Delimiter...)
         split_sub = QMenu("Split Column", menu)
@@ -11670,6 +11905,9 @@ class TransformDataDialog(QDialog):
             return
         if step["op"] == "replace_value":
             self._open_replace_values_dialog(index)
+            return
+        if step["op"] == "replace_error_values":
+            self._open_replace_errors_dialog(index)
             return
         if step["op"] == "add_index_column":
             self._open_add_index_column_dialog(editing_index=index, prior_row=index)

@@ -15,6 +15,7 @@ _STEP_NAMES: dict[str, str] = {
     "count_distinct_rows": "Counted Rows",
     "remove_blank_rows": "Removed Blank Rows",
     "remove_rows_with_errors": "Removed Errors",
+    "replace_error_values": "Replaced Errors",
     "remove_column": "Removed Columns",
     "keep_columns": "Removed Other Columns",
     "rename_column": "Renamed Columns",

@@ -372,6 +372,7 @@ _STEP_FIELDS: dict[str, set[str]] = {
     "keep_duplicates": {"op", "columns"},
     "remove_blank_rows": {"op"},
     "remove_rows_with_errors": {"op"},
+    "replace_error_values": {"op", "replacements"},
     "remove_top_rows": {"op", "count"},
     "remove_bottom_rows": {"op", "count"},
     "remove_sparse_top_rows": {"op"},
@@ -426,6 +427,11 @@ def validate_steps(
         elif op == "remove_rows_with_errors":
             allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"columns"})
             if set(step) not in allowed_shapes:
+                raise TransformationError(
+                    f"Transformation step {index} has missing or unsupported fields."
+                )
+        elif op == "replace_error_values":
+            if set(step) != _STEP_FIELDS[op]:
                 raise TransformationError(
                     f"Transformation step {index} has missing or unsupported fields."
                 )
@@ -532,6 +538,41 @@ def validate_steps(
                     f"Transformation step {index} selects an error-check column more than once."
                 )
             step = {**step, "columns": columns}
+        elif op == "replace_error_values":
+            replacements = step["replacements"]
+            if not isinstance(replacements, list) or not replacements:
+                raise TransformationError(
+                    f"Transformation step {index} needs one or more replacement pairs."
+                )
+            validated_replacements: list[list[Any]] = []
+            seen_columns: set[str] = set()
+            for pair_idx, pair in enumerate(replacements, 1):
+                if (
+                    not isinstance(pair, (list, tuple))
+                    or len(pair) != 2
+                    or not isinstance(pair[0], str)
+                    or not pair[0].strip()
+                ):
+                    raise TransformationError(
+                        f"Replacement pair {pair_idx} in step {index} needs a column and value."
+                    )
+                col_name = pair[0].strip()
+                if col_name in seen_columns:
+                    raise TransformationError(
+                        f"Transformation step {index} selects a duplicate column {col_name!r} more than once."
+                    )
+                seen_columns.add(col_name)
+                rep_val = pair[1]
+                if rep_val is not None and not isinstance(rep_val, (str, bool, int, float, Decimal)):
+                    raise TransformationError(
+                        f"Replacement pair {pair_idx} in step {index} value must be text, a number, true/false or null."
+                    )
+                if isinstance(rep_val, (float, Decimal)) and not Decimal(rep_val).is_finite():
+                    raise TransformationError(
+                        f"Replacement pair {pair_idx} in step {index} value must be a finite number."
+                    )
+                validated_replacements.append([col_name, rep_val])
+            step = {**step, "replacements": validated_replacements}
         elif op in {
             "remove_top_rows", "remove_bottom_rows", "keep_top_rows",
             "keep_bottom_rows", "keep_range_rows",
@@ -1093,7 +1134,7 @@ def validate_steps(
                 selected_columns.add(column)
                 validated_sorts.append({"column": column, "direction": direction})
             step = {**step, "sorts": validated_sorts}
-        elif op not in {"promote_headers", "table_pass_through", "replace_value"} and any(
+        elif op not in {"promote_headers", "table_pass_through", "replace_value", "replace_error_values"} and any(
             not isinstance(value, str) for key, value in step.items()
             if not (op == "split_column" and key == "from_end")
         ):
@@ -1392,6 +1433,19 @@ def apply_transformations(
                 row for row in result.rows
                 if not any(is_cell_error(row[column]) for column in columns)
             ]
+            _check_candidate_limits(result.headers, result.rows)
+            continue
+        if op == "replace_error_values":
+            replacements = step["replacements"]
+            for col, _val in replacements:
+                if col not in result.headers:
+                    raise TransformationError(
+                        f"Error replacement column {col!r} does not exist."
+                    )
+            for row in result.rows:
+                for col, val in replacements:
+                    if is_cell_error(row[col]):
+                        row[col] = val
             _check_candidate_limits(result.headers, result.rows)
             continue
         if op == "remove_top_rows":
@@ -2054,7 +2108,7 @@ def column_types_after_steps(
                             "remove_bottom_rows", "remove_alternate_rows", "convert_type",
                             "convert_type_using_locale", "fill_down", "fill_up",
                             "trim_text", "clean_text", "lowercase_text", "uppercase_text",
-                            "proper_case_text", "reverse_text", "replace_value",
+                            "proper_case_text", "reverse_text", "replace_value", "replace_error_values",
                             "extract_text_by_delimiter", "extract_text_between_delimiters",
                             "split_column_to_rows",
                         }
