@@ -6,6 +6,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -31,7 +32,7 @@ class ColumnToolsRibbonTests(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
         source = self.root / "Orders.csv"
-        source.write_text("Quantity,Unit price\n2,12.5\n3,8\n", encoding="utf-8")
+        source.write_text("Quantity,Unit price,Customer\n2,12.5,Ann\n3,8,Bo\n", encoding="utf-8")
         settings = QSettings(str(self.root / "settings.ini"), QSettings.Format.IniFormat)
         self.controller = StudioController(self.app, settings)
         self.assertTrue(self.controller._commit_import(source, parse_file(source)))
@@ -179,6 +180,42 @@ class ColumnToolsRibbonTests(unittest.TestCase):
         groups_box = self.child("columnToolsDataGroups")
         self.assertIsNotNone(groups_box)
         self.assertEqual(self.get_tooltip(groups_box), "Data groups are not supported yet.")
+
+    @staticmethod
+    def model_entries(box: QObject) -> list[dict]:
+        model = box.property("model")
+        items = model.toVariant() if hasattr(model, "toVariant") else model
+        return [dict(item) for item in items]
+
+    def test_data_type_combo_has_no_any_entry(self) -> None:
+        self.select_column_header(0)
+        type_box = self.child("columnToolsDataType")
+        self.assertIsNotNone(type_box)
+        entries = self.model_entries(type_box)
+        self.assertNotIn("any", [str(e["value"]) for e in entries])
+        self.assertNotIn("Any (mixed)", [str(e["label"]) for e in entries])
+
+    def test_data_type_combo_shows_real_type_after_selecting_other_column(self) -> None:
+        self.select_column_header(1)  # Unit price (decimal)
+        type_box = self.child("columnToolsDataType")
+        self.assertIsNotNone(type_box)
+        self.assertEqual(type_box.property("currentValue"), "decimal_number")
+        self.select_column_header(2)  # Customer (text)
+        self.assertEqual(self.window.property("selectedFieldBinding"), "Customer")
+        self.assertEqual(type_box.property("currentValue"), "text")
+
+    def test_data_type_combo_restores_real_type_after_rejected_change(self) -> None:
+        self.select_column_header(0)  # Quantity (whole number)
+        type_box = self.child("columnToolsDataType")
+        self.assertIsNotNone(type_box)
+        self.assertEqual(type_box.property("currentValue"), "whole_number")
+        target = next(i for i, e in enumerate(self.model_entries(type_box)) if str(e["value"]) == "decimal_number")
+        with patch.object(StudioController, "setColumnType", return_value=False) as mocked:
+            type_box.setProperty("currentIndex", target)
+            type_box.activated.emit(target)
+            self.process()
+        self.assertTrue(mocked.called)
+        self.assertEqual(type_box.property("currentValue"), "whole_number")
 
     def test_table_tools_keeps_working_unchanged(self) -> None:
         self.assertIn("Table tools", self.tabs())

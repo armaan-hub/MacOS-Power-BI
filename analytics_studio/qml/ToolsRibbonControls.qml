@@ -311,7 +311,6 @@ Item {
             valueRole: "value"
             model: [
                 { label: "Text", value: "text" },
-                { label: "Any (mixed)", value: "any" },
                 { label: "Whole number", value: "whole_number" },
                 { label: "Decimal number", value: "decimal_number" },
                 { label: "True/False", value: "boolean" },
@@ -321,7 +320,7 @@ Item {
             ]
             enabled: root.hasTypeChangeSlot && root.columnName !== ""
             currentIndex: {
-                const types = ["text", "any", "whole_number", "decimal_number", "boolean", "date", "datetime", "time"]
+                const types = ["text", "whole_number", "decimal_number", "boolean", "date", "datetime", "time"]
                 const found = types.indexOf(root.columnType)
                 return found < 0 ? 0 : found
             }
@@ -330,6 +329,13 @@ Item {
             onActivated: {
                 if (root.hasTypeChangeSlot && root.columnName !== "")
                     root.studio.setColumnType(root.columnName, String(currentValue))
+                // A user selection breaks the declared binding; restore it so the combo
+                // shows the column's real type after a rejected or failed change.
+                currentIndex = Qt.binding(function() {
+                    const types = ["text", "whole_number", "decimal_number", "boolean", "date", "datetime", "time"]
+                    const found = types.indexOf(root.columnType)
+                    return found < 0 ? 0 : found
+                })
             }
         }
     }
