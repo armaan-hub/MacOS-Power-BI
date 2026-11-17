@@ -2700,3 +2700,9 @@ The Advanced Editor colours M like Power BI and always opens (read-only with per
 Power Query Date Filters now support Before, After, Between, Is Earliest and Is Latest with Power BI's M shapes; generic filters unchanged; relative date filters stay disabled. One Planner-authorised test edit (menu enable list).
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity and Haiku passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Date Filters Before/After/Between/Is Earliest/Is Latest coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 272 (Task 189-190 ux-189-190: 4913)
+
+Format pane now uses Power BI's Visual/General tabs and cards with working on/off switches and new title/axis/gridline/legend/background/border settings (defaults pixel-identical to before). Line and stacked column chart enabled, columns equal stackedColumn and line equals lineClusteredColumn.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity, Haiku and Sonnet passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Format pane Visual/General cards; Line and stacked column chart coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.

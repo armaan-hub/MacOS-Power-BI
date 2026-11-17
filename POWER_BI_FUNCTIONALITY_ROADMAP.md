@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-17, after Iteration 271 / Task 188 ux-188, 4902, Claude Opus 5.5 planned, Date Filters Before/After/Between/Is Earliest/Is Latest coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest Antigravity and Haiku passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 189 Format pane gate, Task 190 Line and stacked column gate, Task 191 Insert Step After (Antigravity)
+**Latest status (2026-11-17, after Iteration 272 / Task 189-190 ux-189-190, 4913, Claude Opus 5.5 planned, Format pane Visual/General cards; Line and stacked column chart coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest Antigravity, Haiku and Sonnet passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 191 Insert Step After gate, Task 192 Column tools (Antigravity), engine support for Fixed decimal/Percentage
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
