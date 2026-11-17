@@ -1888,6 +1888,19 @@ class GroupByDialog(QDialog):
                     valid = False
                     break
 
+        if valid:
+            # Output names must be unique and must not clash with a group column
+            # (the engine rejects both when the step runs).
+            seen = {combo.currentText().strip() for combo in active_groupings}
+            if len(seen) != len(active_groupings):
+                valid = False
+            for row_data in active_aggs:
+                name = row_data["name_edit"].text().strip()
+                if name in seen:
+                    valid = False
+                    break
+                seen.add(name)
+
         self.ok_button.setEnabled(valid)
 
     def step(self) -> dict[str, Any]:

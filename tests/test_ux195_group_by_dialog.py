@@ -268,3 +268,34 @@ class GroupByDialogTests(unittest.TestCase):
         # No step added, selection restored
         self.assertEqual(len(dialog._steps), 1)
         self.assertEqual(dialog.step_list.currentRow(), 0)
+
+
+class GroupByDialogDuplicateNameTests(unittest.TestCase):
+    """Task 195 review fix: OK is refused for clashing output names."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.app = QApplication.instance() or QApplication(["group by dialog tests"])
+
+    def test_ok_disabled_for_duplicate_or_group_column_names(self) -> None:
+        sub = GroupByDialog(["Region", "Product", "Amount"])
+        self.addCleanup(sub.deleteLater)
+        sub.advanced_radio.setChecked(True)
+        sub.add_aggregation_button.click()
+        sub.findChild(QLineEdit, "groupByNewName_0").setText("Count")
+        sub.findChild(QLineEdit, "groupByNewName_1").setText("Total")
+        self.assertTrue(sub.ok_button.isEnabled())
+
+        sub.findChild(QLineEdit, "groupByNewName_1").setText("Count")
+        self.assertFalse(sub.ok_button.isEnabled())
+
+        sub.findChild(QLineEdit, "groupByNewName_1").setText("Region")
+        self.assertFalse(sub.ok_button.isEnabled())
+
+        sub.findChild(QLineEdit, "groupByNewName_1").setText("Total")
+        self.assertTrue(sub.ok_button.isEnabled())
+
+        sub.add_grouping_button.click()  # second grouping defaults to Region too
+        self.assertFalse(sub.ok_button.isEnabled())
+        sub.findChild(QComboBox, "groupByColumnCombo_1").setCurrentText("Product")
+        self.assertTrue(sub.ok_button.isEnabled())
