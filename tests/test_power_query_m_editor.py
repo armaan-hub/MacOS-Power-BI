@@ -3172,6 +3172,7 @@ in
         dialog.deleteLater()
 
     def test_step_settings_dialog_initializes_filter_type_split_and_replace_steps(self) -> None:
+        # Task 196 (2026-11-17): replace_value gear-edit now opens ReplaceValuesDialog; covered in tests/test_ux196_replace_values_dialog.py
         cases = (
             (
                 {"op": "filter_rows", "column": "Region", "operator": "equals", "value": "East"},
@@ -3187,11 +3188,6 @@ in
                 {"op": "split_column", "column": "Customer", "delimiter": " "},
                 lambda dialog: dialog.delimiter_edit.setText("a"),
                 lambda dialog: self.assertEqual(dialog._steps[0]["delimiter"], "a"),
-            ),
-            (
-                {"op": "replace_value", "column": "Region", "value": "East", "replacement": "North"},
-                lambda dialog: dialog.replacement_edit.setText("Central"),
-                lambda dialog: self.assertEqual(dialog._steps[0]["replacement"], "Central"),
             ),
         )
         for step, edit, verify in cases:

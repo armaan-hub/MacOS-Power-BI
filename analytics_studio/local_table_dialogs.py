@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from copy import copy, deepcopy
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -125,7 +126,9 @@ from analytics_studio.transformations import (
     MAX_FILTER_CLAUSES,
     MAX_MERGE_SEPARATOR_CHARS,
     TransformationError,
+    _parse_row_date_or_datetime,
     apply_transformations,
+    canonical_column_type,
     column_types_after_steps,
     count_conversion_errors,
     infer_column_types,
@@ -1303,6 +1306,262 @@ class _PowerQueryConditionDialog(QDialog):
 
     def values(self) -> list[str]:
         return [edit.text().strip() if self._numeric else edit.text() for edit in self.edits]
+
+
+class ReplaceValuesDialog(QDialog):
+    """Power BI's Replace Values dialog (Transform > Replace Values)."""
+
+    _SPECIAL_TOKENS = [
+        ("Tab", "#(tab)"),
+        ("Carriage Return", "#(cr)"),
+        ("Line Feed", "#(lf)"),
+        ("Carriage Return and Line Feed", "#(cr)#(lf)"),
+        ("Non-breaking Space", "#(00A0)"),
+    ]
+
+    def __init__(
+        self,
+        column: str,
+        column_type: str = "text",
+        initial_step: dict[str, Any] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQueryReplaceValuesDialog")
+        self.setWindowTitle("Replace Values")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(440)
+
+        self._column = column
+        self._column_type = canonical_column_type(column_type)
+        self._last_focused_edit: QLineEdit | None = None
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(10)
+
+        caption = QLabel("Replace one value with another in the selected columns.")
+        caption.setWordWrap(True)
+        caption.setStyleSheet("font-size: 12px; color: #273b49;")
+        layout.addWidget(caption)
+
+        find_label = QLabel("Value To Find")
+        self.find_edit = QLineEdit(self)
+        self.find_edit.setObjectName("replaceValuesFind")
+        layout.addWidget(find_label)
+        layout.addWidget(self.find_edit)
+
+        replace_label = QLabel("Replace With")
+        self.replace_edit = QLineEdit(self)
+        self.replace_edit.setObjectName("replaceValuesWith")
+        layout.addWidget(replace_label)
+        layout.addWidget(self.replace_edit)
+
+        self._last_focused_edit = self.find_edit
+        self.find_edit.installEventFilter(self)
+        self.replace_edit.installEventFilter(self)
+
+        # Advanced options (text columns only)
+        self.advanced_toggle = QToolButton(self)
+        self.advanced_toggle.setObjectName("replaceValuesAdvancedToggle")
+        self.advanced_toggle.setText("▶ Advanced options")
+        self.advanced_toggle.setCheckable(True)
+        self.advanced_toggle.setStyleSheet("QToolButton { border: none; font-weight: 600; color: #115ea3; text-align: left; }")
+
+        self.advanced_panel = QWidget(self)
+        advanced_layout = QVBoxLayout(self.advanced_panel)
+        advanced_layout.setContentsMargins(12, 4, 4, 4)
+        advanced_layout.setSpacing(6)
+
+        self.match_entire_box = QCheckBox("Match entire cell contents", self.advanced_panel)
+        self.match_entire_box.setObjectName("replaceValuesMatchEntire")
+        self.match_entire_box.setChecked(False)
+        advanced_layout.addWidget(self.match_entire_box)
+
+        special_row = QHBoxLayout()
+        special_row.setSpacing(8)
+        self.special_chars_box = QCheckBox("Replace using special characters", self.advanced_panel)
+        self.special_chars_box.setObjectName("replaceValuesSpecialChars")
+        self.special_chars_box.setChecked(False)
+        special_row.addWidget(self.special_chars_box)
+
+        self.insert_special_combo = QComboBox(self.advanced_panel)
+        self.insert_special_combo.setObjectName("replaceValuesInsertSpecial")
+        self.insert_special_combo.addItem("Insert special character")
+        for label, token in self._SPECIAL_TOKENS:
+            self.insert_special_combo.addItem(label, token)
+        self.insert_special_combo.setEnabled(False)
+        special_row.addWidget(self.insert_special_combo)
+        special_row.addStretch(1)
+        advanced_layout.addLayout(special_row)
+
+        layout.addWidget(self.advanced_toggle)
+        layout.addWidget(self.advanced_panel)
+
+        is_text = self._column_type == "text"
+        self.advanced_toggle.setVisible(is_text)
+        self.advanced_panel.setVisible(False)
+
+        self.advanced_toggle.toggled.connect(self._toggle_advanced)
+        self.special_chars_box.toggled.connect(self.insert_special_combo.setEnabled)
+        self.insert_special_combo.activated.connect(self._insert_special_token)
+
+        self.error_label = QLabel(self)
+        self.error_label.setObjectName("replaceValuesError")
+        self.error_label.setWordWrap(True)
+        self.error_label.setStyleSheet("color: #a4262c;")
+        self.error_label.setVisible(False)
+        layout.addWidget(self.error_label)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch(1)
+        self.ok_button = QPushButton("OK", self)
+        self.ok_button.setObjectName("replaceValuesOkButton")
+        self.cancel_button = QPushButton("Cancel", self)
+        self.cancel_button.setObjectName("replaceValuesCancelButton")
+        buttons_layout.addWidget(self.ok_button)
+        buttons_layout.addWidget(self.cancel_button)
+        layout.addLayout(buttons_layout)
+
+        self.ok_button.clicked.connect(self._accept_dialog)
+        self.cancel_button.clicked.connect(self.reject)
+        self.find_edit.textChanged.connect(self._clear_error)
+        self.replace_edit.textChanged.connect(self._clear_error)
+
+        if initial_step is not None:
+            self._load_initial_step(initial_step)
+
+    def eventFilter(self, watched: object, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.FocusIn:
+            if watched in (self.find_edit, self.replace_edit):
+                self._last_focused_edit = watched
+        return super().eventFilter(watched, event)
+
+    def _toggle_advanced(self, checked: bool) -> None:
+        self.advanced_panel.setVisible(checked)
+        self.advanced_toggle.setText("▼ Advanced options" if checked else "▶ Advanced options")
+
+    def _insert_special_token(self, index: int) -> None:
+        if index <= 0:
+            return
+        token = str(self.insert_special_combo.itemData(index))
+        target = self._last_focused_edit or self.find_edit
+        target.insert(token)
+        target.setFocus()
+        self.insert_special_combo.setCurrentIndex(0)
+
+    def _clear_error(self) -> None:
+        if self.error_label.isVisible():
+            self.error_label.setVisible(False)
+            self.error_label.setText("")
+
+    def _show_error(self, message: str) -> None:
+        self.error_label.setText(message)
+        self.error_label.setVisible(True)
+
+    def _unescape_special_tokens(self, text: str) -> str:
+        for _label, token in self._SPECIAL_TOKENS:
+            repl = {
+                "#(tab)": "\t",
+                "#(cr)": "\r",
+                "#(lf)": "\n",
+                "#(cr)#(lf)": "\r\n",
+                "#(00A0)": "\u00a0",
+            }[token]
+            text = text.replace(token, repl)
+        return text
+
+    def _load_initial_step(self, step: dict[str, Any]) -> None:
+        v = step.get("value")
+        r = step.get("replacement")
+        self.find_edit.setText("null" if v is None else str(v))
+        self.replace_edit.setText("null" if r is None else str(r))
+        replacer = step.get("replacer", "value")
+        if replacer == "value":
+            self.match_entire_box.setChecked(True)
+        else:
+            self.match_entire_box.setChecked(False)
+
+    def _parse_field_value(self, raw_text: str, field_name: str) -> Any:
+        if raw_text == "null":
+            return None
+        text = raw_text
+        if self._column_type == "text":
+            if self.special_chars_box.isChecked():
+                text = self._unescape_special_tokens(text)
+            return text
+        # Non-text columns
+        if self._column_type in {"whole_number", "decimal_number"}:
+            try:
+                if self._column_type == "whole_number":
+                    try:
+                        return int(text)
+                    except ValueError:
+                        val = Decimal(text.strip())
+                        if not val.is_finite() or val != val.to_integral_value():
+                            raise ValueError
+                        return int(val)
+                number = float(text) if ("." in text or "e" in text.lower()) else int(text)
+                if isinstance(number, float) and not math.isfinite(number):
+                    raise ValueError
+                return number
+            except Exception as exc:
+                raise TransformationError(f"{field_name} must be a valid number.") from exc
+        if self._column_type == "boolean":
+            lowered = text.strip().casefold()
+            if lowered == "true":
+                return True
+            if lowered == "false":
+                return False
+            raise TransformationError(f"{field_name} must be true or false.")
+        if self._column_type in {"date", "datetime"}:
+            parsed = _parse_row_date_or_datetime(text)
+            if parsed is None:
+                raise TransformationError(f"{field_name} must be a valid date or datetime.")
+            return str(parsed)
+        return text
+
+    def _accept_dialog(self) -> None:
+        try:
+            self.step()
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            return
+        self.accept()
+
+    def step(self) -> dict[str, Any]:
+        find_raw = self.find_edit.text()
+        replace_raw = self.replace_edit.text()
+
+        if self._column_type == "text":
+            match_entire = self.match_entire_box.isChecked()
+            replacer = "value" if match_entire else "text"
+            if replacer == "text":
+                if not find_raw:
+                    raise TransformationError("Value To Find cannot be empty when Match Entire Cell is unchecked.")
+                if find_raw == "null":
+                    raise TransformationError("Cannot search for null when Match Entire Cell is unchecked.")
+                if replace_raw == "null":
+                    raise TransformationError("Replace With cannot be null when Match Entire Cell is unchecked.")
+            find_val = self._parse_field_value(find_raw, "Value To Find")
+            replace_val = self._parse_field_value(replace_raw, "Replace With")
+            return {
+                "op": "replace_value",
+                "column": self._column,
+                "value": find_val,
+                "replacement": replace_val,
+                "replacer": replacer,
+            }
+        else:
+            find_val = self._parse_field_value(find_raw, "Value To Find")
+            replace_val = self._parse_field_value(replace_raw, "Replace With")
+            return {
+                "op": "replace_value",
+                "column": self._column,
+                "value": find_val,
+                "replacement": replace_val,
+                "replacer": "value",
+            }
 
 
 class ChooseColumnsDialog(QDialog):
@@ -6338,6 +6597,10 @@ class TransformDataDialog(QDialog):
         if operation == "conditional_column":
             self._open_conditional_dialog(prior_row=prior_row)
             return
+        if operation == "replace_value":
+            self.operation_combo.setCurrentIndex(operation_index)
+            self._open_replace_values_dialog(prior_row=prior_row)
+            return
         if operation == "add_custom_column":
             if prior_row >= 0:
                 self.step_list.setCurrentRow(-1)
@@ -6678,6 +6941,92 @@ class TransformDataDialog(QDialog):
         sub.accepted.connect(accepted)
         sub.finished.connect(finished)
         self._conditional_dialog = sub
+        sub.show()
+
+    def _open_replace_values_dialog(
+        self,
+        editing_index: int | None = None,
+        *,
+        column: str | None = None,
+        prior_row: int = -1,
+    ) -> None:
+        """Power BI's Replace Values dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+        selected = self._selected_preview_columns()
+        target_column = column or (selected[0] if selected else None)
+
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+        if existing is not None and "column" in existing:
+            target_column = existing["column"]
+
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._insert_at = None
+            self._show_error(str(exc))
+            return
+
+        if not target_column:
+            if base.headers:
+                target_column = base.headers[0]
+            else:
+                self._insert_at = None
+                self._show_error("Select a column in the preview first.")
+                return
+
+        # Determine target column's type from step types metadata or preview profiles
+        col_type = "text"
+        try:
+            type_map = column_types_after_steps(
+                self._source_candidate.headers,
+                self._steps[:editing_index] if editing_index is not None else self._steps[:self._insert_position()],
+                output_headers=base.headers,
+                initial_types=self._active_source_types(),
+            )
+            col_type = type_map.get(target_column, "text")
+        except Exception:
+            profiles = getattr(self.preview_header, "_profiles", [])
+            for profile in profiles:
+                if profile.get("name") == target_column:
+                    col_type = str(profile.get("type", "text"))
+                    break
+
+        sub = ReplaceValuesDialog(
+            target_column,
+            column_type=col_type,
+            initial_step=existing,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            self._insert_at = None
+            self.step_settings_toggle.setChecked(False)
+            self.operation_settings_panel.setVisible(False)
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
         sub.show()
 
     def _replace_selected_step(self, step: dict[str, Any]) -> bool:
@@ -9509,8 +9858,8 @@ class TransformDataDialog(QDialog):
             self._filter_clauses = deepcopy(step["clauses"])
             self._render_advanced_filter_clauses(select_row=0)
         if "replacement" in step:
-            self.value_edit.setText(step["value"])
-            self.replacement_edit.setText(step["replacement"])
+            self.value_edit.setText("null" if step["value"] is None else str(step["value"]))
+            self.replacement_edit.setText("null" if step["replacement"] is None else str(step["replacement"]))
         if "delimiter" in step:
             self.delimiter_edit.setText(step["delimiter"])
         if "start_delimiter" in step:
@@ -10628,6 +10977,9 @@ class TransformDataDialog(QDialog):
             return
         if step["op"] == "conditional_column":
             self._open_conditional_dialog(index)
+            return
+        if step["op"] == "replace_value":
+            self._open_replace_values_dialog(index)
             return
         if step["op"] == "group_by":
             self._open_group_by_dialog(index)

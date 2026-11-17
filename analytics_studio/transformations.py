@@ -448,6 +448,10 @@ def validate_steps(
                 _STEP_FIELDS[op], _STEP_FIELDS[op] | {"promote_all_scalars"}
             ):
                 raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
+        elif op == "replace_value":
+            allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"replacer"})
+            if set(step) not in allowed_shapes:
+                raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         elif set(step) != _STEP_FIELDS[op]:
             raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         if op == "add_custom_column" and "output_type" in step:
@@ -1076,10 +1080,34 @@ def validate_steps(
                 selected_columns.add(column)
                 validated_sorts.append({"column": column, "direction": direction})
             step = {**step, "sorts": validated_sorts}
-        elif op not in {"promote_headers", "table_pass_through"} and any(
+        elif op not in {"promote_headers", "table_pass_through", "replace_value"} and any(
             not isinstance(value, str) for value in step.values()
         ):
             raise TransformationError(f"Transformation step {index} values must be strings.")
+        elif op == "replace_value":
+            column_val = step.get("column")
+            if not isinstance(column_val, str) or not column_val.strip():
+                raise TransformationError(f"Transformation step {index} needs a column name.")
+            replacer = step.get("replacer")
+            if replacer is not None and replacer not in {"value", "text"}:
+                raise TransformationError(f"Transformation step {index} replacer must be 'value' or 'text'.")
+            for key in ("value", "replacement"):
+                typed = step.get(key)
+                if typed is not None and not isinstance(typed, (str, bool, int, float, Decimal)):
+                    raise TransformationError(
+                        f"Transformation step {index} {key} must be text, a number, true/false or null."
+                    )
+                if isinstance(typed, (float, Decimal)) and not Decimal(typed).is_finite():
+                    raise TransformationError(f"Transformation step {index} {key} must be a finite number.")
+            if replacer == "text":
+                if not isinstance(step.get("value"), str) or step["value"] == "":
+                    raise TransformationError(
+                        f"Transformation step {index} ReplaceText needs a non-empty text value to find."
+                    )
+                if not isinstance(step.get("replacement"), str):
+                    raise TransformationError(
+                        f"Transformation step {index} ReplaceText needs a text replacement."
+                    )
 
         column = step.get("column")
         if column is not None and not column.strip():
@@ -1544,11 +1572,27 @@ def apply_transformations(
         elif op == "replace_value":
             old_value = step["value"]
             replacement = step["replacement"]
-            for row in result.rows:
-                if not is_cell_error(row[column]) and _filter_values_equal(
-                    row[column], old_value
-                ):
-                    row[column] = replacement
+            replacer = step.get("replacer", "value")
+            if replacer == "text":
+                if not isinstance(old_value, str):
+                    raise TransformationError("ReplaceText requires a text search value.")
+                replacement_str = "" if replacement is None else str(replacement)
+                for row in result.rows:
+                    cell = row[column]
+                    if is_cell_error(cell) or cell is None:
+                        continue
+                    if not isinstance(cell, str):
+                        raise TransformationError(
+                            f"Column {column!r} contains non-text values and cannot use text replacement."
+                        )
+                    row[column] = cell.replace(old_value, replacement_str)
+            else:
+                for row in result.rows:
+                    cell = row[column]
+                    if is_cell_error(cell):
+                        continue
+                    if _replace_cell_matches_value(cell, old_value):
+                        row[column] = replacement
         elif op == "extract_text_by_delimiter":
             _extract_text_by_delimiter(
                 result,
@@ -3549,6 +3593,45 @@ def _filter_value_matches(
     elif operator == "does_not_end_with":
         return not cell_to_text(value).endswith(str(expected))
     raise TransformationError(f"Unsupported filter operator {operator!r}.")
+
+
+def _replace_cell_matches_value(cell: Any, expected: Any) -> bool:
+    """Exact-kind equality matching for replace_value with replacer='value'."""
+    if expected is None:
+        return cell is None
+    if cell is None:
+        return False
+    # None never matches non-null
+    if isinstance(expected, bool):
+        return isinstance(cell, bool) and cell == expected
+    if isinstance(cell, bool):
+        return False
+    if isinstance(expected, (int, float, Decimal)):
+        if not isinstance(cell, (int, float, Decimal)):
+            return False
+        try:
+            return _parse_number(cell) == _parse_number(expected)
+        except TransformationError:
+            return False
+    if isinstance(expected, str):
+        if isinstance(cell, str):
+            return cell == expected
+        if isinstance(cell, (date, datetime)):
+            # If expected is ISO string, compare against cell's string representation
+            cell_iso = cell_to_text(cell)
+            if cell_iso == expected:
+                return True
+            parsed_expected = _parse_row_date_or_datetime(expected)
+            if parsed_expected is not None:
+                if isinstance(cell, datetime) and isinstance(parsed_expected, datetime):
+                    return cell == parsed_expected
+                if isinstance(cell, date) and not isinstance(cell, datetime) and isinstance(parsed_expected, date) and not isinstance(parsed_expected, datetime):
+                    return cell == parsed_expected
+            return False
+        return False
+    if isinstance(cell, (date, datetime)) and isinstance(expected, (date, datetime)):
+        return cell == expected
+    return cell == expected
 
 
 def _filter_values_equal(value: Any, expected: str | Decimal) -> bool:
