@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 188 shipped as Iteration 271; next Task 189 Format pane gate, Task 190 Line and stacked column gate, Task 191 Insert Step After (Antigravity); Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
+**Active agent:** Claude Opus 5.5 (Task 189-190 shipped as Iteration 272; next Task 191 Insert Step After gate, Task 192 Column tools (Antigravity), engine support for Fixed decimal/Percentage; Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
 **Branch in use:** main
 **Working tree clean:** yes
 

@@ -155,6 +155,20 @@ from analytics_studio.transformations import (
 
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
+# Axis cards offered per chart type: (X-axis header key, Y-axis header key).
+# The Title switch works on every listed type; a header key is set only where it
+# changes pixels in ChartCard.qml (checked with offscreen grabs), else None.
+AXIS_CARD_TOGGLES: dict[str, tuple[str | None, str | None]] = {
+    "column": ("show_x_axis", None),
+    "bar": (None, "show_y_axis"),
+    "area": ("show_x_axis", None),
+    "lineClusteredColumn": ("show_x_axis", None),
+    "line": (None, None),
+}
+X_AXIS_CARD_TYPES = set(AXIS_CARD_TOGGLES)
+Y_AXIS_CARD_TYPES = set(AXIS_CARD_TOGGLES)
+# Gridlines draw nothing on these types.
+NO_GRIDLINES_CARD_TYPES = {"funnel"}
 CHART_VISUALS = {"Monthly revenue", "Region revenue"}
 
 
@@ -2058,6 +2072,8 @@ class StudioController(QObject):
             wells = ["Rows", "Columns", "Values", "Tooltips"]
         elif v_type == "lineClusteredColumn":
             wells = ["X-axis", "Column Y-axis", "Line Y-axis", "Tooltips"]
+        elif v_type == "lineStackedColumn":
+            wells = ["X-axis", "Column Y-axis", "Column legend", "Line Y-axis", "Tooltips"]
         elif v_type == "gauge":
             wells = ["Value", "Minimum", "Maximum", "Target", "Tooltips"]
         elif v_type == "kpi":
@@ -2220,17 +2236,136 @@ class StudioController(QObject):
         if not self._selected_visual:
             return []
 
-
         page = self._active_page()
         if not page:
             return []
         visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
         if not visual:
             return []
-            
+
+        v_type = str(visual.get("type", ""))
+        non_chart_types = {"button", "text_box", "image", "shape", "card", "table", "matrix"}
+        is_chart = v_type not in non_chart_types and not v_type.startswith("shape:")
+
+        if is_chart:
+            # Chart visuals: Visual tab and General tab with toggle keys
+            x_toggle, y_toggle = AXIS_CARD_TOGGLES.get(v_type, (None, None))
+            visual_tab_groups = [
+                {
+                    "tab": "Visual",
+                    "name": "X-axis",
+                    "toggleKey": x_toggle,
+                    "toggleValue": bool(visual.get("show_x_axis", True)) if x_toggle else False,
+                    "properties": [
+                        {"key": "show_x_title", "label": "Title", "type": "boolean", "value": bool(visual.get("show_x_title", False))},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Y-axis",
+                    "toggleKey": y_toggle,
+                    "toggleValue": bool(visual.get("show_y_axis", True)) if y_toggle else False,
+                    "properties": [
+                        {"key": "show_y_title", "label": "Title", "type": "boolean", "value": bool(visual.get("show_y_title", False))},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Gridlines",
+                    "toggleKey": "show_gridlines",
+                    "toggleValue": bool(visual.get("show_gridlines", True)),
+                    "properties": [],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Colors",
+                    "toggleKey": None,
+                    "toggleValue": False,
+                    "properties": [
+                        {"key": "color", "label": "Color", "type": "color", "value": visual.get("color", "#0078D4")},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Data labels",
+                    "toggleKey": "show_data_labels",
+                    "toggleValue": bool(visual.get("show_data_labels", False)),
+                    "properties": [
+                        {"key": "data_label_color", "label": "Color", "type": "color", "value": visual.get("data_label_color", "#425466")},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Legend",
+                    "toggleKey": "show_legend",
+                    "toggleValue": bool(visual.get("show_legend", False)),
+                    "properties": [
+                        {"key": "legend_position", "label": "Position", "type": "choice", "value": visual.get("legend_position", "top"), "options": ["top", "bottom"]},
+                    ],
+                },
+            ]
+
+            general_tab_groups = [
+                {
+                    "tab": "General",
+                    "name": "Properties",
+                    "toggleKey": None,
+                    "toggleValue": False,
+                    "properties": [
+                        {"key": "x", "label": "X Position", "type": "number", "value": visual.get("x", 10)},
+                        {"key": "y", "label": "Y Position", "type": "number", "value": visual.get("y", 10)},
+                        {"key": "width", "label": "Width", "type": "number", "value": visual.get("width", 300)},
+                        {"key": "height", "label": "Height", "type": "number", "value": visual.get("height", 200)},
+                    ],
+                },
+                {
+                    "tab": "General",
+                    "name": "Title",
+                    "toggleKey": "show_title",
+                    "toggleValue": bool(visual.get("show_title", True)),
+                    "properties": [
+                        {"key": "title", "label": "Text", "type": "string", "value": visual.get("title", "")},
+                        {"key": "title_font_size", "label": "Font size", "type": "number", "value": visual.get("title_font_size", 14)},
+                        {"key": "title_color", "label": "Font color", "type": "color", "value": visual.get("title_color", "#283746")},
+                        {"key": "title_align", "label": "Alignment", "type": "choice", "value": visual.get("title_align", "left"), "options": ["left", "center", "right"]},
+                    ],
+                },
+                {
+                    "tab": "General",
+                    "name": "Effects > Background",
+                    "toggleKey": "show_background",
+                    "toggleValue": bool(visual.get("show_background", True)),
+                    "properties": [
+                        {"key": "background_color", "label": "Color", "type": "color", "value": visual.get("background_color", "#FFFFFF")},
+                        {"key": "background_transparency", "label": "Transparency", "type": "number", "value": visual.get("background_transparency", 0)},
+                    ],
+                },
+                {
+                    "tab": "General",
+                    "name": "Effects > Visual border",
+                    "toggleKey": "show_border",
+                    "toggleValue": bool(visual.get("show_border", True)),
+                    "properties": [
+                        {"key": "border_color", "label": "Color", "type": "color", "value": visual.get("border_color", "#d9e0e6")},
+                        {"key": "border_radius", "label": "Rounded corners px", "type": "number", "value": visual.get("border_radius", 7)},
+                    ],
+                },
+            ]
+            if v_type not in X_AXIS_CARD_TYPES:
+                visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "X-axis"]
+            if v_type not in Y_AXIS_CARD_TYPES:
+                visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "Y-axis"]
+            if v_type in NO_GRIDLINES_CARD_TYPES:
+                visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "Gridlines"]
+            return visual_tab_groups + general_tab_groups
+
+        # Non-chart visuals: put under General, keep type-specific group and existing properties
         groups = [
             {
+                "tab": "General",
                 "name": "General",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "title", "label": "Title Text", "type": "string", "value": visual.get("title", "")},
                     {"key": "x", "label": "X Position", "type": "number", "value": visual.get("x", 10)},
@@ -2240,7 +2375,10 @@ class StudioController(QObject):
                 ]
             },
             {
+                "tab": "General",
                 "name": "Data Colors",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "color", "label": "Primary Color", "type": "color", "value": visual.get("color", "#0078D4")},
                     {"key": "show_data_labels", "label": "Data Labels", "type": "boolean", "value": visual.get("show_data_labels", False)},
@@ -2248,7 +2386,10 @@ class StudioController(QObject):
                 ]
             },
             {
+                "tab": "General",
                 "name": "Action",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "actionUrl", "label": "Web URL", "type": "string", "value": visual.get("actionUrl", "")},
                     {"key": "text", "label": "Button Text", "type": "string", "value": visual.get("text", "")},
@@ -2257,14 +2398,20 @@ class StudioController(QObject):
         ]
         if visual.get("type") == "text_box":
             groups.insert(1, {
+                "tab": "General",
                 "name": "Text",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "text", "label": "Text", "type": "string", "value": visual.get("text", "")},
                 ],
             })
         if visual.get("type") == "image":
             groups.insert(1, {
+                "tab": "General",
                 "name": "Image",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "image_path", "label": "Image path", "type": "string", "value": visual.get("image_path", "")},
                 ],
@@ -2770,7 +2917,7 @@ class StudioController(QObject):
                     preferred = ["Value"]
                 elif chart_type == "kpi":
                     preferred = ["Indicator"]
-                elif chart_type == "lineClusteredColumn":
+                elif chart_type in {"lineClusteredColumn", "lineStackedColumn"}:
                     preferred = ["Column Y-axis", "Line Y-axis"]
                 else:
                     preferred = ["Y-axis", "Value", "Fields", "Values", "Indicator"]
@@ -2906,7 +3053,7 @@ class StudioController(QObject):
         }
         wells = wells_by_type.get(
             visual_type,
-            ("X-axis", "Y-axis", "Column Y-axis", "Line Y-axis", "Legend"),
+            ("X-axis", "Y-axis", "Column Y-axis", "Column legend", "Line Y-axis", "Legend"),
         )
         bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
         bound_rows = rows_by_table.get(bound_table_id, [])
@@ -12855,7 +13002,7 @@ class StudioController(QObject):
         if visual.get("type") == "scatter" and well_name in {"X-axis", "Y-axis", "Legend", "Details"} and well_fields:
             self._set_status("This Scatter chart supports one field in each axis, legend, and details well.")
             return
-        if visual.get("type") == "lineClusteredColumn" and well_name in {"Column Y-axis", "Line Y-axis"} and well_fields:
+        if visual.get("type") in {"lineClusteredColumn", "lineStackedColumn"} and well_name in {"Column Y-axis", "Line Y-axis", "Column legend"} and well_fields:
             self._set_status("This Combo chart supports one field in each value well.")
             return
         if visual.get("type") == "gauge" and well_name in {"Value", "Minimum", "Maximum", "Target"} and well_fields:
@@ -12908,7 +13055,7 @@ class StudioController(QObject):
             supports_model_default = (
                 (well_name == "Y-axis" and visual_type != "scatter")
                 or (
-                    visual_type == "lineClusteredColumn"
+                    visual_type in {"lineClusteredColumn", "lineStackedColumn"}
                     and well_name in {"Column Y-axis", "Line Y-axis"}
                 )
                 or (
@@ -13068,6 +13215,7 @@ class StudioController(QObject):
             "matrix": "Matrix",
             "scatter": "Scatter chart",
             "line": "Line chart",
+            "lineStackedColumn": "Line and stacked column chart",
             "lineClusteredColumn": "Line and clustered column chart",
             "gauge": "Gauge",
             "kpi": "KPI",
@@ -13184,7 +13332,7 @@ class StudioController(QObject):
             else:
                 y = min(710.0, max(0.0, float(visual.get("y", 0))))
                 normalized = min(max(10.0, normalized), 720.0 - y)
-        elif property_key == "color":
+        elif property_key in {"color", "title_color", "data_label_color", "background_color", "border_color"}:
             normalized = str(value)
             if (
                 len(normalized) != 7
@@ -13193,11 +13341,61 @@ class StudioController(QObject):
             ):
                 self._set_status("Enter a color in #RRGGBB format.")
                 return
-        elif property_key in {"show_data_labels", "show_legend"}:
+        elif property_key in {
+            "show_data_labels", "show_legend", "show_title",
+            "show_x_axis", "show_x_title", "show_y_axis", "show_y_title",
+            "show_gridlines", "show_background", "show_border"
+        }:
             if type(value) is not bool:
                 self._set_status("Choose whether to show this visual element.")
                 return
             normalized = value
+        elif property_key == "title_font_size":
+            if isinstance(value, bool):
+                self._set_status("Enter a font size between 8 and 40.")
+                return
+            try:
+                normalized = float(value)
+            except (TypeError, ValueError):
+                self._set_status("Enter a font size between 8 and 40.")
+                return
+            if not math.isfinite(normalized) or not (8 <= normalized <= 40):
+                self._set_status("Enter a font size between 8 and 40.")
+                return
+        elif property_key == "title_align":
+            normalized = str(value)
+            if normalized not in {"left", "center", "right"}:
+                self._set_status("Choose an alignment of left, center, or right.")
+                return
+        elif property_key == "legend_position":
+            normalized = str(value)
+            if normalized not in {"top", "bottom"}:
+                self._set_status("Choose a legend position of top or bottom.")
+                return
+        elif property_key == "background_transparency":
+            if isinstance(value, bool):
+                self._set_status("Enter a transparency between 0 and 100.")
+                return
+            try:
+                normalized = float(value)
+            except (TypeError, ValueError):
+                self._set_status("Enter a transparency between 0 and 100.")
+                return
+            if not math.isfinite(normalized) or not (0 <= normalized <= 100):
+                self._set_status("Enter a transparency between 0 and 100.")
+                return
+        elif property_key == "border_radius":
+            if isinstance(value, bool):
+                self._set_status("Enter a border radius between 0 and 30.")
+                return
+            try:
+                normalized = float(value)
+            except (TypeError, ValueError):
+                self._set_status("Enter a border radius between 0 and 30.")
+                return
+            if not math.isfinite(normalized) or not (0 <= normalized <= 30):
+                self._set_status("Enter a border radius between 0 and 30.")
+                return
         elif property_key == "text" and visual.get("type") in {"button", "text_box"}:
             normalized = str(value)
         elif property_key == "actionUrl" and visual.get("type") == "button":
@@ -14457,10 +14655,10 @@ class StudioController(QObject):
         if value_well is None:
             value_well = (
                 "Column Y-axis"
-                if visual.get("type") == "lineClusteredColumn"
+                if visual.get("type") in {"lineClusteredColumn", "lineStackedColumn"}
                 else "Indicator" if visual.get("type") == "kpi" else "Y-axis"
             )
-        if visual.get("type") == "lineClusteredColumn" and not fields.get(value_well):
+        if visual.get("type") in {"lineClusteredColumn", "lineStackedColumn"} and not fields.get(value_well):
             return []
         y_axis = fields.get(value_well, [])
         if visual.get("type") == "slicer" and not x_axis and not y_axis:
@@ -14477,7 +14675,11 @@ class StudioController(QObject):
         bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
         x_binding = _visual_well_binding(x_axis, bound_table_id)
         y_binding = _visual_well_binding(y_axis, bound_table_id)
-        legend_binding = _visual_well_binding(fields.get("Legend", []), bound_table_id)
+        legend_well_name = "Column legend" if visual.get("type") == "lineStackedColumn" else "Legend"
+        legend_binding = _visual_well_binding(fields.get(legend_well_name, []), bound_table_id)
+        if visual.get("type") == "lineStackedColumn" and value_well == "Line Y-axis":
+            # The line is never split by the column legend.
+            legend_binding = None
         x_col = x_binding[1] if x_binding else None
         y_col = y_binding[1] if y_binding else None
         legend_col = legend_binding[1] if legend_binding else None
@@ -14528,11 +14730,12 @@ class StudioController(QObject):
         )
 
         measure_name = _visual_measure_name(y_col)
+        is_stacked_chart = visual.get("type") in {
+            "stackedBar", "stackedColumn", "bar100", "column100",
+            "stackedArea", "area100", "ribbon",
+        } or (visual.get("type") == "lineStackedColumn" and value_well != "Line Y-axis" and bool(legend_col))
         if measure_name:
-            stacked = visual.get("type") in {
-                "stackedBar", "stackedColumn", "bar100", "column100",
-                "stackedArea", "area100", "ribbon",
-            }
+            stacked = is_stacked_chart
             try:
                 return self._measure_visual_series(
                     measure_name,
@@ -14552,10 +14755,7 @@ class StudioController(QObject):
             except (MeasureError, KeyError, TypeError, ValueError):
                 return []
 
-        if visual.get("type") in {
-            "stackedBar", "stackedColumn", "bar100", "column100",
-            "stackedArea", "area100", "ribbon",
-        }:
+        if is_stacked_chart:
             if not x_col or not y_col:
                 return []
 
@@ -14676,7 +14876,7 @@ class StudioController(QObject):
             category_values,
         )
         if visual.get("type", "bar") in {
-            "column", "area", "line", "lineClusteredColumn", "waterfall", "ribbon", "kpi",
+            "column", "area", "line", "lineClusteredColumn", "lineStackedColumn", "waterfall", "ribbon", "kpi",
         }:
             if model_order is not None:
                 ordered_values = [
