@@ -203,7 +203,7 @@ _EDITOR_MAPPED_FUNCTIONS = frozenset({
     'Table.ExpandListColumn', 'Table.FillDown', 'Table.FillUp', 'Table.FirstN', 'Table.FromValue', 'Table.Group',
     'Table.LastN', 'Table.Pivot', 'Table.PromoteHeaders', 'Table.Range', 'Table.RemoveColumns',
     'Table.RemoveLastN', 'Table.RemoveRowsWithErrors', 'Table.RenameColumns', 'Table.ReorderColumns',
-    'Table.ReplaceValue', 'Table.SelectColumns', 'Table.SelectRows', 'Table.Skip', 'Table.Sort',
+    'Table.ReplaceErrorValues', 'Table.ReplaceValue', 'Table.SelectColumns', 'Table.SelectRows', 'Table.Skip', 'Table.Sort',
     'Table.SplitColumn', 'Table.TransformColumnTypes', 'Table.TransformColumns', 'Table.Transpose', 'Table.Unpivot',
     'Table.UnpivotOtherColumns', 'Text.AfterDelimiter', 'Text.BeforeDelimiter', 'Text.BetweenDelimiters',
     'Text.Clean', 'Text.Combine', 'Text.Contains', 'Text.EndsWith', 'Text.From', 'Text.Length', 'Text.Lower',
@@ -1400,6 +1400,10 @@ def _parse_table_call(
             if columns:
                 step["columns"] = columns
         return [step]
+    if function == "Table.ReplaceErrorValues":
+        _expect_count(function, args, 1)
+        replacements = _parse_replace_error_pairs(args[0])
+        return [{"op": "replace_error_values", "replacements": replacements}]
     if function == "Table.SelectColumns":
         _expect_count(function, args, 1)
         return [{"op": "keep_columns", "columns": _parse_string_list(args[0])}]
@@ -2586,6 +2590,13 @@ def _step_to_m_call(
             if "columns" in step else ""
         )
         return f"Table.RemoveRowsWithErrors({previous}{columns})"
+    if op == "replace_error_values":
+        pairs = []
+        for col, val in step["replacements"]:
+            col_type = (input_column_types or {}).get(col)
+            val_lit = _m_literal(val, column_type=col_type)
+            pairs.append(f"{{{_m_string(col)}, {val_lit}}}")
+        return f"Table.ReplaceErrorValues({previous}, {{{', '.join(pairs)}}})"
     if op == "remove_column":
         return f"Table.RemoveColumns({previous}, {{{_m_string(step['column'])}}})"
     if op == "keep_columns":
@@ -2978,6 +2989,20 @@ def _parse_rename_pairs(value: str) -> list[tuple[str, str]]:
     return pairs
 
 
+def _parse_replace_error_pairs(value: str) -> list[list[Any]]:
+    pairs = []
+    for item in _parse_braced_items(value):
+        parts = _parse_braced_items(item)
+        if len(parts) != 2:
+            raise PowerQueryMScriptError("Each error replacement entry must contain a column and literal value.")
+        column = _parse_string(parts[0])
+        val = _parse_m_literal(parts[1])
+        pairs.append([column, val])
+    if not pairs:
+        raise PowerQueryMScriptError("Table.ReplaceErrorValues needs at least one replacement pair.")
+    return pairs
+
+
 def _parse_sort_criteria(value: str) -> list[dict[str, str]]:
     sorts = []
     for item in _parse_braced_items(value):
@@ -3283,7 +3308,7 @@ def _validate_m_text_inputs(
         "keep_top_rows", "remove_top_rows", "keep_bottom_rows", "remove_bottom_rows",
         "remove_sparse_top_rows", "remove_sparse_bottom_rows",
         "keep_range_rows", "remove_alternate_rows", "add_index_column", "remove_blank_rows",
-        "remove_rows_with_errors",
+        "remove_rows_with_errors", "replace_error_values",
     }
 
     def types_before(index: int) -> dict[str, str]:
