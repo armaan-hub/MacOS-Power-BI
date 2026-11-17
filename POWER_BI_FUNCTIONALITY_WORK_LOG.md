@@ -2712,3 +2712,9 @@ Format pane now uses Power BI's Visual/General tabs and cards with working on/of
 Applied Steps Insert Step After now adds Power BI's pass-through Custom1 step (= #"previous"), selected with its formula; name kept on formula edit; disabled on the sparse helper.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity and Haiku passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Insert Step After adds a pass-through Custom step coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 274 (Task 192 column-tools: Column tools ribbon tab in Table view)
+
+Selecting a column in Table view now shows a Column tools tab like Power BI. Summarization and Sort by column work and stay in step with Model view, Data type changes the column's type, New column and Manage relationships reuse the existing commands, and the unsupported controls (Name, Format, Data category, Data groups) are disabled with tooltips.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4928 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
