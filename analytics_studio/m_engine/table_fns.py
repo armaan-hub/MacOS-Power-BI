@@ -1406,6 +1406,15 @@ def _compare_rows(left: list, right: list) -> int:
     return 0
 
 
+_TOO_MANY_ELEMENTS = "There were too many elements in the enumeration to complete the operation."
+
+
+def _too_many_elements() -> MValue:
+    """The error cell of a Table.Pivot without an aggregation where one attribute repeats (Power BI answer check
+    2026-11-17: the step succeeds; each repeated cell is an Expression.Error with this message, raised only when read)."""
+    raise MError("Expression.Error", _TOO_MANY_ELEMENTS, fmt=_TOO_MANY_ELEMENTS)
+
+
 def _pivot(table: MValue, values: MValue, attribute: MValue, value_column: MValue, aggregate: MValue) -> MValue:
     if not isinstance(aggregate, (V.Null, V.Function)):
         raise _unsupported("aggregationFunction argument")
@@ -1443,8 +1452,9 @@ def _pivot(table: MValue, values: MValue, attribute: MValue, value_column: MValu
             if fn is not None:  # the aggregation sees every value of the group, nulls included, and no rows at all
                 cells.append(V.Thunk(lambda hits=hits: _apply(fn, V.List(tuple(row[vi] for row in hits)))))
                 continue
-            if len(hits) > 1:
-                raise _unsupported("pivot with a repeated attribute value")
+            if len(hits) > 1:  # Power BI answer check 2026-11-17: the table is built, the repeated cell is an error
+                cells.append(V.Thunk(_too_many_elements))
+                continue
             cells.append(hits[0][vi] if hits else V.Null())
         rows.append(tuple(cells))
     return V.Table(columns, tuple(rows))

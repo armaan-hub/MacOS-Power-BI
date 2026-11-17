@@ -90,6 +90,15 @@ class _Parser:
         self.advance()
         return str(tok.value)
 
+    def record_field_name(self) -> str:
+        """A record literal field name: an identifier, a #"quoted" name, or a keyword (Power BI answer check
+        2026-11-17: ``[let = 1][let]`` and ``[type = 1, each = 2]`` are valid records)."""
+        tok = self.peek()
+        if tok.kind == "keyword":
+            self.advance()
+            return tok.text
+        return self.identifier_name()
+
     def _take_optional(self) -> bool:
         if self.at_op("?"):
             self.advance()
@@ -388,7 +397,7 @@ class _Parser:
             return A.RecordExpr(())
         fields: list[A.RecordField] = []
         while True:
-            name = self.identifier_name()
+            name = self.record_field_name()
             self.expect_op("=")
             fields.append(A.RecordField(name, self.expression()))
             if not self.at_op(","):
