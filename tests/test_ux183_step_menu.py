@@ -71,7 +71,10 @@ class StepMenuTests(unittest.TestCase):
         self.assertEqual(actions["Edit Settings…"].objectName(), "editAppliedStepSettingsAction")
         self.assertTrue(actions["Edit Settings…"].isEnabled())
 
-        for disabled_name in ["Insert Step After", "Extract Previous", "View Native Query"]:
+        # Task 191 (2026-11-17): Insert Step After now works
+        self.assertTrue(actions["Insert Step After"].isEnabled())
+
+        for disabled_name in ["Extract Previous", "View Native Query"]:
             action = actions[disabled_name]
             self.assertFalse(action.isEnabled())
             self.assertEqual(action.toolTip(), "Not supported yet")
