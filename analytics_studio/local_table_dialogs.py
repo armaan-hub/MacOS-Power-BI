@@ -1398,6 +1398,138 @@ class AddIndexColumnDialog(QDialog):
         }
 
 
+class PivotColumnDialog(QDialog):
+    """Power BI's Pivot Column dialog (Transform > Pivot Column)."""
+
+    _AGGREGATION_CHOICES: list[tuple[str, str]] = [
+        ("Don't aggregate", "none"),
+        ("Count (All)", "count_all"),
+        ("Count (Not Blank)", "count_non_blank"),
+        ("Minimum", "min"),
+        ("Maximum", "max"),
+        ("Median", "median"),
+        ("Sum", "sum"),
+        ("Average", "average"),
+    ]
+
+    def __init__(
+        self,
+        attribute_column: str,
+        value_columns: list[str],
+        initial_step: dict[str, Any] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQueryPivotColumnDialog")
+        self.setWindowTitle("Pivot Column")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(440)
+
+        self._attribute_column = attribute_column
+        self._value_columns = list(value_columns)
+        self._initial_step = initial_step
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(10)
+
+        self.description_label = QLabel(
+            f'Use the names in column "{attribute_column}" to create new columns.',
+            self,
+        )
+        self.description_label.setWordWrap(True)
+        self.description_label.setStyleSheet("font-size: 12px; color: #273b49;")
+        layout.addWidget(self.description_label)
+
+        values_label = QLabel("Values Column", self)
+        self.values_combo = QComboBox(self)
+        self.values_combo.setObjectName("pivotValuesColumnCombo")
+        self.values_combo.addItems(self._value_columns)
+        layout.addWidget(values_label)
+        layout.addWidget(self.values_combo)
+
+        # Advanced options (collapsible)
+        self.advanced_toggle = QToolButton(self)
+        self.advanced_toggle.setObjectName("pivotAdvancedOptionsToggle")
+        self.advanced_toggle.setText("▶ Advanced options")
+        self.advanced_toggle.setCheckable(True)
+        self.advanced_toggle.setStyleSheet(
+            "QToolButton { border: none; font-weight: 600; color: #115ea3; text-align: left; }"
+        )
+
+        self.advanced_panel = QWidget(self)
+        advanced_layout = QVBoxLayout(self.advanced_panel)
+        advanced_layout.setContentsMargins(12, 4, 4, 4)
+        advanced_layout.setSpacing(6)
+
+        aggregation_label = QLabel("Aggregate Value Function", self.advanced_panel)
+        self.aggregation_combo = QComboBox(self.advanced_panel)
+        self.aggregation_combo.setObjectName("pivotAggregationCombo")
+        for label, code in self._AGGREGATION_CHOICES:
+            self.aggregation_combo.addItem(label, code)
+        advanced_layout.addWidget(aggregation_label)
+        advanced_layout.addWidget(self.aggregation_combo)
+
+        layout.addWidget(self.advanced_toggle)
+        layout.addWidget(self.advanced_panel)
+
+        self.advanced_toggle.toggled.connect(self._toggle_advanced)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch(1)
+        self.ok_button = QPushButton("OK", self)
+        self.ok_button.setObjectName("pivotOkButton")
+        self.cancel_button = QPushButton("Cancel", self)
+        self.cancel_button.setObjectName("pivotCancelButton")
+        buttons_layout.addWidget(self.ok_button)
+        buttons_layout.addWidget(self.cancel_button)
+        layout.addLayout(buttons_layout)
+
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+
+        # Defaults: values_combo first column; aggregation "sum"; advanced collapsed.
+        # With initial_step: prefill both and expand Advanced when aggregation != "sum".
+        should_expand = False
+        if initial_step is not None:
+            init_val = initial_step.get("value_column")
+            if init_val and init_val in self._value_columns:
+                self.values_combo.setCurrentText(init_val)
+            init_agg = initial_step.get("aggregation", "sum")
+            idx = self.aggregation_combo.findData(init_agg)
+            if idx >= 0:
+                self.aggregation_combo.setCurrentIndex(idx)
+            else:
+                sum_idx = self.aggregation_combo.findData("sum")
+                if sum_idx >= 0:
+                    self.aggregation_combo.setCurrentIndex(sum_idx)
+            if init_agg != "sum":
+                should_expand = True
+        else:
+            sum_idx = self.aggregation_combo.findData("sum")
+            if sum_idx >= 0:
+                self.aggregation_combo.setCurrentIndex(sum_idx)
+
+        self.advanced_panel.setVisible(should_expand)
+        self.advanced_toggle.setChecked(should_expand)
+        self.advanced_toggle.setText("▼ Advanced options" if should_expand else "▶ Advanced options")
+
+        # OK disabled when values_combo is empty (table has only one column)
+        self.ok_button.setEnabled(self.values_combo.count() > 0)
+
+    def _toggle_advanced(self, checked: bool) -> None:
+        self.advanced_panel.setVisible(checked)
+        self.advanced_toggle.setText("▼ Advanced options" if checked else "▶ Advanced options")
+
+    def step(self) -> dict[str, Any]:
+        return {
+            "op": "pivot_column",
+            "attribute_column": self._attribute_column,
+            "value_column": self.values_combo.currentText(),
+            "aggregation": self.aggregation_combo.currentData(),
+        }
+
+
 class ReplaceValuesDialog(QDialog):
     """Power BI's Replace Values dialog (Transform > Replace Values)."""
 
@@ -5860,7 +5992,7 @@ class TransformDataDialog(QDialog):
                 command("Reorder", "reorder_columns", "Drag columns into the required order.", slot=(3, 0, 1, 1)),
                 command("Fill Down", "fill_down", "Fill blank cells with the preceding value.", slot=(0, 1, 1, 1)),
                 command("Fill Up", "fill_up", "Fill blank cells with the following value.", slot=(1, 1, 1, 1)),
-                command("Pivot", "pivot_column", "Pivot distinct values into columns.", slot=(2, 1, 1, 1)),
+                command("Pivot Column", "pivot_column", "Pivot distinct values into columns.", slot=(2, 1, 1, 1)),
                 command(
                     "Unpivot Columns",
                     "unpivot_columns",
@@ -7035,6 +7167,10 @@ class TransformDataDialog(QDialog):
             self.operation_combo.setCurrentIndex(operation_index)
             self._open_replace_values_dialog(prior_row=prior_row)
             return
+        if operation == "pivot_column":
+            self.operation_combo.setCurrentIndex(operation_index)
+            self._open_pivot_column_dialog(prior_row=prior_row)
+            return
         if operation == "split_column":
             self._open_split_by_delimiter_dialog(prior_row=prior_row)
             return
@@ -7103,7 +7239,7 @@ class TransformDataDialog(QDialog):
         return True
 
     def _close_operation_dialog(self) -> None:
-        for name in ("_operation_dialog", "_conditional_dialog", "_group_by_dialog", "_split_by_delimiter_dialog", "_add_index_dialog"):
+        for name in ("_operation_dialog", "_conditional_dialog", "_group_by_dialog", "_split_by_delimiter_dialog", "_add_index_dialog", "_pivot_column_dialog"):
             dialog = getattr(self, name, None)
             if dialog is not None:
                 dialog.reject()
@@ -7467,6 +7603,79 @@ class TransformDataDialog(QDialog):
         sub.accepted.connect(accepted)
         sub.finished.connect(finished)
         self._operation_dialog = sub
+        sub.show()
+
+    def _open_pivot_column_dialog(
+        self,
+        editing_index: int | None = None,
+        *,
+        prior_row: int = -1,
+    ) -> None:
+        """Power BI's Pivot Column dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+        selected = self._selected_preview_columns()
+        target_column = selected[0] if selected else None
+
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+        if existing is not None and "attribute_column" in existing:
+            target_column = existing["attribute_column"]
+
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._insert_at = None
+            self._show_error(str(exc))
+            return
+
+        if not target_column:
+            if base.headers:
+                target_column = base.headers[0]
+            else:
+                self._insert_at = None
+                self._show_error("Select a column in the preview first.")
+                return
+
+        value_columns = [h for h in base.headers if h != target_column]
+
+        sub = PivotColumnDialog(
+            target_column,
+            value_columns=value_columns,
+            initial_step=existing,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            if getattr(self, "_pivot_column_dialog", None) is sub:
+                self._pivot_column_dialog = None
+            self._insert_at = None
+            self.step_settings_toggle.setChecked(False)
+            self.operation_settings_panel.setVisible(False)
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
+        self._pivot_column_dialog = sub
         sub.show()
 
     def _open_add_index_column_dialog(
@@ -11670,6 +11879,9 @@ class TransformDataDialog(QDialog):
             return
         if step["op"] == "replace_value":
             self._open_replace_values_dialog(index)
+            return
+        if step["op"] == "pivot_column":
+            self._open_pivot_column_dialog(editing_index=index, prior_row=index)
             return
         if step["op"] == "add_index_column":
             self._open_add_index_column_dialog(editing_index=index, prior_row=index)
