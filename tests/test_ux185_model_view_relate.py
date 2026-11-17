@@ -213,5 +213,59 @@ class ModelViewRelateTests(unittest.TestCase):
         self.app.processEvents()
 
 
+    def test_edit_relationship_unknown_id_refused(self) -> None:
+        with patch.object(RelationshipDialog, "exec", side_effect=AssertionError("dialog must not open")):
+            self.assertFalse(self.controller.editRelationship("nope"))
+
+    def test_qml_drag_from_column_relates_tables(self) -> None:
+        from PySide6.QtCore import QPoint, QPointF, Qt
+        from PySide6.QtGui import QGuiApplication, QMouseEvent
+        from PySide6.QtCore import QEvent
+        from PySide6.QtTest import QTest
+
+        self.controller.setCurrentView("Model")
+        qml_dir = Path("/Users/armaan/wt-ux-185/analytics_studio/qml")
+        engine = QQmlEngine()
+        component = QQmlComponent(engine)
+        component.loadUrl(QUrl.fromLocalFile(str(qml_dir / "Main.qml")))
+        self.assertFalse(component.isError(), "\n".join(e.toString() for e in component.errors()))
+        window = component.createWithInitialProperties({"studioController": self.controller})
+        self.assertIsNotNone(window)
+        window.resize(1400, 900)
+        window.show()
+        self.app.processEvents()
+
+        src = _quick_item_named(window.contentItem(), f"modelDiagramFieldSelect_{self.orders_id}_RegionID")
+        dst = _quick_item_named(window.contentItem(), f"modelDiagramFieldSelect_{self.regions_id}_RegionID")
+        self.assertIsNotNone(src)
+        self.assertIsNotNone(dst)
+
+        start = src.mapToScene(src.boundingRect().center()).toPoint()
+        end = dst.mapToScene(dst.boundingRect().center()).toPoint()
+
+        with patch.object(self.controller, "createRelationshipFromDrag") as mock_slot:
+            QTest.mousePress(window, Qt.LeftButton, Qt.NoModifier, start)
+            self.app.processEvents()
+            steps = 12
+            for i in range(1, steps + 1):
+                p = QPoint(
+                    start.x() + (end.x() - start.x()) * i // steps,
+                    start.y() + (end.y() - start.y()) * i // steps,
+                )
+                move = QMouseEvent(
+                    QEvent.MouseMove, QPointF(p), QPointF(window.mapToGlobal(p)),
+                    Qt.NoButton, Qt.LeftButton, Qt.NoModifier,
+                )
+                QGuiApplication.sendEvent(window, move)
+                self.app.processEvents()
+            QTest.mouseRelease(window, Qt.LeftButton, Qt.NoModifier, end)
+            self.app.processEvents()
+            mock_slot.assert_called_once_with(self.orders_id, "RegionID", self.regions_id, "RegionID")
+
+        window.deleteLater()
+        component.deleteLater()
+        engine.deleteLater()
+        self.app.processEvents()
+
 if __name__ == "__main__":
     unittest.main()

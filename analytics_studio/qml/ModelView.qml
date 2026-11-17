@@ -1596,6 +1596,7 @@ Item {
                                                     spacing: 1
                                                     ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
                                                     delegate: Button {
+                                                        id: fieldDelegate
                                                         required property var modelData
                                                         property string columnName: String(modelData)
                                                         property var diagramTableData: ListView.view
@@ -1623,13 +1624,18 @@ Item {
                                                             Drag.active: fieldDragMouseArea.drag.active
                                                             Drag.source: fieldDragProxy
                                                             property string tableId: String(diagramTableData ? diagramTableData.id : "")
-                                                            property string columnName: columnName
+                                                            property string dragColumn: fieldDelegate.columnName
                                                         }
                                                         MouseArea {
                                                             id: fieldDragMouseArea
                                                             anchors.fill: parent
                                                             drag.target: fieldDragProxy
                                                             acceptedButtons: Qt.LeftButton
+                                                            onPressed: function(mouse) {
+                                                                fieldDragProxy.x = mouse.x
+                                                                fieldDragProxy.y = mouse.y
+                                                            }
+                                                            onReleased: fieldDragProxy.Drag.drop()
                                                             onClicked: parent.clicked()
                                                         }
                                                         DropArea {
@@ -1645,7 +1651,7 @@ Item {
                                                                         && String(drop.source.tableId) !== String(diagramTableData.id)) {
                                                                     root.finishRelationshipDrag(
                                                                         String(drop.source.tableId),
-                                                                        String(drop.source.columnName),
+                                                                        String(drop.source.dragColumn),
                                                                         String(diagramTableData.id),
                                                                         columnName
                                                                     )

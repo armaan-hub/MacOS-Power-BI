@@ -4386,6 +4386,10 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def editRelationship(self, relationship_id: str) -> bool:
         """Open the relationship dialog focusing the given relationship."""
+        existing_relationships = self._project.get("model", {}).get("relationships", [])
+        if not any(str(r.get("id")) == str(relationship_id) for r in existing_relationships):
+            self._set_status("Relationship not found.")
+            return False
         return self._run_relationship_dialog(initial_edit_id=str(relationship_id))
 
     @Slot(str, result=bool)
