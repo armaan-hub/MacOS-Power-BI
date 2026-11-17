@@ -452,6 +452,11 @@ def validate_steps(
             allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"replacer"})
             if set(step) not in allowed_shapes:
                 raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
+        elif op == "split_column":
+            if set(step) not in (
+                _STEP_FIELDS[op], _STEP_FIELDS[op] | {"from_end"}
+            ):
+                raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         elif set(step) != _STEP_FIELDS[op]:
             raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         if op == "add_custom_column" and "output_type" in step:
@@ -469,6 +474,14 @@ def validate_steps(
                 raise TransformationError(
                     f"Transformation step {index} PromoteAllScalars setting must be Boolean."
                 )
+        if op == "split_column" and "from_end" in step:
+            if not isinstance(step["from_end"], bool):
+                raise TransformationError(
+                    f"Transformation step {index} from_end setting must be Boolean."
+                )
+            if not step["from_end"]:
+                step = dict(step)
+                step.pop("from_end")
         if op == "m_sparse_boundary_helper":
             name = step["name"]
             if not isinstance(name, str) or not re.fullmatch(
@@ -1081,7 +1094,8 @@ def validate_steps(
                 validated_sorts.append({"column": column, "direction": direction})
             step = {**step, "sorts": validated_sorts}
         elif op not in {"promote_headers", "table_pass_through", "replace_value"} and any(
-            not isinstance(value, str) for value in step.values()
+            not isinstance(value, str) for key, value in step.items()
+            if not (op == "split_column" and key == "from_end")
         ):
             raise TransformationError(f"Transformation step {index} values must be strings.")
         elif op == "replace_value":
@@ -1611,7 +1625,10 @@ def apply_transformations(
                 step["end_occurrence"],
             )
         elif op == "split_column":
-            _split_column(result, column, step["delimiter"])
+            _split_column(
+                result, column, step["delimiter"],
+                from_end=bool(step.get("from_end")),
+            )
         elif op == "split_column_by_each_delimiter":
             _split_column_by_each_delimiter(result, column, step["delimiter"])
         elif op == "split_column_by_positions":
@@ -2164,8 +2181,14 @@ def _merge_columns(
     )
 
 
-def _split_column(candidate: ImportCandidate, column: str, delimiter: str) -> None:
-    """Split at the leftmost delimiter, replacing the source with two text columns."""
+def _split_column(
+    candidate: ImportCandidate,
+    column: str,
+    delimiter: str,
+    *,
+    from_end: bool = False,
+) -> None:
+    """Split at the leftmost or rightmost delimiter, replacing the source with two text columns."""
     column_index = _column_index(candidate.headers, column)
     first_name = f"{column}.1"
     second_name = f"{column}.2"
@@ -2186,6 +2209,10 @@ def _split_column(candidate: ImportCandidate, column: str, delimiter: str) -> No
         value = row[column]
         if value is None or is_cell_error(value):
             first, second = value, value
+        elif from_end:
+            left, found, right = cell_to_text(value).rpartition(delimiter)
+            first = left if found else right
+            second = right if found else ""
         else:
             first, found, remainder = cell_to_text(value).partition(delimiter)
             second = remainder if found else ""
