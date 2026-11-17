@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-08. **Last status audit:** 2026-10-26. **Purpose:** Expand the import-only schedule into a map of Power BI's major user-facing and platform capabilities, show what Analytics Studio already supports, and estimate a sensible implementation order.
 
-**Latest status (2026-11-17, after Iteration 280 / Task 200 pivot-column-dialog, Pivot Column dialog like Power BI, Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 4997 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Tasks 201-204 batch gate (M keyword names, Remove Errors, reserved parameter names, test cleanup); Task 205 Replace Errors
+**Latest status (2026-11-17, after Iteration 281 / Task 201-204 m-keywords-remove-errors, M keyword names quoted, Remove Errors on selected columns, reserved M names, test cleanup, Claude Opus 5.5 planned, Antigravity, OpenCode and Codex coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 5015 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 205 Replace Errors, Task 206 Keep/Remove Rows dropdowns and Keep Errors
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
