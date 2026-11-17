@@ -7841,12 +7841,52 @@ class TransformDataDialog(QDialog):
             ),
             target=submenu,
         )
-        # The local filter engine compares dates only by equality, so every other
-        # date condition is shown disabled instead of pretending to work.
-        for label in (
-            "Before…", "After…", "Between…", "In the Next…", "In the Previous…",
-            "Is Earliest", "Is Latest", "Year", "Quarter", "Month", "Week", "Day",
-        ):
+        add(
+            "Date Filters/Before…",
+            lambda: self._open_column_condition(
+                column, "Before", "date_before", placeholder="yyyy-mm-dd"
+            ),
+            target=submenu,
+        )
+        add(
+            "Date Filters/After…",
+            lambda: self._open_column_condition(
+                column, "After", "date_after", placeholder="yyyy-mm-dd"
+            ),
+            target=submenu,
+        )
+        add(
+            "Date Filters/Between…",
+            lambda: self._open_column_condition(
+                column, "Between", "between", placeholder="yyyy-mm-dd"
+            ),
+            target=submenu,
+        )
+        for label in ("In the Next…", "In the Previous…"):
+            add(
+                f"Date Filters/{label}",
+                None,
+                enabled=False,
+                tooltip=_NOT_SUPPORTED_YET,
+                target=submenu,
+            )
+        add(
+            "Date Filters/Is Earliest",
+            lambda: self._insert_step_after_selection({
+                "op": "filter_rows", "column": column,
+                "operator": "is_earliest", "value": "",
+            }),
+            target=submenu,
+        )
+        add(
+            "Date Filters/Is Latest",
+            lambda: self._insert_step_after_selection({
+                "op": "filter_rows", "column": column,
+                "operator": "is_latest", "value": "",
+            }),
+            target=submenu,
+        )
+        for label in ("Year", "Quarter", "Month", "Week", "Day"):
             add(
                 f"Date Filters/{label}",
                 None,
@@ -7918,12 +7958,17 @@ class TransformDataDialog(QDialog):
             return
         values = dialog.values()
         if operator == "between":
+            lower_operator, upper_operator = (
+                ("greater_than_or_equal", "less_than_or_equal")
+                if numeric
+                else ("date_on_or_after", "date_on_or_before")
+            )
             step: dict[str, Any] = {
                 "op": "filter_rows_advanced",
                 "clauses": [
-                    {"column": column, "operator": "greater_than_or_equal",
+                    {"column": column, "operator": lower_operator,
                      "value": values[0], "join": "and"},
-                    {"column": column, "operator": "less_than_or_equal",
+                    {"column": column, "operator": upper_operator,
                      "value": values[1], "join": "and"},
                 ],
             }

@@ -258,10 +258,24 @@ _FILTER_OPERATORS = {
     "greater_than_or_equal",
     "less_than",
     "less_than_or_equal",
+    "date_before",
+    "date_after",
+    "date_on_or_after",
+    "date_on_or_before",
+    "is_earliest",
+    "is_latest",
 }
 FILTER_OPERATORS_WITHOUT_VALUE = frozenset({
     "is_null", "is_not_null", "is_blank", "is_not_blank",
+    "is_earliest", "is_latest",
 })
+_DATE_FILTER_OPERATORS = {
+    "date_before",
+    "date_after",
+    "date_on_or_after",
+    "date_on_or_before",
+}
+_DATE_VALUE_REQUIRED_MESSAGE = "needs a valid date (yyyy-mm-dd) or datetime value."
 _NUMERIC_FILTER_OPERATORS = {
     "greater_than",
     "greater_than_or_equal",
@@ -998,6 +1012,13 @@ def validate_steps(
                     raise TransformationError(
                         f"Filter clause {clause_index} in step {index} does not use a comparison value."
                     )
+                if operator in _DATE_FILTER_OPERATORS and (
+                    "parameter" in clause
+                    or _parse_row_date_or_datetime(clause.get("value")) is None
+                ):
+                    raise TransformationError(
+                        f"Filter clause {clause_index} in step {index} {_DATE_VALUE_REQUIRED_MESSAGE}"
+                    )
                 if join not in {"and", "or"}:
                     raise TransformationError(
                         f"Filter clause {clause_index} in step {index} must join with 'and' or 'or'."
@@ -1096,6 +1117,13 @@ def validate_steps(
             ):
                 raise TransformationError(
                     f"Transformation step {index} does not use a comparison value for this filter."
+                )
+            if step["operator"] in _DATE_FILTER_OPERATORS and (
+                "parameter" in step
+                or _parse_row_date_or_datetime(step.get("value")) is None
+            ):
+                raise TransformationError(
+                    f"Transformation step {index} {_DATE_VALUE_REQUIRED_MESSAGE}"
                 )
         elif op == "sort_rows":
             if step["direction"] not in {"asc", "desc"}:
@@ -1798,8 +1826,27 @@ def column_types_after_steps(
     )
     header_count: int | None = len(headers)
     header_names_known = True
+    known_type_columns = set(supplied_types)
     for step_index, step in enumerate(validated_steps):
         op = step["op"]
+        if op == "convert_type":
+            known_type_columns.add(step["column"])
+        date_filter_columns: list[str] = []
+        if op == "filter_rows" and step["operator"] in (
+            _DATE_FILTER_OPERATORS | {"is_earliest", "is_latest"}
+        ):
+            date_filter_columns = [step["column"]]
+        elif op == "filter_rows_advanced":
+            date_filter_columns = [
+                clause["column"] for clause in step["clauses"]
+                if clause["operator"] in _DATE_FILTER_OPERATORS
+            ]
+        for date_column in date_filter_columns:
+            if date_column in known_type_columns and types.get(date_column) == "text":
+                raise TransformationError(
+                    f"Date filter on column {date_column!r} requires a date or datetime column. "
+                    "Place it after a type conversion."
+                )
         if op in {"promote_headers", "demote_headers", "transpose_table"}:
             # Schema reshaping changes the fields; rebuilt columns default to text.
             types = {}
@@ -3336,12 +3383,57 @@ def _column_index(headers: list[str], column: str) -> int:
         raise TransformationError(f"Column {column!r} does not exist.") from exc
 
 
+def _parse_row_date_or_datetime(v: Any) -> date | datetime | None:
+    if v is None or v == "":
+        return None
+    if isinstance(v, (datetime, date)):
+        return v
+    s = str(v).strip()
+    if not s:
+        return None
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        pass
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        pass
+    return None
+
+
+def _to_comparable_datetime(val: date | datetime) -> datetime:
+    if isinstance(val, datetime):
+        return val
+    return datetime.combine(val, datetime.min.time())
+
+
 def _filter_rows(rows: list[dict[str, str]], column: str, operator: str, expected: str) -> list[dict[str, str]]:
-    prepared_expected = (
-        _parse_number(expected)
-        if operator in _NUMERIC_FILTER_OPERATORS
-        else expected
-    )
+    if operator in {"is_earliest", "is_latest"}:
+        parsed_items: list[tuple[datetime, dict[str, str]]] = []
+        for row in rows:
+            val = row[column]
+            if is_cell_error(val):
+                continue
+            parsed = _parse_row_date_or_datetime(val)
+            if parsed is not None:
+                parsed_items.append((_to_comparable_datetime(parsed), row))
+        if not parsed_items:
+            return []
+        if operator == "is_earliest":
+            target_dt = min(item[0] for item in parsed_items)
+        else:
+            target_dt = max(item[0] for item in parsed_items)
+        return [row for dt, row in parsed_items if dt == target_dt]
+
+    if operator in _DATE_FILTER_OPERATORS:
+        parsed_expected = _parse_row_date_or_datetime(expected)
+        prepared_expected = _to_comparable_datetime(parsed_expected) if parsed_expected is not None else None
+    elif operator in _NUMERIC_FILTER_OPERATORS:
+        prepared_expected = _parse_number(expected)
+    else:
+        prepared_expected = expected
+
     return [
         row
         for row_index, row in enumerate(rows, 1)
@@ -3356,17 +3448,19 @@ def _filter_rows_advanced(
     headers: list[str],
     clauses: list[dict[str, str]],
 ) -> list[dict[str, str]]:
-    prepared_clauses: list[tuple[str, str, str | Decimal, str]] = []
+    prepared_clauses: list[tuple[str, str, Any, str]] = []
     for clause in clauses:
         column = clause["column"]
         _column_index(headers, column)
         operator = clause["operator"]
         value = clause["value"]
-        expected: str | Decimal = (
-            _parse_number(value)
-            if operator in _NUMERIC_FILTER_OPERATORS
-            else value
-        )
+        if operator in _DATE_FILTER_OPERATORS:
+            parsed_dt = _parse_row_date_or_datetime(value)
+            expected: Any = _to_comparable_datetime(parsed_dt) if parsed_dt is not None else None
+        elif operator in _NUMERIC_FILTER_OPERATORS:
+            expected = _parse_number(value)
+        else:
+            expected = value
         prepared_clauses.append((column, operator, expected, clause["join"]))
 
     filtered: list[dict[str, str]] = []
@@ -3392,13 +3486,30 @@ def _filter_value_matches(
     value: Any,
     column: str,
     operator: str,
-    expected: str | Decimal,
+    expected: Any,
     row_index: int,
 ) -> bool:
     if is_cell_error(value):
+        if operator in _DATE_FILTER_OPERATORS:
+            return False
         raise TransformationError(
             f"Cannot evaluate row {row_index} of column {column!r}: {value.message}"
         )
+    if operator in _DATE_FILTER_OPERATORS:
+        if value is None or value == "":
+            return False
+        parsed_val = _parse_row_date_or_datetime(value)
+        if parsed_val is None or expected is None:
+            return False
+        val_dt = _to_comparable_datetime(parsed_val)
+        if operator == "date_before":
+            return val_dt < expected
+        if operator == "date_after":
+            return val_dt > expected
+        if operator == "date_on_or_after":
+            return val_dt >= expected
+        if operator == "date_on_or_before":
+            return val_dt <= expected
     if operator in _NUMERIC_FILTER_OPERATORS:
         if value is None or value == "":
             return False
