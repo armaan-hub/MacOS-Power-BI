@@ -2706,3 +2706,9 @@ Power Query Date Filters now support Before, After, Between, Is Earliest and Is 
 Format pane now uses Power BI's Visual/General tabs and cards with working on/off switches and new title/axis/gridline/legend/background/border settings (defaults pixel-identical to before). Line and stacked column chart enabled, columns equal stackedColumn and line equals lineClusteredColumn.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity, Haiku and Sonnet passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Format pane Visual/General cards; Line and stacked column chart coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 273 (Task 191 ux-191: 4919)
+
+Applied Steps Insert Step After now adds Power BI's pass-through Custom1 step (= #"previous"), selected with its formula; name kept on formula edit; disabled on the sparse helper.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity and Haiku passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Insert Step After adds a pass-through Custom step coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
