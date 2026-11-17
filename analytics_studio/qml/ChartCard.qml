@@ -62,6 +62,142 @@ Rectangle {
         return true
     }
 
+    readonly property bool hasLeftValueAxis: (chartType === "column" || chartType === "line" || chartType === "area" || chartType === "lineClusteredColumn") && showYAxis
+    readonly property bool hasBottomValueAxis: chartType === "bar" && showXAxis
+
+    function niceTicks(minValue, maxValue, targetCount) {
+        let tc = targetCount !== undefined && targetCount !== null ? Number(targetCount) : 5
+        if (tc < 1 || !isFinite(tc)) tc = 5
+        let minV = Number(minValue)
+        let maxV = Number(maxValue)
+        if (!isFinite(minV)) minV = 0
+        if (!isFinite(maxV)) maxV = 1
+        if (minV > maxV) { const tmp = minV; minV = maxV; maxV = tmp }
+        let span = maxV - minV
+        if (span <= 0) {
+            span = 1
+            minV = 0
+            maxV = 1
+        }
+        const rawStep = span / tc
+        const power = Math.pow(10, Math.floor(Math.log10(rawStep)))
+        const fraction = rawStep / power
+        let niceFraction = 1
+        if (fraction <= 1) niceFraction = 1
+        else if (fraction <= 2) niceFraction = 2
+        else if (fraction <= 2.5) niceFraction = 2.5
+        else if (fraction <= 5) niceFraction = 5
+        else niceFraction = 10
+        const step = niceFraction * power
+        const start = Math.floor(minV / step) * step
+        const end = Math.ceil(maxV / step) * step
+        const ticks = []
+        let current = start
+        let safety = 0
+        while (current <= end + 0.0001 * step && safety < 100) {
+            let rounded = Number(current.toFixed(8))
+            if (Math.abs(rounded) < 1e-12) rounded = 0
+            ticks.push(rounded)
+            current += step
+            safety++
+        }
+        return ticks
+    }
+
+    function chooseAxisUnit(ticks) {
+        let maxAbs = 0
+        if (typeof ticks === "number") {
+            maxAbs = Math.abs(ticks)
+        } else if (ticks && ticks.length !== undefined) {
+            for (let i = 0; i < ticks.length; ++i) {
+                const val = Math.abs(Number(ticks[i]) || 0)
+                if (val > maxAbs) maxAbs = val
+            }
+        }
+        if (maxAbs >= 1e12) return { scale: 1e12, suffix: "T" }
+        if (maxAbs >= 1e9) return { scale: 1e9, suffix: "bn" }
+        if (maxAbs >= 1e6) return { scale: 1e6, suffix: "M" }
+        if (maxAbs >= 1e3) return { scale: 1e3, suffix: "K" }
+        return { scale: 1, suffix: "" }
+    }
+
+    function axisValueLabel(value, unit, step) {
+        const num = Number(value) || 0
+        if (num === 0) return "0"
+        let u = null
+        if (typeof unit === "string") {
+            const map = { "T": 1e12, "bn": 1e9, "M": 1e6, "K": 1e3, "": 1 }
+            u = { scale: (map[unit] !== undefined ? map[unit] : 1), suffix: unit }
+        } else if (unit && typeof unit === "object" && unit.scale) {
+            u = unit
+        } else if (typeof unit === "number") {
+            u = { scale: unit, suffix: "" }
+        } else {
+            u = chooseAxisUnit(num)
+        }
+        const scaled = num / u.scale
+        let isWhole = false
+        if (step !== undefined && step !== null) {
+            const stepScaled = Number(step) / u.scale
+            isWhole = Math.abs(Math.round(stepScaled) - stepScaled) < 1e-6
+        } else {
+            isWhole = Math.abs(Math.round(scaled) - scaled) < 1e-6
+        }
+        let formatted = ""
+        if (isWhole) {
+            formatted = String(Math.round(scaled))
+        } else {
+            formatted = scaled.toFixed(1)
+        }
+        return formatted + u.suffix
+    }
+
+    function computeValueTicks(type, seriesData, lineSeriesData) {
+        const vals = seriesData || []
+        const lineVals = lineSeriesData || []
+        let minV = 0
+        let maxV = 0
+        let count = 0
+        for (let i = 0; i < vals.length; ++i) {
+            const v = Number(vals[i].value)
+            if (isFinite(v)) {
+                if (count === 0) { minV = Math.min(0, v); maxV = Math.max(0, v) }
+                else { minV = Math.min(minV, v); maxV = Math.max(maxV, v) }
+                count++
+            }
+        }
+        if (type === "lineClusteredColumn" || type === "lineStackedColumn") {
+            for (let i = 0; i < lineVals.length; ++i) {
+                const v = Number(lineVals[i].value)
+                if (isFinite(v)) {
+                    if (count === 0) { minV = Math.min(0, v); maxV = Math.max(0, v) }
+                    else { minV = Math.min(minV, v); maxV = Math.max(maxV, v) }
+                    count++
+                }
+            }
+        }
+        if (count === 0) return [0, 1]
+        return niceTicks(minV, maxV, 5)
+    }
+
+    readonly property var valueAxisLabels: {
+        const type = root.chartType
+        const isLeft = (type === "column" || type === "line" || type === "area" || type === "lineClusteredColumn")
+        const isBottom = (type === "bar")
+        if (!isLeft && !isBottom) return []
+        if (isLeft && !root.showYAxis) return []
+        if (isBottom && !root.showXAxis) return []
+        const ticks = root.computeValueTicks(type, root.series, root.lineSeries)
+        if (!ticks || !ticks.length) return []
+        const unit = root.chooseAxisUnit(ticks)
+        const step = ticks.length > 1 ? ticks[1] - ticks[0] : 1
+        const result = []
+        for (let i = 0; i < ticks.length; ++i) {
+            result.push(root.axisValueLabel(ticks[i], unit, step))
+        }
+        return result
+    }
+
     function axisLabel(value) {
         const label = String(value || "")
         const monthly = label.match(/^(\d{4})-(\d{2})$/)
@@ -570,12 +706,17 @@ Rectangle {
             onPaint: {
                 const ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                const padLeft = 38 + root.axisTitleLeftPad
+                // Task 193 fix: only the value-axis chart family changes padding; other types keep 38 / 25
+                const padFamily = root.chartType === "column" || root.chartType === "line"
+                    || root.chartType === "area" || root.chartType === "lineClusteredColumn"
+                    || root.chartType === "bar"
+                const padLeft = (root.chartType === "bar" ? (root.showYAxis ? 38 : 8)
+                    : (padFamily ? (root.hasLeftValueAxis ? 38 : 8) : 38)) + root.axisTitleLeftPad
                 const padRight = root.showDataLabels && root.chartType === "bar" ? 48 : 8
                 const padTop = root.hasMultiSeriesLegend() && root.showLegend
                         ? Math.max(27, root.showDataLabels ? 20 : 0)
                         : (root.showDataLabels ? 20 : 9)
-                const padBottom = 25 + root.axisTitleBottomPad
+                const padBottom = (padFamily && !root.showXAxis ? 8 : 25) + root.axisTitleBottomPad
                 const plotW = Math.max(12, width - padLeft - padRight)
                 const plotH = Math.max(12, height - padTop - padBottom)
                 if (root.axisTitleFamily && (root.showXTitle || root.showYTitle)) {
@@ -612,6 +753,23 @@ Rectangle {
                         maxValue = Math.max(maxValue, Number(lineValues[i].value) || 0)
                 }
 
+                const isValueAxisFamily = (root.chartType === "column" || root.chartType === "line"
+                    || root.chartType === "area" || root.chartType === "lineClusteredColumn"
+                    || root.chartType === "bar")
+                const valueTicks = isValueAxisFamily ? root.computeValueTicks(root.chartType, values, lineValues) : []
+                const valueAxisUnit = isValueAxisFamily ? root.chooseAxisUnit(valueTicks) : { scale: 1, suffix: "" }
+                const valueAxisStep = valueTicks.length > 1 ? valueTicks[1] - valueTicks[0] : 1
+                const tickMin = valueTicks.length ? valueTicks[0] : 0
+                const tickMax = valueTicks.length ? valueTicks[valueTicks.length - 1] : 1
+                const tickSpan = tickMax - tickMin > 0 ? (tickMax - tickMin) : 1
+
+                // Task 193 fix: plot span = tick span; zeroFrac is where value 0 sits (0 unless ticks go negative)
+                let zeroFrac = 0
+                if (isValueAxisFamily && valueTicks.length > 0) {
+                    maxValue = tickSpan
+                    zeroFrac = -tickMin / tickSpan
+                }
+
                 if (root.showGridlines && root.chartType !== "pie" && root.chartType !== "donut"
                         && root.chartType !== "gauge"
                         && root.chartType !== "kpi"
@@ -619,9 +777,52 @@ Rectangle {
                         && root.chartType !== "funnel" && root.chartType !== "treemap") {
                     ctx.strokeStyle = "#e7ebef"
                     ctx.lineWidth = 1
-                    for (let g = 0; g < 4; ++g) {
-                        const y = padTop + plotH * g / 3
-                        ctx.beginPath(); ctx.moveTo(padLeft, y); ctx.lineTo(width - padRight, y); ctx.stroke()
+                    if (isValueAxisFamily && valueTicks.length > 0) {
+                        if (root.chartType === "bar") {
+                            // Vertical gridlines on X ticks
+                            for (let g = 0; g < valueTicks.length; ++g) {
+                                const frac = (valueTicks[g] - tickMin) / tickSpan
+                                const gx = padLeft + plotW * frac
+                                ctx.beginPath(); ctx.moveTo(gx, padTop); ctx.lineTo(gx, padTop + plotH); ctx.stroke()
+                            }
+                        } else {
+                            // Horizontal gridlines on Y ticks
+                            for (let g = 0; g < valueTicks.length; ++g) {
+                                const frac = (valueTicks[g] - tickMin) / tickSpan
+                                const gy = padTop + plotH - plotH * frac
+                                ctx.beginPath(); ctx.moveTo(padLeft, gy); ctx.lineTo(width - padRight, gy); ctx.stroke()
+                            }
+                        }
+                    } else {
+                        for (let g = 0; g < 4; ++g) {
+                            const y = padTop + plotH * g / 3
+                            ctx.beginPath(); ctx.moveTo(padLeft, y); ctx.lineTo(width - padRight, y); ctx.stroke()
+                        }
+                    }
+                }
+
+                // Value axis ticks and labels
+                if (root.hasLeftValueAxis && valueTicks.length > 0) {
+                    ctx.fillStyle = "#647382"
+                    ctx.font = "10px sans-serif"
+                    ctx.textAlign = "right"
+                    ctx.textBaseline = "middle"
+                    for (let g = 0; g < valueTicks.length; ++g) {
+                        const frac = (valueTicks[g] - tickMin) / tickSpan
+                        const gy = padTop + plotH - plotH * frac
+                        const lbl = root.axisValueLabel(valueTicks[g], valueAxisUnit, valueAxisStep)
+                        ctx.fillText(lbl, padLeft - 6, gy)
+                    }
+                } else if (root.hasBottomValueAxis && valueTicks.length > 0) {
+                    ctx.fillStyle = "#647382"
+                    ctx.font = "10px sans-serif"
+                    ctx.textAlign = "center"
+                    ctx.textBaseline = "top"
+                    for (let g = 0; g < valueTicks.length; ++g) {
+                        const frac = (valueTicks[g] - tickMin) / tickSpan
+                        const gx = padLeft + plotW * frac
+                        const lbl = root.axisValueLabel(valueTicks[g], valueAxisUnit, valueAxisStep)
+                        ctx.fillText(lbl, gx, padTop + plotH + 5)
                     }
                 }
 
@@ -1605,18 +1806,18 @@ Rectangle {
                             ctx.lineWidth = 2.5
                             ctx.beginPath()
                             for (let i = 0; i < linePoints.length; ++i) {
-                                const y = padTop + plotH - plotH * linePoints[i].value / maxValue
+                                const y = padTop + plotH - plotH * (zeroFrac + linePoints[i].value / maxValue)
                                 if (i === 0) ctx.moveTo(linePoints[i].x, y); else ctx.lineTo(linePoints[i].x, y)
                             }
                             ctx.stroke()
                             for (let i = 0; i < linePoints.length; ++i) {
                                 const point = linePoints[i]
-                                const y = padTop + plotH - plotH * point.value / maxValue
+                                const y = padTop + plotH - plotH * (zeroFrac + point.value / maxValue)
                                 ctx.fillStyle = hasHighlights ? "#b8c2cc" : "#C65911"
                                 ctx.beginPath(); ctx.arc(point.x, y, 3.5, 0, Math.PI * 2); ctx.fill()
                                 const selectedValue = root.highlightedLineValue(point.label)
                                 if (selectedValue !== null) {
-                                    const selectedY = padTop + plotH - plotH * selectedValue / maxValue
+                                    const selectedY = padTop + plotH - plotH * (zeroFrac + selectedValue / maxValue)
                                     ctx.fillStyle = "#C65911"
                                     ctx.beginPath(); ctx.arc(point.x, selectedY, 4.5, 0, Math.PI * 2); ctx.fill()
                                 }
@@ -1636,14 +1837,14 @@ Rectangle {
                     ctx.beginPath()
                     for (let i = 0; i < values.length; ++i) {
                         const x = padLeft + plotW * (i + 0.5) / values.length
-                        const y = padTop + plotH - plotH * (Number(values[i].value) || 0) / maxValue
+                        const y = padTop + plotH - plotH * (zeroFrac + (Number(values[i].value) || 0) / maxValue)
                         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
                     }
                     ctx.stroke()
                     ctx.fillStyle = hasHighlights ? "#b8c2cc" : color
                     for (let i = 0; i < values.length; ++i) {
                         const x = padLeft + plotW * (i + 0.5) / values.length
-                        const y = padTop + plotH - plotH * (Number(values[i].value) || 0) / maxValue
+                        const y = padTop + plotH - plotH * (zeroFrac + (Number(values[i].value) || 0) / maxValue)
                         ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill()
                         if (root.showDataLabels) {
                             ctx.fillStyle = "#425466"
@@ -1660,8 +1861,37 @@ Rectangle {
                             const selectedValue = root.highlightedValue(values[i].label)
                             if (selectedValue === null) continue
                             const x = padLeft + plotW * (i + 0.5) / values.length
-                            const y = padTop + plotH - plotH * selectedValue / maxValue
+                            const y = padTop + plotH - plotH * (zeroFrac + selectedValue / maxValue)
                             ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill()
+                        }
+                    }
+                    if (root.showXAxis) {
+                        const step = plotW / values.length
+                        ctx.font = "10px sans-serif"
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "top"
+                        const labels = []
+                        let maxLabelWidth = 0
+                        for (let i = 0; i < values.length; ++i) {
+                            const label = root.axisLabel(values[i].label)
+                            labels.push(label)
+                            maxLabelWidth = Math.max(maxLabelWidth, ctx.measureText(label).width)
+                        }
+                        const labelCount = Math.max(1, Math.min(values.length,
+                            Math.floor(plotW / Math.max(1, maxLabelWidth + 6))))
+                        const showLabel = []
+                        for (let labelSlot = 0; labelSlot < labelCount; ++labelSlot) {
+                            const labelIndex = labelCount === 1
+                                ? values.length - 1
+                                : Math.round(labelSlot * (values.length - 1) / (labelCount - 1))
+                            showLabel[labelIndex] = true
+                        }
+                        ctx.fillStyle = "#647382"
+                        for (let i = 0; i < values.length; ++i) {
+                            if (showLabel[i]) {
+                                const x = padLeft + step * (i + 0.5)
+                                ctx.fillText(labels[i], x, padTop + plotH + 5)
+                            }
                         }
                     }
                 } else if (root.chartType === "bar") {
@@ -1675,14 +1905,16 @@ Rectangle {
                         const y = padTop + i * step + step * 0.2
                         const barH = Math.max(3, step * 0.58)
                         const barW = plotW * (Number(values[i].value) || 0) / maxValue
+                        const barBaseX = padLeft + plotW * zeroFrac
                         ctx.fillStyle = hasHighlights ? "#d4dce3" : root.seriesColor
-                        ctx.fillRect(padLeft, y, barW, barH)
+                        ctx.fillRect(Math.min(barBaseX, barBaseX + barW), y, Math.abs(barW), barH)
                         const selectedValue = root.highlightedValue(values[i].label)
                         if (selectedValue !== null) {
                             ctx.fillStyle = color
+                            const barHighlightW = plotW * Math.min(Math.max(0, selectedValue), Number(values[i].value) || 0) / maxValue
                             ctx.fillRect(
-                                padLeft, y,
-                                plotW * Math.min(Math.max(0, selectedValue), Number(values[i].value) || 0) / maxValue,
+                                Math.min(barBaseX, barBaseX + barHighlightW), y,
+                                Math.abs(barHighlightW),
                                 barH
                             )
                         }
@@ -1696,9 +1928,9 @@ Rectangle {
                             ctx.textBaseline = "middle"
                             ctx.fillText(
                                 root.valueLabel(values[i].value),
-                                Math.min(padLeft + barW + 4, width - padRight + 2),
+                                Math.min(barBaseX + Math.max(0, barW) + 4, width - padRight + 2),
                                 y + barH / 2,
-                                Math.max(1, width - padRight - Math.min(padLeft + barW + 4, width - padRight + 2))
+                                Math.max(1, width - padRight - Math.min(barBaseX + Math.max(0, barW) + 4, width - padRight + 2))
                             )
                         }
                     }
@@ -1708,15 +1940,16 @@ Rectangle {
                     for (let i = 0; i < values.length; ++i) {
                         points.push({
                             x: padLeft + step * (i + 0.5),
-                            y: padTop + plotH - plotH * (Number(values[i].value) || 0) / maxValue,
+                            y: padTop + plotH - plotH * (zeroFrac + (Number(values[i].value) || 0) / maxValue),
                         })
                     }
                     ctx.beginPath()
-                    ctx.moveTo(points[0].x, padTop + plotH)
+                    const areaBaseY = padTop + plotH - plotH * zeroFrac
+                    ctx.moveTo(points[0].x, areaBaseY)
                     ctx.lineTo(points[0].x, points[0].y)
                     for (let i = 1; i < points.length; ++i)
                         ctx.lineTo(points[i].x, points[i].y)
-                    ctx.lineTo(points[points.length - 1].x, padTop + plotH)
+                    ctx.lineTo(points[points.length - 1].x, areaBaseY)
                     ctx.closePath()
                     ctx.fillStyle = hasHighlights ? "#d4dce3" : color
                     ctx.globalAlpha = hasHighlights ? 0.8 : 0.24
@@ -1780,10 +2013,11 @@ Rectangle {
                     for (let i = 0; i < values.length; ++i) {
                         const v = Number(values[i].value) || 0
                         const barH = plotH * v / maxValue
+                        const barBaseY = padTop + plotH - plotH * zeroFrac
                         const barW = Math.max(5, step * 0.56)
                         const x = padLeft + i * step + (step - barW) / 2
                         ctx.fillStyle = hasHighlights ? "#d4dce3" : root.seriesColor
-                        ctx.fillRect(x, padTop + plotH - barH, barW, barH)
+                        ctx.fillRect(x, Math.min(barBaseY, barBaseY - barH), barW, Math.abs(barH))
                         const selectedValue = root.highlightedValue(values[i].label)
                         if (selectedValue !== null) {
                             const highlightHeight = plotH * Math.min(
@@ -1791,7 +2025,7 @@ Rectangle {
                             ) / maxValue
                             ctx.fillStyle = color
                             ctx.fillRect(
-                                x, padTop + plotH - highlightHeight, barW, highlightHeight
+                                x, Math.min(barBaseY, barBaseY - highlightHeight), barW, Math.abs(highlightHeight)
                             )
                         }
                         if (root.showXAxis && showLabel[i]) {
@@ -1802,7 +2036,7 @@ Rectangle {
                             ctx.fillStyle = root.dataLabelColor
                             ctx.textAlign = "center"
                             ctx.textBaseline = "bottom"
-                            ctx.fillText(root.valueLabel(values[i].value), x + barW / 2, Math.max(10, padTop + plotH - barH - 3))
+                            ctx.fillText(root.valueLabel(values[i].value), x + barW / 2, Math.max(10, Math.min(barBaseY, barBaseY - barH) - 3))
                         }
                     }
                     if ((root.chartType === "lineClusteredColumn" || root.chartType === "lineStackedColumn") && values.length) {
@@ -1827,18 +2061,18 @@ Rectangle {
                         ctx.lineWidth = 2.5
                         ctx.beginPath()
                         for (let i = 0; i < linePoints.length; ++i) {
-                            const y = padTop + plotH - plotH * linePoints[i].value / maxValue
+                            const y = padTop + plotH - plotH * (zeroFrac + linePoints[i].value / maxValue)
                             if (i === 0) ctx.moveTo(linePoints[i].x, y); else ctx.lineTo(linePoints[i].x, y)
                         }
                         ctx.stroke()
                         for (let i = 0; i < linePoints.length; ++i) {
                             const point = linePoints[i]
-                            const y = padTop + plotH - plotH * point.value / maxValue
+                            const y = padTop + plotH - plotH * (zeroFrac + point.value / maxValue)
                             ctx.fillStyle = hasHighlights ? "#b8c2cc" : "#C65911"
                             ctx.beginPath(); ctx.arc(point.x, y, 3.5, 0, Math.PI * 2); ctx.fill()
                             const selectedValue = root.highlightedLineValue(point.label)
                             if (selectedValue !== null) {
-                                const selectedY = padTop + plotH - plotH * selectedValue / maxValue
+                                const selectedY = padTop + plotH - plotH * (zeroFrac + selectedValue / maxValue)
                                 ctx.fillStyle = "#C65911"
                                 ctx.beginPath(); ctx.arc(point.x, selectedY, 4.5, 0, Math.PI * 2); ctx.fill()
                             }

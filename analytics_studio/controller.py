@@ -159,11 +159,11 @@ CHART_TYPES = {"column", "bar", "line"}
 # The Title switch works on every listed type; a header key is set only where it
 # changes pixels in ChartCard.qml (checked with offscreen grabs), else None.
 AXIS_CARD_TOGGLES: dict[str, tuple[str | None, str | None]] = {
-    "column": ("show_x_axis", None),
-    "bar": (None, "show_y_axis"),
-    "area": ("show_x_axis", None),
-    "lineClusteredColumn": ("show_x_axis", None),
-    "line": (None, None),
+    "column": ("show_x_axis", "show_y_axis"),
+    "bar": ("show_x_axis", "show_y_axis"),
+    "area": ("show_x_axis", "show_y_axis"),
+    "lineClusteredColumn": ("show_x_axis", "show_y_axis"),
+    "line": ("show_x_axis", "show_y_axis"),
 }
 X_AXIS_CARD_TYPES = set(AXIS_CARD_TOGGLES)
 Y_AXIS_CARD_TYPES = set(AXIS_CARD_TOGGLES)
