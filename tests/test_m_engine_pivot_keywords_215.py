@@ -44,3 +44,21 @@ def test_record_keyword_field_names():
     assert evaluate_to_text('[if = 1][if]') == "V:number:1"
     assert evaluate_to_text('[type = 1, each = 2, #"let" = 3]') == (
         'V:record:["type"=number:1,"each"=number:2,"let"=number:3]')
+
+
+def test_record_true_and_null_field_names():
+    # Power BI answer check 2026-11-17 (m_probes11 items 0-1)
+    assert evaluate_to_text('[true = 1][true]') == "V:number:1"
+    assert evaluate_to_text('[null = 1][null]') == "V:number:1"
+
+
+def test_duplicate_record_field_under_try_is_caught():
+    # Power BI answer check 2026-11-17 (m_probes11 item 2)
+    assert evaluate_to_text('try [let = 1, let = 2] otherwise "ERR"') == 'V:text:"ERR"'
+
+
+def test_hash_keyword_record_field_name_is_invalid():
+    # Power BI answer check 2026-11-17 (m_probes11 item 3): "[1,2-1,8] Invalid identifier."
+    text = evaluate_to_text('[#table = 1]')
+    assert text.startswith("ERR")
+    assert "Invalid identifier." in text
