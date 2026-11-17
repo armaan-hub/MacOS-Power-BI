@@ -178,7 +178,80 @@ class Ux184DataPaneTreeTests(unittest.TestCase):
         self._click(window, customers_table_row)
 
         # Now Customers field rows exist in QML
+        # For non-active tables, the object name is reportFieldSelect_<tableId>_<binding>
         self.assertIsNotNone(
-            _quick_item_named(field_list, "reportFieldSelect_CustomerName"),
-            "Expanding Customers table must instantiate reportFieldSelect_CustomerName",
+            _quick_item_named(field_list, f"reportFieldSelect_{customers_id}_CustomerName")
+            or _quick_item_named(field_list, "reportFieldSelect_CustomerName"),
+            "Expanding Customers table must instantiate CustomerName field row",
         )
+
+    def test_followup_cross_table_toggle_and_same_named_columns(self) -> None:
+        controller, orders_id, customers_id = self._setup_controller()
+        controller.selectTable(orders_id)
+        controller.setTableExpanded(orders_id, True)
+        controller.setTableExpanded(customers_id, True)
+
+        controller.add_visual("table", "Test Visual", 50, 50, 300, 200)
+        controller.selectVisual("Test Visual")
+
+        # CustomerID exists in both Orders and Customers
+        # Toggling Customers' CustomerID
+        controller.toggleFieldInVisual(customers_id, "CustomerID", True)
+
+        tree = controller.fieldTree
+        cust_t = next(t for t in tree if t["tableId"] == customers_id)
+        ord_t = next(t for t in tree if t["tableId"] == orders_id)
+
+        cust_id_field = next(f for f in cust_t["fields"] if f["label"] == "CustomerID")
+        ord_id_field = next(f for f in ord_t["fields"] if f["label"] == "CustomerID")
+
+        self.assertTrue(cust_id_field["inVisual"])
+        self.assertFalse(ord_id_field["inVisual"])
+
+        # Toggling off removes it
+        controller.toggleFieldInVisual(customers_id, "CustomerID", False)
+        tree = controller.fieldTree
+        cust_t = next(t for t in tree if t["tableId"] == customers_id)
+        cust_id_field = next(f for f in cust_t["fields"] if f["label"] == "CustomerID")
+        self.assertFalse(cust_id_field["inVisual"])
+
+    def test_followup_measure_homes_after_table_switch(self) -> None:
+        controller, orders_id, customers_id = self._setup_controller()
+        # Total Amount was created on Orders table
+        controller.selectTable(customers_id)
+
+        tree = controller.fieldTree
+        cust_t = next(t for t in tree if t["tableId"] == customers_id)
+        ord_t = next(t for t in tree if t["tableId"] == orders_id)
+
+        self.assertNotIn("Total Amount", [f["label"] for f in cust_t["fields"]])
+        self.assertIn("Total Amount", [f["label"] for f in ord_t["fields"]])
+
+    def test_followup_focus_table_leaves_exactly_one_expanded(self) -> None:
+        controller, orders_id, customers_id = self._setup_controller()
+        # Expand both first
+        controller.setTableExpanded(orders_id, True)
+        controller.setTableExpanded(customers_id, True)
+
+        controller.focusTable(customers_id)
+        self.assertEqual(str(controller.activeTableId), customers_id)
+
+        tree = controller.fieldTree
+        cust_t = next(t for t in tree if t["tableId"] == customers_id)
+        ord_t = next(t for t in tree if t["tableId"] == orders_id)
+
+        self.assertTrue(cust_t["expanded"])
+        self.assertFalse(ord_t["expanded"])
+
+    def test_followup_hidden_column_absent_from_field_tree(self) -> None:
+        controller, orders_id, customers_id = self._setup_controller()
+        model_tables = controller._project.get("model", {}).get("tables", [])
+        ord_model = next(t for t in model_tables if str(t.get("id")) == orders_id or t.get("name") == "Orders")
+        # Hide a column on the Orders model table
+        ord_model["hidden_columns"] = ["OrderID"]
+        controller._invalidate_field_tree_cache()
+
+        tree = controller.fieldTree
+        ord_t = next(t for t in tree if t["tableId"] == orders_id)
+        self.assertNotIn("OrderID", [f["label"] for f in ord_t["fields"]])
+

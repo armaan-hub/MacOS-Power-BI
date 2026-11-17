@@ -2335,7 +2335,7 @@ ApplicationWindow {
                                     onActivated: function(index) {
                                         const selected = model[index]
                                         if (selected && String(selected.sourceId) !== String(mainWindow.studioController.activeTableId))
-                                            mainWindow.studioController.selectTable(String(selected.sourceId))
+                                            mainWindow.studioController.focusTable(String(selected.sourceId))
                                     }
                                 }
                             }
@@ -2405,16 +2405,15 @@ ApplicationWindow {
                                     required property var modelData
                                     width: ListView.view.width
                                     spacing: 2
-                                    readonly property string nodeKey: String(modelData)
-                                    readonly property bool isTableNode: nodeKey.indexOf("__table__\t") === 0
-                                    readonly property var tableParts: isTableNode ? nodeKey.split("\t") : []
-                                    readonly property string tableId: isTableNode ? tableParts[1] : ""
-                                    readonly property string tableName: isTableNode ? tableParts[2] : ""
-                                    readonly property bool tableExpanded: isTableNode ? mainWindow.studioController.isTableExpanded(tableId) : false
+                                    readonly property var node: modelData
+                                    readonly property bool isTableNode: Boolean(node.isTable)
+                                    readonly property string tableId: String(node.tableId || "")
+                                    readonly property string tableName: String(node.tableName || "")
+                                    readonly property bool tableExpanded: Boolean(node.expanded)
 
-                                    readonly property string bindingName: isTableNode ? "" : nodeKey
-                                    readonly property string displayName: isTableNode ? "" : mainWindow.studioController.visualFieldLabel(bindingName)
-                                    readonly property string daxName: isTableNode ? "" : mainWindow.measureNameForBinding(bindingName)
+                                    readonly property string bindingName: isTableNode ? "" : String(node.binding || "")
+                                    readonly property string displayName: isTableNode ? "" : String(node.displayLabel || node.label || "")
+                                    readonly property string daxName: isTableNode ? "" : String(node.daxName || "")
                                     readonly property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
 
                                     // Table Header Row
@@ -2482,17 +2481,17 @@ ApplicationWindow {
 
                                         CheckBox {
                                             visible: !dataNodeDelegate.isTableNode
-                                            objectName: !dataNodeDelegate.isTableNode ? "fieldCheck_" + dataNodeDelegate.bindingName : ""
-                                            checked: mainWindow.studioController.isFieldInVisual(dataNodeDelegate.bindingName)
+                                            objectName: !dataNodeDelegate.isTableNode ? "fieldCheck_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName : ""
+                                            checked: Boolean(dataNodeDelegate.node.inVisual)
                                             enabled: Boolean(mainWindow.studioController.selectedVisual)
                                             implicitWidth: 20
                                             implicitHeight: 20
-                                            onToggled: mainWindow.studioController.toggleFieldInVisual(dataNodeDelegate.bindingName, checked)
+                                            onToggled: mainWindow.studioController.toggleFieldInVisual(dataNodeDelegate.tableId, dataNodeDelegate.bindingName, checked)
                                         }
 
                                         Button {
                                             visible: !dataNodeDelegate.isTableNode
-                                            objectName: !dataNodeDelegate.isTableNode ? "dataFieldSelect_" + dataNodeDelegate.bindingName : ""
+                                            objectName: !dataNodeDelegate.isTableNode ? (dataNodeDelegate.tableId === String(mainWindow.studioController.activeTableId) ? "dataFieldSelect_" + dataNodeDelegate.bindingName : "dataFieldSelect_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName) : ""
                                             Layout.fillWidth: true
                                             Layout.preferredHeight: 28
                                             hoverEnabled: true
@@ -2520,7 +2519,7 @@ ApplicationWindow {
                                             contentItem: RowLayout {
                                                 spacing: 6
                                                 FieldIcon {
-                                                    kind: mainWindow.fieldDataType(dataNodeDelegate.bindingName)
+                                                    kind: String(dataNodeDelegate.node.dataType || mainWindow.fieldDataType(dataNodeDelegate.bindingName))
                                                     Layout.preferredWidth: 22
                                                     Layout.preferredHeight: 20
                                                 }
@@ -4558,7 +4557,7 @@ ApplicationWindow {
                                     onActivated: function(index) {
                                         const selected = model[index]
                                         if (selected && String(selected.sourceId) !== String(mainWindow.studioController.activeTableId))
-                                            mainWindow.studioController.selectTable(String(selected.sourceId))
+                                            mainWindow.studioController.focusTable(String(selected.sourceId))
                                     }
                                 }
                                 TextField {
@@ -4619,17 +4618,19 @@ ApplicationWindow {
                                         required property var modelData
                                         width: ListView.view.width
                                         spacing: 2
-                                        readonly property string nodeKey: String(modelData)
-                                        readonly property bool isTableNode: nodeKey.indexOf("__table__\t") === 0
-                                        readonly property var tableParts: isTableNode ? nodeKey.split("\t") : []
-                                        readonly property string tableId: isTableNode ? tableParts[1] : ""
-                                        readonly property string tableName: isTableNode ? tableParts[2] : ""
-                                        readonly property bool tableExpanded: isTableNode ? mainWindow.studioController.isTableExpanded(tableId) : false
+                                        readonly property var node: (modelData && typeof modelData === "object" && !Array.isArray(modelData)) ? modelData : {}
+                                        readonly property string nodeKey: (modelData && typeof modelData === "object" && !Array.isArray(modelData)) ? "" : String(modelData)
+                                        readonly property bool isTableNode: node.isTable !== undefined ? Boolean(node.isTable) : (nodeKey.indexOf("__table__\t") === 0)
+                                        readonly property var tableParts: (!node.isTable && isTableNode) ? nodeKey.split("\t") : []
+                                        readonly property string tableId: node.tableId !== undefined ? String(node.tableId) : (isTableNode ? tableParts[1] : "")
+                                        readonly property string tableName: node.tableName !== undefined ? String(node.tableName) : (isTableNode ? tableParts[2] : "")
+                                        readonly property bool tableExpanded: node.expanded !== undefined ? Boolean(node.expanded) : (isTableNode ? mainWindow.studioController.isTableExpanded(tableId) : false)
 
-                                        readonly property string bindingName: isTableNode ? "" : nodeKey
-                                        readonly property string displayName: isTableNode ? "" : mainWindow.studioController.reportFieldDisplayLabel(bindingName)
-                                        readonly property string daxName: isTableNode ? "" : mainWindow.measureNameForBinding(bindingName)
+                                        readonly property string bindingName: isTableNode ? "" : (node.binding !== undefined ? String(node.binding) : nodeKey)
+                                        readonly property string displayName: isTableNode ? "" : (node.reportDisplayLabel !== undefined ? String(node.reportDisplayLabel) : mainWindow.studioController.reportFieldDisplayLabel(bindingName))
+                                        readonly property string daxName: isTableNode ? "" : (node.daxName !== undefined ? String(node.daxName) : mainWindow.measureNameForBinding(bindingName))
                                         readonly property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
+                                        readonly property bool isCurrentTable: !isTableNode && tableId !== "" && tableId === String(mainWindow.studioController.activeTableId)
 
                                         // Table Header Row
                                         Rectangle {
@@ -4696,18 +4697,18 @@ ApplicationWindow {
 
                                             CheckBox {
                                                 visible: !reportNodeDelegate.isTableNode
-                                                objectName: !reportNodeDelegate.isTableNode ? "fieldCheck_" + reportNodeDelegate.bindingName : ""
-                                                checked: mainWindow.studioController.isFieldInVisual(reportNodeDelegate.bindingName)
+                                                objectName: !reportNodeDelegate.isTableNode ? ("fieldCheck_" + (reportNodeDelegate.tableId !== "" ? (reportNodeDelegate.tableId + "_") : "") + reportNodeDelegate.bindingName) : ""
+                                                checked: reportNodeDelegate.node.inVisual !== undefined ? Boolean(reportNodeDelegate.node.inVisual) : mainWindow.studioController.isFieldInVisual(reportNodeDelegate.bindingName)
                                                 enabled: Boolean(mainWindow.studioController.selectedVisual)
                                                 implicitWidth: 20
                                                 implicitHeight: 20
-                                                onToggled: mainWindow.studioController.toggleFieldInVisual(reportNodeDelegate.bindingName, checked)
+                                                onToggled: mainWindow.studioController.toggleFieldInVisual(reportNodeDelegate.tableId, reportNodeDelegate.bindingName, checked)
                                             }
 
                                             Button {
                                                 id: reportFieldSelectButton
                                                 visible: !reportNodeDelegate.isTableNode
-                                                objectName: !reportNodeDelegate.isTableNode ? "reportFieldSelect_" + reportNodeDelegate.bindingName : ""
+                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" ? ("reportFieldSelect_" + reportNodeDelegate.bindingName) : ("reportFieldSelect_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
                                                 Layout.fillWidth: true
                                                 Layout.preferredHeight: 28
                                                 hoverEnabled: true
@@ -4735,7 +4736,7 @@ ApplicationWindow {
                                                 contentItem: RowLayout {
                                                     spacing: 5
                                                     FieldIcon {
-                                                        kind: mainWindow.fieldDataType(reportNodeDelegate.bindingName)
+                                                        kind: reportNodeDelegate.node.dataType !== undefined ? reportNodeDelegate.node.dataType : mainWindow.fieldDataType(reportNodeDelegate.bindingName)
                                                         Layout.preferredWidth: 22
                                                         Layout.preferredHeight: 20
                                                     }
@@ -4779,7 +4780,7 @@ ApplicationWindow {
                                             ToolButton {
                                                 id: fieldAddButton
                                                 visible: !reportNodeDelegate.isTableNode
-                                                objectName: !reportNodeDelegate.isTableNode ? "reportFieldAdd_" + reportNodeDelegate.bindingName : ""
+                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" ? ("reportFieldAdd_" + reportNodeDelegate.bindingName) : ("reportFieldAdd_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
                                                 text: "+"
                                                 enabled: mainWindow.fieldWellOptions(reportNodeDelegate.bindingName).length > 0
                                                 Accessible.name: "Add " + reportNodeDelegate.displayName + " to selected visual"
