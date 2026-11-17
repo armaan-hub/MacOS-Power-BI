@@ -57,7 +57,7 @@ def test_column_chart_groups_tabs_and_toggles(tmp_path: Path) -> None:
     ]
     toggles = {g["name"]: (g["toggleKey"], g["toggleValue"]) for g in groups}
     assert toggles["X-axis"] == ("show_x_axis", True)
-    assert toggles["Y-axis"] == (None, False)
+    assert toggles["Y-axis"] == ("show_y_axis", True)
     assert toggles["Gridlines"] == ("show_gridlines", True)
     assert toggles["Colors"] == (None, False)
     assert toggles["Data labels"] == ("show_data_labels", False)
@@ -69,12 +69,13 @@ def test_column_chart_groups_tabs_and_toggles(tmp_path: Path) -> None:
 
 
 # (type) -> (X-axis header toggleKey, Y-axis header toggleKey); each card always has its Title switch.
+# Task 193 (2026-11-17): value axes now drawn
 _AXIS_CARDS = {
-    "column": ("show_x_axis", None),
-    "bar": (None, "show_y_axis"),
-    "area": ("show_x_axis", None),
-    "lineClusteredColumn": ("show_x_axis", None),
-    "line": (None, None),
+    "column": ("show_x_axis", "show_y_axis"),
+    "bar": ("show_x_axis", "show_y_axis"),
+    "area": ("show_x_axis", "show_y_axis"),
+    "lineClusteredColumn": ("show_x_axis", "show_y_axis"),
+    "line": ("show_x_axis", "show_y_axis"),
 }
 
 
