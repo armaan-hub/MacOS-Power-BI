@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from unittest import mock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -129,10 +130,11 @@ class RibbonLayoutTests(unittest.TestCase):
                                      sorted(_flatten(t) for t in shown))
 
     def test_narrow_window_collapses_groups_into_dropdowns_with_working_commands(self) -> None:
-        page = self.show_page(0, 900)
+        # Task 207 (2026-11-17): Keep/Remove Rows are dropdowns since Task 206, so the collapsed group shows submenus.
+        page = self.show_page(0, 800)
         collapsed = [b for b in page.findChildren(QToolButton, "powerQueryRibbonCollapsedGroup")
                      if b.isVisible()]
-        self.assertTrue(collapsed, "Home at 900px should collapse at least one group")
+        self.assertTrue(collapsed, "Home at 800px should collapse at least one group")
         for button in collapsed:
             hint = button.sizeHint()
             self.assertGreaterEqual(button.width(), hint.width())
@@ -143,16 +145,17 @@ class RibbonLayoutTests(unittest.TestCase):
             if button.property("groupTitle") != "Reduce Rows":
                 continue
             button.menu().aboutToShow.emit()
-            labels = [a.text() for a in button.menu().actions()]
-            self.assertEqual(labels, ["Keep Rows", "Remove Rows"])
-            real = self.dialog.ribbon_command_buttons["remove_top_rows"]
-            clicked: list[bool] = []
-            real.clicked.connect(lambda *_: clicked.append(True))
-            next(a for a in button.menu().actions() if a.text() == "Remove Rows").trigger()
-            self.assertEqual(clicked, [True])
+            actions = button.menu().actions()
+            self.assertEqual([a.text() for a in actions], ["Keep Rows", "Remove Rows"])
+            self.assertIsNotNone(actions[0].menu())
+            self.assertIsNotNone(actions[1].menu())
+            remove_rows_sub = actions[1].menu()
+            with mock.patch.object(self.dialog, "_select_ribbon_operation") as select:
+                next(a for a in remove_rows_sub.actions() if a.text() == "Remove Top Rows").trigger()
+            select.assert_called_once_with("remove_top_rows")
             break
         else:
-            self.skipTest("Reduce Rows was not collapsed at 900px")
+            self.fail("Reduce Rows was not collapsed at 800px")
 
     def test_no_sparse_row_buttons_in_the_ribbon(self) -> None:
         # Power BI Desktop has no Sparse Top / Sparse Bottom commands; the ops stay for saved queries.

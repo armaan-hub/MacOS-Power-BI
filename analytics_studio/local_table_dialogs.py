@@ -1786,6 +1786,139 @@ class ReplaceValuesDialog(QDialog):
             }
 
 
+class ReplaceErrorsDialog(QDialog):
+    """Power BI's Replace Errors dialog (Transform > Replace Values > Replace Errors)."""
+
+    def __init__(
+        self,
+        columns: list[str],
+        column_types: dict[str, str] | None = None,
+        initial_step: dict[str, Any] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQueryReplaceErrorsDialog")
+        self.setWindowTitle("Replace Errors")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(440)
+
+        self._columns = list(columns)
+        self._column_types = {
+            col: canonical_column_type((column_types or {}).get(col, "text"))
+            for col in self._columns
+        }
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(10)
+
+        caption = QLabel("Enter the value which will replace errors in the selected columns.")
+        caption.setWordWrap(True)
+        caption.setStyleSheet("font-size: 12px; color: #273b49;")
+        layout.addWidget(caption)
+
+        value_label = QLabel("Value")
+        self.value_edit = QLineEdit(self)
+        self.value_edit.setObjectName("replaceErrorsValueEdit")
+        layout.addWidget(value_label)
+        layout.addWidget(self.value_edit)
+
+        self.error_label = QLabel(self)
+        self.error_label.setObjectName("replaceErrorsError")
+        self.error_label.setWordWrap(True)
+        self.error_label.setStyleSheet("color: #a4262c;")
+        self.error_label.setVisible(False)
+        layout.addWidget(self.error_label)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch(1)
+        self.ok_button = QPushButton("OK", self)
+        self.ok_button.setObjectName("replaceErrorsOkButton")
+        self.cancel_button = QPushButton("Cancel", self)
+        self.cancel_button.setObjectName("replaceErrorsCancelButton")
+        buttons_layout.addWidget(self.ok_button)
+        buttons_layout.addWidget(self.cancel_button)
+        layout.addLayout(buttons_layout)
+
+        self.ok_button.clicked.connect(self._accept_dialog)
+        self.cancel_button.clicked.connect(self.reject)
+        self.value_edit.textChanged.connect(self._clear_error)
+
+        if initial_step is not None:
+            self._load_initial_step(initial_step)
+
+    def _clear_error(self) -> None:
+        if self.error_label.isVisible():
+            self.error_label.setVisible(False)
+            self.error_label.setText("")
+
+    def _show_error(self, message: str) -> None:
+        self.error_label.setText(message)
+        self.error_label.setVisible(True)
+
+    def _load_initial_step(self, step: dict[str, Any]) -> None:
+        replacements = step.get("replacements", [])
+        if replacements:
+            val = replacements[0][1]
+            self.value_edit.setText("null" if val is None else str(val))
+
+    def _parse_column_value(self, raw_text: str, col_type: str) -> Any:
+        if raw_text == "null":
+            return None
+        text = raw_text
+        if col_type == "text":
+            return text
+        if col_type in {"whole_number", "decimal_number"}:
+            try:
+                if col_type == "whole_number":
+                    try:
+                        return int(text)
+                    except ValueError:
+                        val = Decimal(text.strip())
+                        if not val.is_finite() or val != val.to_integral_value():
+                            raise ValueError
+                        return int(val)
+                number = float(text) if ("." in text or "e" in text.lower()) else int(text)
+                if isinstance(number, float) and not math.isfinite(number):
+                    raise ValueError
+                return number
+            except Exception as exc:
+                raise TransformationError("Value must be a valid number.") from exc
+        if col_type == "boolean":
+            lowered = text.strip().casefold()
+            if lowered == "true":
+                return True
+            if lowered == "false":
+                return False
+            raise TransformationError("Value must be true or false.")
+        if col_type in {"date", "datetime"}:
+            parsed = _parse_row_date_or_datetime(text)
+            if parsed is None:
+                raise TransformationError("Value must be a valid date or datetime.")
+            return str(parsed)
+        return text
+
+    def step(self) -> dict[str, Any]:
+        raw_text = self.value_edit.text()
+        replacements: list[list[Any]] = []
+        for col in self._columns:
+            col_type = self._column_types.get(col, "text")
+            val = self._parse_column_value(raw_text, col_type)
+            replacements.append([col, val])
+        return {
+            "op": "replace_error_values",
+            "replacements": replacements,
+        }
+
+    def _accept_dialog(self) -> None:
+        try:
+            self.step()
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            return
+        self.accept()
+
+
 class SplitColumnByDelimiterDialog(QDialog):
     """Power BI's Split Column by Delimiter dialog."""
 
@@ -4227,7 +4360,7 @@ class TransformDataDialog(QDialog):
 
     _STEP_OPERATIONS_WITHOUT_SETTINGS = frozenset({
         "promote_headers", "demote_headers", "transpose_table", "remove_blank_rows",
-        "remove_rows_with_errors", "remove_sparse_top_rows",
+        "remove_rows_with_errors", "keep_rows_with_errors", "remove_sparse_top_rows",
         "remove_sparse_bottom_rows", "m_sparse_boundary_helper", "count_rows",
     })
 
@@ -5649,6 +5782,7 @@ class TransformDataDialog(QDialog):
     def _populate_ribbon(self) -> None:
         """Expose every supported local transform through task-oriented ribbon tabs."""
         self.ribbon_command_buttons: dict[str, QToolButton] = {}
+        self.ribbon_menu_actions: dict[str, QAction] = {}
         self._ribbon_icon_cache: dict[str, QIcon] = {}
         self._ribbon_pages: list[dict[str, Any]] = []
 
@@ -5754,6 +5888,25 @@ class TransformDataDialog(QDialog):
         ribbon_locale_supported = (
             self.operation_combo.findData("convert_type_using_locale") >= 0
         )
+        replace_value_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Replace Values", lambda: self._select_ribbon_operation("replace_value"), True, None, "replaceValuesAction", "replace_value"),
+            ("Replace Errors", lambda: self._open_replace_errors_dialog(), True, None, "replaceErrorsAction", "replace_error_values"),
+        ]
+        keep_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Keep Top Rows", lambda: self._select_ribbon_operation("keep_top_rows"), True, None, "keepRowsKeepTopRowsAction", "keep_top_rows"),
+            ("Keep Bottom Rows", lambda: self._select_ribbon_operation("keep_bottom_rows"), True, None, "keepRowsKeepBottomRowsAction", "keep_bottom_rows"),
+            ("Keep Range of Rows", lambda: self._select_ribbon_operation("keep_range_rows"), True, None, "keepRowsKeepRangeRowsAction", "keep_range_rows"),
+            ("Keep Duplicates", lambda: self._select_ribbon_operation("keep_duplicates"), True, None, "keepRowsKeepDuplicatesAction", "keep_duplicates"),
+            ("Keep Errors", lambda: self._apply_keep_errors(), True, None, "keepRowsKeepErrorsAction", "keep_rows_with_errors"),
+        ]
+        remove_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Remove Top Rows", lambda: self._select_ribbon_operation("remove_top_rows"), True, None, "removeRowsRemoveTopRowsAction", "remove_top_rows"),
+            ("Remove Bottom Rows", lambda: self._select_ribbon_operation("remove_bottom_rows"), True, None, "removeRowsRemoveBottomRowsAction", "remove_bottom_rows"),
+            ("Remove Alternate Rows", lambda: self._select_ribbon_operation("remove_alternate_rows"), True, None, "removeRowsRemoveAlternateRowsAction", "remove_alternate_rows"),
+            ("Remove Duplicates", lambda: self._select_ribbon_operation("remove_duplicates"), True, None, "removeRowsRemoveDuplicatesAction", "remove_duplicates"),
+            ("Remove Blank Rows", lambda: self._select_ribbon_operation("remove_blank_rows"), True, None, "removeRowsRemoveBlankRowsAction", "remove_blank_rows"),
+            ("Remove Errors", lambda: self._select_ribbon_operation("remove_rows_with_errors"), True, "Remove rows with an error in the selected columns.", "removeRowsRemoveErrorsAction", "remove_rows_with_errors"),
+        ]
         data_type_menu_items: list[tuple[str, Any, bool]] = []
         for label, op_or_type, is_locale_op in _POWER_BI_CHANGE_TYPE_SPECS:
             if is_locale_op:
@@ -5773,19 +5926,28 @@ class TransformDataDialog(QDialog):
             else:
                 data_type_menu_items.append((label, lambda: None, False))
 
-        split_column_menu_items: list[tuple[str, Any, bool, str | None]] = [
-            ("By Delimiter...", lambda: self._open_split_by_delimiter_dialog(), True, None),
+        split_column_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            (
+                "By Delimiter...",
+                lambda: self._open_split_by_delimiter_dialog(),
+                True,
+                None,
+                "splitColumnByDelimiterAction",
+                ("split_column", "split_column_by_each_delimiter", "split_column_to_rows"),
+            ),
             (
                 "By Positions...",
                 lambda: self._select_ribbon_operation("split_column_by_positions"),
                 True,
                 None,
+                "splitColumnByPositionsAction",
+                "split_column_by_positions",
             ),
-            ("By Number of Characters...", lambda: None, False, "Not supported yet"),
-            ("By Lowercase to Uppercase", lambda: None, False, "Not supported yet"),
-            ("By Uppercase to Lowercase", lambda: None, False, "Not supported yet"),
-            ("By Digit to Non-Digit", lambda: None, False, "Not supported yet"),
-            ("By Non-Digit to Digit", lambda: None, False, "Not supported yet"),
+            ("By Number of Characters...", lambda: None, False, "Not supported yet", None, None),
+            ("By Lowercase to Uppercase", lambda: None, False, "Not supported yet", None, None),
+            ("By Uppercase to Lowercase", lambda: None, False, "Not supported yet", None, None),
+            ("By Digit to Non-Digit", lambda: None, False, "Not supported yet", None, None),
+            ("By Non-Digit to Digit", lambda: None, False, "Not supported yet", None, None),
         ]
         home_groups = [
             ("Close", [action(
@@ -5845,8 +6007,26 @@ class TransformDataDialog(QDialog):
                 command("Remove Columns", "remove_column", "Remove the selected column.", size="medium", slot=(0, 1, 3, 1), width=52),
             ], "office"),
             ("Reduce Rows", [
-                command("Keep Rows", "keep_top_rows", "Keep the first N rows.", size="medium", slot=(0, 0, 3, 1), width=47),
-                command("Remove Rows", "remove_top_rows", "Remove the first N rows.", size="medium", slot=(0, 1, 3, 1), width=47),
+                command(
+                    "Keep Rows",
+                    "keep_top_rows",
+                    "Keep the first N rows.",
+                    size="medium",
+                    slot=(0, 0, 3, 1),
+                    width=47,
+                    menu_items=keep_rows_menu_items,
+                    menu_button_popup=True,
+                ),
+                command(
+                    "Remove Rows",
+                    "remove_top_rows",
+                    "Remove the first N rows.",
+                    size="medium",
+                    slot=(0, 1, 3, 1),
+                    width=47,
+                    menu_items=remove_rows_menu_items,
+                    menu_button_popup=True,
+                ),
             ], "office"),
             ("Sort", [
                 action(
@@ -5887,7 +6067,16 @@ class TransformDataDialog(QDialog):
                     menu_items=data_type_menu_items,
                 ),
                 command("Use First Row as Headers", "promote_headers", "Use the first row as column names.", size="small", slot=(1, 2, 1, 1), width=150),
-                command("Replace Values", "replace_value", "Replace matching values in a column.", size="small", slot=(2, 2, 1, 1), width=145),
+                command(
+                    "Replace Values",
+                    "replace_value",
+                    "Replace matching values in a column.",
+                    size="small",
+                    slot=(2, 2, 1, 1),
+                    width=145,
+                    menu_items=replace_value_menu_items,
+                    menu_button_popup=True,
+                ),
                 action(
                     "Detect Data Types",
                     "Infer safe types for columns and add explicit conversion steps.",
@@ -5974,10 +6163,10 @@ class TransformDataDialog(QDialog):
                 width=102,
             )], "office"),
         ]
-        unpivot_columns_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
-            ("Unpivot Columns", lambda: self._run_unpivot("columns"), True, None, "unpivotColumnsAction"),
-            ("Unpivot Other Columns", lambda: self._run_unpivot("other"), True, None, "unpivotOtherColumnsAction"),
-            ("Unpivot Only Selected Columns", lambda: self._run_unpivot("only_selected"), True, None, "unpivotOnlySelectedColumnsAction"),
+        unpivot_columns_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Unpivot Columns", lambda: self._run_unpivot("columns"), True, None, "unpivotColumnsAction", "unpivot_columns"),
+            ("Unpivot Other Columns", lambda: self._run_unpivot("other"), True, None, "unpivotOtherColumnsAction", "unpivot_other_columns"),
+            ("Unpivot Only Selected Columns", lambda: self._run_unpivot("only_selected"), True, None, "unpivotOnlySelectedColumnsAction", "unpivot_columns"),
         ]
         transform_groups = [
             ("Table", [
@@ -6001,8 +6190,6 @@ class TransformDataDialog(QDialog):
                     menu_items=unpivot_columns_menu_items,
                     menu_button_popup=True,
                 ),
-                command("Remove Duplicates", "remove_duplicates", "Keep the first row for each duplicate key.", slot=(1, 2, 1, 1)),
-                command("Keep Duplicates", "keep_duplicates", "Keep rows whose selected key occurs more than once.", slot=(2, 2, 1, 1)),
             ], "office"),
             ("Text Column", [
                 command("Trim", "trim_text", "Remove leading and trailing whitespace.", slot=(0, 0, 1, 1)),
@@ -6011,29 +6198,20 @@ class TransformDataDialog(QDialog):
                 command("Uppercase", "uppercase_text", "Convert text to uppercase.", slot=(3, 0, 1, 1)),
                 command("Capitalize", "proper_case_text", "Capitalize each word.", slot=(0, 1, 1, 1)),
                 command("Reverse", "reverse_text", "Reverse text in the selected column.", slot=(1, 1, 1, 1)),
-                command("Split Each Delim.", "split_column_by_each_delimiter", "Split at every delimiter into columns.", slot=(2, 1, 1, 1)),
-                command("Split to Rows", "split_column_to_rows", "Create a row for each delimited value.", slot=(3, 1, 1, 1)),
-                command("Split at Positions", "split_column_by_positions", "Split text at character positions.", slot=(0, 2, 1, 1)),
-                command("Extract Delim.", "extract_text_by_delimiter", "Extract text around a selected delimiter occurrence.", slot=(1, 2, 1, 1)),
-                command("Between Delims", "extract_text_between_delimiters", "Extract text between matching delimiters.", slot=(2, 2, 1, 1)),
+                command("Extract Delim.", "extract_text_by_delimiter", "Extract text around a selected delimiter occurrence.", slot=(2, 1, 1, 1)),
+                command("Between Delims", "extract_text_between_delimiters", "Extract text between matching delimiters.", slot=(3, 1, 1, 1)),
             ], "office"),
             ("Rows", [
                 command("Filter Rows", "filter_rows", "Filter one column with a supported comparison.", slot=(0, 0, 1, 1)),
                 command("Advanced Filter", "filter_rows_advanced", "Build an AND/OR filter across columns.", slot=(1, 0, 1, 1)),
-                command("Keep Bottom", "keep_bottom_rows", "Keep the last N rows.", slot=(2, 0, 1, 1)),
-                command("Keep Range", "keep_range_rows", "Keep a range beginning at a one-based row number.", slot=(3, 0, 1, 1)),
-                command("Remove Bottom", "remove_bottom_rows", "Remove the last N rows.", slot=(0, 1, 1, 1)),
-                command("Remove Alternate", "remove_alternate_rows", "Remove repeating groups of rows.", slot=(1, 1, 1, 1)),
-                command("Remove Blank Rows", "remove_blank_rows", "Remove rows where every field is blank.", slot=(2, 1, 1, 1)),
-                command("Remove Errors", "remove_rows_with_errors", "Remove rows with an error in the selected columns.", slot=(3, 1, 1, 1)),
-                command("Sort Rows", "sort_rows", "Sort the selected column ascending or descending.", slot=(0, 2, 1, 1)),
-                command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(1, 2, 1, 1)),
+                command("Sort Rows", "sort_rows", "Sort the selected column ascending or descending.", slot=(2, 0, 1, 1)),
+                command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(3, 0, 1, 1)),
             ], "office"),
         ]
-        index_column_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
-            ("From 0", lambda: self._add_direct_index_step(0, 1), True, None, "indexColumnFrom0Action"),
-            ("From 1", lambda: self._add_direct_index_step(1, 1), True, None, "indexColumnFrom1Action"),
-            ("Custom...", lambda: self._open_add_index_column_dialog(), True, None, "indexColumnCustomAction"),
+        index_column_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("From 0", lambda: self._add_direct_index_step(0, 1), True, None, "indexColumnFrom0Action", "add_index_column"),
+            ("From 1", lambda: self._add_direct_index_step(1, 1), True, None, "indexColumnFrom1Action", "add_index_column"),
+            ("Custom...", lambda: self._open_add_index_column_dialog(), True, None, "indexColumnCustomAction", "add_index_column"),
         ]
         add_column_groups = [
             ("General", [
@@ -6308,6 +6486,13 @@ class TransformDataDialog(QDialog):
                                 menu_action.triggered.connect(
                                     lambda _checked=False, fn=menu_callback: fn()
                                 )
+                            if len(item) > 5 and item[5]:
+                                op_keys = item[5]
+                                if isinstance(op_keys, (list, tuple, set)):
+                                    for op_key in op_keys:
+                                        self.ribbon_menu_actions.setdefault(str(op_key), menu_action)
+                                else:
+                                    self.ribbon_menu_actions.setdefault(str(op_keys), menu_action)
                         button.setMenu(menu)
                         button.setPopupMode(
                             QToolButton.ToolButtonPopupMode.MenuButtonPopup
@@ -7011,7 +7196,7 @@ class TransformDataDialog(QDialog):
         "unpivot_other_columns",
     })
     _PARAMETERLESS_OPERATIONS = frozenset({
-        "remove_blank_rows", "remove_rows_with_errors",
+        "remove_blank_rows", "remove_rows_with_errors", "keep_rows_with_errors",
     })
 
     def _selected_preview_columns(self) -> list[str]:
@@ -7098,6 +7283,18 @@ class TransformDataDialog(QDialog):
         self._reselect_step(prior_row)
         if message:
             self._show_error(message)
+
+    def _apply_keep_errors(self) -> None:
+        """Keep only rows that contain errors (in selected columns, or in any column if none selected)."""
+        if not self._confirm_insert_step():
+            return
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+        selected = self._selected_preview_columns()
+        before = len(self._steps)
+        self._apply_direct_operation("keep_rows_with_errors", selected)
+        self._finish_insert(len(self._steps) > before, prior_row)
 
     def _select_ribbon_sort(self, direction: str) -> None:
         if not self._confirm_insert_step():
@@ -7198,7 +7395,7 @@ class TransformDataDialog(QDialog):
 
     def _apply_direct_operation(self, operation: str, selected: list[str]) -> bool:
         """Apply a command that needs no further input. False means it needs a dialog."""
-        if operation == "remove_rows_with_errors":
+        if operation in {"remove_rows_with_errors", "keep_rows_with_errors"}:
             steps: list[dict[str, Any]] = (
                 [{"op": operation, "columns": list(selected)}]
                 if selected else [{"op": operation}]
@@ -7681,6 +7878,90 @@ class TransformDataDialog(QDialog):
         sub.finished.connect(finished)
         self._operation_dialog = sub
         self._pivot_column_dialog = sub
+        sub.show()
+
+    def _open_replace_errors_dialog(
+        self,
+        editing_index: int | None = None,
+        *,
+        prior_row: int = -1,
+    ) -> None:
+        """Power BI's Replace Errors dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+        selected = self._selected_preview_columns()
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+        if existing is not None and "replacements" in existing:
+            target_columns = [pair[0] for pair in existing["replacements"]]
+        else:
+            target_columns = list(selected)
+
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._insert_at = None
+            self._show_error(str(exc))
+            return
+
+        if not target_columns:
+            if base.headers:
+                target_columns = [base.headers[0]]
+            else:
+                self._insert_at = None
+                self._show_error("Select a column in the preview first.")
+                return
+
+        col_types: dict[str, str] = {}
+        try:
+            type_map = column_types_after_steps(
+                self._source_candidate.headers,
+                self._steps[:editing_index] if editing_index is not None else self._steps[:self._insert_position()],
+                output_headers=base.headers,
+                initial_types=self._active_source_types(),
+            )
+            col_types = {col: type_map.get(col, "text") for col in target_columns}
+        except Exception:
+            profiles = getattr(self.preview_header, "_profiles", [])
+            for profile in profiles:
+                col_name = profile.get("name")
+                if col_name in target_columns:
+                    col_types[col_name] = str(profile.get("type", "text"))
+
+        sub = ReplaceErrorsDialog(
+            columns=target_columns,
+            column_types=col_types,
+            initial_step=existing,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            self._insert_at = None
+            self.step_settings_toggle.setChecked(False)
+            self.operation_settings_panel.setVisible(False)
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
         sub.show()
 
     def _open_add_index_column_dialog(
@@ -9283,7 +9564,12 @@ class TransformDataDialog(QDialog):
         add_item(menu, "Replace Values...", "replace_value")
 
         # 11. Replace Errors...
-        add_item(menu, "Replace Errors...", None)
+        add_item(
+            menu,
+            "Replace Errors...",
+            None,
+            action_fn=lambda: self._open_replace_errors_dialog(),
+        )
 
         # Split Column ▸ (By Delimiter...)
         split_sub = QMenu("Split Column", menu)
@@ -10367,6 +10653,7 @@ class TransformDataDialog(QDialog):
             "keep_duplicates",
             "remove_blank_rows",
             "remove_rows_with_errors",
+            "keep_rows_with_errors",
             "remove_sparse_top_rows",
             "remove_sparse_bottom_rows",
             "remove_top_rows",
@@ -10961,7 +11248,7 @@ class TransformDataDialog(QDialog):
                 if self.keep_columns_list.item(index).checkState() == Qt.CheckState.Checked
             ]
             return {"op": op, "columns": columns}
-        if op in {"remove_blank_rows", "remove_rows_with_errors"}:
+        if op in {"remove_blank_rows", "remove_rows_with_errors", "keep_rows_with_errors"}:
             return {"op": op}
         if op == "keep_range_rows":
             try:
@@ -11888,6 +12175,9 @@ class TransformDataDialog(QDialog):
         if step["op"] == "pivot_column":
             self._open_pivot_column_dialog(editing_index=index, prior_row=index)
             return
+        if step["op"] == "replace_error_values":
+            self._open_replace_errors_dialog(index)
+            return
         if step["op"] == "add_index_column":
             self._open_add_index_column_dialog(editing_index=index, prior_row=index)
             return
@@ -12185,7 +12475,7 @@ class TransformDataDialog(QDialog):
                 detail = "entire rows"
             elif step["op"] == "remove_blank_rows":
                 detail = "all fields empty"
-            elif step["op"] == "remove_rows_with_errors":
+            elif step["op"] in {"remove_rows_with_errors", "keep_rows_with_errors"}:
                 detail = (
                     "all fields"
                     if "columns" not in step

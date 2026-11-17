@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 201-204 shipped as Iteration 281; next Task 205 Replace Errors, Task 206 Keep/Remove Rows dropdowns and Keep Errors; Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
+**Active agent:** Claude Opus 5.5 (Task 205-207 shipped as Iteration 282; next VM screen check of the open UX parity risks (user OK needed), then the next ux_backlog items; Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
 **Branch in use:** main
 **Working tree clean:** yes
 

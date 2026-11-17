@@ -1447,9 +1447,10 @@ in
         }
         # Power BI Desktop has no Sparse Top / Sparse Bottom buttons (the operations stay in the form).
         sparse = {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
-        # Task 199 (2026-11-17): Unpivot Other Columns is an entry of the Unpivot Columns dropdown, not its own button.
-        in_dropdown = {"unpivot_other_columns"}
-        self.assertEqual(set(dialog.ribbon_command_buttons), operations - sparse - in_dropdown)
+        # Task 207 (2026-11-17): Keep Errors and Replace Errors exist only as dropdown entries (not in the operation form).
+        dropdown_only = {"keep_rows_with_errors", "replace_error_values"}
+        reachable = set(dialog.ribbon_command_buttons) | set(dialog.ribbon_menu_actions)
+        self.assertEqual(reachable, (operations - sparse) | dropdown_only)
         direct_operations = (
             dialog._SELECTION_OPERATIONS_PER_COLUMN
             | dialog._SELECTION_OPERATIONS_COLUMN_LIST
