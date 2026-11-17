@@ -15,7 +15,7 @@ from analytics_studio.power_query_m import (
     parse_m_script,
     steps_to_m_script,
 )
-from analytics_studio.transformations import TransformationError, validate_steps
+from analytics_studio.transformations import TransformationError, column_types_after_steps, validate_steps
 
 QUERY = "Source Table"
 SOURCE_TYPES = {
@@ -101,6 +101,14 @@ class GroupByEmitterTypeTests(unittest.TestCase):
         self.assertIn('{"Count", each List.Sum([W])}', script)
         self.assertNotIn("type number", script)
 
+    def test_no_initial_types_sum_emits_no_type(self) -> None:
+        # Task 216 fix: without initial_column_types nothing is known, so no type argument.
+        script = steps_to_m_script(
+            [group_step({"operation": "sum", "column": "V", "new_name": "X"})], QUERY,
+        )
+        self.assertIn('{{"X", each List.Sum([V])}}', script)
+        self.assertNotIn("type number", script)
+
     def test_unknown_column_type_emits_no_type(self) -> None:
         # Column Z is not in the known types, so no type argument is written.
         script = self.emit({"operation": "sum", "column": "Z", "new_name": "Count"})
@@ -174,6 +182,47 @@ class GroupByRoundTripTests(unittest.TestCase):
         # Projects saved before Task 216 have no m_type key and need no migration.
         legacy = group_step({"operation": "sum", "column": "W", "new_name": "Count"})
         self.assertNotIn("m_type", validate_steps([legacy])[0]["aggregations"][0])
+
+
+class GroupByReplayColumnTypeTests(unittest.TestCase):
+    """Task 216: replay types of Group By results (Power BI's grid shows Sum as Decimal Number)."""
+
+    def result_type(self, aggregate: dict[str, str]) -> str:
+        return column_types_after_steps(
+            list(SOURCE_TYPES),
+            [group_step(aggregate)],
+            initial_types=SOURCE_TYPES,
+        )["Count"]
+
+    def test_count_rows_stays_whole_number(self) -> None:
+        self.assertEqual(self.result_type({"operation": "count_rows", "new_name": "Count"}), "whole_number")
+
+    def test_sum_of_whole_number_gives_decimal_number(self) -> None:
+        self.assertEqual(
+            self.result_type({"operation": "sum", "column": "W", "new_name": "Count"}),
+            "decimal_number",
+        )
+
+    def test_sum_of_decimal_number_gives_decimal_number(self) -> None:
+        self.assertEqual(
+            self.result_type({"operation": "sum", "column": "N", "new_name": "Count"}),
+            "decimal_number",
+        )
+
+    def test_average_and_median_give_decimal_number(self) -> None:
+        for operation, column in (("average", "W"), ("median", "C")):
+            with self.subTest(operation=operation):
+                self.assertEqual(
+                    self.result_type({"operation": operation, "column": column, "new_name": "Count"}),
+                    "decimal_number",
+                )
+
+    def test_min_keeps_source_type(self) -> None:
+        # Min/Max are not part of Task 216's Power BI answers; their replay type is unchanged.
+        self.assertEqual(
+            self.result_type({"operation": "min", "column": "W", "new_name": "Count"}),
+            "whole_number",
+        )
 
 
 class GroupByEvaluationTests(unittest.TestCase):

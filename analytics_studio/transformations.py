@@ -2094,13 +2094,9 @@ def column_types_after_steps(
                 operation = aggregate["operation"]
                 if operation in _GROUP_ROW_OPERATIONS or operation == "count_distinct_values":
                     aggregate_type = "whole_number"
-                elif operation in {"average", "median"}:
+                elif operation in {"sum", "average", "median"}:
+                    # Task 216: Power BI's Sum/Average/Median give a Decimal Number column.
                     aggregate_type = "decimal_number"
-                elif operation == "sum":
-                    source_type = previous_types.get(aggregate["column"], "text")
-                    aggregate_type = (
-                        "whole_number" if source_type == "whole_number" else "decimal_number"
-                    )
                 else:
                     aggregate_type = previous_types.get(aggregate["column"], "text")
                 types[aggregate["new_name"]] = aggregate_type
