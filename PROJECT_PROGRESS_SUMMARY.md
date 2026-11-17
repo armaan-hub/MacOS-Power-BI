@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-17, after Iteration 281 / Task 201-204 m-keywords-remove-errors, M keyword names quoted, Remove Errors on selected columns, reserved M names, test cleanup, Claude Opus 5.5 planned, Antigravity, OpenCode and Codex coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 5015 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 205 Replace Errors, Task 206 Keep/Remove Rows dropdowns and Keep Errors
+**Latest status (2026-11-17, after Iteration 282 / Task 205-207 ux-205-207, Replace Errors, Keep/Remove Rows dropdowns with Keep Errors, ribbon cleanup, Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest 5039 passed (full gate), real app 575/575 equal (fresh probes not re-run, UI-only iteration), replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: VM screen check of the open UX parity risks (user OK needed), then the next ux_backlog items
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
