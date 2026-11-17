@@ -442,11 +442,18 @@ ApplicationWindow {
         }
     }
 
-    readonly property var ribbonTabs: ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help", "Table tools", "Measure tools"]
+    readonly property var ribbonTabs: ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help", "Table tools", "Measure tools", "Column tools"]
     // Contextual tabs: Table tools in Data view (or while a column is being written), Measure
-    // tools while a measure is selected in the Data pane or being written in the formula bar.
+    // tools while a measure is selected in the Data pane or being written in the formula bar,
+    // and Column tools when a column is selected in Table view.
     readonly property bool formulaBarActive: mainWindow.studioController.formulaBar.active
     readonly property string formulaBarMode: mainWindow.studioController.formulaBar.mode
+    readonly property bool columnToolsVisible: mainWindow.studioController.sourceLoaded
+            && mainWindow.studioController.currentView === "Data"
+            && !formulaBarActive
+            && selectedFieldBinding !== ""
+            && measureNameForBinding(selectedFieldBinding) === ""
+            && (mainWindow.studioController.headers || []).indexOf(String(mainWindow.studioController.visualFieldLabel ? mainWindow.studioController.visualFieldLabel(selectedFieldBinding) : selectedFieldBinding)) >= 0
     readonly property bool measureToolsVisible: mainWindow.studioController.sourceLoaded
             && ((formulaBarActive && formulaBarMode === "measure")
                 || (!formulaBarActive && mainWindow.studioController.currentView === "Data"
@@ -457,6 +464,8 @@ ApplicationWindow {
         const tabs = ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help"]
         if (tableToolsVisible)
             tabs.push("Table tools")
+        if (columnToolsVisible)
+            tabs.push("Column tools")
         if (measureToolsVisible)
             tabs.push("Measure tools")
         return tabs
@@ -699,6 +708,19 @@ ApplicationWindow {
                 { label: "New measure", visibleLabel: "New\nmeasure", width: 46, iconName: "measure", commandId: "data.newMeasure", description: "Create a measure in the formula bar." },
                 { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 46, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." }
             ]}
+        ]},
+        { groups: [
+            { title: "Structure", kind: "columnStructure", actions: [] },
+            { title: "Formatting", kind: "columnFormatting", actions: [] },
+            { title: "Properties", kind: "columnProperties", actions: [] },
+            { title: "Sort", kind: "columnSort", actions: [] },
+            { title: "Groups", kind: "columnGroups", actions: [] },
+            { title: "Relationships", actions: [
+                { label: "Manage relationships", visibleLabel: "Manage\nrelationships", width: 72, iconName: "relationship", commandId: "model.manageRelationships", description: "Create, edit, or remove relationships between loaded model tables." }
+            ]},
+            { title: "Calculations", actions: [
+                { label: "New column", visibleLabel: "New\ncolumn", width: 46, iconName: "column", commandId: "model.newCalculatedColumn", description: "Create a calculated column in the formula bar." }
+            ]}
         ]}
     ]
 
@@ -762,7 +784,13 @@ ApplicationWindow {
         if (bar.active && !bar.isNew)
             bar.cancel()
     }
-    onSelectedFieldBindingChanged: Qt.callLater(mainWindow.syncFormulaBarToSelection)
+    onSelectedFieldBindingChanged: {
+        Qt.callLater(function() {
+            mainWindow.syncFormulaBarToSelection()
+            if (mainWindow.columnToolsVisible && mainWindow.studioController.currentView === "Data")
+                mainWindow.ribbonTabName = "Column tools"
+        })
+    }
 
     // Right-click menu on a field in the Data pane: author or edit DAX with the formula bar.
     Menu {
