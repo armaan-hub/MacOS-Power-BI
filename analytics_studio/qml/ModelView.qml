@@ -33,6 +33,17 @@ Item {
     readonly property var measures: appController ? (appController.modelMeasures || []) : []
     property bool diagramMode: true
     property real diagramAvailableWidth: 0
+
+    function finishRelationshipDrag(fromTable, fromColumn, toTable, toColumn) {
+        if (appController && appController.createRelationshipFromDrag) {
+            appController.createRelationshipFromDrag(
+                String(fromTable),
+                String(fromColumn),
+                String(toTable),
+                String(toColumn)
+            )
+        }
+    }
     readonly property var diagramTables: buildDiagramTables()
     readonly property var diagramNodes: buildDiagramNodes()
     readonly property var diagramRelationships: relationshipCatalog.filter(function(relationship) {
@@ -1467,6 +1478,44 @@ Item {
                                                 String(route.relationship.from_table_id),
                                                 String(route.relationship.from_column)
                                             )
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                                onDoubleClicked: function(mouse) {
+                                                    if (mouse.button === Qt.LeftButton) {
+                                                        if (root.appController && root.appController.editRelationship) {
+                                                             root.appController.editRelationship(String(route.relationshipId))
+                                                        }
+                                                    }
+                                                }
+                                                onClicked: function(mouse) {
+                                                    if (mouse.button === Qt.RightButton) {
+                                                        relationshipMenu.popup()
+                                                    } else if (mouse.button === Qt.LeftButton) {
+                                                        relationshipLinkButton.clicked()
+                                                    }
+                                                }
+                                            }
+                                            Menu {
+                                                id: relationshipMenu
+                                                objectName: "modelRelationshipMenu"
+                                                MenuItem {
+                                                    text: "Properties"
+                                                    onTriggered: {
+                                                        if (root.appController && root.appController.editRelationship) {
+                                                            root.appController.editRelationship(String(route.relationshipId))
+                                                        }
+                                                    }
+                                                }
+                                                MenuItem {
+                                                    text: "Delete"
+                                                    onTriggered: {
+                                                        if (root.appController && root.appController.deleteRelationship) {
+                                                            root.appController.deleteRelationship(String(route.relationshipId))
+                                                        }
+                                                    }
+                                                }
+                                            }
                                             background: Rectangle {
                                                 objectName: "modelDiagramRelationshipLinkBackground_"
                                                              + String(route.relationshipId)
@@ -1569,12 +1618,50 @@ Item {
                                                             String(diagramTableData
                                                                    ? diagramTableData.id : ""), columnName
                                                         )
+                                                        Item {
+                                                            id: fieldDragProxy
+                                                            Drag.active: fieldDragMouseArea.drag.active
+                                                            Drag.source: fieldDragProxy
+                                                            property string tableId: String(diagramTableData ? diagramTableData.id : "")
+                                                            property string columnName: columnName
+                                                        }
+                                                        MouseArea {
+                                                            id: fieldDragMouseArea
+                                                            anchors.fill: parent
+                                                            drag.target: fieldDragProxy
+                                                            acceptedButtons: Qt.LeftButton
+                                                            onClicked: parent.clicked()
+                                                        }
+                                                        DropArea {
+                                                            id: fieldDropArea
+                                                            anchors.fill: parent
+                                                            property bool isHovered: containsDrag
+                                                                                      && drag.source
+                                                                                      && drag.source.tableId
+                                                                                      && diagramTableData
+                                                                                      && String(drag.source.tableId) !== String(diagramTableData.id)
+                                                            onDropped: function(drop) {
+                                                                if (drop.source && drop.source.tableId && diagramTableData
+                                                                        && String(drop.source.tableId) !== String(diagramTableData.id)) {
+                                                                    root.finishRelationshipDrag(
+                                                                        String(drop.source.tableId),
+                                                                        String(drop.source.columnName),
+                                                                        String(diagramTableData.id),
+                                                                        columnName
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
                                                         background: Rectangle {
                                                             radius: 2
-                                                            color: diagramTableData
-                                                                   && root.isRelationshipColumn(
-                                                                       String(diagramTableData.id), columnName
-                                                                   ) ? "#edf7f5" : "transparent"
+                                                            color: fieldDropArea.isHovered
+                                                                   ? "#ccefe9"
+                                                                   : (diagramTableData
+                                                                      && root.isRelationshipColumn(
+                                                                          String(diagramTableData.id), columnName
+                                                                      ) ? "#edf7f5" : "transparent")
+                                                            border.width: fieldDropArea.isHovered ? 1 : 0
+                                                            border.color: fieldDropArea.isHovered ? "#107c71" : "transparent"
                                                         }
                                                         contentItem: RowLayout {
                                                             Icon {
