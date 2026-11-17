@@ -2676,3 +2676,15 @@ Applied Steps now has Power BI's right-click menu (Edit Settings, Rename, Delete
 The Data pane and report Fields pane now list every table as a collapsible group (sorted A-Z, measures under their home table, search across tables, add-to-visual checkboxes, cross-table add), like Power BI. One Planner-authorised test edit (three lines expand the measure's home table).
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity, Haiku and Sonnet passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Data pane grouped by table with expand/collapse and add-to-visual checkboxes coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 268 (Task 186 ux-186: 4870)
+
+The Power Query ribbon Data Type list now shows Power BI's 13 types in Power BI's order (shared with the header Change Type menu); types the engine cannot convert yet are disabled. Supported types come from one constant, so the menus no longer touch the editor.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest Haiku passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, ribbon Data Type list matches Power BI coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 269 (Task 185 ux-185: 4880)
+
+Model view now creates a relationship by dragging a column onto another table's column (New relationship dialog prefilled), and a relationship line opens Edit on double-click and Properties/Delete on right-click, like Power BI.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity and Haiku passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Model view drag-to-relate and relationship line edit/delete coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
