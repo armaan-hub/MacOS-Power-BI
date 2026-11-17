@@ -91,10 +91,15 @@ class PivotColumnLifecycleTests(unittest.TestCase):
             ],
         }
 
+        # Task 215b: a repeated row-key/category pair is an error cell; the step is added.
         no_aggregate = self.pivot_dialog(raw, "none")
         no_aggregate._add_step()
-        self.assertIsNone(no_aggregate.candidate)
-        self.assertIn("multiple values", no_aggregate.error_label.text())
+        self.assertEqual(len(no_aggregate._steps), 1)
+        self.assertTrue(any(
+            type(value).__name__ == "PowerQueryCellError"
+            for row in no_aggregate._preview_candidate.rows
+            for value in row.values()
+        ))
         no_aggregate.deleteLater()
 
         for aggregation, expected_rows in expected.items():

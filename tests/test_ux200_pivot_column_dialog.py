@@ -17,6 +17,7 @@ from analytics_studio.local_table_dialogs import (
     TransformDataDialog,
 )
 from analytics_studio.power_query_m import steps_to_m_script
+from analytics_studio.power_query_values import PowerQueryCellError
 from analytics_studio.transformations import apply_transformations
 
 
@@ -140,7 +141,9 @@ class PivotColumnDialogTests(TestCase):
         self.assertIn("Table.Pivot(", m_script)
         self.assertIn("List.Sum", m_script)
 
-    def test_dont_aggregate_on_duplicate_pairs_shows_error_and_adds_no_step(self) -> None:
+    def test_dont_aggregate_on_duplicate_pairs_keeps_error_cells_and_adds_step(self) -> None:
+        # Task 215b: Power BI keeps a repeated row-key/category pair as an error cell and the
+        # step succeeds; this test used to assert the old refusal ("multiple values").
         source = _sample_source()
         dialog = TransformDataDialog(source, query_name="TestQuery")
         self.addCleanup(dialog.deleteLater)
@@ -160,9 +163,14 @@ class PivotColumnDialogTests(TestCase):
         sub.ok_button.click()
         self.app.processEvents()
 
-        self.assertEqual(len(dialog._steps), 0)
-        self.assertTrue(dialog.error_label.isVisible())
-        self.assertIn("multiple values", dialog.error_label.text())
+        # Task 215b: the step is added and the repeated pair is an error cell in the preview.
+        self.assertEqual(len(dialog._steps), 1)
+        self.assertEqual(dialog._steps[-1]["aggregation"], "none")
+        self.assertTrue(any(
+            isinstance(value, PowerQueryCellError)
+            for row in dialog._preview_candidate.rows
+            for value in row.values()
+        ))
 
     def test_dont_aggregate_on_distinct_pairs_adds_step(self) -> None:
         # Without duplicate pairs for the row key, aggregation="none" succeeds and adds the step
