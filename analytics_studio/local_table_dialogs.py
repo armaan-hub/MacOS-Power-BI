@@ -5893,7 +5893,7 @@ class TransformDataDialog(QDialog):
                 command("Remove Bottom", "remove_bottom_rows", "Remove the last N rows.", slot=(0, 1, 1, 1)),
                 command("Remove Alternate", "remove_alternate_rows", "Remove repeating groups of rows.", slot=(1, 1, 1, 1)),
                 command("Remove Blank Rows", "remove_blank_rows", "Remove rows where every field is blank.", slot=(2, 1, 1, 1)),
-                command("Remove Error Rows", "remove_rows_with_errors", "Remove rows with an error in any column.", slot=(3, 1, 1, 1)),
+                command("Remove Errors", "remove_rows_with_errors", "Remove rows with an error in the selected columns.", slot=(3, 1, 1, 1)),
                 command("Sort Rows", "sort_rows", "Sort the selected column ascending or descending.", slot=(0, 2, 1, 1)),
                 command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(1, 2, 1, 1)),
             ], "office"),
@@ -7062,8 +7062,13 @@ class TransformDataDialog(QDialog):
 
     def _apply_direct_operation(self, operation: str, selected: list[str]) -> bool:
         """Apply a command that needs no further input. False means it needs a dialog."""
-        if operation in self._STEP_OPERATIONS_WITHOUT_SETTINGS | self._PARAMETERLESS_OPERATIONS:
-            steps: list[dict[str, Any]] = [{"op": operation}]
+        if operation == "remove_rows_with_errors":
+            steps: list[dict[str, Any]] = (
+                [{"op": operation, "columns": list(selected)}]
+                if selected else [{"op": operation}]
+            )
+        elif operation in self._STEP_OPERATIONS_WITHOUT_SETTINGS | self._PARAMETERLESS_OPERATIONS:
+            steps = [{"op": operation}]
         elif operation in self._SELECTION_OPERATIONS_PER_COLUMN:
             if not selected:
                 self._show_error("Select a column in the preview first.")
@@ -9044,7 +9049,7 @@ class TransformDataDialog(QDialog):
         add_item(menu, "Remove Duplicates", "remove_duplicates")
 
         # 7. Remove Errors
-        add_item(menu, "Remove Errors", None)
+        add_item(menu, "Remove Errors", "remove_rows_with_errors")
 
         # 8. Change Type ▸
         change_type_sub = self._build_change_type_menu(logical_index, parent=menu)
