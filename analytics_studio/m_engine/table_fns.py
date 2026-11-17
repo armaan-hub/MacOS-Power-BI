@@ -1226,16 +1226,65 @@ def _remove_matching_rows(table: MValue, records: MValue, criteria_fn: MValue) -
     return V.Table(t.columns, tuple(row for row in t.rows if not matches(row)))
 
 
+def _error_check_indexes(t: V.Table, columns: MValue) -> list:
+    """The column positions an error check looks at: the listed ones, or all of them when null."""
+    if isinstance(columns, V.Null):
+        return list(range(len(t.columns)))
+    return [_index(t, name) for name in _names(columns)]
+
+
+def _row_has_error_at(row: tuple, indexes: list) -> bool:
+    for i in indexes:
+        try:
+            V.force(row[i])
+        except MError:
+            return True
+    return False
+
+
 def _select_rows_with_errors(table: MValue, columns: MValue) -> MValue:
-    _no_option(columns, "columns argument")
     t = _table(table)
-    return V.Table(t.columns, tuple(row for row in t.rows if _row_has_error(row)))
+    indexes = _error_check_indexes(t, columns)
+    return V.Table(t.columns, tuple(row for row in t.rows if _row_has_error_at(row, indexes)))
 
 
 def _remove_rows_with_errors(table: MValue, columns: MValue) -> MValue:
-    _no_option(columns, "columns argument")
     t = _table(table)
-    return V.Table(t.columns, tuple(row for row in t.rows if not _row_has_error(row)))
+    indexes = _error_check_indexes(t, columns)
+    return V.Table(t.columns, tuple(row for row in t.rows if not _row_has_error_at(row, indexes)))
+
+
+def _error_replacement_pairs(value: MValue) -> list:
+    """{{column, value}, ...}, or one flat pair {column, value}."""
+    items = _items(value)
+    if items and isinstance(items[0], V.Text):
+        if len(items) != 2:
+            raise _unsupported("error replacement pair")
+        return [(items[0].value, items[1])]
+    pairs = []
+    for item in items:
+        pair = _items(item)
+        if len(pair) != 2 or not isinstance(pair[0], V.Text):
+            raise _unsupported("error replacement pair")
+        pairs.append((pair[0].value, pair[1]))
+    return pairs
+
+
+def _replace_error_values(table: MValue, errorReplacement: MValue) -> MValue:
+    t = _table(table)
+    replacement = {}
+    for name, value in _error_replacement_pairs(errorReplacement):
+        replacement[_index(t, name)] = value
+    rows = []
+    for row in t.rows:
+        cells = list(row)
+        for i, value in replacement.items():
+            try:
+                V.force(cells[i])
+            except MError:
+                cells[i] = value  # the column type is kept, as Power BI does
+        rows.append(tuple(cells))
+    return V.Table(t.columns, tuple(rows))
 
 
 # ---- grouping, pivoting and reshaping -------------------------------------------
@@ -1825,6 +1874,7 @@ TABLE_GLOBALS: dict = {
                                         _remove_matching_rows),
     "Table.SelectRowsWithErrors": _native((("table", False), ("columns", True)), _select_rows_with_errors),
     "Table.RemoveRowsWithErrors": _native((("table", False), ("columns", True)), _remove_rows_with_errors),
+    "Table.ReplaceErrorValues": _native((("table", False), ("errorReplacement", False)), _replace_error_values),
     "Table.SplitColumn": _native((("table", False), ("sourceColumn", False), ("splitter", False),
                                   ("columnNamesOrNumberOfColumns", True), ("default", True), ("extraColumns", True)),
                                  _split_column),

@@ -141,7 +141,7 @@ _GROUPS = {
         'Table.MinN', 'Table.NestedJoin', 'Table.Pivot', 'Table.Profile', 'Table.PromoteHeaders', 'Table.Range',
         'Table.RemoveColumns', 'Table.RemoveFirstN', 'Table.RemoveLastN', 'Table.RemoveMatchingRows',
         'Table.RemoveRows', 'Table.RemoveRowsWithErrors', 'Table.RenameColumns', 'Table.ReorderColumns',
-        'Table.Repeat', 'Table.ReplaceValue', 'Table.ReverseRows', 'Table.Schema', 'Table.SelectColumns',
+        'Table.Repeat', 'Table.ReplaceErrorValues', 'Table.ReplaceValue', 'Table.ReverseRows', 'Table.Schema', 'Table.SelectColumns',
         'Table.SelectRows', 'Table.SelectRowsWithErrors', 'Table.Skip', 'Table.Sort', 'Table.SplitColumn',
         'Table.TransformColumnTypes', 'Table.TransformColumns', 'Table.Transpose', 'Table.Unpivot',
         'Table.UnpivotOtherColumns', 'Type.TableSchema',
