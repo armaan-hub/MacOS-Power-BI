@@ -4251,7 +4251,7 @@ class PowerQueryMEditorDialog(QDialog):
                     step_names=prefix_step_names,
                 )
             except Exception:
-                base_script = f"let\n    Source = #{query_name!r}\nin\n    Source"
+                base_script = f"let\n    Source = {_m_reference(query_name)}\nin\n    Source"
             issue_lines = [
                 f"// Step {issue.get('step', '?')} ({issue.get('operation', 'operation')}): {issue.get('message', '')}"
                 for issue in self._read_only_issues
