@@ -123,6 +123,9 @@ class CrossTableTableVisualUiTests(unittest.TestCase):
             controller.create_measure("Order Amount", "SUM('Orders'[Amount])"),
             controller.statusMessage,
         )
+        # Task 184 (2026-11-17): the Data pane is a tree; a measure is listed under its home table (Regions), as in Power BI
+        controller.setTableExpanded(regions_id, True)
+        self.app.processEvents()
         # Start on Orders so the UI test has to switch the report field selector
         # to the Regions dimension before adding its category field.
         self.assertTrue(controller.selectTable(orders_id), controller.statusMessage)

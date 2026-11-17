@@ -2481,7 +2481,7 @@ ApplicationWindow {
 
                                         CheckBox {
                                             visible: !dataNodeDelegate.isTableNode
-                                            objectName: !dataNodeDelegate.isTableNode ? "fieldCheck_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName : ""
+                                            objectName: !dataNodeDelegate.isTableNode ? (String(dataNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? "fieldCheck_" + dataNodeDelegate.bindingName : "fieldCheck_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName) : ""
                                             checked: Boolean(dataNodeDelegate.node.inVisual)
                                             enabled: Boolean(mainWindow.studioController.selectedVisual)
                                             implicitWidth: 20
@@ -2491,7 +2491,7 @@ ApplicationWindow {
 
                                         Button {
                                             visible: !dataNodeDelegate.isTableNode
-                                            objectName: !dataNodeDelegate.isTableNode ? (dataNodeDelegate.tableId === String(mainWindow.studioController.activeTableId) ? "dataFieldSelect_" + dataNodeDelegate.bindingName : "dataFieldSelect_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName) : ""
+                                            objectName: !dataNodeDelegate.isTableNode ? (dataNodeDelegate.tableId === String(mainWindow.studioController.activeTableId) || String(dataNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? "dataFieldSelect_" + dataNodeDelegate.bindingName : "dataFieldSelect_" + dataNodeDelegate.tableId + "_" + dataNodeDelegate.bindingName) : ""
                                             Layout.fillWidth: true
                                             Layout.preferredHeight: 28
                                             hoverEnabled: true
@@ -4697,7 +4697,7 @@ ApplicationWindow {
 
                                             CheckBox {
                                                 visible: !reportNodeDelegate.isTableNode
-                                                objectName: !reportNodeDelegate.isTableNode ? ("fieldCheck_" + (reportNodeDelegate.tableId !== "" ? (reportNodeDelegate.tableId + "_") : "") + reportNodeDelegate.bindingName) : ""
+                                                objectName: !reportNodeDelegate.isTableNode ? ("fieldCheck_" + ((reportNodeDelegate.tableId !== "" && !(String(reportNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0)) ? (reportNodeDelegate.tableId + "_") : "") + reportNodeDelegate.bindingName) : ""
                                                 checked: reportNodeDelegate.node.inVisual !== undefined ? Boolean(reportNodeDelegate.node.inVisual) : mainWindow.studioController.isFieldInVisual(reportNodeDelegate.bindingName)
                                                 enabled: Boolean(mainWindow.studioController.selectedVisual)
                                                 implicitWidth: 20
@@ -4708,7 +4708,7 @@ ApplicationWindow {
                                             Button {
                                                 id: reportFieldSelectButton
                                                 visible: !reportNodeDelegate.isTableNode
-                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" ? ("reportFieldSelect_" + reportNodeDelegate.bindingName) : ("reportFieldSelect_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
+                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" || String(reportNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? ("reportFieldSelect_" + reportNodeDelegate.bindingName) : ("reportFieldSelect_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
                                                 Layout.fillWidth: true
                                                 Layout.preferredHeight: 28
                                                 hoverEnabled: true
@@ -4780,7 +4780,7 @@ ApplicationWindow {
                                             ToolButton {
                                                 id: fieldAddButton
                                                 visible: !reportNodeDelegate.isTableNode
-                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" ? ("reportFieldAdd_" + reportNodeDelegate.bindingName) : ("reportFieldAdd_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
+                                                objectName: !reportNodeDelegate.isTableNode ? (reportNodeDelegate.isCurrentTable || reportNodeDelegate.tableId === "" || String(reportNodeDelegate.bindingName).indexOf("__dax_measure__:") === 0 ? ("reportFieldAdd_" + reportNodeDelegate.bindingName) : ("reportFieldAdd_" + reportNodeDelegate.tableId + "_" + reportNodeDelegate.bindingName)) : ""
                                                 text: "+"
                                                 enabled: mainWindow.fieldWellOptions(reportNodeDelegate.bindingName).length > 0
                                                 Accessible.name: "Add " + reportNodeDelegate.displayName + " to selected visual"

@@ -243,6 +243,21 @@ class Ux184DataPaneTreeTests(unittest.TestCase):
         self.assertTrue(cust_t["expanded"])
         self.assertFalse(ord_t["expanded"])
 
+    def test_select_table_keeps_other_tables_expanded_focus_collapses(self) -> None:
+        controller, orders_id, customers_id = self._setup_controller()
+        controller.setTableExpanded(orders_id, True)
+        controller.setTableExpanded(customers_id, True)
+
+        self.assertTrue(controller.selectTable(customers_id))
+        tree = controller.fieldTree
+        self.assertTrue(next(t for t in tree if t["tableId"] == customers_id)["expanded"])
+        self.assertTrue(next(t for t in tree if t["tableId"] == orders_id)["expanded"])
+
+        controller.focusTable(customers_id)
+        tree = controller.fieldTree
+        self.assertTrue(next(t for t in tree if t["tableId"] == customers_id)["expanded"])
+        self.assertFalse(next(t for t in tree if t["tableId"] == orders_id)["expanded"])
+
     def test_followup_hidden_column_absent_from_field_tree(self) -> None:
         controller, orders_id, customers_id = self._setup_controller()
         model_tables = controller._project.get("model", {}).get("tables", [])
@@ -254,4 +269,44 @@ class Ux184DataPaneTreeTests(unittest.TestCase):
         tree = controller.fieldTree
         ord_t = next(t for t in tree if t["tableId"] == orders_id)
         self.assertNotIn("OrderID", [f["label"] for f in ord_t["fields"]])
+
+    def test_calculated_column_shows_in_field_tree(self) -> None:
+        controller, orders_id, customers_id = self._setup_controller()
+        controller.selectTable(orders_id)
+
+        # Before adding calculated column
+        tree_before = controller.fieldTree
+        ord_t_before = next(t for t in tree_before if t["tableId"] == orders_id)
+        self.assertNotIn("Double", [f["label"] for f in ord_t_before["fields"]])
+
+        # Add calculated column
+        err = controller.save_calculated_column("Double", "Orders[Amount] * 2")
+        self.assertEqual(err, "")
+
+        tree_after = controller.fieldTree
+        ord_t_after = next(t for t in tree_after if t["tableId"] == orders_id)
+        self.assertIn("Double", [f["label"] for f in ord_t_after["fields"]])
+
+    def test_renaming_column_shows_new_name_in_field_tree(self) -> None:
+        from analytics_studio.transformations import apply_transformations
+
+        controller, orders_id, customers_id = self._setup_controller()
+        controller.selectTable(orders_id)
+
+        tree_before = controller.fieldTree
+        ord_t_before = next(t for t in tree_before if t["tableId"] == orders_id)
+        self.assertIn("Amount", [f["label"] for f in ord_t_before["fields"]])
+        self.assertNotIn("OrderAmount", [f["label"] for f in ord_t_before["fields"]])
+
+        # Rename column via transformation steps
+        raw = controller._raw_candidates[orders_id]
+        steps = [{"op": "rename_column", "column": "Amount", "new_name": "OrderAmount"}]
+        transformed = apply_transformations(raw, steps)
+        self.assertTrue(controller._commit_transform_steps(orders_id, steps, transformed))
+
+        tree_after = controller.fieldTree
+        ord_t_after = next(t for t in tree_after if t["tableId"] == orders_id)
+        self.assertNotIn("Amount", [f["label"] for f in ord_t_after["fields"]])
+        self.assertIn("OrderAmount", [f["label"] for f in ord_t_after["fields"]])
+
 

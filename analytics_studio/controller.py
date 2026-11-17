@@ -2409,7 +2409,14 @@ class StudioController(QObject):
             for m in self._project.get("model", {}).get("measures", [])
         )
         catalog_sig = tuple(
-            (str(t.get("id", "")), str(t.get("displayName") or t.get("name") or ""), bool(t.get("loaded")), bool(t.get("loadEnabled")))
+            (
+                str(t.get("id", "")),
+                str(t.get("displayName") or t.get("name") or ""),
+                bool(t.get("loaded")),
+                bool(t.get("loadEnabled")),
+                tuple(t.get("headers") or []),
+                tuple(sorted((t.get("columnTypes") or {}).items())),
+            )
             for t in self._table_catalog
         )
         expanded_sig = tuple(sorted(self._table_expanded.items()))
@@ -4937,7 +4944,7 @@ class StudioController(QObject):
         self._install_source(path, source_id, parsed)
         self._source_warning = self._compose_source_warning()
         self._current_region = None
-        self._table_expanded = {str(source_id): True}
+        self._table_expanded[str(source_id)] = True
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
@@ -8828,23 +8835,13 @@ class StudioController(QObject):
             self._set_status("Import a table before creating a measure.")
             return False
         try:
-            if home_table_id is None:
-                # Infer home table from DAX expression table references if unique
-                found_refs = set(re.findall(r"(?:'([^']+)'|([A-Za-z0-9_]+))\[", expression))
-                ref_names = {a or b for a, b in found_refs}
-                matched_tables = [
-                    t for t in self._table_catalog
-                    if (str(t.get("displayName") or t.get("name") or "")) in ref_names
-                ]
-                if len(matched_tables) == 1:
-                    home_table_id = str(matched_tables[0].get("id", ""))
-                else:
-                    home_table_id = self._active_model_table_id()
-
             measure = normalize_measure(
                 name, expression, description=description,
                 display_folder=display_folder, is_hidden=is_hidden,
-                home_table_id=home_table_id,
+                home_table_id=(
+                    self._active_model_table_id()
+                    if home_table_id is None else home_table_id
+                ),
             )
             current = list(self._project.get("model", {}).get("measures", []))
             if any(item["name"].casefold() == measure["name"].casefold() for item in current):
@@ -14757,6 +14754,7 @@ class StudioController(QObject):
             self._model_relationship_label(relationship)
             for relationship in model.get("relationships", [])
         ]
+        self._invalidate_field_tree_cache()
 
     @staticmethod
     def _source_metadata_warning(sources: list[dict[str, Any]]) -> str:
