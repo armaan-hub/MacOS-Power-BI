@@ -17,7 +17,7 @@ from .canonical import to_canonical
 from .lexer import MSyntaxError
 from .parser import parse
 from .stdlib import GLOBALS
-from .table_fns import combine_tables, table_field, table_item
+from .table_fns import combine_tables, project_table, table_field, table_item
 from .values import MError, MValue, Thunk, force
 
 
@@ -503,6 +503,8 @@ def _projection(node: A.Projection, env: Env) -> MValue:
     target = evaluate(node.target, env)
     if isinstance(target, V.Null) and node.optional:
         return V.Null()
+    if isinstance(target, V.Table):
+        return project_table(target, node.names)  # Power BI answer check 2026-11-17, items 16-17
     if not isinstance(target, V.Record):
         raise V.convert_error(target, V.TypeValue("record"))
     fields = []

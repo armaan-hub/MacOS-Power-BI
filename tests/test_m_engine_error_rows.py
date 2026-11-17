@@ -9,8 +9,6 @@ from __future__ import annotations
 
 import unittest
 
-import pytest
-
 from analytics_studio.m_engine import evaluate_to_text
 from analytics_studio.m_engine import values as V
 from analytics_studio.m_engine.evaluator import evaluate, root_env
@@ -51,7 +49,6 @@ class ReplaceErrorValuesTests(unittest.TestCase):
         self.assertEqual(evaluate_to_text(source), "UNREPRESENTABLE")
         self.assertEqual(_error_columns(source), {"B"})
 
-    @pytest.mark.xfail(strict=True, reason="Task 212: try inside Table.TransformColumns must not catch cell errors (Power BI answer check 2026-11-17)")
     def test_item_22_replace_then_try_per_cell(self):
         source = (
             f'let t = Table.ReplaceErrorValues({BASE_TWO_ROWS}, {{{{"A", null}}}}) in '
@@ -114,7 +111,6 @@ class RowsWithErrorsColumnsTests(unittest.TestCase):
         self.assertEqual(evaluate_to_text(source), "UNREPRESENTABLE")
         self.assertEqual(_error_columns(source), {"A", "B"})
 
-    @pytest.mark.xfail(strict=True, reason="Task 212: try inside Table.TransformColumns must not catch cell errors (Power BI answer check 2026-11-17)")
     def test_item_23_select_then_try_per_cell(self):
         source = (
             f'let t = Table.SelectRowsWithErrors({BASE}, {{"A","B"}}) in '
@@ -122,7 +118,6 @@ class RowsWithErrorsColumnsTests(unittest.TestCase):
         )
         self.assertEqual(evaluate_to_text(source), "UNREPRESENTABLE")
 
-    @pytest.mark.xfail(strict=True, reason="Task 212: try inside Table.TransformColumns must not catch cell errors (Power BI answer check 2026-11-17)")
     def test_item_24_select_on_column_a_then_try_per_cell(self):
         source = (
             f'let t = Table.SelectRowsWithErrors({BASE}, {{"A"}}) in '

@@ -559,6 +559,13 @@ def _repeat(table: MValue, count: MValue) -> MValue:
 
 # ---- columns ----------------------------------------------------------------
 
+def project_table(table: V.Table, names: tuple) -> V.Table:
+    """A table projection t[[A],[B]]: only the named columns, in that order, keeping their types.
+    TODO: missing column and the optional form on a table are unchecked against Power BI; a missing column
+    raises the Table.SelectColumns error for now."""
+    return _select_columns(table, V.List(tuple(V.Text(name) for name in names)), V.Null())
+
+
 def _select_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
     t = _table(table)
     mode = _missing_mode(missing, (MISSING_ERROR, MISSING_USE_NULL))
@@ -667,6 +674,13 @@ def _transformed_kind(fn: V.Function, explicit: Optional[str], old: str) -> str:
     return explicit if explicit is not None else _function_spec(fn)
 
 
+def _transform_cell(fn: V.Function, cell: MValue) -> MValue:
+    """One cell of Table.TransformColumns. An error cell stays that error: Power BI does not pass it to the function,
+    so ``each try _ otherwise "ERR"`` never catches it (Power BI answer check 2026-11-17, items 20-24)."""
+    V.force(cell)  # raises the cell's own error without calling fn
+    return _apply(fn, cell)
+
+
 def _transform_columns(table: MValue, transforms: MValue, default: MValue, missing: MValue) -> MValue:
     t = _table(table)
     mode = _missing_mode(missing, (MISSING_ERROR, MISSING_IGNORE))
@@ -691,7 +705,7 @@ def _transform_columns(table: MValue, transforms: MValue, default: MValue, missi
         for i, (fn, _explicit) in fns.items():
             if fn.origin == "identity":
                 continue
-            cells[i] = V.Thunk(lambda cell=row[i], fn=fn: _apply(fn, cell))
+            cells[i] = V.Thunk(lambda cell=row[i], fn=fn: _transform_cell(fn, cell))
         rows.append(tuple(cells))
     columns = tuple((name, _transformed_kind(fns[i][0], fns[i][1], kind) if i in fns else kind)
                     for i, (name, kind) in enumerate(t.columns))
@@ -811,7 +825,7 @@ def _add_index_column(table: MValue, name: MValue, start: MValue, step: MValue, 
     new = _text(name)
     explicit = _type_argument(kind)
     if new in _names_of(t):
-        raise _unsupported("index column over an existing column name")
+        raise _exists(new)  # Power BI answer check 2026-11-17, item 18
     first = _integer(start, 0)
     increment = _integer(step, 1)
     rows = tuple(tuple(row) + (V.Number(float(first + i * increment)),) for i, row in enumerate(t.rows))
