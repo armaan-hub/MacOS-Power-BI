@@ -34,6 +34,7 @@ from PySide6.QtGui import (
     QRegularExpressionValidator,
     QShortcut,
     QTextCursor,
+    QValidator,
 )
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -1307,6 +1308,94 @@ class _PowerQueryConditionDialog(QDialog):
 
     def values(self) -> list[str]:
         return [edit.text().strip() if self._numeric else edit.text() for edit in self.edits]
+
+
+class AddIndexColumnDialog(QDialog):
+    """Power BI's Add Index Column dialog (Add Column > Index Column > Custom...)."""
+
+    def __init__(
+        self,
+        initial_step: dict[str, Any] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQueryAddIndexColumnDialog")
+        self.setWindowTitle("Add Index Column")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(360)
+
+        self._initial_step = initial_step
+        validator = QRegularExpressionValidator(QRegularExpression(r"^-?\d{1,18}$"), self)
+        self._validator = validator
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(10)
+
+        start_label = QLabel("Starting index", self)
+        self.start_edit = QLineEdit(self)
+        self.start_edit.setObjectName("addIndexStartingIndexEdit")
+        self.start_edit.setValidator(validator)
+        layout.addWidget(start_label)
+        layout.addWidget(self.start_edit)
+
+        increment_label = QLabel("Increment", self)
+        self.increment_edit = QLineEdit(self)
+        self.increment_edit.setObjectName("addIndexIncrementEdit")
+        self.increment_edit.setValidator(validator)
+        layout.addWidget(increment_label)
+        layout.addWidget(self.increment_edit)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch(1)
+        self.ok_button = QPushButton("OK", self)
+        self.ok_button.setObjectName("addIndexOkButton")
+        self.cancel_button = QPushButton("Cancel", self)
+        self.cancel_button.setObjectName("addIndexCancelButton")
+        buttons_layout.addWidget(self.ok_button)
+        buttons_layout.addWidget(self.cancel_button)
+        layout.addLayout(buttons_layout)
+
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+        self.start_edit.textChanged.connect(self._refresh_ok)
+        self.increment_edit.textChanged.connect(self._refresh_ok)
+
+        if initial_step is not None:
+            self.start_edit.setText(str(initial_step.get("start", 0)))
+            self.increment_edit.setText(str(initial_step.get("increment", 1)))
+        else:
+            self.start_edit.setText("0")
+            self.increment_edit.setText("1")
+
+        self._refresh_ok()
+
+    def _is_valid_whole_number(self, text: str) -> bool:
+        if not text:
+            return False
+        result = self._validator.validate(text, 0)
+        state = result[0]
+        return state == QValidator.State.Acceptable
+
+    def _refresh_ok(self, *_args: Any) -> None:
+        valid = (
+            self._is_valid_whole_number(self.start_edit.text())
+            and self._is_valid_whole_number(self.increment_edit.text())
+        )
+        self.ok_button.setEnabled(valid)
+
+    def step(self) -> dict[str, Any]:
+        new_name = (
+            self._initial_step["new_name"]
+            if self._initial_step is not None and "new_name" in self._initial_step
+            else "Index"
+        )
+        return {
+            "op": "add_index_column",
+            "new_name": new_name,
+            "start": int(self.start_edit.text()),
+            "increment": int(self.increment_edit.text()),
+        }
 
 
 class ReplaceValuesDialog(QDialog):
@@ -5798,11 +5887,24 @@ class TransformDataDialog(QDialog):
                 command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(1, 2, 1, 1)),
             ], "office"),
         ]
+        index_column_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
+            ("From 0", lambda: self._add_direct_index_step(0, 1), True, None, "indexColumnFrom0Action"),
+            ("From 1", lambda: self._add_direct_index_step(1, 1), True, None, "indexColumnFrom1Action"),
+            ("Custom...", lambda: self._open_add_index_column_dialog(), True, None, "indexColumnCustomAction"),
+        ]
         add_column_groups = [
             ("General", [
                 command("Custom Column", "add_custom_column", "Create a column with a supported M-subset expression.", size="medium", slot=(0, 0, 3, 1)),
                 command("Conditional Column", "conditional_column", "Create a column from ordered conditional rules.", size="medium", slot=(0, 1, 3, 1), width=74),
-                command("Index Column", "add_index_column", "Add an index with a chosen start and increment.", size="medium", slot=(0, 2, 3, 1)),
+                command(
+                    "Index Column",
+                    "add_index_column",
+                    "Add an index with a chosen start and increment.",
+                    size="medium",
+                    slot=(0, 2, 3, 1),
+                    menu_items=index_column_menu_items,
+                    menu_button_popup=True,
+                ),
                 command("Duplicate Column", "duplicate_column", "Copy a column under a new name.", size="medium", slot=(0, 3, 3, 1)),
                 action("Manage Functions", "Create and reuse safe typed scalar M functions in custom-column formulas.", self._manage_query_functions, object_name="managePowerQueryFunctionsButton", size="medium", slot=(0, 4, 3, 1)),
             ], "office"),
@@ -6055,6 +6157,8 @@ class TransformDataDialog(QDialog):
                             item_tooltip = item[3] if len(item) > 3 else None
                             menu_action = menu.addAction(menu_label)
                             menu_action.setEnabled(bool(enabled))
+                            if len(item) > 4 and item[4]:
+                                menu_action.setObjectName(item[4])
                             if item_tooltip:
                                 menu_action.setToolTip(item_tooltip)
                             if enabled:
@@ -6923,6 +7027,9 @@ class TransformDataDialog(QDialog):
         if operation == "split_column":
             self._open_split_by_delimiter_dialog(prior_row=prior_row)
             return
+        if operation == "add_index_column":
+            self._open_add_index_column_dialog(prior_row=prior_row)
+            return
         if operation == "add_custom_column":
             if prior_row >= 0:
                 self.step_list.setCurrentRow(-1)
@@ -6985,7 +7092,7 @@ class TransformDataDialog(QDialog):
         return True
 
     def _close_operation_dialog(self) -> None:
-        for name in ("_operation_dialog", "_conditional_dialog", "_group_by_dialog", "_split_by_delimiter_dialog"):
+        for name in ("_operation_dialog", "_conditional_dialog", "_group_by_dialog", "_split_by_delimiter_dialog", "_add_index_dialog"):
             dialog = getattr(self, name, None)
             if dialog is not None:
                 dialog.reject()
@@ -7350,6 +7457,91 @@ class TransformDataDialog(QDialog):
         sub.finished.connect(finished)
         self._operation_dialog = sub
         sub.show()
+
+    def _open_add_index_column_dialog(
+        self,
+        editing_index: int | None = None,
+        *,
+        prior_row: int = -1,
+    ) -> None:
+        """Power BI's Add Index Column dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+
+        previous_operation_index = self.operation_combo.currentIndex()
+        index_op_index = self.operation_combo.findData("add_index_column")
+        if editing_index is None and index_op_index >= 0:
+            blocker = QSignalBlocker(self.operation_combo)
+            self.operation_combo.setCurrentIndex(index_op_index)
+            del blocker
+
+        sub = AddIndexColumnDialog(
+            initial_step=existing,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            if getattr(self, "_add_index_dialog", None) is sub:
+                self._add_index_dialog = None
+            if (
+                editing_index is None
+                and self.operation_combo.currentData() == "add_index_column"
+                and 0 <= previous_operation_index < self.operation_combo.count()
+            ):
+                blocker = QSignalBlocker(self.operation_combo)
+                self.operation_combo.setCurrentIndex(previous_operation_index)
+                del blocker
+            self._insert_at = None
+            self.step_settings_toggle.setChecked(False)
+            self.operation_settings_panel.setVisible(False)
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
+        self._add_index_dialog = sub
+        sub.show()
+
+    def _add_direct_index_step(self, start: int, increment: int = 1) -> None:
+        """Add an index column step directly (used by ribbon From 0 / From 1)."""
+        if not self._confirm_insert_step():
+            return
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+        added = self._add_step(
+            {
+                "op": "add_index_column",
+                "new_name": "Index",
+                "start": start,
+                "increment": increment,
+            },
+            power_bi_name=True,
+        )
+        self._finish_insert(added, prior_row)
+        if added:
+            self.step_settings_toggle.setChecked(False)
 
     def _open_split_by_delimiter_dialog(
         self, editing_index: int | None = None, *, prior_row: int = -1
@@ -11395,6 +11587,9 @@ class TransformDataDialog(QDialog):
             return
         if step["op"] == "replace_value":
             self._open_replace_values_dialog(index)
+            return
+        if step["op"] == "add_index_column":
+            self._open_add_index_column_dialog(editing_index=index, prior_row=index)
             return
         if step["op"] == "group_by":
             self._open_group_by_dialog(index)

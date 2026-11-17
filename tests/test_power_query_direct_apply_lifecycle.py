@@ -206,11 +206,11 @@ class PowerQueryDirectApplyTests(unittest.TestCase):
         # Task 195 (2026-11-17): group_by now opens GroupByDialog; its fields are tested in tests/test_ux195_group_by_dialog.py
         # Task 196 (2026-11-17): replace_value now opens ReplaceValuesDialog; see tests/test_ux196_replace_values_dialog.py
         # Task 197 (2026-11-17): split_column now opens SplitColumnByDelimiterDialog; see tests/test_ux197_split_by_delimiter_dialog.py
+        # Task 198 (2026-11-17): add_index_column now opens a From 0 / From 1 / Custom menu; see tests/test_ux198_add_index_column_dialog.py
         expected = {
             "keep_top_rows": ("value_edit",),
             "remove_top_rows": ("value_edit",),
             "rename_column": ("value_edit", "column_combo"),
-            "add_index_column": ("value_edit", "index_start_edit"),
         }
         for operation, fields in expected.items():
             with self.subTest(operation=operation):
@@ -228,9 +228,10 @@ class PowerQueryDirectApplyTests(unittest.TestCase):
     def test_every_parameter_command_opens_dialog_not_bottom_form(self) -> None:
         dialog = self.open_dialog()
         self.select_column(dialog, 1)
+        # Task 198 (2026-11-17): add_index_column now opens a From 0 / From 1 / Custom menu; see tests/test_ux198_add_index_column_dialog.py
         for operation in (
             "split_column", "replace_value", "group_by", "merge_columns",
-            "remove_top_rows", "filter_rows", "add_index_column", "rename_column",
+            "remove_top_rows", "filter_rows", "rename_column",
         ):
             with self.subTest(operation=operation):
                 dialog.ribbon_command_buttons[operation].click()
