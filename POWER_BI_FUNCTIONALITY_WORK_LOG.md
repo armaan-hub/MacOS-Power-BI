@@ -2724,3 +2724,9 @@ Selecting a column in Table view now shows a Column tools tab like Power BI. Sum
 Charts now draw Power BI's value axis: nice ticks from 0 (step 1/2/2.5/5 x 10^n), Auto display units (K, M, bn, T), gridlines on ticks; bar charts along the bottom; negative data drawn from the zero line. Format pane Y-axis/X-axis switches are now live. Plan: docs/plans/2026-11-17-ux-193.md.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4924 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity and Sonnet coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 276 (Task 194 Advanced Editor quoting: M quoting in the Advanced Editor fallback and a stronger Insert Step After type test)
+
+The read-only Advanced Editor fallback now writes Power BI's M name quoting (#"..." with doubled quotes) instead of Python quoting; the Insert Step After type test now checks step type metadata. Gated together with Task 195. Plan: docs/plans/2026-11-17-ux-194.md.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 4944 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
