@@ -2790,10 +2790,12 @@ def _step_to_m_call(
             "Splitter.SplitTextByEachDelimiter("
             f"{{{_m_string(step['delimiter'])}}}, QuoteStyle.None{from_end_arg})"
         )
-        # Task 209: Power BI's answer is a null for a missing part, so no default argument is emitted.
+        # Task 209: Power BI's answer is a null for a missing part, so no default argument is emitted,
+        # unless the step keeps the old explicit "" default (missing_part == "", v84 migration).
+        default_arg = f", {_m_string('')}" if step.get("missing_part") == "" else ""
         return (
             f"Table.SplitColumn({previous}, {_m_string(step['column'])}, "
-            f"{splitter}, {names})"
+            f"{splitter}, {names}{default_arg})"
         )
     if op == "split_column_by_positions":
         positions = "{" + ", ".join(map(str, step["positions"])) + "}"
@@ -2812,10 +2814,11 @@ def _step_to_m_call(
             f"Splitter.SplitTextByDelimiter({_m_string(step['delimiter'])}, QuoteStyle.None)"
         )
         split_count = _m_dynamic_split_count(previous, step["column"], step["delimiter"])
-        # Task 209: no default argument, so a missing part is null.
+        # Task 209: no default argument, so a missing part is null, unless missing_part == "" keeps the old default.
+        default_arg = f", {_m_string('')}" if step.get("missing_part") == "" else ""
         return (
             f"Table.SplitColumn({previous}, {_m_string(step['column'])}, "
-            f"{splitter}, {split_count})"
+            f"{splitter}, {split_count}{default_arg})"
         )
     if op == "split_column_to_rows":
         column = step["column"]
@@ -3158,7 +3161,7 @@ def _parse_split_column(arguments: list[str], previous_name: str) -> dict[str, A
             raise PowerQueryMScriptError(
                 "A positional split must use the local numbered output column names."
             )
-        step ={"op": "split_column_by_positions", "column": column, "positions": positions}
+        step = {"op": "split_column_by_positions", "column": column, "positions": positions}
         try:
             return validate_steps([step])[0]
         except TransformationError as exc:
