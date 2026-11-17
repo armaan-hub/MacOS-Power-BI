@@ -51,27 +51,36 @@ from dataclasses import replace as _dc_replace
 
 # ---- type nodes -------------------------------------------------------------
 
-def type_of_node(node: A.Node) -> V.TypeValue:
+def type_of_node(node: A.Node, env: Optional["Env"] = None) -> V.TypeValue:
     if isinstance(node, A.PrimitiveType):
         return V.TypeValue(node.name)
+    if isinstance(node, A.TypeValueExpr):
+        # a type value such as Int64.Type is kept as it is (its label is the Table.Schema TypeName)
+        if env is None:
+            raise MError("Expression.Error", "unknown type expression")
+        value = evaluate(node.expr, env)
+        if not isinstance(value, V.TypeValue):
+            raise V.convert_error(value, V.TypeValue("type"))
+        return value
     if isinstance(node, A.NullableType):
-        inner = type_of_node(node.inner)
+        inner = type_of_node(node.inner, env)
         return _dc_replace(inner, nullable=True)
     if isinstance(node, A.ListType):
-        return V.TypeValue("list", item=type_of_node(node.item))
+        return V.TypeValue("list", item=type_of_node(node.item, env))
     if isinstance(node, A.RecordType):
-        return V.TypeValue("record", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.fields),
+        return V.TypeValue("record", fields=tuple((f.name, type_of_node(f.type_, env), f.optional) for f in node.fields),
                            open_record=node.open_)
     if isinstance(node, A.TableType):
-        return V.TypeValue("table", fields=tuple((f.name, type_of_node(f.type_), f.optional) for f in node.row.fields))
+        return V.TypeValue("table", fields=tuple((f.name, type_of_node(f.type_, env), f.optional)
+                                                 for f in node.row.fields))
     if isinstance(node, A.FunctionType):
         names = [p.name for p in node.params]
         for name in names:
             if names.count(name) > 1:
                 raise MError("Expression.Error", f"Duplicate parameter named '{name}'.")
-        params = tuple((p.name, type_of_node(p.type_) if p.type_ is not None else V.TypeValue("any"), p.optional)
+        params = tuple((p.name, type_of_node(p.type_, env) if p.type_ is not None else V.TypeValue("any"), p.optional)
                        for p in node.params)
-        ret = type_of_node(node.return_type) if node.return_type is not None else None
+        ret = type_of_node(node.return_type, env) if node.return_type is not None else None
         return V.TypeValue("function", signature=(params, ret))
     raise MError("Expression.Error", "unknown type expression")
 
@@ -174,7 +183,7 @@ def _closure(params: tuple, return_type: Optional[V.TypeValue], body: A.Node, en
         if p.name in seen:
             raise MError("Expression.Error", f"Duplicate parameter named '{p.name}'.")
         seen.add(p.name)
-    specs = tuple(V.ParamSpec(p.name, type_of_node(p.type_) if p.type_ is not None else None, p.optional)
+    specs = tuple(V.ParamSpec(p.name, type_of_node(p.type_, env) if p.type_ is not None else None, p.optional)
                   for p in params)
 
     def invoke(bound: list) -> MValue:
@@ -245,8 +254,18 @@ def equals(a: MValue, b: MValue) -> bool:
         return a.columns == b.columns and len(a.rows) == len(b.rows) and all(
             all(equals(force(x), force(y)) for x, y in zip(ra, rb)) for ra, rb in zip(a.rows, b.rows))
     if kind == "type":
-        return a.name == b.name and a.nullable == b.nullable
+        # Power BI answer check 2026-11-17: a facet type (Int64.Type) and the table type with its column types are
+        # compared as well (type table [W = Int64.Type] is not type table [W = number])
+        return (a.name == b.name and a.nullable == b.nullable and a.label == b.label
+                and _type_fields_equal(a.fields, b.fields))
     return a is b
+
+
+def _type_fields_equal(a: Optional[tuple], b: Optional[tuple]) -> bool:
+    if a is None or b is None:
+        return a is None and b is None
+    return len(a) == len(b) and all(
+        x[0] == y[0] and x[2] == y[2] and equals(x[1], y[1]) for x, y in zip(a, b))
 
 
 _COMPARABLE = frozenset({"logical", "number", "text", "date", "time", "datetime", "datetimezone",
@@ -587,12 +606,12 @@ def evaluate(node: A.Node, env: Env) -> MValue:
         return _binary(node, env)
     if isinstance(node, A.TypeOp):
         value = evaluate(node.operand, env)
-        t = type_of_node(node.type_)
+        t = type_of_node(node.type_, env)
         if node.op == "is":
             return V.Logical(V.is_type(value, t))
         return V.check_type(value, t)
     if isinstance(node, A.TypeLiteral):
-        return type_of_node(node.type_)
+        return type_of_node(node.type_, env)
     if isinstance(node, A.FieldAccess):
         return _field_access(evaluate(node.target, env), node.name, node.optional)
     if isinstance(node, A.ItemAccess):
@@ -609,7 +628,7 @@ def evaluate(node: A.Node, env: Env) -> MValue:
         return V.Function((V.ParamSpec("_"),), lambda bound: evaluate(node.body, Env({"_": bound[0]}, env)),
                           None, None, origin)
     if isinstance(node, A.FunctionLiteral):
-        return _closure(node.params, type_of_node(node.return_type) if node.return_type else None,
+        return _closure(node.params, type_of_node(node.return_type, env) if node.return_type else None,
                         node.body, env)
     if isinstance(node, A.LetExpr):
         scope = Env({}, env)

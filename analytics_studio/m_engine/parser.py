@@ -463,6 +463,10 @@ class _Parser:
                     self.fail("Token 'as' expected.")
                 return A.FunctionType(params, return_type)
             return A.PrimitiveType(tok.text)
+        if tok.kind == "ident" or self.at_op("("):
+            # Power BI answer check 2026-11-17: a type may be a primary expression whose value is a type
+            # (type table [W = Int64.Type] is accepted and keeps the facet name)
+            return A.TypeValueExpr(self.postfix(self.primary()))
         self.fail("Expected a type")
         raise AssertionError("unreachable")
 

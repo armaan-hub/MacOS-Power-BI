@@ -740,7 +740,19 @@ def _arith(op: str) -> Callable[[MValue, MValue], MValue]:
     return run
 
 
+def _column_type(kind: str) -> V.TypeValue:
+    """The type of a table column: a facet type such as Int64.Type keeps its TypeName as its label."""
+    from .table_fns import _parts, _PRIMITIVE_TYPE_NAMES
+    base, type_name, nullable = _parts(kind)
+    if base == "any" or type_name == _PRIMITIVE_TYPE_NAMES[base] + ".Type":
+        return V.TypeValue(base, nullable=nullable)
+    return V.TypeValue(base, nullable=nullable, label=type_name)
+
+
 def _value_type(value: MValue) -> MValue:
+    if isinstance(value, V.Table):
+        # Power BI answer check 2026-11-17: Value.Type of a table is its table type with each column's type
+        return V.TypeValue("table", fields=tuple((name, _column_type(kind), False) for name, kind in value.columns))
     if isinstance(value, V.Number) and value.subtype is not None:
         # Power BI's Value.Type of an Int64 cell is not a value this engine has measured (the saved answer for
         # Value.Type([Units]) = Int64.Type is false, the plain number type gives true): refuse, never guess.
