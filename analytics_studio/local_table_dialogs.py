@@ -9916,8 +9916,7 @@ class TransformDataDialog(QDialog):
 
         # 5. Insert Step After
         insert_after_action = menu.addAction("Insert Step After")
-        insert_after_action.setEnabled(False)
-        insert_after_action.setToolTip(_NOT_SUPPORTED_YET)
+        insert_after_action.setEnabled(True)
         actions["Insert Step After"] = insert_after_action
 
         # 6. Move before
@@ -9947,6 +9946,59 @@ class TransformDataDialog(QDialog):
         actions["Properties..."] = properties_action
 
         return menu, actions
+
+    def _insert_step_after(self, row: int) -> bool:
+        if not 0 <= row < len(self._steps):
+            return False
+        prior_row = self.step_list.currentRow()
+        self._insert_at = row + 1
+        used_names = {
+            name.casefold()
+            for name in self._applied_step_names().values()
+        }
+        for meta in self._step_metadata:
+            custom_name = str(meta.get("name", "")).strip()
+            if custom_name:
+                used_names.add(custom_name.casefold())
+        n = 1
+        while f"custom{n}" in used_names:
+            n += 1
+        step_name = f"Custom{n}"
+
+        step = {"op": "table_pass_through"}
+        at = self._insert_position()
+        try:
+            next_steps = validate_steps(
+                [*self._steps[:at], step, *self._steps[at:]]
+            )
+            transformed = apply_transformations(
+                self._source_candidate,
+                next_steps,
+                parameters=self._parameter_values(),
+                initial_types=self._active_source_types(),
+            )
+            next_metadata = (
+                validate_applied_step_metadata(
+                    deepcopy(self._step_metadata), len(self._steps)
+                )
+                if at < len(self._steps)
+                else list(self._step_metadata)
+            )
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            self._finish_insert(False, prior_row)
+            return False
+
+        next_metadata.insert(at, {"name": step_name})
+        self._steps, self._step_metadata = next_steps, next_metadata
+        self._preview_candidate = transformed
+        self._render_steps()
+        self._refresh_preview()
+        self._configure_editor()
+        self.step_list.setCurrentRow(at)
+        self._clear_error()
+        self._finish_insert(True, prior_row)
+        return True
 
     def _delete_steps_until_end(self, from_index: int) -> None:
         if not 0 <= from_index < len(self._steps):
@@ -9981,6 +10033,8 @@ class TransformDataDialog(QDialog):
             self._remove_step()
         elif selected is actions.get("Delete Until End"):
             self._delete_steps_until_end(index)
+        elif selected is actions.get("Insert Step After"):
+            self._insert_step_after(index)
         elif selected is actions.get("Move before"):
             self._move_step(-1)
         elif selected is actions.get("Move after"):

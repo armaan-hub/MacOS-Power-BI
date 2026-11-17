@@ -376,6 +376,7 @@ _STEP_FIELDS: dict[str, set[str]] = {
     "promote_headers": {"op"},
     "demote_headers": {"op"},
     "transpose_table": {"op"},
+    "table_pass_through": {"op"},
 }
 
 
@@ -399,6 +400,9 @@ def validate_steps(
         op = step.get("op")
         if not isinstance(op, str) or op not in _STEP_FIELDS:
             raise TransformationError(f"Transformation step {index} has an unsupported operation.")
+        if op == "table_pass_through":
+            validated.append(dict(step))
+            continue
         if op == "remove_duplicates":
             allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"columns"})
             if set(step) not in allowed_shapes:
@@ -456,6 +460,8 @@ def validate_steps(
                     f"Transformation step {index} needs a simple M helper name."
                 )
             step = {**step, "name": name}
+        if op == "table_pass_through":
+            continue
         if op == "m_script":
             script = step["script"]
             binding = step["source_binding"]
@@ -1049,7 +1055,7 @@ def validate_steps(
                 selected_columns.add(column)
                 validated_sorts.append({"column": column, "direction": direction})
             step = {**step, "sorts": validated_sorts}
-        elif op != "promote_headers" and any(
+        elif op not in {"promote_headers", "table_pass_through"} and any(
             not isinstance(value, str) for value in step.values()
         ):
             raise TransformationError(f"Transformation step {index} values must be strings.")
@@ -1426,6 +1432,8 @@ def apply_transformations(
                 step["aggregation"],
             )
             _check_candidate_limits(result.headers, result.rows)
+            continue
+        if op == "table_pass_through":
             continue
         if op == "m_script":
             from analytics_studio.m_script_step import run_m_script  # local: m_script_step reads this module's helpers

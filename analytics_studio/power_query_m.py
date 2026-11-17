@@ -1295,6 +1295,15 @@ def _parse_table_call(
 ) -> list[dict[str, Any]]:
     if rhs.strip().casefold().startswith("let"):
         return [_parse_keep_duplicates_m_expression(rhs, previous_name)]
+    clean_rhs = rhs.strip()
+    if _IDENTIFIER.fullmatch(clean_rhs) or (clean_rhs.startswith('#"') and clean_rhs.endswith('"')):
+        try:
+            ref_name = _parse_name(clean_rhs)
+        except PowerQueryMScriptError:
+            pass
+        else:
+            if ref_name.casefold() == previous_name.casefold():
+                return [{"op": "table_pass_through"}]
     match = _CALL.fullmatch(rhs.strip())
     if match is None:
         raise PowerQueryMScriptError("Each applied step must call a supported Table.* function.")
@@ -2327,6 +2336,8 @@ def _step_to_m_call(
     sparse_boundary_helper_name: str = "FilterNullAndWhitespace",
 ) -> str:
     op = step["op"]
+    if op == "table_pass_through":
+        return previous
     if op == "count_rows":
         return (
             f"Table.FromValue(Table.RowCount({previous}), "
