@@ -113,8 +113,10 @@ class ColumnMenuTests(unittest.TestCase):
              "In the Previous…", "Is Earliest", "Is Latest", "Year", "Quarter",
              "Month", "Week", "Day"],
         )
-        self.assertTrue(info.action("Date Filters/Equals…").isEnabled())
-        for text in _texts(submenu)[1:]:
+        # Task 188 (2026-11-17): Before/After/Between/Is Earliest/Is Latest now work
+        for text in ("Equals…", "Before…", "After…", "Between…", "Is Earliest", "Is Latest"):
+            self.assertTrue(info.action(f"Date Filters/{text}").isEnabled(), text)
+        for text in ("In the Next…", "In the Previous…", "Year", "Quarter", "Month", "Week", "Day"):
             action = info.action(f"Date Filters/{text}")
             self.assertFalse(action.isEnabled(), text)
             self.assertEqual(action.toolTip(), NOT_SUPPORTED, text)
