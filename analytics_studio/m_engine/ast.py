@@ -207,6 +207,13 @@ class NullableType(Node):
 
 
 @dataclass(frozen=True)
+class TypeValueExpr(Node):
+    """A type written as an expression whose value is a type, such as ``Int64.Type`` in ``type table [W = Int64.Type]``
+    (Power BI answer check 2026-11-17). Evaluated at run time; anything but a type value is an error."""
+    expr: Node
+
+
+@dataclass(frozen=True)
 class ListType(Node):
     item: Node
 

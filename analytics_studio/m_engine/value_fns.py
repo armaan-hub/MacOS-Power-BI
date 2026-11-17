@@ -740,7 +740,28 @@ def _arith(op: str) -> Callable[[MValue, MValue], MValue]:
     return run
 
 
+def _column_type(kind: str) -> V.TypeValue:
+    """The type of a table column: a facet type such as Int64.Type keeps its TypeName as its label."""
+    from .table_fns import _parts, _PRIMITIVE_TYPE_NAMES
+    if kind == "any":  # an untyped column: Power BI answer check 2026-11-18, its type equals type any
+        return V.TypeValue("any")
+    base, type_name, nullable = _parts(kind)
+    if base == "any" or type_name == _PRIMITIVE_TYPE_NAMES[base] + ".Type":
+        return V.TypeValue(base, nullable=nullable)
+    return V.TypeValue(base, nullable=nullable, label=type_name)
+
+
 def _value_type(value: MValue) -> MValue:
+    if isinstance(value, V.Table):
+        # Power BI answer check 2026-11-17: Value.Type of a table is its table type with each column's type.
+        # The same table value gives the same type value (Power BI answer check 2026-11-18: identity), so the
+        # type is kept on the table.
+        cached = value.__dict__.get("_type_value")
+        if cached is None:
+            cached = V.TypeValue("table", fields=tuple((name, _column_type(kind), False)
+                                                       for name, kind in value.columns))
+            object.__setattr__(value, "_type_value", cached)
+        return cached
     if isinstance(value, V.Number) and value.subtype is not None:
         # Power BI's Value.Type of an Int64 cell is not a value this engine has measured (the saved answer for
         # Value.Type([Units]) = Int64.Type is false, the plain number type gives true): refuse, never guess.
@@ -2094,7 +2115,8 @@ def _uri_parts(text: MValue) -> MValue:
 
 _NUMBER_TYPE_CONSTANTS = ("Number", "Int8", "Int16", "Int32", "Int64", "Byte", "Double", "Single", "Decimal",
                           "Currency", "Percentage")
-_TYPE_CONSTANTS: dict = {f"{name}.Type": V.TypeValue("number", label=f"{name}.Type")
+# Power BI answer check 2026-11-18: Number.Type is the plain number type (no facet label), the others keep theirs
+_TYPE_CONSTANTS: dict = {f"{name}.Type": V.TypeValue("number", label=None if name == "Number" else f"{name}.Type")
                       for name in _NUMBER_TYPE_CONSTANTS}
 _TYPE_CONSTANTS.update({
     "Any.Type": V.TypeValue("any"),
