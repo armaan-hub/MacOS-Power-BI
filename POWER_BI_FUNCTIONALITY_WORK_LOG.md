@@ -2664,3 +2664,15 @@ The Power Query column filter now lists (null) as its own entry (is_null / is_no
 Power Query and import now look like Power BI: Choose Columns dialog (177), Custom Column completion and syntax status (178), Excel Navigator with multi-sheet Load (179), CSV File Origin and Colon delimiter (180), column header right-click and type-icon Change Type menus (182). Three test edits authorised by the Planner, listed in docs/plans/2026-11-17-ux-177-182.md.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity and OpenCode passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Choose Columns dialog, Custom Column formula help, Excel Navigator, CSV File Origin, column header menus coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 266 (Task 183 ux-183: 4855)
+
+Applied Steps now has Power BI's right-click menu (Edit Settings, Rename, Delete, Delete Until End, Move before/after, Properties; Insert Step After, Extract Previous and View Native Query shown disabled). Menu items follow the buttons' enable rules; Delete Until End cannot loop.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Applied Steps right-click menu coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 267 (Task 184 ux-184: 4864)
+
+The Data pane and report Fields pane now list every table as a collapsible group (sorted A-Z, measures under their home table, search across tables, add-to-visual checkboxes, cross-table add), like Power BI. One Planner-authorised test edit (three lines expand the measure's home table).
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity, Haiku and Sonnet passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Data pane grouped by table with expand/collapse and add-to-visual checkboxes coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.

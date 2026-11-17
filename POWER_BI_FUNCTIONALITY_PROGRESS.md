@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-17, after Iteration 265 / Task 177-182 ux-batch, 4846, Claude Opus 5.5 planned, Choose Columns dialog, Custom Column formula help, Excel Navigator, CSV File Origin, column header menus coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest Antigravity and OpenCode passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 184 Data pane tree follow-up, Task 183 step menu fix, then 185-190
+**Latest status (2026-11-17, after Iteration 267 / Task 184 ux-184, 4864, Claude Opus 5.5 planned, Data pane grouped by table with expand/collapse and add-to-visual checkboxes coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest Antigravity, Haiku and Sonnet passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 186 ribbon Data Type list gate, Task 185 Model view drag-to-relate (Antigravity), then engine support for Fixed decimal/Percentage types, 187-190
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

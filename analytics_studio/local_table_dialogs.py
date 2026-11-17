@@ -9876,27 +9876,116 @@ class TransformDataDialog(QDialog):
         self._clear_error()
         return True
 
+    def _build_step_context_menu(
+        self, index: int
+    ) -> tuple[QMenu, dict[str, QAction]]:
+        menu = QMenu(self.step_list)
+        menu.setToolTipsVisible(True)
+        actions: dict[str, QAction] = {}
+        if not 0 <= index < len(self._steps):
+            return menu, actions
+
+        self.step_list.setCurrentRow(index)
+        step = self._steps[index]
+
+        # 1. Edit Settings
+        edit_settings_action = menu.addAction("Edit Settings…")
+        edit_settings_action.setObjectName("editAppliedStepSettingsAction")
+        edit_settings_action.setEnabled(
+            step["op"] not in self._STEP_OPERATIONS_WITHOUT_SETTINGS
+        )
+        actions["Edit Settings…"] = edit_settings_action
+
+        # 2. Rename
+        rename_action = menu.addAction("Rename…")
+        actions["Rename…"] = rename_action
+
+        # 3. Delete
+        delete_action = menu.addAction("Delete")
+        delete_action.setEnabled(self.remove_button.isEnabled())
+        actions["Delete"] = delete_action
+
+        # 4. Delete Until End
+        delete_until_end_action = menu.addAction("Delete Until End")
+        can_delete_until_end = self.remove_button.isEnabled() and not any(
+            s["op"] == "m_sparse_boundary_helper"
+            for s in self._steps[index:]
+        )
+        delete_until_end_action.setEnabled(can_delete_until_end)
+        actions["Delete Until End"] = delete_until_end_action
+
+        # 5. Insert Step After
+        insert_after_action = menu.addAction("Insert Step After")
+        insert_after_action.setEnabled(False)
+        insert_after_action.setToolTip(_NOT_SUPPORTED_YET)
+        actions["Insert Step After"] = insert_after_action
+
+        # 6. Move before
+        move_before_action = menu.addAction("Move before")
+        move_before_action.setEnabled(self.up_button.isEnabled())
+        actions["Move before"] = move_before_action
+
+        # 7. Move after
+        move_after_action = menu.addAction("Move after")
+        move_after_action.setEnabled(self.down_button.isEnabled())
+        actions["Move after"] = move_after_action
+
+        # 8. Extract Previous
+        extract_prev_action = menu.addAction("Extract Previous")
+        extract_prev_action.setEnabled(False)
+        extract_prev_action.setToolTip(_NOT_SUPPORTED_YET)
+        actions["Extract Previous"] = extract_prev_action
+
+        # 9. View Native Query
+        native_query_action = menu.addAction("View Native Query")
+        native_query_action.setEnabled(False)
+        native_query_action.setToolTip(_NOT_SUPPORTED_YET)
+        actions["View Native Query"] = native_query_action
+
+        # 10. Properties...
+        properties_action = menu.addAction("Properties...")
+        actions["Properties..."] = properties_action
+
+        return menu, actions
+
+    def _delete_steps_until_end(self, from_index: int) -> None:
+        if not 0 <= from_index < len(self._steps):
+            return
+        reply = QMessageBox.question(
+            self,
+            "Delete Steps",
+            "Are you sure you want to delete this step and all the steps after it?",
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        while len(self._steps) > from_index:
+            previous_count = len(self._steps)
+            self.step_list.setCurrentRow(len(self._steps) - 1)
+            self._remove_step()
+            if len(self._steps) >= previous_count:
+                break
+
     def _show_step_context_menu(self, position: Any) -> None:
         item = self.step_list.itemAt(position)
         if item is None:
             return
         self.step_list.setCurrentItem(item)
         index = self.step_list.currentRow()
-        menu = QMenu(self.step_list)
-        step = self._steps[index]
-        edit_settings_action = menu.addAction("Edit Settings…")
-        edit_settings_action.setObjectName("editAppliedStepSettingsAction")
-        edit_settings_action.setEnabled(
-            step["op"] not in self._STEP_OPERATIONS_WITHOUT_SETTINGS
-        )
-        rename_action = menu.addAction("Rename Step…")
-        description_action = menu.addAction("Edit Description…")
+        menu, actions = self._build_step_context_menu(index)
         selected = menu.exec(self.step_list.mapToGlobal(position))
-        if edit_settings_action is not None and selected is edit_settings_action:
+        if selected is actions.get("Edit Settings…"):
             self._edit_selected_step_settings()
-        elif selected is rename_action:
+        elif selected is actions.get("Rename…"):
             self._rename_selected_step()
-        elif selected is description_action:
+        elif selected is actions.get("Delete"):
+            self._remove_step()
+        elif selected is actions.get("Delete Until End"):
+            self._delete_steps_until_end(index)
+        elif selected is actions.get("Move before"):
+            self._move_step(-1)
+        elif selected is actions.get("Move after"):
+            self._move_step(1)
+        elif selected is actions.get("Properties..."):
             self._describe_selected_step()
 
     def _edit_selected_step_settings(self) -> None:
