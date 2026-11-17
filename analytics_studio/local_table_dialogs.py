@@ -6578,6 +6578,15 @@ class TransformDataDialog(QDialog):
             if editing_index is not None and 0 <= editing_index < len(self._steps)
             else None
         )
+        # Show Group By in the operation selector while the modal dialog is open, like
+        # the other operation dialogs. Signals are blocked so the old inline Group By
+        # panel is not configured or shown; the previous selection returns on close.
+        previous_operation_index = self.operation_combo.currentIndex()
+        group_by_index = self.operation_combo.findData("group_by")
+        if editing_index is None and group_by_index >= 0:
+            blocker = QSignalBlocker(self.operation_combo)
+            self.operation_combo.setCurrentIndex(group_by_index)
+            del blocker
         sub = GroupByDialog(
             base.headers,
             initial_step=existing,
@@ -6600,6 +6609,14 @@ class TransformDataDialog(QDialog):
                 self._operation_dialog = None
             if getattr(self, "_group_by_dialog", None) is sub:
                 self._group_by_dialog = None
+            if (
+                editing_index is None
+                and self.operation_combo.currentData() == "group_by"
+                and 0 <= previous_operation_index < self.operation_combo.count()
+            ):
+                blocker = QSignalBlocker(self.operation_combo)
+                self.operation_combo.setCurrentIndex(previous_operation_index)
+                del blocker
             self._insert_at = None
             if _result != QDialog.DialogCode.Accepted.value:
                 self._reselect_step(prior_row)

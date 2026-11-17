@@ -299,3 +299,28 @@ class GroupByDialogDuplicateNameTests(unittest.TestCase):
         self.assertFalse(sub.ok_button.isEnabled())
         sub.findChild(QComboBox, "groupByColumnCombo_1").setCurrentText("Product")
         self.assertTrue(sub.ok_button.isEnabled())
+
+
+class GroupByOperationSelectorTests(unittest.TestCase):
+    """Task 195 fix: the operation selector shows Group By while the dialog is open."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.app = QApplication.instance() or QApplication(["group by dialog tests"])
+
+    def test_operation_combo_is_group_by_while_open_and_inline_panel_stays_hidden(self) -> None:
+        dialog = TransformDataDialog(_source(), query_name="Sales")
+        self.addCleanup(dialog.deleteLater)
+        dialog.show()
+        self.app.processEvents()
+        previous = dialog.operation_combo.currentData()
+        dialog.ribbon_command_buttons["group_by"].click()
+        self.app.processEvents()
+        self.assertIsInstance(dialog._operation_dialog, GroupByDialog)
+        self.assertEqual(dialog.operation_combo.currentData(), "group_by")
+        self.assertFalse(dialog.group_aggregation_widget.isVisible())
+        self.assertFalse(dialog.operation_settings_panel.isVisible())
+        dialog._operation_dialog.reject()
+        self.app.processEvents()
+        self.assertEqual(dialog.operation_combo.currentData(), previous)
+        self.assertEqual(dialog.step_list.count(), 0)
