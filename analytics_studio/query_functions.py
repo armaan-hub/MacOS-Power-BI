@@ -18,6 +18,12 @@ _RESERVED_NAMES = {
     "source", "let", "in", "true", "false", "null", "and", "or",
     "not", "if", "then", "else",
 }
+# M keywords are lowercase only (M lexical structure), so "Type" and "Error" stay valid names.
+_M_KEYWORDS = frozenset({
+    "and", "as", "each", "else", "error", "false", "if", "in", "is", "let",
+    "meta", "not", "null", "or", "otherwise", "section", "shared", "then",
+    "true", "try", "type",
+})
 _M_NAMESPACE_ROOTS = {
     "binary", "combiner", "comparer", "date", "datetime", "datetimezone",
     "diagnostics", "duration", "error", "function", "guid", "hash", "list",
@@ -64,6 +70,7 @@ def normalize_query_function(value: Any) -> dict[str, str]:
             not isinstance(identifier, str)
             or not _NAME.fullmatch(identifier)
             or identifier.casefold() in _RESERVED_NAMES
+            or identifier in _M_KEYWORDS
         ):
             raise QueryFunctionError(
                 f"The {role} name must be a valid non-reserved M identifier."
