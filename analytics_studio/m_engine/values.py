@@ -268,7 +268,12 @@ def type_display(value: MValue) -> str:
 def with_meta(value: MValue, meta: Optional[Record]) -> MValue:
     """Return the same value with new metadata."""
     kwargs = {"meta": meta}
-    return type(value)(**{f: getattr(value, f) for f in _fields_of(value)}, **kwargs)
+    out = type(value)(**{f: getattr(value, f) for f in _fields_of(value)}, **kwargs)
+    # Power BI answer check 2026-11-18: a table keeps its type identity when only its metadata changes
+    if isinstance(value, Table):
+        from .value_fns import _value_type  # local import: value_fns imports this module
+        object.__setattr__(out, "_type_value", _value_type(value))  # fills the cache on value, then shares it
+    return out
 
 
 def _fields_of(value: MValue) -> list[str]:

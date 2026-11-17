@@ -89,9 +89,42 @@ ANSWERS_14 = [
 ]
 
 
+PROBES_15 = [
+    'Number.Type = type number',
+    'Value.Type(1) = Number.Type',
+    'Value.Type(1) = type number',
+    'Text.Type = type text',
+    'Type.TableColumn(Value.Type(Table.FromRows({{1}}, {"a"})), "a") = type any',
+    'Type.TableColumn(Value.Type(#table({"a"},{{1}})), "a") = type any',
+    'Value.Type(#table({"a"},{{1}})) = type table',
+    'let t = #table({"a"},{{1}}) in Value.Type(t meta [x=1]) = Value.Type(t)',
+    'Int64.Type = Int64.Type',
+    'Value.Type(Int64.From(1)) = Int64.Type',
+    'Value.Type(Int64.From(1)) = type number',
+    'Type.Is(Value.Type(1), Number.Type)',
+]
+
+
+ANSWERS_15 = [
+    'V:true',
+    'V:true',
+    'V:true',
+    'V:true',
+    'V:true',
+    'V:true',
+    'V:false',
+    'V:true',
+    'V:true',
+    'V:false',
+    'V:true',
+    'V:true',
+]
+
+
 _CASES = [
     (probe, answer)
-    for probes, answers in ((PROBES_12, ANSWERS_12), (PROBES_13, ANSWERS_13), (PROBES_14, ANSWERS_14))
+    for probes, answers in ((PROBES_12, ANSWERS_12), (PROBES_13, ANSWERS_13), (PROBES_14, ANSWERS_14),
+                            (PROBES_15, ANSWERS_15))
     for probe, answer in zip(probes, answers)
 ]
 
