@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QApplication, QDialog
 
 from analytics_studio.file_import import ImportCandidate
 from analytics_studio.local_table_dialogs import TransformDataDialog
+from analytics_studio.transformations import infer_column_types
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     m_script_matches_steps,
@@ -153,3 +154,57 @@ class InsertStepAfterTests(unittest.TestCase):
         )
         self.assertIn('#"Custom1" = #"Removed Columns"', m_script)
         self.assertTrue(m_script_matches_steps(m_script, "Sales", dialog._steps))
+
+    def test_insert_after_sparse_helper_is_disabled(self) -> None:
+        steps = [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_bottom_rows"},
+            {"op": "remove_sparse_top_rows"},
+            {"op": "promote_headers", "promote_all_scalars": True},
+        ]
+        dialog = TransformDataDialog(_source(), steps=steps, query_name="Sales")
+        self.addCleanup(dialog.deleteLater)
+        before = [dict(step) for step in dialog._steps]
+
+        _, actions = dialog._build_step_context_menu(0)
+        self.assertFalse(actions["Insert Step After"].isEnabled())
+        self.assertEqual(actions["Insert Step After"].toolTip(), "Not supported yet")
+
+        self.assertFalse(dialog._insert_step_after(0))
+        self.assertEqual(dialog._steps, before)
+
+    def test_formula_edit_keeps_custom_name(self) -> None:
+        dialog = self.make_with_three_steps()
+        dialog._insert_step_after(0)
+        self.assertEqual(dialog.step_list.item(1).text(), "Custom1")
+
+        dialog.step_list.setCurrentRow(1)
+        dialog.formula_bar.setText(
+            'Table.SelectRows(#"Sorted Rows", each [Region] = "East")'
+        )
+        dialog._apply_formula_bar()
+
+        self.assertEqual(dialog.step_list.item(1).text(), "Custom1")
+        self.assertEqual(dialog._steps[1]["op"], "filter_rows")
+
+    def test_insert_after_convert_type_preserves_types(self) -> None:
+        steps = [
+            {"op": "convert_type", "column": "Amount", "type": "number"},
+            {"op": "remove_column", "column": "Day"},
+        ]
+        dialog = TransformDataDialog(_source(), steps=steps, query_name="Sales")
+        self.addCleanup(dialog.deleteLater)
+
+        dialog._insert_step_after(0)
+        self.assertEqual(dialog.step_list.item(1).text(), "Custom1")
+
+        dialog.step_list.setCurrentRow(0)
+        selected_preview = dialog._selected_preview_candidate()
+        dialog.step_list.setCurrentRow(1)
+        custom_preview = dialog._selected_preview_candidate()
+
+        self.assertEqual(custom_preview.headers, selected_preview.headers)
+        self.assertEqual(
+            infer_column_types(custom_preview.headers, custom_preview.rows),
+            infer_column_types(selected_preview.headers, selected_preview.rows),
+        )

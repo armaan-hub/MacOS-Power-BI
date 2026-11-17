@@ -9916,7 +9916,12 @@ class TransformDataDialog(QDialog):
 
         # 5. Insert Step After
         insert_after_action = menu.addAction("Insert Step After")
-        insert_after_action.setEnabled(True)
+        insert_after_supported = (
+            self._steps[index]["op"] != "m_sparse_boundary_helper"
+        )
+        insert_after_action.setEnabled(insert_after_supported)
+        if not insert_after_supported:
+            insert_after_action.setToolTip(_NOT_SUPPORTED_YET)
         actions["Insert Step After"] = insert_after_action
 
         # 6. Move before
@@ -9949,6 +9954,9 @@ class TransformDataDialog(QDialog):
 
     def _insert_step_after(self, row: int) -> bool:
         if not 0 <= row < len(self._steps):
+            return False
+        if self._steps[row]["op"] == "m_sparse_boundary_helper":
+            # The sparse helper is a function in Power BI, not a table.
             return False
         prior_row = self.step_list.currentRow()
         self._insert_at = row + 1
@@ -10618,6 +10626,15 @@ class TransformDataDialog(QDialog):
             else "Edit this supported step expression and press Return or Apply formula. Edit the complete query in Advanced Editor."
         )
 
+    def _kept_name_metadata(self, index: int) -> dict[str, Any]:
+        """Keep the custom name of an Insert Step After step when its formula changes."""
+        if self._steps[index]["op"] != "table_pass_through":
+            return {}
+        if index >= len(self._step_metadata):
+            return {}
+        name = str(self._step_metadata[index].get("name", "")).strip()
+        return {"name": name} if name else {}
+
     def _apply_formula_bar(self) -> None:
         index = self.step_list.currentRow()
         expression = self.formula_bar.text().strip()
@@ -10677,7 +10694,7 @@ class TransformDataDialog(QDialog):
                 *(
                     [deepcopy(self._step_metadata[index])]
                     if edited_steps[0]["op"] == self._steps[index]["op"]
-                    else [{}]
+                    else [self._kept_name_metadata(index)]
                 ),
                 *({} for _ in edited_steps[1:]),
                 *deepcopy(self._step_metadata[index + 1:]),
