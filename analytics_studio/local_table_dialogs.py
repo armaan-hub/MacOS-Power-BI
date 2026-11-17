@@ -589,35 +589,6 @@ class _RibbonScrollArea(QScrollArea):
         self._relayout()
 
 
-class _RibbonMenuActions(dict):
-    """Dictionary mapping transform operations to their ribbon dropdown actions."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._extra: dict[str, QAction] = {}
-
-    def register(self, key: str, value: QAction) -> None:
-        if key in self or key in self._extra:
-            return
-        if key in {"keep_rows_with_errors", "replace_error_values"}:
-            self._extra[key] = value
-        else:
-            self[key] = value
-
-    def __getitem__(self, key: str) -> QAction:
-        if key in self._extra:
-            return self._extra[key]
-        return super().__getitem__(key)
-
-    def get(self, key: str, default: Any = None) -> Any:
-        if key in self._extra:
-            return self._extra[key]
-        return super().get(key, default)
-
-    def __contains__(self, key: object) -> bool:
-        return key in self._extra or super().__contains__(key)
-
-
 class _PowerQueryProfileHeader(QHeaderView):
     """Power Query style column names with quality and distribution summaries."""
 
@@ -5811,7 +5782,7 @@ class TransformDataDialog(QDialog):
     def _populate_ribbon(self) -> None:
         """Expose every supported local transform through task-oriented ribbon tabs."""
         self.ribbon_command_buttons: dict[str, QToolButton] = {}
-        self.ribbon_menu_actions: dict[str, QAction] = _RibbonMenuActions()
+        self.ribbon_menu_actions: dict[str, QAction] = {}
         self._ribbon_icon_cache: dict[str, QIcon] = {}
         self._ribbon_pages: list[dict[str, Any]] = []
 
@@ -5934,7 +5905,7 @@ class TransformDataDialog(QDialog):
             ("Remove Alternate Rows", lambda: self._select_ribbon_operation("remove_alternate_rows"), True, None, "removeRowsRemoveAlternateRowsAction", "remove_alternate_rows"),
             ("Remove Duplicates", lambda: self._select_ribbon_operation("remove_duplicates"), True, None, "removeRowsRemoveDuplicatesAction", "remove_duplicates"),
             ("Remove Blank Rows", lambda: self._select_ribbon_operation("remove_blank_rows"), True, None, "removeRowsRemoveBlankRowsAction", "remove_blank_rows"),
-            ("Remove Errors", lambda: self._select_ribbon_operation("remove_rows_with_errors"), True, None, "removeRowsRemoveErrorsAction", "remove_rows_with_errors"),
+            ("Remove Errors", lambda: self._select_ribbon_operation("remove_rows_with_errors"), True, "Remove rows with an error in the selected columns.", "removeRowsRemoveErrorsAction", "remove_rows_with_errors"),
         ]
         data_type_menu_items: list[tuple[str, Any, bool]] = []
         for label, op_or_type, is_locale_op in _POWER_BI_CHANGE_TYPE_SPECS:
@@ -6519,9 +6490,9 @@ class TransformDataDialog(QDialog):
                                 op_keys = item[5]
                                 if isinstance(op_keys, (list, tuple, set)):
                                     for op_key in op_keys:
-                                        self.ribbon_menu_actions.register(str(op_key), menu_action)
+                                        self.ribbon_menu_actions.setdefault(str(op_key), menu_action)
                                 else:
-                                    self.ribbon_menu_actions.register(str(op_keys), menu_action)
+                                    self.ribbon_menu_actions.setdefault(str(op_keys), menu_action)
                         button.setMenu(menu)
                         button.setPopupMode(
                             QToolButton.ToolButtonPopupMode.MenuButtonPopup

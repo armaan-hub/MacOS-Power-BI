@@ -74,6 +74,10 @@ class RemoveErrorsTests(unittest.TestCase):
         action = dialog.ribbon_menu_actions.get("remove_rows_with_errors")
         self.assertIsNotNone(action)
         self.assertEqual(action.text(), "Remove Errors")
+        self.assertEqual(
+            dialog.ribbon_menu_actions["remove_rows_with_errors"].toolTip(),
+            "Remove rows with an error in the selected columns.",
+        )
 
     def test_ribbon_remove_errors_with_region_selected(self) -> None:
         source = _sample_source()
