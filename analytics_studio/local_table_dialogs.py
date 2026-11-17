@@ -5842,6 +5842,11 @@ class TransformDataDialog(QDialog):
                 width=102,
             )], "office"),
         ]
+        unpivot_columns_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
+            ("Unpivot Columns", lambda: self._run_unpivot("columns"), True, None, "unpivotColumnsAction"),
+            ("Unpivot Other Columns", lambda: self._run_unpivot("other"), True, None, "unpivotOtherColumnsAction"),
+            ("Unpivot Only Selected Columns", lambda: self._run_unpivot("only_selected"), True, None, "unpivotOnlySelectedColumnsAction"),
+        ]
         transform_groups = [
             ("Table", [
                 command("Transpose", "transpose_table", "Swap table rows and columns.", size="medium", slot=(0, 0, 3, 1)),
@@ -5856,8 +5861,14 @@ class TransformDataDialog(QDialog):
                 command("Fill Down", "fill_down", "Fill blank cells with the preceding value.", slot=(0, 1, 1, 1)),
                 command("Fill Up", "fill_up", "Fill blank cells with the following value.", slot=(1, 1, 1, 1)),
                 command("Pivot", "pivot_column", "Pivot distinct values into columns.", slot=(2, 1, 1, 1)),
-                command("Unpivot Cols", "unpivot_columns", "Turn selected columns into attribute/value rows.", slot=(3, 1, 1, 1)),
-                command("Unpivot Other", "unpivot_other_columns", "Keep selected columns and unpivot the rest.", slot=(0, 2, 1, 1)),
+                command(
+                    "Unpivot Columns",
+                    "unpivot_columns",
+                    "Turn selected columns into attribute/value rows.",
+                    slot=(3, 1, 1, 1),
+                    menu_items=unpivot_columns_menu_items,
+                    menu_button_popup=True,
+                ),
                 command("Remove Duplicates", "remove_duplicates", "Keep the first row for each duplicate key.", slot=(1, 2, 1, 1)),
                 command("Keep Duplicates", "keep_duplicates", "Keep rows whose selected key occurs more than once.", slot=(2, 2, 1, 1)),
             ], "office"),
@@ -7543,6 +7554,59 @@ class TransformDataDialog(QDialog):
         if added:
             self.step_settings_toggle.setChecked(False)
 
+    def _run_unpivot(self, mode: str) -> None:
+        """Apply unpivot in one of three modes: 'columns', 'other', or 'only_selected'."""
+        if not self._confirm_insert_step():
+            return
+        selected = self._selected_preview_columns()
+        if not selected:
+            self._insert_at = None
+            self._show_error("Select one or more columns in the preview first.")
+            return
+
+        preview_headers = list(self._selected_preview_candidate().headers)
+        selected_set = set(selected)
+
+        if mode == "columns":
+            columns = [h for h in preview_headers if h not in selected_set]
+            step = {
+                "op": "unpivot_other_columns",
+                "columns": columns,
+                "attribute_name": "Attribute",
+                "value_name": "Value",
+            }
+            step_name = "Unpivoted Columns"
+        elif mode == "other":
+            columns = [h for h in preview_headers if h in selected_set]
+            step = {
+                "op": "unpivot_other_columns",
+                "columns": columns,
+                "attribute_name": "Attribute",
+                "value_name": "Value",
+            }
+            step_name = "Unpivoted Other Columns"
+        elif mode == "only_selected":
+            columns = [h for h in preview_headers if h in selected_set]
+            step = {
+                "op": "unpivot_columns",
+                "columns": columns,
+                "attribute_name": "Attribute",
+                "value_name": "Value",
+            }
+            step_name = "Unpivoted Only Selected Columns"
+        else:
+            self._insert_at = None
+            return
+
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+
+        added = self._add_step(step, power_bi_name=True, step_name=step_name)
+        self._finish_insert(added, prior_row)
+        if added:
+            self.step_settings_toggle.setChecked(False)
+
     def _open_split_by_delimiter_dialog(
         self, editing_index: int | None = None, *, prior_row: int = -1
     ) -> None:
@@ -9004,6 +9068,9 @@ class TransformDataDialog(QDialog):
         # 10. Replace Values...
         add_item(menu, "Replace Values...", "replace_value")
 
+        # 11. Replace Errors...
+        add_item(menu, "Replace Errors...", None)
+
         # Split Column ▸ (By Delimiter...)
         split_sub = QMenu("Split Column", menu)
         split_sub.setObjectName("powerQueryHeaderSplitColumnMenu")
@@ -9015,9 +9082,6 @@ class TransformDataDialog(QDialog):
             action_fn=lambda: self._open_split_by_delimiter_dialog(),
         )
         menu.addMenu(split_sub)
-
-        # 11. Replace Errors...
-        add_item(menu, "Replace Errors...", None)
 
         # 12. Group By...
         add_item(menu, "Group By...", "group_by")
@@ -9031,13 +9095,28 @@ class TransformDataDialog(QDialog):
         menu.addMenu(fill_sub)
 
         # 14. Unpivot Columns
-        add_item(menu, "Unpivot Columns", "unpivot_columns")
+        add_item(
+            menu,
+            "Unpivot Columns",
+            None,
+            action_fn=lambda: self._run_unpivot("columns"),
+        )
 
         # 15. Unpivot Other Columns
-        add_item(menu, "Unpivot Other Columns", "unpivot_other_columns")
+        add_item(
+            menu,
+            "Unpivot Other Columns",
+            None,
+            action_fn=lambda: self._run_unpivot("other"),
+        )
 
         # 16. Unpivot Only Selected Columns
-        add_item(menu, "Unpivot Only Selected Columns", None)
+        add_item(
+            menu,
+            "Unpivot Only Selected Columns",
+            None,
+            action_fn=lambda: self._run_unpivot("only_selected"),
+        )
 
         # 17. Rename...
         add_item(menu, "Rename...", "rename_column")
@@ -11190,6 +11269,7 @@ class TransformDataDialog(QDialog):
         step: dict[str, Any] | None = None,
         *,
         power_bi_name: bool = False,
+        step_name: str | None = None,
     ) -> bool:
         """Add a step built from the form (or the explicit ``step``); True on success.
 
@@ -11215,12 +11295,15 @@ class TransformDataDialog(QDialog):
             return False
         next_metadata.insert(at, {})
         self._steps, self._step_metadata = next_steps, next_metadata
-        step_name = (
-            self._applied_step_names().get(at, "")
-            if power_bi_name and is_known_power_bi_step(next_steps[at]) else ""
-        )
-        if step_name:
+        if step_name is not None:
             self._step_metadata[at] = {"name": step_name}
+        else:
+            computed_name = (
+                self._applied_step_names().get(at, "")
+                if power_bi_name and is_known_power_bi_step(next_steps[at]) else ""
+            )
+            if computed_name:
+                self._step_metadata[at] = {"name": computed_name}
         self._preview_candidate = transformed
         if self._insert_at is not None:
             self._insert_at = at + 1
