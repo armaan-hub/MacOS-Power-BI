@@ -1594,7 +1594,11 @@ Item {
                                                     property var tableData: tableRecord
                                                     clip: true
                                                     spacing: 1
-                                                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                                                    ScrollBar.vertical: ScrollBar {
+                                                        policy: ScrollBar.AsNeeded
+                                                        visible: size < 1.0
+                                                        enabled: visible
+                                                    }
                                                     delegate: Button {
                                                         id: fieldDelegate
                                                         required property var modelData
@@ -1621,7 +1625,8 @@ Item {
                                                         )
                                                         Item {
                                                             id: fieldDragProxy
-                                                            Drag.active: fieldDragMouseArea.drag.active
+                                                            property bool dragActive: false
+                                                            Drag.active: dragActive
                                                             Drag.source: fieldDragProxy
                                                             property string tableId: String(diagramTableData ? diagramTableData.id : "")
                                                             property string dragColumn: fieldDelegate.columnName
@@ -1629,13 +1634,24 @@ Item {
                                                         MouseArea {
                                                             id: fieldDragMouseArea
                                                             anchors.fill: parent
-                                                            drag.target: fieldDragProxy
                                                             acceptedButtons: Qt.LeftButton
+                                                            preventStealing: true
                                                             onPressed: function(mouse) {
                                                                 fieldDragProxy.x = mouse.x
                                                                 fieldDragProxy.y = mouse.y
                                                             }
-                                                            onReleased: fieldDragProxy.Drag.drop()
+                                                            onPositionChanged: function(mouse) {
+                                                                if (pressed) {
+                                                                    fieldDragProxy.x = mouse.x
+                                                                    fieldDragProxy.y = mouse.y
+                                                                    fieldDragProxy.dragActive = true
+                                                                }
+                                                            }
+                                                            onReleased: {
+                                                                if (fieldDragProxy.dragActive)
+                                                                    fieldDragProxy.Drag.drop()
+                                                                fieldDragProxy.dragActive = false
+                                                            }
                                                             onClicked: parent.clicked()
                                                         }
                                                         DropArea {
