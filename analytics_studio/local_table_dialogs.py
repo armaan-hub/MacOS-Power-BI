@@ -7958,12 +7958,17 @@ class TransformDataDialog(QDialog):
             return
         values = dialog.values()
         if operator == "between":
+            lower_operator, upper_operator = (
+                ("greater_than_or_equal", "less_than_or_equal")
+                if numeric
+                else ("date_on_or_after", "date_on_or_before")
+            )
             step: dict[str, Any] = {
                 "op": "filter_rows_advanced",
                 "clauses": [
-                    {"column": column, "operator": "greater_than_or_equal",
+                    {"column": column, "operator": lower_operator,
                      "value": values[0], "join": "and"},
-                    {"column": column, "operator": "less_than_or_equal",
+                    {"column": column, "operator": upper_operator,
                      "value": values[1], "join": "and"},
                 ],
             }

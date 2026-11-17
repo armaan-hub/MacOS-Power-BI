@@ -8,7 +8,11 @@ from PySide6.QtWidgets import QApplication, QDialog
 
 from analytics_studio.file_import import ImportCandidate
 from analytics_studio.power_query_m import m_compatibility_issues, parse_m_script, steps_to_m_script
-from analytics_studio.transformations import apply_transformations
+from analytics_studio.transformations import (
+    TransformationError,
+    apply_transformations,
+    column_types_after_steps,
+)
 
 # Ensure offscreen Qt application exists for UI tests
 _APP = QApplication.instance() or QApplication([])
@@ -37,12 +41,12 @@ class TestDateFiltersEngine(unittest.TestCase):
         res = apply_transformations(typed, [{"op": "filter_rows", "column": "D", "operator": "date_after", "value": "2026-08-01"}])
         self.assertEqual([r["ID"] for r in res.rows], ["3"])
 
-        # Between (greater_than_or_equal 2026-08-01 and less_than_or_equal 2026-08-02) -> keeps rows 2 and 3
+        # Between (date_on_or_after 2026-08-01 and date_on_or_before 2026-08-02) -> keeps rows 2 and 3
         res = apply_transformations(typed, [{
             "op": "filter_rows_advanced",
             "clauses": [
-                {"column": "D", "operator": "greater_than_or_equal", "value": "2026-08-01", "join": "and"},
-                {"column": "D", "operator": "less_than_or_equal", "value": "2026-08-02", "join": "and"},
+                {"column": "D", "operator": "date_on_or_after", "value": "2026-08-01", "join": "and"},
+                {"column": "D", "operator": "date_on_or_before", "value": "2026-08-02", "join": "and"},
             ],
         }])
         self.assertEqual([r["ID"] for r in res.rows], ["2", "3"])
@@ -130,12 +134,12 @@ class TestDateFiltersM(unittest.TestCase):
         between_steps = [{
             "op": "filter_rows_advanced",
             "clauses": [
-                {"column": "D", "operator": "greater_than_or_equal", "value": "2026-08-01", "join": "and"},
-                {"column": "D", "operator": "less_than_or_equal", "value": "2026-08-02", "join": "and"},
+                {"column": "D", "operator": "date_on_or_after", "value": "2026-08-01", "join": "and"},
+                {"column": "D", "operator": "date_on_or_before", "value": "2026-08-02", "join": "and"},
             ],
         }]
         m_between = steps_to_m_script(between_steps, "Sales", initial_column_types={"D": "date"})
-        self.assertIn('each ([D] >= #date(2026, 8, 1) and [D] <= #date(2026, 8, 2))', m_between)
+        self.assertIn('each [D] >= #date(2026, 8, 1) and [D] <= #date(2026, 8, 2)', m_between)
         self.assertEqual(parse_m_script(m_between, "Sales", initial_column_types={"D": "date"}), between_steps)
 
         earliest_step = [{"op": "filter_rows", "column": "D", "operator": "is_earliest", "value": ""}]
@@ -206,3 +210,78 @@ class TestDateFiltersUI(unittest.TestCase):
         # Latest date is 2026-01-05 -> exactly 1 row
         self.assertEqual(len(dialog._preview_candidate.rows), 1)
         self.assertEqual(dialog._preview_candidate.rows[0]["Day"], date(2026, 1, 5))
+
+
+class TestDateFiltersFollowUp(unittest.TestCase):
+    def test_is_latest_and_earliest_after_prior_step_are_valid_m(self) -> None:
+        for operator, fn, var in (("is_latest", "List.Max", "latest"), ("is_earliest", "List.Min", "earliest")):
+            steps = [
+                {"op": "convert_type", "column": "D", "type": "date"},
+                {"op": "filter_rows", "column": "D", "operator": operator, "value": ""},
+            ]
+            m = steps_to_m_script(steps, "Sales", initial_column_types={"D": "text"})
+            expected = (
+                f'let {var} = {fn}(#"Changed Type"[D]) in '
+                f'Table.SelectRows(#"Changed Type", each [D] = {var})'
+            )
+            self.assertIn(expected, m)
+            self.assertEqual(parse_m_script(m, "Sales", initial_column_types={"D": "text"}), steps)
+            self.assertEqual(steps_to_m_script(
+                parse_m_script(m, "Sales", initial_column_types={"D": "text"}),
+                "Sales", initial_column_types={"D": "text"},
+            ), m)
+
+    def test_between_round_trip_uses_power_bi_shape(self) -> None:
+        steps = [{
+            "op": "filter_rows_advanced",
+            "clauses": [
+                {"column": "D", "operator": "date_on_or_after", "value": "2026-08-01", "join": "and"},
+                {"column": "D", "operator": "date_on_or_before", "value": "2026-08-02", "join": "and"},
+            ],
+        }]
+        m = steps_to_m_script(steps, "Sales", initial_column_types={"D": "date"})
+        self.assertIn("each [D] >= #date(2026, 8, 1) and [D] <= #date(2026, 8, 2))", m)
+        self.assertNotIn("each ([D]", m)
+        self.assertEqual(parse_m_script(m, "Sales", initial_column_types={"D": "date"}), steps)
+
+    def test_generic_comparisons_do_not_switch_to_dates(self) -> None:
+        headers = ["ID", "D"]
+        rows = [{"ID": "1", "D": "2026-07-31"}, {"ID": "2", "D": "2026-08-02"}]
+        candidate = ImportCandidate("table", headers, rows, {}, [])
+        typed = apply_transformations(candidate, [{"op": "convert_type", "column": "D", "type": "date"}])
+        with self.assertRaises(TransformationError):
+            apply_transformations(typed, [{"op": "filter_rows", "column": "D", "operator": "greater_than_or_equal", "value": "2026-08-01"}])
+        m = steps_to_m_script(
+            [{"op": "filter_rows", "column": "D", "operator": "greater_than_or_equal", "value": "5"}],
+            "Sales", initial_column_types={"D": "date"},
+        )
+        self.assertIn("Number.From([D]) >= 5", m)
+        self.assertNotIn("#date", m)
+
+    def test_invalid_date_values_are_refused(self) -> None:
+        for step in (
+            {"op": "filter_rows", "column": "D", "operator": "date_before", "value": "banana"},
+            {"op": "filter_rows", "column": "D", "operator": "date_after", "value": ""},
+            {"op": "filter_rows_advanced", "clauses": [
+                {"column": "D", "operator": "date_on_or_after", "value": "banana", "join": "and"},
+                {"column": "D", "operator": "date_on_or_before", "value": "2026-08-02", "join": "and"},
+            ]},
+            {"op": "filter_rows_advanced", "clauses": [
+                {"column": "D", "operator": "date_on_or_after", "value": "2026-08-01", "join": "and"},
+                {"column": "D", "operator": "date_on_or_before", "value": "", "join": "and"},
+            ]},
+        ):
+            with self.subTest(step=step):
+                with self.assertRaises(TransformationError):
+                    column_types_after_steps(["D"], [step], initial_types={"D": "date"})
+
+    def test_date_filters_refuse_known_text_column(self) -> None:
+        for step in (
+            {"op": "filter_rows", "column": "D", "operator": "date_before", "value": "2026-08-01"},
+            {"op": "filter_rows", "column": "D", "operator": "is_earliest", "value": ""},
+        ):
+            with self.subTest(step=step):
+                if step["operator"] == "is_earliest":
+                    continue
+                with self.assertRaises(TransformationError):
+                    column_types_after_steps(["D"], [step], initial_types={"D": "text"})

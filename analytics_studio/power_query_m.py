@@ -2066,8 +2066,8 @@ def _parse_date_m_predicate(pred_str: str) -> tuple[str, str, str] | None:
     op_map = {
         "<": "date_before",
         ">": "date_after",
-        "<=": "less_than_or_equal",
-        ">=": "greater_than_or_equal",
+        "<=": "date_on_or_before",
+        ">=": "date_on_or_after",
         "=": "equals",
     }
     return col, op_map[op_sym], val
@@ -2083,15 +2083,17 @@ def _parse_m_date_row_filter(expression: str) -> list[dict[str, Any]] | None:
         return None
     if len(parsed_parts) == 1:
         col, op, val = parsed_parts[0]  # type: ignore[misc]
+        if op in {"date_on_or_after", "date_on_or_before"}:
+            return None
         return [{"op": "filter_rows", "column": col, "operator": op, "value": val}]
     if len(parsed_parts) == 2:
         (c1, op1, v1), (c2, op2, v2) = parsed_parts  # type: ignore[misc]
-        if c1 == c2 and op1 == "greater_than_or_equal" and op2 == "less_than_or_equal":
+        if c1 == c2 and op1 == "date_on_or_after" and op2 == "date_on_or_before":
             return [{
                 "op": "filter_rows_advanced",
                 "clauses": [
-                    {"column": c1, "operator": "greater_than_or_equal", "value": v1, "join": "and"},
-                    {"column": c2, "operator": "less_than_or_equal", "value": v2, "join": "and"},
+                    {"column": c1, "operator": "date_on_or_after", "value": v1, "join": "and"},
+                    {"column": c2, "operator": "date_on_or_before", "value": v2, "join": "and"},
                 ],
             }]
     return None
@@ -2403,16 +2405,12 @@ def _filter_clause_to_m_predicate(
     if operator == "date_after":
         date_lit = _m_date_literal(clause["value"], col_type)
         return f"{column} > {date_lit}"
-    if operator in {"greater_than_or_equal", "less_than_or_equal"} and (
-        col_type in {"date", "datetime"}
-        or re.match(r"^\d{4}-\d{2}-\d{2}", str(clause.get("value", "")).strip())
-    ):
-        try:
-            date_lit = _m_date_literal(clause["value"], col_type)
-            sym = ">=" if operator == "greater_than_or_equal" else "<="
-            return f"{column} {sym} {date_lit}"
-        except PowerQueryMScriptError:
-            pass
+    if operator == "date_on_or_after":
+        date_lit = _m_date_literal(clause["value"], col_type)
+        return f"{column} >= {date_lit}"
+    if operator == "date_on_or_before":
+        date_lit = _m_date_literal(clause["value"], col_type)
+        return f"{column} <= {date_lit}"
     if operator == "is_null":
         return f"{column} = null"
     if operator == "is_not_null":
@@ -2516,8 +2514,7 @@ def _step_to_m_call(
         fn = "List.Min" if step["operator"] == "is_earliest" else "List.Max"
         var = "earliest" if step["operator"] == "is_earliest" else "latest"
         col = _m_field(step["column"])
-        ref = _m_reference(previous)
-        return f"let {var} = {fn}({ref}{col}) in Table.SelectRows({ref}, each {col} = {var})"
+        return f"let {var} = {fn}({previous}{col}) in Table.SelectRows({previous}, each {col} = {var})"
     if op in {"filter_rows", "filter_rows_advanced"}:
         clauses = ([{
             "column": step["column"], "operator": step["operator"],
@@ -2533,6 +2530,17 @@ def _step_to_m_call(
                 groups[-1].append(expression)
             else:
                 groups.append([expression])
+        date_between = (
+            len(groups) == 1
+            and bool(clauses)
+            and all(
+                clause["operator"] in {"date_on_or_after", "date_on_or_before"}
+                for clause in clauses
+            )
+        )
+        if date_between:
+            # Power BI writes the date Between as a bare "and" pair, with no outer parentheses.
+            return f"Table.SelectRows({previous}, each {' and '.join(groups[0])})"
         predicate = " or ".join(
             " and ".join(group) if len(group) == 1 else "(" + " and ".join(group) + ")"
             for group in groups
