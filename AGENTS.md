@@ -1,4 +1,4 @@
-# Analytics Studio: shared rules for Claude and Antigravity
+# Analytics Studio: shared rules for Claude, Antigravity and Codex
 
 Both agents read this file first. `CLAUDE.md` and `GEMINI.md` only point here, so the rules cannot drift apart.
 The user (Armaan) decides what gets built and approves what is finished. Neither agent overrules the user.
@@ -18,6 +18,22 @@ The user (Armaan) decides what gets built and approves what is finished. Neither
 **Temporary roles (set by the user 2026-11-01, until Antigravity's quota returns, about 14:15 on Nov 2).** Haiku 5.5 takes the Builder column and Sonnet 5.5 fixes errors Haiku cannot, both as subagents started by Claude Opus 5.5, one at a time. Every Builder limit applies to them: no `--freeze`, `--accept`, commit, merge or Power BI, no edits to saved answers or existing tests. Opus 5.5 plans and does the full review. Branch: `haiku/<task>`. This does not change the rules below.
 
 If the user explicitly tells Claude to code something, that instruction applies to that task only. Roles then return to the table above.
+
+## Codex: backup Builder (set by the user 2026-11-17)
+
+Codex (OpenAI Codex CLI, free ChatGPT plan, small quota) builds when Antigravity and OpenCode are out of tokens. Claude Opus 5.5 (Team-Planner) starts it headless with `codex exec` on one brief at a time, inside a worktree such as `/Users/armaan/wt-ux-NNN` on branch `antigravity/ux-NNN`. Every Builder limit above applies to Codex. In addition:
+
+- **Read the brief first.** It names the files, lines, step shapes and tests. Do not explore beyond what the brief needs, because the quota is small.
+- **Stay in the worktree.** Never edit the main repo folder, other worktrees, `~/.claude`, or anything outside the worktree.
+- **Tests.** Run only the test files the brief names, with `QT_QPA_PLATFORM=offscreen` and `-p no:cacheprovider`. Never run the full parity gate; Claude runs it.
+- **Existing tests.** Never change, skip or delete an existing test unless the brief says so. If one breaks, stop and report `BLOCKED:` with the test name and the output.
+- **No machine paths in tests.** Never write `/Users/armaan` into `tests/` or `analytics_studio/`.
+- **Qt.** Never open windows on the user's screen. Qt code always runs with `QT_QPA_PLATFORM=offscreen`.
+- **Commit** on the current branch only, when the brief's tests pass. Never merge, push, rebase, reset or force anything.
+- **Never** read or write `tools/parity/`, saved Power BI answers, `PARITY_LEDGER.md` or `tools/parity_check.py`, and never run `--freeze` or `--accept`.
+- **Finish** with a short report: files changed, tests run with their pass and fail counts, and open doubts. If you could not finish, or you hit a usage limit, make the last line `BLOCKED: <reason>`.
+
+Team-Thinker (Claude Sonnet 5.5) reviews and tests Codex's commit, and Claude runs the gate before any merge, the same as for Antigravity.
 
 ## The loop
 
