@@ -2747,9 +2747,10 @@ def _step_to_m_call(
         return f"Table.TransformColumns({previous}, {{{transform}}})"
     if op == "split_column":
         names = _m_string_list([f"{step['column']}.1", f"{step['column']}.2"])
+        from_end_arg = ", true" if step.get("from_end") else ""
         splitter = (
             "Splitter.SplitTextByEachDelimiter("
-            f"{{{_m_string(step['delimiter'])}}}, QuoteStyle.None)"
+            f"{{{_m_string(step['delimiter'])}}}, QuoteStyle.None{from_end_arg})"
         )
         return (
             f"Table.SplitColumn({previous}, {_m_string(step['column'])}, "
@@ -3024,14 +3025,34 @@ def _parse_transform_list(value: str) -> list[tuple[str, ...]]:
     return result
 
 
-def _parse_text_splitter(value: str) -> tuple[str, str]:
+def _parse_text_splitter(value: str) -> tuple[str, str, bool]:
     """Parse only literal, quote-insensitive delimiter splitters."""
     match = _CALL.fullmatch(value.strip())
     if match is None:
         raise PowerQueryMScriptError("The split function is outside the supported local subset.")
     arguments = _split_top_level(match.group(2), ",")
     if match.group(1) == "Splitter.SplitTextByEachDelimiter":
-        if len(arguments) != 2 or arguments[1].strip() != "QuoteStyle.None":
+        if len(arguments) == 2:
+            if arguments[1].strip() != "QuoteStyle.None":
+                raise PowerQueryMScriptError(
+                    "A first-delimiter split must use QuoteStyle.None and one literal delimiter."
+                )
+            from_end = False
+        elif len(arguments) == 3:
+            if arguments[1].strip() != "QuoteStyle.None":
+                raise PowerQueryMScriptError(
+                    "A first-delimiter split must use QuoteStyle.None and one literal delimiter."
+                )
+            from_end_text = arguments[2].strip().lower()
+            if from_end_text == "true":
+                from_end = True
+            elif from_end_text == "false":
+                from_end = False
+            else:
+                raise PowerQueryMScriptError(
+                    "A delimiter split direction argument must be true or false."
+                )
+        else:
             raise PowerQueryMScriptError(
                 "A first-delimiter split must use QuoteStyle.None and one literal delimiter."
             )
@@ -3040,13 +3061,13 @@ def _parse_text_splitter(value: str) -> tuple[str, str]:
             raise PowerQueryMScriptError(
                 "A first-delimiter split must list exactly one delimiter."
             )
-        return "first", delimiters[0]
+        return "first", delimiters[0], from_end
     if match.group(1) == "Splitter.SplitTextByDelimiter":
         if len(arguments) != 2 or arguments[1].strip() != "QuoteStyle.None":
             raise PowerQueryMScriptError(
                 "A delimiter split must use QuoteStyle.None to match the local text engine."
             )
-        return "all", _parse_string(arguments[0])
+        return "all", _parse_string(arguments[0]), False
     raise PowerQueryMScriptError(f"Unsupported split function {match.group(1)!r}.")
 
 
@@ -3084,7 +3105,7 @@ def _parse_split_column(arguments: list[str], previous_name: str) -> dict[str, A
             return validate_steps([step])[0]
         except TransformationError as exc:
             raise PowerQueryMScriptError(str(exc)) from exc
-    split_kind, delimiter = _parse_text_splitter(arguments[1])
+    split_kind, delimiter, from_end = _parse_text_splitter(arguments[1])
     if _parse_string(arguments[3]) != "":
         raise PowerQueryMScriptError(
             "Table.SplitColumn must use an empty-text default to match the local table model."
@@ -3096,7 +3117,10 @@ def _parse_split_column(arguments: list[str], previous_name: str) -> dict[str, A
             raise PowerQueryMScriptError(
                 "A first-delimiter split must name exactly the local .1 and .2 output columns."
             )
-        return {"op": "split_column", "column": column, "delimiter": delimiter}
+        step = {"op": "split_column", "column": column, "delimiter": delimiter}
+        if from_end:
+            step["from_end"] = True
+        return step
     expected_count = _m_dynamic_split_count(_m_name_reference(previous_name), column, delimiter)
     if _compact_m_whitespace(expected_count) != _compact_m_whitespace(arguments[2]):
         raise PowerQueryMScriptError(

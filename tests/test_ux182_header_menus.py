@@ -53,6 +53,7 @@ class HeaderMenusTests(unittest.TestCase):
     def test_context_menu_for_region_lists_items_in_order(self) -> None:
         dialog = self.make()
         menu = dialog._build_header_context_menu(0)
+        # Task 197 (2026-11-17): Power BI's column menu has Split Column (Microsoft Learn, split-columns-delimiter); position after Replace Errors... pending a VM check.
         expected_items = [
             "Copy",
             "Remove",
@@ -65,6 +66,7 @@ class HeaderMenusTests(unittest.TestCase):
             "Transform",
             "Replace Values...",
             "Replace Errors...",
+            "Split Column",
             "Group By...",
             "Fill",
             "Unpivot Columns",

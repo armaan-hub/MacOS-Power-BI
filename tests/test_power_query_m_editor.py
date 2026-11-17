@@ -3173,6 +3173,7 @@ in
 
     def test_step_settings_dialog_initializes_filter_type_split_and_replace_steps(self) -> None:
         # Task 196 (2026-11-17): replace_value gear-edit now opens ReplaceValuesDialog; covered in tests/test_ux196_replace_values_dialog.py
+        # Task 197 (2026-11-17): split_column gear-edit now opens SplitColumnByDelimiterDialog; covered in tests/test_ux197_split_by_delimiter_dialog.py
         cases = (
             (
                 {"op": "filter_rows", "column": "Region", "operator": "equals", "value": "East"},
@@ -3183,11 +3184,6 @@ in
                 {"op": "convert_type", "column": "Revenue", "type": "whole_number"},
                 lambda dialog: dialog._set_combo_data(dialog.option_combo, "decimal_number"),
                 lambda dialog: self.assertEqual(dialog._steps[0]["type"], "decimal_number"),
-            ),
-            (
-                {"op": "split_column", "column": "Customer", "delimiter": " "},
-                lambda dialog: dialog.delimiter_edit.setText("a"),
-                lambda dialog: self.assertEqual(dialog._steps[0]["delimiter"], "a"),
             ),
         )
         for step, edit, verify in cases:

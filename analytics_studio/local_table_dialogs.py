@@ -34,6 +34,7 @@ from PySide6.QtGui import (
     QRegularExpressionValidator,
     QShortcut,
     QTextCursor,
+    QValidator,
 )
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -60,6 +61,7 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QRadioButton,
     QScrollArea,
+    QSpinBox,
     QSplitter,
     QStyle,
     QTableView,
@@ -1308,6 +1310,94 @@ class _PowerQueryConditionDialog(QDialog):
         return [edit.text().strip() if self._numeric else edit.text() for edit in self.edits]
 
 
+class AddIndexColumnDialog(QDialog):
+    """Power BI's Add Index Column dialog (Add Column > Index Column > Custom...)."""
+
+    def __init__(
+        self,
+        initial_step: dict[str, Any] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQueryAddIndexColumnDialog")
+        self.setWindowTitle("Add Index Column")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(360)
+
+        self._initial_step = initial_step
+        validator = QRegularExpressionValidator(QRegularExpression(r"^-?\d{1,18}$"), self)
+        self._validator = validator
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(10)
+
+        start_label = QLabel("Starting index", self)
+        self.start_edit = QLineEdit(self)
+        self.start_edit.setObjectName("addIndexStartingIndexEdit")
+        self.start_edit.setValidator(validator)
+        layout.addWidget(start_label)
+        layout.addWidget(self.start_edit)
+
+        increment_label = QLabel("Increment", self)
+        self.increment_edit = QLineEdit(self)
+        self.increment_edit.setObjectName("addIndexIncrementEdit")
+        self.increment_edit.setValidator(validator)
+        layout.addWidget(increment_label)
+        layout.addWidget(self.increment_edit)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch(1)
+        self.ok_button = QPushButton("OK", self)
+        self.ok_button.setObjectName("addIndexOkButton")
+        self.cancel_button = QPushButton("Cancel", self)
+        self.cancel_button.setObjectName("addIndexCancelButton")
+        buttons_layout.addWidget(self.ok_button)
+        buttons_layout.addWidget(self.cancel_button)
+        layout.addLayout(buttons_layout)
+
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+        self.start_edit.textChanged.connect(self._refresh_ok)
+        self.increment_edit.textChanged.connect(self._refresh_ok)
+
+        if initial_step is not None:
+            self.start_edit.setText(str(initial_step.get("start", 0)))
+            self.increment_edit.setText(str(initial_step.get("increment", 1)))
+        else:
+            self.start_edit.setText("0")
+            self.increment_edit.setText("1")
+
+        self._refresh_ok()
+
+    def _is_valid_whole_number(self, text: str) -> bool:
+        if not text:
+            return False
+        result = self._validator.validate(text, 0)
+        state = result[0]
+        return state == QValidator.State.Acceptable
+
+    def _refresh_ok(self, *_args: Any) -> None:
+        valid = (
+            self._is_valid_whole_number(self.start_edit.text())
+            and self._is_valid_whole_number(self.increment_edit.text())
+        )
+        self.ok_button.setEnabled(valid)
+
+    def step(self) -> dict[str, Any]:
+        new_name = (
+            self._initial_step["new_name"]
+            if self._initial_step is not None and "new_name" in self._initial_step
+            else "Index"
+        )
+        return {
+            "op": "add_index_column",
+            "new_name": new_name,
+            "start": int(self.start_edit.text()),
+            "increment": int(self.increment_edit.text()),
+        }
+
+
 class ReplaceValuesDialog(QDialog):
     """Power BI's Replace Values dialog (Transform > Replace Values)."""
 
@@ -1562,6 +1652,288 @@ class ReplaceValuesDialog(QDialog):
                 "replacement": replace_val,
                 "replacer": "value",
             }
+
+
+class SplitColumnByDelimiterDialog(QDialog):
+    """Power BI's Split Column by Delimiter dialog."""
+
+    _STANDARD_DELIMITERS: list[tuple[str, str]] = [
+        ("Colon", ":"),
+        ("Comma", ","),
+        ("Equals Sign", "="),
+        ("Semicolon", ";"),
+        ("Space", " "),
+        ("Tab", "\t"),
+    ]
+
+    def __init__(
+        self,
+        column: str,
+        candidate: ImportCandidate | None = None,
+        initial_step: dict[str, Any] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQuerySplitByDelimiterDialog")
+        self.setWindowTitle("Split Column by Delimiter")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(440)
+
+        self._column = column
+        self._candidate = candidate
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 14, 16, 12)
+        layout.setSpacing(10)
+
+        instructions = QLabel("Specify the delimiter used to split the text column.")
+        instructions.setStyleSheet("font-size: 12px; color: #273b49;")
+        layout.addWidget(instructions)
+
+        delim_label = QLabel("Select or enter delimiter")
+        delim_label.setStyleSheet("font-weight: 600; color: #273b49;")
+        layout.addWidget(delim_label)
+
+        self.splitDelimiterCombo = QComboBox(self)
+        self.splitDelimiterCombo.setObjectName("splitDelimiterCombo")
+        for label, val in self._STANDARD_DELIMITERS:
+            self.splitDelimiterCombo.addItem(label, val)
+        self.splitDelimiterCombo.addItem("--Custom--", "--custom--")
+        layout.addWidget(self.splitDelimiterCombo)
+
+        self.splitCustomDelimiterEdit = QLineEdit(self)
+        self.splitCustomDelimiterEdit.setObjectName("splitCustomDelimiterEdit")
+        self.splitCustomDelimiterEdit.setPlaceholderText("Custom delimiter")
+        self.splitCustomDelimiterEdit.setVisible(False)
+        layout.addWidget(self.splitCustomDelimiterEdit)
+
+        split_at_label = QLabel("Split at")
+        split_at_label.setStyleSheet("font-weight: 600; color: #273b49; margin-top: 6px;")
+        layout.addWidget(split_at_label)
+
+        self.splitAtLeftRadio = QRadioButton("Left-most delimiter", self)
+        self.splitAtLeftRadio.setObjectName("splitAtLeftRadio")
+        self.splitAtLeftRadio.setChecked(True)
+        layout.addWidget(self.splitAtLeftRadio)
+
+        self.splitAtRightRadio = QRadioButton("Right-most delimiter", self)
+        self.splitAtRightRadio.setObjectName("splitAtRightRadio")
+        layout.addWidget(self.splitAtRightRadio)
+
+        self.splitAtEachRadio = QRadioButton("Each occurrence of the delimiter", self)
+        self.splitAtEachRadio.setObjectName("splitAtEachRadio")
+        layout.addWidget(self.splitAtEachRadio)
+
+        # Advanced options
+        self.splitAdvancedToggle = QToolButton(self)
+        self.splitAdvancedToggle.setObjectName("splitAdvancedToggle")
+        self.splitAdvancedToggle.setText("▶ Advanced options")
+        self.splitAdvancedToggle.setCheckable(True)
+        self.splitAdvancedToggle.setStyleSheet(
+            "QToolButton { border: none; font-weight: 600; color: #115ea3; text-align: left; margin-top: 6px; }"
+        )
+        layout.addWidget(self.splitAdvancedToggle)
+
+        self._advanced_panel = QWidget(self)
+        adv_layout = QVBoxLayout(self._advanced_panel)
+        adv_layout.setContentsMargins(12, 4, 4, 4)
+        adv_layout.setSpacing(6)
+
+        split_into_label = QLabel("Split into", self._advanced_panel)
+        split_into_label.setStyleSheet("font-weight: 600; color: #273b49;")
+        adv_layout.addWidget(split_into_label)
+
+        self.splitIntoColumnsRadio = QRadioButton("Columns", self._advanced_panel)
+        self.splitIntoColumnsRadio.setObjectName("splitIntoColumnsRadio")
+        self.splitIntoColumnsRadio.setChecked(True)
+        adv_layout.addWidget(self.splitIntoColumnsRadio)
+
+        self.splitIntoRowsRadio = QRadioButton("Rows", self._advanced_panel)
+        self.splitIntoRowsRadio.setObjectName("splitIntoRowsRadio")
+        adv_layout.addWidget(self.splitIntoRowsRadio)
+
+        num_cols_label = QLabel("Number of columns to split into", self._advanced_panel)
+        num_cols_label.setStyleSheet("font-weight: 600; color: #273b49; margin-top: 4px;")
+        adv_layout.addWidget(num_cols_label)
+
+        self.splitColumnCountSpin = QSpinBox(self._advanced_panel)
+        self.splitColumnCountSpin.setObjectName("splitColumnCountSpin")
+        self.splitColumnCountSpin.setValue(2)
+        self.splitColumnCountSpin.setEnabled(False)
+        self.splitColumnCountSpin.setToolTip(
+            "Not supported yet; the column count comes from the data"
+        )
+        adv_layout.addWidget(self.splitColumnCountSpin)
+
+        quote_label = QLabel("Quote Character", self._advanced_panel)
+        quote_label.setStyleSheet("font-weight: 600; color: #273b49; margin-top: 4px;")
+        adv_layout.addWidget(quote_label)
+
+        self.splitQuoteCombo = QComboBox(self._advanced_panel)
+        self.splitQuoteCombo.setObjectName("splitQuoteCombo")
+        self.splitQuoteCombo.addItem("None", "none")
+        self.splitQuoteCombo.addItem('"', "quote")
+        # Disable the '"' item
+        quote_model = self.splitQuoteCombo.model()
+        if quote_model is not None:
+            item = quote_model.index(1, 0)
+            if item.isValid():
+                self.splitQuoteCombo.setItemData(
+                    1, Qt.ItemFlag.NoItemFlags, Qt.ItemDataRole.UserRole - 1
+                )
+        self.splitQuoteCombo.setCurrentIndex(0)
+        self.splitQuoteCombo.setToolTip("Quote character not supported yet")
+        adv_layout.addWidget(self.splitQuoteCombo)
+
+        self._advanced_panel.setVisible(False)
+        layout.addWidget(self._advanced_panel)
+
+        self.splitError = QLabel(self)
+        self.splitError.setObjectName("splitError")
+        self.splitError.setStyleSheet("color: #b00020; font-size: 11px;")
+        self.splitError.setVisible(False)
+        layout.addWidget(self.splitError)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+            parent=self,
+        )
+        buttons.setObjectName("powerQuerySplitByDelimiterButtons")
+        self.ok_button = buttons.button(QDialogButtonBox.StandardButton.Ok)
+        self.ok_button.setObjectName("splitOkButton")
+        self.cancel_button = buttons.button(QDialogButtonBox.StandardButton.Cancel)
+        self.cancel_button.setObjectName("splitCancelButton")
+        layout.addWidget(buttons)
+
+        # Wire events
+        self.splitDelimiterCombo.currentIndexChanged.connect(self._on_delimiter_combo_changed)
+        self.splitCustomDelimiterEdit.textChanged.connect(self._update_ok_state)
+        self.splitAtLeftRadio.toggled.connect(self._on_split_at_changed)
+        self.splitAtRightRadio.toggled.connect(self._on_split_at_changed)
+        self.splitAtEachRadio.toggled.connect(self._on_split_at_changed)
+        self.splitAdvancedToggle.toggled.connect(self._toggle_advanced)
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+
+        # Set initial values
+        if initial_step is not None:
+            self._load_initial_step(initial_step)
+        else:
+            detected = self._detect_default_delimiter()
+            self._set_delimiter(detected)
+
+        self._on_split_at_changed()
+        self._update_ok_state()
+
+    def _toggle_advanced(self, checked: bool) -> None:
+        self._advanced_panel.setVisible(checked)
+        self.splitAdvancedToggle.setText("▼ Advanced options" if checked else "▶ Advanced options")
+
+    def _detect_default_delimiter(self) -> str:
+        """The first of ': , = ; space tab' appearing in the column's first 200 non-null values."""
+        if self._candidate is None or self._column not in self._candidate.headers:
+            return "--custom--"
+        checks = [
+            (":", ":"),
+            (",", ","),
+            ("=", "="),
+            (";", ";"),
+            (" ", " "),
+            ("\t", "\t"),
+        ]
+        count = 0
+        for row in self._candidate.rows:
+            val = row.get(self._column)
+            if val is None or is_cell_error(val):
+                continue
+            text = cell_to_text(val)
+            for char, _ in checks:
+                if char in text:
+                    return char
+            count += 1
+            if count >= 200:
+                break
+        return "--custom--"
+
+    def _set_delimiter(self, delim: str) -> None:
+        for idx, (_lbl, val) in enumerate(self._STANDARD_DELIMITERS):
+            if val == delim:
+                self.splitDelimiterCombo.setCurrentIndex(idx)
+                self.splitCustomDelimiterEdit.setVisible(False)
+                return
+        custom_idx = self.splitDelimiterCombo.findData("--custom--")
+        if custom_idx >= 0:
+            self.splitDelimiterCombo.setCurrentIndex(custom_idx)
+            self.splitCustomDelimiterEdit.setVisible(True)
+            if delim != "--custom--":
+                self.splitCustomDelimiterEdit.setText(delim)
+
+    def _on_delimiter_combo_changed(self) -> None:
+        is_custom = self.splitDelimiterCombo.currentData() == "--custom--"
+        self.splitCustomDelimiterEdit.setVisible(is_custom)
+        if is_custom:
+            self.splitCustomDelimiterEdit.setFocus()
+        self._update_ok_state()
+
+    def _on_split_at_changed(self) -> None:
+        each = self.splitAtEachRadio.isChecked()
+        self.splitIntoRowsRadio.setEnabled(each)
+        if not each and self.splitIntoRowsRadio.isChecked():
+            self.splitIntoColumnsRadio.setChecked(True)
+
+    def _update_ok_state(self) -> None:
+        delim = self.delimiter()
+        self.ok_button.setEnabled(bool(delim))
+
+    def delimiter(self) -> str:
+        data = self.splitDelimiterCombo.currentData()
+        if data == "--custom--":
+            return self.splitCustomDelimiterEdit.text()
+        return str(data)
+
+    def _load_initial_step(self, step: dict[str, Any]) -> None:
+        op = step.get("op", "")
+        delim = step.get("delimiter", "")
+        self._set_delimiter(delim)
+        if op == "split_column":
+            if step.get("from_end"):
+                self.splitAtRightRadio.setChecked(True)
+            else:
+                self.splitAtLeftRadio.setChecked(True)
+            self.splitIntoColumnsRadio.setChecked(True)
+        elif op == "split_column_by_each_delimiter":
+            self.splitAtEachRadio.setChecked(True)
+            self.splitIntoColumnsRadio.setChecked(True)
+        elif op == "split_column_to_rows":
+            self.splitAtEachRadio.setChecked(True)
+            self.splitIntoRowsRadio.setChecked(True)
+
+    def step(self) -> dict[str, Any]:
+        delim = self.delimiter()
+        if self.splitAtEachRadio.isChecked():
+            if self.splitIntoRowsRadio.isChecked():
+                return {
+                    "op": "split_column_to_rows",
+                    "column": self._column,
+                    "delimiter": delim,
+                }
+            return {
+                "op": "split_column_by_each_delimiter",
+                "column": self._column,
+                "delimiter": delim,
+            }
+        if self.splitAtRightRadio.isChecked():
+            return {
+                "op": "split_column",
+                "column": self._column,
+                "delimiter": delim,
+                "from_end": True,
+            }
+        return {
+            "op": "split_column",
+            "column": self._column,
+            "delimiter": delim,
+        }
 
 
 class ChooseColumnsDialog(QDialog):
@@ -5156,6 +5528,8 @@ class TransformDataDialog(QDialog):
             size: str = "small",
             slot: tuple[int, int, int, int] | None = None,
             width: int | None = None,
+            menu_items: list[tuple[Any, ...]] | None = None,
+            menu_button_popup: bool = False,
         ) -> dict[str, Any]:
             entry = {
                 "label": label,
@@ -5167,6 +5541,10 @@ class TransformDataDialog(QDialog):
                 entry["slot"] = slot
             if width is not None:
                 entry["width"] = width
+            if menu_items is not None:
+                entry["menu_items"] = menu_items
+            if menu_button_popup:
+                entry["menu_button_popup"] = True
             return entry
 
         def action(
@@ -5262,6 +5640,21 @@ class TransformDataDialog(QDialog):
                 ))
             else:
                 data_type_menu_items.append((label, lambda: None, False))
+
+        split_column_menu_items: list[tuple[str, Any, bool, str | None]] = [
+            ("By Delimiter...", lambda: self._open_split_by_delimiter_dialog(), True, None),
+            (
+                "By Positions...",
+                lambda: self._select_ribbon_operation("split_column_by_positions"),
+                True,
+                None,
+            ),
+            ("By Number of Characters...", lambda: None, False, "Not supported yet"),
+            ("By Lowercase to Uppercase", lambda: None, False, "Not supported yet"),
+            ("By Uppercase to Lowercase", lambda: None, False, "Not supported yet"),
+            ("By Digit to Non-Digit", lambda: None, False, "Not supported yet"),
+            ("By Non-Digit to Digit", lambda: None, False, "Not supported yet"),
+        ]
         home_groups = [
             ("Close", [action(
                 "Close &\nLoad",
@@ -5340,7 +5733,16 @@ class TransformDataDialog(QDialog):
                 ),
             ], "office"),
             ("Transform", [
-                command("Split Column", "split_column", "Split a column at its first delimiter.", size="medium", slot=(0, 0, 3, 1), width=50),
+                command(
+                    "Split Column",
+                    "split_column",
+                    "Split a column at its first delimiter.",
+                    size="medium",
+                    slot=(0, 0, 3, 1),
+                    width=50,
+                    menu_items=split_column_menu_items,
+                    menu_button_popup=True,
+                ),
                 command("Group By", "group_by", "Group rows and add supported aggregations.", size="medium", slot=(0, 1, 3, 1), width=50),
                 action(
                     "Data Type: Any",
@@ -5440,6 +5842,11 @@ class TransformDataDialog(QDialog):
                 width=102,
             )], "office"),
         ]
+        unpivot_columns_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
+            ("Unpivot Columns", lambda: self._run_unpivot("columns"), True, None, "unpivotColumnsAction"),
+            ("Unpivot Other Columns", lambda: self._run_unpivot("other"), True, None, "unpivotOtherColumnsAction"),
+            ("Unpivot Only Selected Columns", lambda: self._run_unpivot("only_selected"), True, None, "unpivotOnlySelectedColumnsAction"),
+        ]
         transform_groups = [
             ("Table", [
                 command("Transpose", "transpose_table", "Swap table rows and columns.", size="medium", slot=(0, 0, 3, 1)),
@@ -5454,8 +5861,14 @@ class TransformDataDialog(QDialog):
                 command("Fill Down", "fill_down", "Fill blank cells with the preceding value.", slot=(0, 1, 1, 1)),
                 command("Fill Up", "fill_up", "Fill blank cells with the following value.", slot=(1, 1, 1, 1)),
                 command("Pivot", "pivot_column", "Pivot distinct values into columns.", slot=(2, 1, 1, 1)),
-                command("Unpivot Cols", "unpivot_columns", "Turn selected columns into attribute/value rows.", slot=(3, 1, 1, 1)),
-                command("Unpivot Other", "unpivot_other_columns", "Keep selected columns and unpivot the rest.", slot=(0, 2, 1, 1)),
+                command(
+                    "Unpivot Columns",
+                    "unpivot_columns",
+                    "Turn selected columns into attribute/value rows.",
+                    slot=(3, 1, 1, 1),
+                    menu_items=unpivot_columns_menu_items,
+                    menu_button_popup=True,
+                ),
                 command("Remove Duplicates", "remove_duplicates", "Keep the first row for each duplicate key.", slot=(1, 2, 1, 1)),
                 command("Keep Duplicates", "keep_duplicates", "Keep rows whose selected key occurs more than once.", slot=(2, 2, 1, 1)),
             ], "office"),
@@ -5485,11 +5898,24 @@ class TransformDataDialog(QDialog):
                 command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(1, 2, 1, 1)),
             ], "office"),
         ]
+        index_column_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
+            ("From 0", lambda: self._add_direct_index_step(0, 1), True, None, "indexColumnFrom0Action"),
+            ("From 1", lambda: self._add_direct_index_step(1, 1), True, None, "indexColumnFrom1Action"),
+            ("Custom...", lambda: self._open_add_index_column_dialog(), True, None, "indexColumnCustomAction"),
+        ]
         add_column_groups = [
             ("General", [
                 command("Custom Column", "add_custom_column", "Create a column with a supported M-subset expression.", size="medium", slot=(0, 0, 3, 1)),
                 command("Conditional Column", "conditional_column", "Create a column from ordered conditional rules.", size="medium", slot=(0, 1, 3, 1), width=74),
-                command("Index Column", "add_index_column", "Add an index with a chosen start and increment.", size="medium", slot=(0, 2, 3, 1)),
+                command(
+                    "Index Column",
+                    "add_index_column",
+                    "Add an index with a chosen start and increment.",
+                    size="medium",
+                    slot=(0, 2, 3, 1),
+                    menu_items=index_column_menu_items,
+                    menu_button_popup=True,
+                ),
                 command("Duplicate Column", "duplicate_column", "Copy a column under a new name.", size="medium", slot=(0, 3, 3, 1)),
                 action("Manage Functions", "Create and reuse safe typed scalar M functions in custom-column formulas.", self._manage_query_functions, object_name="managePowerQueryFunctionsButton", size="medium", slot=(0, 4, 3, 1)),
             ], "office"),
@@ -5735,9 +6161,17 @@ class TransformDataDialog(QDialog):
                     menu_items = entry.get("menu_items")
                     if menu_items:
                         menu = QMenu(button)
-                        for menu_label, menu_callback, enabled in menu_items:
+                        for item in menu_items:
+                            menu_label = item[0]
+                            menu_callback = item[1]
+                            enabled = item[2]
+                            item_tooltip = item[3] if len(item) > 3 else None
                             menu_action = menu.addAction(menu_label)
                             menu_action.setEnabled(bool(enabled))
+                            if len(item) > 4 and item[4]:
+                                menu_action.setObjectName(item[4])
+                            if item_tooltip:
+                                menu_action.setToolTip(item_tooltip)
                             if enabled:
                                 menu_action.triggered.connect(
                                     lambda _checked=False, fn=menu_callback: fn()
@@ -6601,6 +7035,12 @@ class TransformDataDialog(QDialog):
             self.operation_combo.setCurrentIndex(operation_index)
             self._open_replace_values_dialog(prior_row=prior_row)
             return
+        if operation == "split_column":
+            self._open_split_by_delimiter_dialog(prior_row=prior_row)
+            return
+        if operation == "add_index_column":
+            self._open_add_index_column_dialog(prior_row=prior_row)
+            return
         if operation == "add_custom_column":
             if prior_row >= 0:
                 self.step_list.setCurrentRow(-1)
@@ -6663,7 +7103,7 @@ class TransformDataDialog(QDialog):
         return True
 
     def _close_operation_dialog(self) -> None:
-        for name in ("_operation_dialog", "_conditional_dialog", "_group_by_dialog"):
+        for name in ("_operation_dialog", "_conditional_dialog", "_group_by_dialog", "_split_by_delimiter_dialog", "_add_index_dialog"):
             dialog = getattr(self, name, None)
             if dialog is not None:
                 dialog.reject()
@@ -7027,6 +7467,225 @@ class TransformDataDialog(QDialog):
         sub.accepted.connect(accepted)
         sub.finished.connect(finished)
         self._operation_dialog = sub
+        sub.show()
+
+    def _open_add_index_column_dialog(
+        self,
+        editing_index: int | None = None,
+        *,
+        prior_row: int = -1,
+    ) -> None:
+        """Power BI's Add Index Column dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+
+        previous_operation_index = self.operation_combo.currentIndex()
+        index_op_index = self.operation_combo.findData("add_index_column")
+        if editing_index is None and index_op_index >= 0:
+            blocker = QSignalBlocker(self.operation_combo)
+            self.operation_combo.setCurrentIndex(index_op_index)
+            del blocker
+
+        sub = AddIndexColumnDialog(
+            initial_step=existing,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            if getattr(self, "_add_index_dialog", None) is sub:
+                self._add_index_dialog = None
+            if (
+                editing_index is None
+                and self.operation_combo.currentData() == "add_index_column"
+                and 0 <= previous_operation_index < self.operation_combo.count()
+            ):
+                blocker = QSignalBlocker(self.operation_combo)
+                self.operation_combo.setCurrentIndex(previous_operation_index)
+                del blocker
+            self._insert_at = None
+            self.step_settings_toggle.setChecked(False)
+            self.operation_settings_panel.setVisible(False)
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
+        self._add_index_dialog = sub
+        sub.show()
+
+    def _add_direct_index_step(self, start: int, increment: int = 1) -> None:
+        """Add an index column step directly (used by ribbon From 0 / From 1)."""
+        if not self._confirm_insert_step():
+            return
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+        added = self._add_step(
+            {
+                "op": "add_index_column",
+                "new_name": "Index",
+                "start": start,
+                "increment": increment,
+            },
+            power_bi_name=True,
+        )
+        self._finish_insert(added, prior_row)
+        if added:
+            self.step_settings_toggle.setChecked(False)
+
+    def _run_unpivot(self, mode: str) -> None:
+        """Apply unpivot in one of three modes: 'columns', 'other', or 'only_selected'."""
+        if not self._confirm_insert_step():
+            return
+        selected = self._selected_preview_columns()
+        if not selected:
+            self._insert_at = None
+            self._show_error("Select one or more columns in the preview first.")
+            return
+
+        preview_headers = list(self._selected_preview_candidate().headers)
+        selected_set = set(selected)
+
+        if mode == "columns":
+            columns = [h for h in preview_headers if h not in selected_set]
+            step = {
+                "op": "unpivot_other_columns",
+                "columns": columns,
+                "attribute_name": "Attribute",
+                "value_name": "Value",
+            }
+            step_name = "Unpivoted Columns"
+        elif mode == "other":
+            columns = [h for h in preview_headers if h in selected_set]
+            step = {
+                "op": "unpivot_other_columns",
+                "columns": columns,
+                "attribute_name": "Attribute",
+                "value_name": "Value",
+            }
+            step_name = "Unpivoted Other Columns"
+        elif mode == "only_selected":
+            columns = [h for h in preview_headers if h in selected_set]
+            step = {
+                "op": "unpivot_columns",
+                "columns": columns,
+                "attribute_name": "Attribute",
+                "value_name": "Value",
+            }
+            step_name = "Unpivoted Only Selected Columns"
+        else:
+            self._insert_at = None
+            return
+
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+
+        added = self._add_step(step, power_bi_name=True, step_name=step_name)
+        self._finish_insert(added, prior_row)
+        if added:
+            self.step_settings_toggle.setChecked(False)
+
+    def _open_split_by_delimiter_dialog(
+        self, editing_index: int | None = None, *, prior_row: int = -1
+    ) -> None:
+        """Power BI's Split Column by Delimiter dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+        selected = self._selected_preview_columns()
+        if editing_index is None and self.step_list.currentRow() >= 0:
+            self.step_list.setCurrentRow(-1)
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._insert_at = None
+            self._show_error(str(exc))
+            return
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+        target_column = (
+            existing.get("column")
+            if existing is not None and "column" in existing
+            else (selected[0] if selected else (base.headers[0] if base.headers else ""))
+        )
+        if not target_column:
+            self._insert_at = None
+            self._show_error("Select a column in the preview first.")
+            return
+
+        # Show split_column in the operation selector while the modal dialog is open, like
+        # the other operation dialogs. Signals are blocked so the old inline split
+        # panel is not configured or shown; the previous selection returns on close.
+        previous_operation_index = self.operation_combo.currentIndex()
+        split_index = self.operation_combo.findData("split_column")
+        if editing_index is None and split_index >= 0:
+            blocker = QSignalBlocker(self.operation_combo)
+            self.operation_combo.setCurrentIndex(split_index)
+            del blocker
+        sub = SplitColumnByDelimiterDialog(
+            target_column,
+            candidate=base,
+            initial_step=existing,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            if getattr(self, "_split_by_delimiter_dialog", None) is sub:
+                self._split_by_delimiter_dialog = None
+            if (
+                editing_index is None
+                and self.operation_combo.currentData() == "split_column"
+                and 0 <= previous_operation_index < self.operation_combo.count()
+            ):
+                blocker = QSignalBlocker(self.operation_combo)
+                self.operation_combo.setCurrentIndex(previous_operation_index)
+                del blocker
+            self._insert_at = None
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
+        self._split_by_delimiter_dialog = sub
         sub.show()
 
     def _replace_selected_step(self, step: dict[str, Any]) -> bool:
@@ -8412,6 +9071,18 @@ class TransformDataDialog(QDialog):
         # 11. Replace Errors...
         add_item(menu, "Replace Errors...", None)
 
+        # Split Column ▸ (By Delimiter...)
+        split_sub = QMenu("Split Column", menu)
+        split_sub.setObjectName("powerQueryHeaderSplitColumnMenu")
+        split_sub.setToolTipsVisible(True)
+        add_item(
+            split_sub,
+            "By Delimiter...",
+            None,
+            action_fn=lambda: self._open_split_by_delimiter_dialog(),
+        )
+        menu.addMenu(split_sub)
+
         # 12. Group By...
         add_item(menu, "Group By...", "group_by")
 
@@ -8424,13 +9095,28 @@ class TransformDataDialog(QDialog):
         menu.addMenu(fill_sub)
 
         # 14. Unpivot Columns
-        add_item(menu, "Unpivot Columns", "unpivot_columns")
+        add_item(
+            menu,
+            "Unpivot Columns",
+            None,
+            action_fn=lambda: self._run_unpivot("columns"),
+        )
 
         # 15. Unpivot Other Columns
-        add_item(menu, "Unpivot Other Columns", "unpivot_other_columns")
+        add_item(
+            menu,
+            "Unpivot Other Columns",
+            None,
+            action_fn=lambda: self._run_unpivot("other"),
+        )
 
         # 16. Unpivot Only Selected Columns
-        add_item(menu, "Unpivot Only Selected Columns", None)
+        add_item(
+            menu,
+            "Unpivot Only Selected Columns",
+            None,
+            action_fn=lambda: self._run_unpivot("only_selected"),
+        )
 
         # 17. Rename...
         add_item(menu, "Rename...", "rename_column")
@@ -10583,6 +11269,7 @@ class TransformDataDialog(QDialog):
         step: dict[str, Any] | None = None,
         *,
         power_bi_name: bool = False,
+        step_name: str | None = None,
     ) -> bool:
         """Add a step built from the form (or the explicit ``step``); True on success.
 
@@ -10608,12 +11295,15 @@ class TransformDataDialog(QDialog):
             return False
         next_metadata.insert(at, {})
         self._steps, self._step_metadata = next_steps, next_metadata
-        step_name = (
-            self._applied_step_names().get(at, "")
-            if power_bi_name and is_known_power_bi_step(next_steps[at]) else ""
-        )
-        if step_name:
+        if step_name is not None:
             self._step_metadata[at] = {"name": step_name}
+        else:
+            computed_name = (
+                self._applied_step_names().get(at, "")
+                if power_bi_name and is_known_power_bi_step(next_steps[at]) else ""
+            )
+            if computed_name:
+                self._step_metadata[at] = {"name": computed_name}
         self._preview_candidate = transformed
         if self._insert_at is not None:
             self._insert_at = at + 1
@@ -10981,8 +11671,14 @@ class TransformDataDialog(QDialog):
         if step["op"] == "replace_value":
             self._open_replace_values_dialog(index)
             return
+        if step["op"] == "add_index_column":
+            self._open_add_index_column_dialog(editing_index=index, prior_row=index)
+            return
         if step["op"] == "group_by":
             self._open_group_by_dialog(index)
+            return
+        if step["op"] in {"split_column", "split_column_by_each_delimiter", "split_column_to_rows"}:
+            self._open_split_by_delimiter_dialog(index)
             return
         operation_name = self.operation_combo.currentText()
         settings_dialog = QDialog(self)
