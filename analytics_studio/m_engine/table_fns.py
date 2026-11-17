@@ -1227,10 +1227,13 @@ def _remove_matching_rows(table: MValue, records: MValue, criteria_fn: MValue) -
 
 
 def _error_check_indexes(t: V.Table, columns: MValue) -> list:
-    """The column positions an error check looks at: the listed ones, or all of them when null."""
+    """The column positions an error check looks at: all of them when null, the listed ones otherwise.
+
+    An empty list means no columns (Power BI: nothing has an error). A text argument is refused.
+    """
     if isinstance(columns, V.Null):
         return list(range(len(t.columns)))
-    return [_index(t, name) for name in _names(columns)]
+    return [_index(t, _text(item)) for item in _items(columns)]
 
 
 def _row_has_error_at(row: tuple, indexes: list) -> bool:

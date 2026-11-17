@@ -1397,9 +1397,8 @@ def _parse_table_call(
             )
         step: dict[str, Any] = {"op": "remove_rows_with_errors"}
         if len(args) == 1 and args[0].strip() != "null":
-            columns = _parse_string_list(args[0])
-            if columns:
-                step["columns"] = columns
+            # An empty list {} means no columns (Power BI); omitting the argument means all columns.
+            step["columns"] = [_parse_string(item) for item in _parse_braced_items(args[0])]
         return [step]
     if function == "Table.SelectRowsWithErrors":
         if len(args) not in {0, 1}:
@@ -1408,9 +1407,8 @@ def _parse_table_call(
             )
         step = {"op": "keep_rows_with_errors"}
         if len(args) == 1 and args[0].strip() != "null":
-            columns = _parse_string_list(args[0])
-            if columns:
-                step["columns"] = columns
+            # An empty list {} means no columns (Power BI); omitting the argument means all columns.
+            step["columns"] = [_parse_string(item) for item in _parse_braced_items(args[0])]
         return [step]
     if function == "Table.ReplaceErrorValues":
         _expect_count(function, args, 1)

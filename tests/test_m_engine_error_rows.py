@@ -88,9 +88,12 @@ class ReplaceErrorValuesTests(unittest.TestCase):
             "UNREPRESENTABLE",
         )
 
-    def test_unknown_column_is_an_expression_error(self):
+    def test_unknown_column_message_verbatim(self):
         source = f'Table.ReplaceErrorValues({BASE_TWO_ROWS}, {{{{"Zed", 0}}}})'
-        self.assertTrue(evaluate_to_text(source).startswith("ERR:Expression.Error"))
+        self.assertEqual(
+            evaluate_to_text(source),
+            "ERR:Expression.Error: The column 'Zed' of the table wasn't found.",
+        )
 
 
 class RowsWithErrorsColumnsTests(unittest.TestCase):
@@ -144,9 +147,83 @@ class RowsWithErrorsColumnsTests(unittest.TestCase):
         )
         self.assertEqual(evaluate_to_text(source), 'V:list:[list:[text:"ERR",text:"2"]]')
 
-    def test_unknown_column_is_an_expression_error(self):
+    def test_unknown_column_message_verbatim(self):
         source = f'Table.SelectRowsWithErrors({BASE}, {{"Zed"}})'
-        self.assertTrue(evaluate_to_text(source).startswith("ERR:Expression.Error"))
+        self.assertEqual(
+            evaluate_to_text(source),
+            "ERR:Expression.Error: The column 'Zed' of the table wasn't found.",
+        )
+
+    def test_remove_unknown_column_message_verbatim(self):
+        source = f'Table.RemoveRowsWithErrors({BASE}, {{"Zed"}})'
+        self.assertEqual(
+            evaluate_to_text(source),
+            "ERR:Expression.Error: The column 'Zed' of the table wasn't found.",
+        )
+
+    def test_item_1_select_with_empty_list_keeps_no_rows(self):
+        source = f'Table.RowCount(Table.SelectRowsWithErrors({BASE}, {{}}))'
+        self.assertEqual(evaluate_to_text(source), "V:number:0")
+
+    def test_item_1_remove_with_empty_list_keeps_all_rows(self):
+        source = f'Table.RowCount(Table.RemoveRowsWithErrors({BASE}, {{}}))'
+        self.assertEqual(evaluate_to_text(source), "V:number:3")
+
+    def test_item_2_select_text_argument_is_refused(self):
+        source = 'Table.SelectRowsWithErrors(#table({"A"},{{1}}), "A")'
+        self.assertEqual(
+            evaluate_to_text(source),
+            'ERR:Expression.Error: We cannot convert the value "A" to type List.',
+        )
+
+    def test_item_2_remove_text_argument_is_refused(self):
+        source = 'Table.RemoveRowsWithErrors(#table({"A"},{{1}}), "A")'
+        self.assertEqual(
+            evaluate_to_text(source),
+            'ERR:Expression.Error: We cannot convert the value "A" to type List.',
+        )
+
+
+class AppEmptyColumnListTests(unittest.TestCase):
+    """The app reads and writes the same meaning as Power BI: {} is no columns, an omitted list is all columns."""
+
+    def _parse(self, op: str, arguments: str):
+        from analytics_studio.power_query_m import parse_m_script, steps_to_m_script
+
+        script = steps_to_m_script([{"op": op}], "Errors").replace("(Source)", f"(Source{arguments})")
+        return parse_m_script(script, "Errors")
+
+    def test_empty_list_parses_as_no_columns(self):
+        self.assertEqual(self._parse("remove_rows_with_errors", ", {}"),
+                         [{"op": "remove_rows_with_errors", "columns": []}])
+        self.assertEqual(self._parse("keep_rows_with_errors", ", {}"),
+                         [{"op": "keep_rows_with_errors", "columns": []}])
+
+    def test_omitted_list_parses_as_all_columns(self):
+        self.assertEqual(self._parse("remove_rows_with_errors", ""),
+                         [{"op": "remove_rows_with_errors"}])
+
+    def test_empty_list_step_emits_empty_braces(self):
+        from analytics_studio.power_query_m import steps_to_m_script
+
+        script = steps_to_m_script([{"op": "keep_rows_with_errors", "columns": []}], "Errors")
+        self.assertIn("Table.SelectRowsWithErrors(Source, {})", script)
+
+    def test_replay_empty_list_means_no_columns(self):
+        from analytics_studio.file_import import ImportCandidate
+        from analytics_studio.power_query_values import PowerQueryCellError
+        from analytics_studio.transformations import apply_transformations
+
+        error = PowerQueryCellError("DataFormat.Error", "bad value", "bad", "number", row=1)
+        source = ImportCandidate("inline", ["A", "B"], [
+            {"A": error, "B": "keep"},
+            {"A": "keep", "B": error},
+            {"A": "clean", "B": "clean"},
+        ], {}, [])
+        kept = apply_transformations(source, [{"op": "keep_rows_with_errors", "columns": []}])
+        removed = apply_transformations(source, [{"op": "remove_rows_with_errors", "columns": []}])
+        self.assertEqual(kept.rows, [])
+        self.assertEqual(removed.rows, source.rows)
 
 
 if __name__ == "__main__":
