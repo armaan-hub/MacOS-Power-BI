@@ -60,8 +60,8 @@ def test_line_stacked_column_fields_series_and_lifecycle(tmp_path: Path) -> None
             ),
             None,
         )
-        if gallery_tile is not None:
-            assert gallery_tile.property("enabled") is True
+        assert gallery_tile is not None, "visualTypeTile_lineStackedColumn gallery tile not found"
+        assert gallery_tile.property("enabled") is True
 
         window.runCommand("insert.newVisual")
         window.runCommand("chart.type.lineStackedColumn")
@@ -190,3 +190,45 @@ def test_line_stacked_column_fields_series_and_lifecycle(tmp_path: Path) -> None
         window.deleteLater()
         engine.deleteLater()
         app.processEvents()
+
+
+def test_line_y_axis_ignores_column_legend(tmp_path: Path) -> None:
+    app = QApplication.instance() or QApplication(["line stacked column legend tests"])
+    source_path = tmp_path / "sales.csv"
+    # Category, Region, Units, Revenue
+    source_path.write_text(
+        "Category,Region,Units,Revenue\nA,North,2,10\nA,South,3,30\nB,North,4,20\nC,South,5,40\n",
+        encoding="utf-8",
+    )
+    controller = StudioController(
+        app,
+        QSettings(str(tmp_path / "settings.ini"), QSettings.Format.IniFormat),
+    )
+    assert controller._commit_import(source_path, parse_file(source_path))
+    assert controller.create_measure("Revenue total", "SUM([Revenue])")
+    measure_binding = "__dax_measure__:Revenue total"
+
+    stacked_title = "Stacked measure line"
+    clustered_title = "Clustered measure line"
+    controller.add_visual("lineStackedColumn", stacked_title, 20, 20, 360, 240)
+    controller.add_field_to_well("X-axis", "Category")
+    controller.add_field_to_well("Column Y-axis", "Units")
+    controller.add_field_to_well("Column legend", "Region")
+    controller.add_field_to_well("Line Y-axis", measure_binding)
+
+    controller.add_visual("lineClusteredColumn", clustered_title, 20, 280, 360, 240)
+    controller.add_field_to_well("X-axis", "Category")
+    controller.add_field_to_well("Column Y-axis", "Units")
+    controller.add_field_to_well("Line Y-axis", measure_binding)
+
+    # Line is never split by the column legend: one point per category, no legend segments.
+    expected_line = [
+        {"label": "A", "value": 40.0},
+        {"label": "B", "value": 20.0},
+        {"label": "C", "value": 40.0},
+    ]
+    stacked_line = controller.visualLineSeries(stacked_title)
+    assert stacked_line == expected_line
+    assert stacked_line == controller.visualLineSeries(clustered_title)
+    for point in stacked_line:
+        assert "segments" not in point

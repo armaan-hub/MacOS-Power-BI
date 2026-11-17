@@ -3869,6 +3869,7 @@ ApplicationWindow {
                                             ]
                                             delegate: Item {
                                                 id: visualTypeTile
+                                                objectName: "visualTypeTile_" + modelData.type
                                                 required property int index
                                                 required property var modelData
                                                 property bool typeSelected: Boolean(modelData.active) && mainWindow.studioController.selectedChartType === modelData.type

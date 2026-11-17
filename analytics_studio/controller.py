@@ -14482,6 +14482,9 @@ class StudioController(QObject):
         y_binding = _visual_well_binding(y_axis, bound_table_id)
         legend_well_name = "Column legend" if visual.get("type") == "lineStackedColumn" else "Legend"
         legend_binding = _visual_well_binding(fields.get(legend_well_name, []), bound_table_id)
+        if visual.get("type") == "lineStackedColumn" and value_well == "Line Y-axis":
+            # The line is never split by the column legend.
+            legend_binding = None
         x_col = x_binding[1] if x_binding else None
         y_col = y_binding[1] if y_binding else None
         legend_col = legend_binding[1] if legend_binding else None
