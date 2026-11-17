@@ -203,13 +203,13 @@ class PowerQueryDirectApplyTests(unittest.TestCase):
     def test_parameter_dialogs_show_their_input_fields(self) -> None:
         dialog = self.open_dialog()
         self.select_column(dialog, 1)
+        # Task 195 (2026-11-17): group_by now opens GroupByDialog; its fields are tested in tests/test_ux195_group_by_dialog.py
         expected = {
             "keep_top_rows": ("value_edit",),
             "remove_top_rows": ("value_edit",),
             "replace_value": ("value_edit", "replacement_edit", "column_combo"),
             "split_column": ("delimiter_edit", "column_combo"),
             "rename_column": ("value_edit", "column_combo"),
-            "group_by": ("keep_columns_list",),
             "add_index_column": ("value_edit", "index_start_edit"),
         }
         for operation, fields in expected.items():

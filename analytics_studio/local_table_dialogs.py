@@ -37,6 +37,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
+    QButtonGroup,
     QCheckBox,
     QComboBox,
     QDialog,
@@ -56,6 +57,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QPlainTextEdit,
+    QRadioButton,
     QScrollArea,
     QSplitter,
     QStyle,
@@ -1483,6 +1485,435 @@ class ChooseColumnsDialog(QDialog):
             for index, header in enumerate(self._headers)
             if index in checked_indices
         ]
+
+
+class GroupByDialog(QDialog):
+    """Power BI's Group By dialog (Basic / Advanced)."""
+
+    _OPERATIONS: tuple[tuple[str, str, bool], ...] = (
+        ("Sum", "sum", True),
+        ("Average", "average", True),
+        ("Median", "median", True),
+        ("Min", "min", True),
+        ("Max", "max", True),
+        ("Count Rows", "count_rows", False),
+        ("Count Distinct Rows", "count_distinct_rows", False),
+        ("All Rows", "all_rows", False),
+    )
+
+    def __init__(
+        self,
+        headers: list[str],
+        *,
+        initial_step: dict[str, Any] | None = None,
+        default_column: str | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setObjectName("powerQueryGroupByDialog")
+        self.setWindowTitle("Group By")
+        apply_light_dialog_theme(self)
+        self.setMinimumWidth(680)
+
+        self._headers = list(headers)
+        self._grouping_combos: list[QComboBox] = []
+        self._agg_rows: list[dict[str, Any]] = []
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(12)
+
+        # Mode radio buttons
+        mode_row = QHBoxLayout()
+        mode_row.setSpacing(16)
+        self.basic_radio = QRadioButton("Basic")
+        self.basic_radio.setObjectName("groupByBasicRadio")
+        self.advanced_radio = QRadioButton("Advanced")
+        self.advanced_radio.setObjectName("groupByAdvancedRadio")
+        self._mode_group = QButtonGroup(self)
+        self._mode_group.addButton(self.basic_radio)
+        self._mode_group.addButton(self.advanced_radio)
+        mode_row.addWidget(self.basic_radio)
+        mode_row.addWidget(self.advanced_radio)
+        mode_row.addStretch(1)
+        layout.addLayout(mode_row)
+
+        # Explanatory text
+        self.description_label = QLabel()
+        self.description_label.setStyleSheet("color: #526477; font-size: 12px;")
+        layout.addWidget(self.description_label)
+
+        # Grouping section
+        self.grouping_section = QWidget(self)
+        self._grouping_section_layout = QVBoxLayout(self.grouping_section)
+        self._grouping_section_layout.setContentsMargins(0, 0, 0, 0)
+        self._grouping_section_layout.setSpacing(6)
+
+        self._grouping_rows_container = QWidget(self.grouping_section)
+        self._grouping_rows_layout = QVBoxLayout(self._grouping_rows_container)
+        self._grouping_rows_layout.setContentsMargins(0, 0, 0, 0)
+        self._grouping_rows_layout.setSpacing(6)
+        self._grouping_section_layout.addWidget(self._grouping_rows_container)
+
+        self.add_grouping_button = QPushButton("Add grouping")
+        self.add_grouping_button.setObjectName("groupByAddGrouping")
+        self.add_grouping_button.setFixedWidth(120)
+        self._grouping_section_layout.addWidget(self.add_grouping_button)
+        layout.addWidget(self.grouping_section)
+
+        # Aggregation section
+        self.agg_section = QWidget(self)
+        self._agg_section_layout = QVBoxLayout(self.agg_section)
+        self._agg_section_layout.setContentsMargins(0, 0, 0, 0)
+        self._agg_section_layout.setSpacing(6)
+
+        self._agg_rows_container = QWidget(self.agg_section)
+        self._agg_rows_layout = QVBoxLayout(self._agg_rows_container)
+        self._agg_rows_layout.setContentsMargins(0, 0, 0, 0)
+        self._agg_rows_layout.setSpacing(6)
+        self._agg_section_layout.addWidget(self._agg_rows_container)
+
+        self.add_aggregation_button = QPushButton("Add aggregation")
+        self.add_aggregation_button.setObjectName("groupByAddAggregation")
+        self.add_aggregation_button.setFixedWidth(130)
+        self._agg_section_layout.addWidget(self.add_aggregation_button)
+        layout.addWidget(self.agg_section)
+
+        # Bottom buttons
+        button_box = QHBoxLayout()
+        button_box.addStretch(1)
+        self.ok_button = QPushButton("OK")
+        self.ok_button.setObjectName("groupByOkButton")
+        self.ok_button.setDefault(True)
+        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button.setObjectName("groupByCancelButton")
+        button_box.addWidget(self.ok_button)
+        button_box.addWidget(self.cancel_button)
+        layout.addLayout(button_box)
+
+        # Signals
+        self.basic_radio.toggled.connect(self._on_mode_toggled)
+        self.add_grouping_button.clicked.connect(lambda: self._add_grouping_row())
+        self.add_aggregation_button.clicked.connect(lambda: self._add_aggregation_row())
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+
+        # Initial state setup
+        if initial_step is not None:
+            cols = initial_step.get("columns", [])
+            aggs = initial_step.get("aggregations", [])
+            is_advanced = len(cols) > 1 or len(aggs) > 1
+            if is_advanced:
+                self.advanced_radio.setChecked(True)
+            else:
+                self.basic_radio.setChecked(True)
+
+            for col in cols:
+                self._add_grouping_row(col)
+            for agg in aggs:
+                self._add_aggregation_row(
+                    new_name=str(agg.get("new_name", "")),
+                    operation=str(agg.get("operation", "count_rows")),
+                    column=str(agg.get("column", "")),
+                )
+        else:
+            self.basic_radio.setChecked(True)
+            initial_col = default_column if default_column in self._headers else (self._headers[0] if self._headers else "")
+            self._add_grouping_row(initial_col)
+            self._add_aggregation_row(new_name="Count", operation="count_rows")
+
+        self._update_mode_ui()
+        self._refresh_state()
+
+    def _update_mode_ui(self) -> None:
+        is_advanced = self.advanced_radio.isChecked()
+        if is_advanced:
+            self.description_label.setText("Specify the columns to group by and one or more outputs.")
+            self.add_grouping_button.setVisible(True)
+            self.add_aggregation_button.setVisible(True)
+        else:
+            self.description_label.setText("Specify the column to group by and the desired output.")
+            self.add_grouping_button.setVisible(False)
+            self.add_aggregation_button.setVisible(False)
+
+        # Update visibility of extra rows and menus
+        for i, combo in enumerate(self._grouping_combos):
+            row_widget = combo.parentWidget()
+            if row_widget is not None:
+                row_widget.setVisible(is_advanced or i == 0)
+
+        for i, row_data in enumerate(self._agg_rows):
+            row_widget = row_data["widget"]
+            row_widget.setVisible(is_advanced or i == 0)
+            row_data["menu_button"].setVisible(is_advanced)
+
+    def _on_mode_toggled(self) -> None:
+        if self.basic_radio.isChecked():
+            # Switching Advanced -> Basic keeps the first grouping and first aggregation
+            while len(self._grouping_combos) > 1:
+                self._remove_grouping_row(len(self._grouping_combos) - 1)
+            while len(self._agg_rows) > 1:
+                self._remove_aggregation_row(len(self._agg_rows) - 1)
+        self._update_mode_ui()
+        self._refresh_state()
+
+    def _add_grouping_row(self, col: str | None = None) -> QComboBox:
+        i = len(self._grouping_combos)
+        row_widget = QWidget(self._grouping_rows_container)
+        row_layout = QHBoxLayout(row_widget)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        row_layout.setSpacing(6)
+
+        combo = QComboBox(row_widget)
+        combo.setObjectName(f"groupByColumnCombo_{i}")
+        combo.addItems(self._headers)
+        if col and col in self._headers:
+            combo.setCurrentText(col)
+        elif self._headers:
+            combo.setCurrentIndex(0)
+        combo.currentIndexChanged.connect(self._refresh_state)
+        row_layout.addWidget(combo, 1)
+
+        menu_button = QToolButton(row_widget)
+        menu_button.setText("...")
+        menu_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        menu_button.setVisible(self.advanced_radio.isChecked())
+
+        row_layout.addWidget(menu_button)
+
+        self._grouping_combos.append(combo)
+        self._grouping_rows_layout.addWidget(row_widget)
+
+        self._rebuild_all_grouping_menus()
+        self._rebuild_all_aggregation_menus()
+        self._refresh_state()
+        return combo
+
+    def _remove_grouping_row(self, index: int) -> None:
+        if not 0 <= index < len(self._grouping_combos):
+            return
+        combo = self._grouping_combos.pop(index)
+        row_widget = combo.parentWidget()
+        if row_widget is not None:
+            self._grouping_rows_layout.removeWidget(row_widget)
+            row_widget.hide()
+            row_widget.deleteLater()
+        self._reindex_grouping_combos()
+        self._rebuild_all_grouping_menus()
+        self._refresh_state()
+
+    def _move_grouping_row(self, index: int, delta: int) -> None:
+        target = index + delta
+        if not (0 <= target < len(self._grouping_combos)):
+            return
+        combo = self._grouping_combos.pop(index)
+        self._grouping_combos.insert(target, combo)
+        widget = combo.parentWidget()
+        self._grouping_rows_layout.removeWidget(widget)
+        self._grouping_rows_layout.insertWidget(target, widget)
+        self._reindex_grouping_combos()
+        self._rebuild_all_grouping_menus()
+        self._refresh_state()
+
+    def _reindex_grouping_combos(self) -> None:
+        for i, combo in enumerate(self._grouping_combos):
+            combo.setObjectName(f"groupByColumnCombo_{i}")
+
+    def _rebuild_all_grouping_menus(self) -> None:
+        count = len(self._grouping_combos)
+        for i, combo in enumerate(self._grouping_combos):
+            row_widget = combo.parentWidget()
+            menu_btn = row_widget.findChild(QToolButton) if row_widget is not None else None
+            if menu_btn is None:
+                continue
+            menu = QMenu(menu_btn)
+            menu_btn.setMenu(menu)
+
+            del_action = menu.addAction("Delete")
+            del_action.setEnabled(count > 1)
+            del_action.triggered.connect(lambda checked=False, idx=i: self._remove_grouping_row(idx))
+
+            up_action = menu.addAction("Move up")
+            up_action.setEnabled(i > 0)
+            up_action.triggered.connect(lambda checked=False, idx=i: self._move_grouping_row(idx, -1))
+
+            down_action = menu.addAction("Move down")
+            down_action.setEnabled(i < count - 1)
+            down_action.triggered.connect(lambda checked=False, idx=i: self._move_grouping_row(idx, 1))
+
+    def _add_aggregation_row(
+        self,
+        new_name: str = "",
+        operation: str = "count_rows",
+        column: str = "",
+    ) -> dict[str, Any]:
+        i = len(self._agg_rows)
+        row_widget = QWidget(self._agg_rows_container)
+        row_layout = QHBoxLayout(row_widget)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        row_layout.setSpacing(6)
+
+        name_edit = QLineEdit(row_widget)
+        name_edit.setObjectName(f"groupByNewName_{i}")
+        name_edit.setPlaceholderText("New column name")
+        name_edit.setText(new_name)
+        name_edit.textChanged.connect(self._refresh_state)
+        row_layout.addWidget(name_edit, 2)
+
+        op_combo = QComboBox(row_widget)
+        op_combo.setObjectName(f"groupByOperation_{i}")
+        for label, val, _ in self._OPERATIONS:
+            op_combo.addItem(label, val)
+        # Disable "All Rows"
+        all_rows_idx = op_combo.findData("all_rows")
+        if all_rows_idx >= 0:
+            item = op_combo.model().item(all_rows_idx)
+            if item is not None:
+                item.setEnabled(False)
+                item.setToolTip("All Rows is not supported yet.")
+
+        idx = op_combo.findData(operation)
+        if idx >= 0:
+            op_combo.setCurrentIndex(idx)
+        row_layout.addWidget(op_combo, 2)
+
+        col_combo = QComboBox(row_widget)
+        col_combo.setObjectName(f"groupByAggColumn_{i}")
+        col_combo.addItems(self._headers)
+        if column and column in self._headers:
+            col_combo.setCurrentText(column)
+        elif self._headers:
+            col_combo.setCurrentIndex(0)
+        col_combo.currentIndexChanged.connect(self._refresh_state)
+        row_layout.addWidget(col_combo, 2)
+
+        menu_button = QToolButton(row_widget)
+        menu_button.setText("...")
+        menu_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        menu_button.setVisible(self.advanced_radio.isChecked())
+        row_layout.addWidget(menu_button)
+
+        row_data = {
+            "widget": row_widget,
+            "name_edit": name_edit,
+            "op_combo": op_combo,
+            "col_combo": col_combo,
+            "menu_button": menu_button,
+        }
+        self._agg_rows.append(row_data)
+        self._agg_rows_layout.addWidget(row_widget)
+
+        def on_op_changed() -> None:
+            op = str(op_combo.currentData())
+            needs_col = op not in {"count_rows", "count_distinct_rows", "all_rows"}
+            col_combo.setEnabled(needs_col)
+            self._refresh_state()
+
+        op_combo.currentIndexChanged.connect(on_op_changed)
+        on_op_changed()
+
+        self._rebuild_all_aggregation_menus()
+        self._refresh_state()
+        return row_data
+
+    def _remove_aggregation_row(self, index: int) -> None:
+        if not 0 <= index < len(self._agg_rows):
+            return
+        row_data = self._agg_rows.pop(index)
+        row_widget = row_data["widget"]
+        self._agg_rows_layout.removeWidget(row_widget)
+        row_widget.hide()
+        row_widget.deleteLater()
+        self._reindex_agg_rows()
+        self._rebuild_all_aggregation_menus()
+        self._refresh_state()
+
+    def _move_aggregation_row(self, index: int, delta: int) -> None:
+        target = index + delta
+        if not (0 <= target < len(self._agg_rows)):
+            return
+        row_data = self._agg_rows.pop(index)
+        self._agg_rows.insert(target, row_data)
+        widget = row_data["widget"]
+        self._agg_rows_layout.removeWidget(widget)
+        self._agg_rows_layout.insertWidget(target, widget)
+        self._reindex_agg_rows()
+        self._rebuild_all_aggregation_menus()
+        self._refresh_state()
+
+    def _reindex_agg_rows(self) -> None:
+        for i, row_data in enumerate(self._agg_rows):
+            row_data["name_edit"].setObjectName(f"groupByNewName_{i}")
+            row_data["op_combo"].setObjectName(f"groupByOperation_{i}")
+            row_data["col_combo"].setObjectName(f"groupByAggColumn_{i}")
+
+    def _rebuild_all_aggregation_menus(self) -> None:
+        count = len(self._agg_rows)
+        for i, row_data in enumerate(self._agg_rows):
+            menu_btn = row_data["menu_button"]
+            menu = QMenu(menu_btn)
+            menu_btn.setMenu(menu)
+
+            del_action = menu.addAction("Delete")
+            del_action.setEnabled(count > 1)
+            del_action.triggered.connect(lambda checked=False, idx=i: self._remove_aggregation_row(idx))
+
+            up_action = menu.addAction("Move up")
+            up_action.setEnabled(i > 0)
+            up_action.triggered.connect(lambda checked=False, idx=i: self._move_aggregation_row(idx, -1))
+
+            down_action = menu.addAction("Move down")
+            down_action.setEnabled(i < count - 1)
+            down_action.triggered.connect(lambda checked=False, idx=i: self._move_aggregation_row(idx, 1))
+
+    def _refresh_state(self, *_args: Any) -> None:
+        is_advanced = self.advanced_radio.isChecked()
+        active_groupings = self._grouping_combos if is_advanced else self._grouping_combos[:1]
+        active_aggs = self._agg_rows if is_advanced else self._agg_rows[:1]
+
+        valid = bool(active_groupings) and bool(active_aggs)
+        for combo in active_groupings:
+            if not combo.currentText().strip():
+                valid = False
+                break
+
+        for row_data in active_aggs:
+            name = row_data["name_edit"].text().strip()
+            if not name:
+                valid = False
+                break
+            op = str(row_data["op_combo"].currentData())
+            if op not in {"count_rows", "count_distinct_rows"}:
+                if not row_data["col_combo"].currentText().strip():
+                    valid = False
+                    break
+
+        self.ok_button.setEnabled(valid)
+
+    def step(self) -> dict[str, Any]:
+        is_advanced = self.advanced_radio.isChecked()
+        active_groupings = self._grouping_combos if is_advanced else self._grouping_combos[:1]
+        active_aggs = self._agg_rows if is_advanced else self._agg_rows[:1]
+
+        columns = [combo.currentText().strip() for combo in active_groupings]
+        aggregations: list[dict[str, str]] = []
+        for row_data in active_aggs:
+            op = str(row_data["op_combo"].currentData())
+            name = row_data["name_edit"].text().strip()
+            agg: dict[str, str] = {
+                "operation": op,
+                "new_name": name,
+            }
+            if op not in {"count_rows", "count_distinct_rows"}:
+                agg["column"] = row_data["col_combo"].currentText().strip()
+            aggregations.append(agg)
+
+        return {
+            "op": "group_by",
+            "columns": columns,
+            "aggregations": aggregations,
+        }
+
 
 
 class _PowerQueryColumnFilterPanel(QWidget):
@@ -5888,6 +6319,9 @@ class TransformDataDialog(QDialog):
         if operation == "keep_columns":
             self._open_choose_columns_dialog(prior_row=prior_row)
             return
+        if operation == "group_by":
+            self._open_group_by_dialog(prior_row=prior_row)
+            return
         if operation == "conditional_column":
             self._open_conditional_dialog(prior_row=prior_row)
             return
@@ -5953,7 +6387,7 @@ class TransformDataDialog(QDialog):
         return True
 
     def _close_operation_dialog(self) -> None:
-        for name in ("_operation_dialog", "_conditional_dialog"):
+        for name in ("_operation_dialog", "_conditional_dialog", "_group_by_dialog"):
             dialog = getattr(self, name, None)
             if dialog is not None:
                 dialog.reject()
@@ -6109,6 +6543,60 @@ class TransformDataDialog(QDialog):
         dialog.accepted.connect(accepted)
         dialog.finished.connect(finished)
         dialog.show()
+
+    def _open_group_by_dialog(
+        self, editing_index: int | None = None, *, prior_row: int = -1
+    ) -> None:
+        """Power BI's Group By dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
+        self._close_operation_dialog()
+        self._insert_at = insert_at
+        selected = self._selected_preview_columns()
+        if editing_index is None and self.step_list.currentRow() >= 0:
+            self.step_list.setCurrentRow(-1)
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._insert_at = None
+            self._show_error(str(exc))
+            return
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+        sub = GroupByDialog(
+            base.headers,
+            initial_step=existing,
+            default_column=selected[0] if selected else None,
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            if getattr(self, "_group_by_dialog", None) is sub:
+                self._group_by_dialog = None
+            self._insert_at = None
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._operation_dialog = sub
+        self._group_by_dialog = sub
+        sub.show()
 
     def _open_conditional_dialog(
         self, editing_index: int | None = None, *, prior_row: int = -1
@@ -10110,6 +10598,9 @@ class TransformDataDialog(QDialog):
             return
         if step["op"] == "conditional_column":
             self._open_conditional_dialog(index)
+            return
+        if step["op"] == "group_by":
+            self._open_group_by_dialog(index)
             return
         operation_name = self.operation_combo.currentText()
         settings_dialog = QDialog(self)
