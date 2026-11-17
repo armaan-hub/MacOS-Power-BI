@@ -1,11 +1,12 @@
 """Tests for Task 196: Replace Values dialog, typed values, null, ReplaceText, and special characters."""
 
 from unittest import TestCase
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
     QComboBox,
+    QDialog,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -308,4 +309,129 @@ class ReplaceValuesTests(TestCase):
 
         self.assertEqual(len(dialog._steps), 0)
         self.assertIsNone(dialog._operation_dialog)
+        dialog.deleteLater()
+
+
+class ReplaceValuesReviewTests(TestCase):
+    """Review additions (Team-Thinker): typed matching, validation, ribbon and insert-after."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.app = QApplication.instance() or QApplication([])
+
+    @staticmethod
+    def _run(rows, **step):
+        source = ImportCandidate("inline", ["C"], [{"C": value} for value in rows], {}, [])
+        full = {"op": "replace_value", "column": "C", **step}
+        return [row["C"] for row in apply_transformations(source, [full]).rows]
+
+    def test_value_replacer_is_kind_exact(self) -> None:
+        from datetime import date, datetime
+        from decimal import Decimal
+
+        self.assertEqual(
+            self._run([5, "5", Decimal("5"), True, None], value=5, replacement=7, replacer="value"),
+            [7, "5", 7, True, None],
+        )
+        self.assertEqual(
+            self._run([True, 1, "true"], value=True, replacement=False, replacer="value"),
+            [False, 1, "true"],
+        )
+        self.assertEqual(
+            self._run([None, "", 0], value=None, replacement="n/a", replacer="value"),
+            ["n/a", "", 0],
+        )
+        self.assertEqual(
+            self._run(
+                [date(2026, 8, 1), datetime(2026, 8, 1), None],
+                value="2026-08-01", replacement="2026-09-01", replacer="value",
+            ),
+            ["2026-09-01", datetime(2026, 8, 1), None],
+        )
+
+    def test_text_replacer_refuses_unsafe_steps(self) -> None:
+        for step in (
+            {"value": "", "replacement": "-", "replacer": "text"},
+            {"value": "a", "replacement": None, "replacer": "text"},
+            {"value": "a", "replacement": 5, "replacer": "text"},
+            {"value": 5, "replacement": "x", "replacer": "text"},
+            {"value": ["a"], "replacement": "x", "replacer": "value"},
+            {"value": float("inf"), "replacement": "x", "replacer": "value"},
+        ):
+            with self.subTest(step=step), self.assertRaises(TransformationError):
+                self._run(["abc"], **step)
+
+    def test_text_replacer_leaves_null_alone(self) -> None:
+        self.assertEqual(self._run(["abc", None], value="b", replacement="x", replacer="text"), ["axc", None])
+
+    def test_dialog_whole_number_keeps_large_integers_and_text_null_replacement_refused(self) -> None:
+        sub = ReplaceValuesDialog("N", column_type="whole_number")
+        sub.find_edit.setText("9007199254740993")
+        sub.replace_edit.setText("1")
+        self.assertEqual(sub.step()["value"], 9007199254740993)
+        sub.find_edit.setText("1.5")
+        with self.assertRaises(TransformationError):
+            sub.step()
+        dec = ReplaceValuesDialog("D", column_type="decimal_number")
+        dec.find_edit.setText("1e999")
+        with self.assertRaises(TransformationError):
+            dec.step()
+        text = ReplaceValuesDialog("T", column_type="text")
+        text.find_edit.setText("a")
+        text.replace_edit.setText("null")
+        with self.assertRaises(TransformationError):
+            text.step()
+
+    def test_ribbon_route_sets_operation_dialog_and_inserts_after_selected_step(self) -> None:
+        source = ImportCandidate(
+            "inline", ["Region", "Amount"],
+            [{"Region": "East", "Amount": 5}, {"Region": "West", "Amount": 6}], {}, [],
+        )
+        steps = [
+            {"op": "rename_column", "column": "Region", "new_name": "Area"},
+            {"op": "filter_rows", "column": "Amount", "operator": "equals", "value": "5"},
+        ]
+        dialog = TransformDataDialog(source, steps, query_name="Q")
+        dialog.step_list.setCurrentRow(0)
+
+        def answer_insert() -> None:
+            box = self.app.activeModalWidget()
+            if not (isinstance(box, QDialog) and box.objectName() == "powerQueryInsertStepPrompt"):
+                QTimer.singleShot(10, answer_insert)
+                return
+            next(b for b in box.findChildren(QPushButton) if b.text().replace("&", "") == "Insert").click()
+
+        QTimer.singleShot(0, answer_insert)
+        dialog.ribbon_command_buttons["replace_value"].click()
+        sub = dialog._operation_dialog
+        self.assertIsInstance(sub, ReplaceValuesDialog)
+        self.assertEqual(dialog.operation_combo.currentData(), "replace_value")
+        sub.find_edit.setText("East")
+        sub.replace_edit.setText("North")
+        sub.ok_button.click()
+        self.app.processEvents()
+        self.assertIsNone(dialog._operation_dialog)
+        self.assertEqual([s["op"] for s in dialog._steps], ["rename_column", "replace_value", "filter_rows"])
+        dialog.deleteLater()
+
+    def test_selecting_typed_replace_step_fills_form_without_error(self) -> None:
+        import sys
+
+        source = ImportCandidate("inline", ["Amount"], [{"Amount": 5}], {}, [])
+        steps = [
+            {"op": "replace_value", "column": "Amount", "value": 5, "replacement": None, "replacer": "value"},
+            {"op": "replace_value", "column": "Amount", "value": None, "replacement": 7, "replacer": "value"},
+        ]
+        dialog = TransformDataDialog(source, steps, query_name="Q")
+        errors = []
+        previous = sys.excepthook
+        sys.excepthook = lambda *args: errors.append(args)
+        try:
+            for row, expected in ((0, ("5", "null")), (1, ("null", "7"))):
+                dialog.step_list.setCurrentRow(row)
+                self.app.processEvents()
+                self.assertEqual((dialog.value_edit.text(), dialog.replacement_edit.text()), expected)
+        finally:
+            sys.excepthook = previous
+        self.assertEqual(errors, [])
         dialog.deleteLater()

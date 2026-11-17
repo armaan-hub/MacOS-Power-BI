@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from copy import copy, deepcopy
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -1491,11 +1492,17 @@ class ReplaceValuesDialog(QDialog):
         if self._column_type in {"whole_number", "decimal_number"}:
             try:
                 if self._column_type == "whole_number":
-                    val = float(text)
-                    if not val.is_integer():
-                        raise ValueError
-                    return int(val)
-                return float(text) if ("." in text or "e" in text.lower()) else int(text)
+                    try:
+                        return int(text)
+                    except ValueError:
+                        val = Decimal(text.strip())
+                        if not val.is_finite() or val != val.to_integral_value():
+                            raise ValueError
+                        return int(val)
+                number = float(text) if ("." in text or "e" in text.lower()) else int(text)
+                if isinstance(number, float) and not math.isfinite(number):
+                    raise ValueError
+                return number
             except Exception as exc:
                 raise TransformationError(f"{field_name} must be a valid number.") from exc
         if self._column_type == "boolean":
@@ -1532,6 +1539,8 @@ class ReplaceValuesDialog(QDialog):
                     raise TransformationError("Value To Find cannot be empty when Match Entire Cell is unchecked.")
                 if find_raw == "null":
                     raise TransformationError("Cannot search for null when Match Entire Cell is unchecked.")
+                if replace_raw == "null":
+                    raise TransformationError("Replace With cannot be null when Match Entire Cell is unchecked.")
             find_val = self._parse_field_value(find_raw, "Value To Find")
             replace_val = self._parse_field_value(replace_raw, "Replace With")
             return {
@@ -9331,8 +9340,8 @@ class TransformDataDialog(QDialog):
             self._filter_clauses = deepcopy(step["clauses"])
             self._render_advanced_filter_clauses(select_row=0)
         if "replacement" in step:
-            self.value_edit.setText(step["value"])
-            self.replacement_edit.setText(step["replacement"])
+            self.value_edit.setText("null" if step["value"] is None else str(step["value"]))
+            self.replacement_edit.setText("null" if step["replacement"] is None else str(step["replacement"]))
         if "delimiter" in step:
             self.delimiter_edit.setText(step["delimiter"])
         if "start_delimiter" in step:

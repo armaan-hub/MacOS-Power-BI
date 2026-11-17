@@ -1091,6 +1091,23 @@ def validate_steps(
             replacer = step.get("replacer")
             if replacer is not None and replacer not in {"value", "text"}:
                 raise TransformationError(f"Transformation step {index} replacer must be 'value' or 'text'.")
+            for key in ("value", "replacement"):
+                typed = step.get(key)
+                if typed is not None and not isinstance(typed, (str, bool, int, float, Decimal)):
+                    raise TransformationError(
+                        f"Transformation step {index} {key} must be text, a number, true/false or null."
+                    )
+                if isinstance(typed, (float, Decimal)) and not Decimal(typed).is_finite():
+                    raise TransformationError(f"Transformation step {index} {key} must be a finite number.")
+            if replacer == "text":
+                if not isinstance(step.get("value"), str) or step["value"] == "":
+                    raise TransformationError(
+                        f"Transformation step {index} ReplaceText needs a non-empty text value to find."
+                    )
+                if not isinstance(step.get("replacement"), str):
+                    raise TransformationError(
+                        f"Transformation step {index} ReplaceText needs a text replacement."
+                    )
 
         column = step.get("column")
         if column is not None and not column.strip():
