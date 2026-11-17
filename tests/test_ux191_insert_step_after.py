@@ -12,7 +12,6 @@ from PySide6.QtWidgets import QApplication, QDialog
 
 from analytics_studio.file_import import ImportCandidate
 from analytics_studio.local_table_dialogs import TransformDataDialog
-from analytics_studio.transformations import infer_column_types
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     m_script_matches_steps,
