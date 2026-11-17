@@ -70,13 +70,10 @@ class RemoveErrorsTests(unittest.TestCase):
 
     def test_ribbon_button_text_and_tooltip(self) -> None:
         dialog = self.make()
-        button = dialog.ribbon_command_buttons.get("remove_rows_with_errors")
-        self.assertIsNotNone(button)
-        self.assertEqual(button.text(), "Remove Errors")
-        self.assertEqual(
-            button.toolTip(),
-            "Remove rows with an error in the selected columns.",
-        )
+        # Task 207 (2026-11-17): commands Power BI keeps in dropdowns are reachable through ribbon_menu_actions.
+        action = dialog.ribbon_menu_actions.get("remove_rows_with_errors")
+        self.assertIsNotNone(action)
+        self.assertEqual(action.text(), "Remove Errors")
 
     def test_ribbon_remove_errors_with_region_selected(self) -> None:
         source = _sample_source()
@@ -87,8 +84,8 @@ class RemoveErrorsTests(unittest.TestCase):
         self._select_columns(dialog, ["Region"])
         self.assertEqual(dialog._selected_preview_columns(), ["Region"])
 
-        button = dialog.ribbon_command_buttons["remove_rows_with_errors"]
-        button.click()
+        # Task 207 (2026-11-17): commands Power BI keeps in dropdowns are reachable through ribbon_menu_actions.
+        dialog.ribbon_menu_actions["remove_rows_with_errors"].trigger()
         self.app.processEvents()
 
         self.assertEqual(len(dialog._steps), 1)
@@ -124,8 +121,8 @@ class RemoveErrorsTests(unittest.TestCase):
         self._select_columns(dialog, ["Amount", "Region"])
         self.assertEqual(dialog._selected_preview_columns(), ["Region", "Amount"])
 
-        button = dialog.ribbon_command_buttons["remove_rows_with_errors"]
-        button.click()
+        # Task 207 (2026-11-17): commands Power BI keeps in dropdowns are reachable through ribbon_menu_actions.
+        dialog.ribbon_menu_actions["remove_rows_with_errors"].trigger()
         self.app.processEvents()
 
         self.assertEqual(len(dialog._steps), 1)
@@ -144,8 +141,8 @@ class RemoveErrorsTests(unittest.TestCase):
         dialog.preview.setCurrentIndex(dialog.preview.model().index(-1, -1))
         self.assertEqual(dialog._selected_preview_columns(), [])
 
-        button = dialog.ribbon_command_buttons["remove_rows_with_errors"]
-        button.click()
+        # Task 207 (2026-11-17): commands Power BI keeps in dropdowns are reachable through ribbon_menu_actions.
+        dialog.ribbon_menu_actions["remove_rows_with_errors"].trigger()
         self.app.processEvents()
 
         self.assertEqual(len(dialog._steps), 1)

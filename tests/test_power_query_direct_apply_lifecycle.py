@@ -105,7 +105,8 @@ class PowerQueryDirectApplyTests(unittest.TestCase):
             ["Column1", "Column2", "Column3", "Column1 - Copy"],
         )
         self.select_column(dialog, 2)
-        dialog.ribbon_command_buttons["remove_duplicates"].click()
+        # Task 207 (2026-11-17): commands Power BI keeps in dropdowns are reachable through ribbon_menu_actions.
+        dialog.ribbon_menu_actions["remove_duplicates"].trigger()
         self.app.processEvents()
         self.assertEqual(self.step_names(dialog)[-1], "Removed Duplicates")
         self.assertTrue(dialog.operation_settings_panel.isHidden())

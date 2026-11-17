@@ -331,7 +331,12 @@ class PowerQueryMEditorTests(unittest.TestCase):
         for operation, source, expected_rows in cases:
             with self.subTest(operation=operation):
                 dialog = TransformDataDialog(source)
-                dialog.ribbon_command_buttons[operation].click()
+                # Task 207 (2026-11-17): commands Power BI keeps in dropdowns are reachable through ribbon_menu_actions.
+                control = dialog.ribbon_command_buttons.get(operation)
+                if control is not None:
+                    control.click()
+                else:
+                    dialog.ribbon_menu_actions[operation].trigger()
                 self.assertEqual(dialog._steps, [{"op": operation}])
                 self.assertEqual(dialog._preview_candidate.rows, expected_rows)
                 self.assertTrue(dialog.operation_settings_panel.isHidden())

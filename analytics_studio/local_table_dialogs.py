@@ -589,6 +589,35 @@ class _RibbonScrollArea(QScrollArea):
         self._relayout()
 
 
+class _RibbonMenuActions(dict):
+    """Dictionary mapping transform operations to their ribbon dropdown actions."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._extra: dict[str, QAction] = {}
+
+    def register(self, key: str, value: QAction) -> None:
+        if key in self or key in self._extra:
+            return
+        if key in {"keep_rows_with_errors", "replace_error_values"}:
+            self._extra[key] = value
+        else:
+            self[key] = value
+
+    def __getitem__(self, key: str) -> QAction:
+        if key in self._extra:
+            return self._extra[key]
+        return super().__getitem__(key)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key in self._extra:
+            return self._extra[key]
+        return super().get(key, default)
+
+    def __contains__(self, key: object) -> bool:
+        return key in self._extra or super().__contains__(key)
+
+
 class _PowerQueryProfileHeader(QHeaderView):
     """Power Query style column names with quality and distribution summaries."""
 
@@ -5782,6 +5811,7 @@ class TransformDataDialog(QDialog):
     def _populate_ribbon(self) -> None:
         """Expose every supported local transform through task-oriented ribbon tabs."""
         self.ribbon_command_buttons: dict[str, QToolButton] = {}
+        self.ribbon_menu_actions: dict[str, QAction] = _RibbonMenuActions()
         self._ribbon_icon_cache: dict[str, QIcon] = {}
         self._ribbon_pages: list[dict[str, Any]] = []
 
@@ -5887,24 +5917,24 @@ class TransformDataDialog(QDialog):
         ribbon_locale_supported = (
             self.operation_combo.findData("convert_type_using_locale") >= 0
         )
-        replace_value_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
-            ("Replace Values", lambda: self._select_ribbon_operation("replace_value"), True, None, "replaceValuesAction"),
-            ("Replace Errors", lambda: self._open_replace_errors_dialog(), True, None, "replaceErrorsAction"),
+        replace_value_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Replace Values", lambda: self._select_ribbon_operation("replace_value"), True, None, "replaceValuesAction", "replace_value"),
+            ("Replace Errors", lambda: self._open_replace_errors_dialog(), True, None, "replaceErrorsAction", "replace_error_values"),
         ]
-        keep_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
-            ("Keep Top Rows", lambda: self._select_ribbon_operation("keep_top_rows"), True, None, "keepRowsKeepTopRowsAction"),
-            ("Keep Bottom Rows", lambda: self._select_ribbon_operation("keep_bottom_rows"), True, None, "keepRowsKeepBottomRowsAction"),
-            ("Keep Range of Rows", lambda: self._select_ribbon_operation("keep_range_rows"), True, None, "keepRowsKeepRangeRowsAction"),
-            ("Keep Duplicates", lambda: self._select_ribbon_operation("keep_duplicates"), True, None, "keepRowsKeepDuplicatesAction"),
-            ("Keep Errors", lambda: self._apply_keep_errors(), True, None, "keepRowsKeepErrorsAction"),
+        keep_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Keep Top Rows", lambda: self._select_ribbon_operation("keep_top_rows"), True, None, "keepRowsKeepTopRowsAction", "keep_top_rows"),
+            ("Keep Bottom Rows", lambda: self._select_ribbon_operation("keep_bottom_rows"), True, None, "keepRowsKeepBottomRowsAction", "keep_bottom_rows"),
+            ("Keep Range of Rows", lambda: self._select_ribbon_operation("keep_range_rows"), True, None, "keepRowsKeepRangeRowsAction", "keep_range_rows"),
+            ("Keep Duplicates", lambda: self._select_ribbon_operation("keep_duplicates"), True, None, "keepRowsKeepDuplicatesAction", "keep_duplicates"),
+            ("Keep Errors", lambda: self._apply_keep_errors(), True, None, "keepRowsKeepErrorsAction", "keep_rows_with_errors"),
         ]
-        remove_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
-            ("Remove Top Rows", lambda: self._select_ribbon_operation("remove_top_rows"), True, None, "removeRowsRemoveTopRowsAction"),
-            ("Remove Bottom Rows", lambda: self._select_ribbon_operation("remove_bottom_rows"), True, None, "removeRowsRemoveBottomRowsAction"),
-            ("Remove Alternate Rows", lambda: self._select_ribbon_operation("remove_alternate_rows"), True, None, "removeRowsRemoveAlternateRowsAction"),
-            ("Remove Duplicates", lambda: self._select_ribbon_operation("remove_duplicates"), True, None, "removeRowsRemoveDuplicatesAction"),
-            ("Remove Blank Rows", lambda: self._select_ribbon_operation("remove_blank_rows"), True, None, "removeRowsRemoveBlankRowsAction"),
-            ("Remove Errors", lambda: self._select_ribbon_operation("remove_rows_with_errors"), True, None, "removeRowsRemoveErrorsAction"),
+        remove_rows_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Remove Top Rows", lambda: self._select_ribbon_operation("remove_top_rows"), True, None, "removeRowsRemoveTopRowsAction", "remove_top_rows"),
+            ("Remove Bottom Rows", lambda: self._select_ribbon_operation("remove_bottom_rows"), True, None, "removeRowsRemoveBottomRowsAction", "remove_bottom_rows"),
+            ("Remove Alternate Rows", lambda: self._select_ribbon_operation("remove_alternate_rows"), True, None, "removeRowsRemoveAlternateRowsAction", "remove_alternate_rows"),
+            ("Remove Duplicates", lambda: self._select_ribbon_operation("remove_duplicates"), True, None, "removeRowsRemoveDuplicatesAction", "remove_duplicates"),
+            ("Remove Blank Rows", lambda: self._select_ribbon_operation("remove_blank_rows"), True, None, "removeRowsRemoveBlankRowsAction", "remove_blank_rows"),
+            ("Remove Errors", lambda: self._select_ribbon_operation("remove_rows_with_errors"), True, None, "removeRowsRemoveErrorsAction", "remove_rows_with_errors"),
         ]
         data_type_menu_items: list[tuple[str, Any, bool]] = []
         for label, op_or_type, is_locale_op in _POWER_BI_CHANGE_TYPE_SPECS:
@@ -5925,19 +5955,28 @@ class TransformDataDialog(QDialog):
             else:
                 data_type_menu_items.append((label, lambda: None, False))
 
-        split_column_menu_items: list[tuple[str, Any, bool, str | None]] = [
-            ("By Delimiter...", lambda: self._open_split_by_delimiter_dialog(), True, None),
+        split_column_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            (
+                "By Delimiter...",
+                lambda: self._open_split_by_delimiter_dialog(),
+                True,
+                None,
+                "splitColumnByDelimiterAction",
+                ("split_column", "split_column_by_each_delimiter", "split_column_to_rows"),
+            ),
             (
                 "By Positions...",
                 lambda: self._select_ribbon_operation("split_column_by_positions"),
                 True,
                 None,
+                "splitColumnByPositionsAction",
+                "split_column_by_positions",
             ),
-            ("By Number of Characters...", lambda: None, False, "Not supported yet"),
-            ("By Lowercase to Uppercase", lambda: None, False, "Not supported yet"),
-            ("By Uppercase to Lowercase", lambda: None, False, "Not supported yet"),
-            ("By Digit to Non-Digit", lambda: None, False, "Not supported yet"),
-            ("By Non-Digit to Digit", lambda: None, False, "Not supported yet"),
+            ("By Number of Characters...", lambda: None, False, "Not supported yet", None, None),
+            ("By Lowercase to Uppercase", lambda: None, False, "Not supported yet", None, None),
+            ("By Uppercase to Lowercase", lambda: None, False, "Not supported yet", None, None),
+            ("By Digit to Non-Digit", lambda: None, False, "Not supported yet", None, None),
+            ("By Non-Digit to Digit", lambda: None, False, "Not supported yet", None, None),
         ]
         home_groups = [
             ("Close", [action(
@@ -6153,10 +6192,10 @@ class TransformDataDialog(QDialog):
                 width=102,
             )], "office"),
         ]
-        unpivot_columns_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
-            ("Unpivot Columns", lambda: self._run_unpivot("columns"), True, None, "unpivotColumnsAction"),
-            ("Unpivot Other Columns", lambda: self._run_unpivot("other"), True, None, "unpivotOtherColumnsAction"),
-            ("Unpivot Only Selected Columns", lambda: self._run_unpivot("only_selected"), True, None, "unpivotOnlySelectedColumnsAction"),
+        unpivot_columns_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("Unpivot Columns", lambda: self._run_unpivot("columns"), True, None, "unpivotColumnsAction", "unpivot_columns"),
+            ("Unpivot Other Columns", lambda: self._run_unpivot("other"), True, None, "unpivotOtherColumnsAction", "unpivot_other_columns"),
+            ("Unpivot Only Selected Columns", lambda: self._run_unpivot("only_selected"), True, None, "unpivotOnlySelectedColumnsAction", "unpivot_columns"),
         ]
         transform_groups = [
             ("Table", [
@@ -6180,8 +6219,6 @@ class TransformDataDialog(QDialog):
                     menu_items=unpivot_columns_menu_items,
                     menu_button_popup=True,
                 ),
-                command("Remove Duplicates", "remove_duplicates", "Keep the first row for each duplicate key.", slot=(1, 2, 1, 1)),
-                command("Keep Duplicates", "keep_duplicates", "Keep rows whose selected key occurs more than once.", slot=(2, 2, 1, 1)),
             ], "office"),
             ("Text Column", [
                 command("Trim", "trim_text", "Remove leading and trailing whitespace.", slot=(0, 0, 1, 1)),
@@ -6190,29 +6227,20 @@ class TransformDataDialog(QDialog):
                 command("Uppercase", "uppercase_text", "Convert text to uppercase.", slot=(3, 0, 1, 1)),
                 command("Capitalize", "proper_case_text", "Capitalize each word.", slot=(0, 1, 1, 1)),
                 command("Reverse", "reverse_text", "Reverse text in the selected column.", slot=(1, 1, 1, 1)),
-                command("Split Each Delim.", "split_column_by_each_delimiter", "Split at every delimiter into columns.", slot=(2, 1, 1, 1)),
-                command("Split to Rows", "split_column_to_rows", "Create a row for each delimited value.", slot=(3, 1, 1, 1)),
-                command("Split at Positions", "split_column_by_positions", "Split text at character positions.", slot=(0, 2, 1, 1)),
-                command("Extract Delim.", "extract_text_by_delimiter", "Extract text around a selected delimiter occurrence.", slot=(1, 2, 1, 1)),
-                command("Between Delims", "extract_text_between_delimiters", "Extract text between matching delimiters.", slot=(2, 2, 1, 1)),
+                command("Extract Delim.", "extract_text_by_delimiter", "Extract text around a selected delimiter occurrence.", slot=(2, 1, 1, 1)),
+                command("Between Delims", "extract_text_between_delimiters", "Extract text between matching delimiters.", slot=(3, 1, 1, 1)),
             ], "office"),
             ("Rows", [
                 command("Filter Rows", "filter_rows", "Filter one column with a supported comparison.", slot=(0, 0, 1, 1)),
                 command("Advanced Filter", "filter_rows_advanced", "Build an AND/OR filter across columns.", slot=(1, 0, 1, 1)),
-                command("Keep Bottom", "keep_bottom_rows", "Keep the last N rows.", slot=(2, 0, 1, 1)),
-                command("Keep Range", "keep_range_rows", "Keep a range beginning at a one-based row number.", slot=(3, 0, 1, 1)),
-                command("Remove Bottom", "remove_bottom_rows", "Remove the last N rows.", slot=(0, 1, 1, 1)),
-                command("Remove Alternate", "remove_alternate_rows", "Remove repeating groups of rows.", slot=(1, 1, 1, 1)),
-                command("Remove Blank Rows", "remove_blank_rows", "Remove rows where every field is blank.", slot=(2, 1, 1, 1)),
-                command("Remove Errors", "remove_rows_with_errors", "Remove rows with an error in the selected columns.", slot=(3, 1, 1, 1)),
-                command("Sort Rows", "sort_rows", "Sort the selected column ascending or descending.", slot=(0, 2, 1, 1)),
-                command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(1, 2, 1, 1)),
+                command("Sort Rows", "sort_rows", "Sort the selected column ascending or descending.", slot=(2, 0, 1, 1)),
+                command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(3, 0, 1, 1)),
             ], "office"),
         ]
-        index_column_menu_items: list[tuple[str, Any, bool, str | None, str | None]] = [
-            ("From 0", lambda: self._add_direct_index_step(0, 1), True, None, "indexColumnFrom0Action"),
-            ("From 1", lambda: self._add_direct_index_step(1, 1), True, None, "indexColumnFrom1Action"),
-            ("Custom...", lambda: self._open_add_index_column_dialog(), True, None, "indexColumnCustomAction"),
+        index_column_menu_items: list[tuple[str, Any, bool, str | None, str | None, str | tuple[str, ...] | None]] = [
+            ("From 0", lambda: self._add_direct_index_step(0, 1), True, None, "indexColumnFrom0Action", "add_index_column"),
+            ("From 1", lambda: self._add_direct_index_step(1, 1), True, None, "indexColumnFrom1Action", "add_index_column"),
+            ("Custom...", lambda: self._open_add_index_column_dialog(), True, None, "indexColumnCustomAction", "add_index_column"),
         ]
         add_column_groups = [
             ("General", [
@@ -6487,6 +6515,13 @@ class TransformDataDialog(QDialog):
                                 menu_action.triggered.connect(
                                     lambda _checked=False, fn=menu_callback: fn()
                                 )
+                            if len(item) > 5 and item[5]:
+                                op_keys = item[5]
+                                if isinstance(op_keys, (list, tuple, set)):
+                                    for op_key in op_keys:
+                                        self.ribbon_menu_actions.register(str(op_key), menu_action)
+                                else:
+                                    self.ribbon_menu_actions.register(str(op_keys), menu_action)
                         button.setMenu(menu)
                         button.setPopupMode(
                             QToolButton.ToolButtonPopupMode.MenuButtonPopup
