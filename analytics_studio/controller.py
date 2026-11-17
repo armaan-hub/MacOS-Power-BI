@@ -4687,9 +4687,34 @@ class StudioController(QObject):
             return
         action()
 
-    @Slot(result=bool)
-    def manage_relationships(self) -> bool:
-        """Create, edit, or remove validated relationships between loaded tables."""
+    def _save_validated_relationships(
+        self,
+        relationships: list[dict[str, Any]],
+        *,
+        success_message: str | None = None,
+    ) -> bool:
+        """Validate project with candidate relationships, apply, and refresh."""
+        if relationships == self._project.get("model", {}).get("relationships", []):
+            self._set_status("No relationship changes to save.")
+            return True
+        next_project = deepcopy(self._project)
+        next_project.setdefault("model", {})["relationships"] = relationships
+        try:
+            next_project = validate_project(next_project)
+        except ProjectFileError as exc:
+            QMessageBox.warning(None, "Could not save relationships", str(exc))
+            return False
+        self._project = next_project
+        self._dirty = True
+        self._refresh_model_view()
+        self._refresh_report()
+        msg = success_message or f"Saved {len(relationships):,} model relationship(s)"
+        self._set_status(msg)
+        self.stateChanged.emit()
+        return True
+
+    def _run_relationship_dialog(self, **dialog_kwargs: Any) -> bool:
+        """Helper to build, run and save RelationshipDialog."""
         eligible_tables = [
             table for table in self._table_catalog
             if table.get("loaded") and table.get("loadEnabled") and table.get("headers")
@@ -4732,27 +4757,77 @@ class StudioController(QObject):
             detect_candidates=lambda current, target_tables=None: detect_relationship_candidates(
                 detection_tables, current, target_tables
             ),
+            **dialog_kwargs,
         )
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return False
-        relationships = dialog.relationships
-        if relationships == self._project.get("model", {}).get("relationships", []):
-            self._set_status("No relationship changes to save.")
-            return True
-        next_project = deepcopy(self._project)
-        next_project.setdefault("model", {})["relationships"] = relationships
-        try:
-            next_project = validate_project(next_project)
-        except ProjectFileError as exc:
-            QMessageBox.warning(None, "Could not save relationships", str(exc))
+        return self._save_validated_relationships(dialog.relationships)
+
+    @Slot(result=bool)
+    def manage_relationships(self) -> bool:
+        """Create, edit, or remove validated relationships between loaded tables."""
+        return self._run_relationship_dialog()
+
+    @Slot(str, str, str, str, result=bool)
+    def createRelationshipFromDrag(
+        self,
+        from_table_id: str,
+        from_column: str,
+        to_table_id: str,
+        to_column: str,
+    ) -> bool:
+        """Open the relationship dialog prefilled from a drag-and-drop interaction."""
+        if not from_table_id or not to_table_id or from_table_id == to_table_id:
+            self._set_status("Cannot relate a table to itself.")
             return False
-        self._project = next_project
-        self._dirty = True
-        self._refresh_model_view()
-        self._refresh_report()
-        self._set_status(f"Saved {len(relationships):,} model relationship(s)")
-        self.stateChanged.emit()
-        return True
+        initial_new = {
+            "from_table_id": str(from_table_id),
+            "from_column": str(from_column),
+            "to_table_id": str(to_table_id),
+            "to_column": str(to_column),
+        }
+        return self._run_relationship_dialog(initial_new=initial_new)
+
+    @Slot(str, result=bool)
+    def editRelationship(self, relationship_id: str) -> bool:
+        """Open the relationship dialog focusing the given relationship."""
+        existing_relationships = self._project.get("model", {}).get("relationships", [])
+        if not any(str(r.get("id")) == str(relationship_id) for r in existing_relationships):
+            self._set_status("Relationship not found.")
+            return False
+        return self._run_relationship_dialog(initial_edit_id=str(relationship_id))
+
+    @Slot(str, result=bool)
+    def deleteRelationship(self, relationship_id: str) -> bool:
+        """Prompt confirmation and remove the given relationship."""
+        existing_relationships = self._project.get("model", {}).get("relationships", [])
+        rel = next(
+            (r for r in existing_relationships if str(r.get("id")) == str(relationship_id)),
+            None,
+        )
+        if rel is None:
+            self._set_status("Relationship not found.")
+            return False
+        from_name = rel.get("from") or f"{rel.get('from_table_id')}[{rel.get('from_column')}]"
+        to_name = rel.get("to") or f"{rel.get('to_table_id')}[{rel.get('to_column')}]"
+        label = f"{from_name} → {to_name}"
+        answer = QMessageBox.question(
+            None,
+            "Delete relationship",
+            f"Are you sure you want to delete this relationship?\n\n{label}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return False
+        remaining = [
+            r for r in existing_relationships
+            if str(r.get("id")) != str(relationship_id)
+        ]
+        return self._save_validated_relationships(
+            remaining,
+            success_message="Deleted model relationship",
+        )
 
     def _validate_relationship_candidate(
         self,

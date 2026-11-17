@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 186 shipped as Iteration 268; next Task 185 Model view drag-to-relate re-review, Task 187 Advanced Editor (Antigravity), then engine support for Fixed decimal/Percentage/Duration types; Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
+**Active agent:** Claude Opus 5.5 (Task 185 shipped as Iteration 269; next Task 187 Advanced Editor gate, Task 188 Date Filters (Antigravity), then engine support for Fixed decimal/Percentage/Duration; Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
 **Branch in use:** main
 **Working tree clean:** yes
 

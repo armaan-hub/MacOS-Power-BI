@@ -43,6 +43,8 @@ class RelationshipDialog(QDialog):
         parent=None,
         *,
         detect_candidates: Callable[..., list[dict[str, Any]]] | None = None,
+        initial_new: dict[str, Any] | None = None,
+        initial_edit_id: str | None = None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Manage relationships")
@@ -247,10 +249,80 @@ class RelationshipDialog(QDialog):
         self._populate_columns(self.to_table, self.to_column)
         self._refresh_relationship_list()
         self._set_editable(bool(self._tables) and len(self._tables) > 1)
-        if self._relationships:
+        if initial_new:
+            self._start_new()
+            self._apply_initial_new(initial_new)
+        elif initial_edit_id is not None:
+            edit_row = next((
+                row for row in range(self.relationship_list.count())
+                if self._relationship_at_row(row).get("id") == initial_edit_id
+            ), -1)
+            if edit_row >= 0:
+                self.relationship_list.setCurrentRow(edit_row)
+            elif self._relationships:
+                self.relationship_list.setCurrentRow(0)
+            else:
+                self._start_new()
+        elif self._relationships:
             self.relationship_list.setCurrentRow(0)
         else:
             self._start_new()
+
+    def _relationship_at_row(self, row: int) -> dict[str, Any]:
+        index = self._relationship_index_at(row)
+        if index is not None and 0 <= index < len(self._relationships):
+            return self._relationships[index]
+        return {}
+
+    def _apply_initial_new(self, initial: dict[str, Any]) -> None:
+        from_table_id = initial.get("from_table_id")
+        from_column = initial.get("from_column")
+        to_table_id = initial.get("to_table_id")
+        to_column = initial.get("to_column")
+        if from_table_id:
+            self._set_table_selection(self.from_table, str(from_table_id))
+        if to_table_id:
+            self._set_table_selection(self.to_table, str(to_table_id))
+        self._populate_columns(self.from_table, self.from_column, from_column or "")
+        self._populate_columns(self.to_table, self.to_column, to_column or "")
+        if self._detect_candidates is not None and from_table_id and to_table_id and from_column and to_column:
+            try:
+                suggestions = self._detect_candidates(
+                    deepcopy(self._relationships),
+                    {str(from_table_id), str(to_table_id)},
+                )
+                for suggestion in suggestions:
+                    s_from_t = str(suggestion.get("from_table_id", ""))
+                    s_to_t = str(suggestion.get("to_table_id", ""))
+                    s_from_c = str(suggestion.get("from_column", ""))
+                    s_to_c = str(suggestion.get("to_column", ""))
+                    if (
+                        s_from_t == str(from_table_id)
+                        and s_to_t == str(to_table_id)
+                        and s_from_c == str(from_column)
+                        and s_to_c == str(to_column)
+                    ):
+                        self._set_combo_data(self.cardinality, suggestion.get("cardinality"))
+                        self._set_combo_data(self.cross_filter, suggestion.get("cross_filter_direction"))
+                        break
+                    elif (
+                        s_from_t == str(to_table_id)
+                        and s_to_t == str(from_table_id)
+                        and s_from_c == str(to_column)
+                        and s_to_c == str(from_column)
+                    ):
+                        # The pair matches in reverse; map cardinality accordingly
+                        rev_card = {
+                            "many_to_one": "one_to_many",
+                            "one_to_many": "many_to_one",
+                            "one_to_one": "one_to_one",
+                            "many_to_many": "many_to_many",
+                        }.get(str(suggestion.get("cardinality", "")), "many_to_one")
+                        self._set_combo_data(self.cardinality, rev_card)
+                        self._set_combo_data(self.cross_filter, suggestion.get("cross_filter_direction"))
+                        break
+            except Exception:
+                pass
 
     @property
     def relationships(self) -> list[dict[str, Any]]:
