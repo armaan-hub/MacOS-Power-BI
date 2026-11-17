@@ -526,11 +526,12 @@ def validate_steps(
             step = {**step, "columns": columns}
         elif op in {"remove_rows_with_errors", "keep_rows_with_errors"} and "columns" in step:
             columns = step["columns"]
-            if not isinstance(columns, list) or not columns or any(
+            # An empty list means no columns (Power BI); an omitted "columns" means all columns.
+            if not isinstance(columns, list) or any(
                 not isinstance(column, str) or not column.strip() for column in columns
             ):
                 raise TransformationError(
-                    f"Transformation step {index} needs one or more error-check columns."
+                    f"Transformation step {index} needs a list of error-check column names."
                 )
             columns = [column.strip() for column in columns]
             if len(set(columns)) != len(columns):

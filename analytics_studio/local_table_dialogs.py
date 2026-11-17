@@ -12479,7 +12479,10 @@ class TransformDataDialog(QDialog):
                 detail = (
                     "all fields"
                     if "columns" not in step
-                    else f"columns: {', '.join(step['columns'])}"
+                    else (
+                        f"columns: {', '.join(step['columns'])}"
+                        if step["columns"] else "no columns"
+                    )
                 )
             elif step["op"] == "keep_range_rows":
                 detail = f"from row {step['first_row']}, {step['count']} rows"

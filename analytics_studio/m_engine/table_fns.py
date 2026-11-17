@@ -305,11 +305,12 @@ def _projection_matches(names: list, row: tuple, criteria: V.Record) -> bool:
 
 
 def _check_cell(value: MValue, kind: str) -> None:
-    base, _type_name, nullable = _parts(kind)
+    base, _type_name, _nullable = _parts(kind)
+    # Power BI accepts a null cell in any typed column (Task 214 answer check); the column type and
+    # its IsNullable metadata are kept unchanged.
     if isinstance(value, V.Null):
-        if not nullable:
-            raise _unsupported(f"{base} column with a null cell")
-    elif base != "any" and V.kind_of(value) != base:
+        return
+    if base != "any" and V.kind_of(value) != base:
         raise _unsupported(f"{base} column with a cell of another type")
 
 
@@ -559,6 +560,13 @@ def _repeat(table: MValue, count: MValue) -> MValue:
 
 # ---- columns ----------------------------------------------------------------
 
+def project_table(table: V.Table, names: tuple) -> V.Table:
+    """A table projection t[[A],[B]]: only the named columns, in that order, keeping their types.
+    TODO: missing column and the optional form on a table are unchecked against Power BI; a missing column
+    raises the Table.SelectColumns error for now."""
+    return _select_columns(table, V.List(tuple(V.Text(name) for name in names)), V.Null())
+
+
 def _select_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
     t = _table(table)
     mode = _missing_mode(missing, (MISSING_ERROR, MISSING_USE_NULL))
@@ -667,6 +675,13 @@ def _transformed_kind(fn: V.Function, explicit: Optional[str], old: str) -> str:
     return explicit if explicit is not None else _function_spec(fn)
 
 
+def _transform_cell(fn: V.Function, cell: MValue) -> MValue:
+    """One cell of Table.TransformColumns. An error cell stays that error: Power BI does not pass it to the function,
+    so ``each try _ otherwise "ERR"`` never catches it (Power BI answer check 2026-11-17, items 20-24)."""
+    V.force(cell)  # raises the cell's own error without calling fn
+    return _apply(fn, cell)
+
+
 def _transform_columns(table: MValue, transforms: MValue, default: MValue, missing: MValue) -> MValue:
     t = _table(table)
     mode = _missing_mode(missing, (MISSING_ERROR, MISSING_IGNORE))
@@ -691,7 +706,7 @@ def _transform_columns(table: MValue, transforms: MValue, default: MValue, missi
         for i, (fn, _explicit) in fns.items():
             if fn.origin == "identity":
                 continue
-            cells[i] = V.Thunk(lambda cell=row[i], fn=fn: _apply(fn, cell))
+            cells[i] = V.Thunk(lambda cell=row[i], fn=fn: _transform_cell(fn, cell))
         rows.append(tuple(cells))
     columns = tuple((name, _transformed_kind(fns[i][0], fns[i][1], kind) if i in fns else kind)
                     for i, (name, kind) in enumerate(t.columns))
@@ -811,7 +826,7 @@ def _add_index_column(table: MValue, name: MValue, start: MValue, step: MValue, 
     new = _text(name)
     explicit = _type_argument(kind)
     if new in _names_of(t):
-        raise _unsupported("index column over an existing column name")
+        raise _exists(new)  # Power BI answer check 2026-11-17, item 18
     first = _integer(start, 0)
     increment = _integer(step, 1)
     rows = tuple(tuple(row) + (V.Number(float(first + i * increment)),) for i, row in enumerate(t.rows))
@@ -1179,7 +1194,15 @@ def _find_text(table: MValue, text: MValue) -> MValue:
 def _select_rows(table: MValue, predicate: MValue) -> MValue:
     t = _table(table)
     names = _names_of(t)
-    return V.Table(t.columns, tuple(row for row in t.rows if _truth(_apply(predicate, _record(names, row)))))
+    # Power BI answer (Task 214, item 41): a null predicate result drops the row instead of raising.
+    kept = []
+    for row in t.rows:
+        verdict = _apply(predicate, _record(names, row))
+        if isinstance(verdict, V.Null):
+            continue
+        if _truth(verdict):
+            kept.append(row)
+    return V.Table(t.columns, tuple(kept))
 
 
 def _remove_rows(table: MValue, offset: MValue, count: MValue) -> MValue:
@@ -1226,16 +1249,68 @@ def _remove_matching_rows(table: MValue, records: MValue, criteria_fn: MValue) -
     return V.Table(t.columns, tuple(row for row in t.rows if not matches(row)))
 
 
+def _error_check_indexes(t: V.Table, columns: MValue) -> list:
+    """The column positions an error check looks at: all of them when null, the listed ones otherwise.
+
+    An empty list means no columns (Power BI: nothing has an error). A text argument is refused.
+    """
+    if isinstance(columns, V.Null):
+        return list(range(len(t.columns)))
+    return [_index(t, _text(item)) for item in _items(columns)]
+
+
+def _row_has_error_at(row: tuple, indexes: list) -> bool:
+    for i in indexes:
+        try:
+            V.force(row[i])
+        except MError:
+            return True
+    return False
+
+
 def _select_rows_with_errors(table: MValue, columns: MValue) -> MValue:
-    _no_option(columns, "columns argument")
     t = _table(table)
-    return V.Table(t.columns, tuple(row for row in t.rows if _row_has_error(row)))
+    indexes = _error_check_indexes(t, columns)
+    return V.Table(t.columns, tuple(row for row in t.rows if _row_has_error_at(row, indexes)))
 
 
 def _remove_rows_with_errors(table: MValue, columns: MValue) -> MValue:
-    _no_option(columns, "columns argument")
     t = _table(table)
-    return V.Table(t.columns, tuple(row for row in t.rows if not _row_has_error(row)))
+    indexes = _error_check_indexes(t, columns)
+    return V.Table(t.columns, tuple(row for row in t.rows if not _row_has_error_at(row, indexes)))
+
+
+def _error_replacement_pairs(value: MValue) -> list:
+    """{{column, value}, ...}, or one flat pair {column, value}."""
+    items = _items(value)
+    if items and isinstance(items[0], V.Text):
+        if len(items) != 2:
+            raise _unsupported("error replacement pair")
+        return [(items[0].value, items[1])]
+    pairs = []
+    for item in items:
+        pair = _items(item)
+        if len(pair) != 2 or not isinstance(pair[0], V.Text):
+            raise _unsupported("error replacement pair")
+        pairs.append((pair[0].value, pair[1]))
+    return pairs
+
+
+def _replace_error_values(table: MValue, errorReplacement: MValue) -> MValue:
+    t = _table(table)
+    replacement = {}
+    for name, value in _error_replacement_pairs(errorReplacement):
+        replacement[_index(t, name)] = value
+    rows = []
+    for row in t.rows:
+        cells = list(row)
+        for i, value in replacement.items():
+            try:
+                V.force(cells[i])
+            except MError:
+                cells[i] = value  # the column type is kept, as Power BI does
+        rows.append(tuple(cells))
+    return V.Table(t.columns, tuple(rows))
 
 
 # ---- grouping, pivoting and reshaping -------------------------------------------
@@ -1825,6 +1900,7 @@ TABLE_GLOBALS: dict = {
                                         _remove_matching_rows),
     "Table.SelectRowsWithErrors": _native((("table", False), ("columns", True)), _select_rows_with_errors),
     "Table.RemoveRowsWithErrors": _native((("table", False), ("columns", True)), _remove_rows_with_errors),
+    "Table.ReplaceErrorValues": _native((("table", False), ("errorReplacement", False)), _replace_error_values),
     "Table.SplitColumn": _native((("table", False), ("sourceColumn", False), ("splitter", False),
                                   ("columnNamesOrNumberOfColumns", True), ("default", True), ("extraColumns", True)),
                                  _split_column),

@@ -252,8 +252,8 @@ class TransformationTests(unittest.TestCase):
                     {"operation": "sum", "column": "Amount", "new_name": "Total"},
                 ],
             }])
-        for source in (pivot_source, pivot_error_source):
-            with self.subTest(source=source):
+        for label, source in (("typed_category", pivot_source), ("error_attribute", pivot_error_source)):
+            with self.subTest(source=label):
                 with self.assertRaisesRegex(TransformationError, "pivot.*(typed|error)"):
                     apply_transformations(source, [{
                         "op": "pivot_column", "attribute_column": "Attribute",
