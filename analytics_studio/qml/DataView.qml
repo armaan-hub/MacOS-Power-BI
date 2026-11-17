@@ -852,8 +852,10 @@ Item {
                                             && point.x <= bottomRight.x
                                             && point.y >= topLeft.y
                                             && point.y <= bottomRight.y
-                                    if (!insideFilterButton)
+                                    if (!insideFilterButton) {
+                                        root.selectedColumnRequested(root.columnNameAt(index))
                                         root.appController.dataModel.sortByColumn(index)
+                                    }
                                 }
                             }
                             Button {
