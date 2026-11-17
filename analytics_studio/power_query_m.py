@@ -40,6 +40,7 @@ from analytics_studio.power_query_expression import (
     expression_value_to_text,
 )
 from analytics_studio.transformations import (
+    GROUP_AGGREGATION_M_TYPES_FOLDED,
     TransformationError,
     apply_transformations,
     canonical_column_type,
@@ -2716,7 +2717,7 @@ def _step_to_m_call(
     if op == "group_by":
         aggregations = ", ".join(
             "{" + _m_string(aggregate["new_name"]) + ", "
-            + _m_group_aggregation(aggregate) + "}"
+            + _m_group_aggregation(aggregate, input_column_types) + "}"
             for aggregate in step["aggregations"]
         )
         return (
@@ -2869,6 +2870,47 @@ def _step_to_m_call(
     )
 
 
+def _parse_group_aggregation_expression(
+    new_name: str,
+    expression: str,
+    function_operations: dict[str, str],
+) -> dict[str, str]:
+    """Parse one ``each ...`` aggregation expression into a local aggregation step."""
+    if expression == "each Table.RowCount(_)":
+        return {"operation": "count_rows", "new_name": new_name}
+    if expression == "each Table.RowCount(Table.Distinct(_))":
+        return {"operation": "count_distinct_rows", "new_name": new_name}
+    expression = re.sub(r"^each\s+", "", expression, count=1)
+    call = _CALL.fullmatch(expression)
+    if call is None:
+        raise PowerQueryMScriptError(
+            f"Table.Group aggregation {new_name!r} is outside the supported local subset."
+        )
+    function = call.group(1)
+    arguments = _split_top_level(call.group(2), ",")
+    if function == "List.Count" and len(arguments) == 1:
+        distinct = _CALL.fullmatch(arguments[0].strip())
+        if distinct is not None and distinct.group(1) == "List.Distinct":
+            distinct_arguments = _split_top_level(distinct.group(2), ",")
+            if len(distinct_arguments) == 1:
+                column = _parse_m_field_reference(distinct_arguments[0])
+                return {
+                    "operation": "count_distinct_values",
+                    "column": column,
+                    "new_name": new_name,
+                }
+    operation = function_operations.get(function)
+    if operation is None or len(arguments) != 1:
+        raise PowerQueryMScriptError(
+            f"Table.Group aggregation {new_name!r} is outside the supported local subset."
+        )
+    return {
+        "operation": operation,
+        "column": _parse_m_field_reference(arguments[0]),
+        "new_name": new_name,
+    }
+
+
 def _parse_group_aggregations(value: str) -> list[dict[str, str]]:
     result: list[dict[str, str]] = []
     function_operations = {
@@ -2880,48 +2922,25 @@ def _parse_group_aggregations(value: str) -> list[dict[str, str]]:
     }
     for item in _parse_braced_items(value):
         parts = _parse_braced_items(item)
-        if len(parts) != 2:
+        if len(parts) not in {2, 3}:
             raise PowerQueryMScriptError(
                 "Each local Table.Group aggregation needs an output name and an each expression."
             )
         new_name = _parse_string(parts[0])
-        expression = parts[1].strip()
-        if expression == "each Table.RowCount(_)":
-            result.append({"operation": "count_rows", "new_name": new_name})
-            continue
-        if expression == "each Table.RowCount(Table.Distinct(_))":
-            result.append({"operation": "count_distinct_rows", "new_name": new_name})
-            continue
-        expression = re.sub(r"^each\s+", "", expression, count=1)
-        call = _CALL.fullmatch(expression)
-        if call is None:
-            raise PowerQueryMScriptError(
-                f"Table.Group aggregation {new_name!r} is outside the supported local subset."
-            )
-        function = call.group(1)
-        arguments = _split_top_level(call.group(2), ",")
-        if function == "List.Count" and len(arguments) == 1:
-            distinct = _CALL.fullmatch(arguments[0].strip())
-            if distinct is not None and distinct.group(1) == "List.Distinct":
-                distinct_arguments = _split_top_level(distinct.group(2), ",")
-                if len(distinct_arguments) == 1:
-                    column = _parse_m_field_reference(distinct_arguments[0])
-                    result.append({
-                        "operation": "count_distinct_values",
-                        "column": column,
-                        "new_name": new_name,
-                    })
-                    continue
-        operation = function_operations.get(function)
-        if operation is None or len(arguments) != 1:
-            raise PowerQueryMScriptError(
-                f"Table.Group aggregation {new_name!r} is outside the supported local subset."
-            )
-        result.append({
-            "operation": operation,
-            "column": _parse_m_field_reference(arguments[0]),
-            "new_name": new_name,
-        })
+        aggregate = _parse_group_aggregation_expression(
+            new_name, parts[1].strip(), function_operations
+        )
+        if len(parts) == 3:
+            # Power BI's optional third element (Task 216), stored exactly as written.
+            m_type = parts[2].strip()
+            if m_type.casefold() not in GROUP_AGGREGATION_M_TYPES_FOLDED:
+                raise PowerQueryMScriptError(
+                    f"Table.Group aggregation {new_name!r} is outside the supported local subset."
+                )
+            # Count Rows always emits Int64.Type, so that one is not stored; the text is re-emitted anyway.
+            if not (aggregate["operation"] == "count_rows" and m_type.casefold() == "int64.type"):
+                aggregate["m_type"] = m_type
+        result.append(aggregate)
     if not result:
         raise PowerQueryMScriptError("Table.Group needs at least one aggregation.")
     return result
@@ -2968,7 +2987,34 @@ def _validate_dynamic_pivot_values(
         )
 
 
-def _m_group_aggregation(aggregate: dict[str, str]) -> str:
+def _m_group_aggregation(
+    aggregate: dict[str, str],
+    input_column_types: dict[str, str] | None = None,
+) -> str:
+    """Return the ``each ...`` expression, plus Power BI's optional third element (Task 216).
+
+    A stored ``m_type`` is written exactly. Otherwise the type follows Power BI's
+    Group By dialog: count_rows -> Int64.Type; sum/average/median -> ``type number``
+    on a whole/decimal number column and ``type text`` on a text column, when the
+    input column type is known. Everything else is written without a type.
+    """
+    expression = _m_group_expression(aggregate)
+    stored = aggregate.get("m_type")
+    if stored is not None:
+        return f"{expression}, {stored.strip()}"
+    operation = aggregate["operation"]
+    if operation == "count_rows":
+        return f"{expression}, Int64.Type"
+    if operation in {"sum", "average", "median"} and "column" in aggregate:
+        source_type = (input_column_types or {}).get(aggregate["column"])
+        if source_type in {"whole_number", "decimal_number"}:
+            return f"{expression}, type number"
+        if source_type == "text":
+            return f"{expression}, type text"
+    return expression
+
+
+def _m_group_expression(aggregate: dict[str, str]) -> str:
     operation = aggregate["operation"]
     if operation == "count_rows":
         return "each Table.RowCount(_)"
