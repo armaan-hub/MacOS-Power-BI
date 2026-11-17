@@ -706,14 +706,17 @@ Rectangle {
             onPaint: {
                 const ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
+                // Task 193 fix: only the value-axis chart family changes padding; other types keep 38 / 25
+                const padFamily = root.chartType === "column" || root.chartType === "line"
+                    || root.chartType === "area" || root.chartType === "lineClusteredColumn"
+                    || root.chartType === "bar"
                 const padLeft = (root.chartType === "bar" ? (root.showYAxis ? 38 : 8)
-                    : (root.hasLeftValueAxis ? 38 : 8)) + root.axisTitleLeftPad
+                    : (padFamily ? (root.hasLeftValueAxis ? 38 : 8) : 38)) + root.axisTitleLeftPad
                 const padRight = root.showDataLabels && root.chartType === "bar" ? 48 : 8
                 const padTop = root.hasMultiSeriesLegend() && root.showLegend
                         ? Math.max(27, root.showDataLabels ? 20 : 0)
                         : (root.showDataLabels ? 20 : 9)
-                const padBottom = (root.chartType === "bar" ? (root.showXAxis ? 25 : 8)
-                    : (root.showXAxis ? 25 : 8)) + root.axisTitleBottomPad
+                const padBottom = (padFamily && !root.showXAxis ? 8 : 25) + root.axisTitleBottomPad
                 const plotW = Math.max(12, width - padLeft - padRight)
                 const plotH = Math.max(12, height - padTop - padBottom)
                 if (root.axisTitleFamily && (root.showXTitle || root.showYTitle)) {
@@ -760,8 +763,11 @@ Rectangle {
                 const tickMax = valueTicks.length ? valueTicks[valueTicks.length - 1] : 1
                 const tickSpan = tickMax - tickMin > 0 ? (tickMax - tickMin) : 1
 
+                // Task 193 fix: plot span = tick span; zeroFrac is where value 0 sits (0 unless ticks go negative)
+                let zeroFrac = 0
                 if (isValueAxisFamily && valueTicks.length > 0) {
-                    maxValue = tickMax
+                    maxValue = tickSpan
+                    zeroFrac = -tickMin / tickSpan
                 }
 
                 if (root.showGridlines && root.chartType !== "pie" && root.chartType !== "donut"
@@ -1800,18 +1806,18 @@ Rectangle {
                             ctx.lineWidth = 2.5
                             ctx.beginPath()
                             for (let i = 0; i < linePoints.length; ++i) {
-                                const y = padTop + plotH - plotH * linePoints[i].value / maxValue
+                                const y = padTop + plotH - plotH * (zeroFrac + linePoints[i].value / maxValue)
                                 if (i === 0) ctx.moveTo(linePoints[i].x, y); else ctx.lineTo(linePoints[i].x, y)
                             }
                             ctx.stroke()
                             for (let i = 0; i < linePoints.length; ++i) {
                                 const point = linePoints[i]
-                                const y = padTop + plotH - plotH * point.value / maxValue
+                                const y = padTop + plotH - plotH * (zeroFrac + point.value / maxValue)
                                 ctx.fillStyle = hasHighlights ? "#b8c2cc" : "#C65911"
                                 ctx.beginPath(); ctx.arc(point.x, y, 3.5, 0, Math.PI * 2); ctx.fill()
                                 const selectedValue = root.highlightedLineValue(point.label)
                                 if (selectedValue !== null) {
-                                    const selectedY = padTop + plotH - plotH * selectedValue / maxValue
+                                    const selectedY = padTop + plotH - plotH * (zeroFrac + selectedValue / maxValue)
                                     ctx.fillStyle = "#C65911"
                                     ctx.beginPath(); ctx.arc(point.x, selectedY, 4.5, 0, Math.PI * 2); ctx.fill()
                                 }
@@ -1831,14 +1837,14 @@ Rectangle {
                     ctx.beginPath()
                     for (let i = 0; i < values.length; ++i) {
                         const x = padLeft + plotW * (i + 0.5) / values.length
-                        const y = padTop + plotH - plotH * (Number(values[i].value) || 0) / maxValue
+                        const y = padTop + plotH - plotH * (zeroFrac + (Number(values[i].value) || 0) / maxValue)
                         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
                     }
                     ctx.stroke()
                     ctx.fillStyle = hasHighlights ? "#b8c2cc" : color
                     for (let i = 0; i < values.length; ++i) {
                         const x = padLeft + plotW * (i + 0.5) / values.length
-                        const y = padTop + plotH - plotH * (Number(values[i].value) || 0) / maxValue
+                        const y = padTop + plotH - plotH * (zeroFrac + (Number(values[i].value) || 0) / maxValue)
                         ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill()
                         if (root.showDataLabels) {
                             ctx.fillStyle = "#425466"
@@ -1855,7 +1861,7 @@ Rectangle {
                             const selectedValue = root.highlightedValue(values[i].label)
                             if (selectedValue === null) continue
                             const x = padLeft + plotW * (i + 0.5) / values.length
-                            const y = padTop + plotH - plotH * selectedValue / maxValue
+                            const y = padTop + plotH - plotH * (zeroFrac + selectedValue / maxValue)
                             ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill()
                         }
                     }
@@ -1899,14 +1905,16 @@ Rectangle {
                         const y = padTop + i * step + step * 0.2
                         const barH = Math.max(3, step * 0.58)
                         const barW = plotW * (Number(values[i].value) || 0) / maxValue
+                        const barBaseX = padLeft + plotW * zeroFrac
                         ctx.fillStyle = hasHighlights ? "#d4dce3" : root.seriesColor
-                        ctx.fillRect(padLeft, y, barW, barH)
+                        ctx.fillRect(Math.min(barBaseX, barBaseX + barW), y, Math.abs(barW), barH)
                         const selectedValue = root.highlightedValue(values[i].label)
                         if (selectedValue !== null) {
                             ctx.fillStyle = color
+                            const barHighlightW = plotW * Math.min(Math.max(0, selectedValue), Number(values[i].value) || 0) / maxValue
                             ctx.fillRect(
-                                padLeft, y,
-                                plotW * Math.min(Math.max(0, selectedValue), Number(values[i].value) || 0) / maxValue,
+                                Math.min(barBaseX, barBaseX + barHighlightW), y,
+                                Math.abs(barHighlightW),
                                 barH
                             )
                         }
@@ -1920,9 +1928,9 @@ Rectangle {
                             ctx.textBaseline = "middle"
                             ctx.fillText(
                                 root.valueLabel(values[i].value),
-                                Math.min(padLeft + barW + 4, width - padRight + 2),
+                                Math.min(barBaseX + Math.max(0, barW) + 4, width - padRight + 2),
                                 y + barH / 2,
-                                Math.max(1, width - padRight - Math.min(padLeft + barW + 4, width - padRight + 2))
+                                Math.max(1, width - padRight - Math.min(barBaseX + Math.max(0, barW) + 4, width - padRight + 2))
                             )
                         }
                     }
@@ -1932,15 +1940,16 @@ Rectangle {
                     for (let i = 0; i < values.length; ++i) {
                         points.push({
                             x: padLeft + step * (i + 0.5),
-                            y: padTop + plotH - plotH * (Number(values[i].value) || 0) / maxValue,
+                            y: padTop + plotH - plotH * (zeroFrac + (Number(values[i].value) || 0) / maxValue),
                         })
                     }
                     ctx.beginPath()
-                    ctx.moveTo(points[0].x, padTop + plotH)
+                    const areaBaseY = padTop + plotH - plotH * zeroFrac
+                    ctx.moveTo(points[0].x, areaBaseY)
                     ctx.lineTo(points[0].x, points[0].y)
                     for (let i = 1; i < points.length; ++i)
                         ctx.lineTo(points[i].x, points[i].y)
-                    ctx.lineTo(points[points.length - 1].x, padTop + plotH)
+                    ctx.lineTo(points[points.length - 1].x, areaBaseY)
                     ctx.closePath()
                     ctx.fillStyle = hasHighlights ? "#d4dce3" : color
                     ctx.globalAlpha = hasHighlights ? 0.8 : 0.24
@@ -2004,10 +2013,11 @@ Rectangle {
                     for (let i = 0; i < values.length; ++i) {
                         const v = Number(values[i].value) || 0
                         const barH = plotH * v / maxValue
+                        const barBaseY = padTop + plotH - plotH * zeroFrac
                         const barW = Math.max(5, step * 0.56)
                         const x = padLeft + i * step + (step - barW) / 2
                         ctx.fillStyle = hasHighlights ? "#d4dce3" : root.seriesColor
-                        ctx.fillRect(x, padTop + plotH - barH, barW, barH)
+                        ctx.fillRect(x, Math.min(barBaseY, barBaseY - barH), barW, Math.abs(barH))
                         const selectedValue = root.highlightedValue(values[i].label)
                         if (selectedValue !== null) {
                             const highlightHeight = plotH * Math.min(
@@ -2015,7 +2025,7 @@ Rectangle {
                             ) / maxValue
                             ctx.fillStyle = color
                             ctx.fillRect(
-                                x, padTop + plotH - highlightHeight, barW, highlightHeight
+                                x, Math.min(barBaseY, barBaseY - highlightHeight), barW, Math.abs(highlightHeight)
                             )
                         }
                         if (root.showXAxis && showLabel[i]) {
@@ -2026,7 +2036,7 @@ Rectangle {
                             ctx.fillStyle = root.dataLabelColor
                             ctx.textAlign = "center"
                             ctx.textBaseline = "bottom"
-                            ctx.fillText(root.valueLabel(values[i].value), x + barW / 2, Math.max(10, padTop + plotH - barH - 3))
+                            ctx.fillText(root.valueLabel(values[i].value), x + barW / 2, Math.max(10, Math.min(barBaseY, barBaseY - barH) - 3))
                         }
                     }
                     if ((root.chartType === "lineClusteredColumn" || root.chartType === "lineStackedColumn") && values.length) {
@@ -2051,18 +2061,18 @@ Rectangle {
                         ctx.lineWidth = 2.5
                         ctx.beginPath()
                         for (let i = 0; i < linePoints.length; ++i) {
-                            const y = padTop + plotH - plotH * linePoints[i].value / maxValue
+                            const y = padTop + plotH - plotH * (zeroFrac + linePoints[i].value / maxValue)
                             if (i === 0) ctx.moveTo(linePoints[i].x, y); else ctx.lineTo(linePoints[i].x, y)
                         }
                         ctx.stroke()
                         for (let i = 0; i < linePoints.length; ++i) {
                             const point = linePoints[i]
-                            const y = padTop + plotH - plotH * point.value / maxValue
+                            const y = padTop + plotH - plotH * (zeroFrac + point.value / maxValue)
                             ctx.fillStyle = hasHighlights ? "#b8c2cc" : "#C65911"
                             ctx.beginPath(); ctx.arc(point.x, y, 3.5, 0, Math.PI * 2); ctx.fill()
                             const selectedValue = root.highlightedLineValue(point.label)
                             if (selectedValue !== null) {
-                                const selectedY = padTop + plotH - plotH * selectedValue / maxValue
+                                const selectedY = padTop + plotH - plotH * (zeroFrac + selectedValue / maxValue)
                                 ctx.fillStyle = "#C65911"
                                 ctx.beginPath(); ctx.arc(point.x, selectedY, 4.5, 0, Math.PI * 2); ctx.fill()
                             }
