@@ -2688,3 +2688,9 @@ The Power Query ribbon Data Type list now shows Power BI's 13 types in Power BI'
 Model view now creates a relationship by dragging a column onto another table's column (New relationship dialog prefilled), and a relationship line opens Edit on double-click and Properties/Delete on right-click, like Power BI.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity and Haiku passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Model view drag-to-relate and relationship line edit/delete coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 270 (Task 187 ux-187: 4887)
+
+The Advanced Editor colours M like Power BI and always opens (read-only with per-step notes when some steps cannot be shown as M). Includes the hotfix for Task 185's hard-coded test path.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest Antigravity passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Advanced Editor M syntax colours; opens read-only when steps cannot be shown as M coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
