@@ -41,6 +41,11 @@ Rectangle {
     property color visualBorderColor: "#d9e0e6"
     property real visualBorderRadius: 7
     property string seriesLabel: ""
+    property string categoryLabel: ""
+    readonly property bool axisTitleFamily: chartType === "column" || chartType === "lineClusteredColumn"
+            || chartType === "bar" || chartType === "line" || chartType === "area"
+    readonly property int axisTitleLeftPad: axisTitleFamily && showYTitle ? 16 : 0
+    readonly property int axisTitleBottomPad: axisTitleFamily && showXTitle ? 16 : 0
     property string lineSeriesLabel: ""
     property bool selected: false
     property bool filterOnCategory: false
@@ -543,14 +548,32 @@ Rectangle {
             onPaint: {
                 const ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                const padLeft = 38
+                const padLeft = 38 + root.axisTitleLeftPad
                 const padRight = root.showDataLabels && root.chartType === "bar" ? 48 : 8
                 const padTop = root.hasMultiSeriesLegend() && root.showLegend
                         ? Math.max(27, root.showDataLabels ? 20 : 0)
                         : (root.showDataLabels ? 20 : 9)
-                const padBottom = 25
+                const padBottom = 25 + root.axisTitleBottomPad
                 const plotW = Math.max(12, width - padLeft - padRight)
                 const plotH = Math.max(12, height - padTop - padBottom)
+                if (root.axisTitleFamily && (root.showXTitle || root.showYTitle)) {
+                    ctx.save()
+                    ctx.fillStyle = "#647382"
+                    ctx.font = "11px sans-serif"
+                    if (root.showXTitle && root.categoryLabel) {
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "bottom"
+                        ctx.fillText(root.categoryLabel, padLeft + plotW / 2, height - 2, plotW)
+                    }
+                    if (root.showYTitle && root.seriesLabel) {
+                        ctx.translate(9, padTop + plotH / 2)
+                        ctx.rotate(-Math.PI / 2)
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "middle"
+                        ctx.fillText(root.seriesLabel, 0, 0, plotH)
+                    }
+                    ctx.restore()
+                }
                 const values = root.series || []
                 const lineValues = root.lineSeries || []
                 const highlightScatterPoints = root.highlightScatterPoints || []

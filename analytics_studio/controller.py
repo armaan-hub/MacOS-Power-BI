@@ -155,6 +155,9 @@ from analytics_studio.transformations import (
 
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
+# Axis format cards are offered only where ChartCard.qml's drawing reads the flag.
+X_AXIS_CARD_TYPES = {"column", "lineClusteredColumn", "area"}
+Y_AXIS_CARD_TYPES = {"bar"}
 CHART_VISUALS = {"Monthly revenue", "Region revenue"}
 
 
@@ -2334,6 +2337,10 @@ class StudioController(QObject):
                     ],
                 },
             ]
+            if v_type not in X_AXIS_CARD_TYPES:
+                visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "X-axis"]
+            if v_type not in Y_AXIS_CARD_TYPES:
+                visual_tab_groups = [g for g in visual_tab_groups if g["name"] != "Y-axis"]
             return visual_tab_groups + general_tab_groups
 
         # Non-chart visuals: put under General, keep type-specific group and existing properties

@@ -48,16 +48,16 @@ def test_column_chart_groups_tabs_and_toggles(tmp_path: Path) -> None:
 
     groups = controller.activeVisualPropertyGroups
     assert [g["tab"] for g in groups] == [
-        "Visual", "Visual", "Visual", "Visual", "Visual", "Visual",
+        "Visual", "Visual", "Visual", "Visual", "Visual",
         "General", "General", "General", "General"
     ]
     assert [g["name"] for g in groups] == [
-        "X-axis", "Y-axis", "Gridlines", "Colors", "Data labels", "Legend",
+        "X-axis", "Gridlines", "Colors", "Data labels", "Legend",
         "Properties", "Title", "Effects > Background", "Effects > Visual border"
     ]
     toggles = {g["name"]: (g["toggleKey"], g["toggleValue"]) for g in groups}
     assert toggles["X-axis"] == ("show_x_axis", True)
-    assert toggles["Y-axis"] == ("show_y_axis", True)
+    assert "Y-axis" not in toggles
     assert toggles["Gridlines"] == ("show_gridlines", True)
     assert toggles["Colors"] == (None, False)
     assert toggles["Data labels"] == ("show_data_labels", False)
@@ -66,6 +66,92 @@ def test_column_chart_groups_tabs_and_toggles(tmp_path: Path) -> None:
     assert toggles["Title"] == ("show_title", True)
     assert toggles["Effects > Background"] == ("show_background", True)
     assert toggles["Effects > Visual border"] == ("show_border", True)
+
+
+def test_axis_cards_only_where_drawing_reads_the_flag(tmp_path: Path) -> None:
+    controller = _controller(tmp_path)
+    expected = {
+        "column": (True, False),
+        "lineClusteredColumn": (True, False),
+        "area": (True, False),
+        "line": (False, False),
+        "bar": (False, True),
+    }
+    for chart_type, (has_x, has_y) in expected.items():
+        title = f"{chart_type} axes"
+        controller.add_visual(chart_type, title, 10, 10, 400, 300)
+        controller.selectVisual(title)
+        names = [g["name"] for g in controller.activeVisualPropertyGroups]
+        assert ("X-axis" in names) is has_x, chart_type
+        assert ("Y-axis" in names) is has_y, chart_type
+        assert "Gridlines" in names, chart_type
+
+
+def _load_chart_card(chart_type: str):
+    QApplication.instance() or QApplication(["chart card test"])
+    engine = QQmlEngine()
+    component = QQmlComponent(engine)
+    qml_path = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "ChartCard.qml"
+    component.loadUrl(QUrl.fromLocalFile(str(qml_path)))
+    assert not component.isError(), "\n".join(e.toString() for e in component.errors())
+    card = component.createWithInitialProperties({"chartType": chart_type})
+    assert card is not None
+    return card, component, engine
+
+
+def test_axis_title_padding_only_when_title_is_on() -> None:
+    card, component, engine = _load_chart_card("column")
+    assert card.property("axisTitleLeftPad") == 0
+    assert card.property("axisTitleBottomPad") == 0
+
+    card.setProperty("showXTitle", True)
+    assert card.property("axisTitleBottomPad") == 16
+    assert card.property("axisTitleLeftPad") == 0
+
+    card.setProperty("showYTitle", True)
+    assert card.property("axisTitleLeftPad") == 16
+    assert card.property("axisTitleBottomPad") == 16
+
+    for family in ("bar", "line"):
+        card.setProperty("chartType", family)
+        assert card.property("axisTitleLeftPad") == 16
+        assert card.property("axisTitleBottomPad") == 16
+
+    card.setProperty("chartType", "pie")
+    assert card.property("axisTitleLeftPad") == 0
+    assert card.property("axisTitleBottomPad") == 0
+
+
+def test_main_passes_category_label_and_title_flags(tmp_path: Path) -> None:
+    app = QApplication.instance() or QApplication(["axis title test"])
+    controller = _controller(tmp_path)
+    engine = QQmlEngine()
+    component = QQmlComponent(engine)
+    qml_path = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml"
+    component.loadUrl(QUrl.fromLocalFile(str(qml_path)))
+    assert not component.isError(), "\n".join(e.toString() for e in component.errors())
+    window = component.createWithInitialProperties({"studioController": controller})
+    assert window is not None
+    window.show()
+    controller.setCurrentView("Report")
+    controller.add_visual("column", "Axis titles", 20, 20, 400, 300)
+    controller.add_field_to_well("X-axis", "Category")
+    controller.add_field_to_well("Y-axis", "Amount")
+    controller.selectVisual("Axis titles")
+    controller.set_visual_property("show_x_title", True)
+    controller.set_visual_property("show_y_title", True)
+    app.processEvents()
+
+    chart = next(
+        item for item in _items(window.contentItem())
+        if item.objectName() == "chartCard_Axis titles"
+    )
+    x_field = controller.activeVisualObjects[0]["fields"]["X-axis"][0]
+    assert chart.property("categoryLabel") == controller.visualFieldLabel(x_field)
+    assert chart.property("showXTitle") is True
+    assert chart.property("showYTitle") is True
+    assert chart.property("axisTitleBottomPad") == 16
+    assert chart.property("axisTitleLeftPad") == 16
 
 
 def test_property_validation(tmp_path: Path) -> None:

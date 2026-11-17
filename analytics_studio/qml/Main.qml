@@ -1726,6 +1726,11 @@ ApplicationWindow {
                                                         const measures = fields[well] || []
                                                         return measures.length ? mainWindow.studioController.visualFieldLabel(String(measures[0])) : ""
                                                     }
+                                                    categoryLabel: {
+                                                        const fields = modelData.fields || {}
+                                                        const categories = fields["X-axis"] || []
+                                                        return categories.length ? mainWindow.studioController.visualFieldLabel(String(categories[0])) : ""
+                                                    }
                                                     lineSeriesLabel: {
                                                         const fields = modelData.fields || {}
                                                         const measures = fields["Line Y-axis"] || []
