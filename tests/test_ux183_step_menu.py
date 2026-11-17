@@ -9,7 +9,7 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication, QMessageBox, QMenu
 
 from analytics_studio.file_import import ImportCandidate
 from analytics_studio.local_table_dialogs import TransformDataDialog
@@ -133,3 +133,62 @@ class StepMenuTests(unittest.TestCase):
             [s["op"] for s in dialog._steps],
             ["filter_rows", "sort_rows", "remove_column"],
         )
+
+    def test_sparse_boundary_helper_steps_menu_enable_states(self) -> None:
+        steps = [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_bottom_rows"},
+            {"op": "remove_sparse_top_rows"},
+            {"op": "promote_headers", "promote_all_scalars": True},
+        ]
+        dialog = self.make(steps=steps)
+
+        # Right-click row 0: Delete disabled, Move after disabled
+        _, actions_row0 = dialog._build_step_context_menu(0)
+        self.assertFalse(actions_row0["Delete"].isEnabled())
+        self.assertFalse(actions_row0["Move after"].isEnabled())
+        self.assertFalse(actions_row0["Delete Until End"].isEnabled())
+
+        # Right-click row 1: Move before disabled
+        _, actions_row1 = dialog._build_step_context_menu(1)
+        self.assertFalse(actions_row1["Move before"].isEnabled())
+        self.assertTrue(actions_row1["Delete"].isEnabled())
+        self.assertTrue(actions_row1["Move after"].isEnabled())
+
+    def test_delete_steps_until_end_stops_if_remove_refuses(self) -> None:
+        dialog = self.make_with_three_steps()
+        self.assertEqual(len(dialog._steps), 3)
+
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes), \
+             patch.object(dialog, "_remove_step") as mock_remove:
+            dialog._delete_steps_until_end(1)
+            # Guard against infinite loop stopped execution and called _remove_step once
+            self.assertEqual(mock_remove.call_count, 1)
+
+        self.assertEqual(len(dialog._steps), 3)
+
+    def test_show_step_context_menu_dispatches_delete_action(self) -> None:
+        dialog = self.make_with_three_steps()
+        self.assertEqual(len(dialog._steps), 3)
+
+        def choose_delete(self, *args, **kwargs):
+            return next((act for act in self.actions() if act.text() == "Delete"), None)
+
+        class CustomMenu(QMenu):
+            def exec(self, *a, **k):
+                return choose_delete(self, *a, **k)
+
+        real_init = QMenu.__init__
+        def custom_init(self, *args, **kwargs):
+            real_init(self, *args, **kwargs)
+            self.exec = lambda *a, **k: choose_delete(self, *a, **k)
+
+        with patch.object(QMenu, "exec", choose_delete), \
+             patch.object(QMenu, "__init__", custom_init), \
+             patch("analytics_studio.local_table_dialogs.QMenu", CustomMenu):
+            item = dialog.step_list.item(1)
+            pos = dialog.step_list.visualItemRect(item).center()
+            dialog._show_step_context_menu(pos)
+
+        self.assertEqual(len(dialog._steps), 2)
+        self.assertEqual([s["op"] for s in dialog._steps], ["sort_rows", "remove_column"])

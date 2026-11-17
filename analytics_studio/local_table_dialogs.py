@@ -9208,6 +9208,7 @@ class TransformDataDialog(QDialog):
         if not 0 <= index < len(self._steps):
             return menu, actions
 
+        self.step_list.setCurrentRow(index)
         step = self._steps[index]
 
         # 1. Edit Settings
@@ -9224,10 +9225,16 @@ class TransformDataDialog(QDialog):
 
         # 3. Delete
         delete_action = menu.addAction("Delete")
+        delete_action.setEnabled(self.remove_button.isEnabled())
         actions["Delete"] = delete_action
 
         # 4. Delete Until End
         delete_until_end_action = menu.addAction("Delete Until End")
+        can_delete_until_end = self.remove_button.isEnabled() and not any(
+            s["op"] == "m_sparse_boundary_helper"
+            for s in self._steps[index:]
+        )
+        delete_until_end_action.setEnabled(can_delete_until_end)
         actions["Delete Until End"] = delete_until_end_action
 
         # 5. Insert Step After
@@ -9238,12 +9245,12 @@ class TransformDataDialog(QDialog):
 
         # 6. Move before
         move_before_action = menu.addAction("Move before")
-        move_before_action.setEnabled(index > 0)
+        move_before_action.setEnabled(self.up_button.isEnabled())
         actions["Move before"] = move_before_action
 
         # 7. Move after
         move_after_action = menu.addAction("Move after")
-        move_after_action.setEnabled(index < len(self._steps) - 1)
+        move_after_action.setEnabled(self.down_button.isEnabled())
         actions["Move after"] = move_after_action
 
         # 8. Extract Previous
@@ -9275,8 +9282,11 @@ class TransformDataDialog(QDialog):
         if reply != QMessageBox.StandardButton.Yes:
             return
         while len(self._steps) > from_index:
+            previous_count = len(self._steps)
             self.step_list.setCurrentRow(len(self._steps) - 1)
             self._remove_step()
+            if len(self._steps) >= previous_count:
+                break
 
     def _show_step_context_menu(self, position: Any) -> None:
         item = self.step_list.itemAt(position)
