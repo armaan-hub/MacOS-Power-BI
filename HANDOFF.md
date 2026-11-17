@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 205-207 shipped as Iteration 282; next VM screen check of the open UX parity risks (user OK needed), then the next ux_backlog items; Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
+**Active agent:** Claude Opus 5.5 (Iterations 283-284 / Tasks 208-214 shipped, Chapter 1 closed and tagged; Chapter 3 open: next a VM screen session for Power BI's Group By and Split dialog output, then ux_backlog; Haiku codes, Sonnet heads review)
 **Branch in use:** main
 **Working tree clean:** yes
 
