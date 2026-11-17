@@ -11,10 +11,15 @@ from typing import Any
 MAX_QUERY_PARAMETERS = 128
 _NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]{0,119}\Z")
 _RESERVED_NAMES = {
-    "source", "and", "as", "each", "else", "error", "false", "if", "in", "is",
-    "let", "meta", "not", "null", "or", "otherwise", "section", "shared",
-    "then", "true", "try", "type",
+    "source", "let", "in", "true", "false", "null", "and", "or",
+    "not", "if", "then", "else",
 }
+# M keywords are lowercase only (M lexical structure), so "Type" and "Error" stay valid names.
+_M_KEYWORDS = frozenset({
+    "and", "as", "each", "else", "error", "false", "if", "in", "is", "let",
+    "meta", "not", "null", "or", "otherwise", "section", "shared", "then",
+    "true", "try", "type",
+})
 QUERY_PARAMETER_TYPES = (
     "text", "whole_number", "decimal_number", "boolean", "date", "datetime",
 )
@@ -39,6 +44,7 @@ def normalize_query_parameter(value: Any) -> dict[str, str]:
         not isinstance(name, str)
         or not _NAME.fullmatch(name)
         or name.casefold() in _RESERVED_NAMES
+        or name in _M_KEYWORDS
     ):
         raise QueryParameterError(
             "Parameter names must be valid M identifiers and cannot use reserved words."
