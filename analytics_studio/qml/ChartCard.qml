@@ -23,7 +23,29 @@ Rectangle {
     property color seriesColor: "#0078D4"
     property bool showDataLabels: false
     property bool showLegend: false
+    property string legendPosition: "top"
+    property bool showTitle: true
+    property real titleFontSize: 14
+    property color titleColor: "#283746"
+    property string titleAlign: "left"
+    property bool showXAxis: true
+    property bool showXTitle: false
+    property bool showYAxis: true
+    property bool showYTitle: false
+    property bool showGridlines: true
+    property color dataLabelColor: "#425466"
+    property bool showBackground: true
+    property color backgroundColor: "#FFFFFF"
+    property real backgroundTransparency: 0
+    property bool showBorder: true
+    property color visualBorderColor: "#d9e0e6"
+    property real visualBorderRadius: 7
     property string seriesLabel: ""
+    property string categoryLabel: ""
+    readonly property bool axisTitleFamily: chartType === "column" || chartType === "lineClusteredColumn"
+            || chartType === "bar" || chartType === "line" || chartType === "area"
+    readonly property int axisTitleLeftPad: axisTitleFamily && showYTitle ? 16 : 0
+    readonly property int axisTitleBottomPad: axisTitleFamily && showXTitle ? 16 : 0
     property string lineSeriesLabel: ""
     property bool selected: false
     property bool filterOnCategory: false
@@ -427,10 +449,10 @@ Rectangle {
     }
     implicitWidth: 330
     implicitHeight: 248
-    radius: 7
-    color: "#ffffff"
-    border.width: selected || activeFocus ? 2 : 1
-    border.color: selected ? "#0078D4" : (activeFocus ? "#718b9e" : "#d9e0e6")
+    radius: root.showBorder ? root.visualBorderRadius : 0
+    color: root.showBackground ? Qt.rgba(root.backgroundColor.r, root.backgroundColor.g, root.backgroundColor.b, 1 - root.backgroundTransparency / 100) : "transparent"
+    border.width: selected || activeFocus ? 2 : (root.showBorder ? 1 : 0)
+    border.color: selected ? "#0078D4" : (activeFocus ? "#718b9e" : (root.showBorder ? root.visualBorderColor : "transparent"))
     Accessible.name: title + " chart"
     Accessible.description: "Activate to select this chart. " + (chartType === "map"
         ? ((mapPoints || []).length + " mapped locations.")
@@ -453,13 +475,21 @@ Rectangle {
         spacing: 8
 
         RowLayout {
+            id: chartTitleRow
+            objectName: "chartTitleRow"
+            visible: root.showTitle
             Layout.fillWidth: true
+            Layout.preferredHeight: visible ? implicitHeight : 0
             Text {
+                id: chartTitleText
+                objectName: "chartTitleText"
+                visible: root.showTitle
                 Layout.fillWidth: true
                 text: root.title
-                color: "#283746"
-                font.pixelSize: 14
+                color: root.titleColor
+                font.pixelSize: root.titleFontSize
                 font.weight: Font.DemiBold
+                horizontalAlignment: root.titleAlign === "center" ? Text.AlignHCenter : (root.titleAlign === "right" ? Text.AlignRight : Text.AlignLeft)
                 elide: Text.ElideRight
             }
             Text {
@@ -470,7 +500,9 @@ Rectangle {
         }
 
         RowLayout {
-            visible: root.showLegend && !root.hasMultiSeriesLegend()
+            id: topLegendRow
+            objectName: "chartLegendTop"
+            visible: root.showLegend && root.legendPosition === "top" && !root.hasMultiSeriesLegend()
                     && root.chartType !== "pie" && root.chartType !== "donut" && root.chartType !== "treemap"
                     && root.chartType !== "scatter" && root.chartType !== "gauge"
                     && root.chartType !== "kpi" && root.chartType !== "map"
@@ -516,14 +548,35 @@ Rectangle {
             onPaint: {
                 const ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                const padLeft = 38
+                const padLeft = 38 + root.axisTitleLeftPad
                 const padRight = root.showDataLabels && root.chartType === "bar" ? 48 : 8
                 const padTop = root.hasMultiSeriesLegend() && root.showLegend
                         ? Math.max(27, root.showDataLabels ? 20 : 0)
                         : (root.showDataLabels ? 20 : 9)
-                const padBottom = 25
+                const padBottom = 25 + root.axisTitleBottomPad
                 const plotW = Math.max(12, width - padLeft - padRight)
                 const plotH = Math.max(12, height - padTop - padBottom)
+                if (root.axisTitleFamily && (root.showXTitle || root.showYTitle)) {
+                    ctx.save()
+                    ctx.fillStyle = "#647382"
+                    ctx.font = "11px sans-serif"
+                    const isBar = root.chartType === "bar"
+                    const xTitleText = isBar ? root.seriesLabel : root.categoryLabel
+                    const yTitleText = isBar ? root.categoryLabel : root.seriesLabel
+                    if (root.showXTitle && xTitleText) {
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "bottom"
+                        ctx.fillText(xTitleText, padLeft + plotW / 2, height - 2, plotW)
+                    }
+                    if (root.showYTitle && yTitleText) {
+                        ctx.translate(9, padTop + plotH / 2)
+                        ctx.rotate(-Math.PI / 2)
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "middle"
+                        ctx.fillText(yTitleText, 0, 0, plotH)
+                    }
+                    ctx.restore()
+                }
                 const values = root.series || []
                 const lineValues = root.lineSeries || []
                 const highlightScatterPoints = root.highlightScatterPoints || []
@@ -537,7 +590,7 @@ Rectangle {
                         maxValue = Math.max(maxValue, Number(lineValues[i].value) || 0)
                 }
 
-                if (root.chartType !== "pie" && root.chartType !== "donut"
+                if (root.showGridlines && root.chartType !== "pie" && root.chartType !== "donut"
                         && root.chartType !== "gauge"
                         && root.chartType !== "kpi"
                         && root.chartType !== "map"
@@ -1565,12 +1618,12 @@ Rectangle {
                                 barH
                             )
                         }
-                        if (i % labelStride === 0) {
+                        if (root.showYAxis && i % labelStride === 0) {
                             ctx.fillStyle = "#647382"
                             ctx.fillText(label, padLeft - 5, y + barH / 2, padLeft - 8)
                         }
                         if (root.showDataLabels) {
-                            ctx.fillStyle = "#425466"
+                            ctx.fillStyle = root.dataLabelColor
                             ctx.textAlign = "left"
                             ctx.textBaseline = "middle"
                             ctx.fillText(
@@ -1615,23 +1668,25 @@ Rectangle {
                                 : (hasHighlights ? "#b8c2cc" : color)
                         ctx.beginPath(); ctx.arc(points[i].x, points[i].y, 3, 0, Math.PI * 2); ctx.fill()
                         if (root.showDataLabels) {
-                            ctx.fillStyle = "#425466"
+                            ctx.fillStyle = root.dataLabelColor
                             ctx.font = "10px sans-serif"
                             ctx.textAlign = "center"
                             ctx.textBaseline = "bottom"
                             ctx.fillText(root.valueLabel(values[i].value), points[i].x, Math.max(10, points[i].y - 5))
                         }
                     }
-                    const labelCount = Math.max(1, Math.min(values.length, Math.floor(plotW / 60)))
-                    ctx.fillStyle = "#647382"
-                    ctx.font = "10px sans-serif"
-                    ctx.textAlign = "center"
-                    ctx.textBaseline = "top"
-                    for (let slot = 0; slot < labelCount; ++slot) {
-                        const index = labelCount === 1
-                            ? values.length - 1
-                            : Math.round(slot * (values.length - 1) / (labelCount - 1))
-                        ctx.fillText(root.axisLabel(values[index].label), points[index].x, padTop + plotH + 5, Math.max(1, plotW / labelCount))
+                    if (root.showXAxis) {
+                        const labelCount = Math.max(1, Math.min(values.length, Math.floor(plotW / 60)))
+                        ctx.fillStyle = "#647382"
+                        ctx.font = "10px sans-serif"
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "top"
+                        for (let slot = 0; slot < labelCount; ++slot) {
+                            const index = labelCount === 1
+                                ? values.length - 1
+                                : Math.round(slot * (values.length - 1) / (labelCount - 1))
+                            ctx.fillText(root.axisLabel(values[index].label), points[index].x, padTop + plotH + 5, Math.max(1, plotW / labelCount))
+                        }
                     }
                 } else {
                     const step = plotW / values.length
@@ -1671,12 +1726,12 @@ Rectangle {
                                 x, padTop + plotH - highlightHeight, barW, highlightHeight
                             )
                         }
-                        if (showLabel[i]) {
+                        if (root.showXAxis && showLabel[i]) {
                             ctx.fillStyle = "#647382"
                             ctx.fillText(labels[i], x + barW / 2, padTop + plotH + 5)
                         }
                         if (root.showDataLabels) {
-                            ctx.fillStyle = "#425466"
+                            ctx.fillStyle = root.dataLabelColor
                             ctx.textAlign = "center"
                             ctx.textBaseline = "bottom"
                             ctx.fillText(root.valueLabel(values[i].value), x + barW / 2, Math.max(10, padTop + plotH - barH - 3))
@@ -1732,6 +1787,45 @@ Rectangle {
             }
             onWidthChanged: requestPaint()
             onHeightChanged: requestPaint()
+        }
+
+        RowLayout {
+            id: bottomLegendRow
+            objectName: "chartLegendBottom"
+            visible: root.showLegend && root.legendPosition === "bottom" && !root.hasMultiSeriesLegend()
+                    && root.chartType !== "pie" && root.chartType !== "donut" && root.chartType !== "treemap"
+                    && root.chartType !== "scatter" && root.chartType !== "gauge"
+                    && root.chartType !== "kpi" && root.chartType !== "map"
+                    && (root.series || []).length > 0
+            Layout.fillWidth: true
+            Layout.preferredHeight: visible ? 14 : 0
+            spacing: 5
+            Rectangle {
+                width: 9
+                height: 9
+                radius: 2
+                color: root.seriesColor
+            }
+            Text {
+                Layout.fillWidth: true
+                text: root.seriesLabel || "Series"
+                color: "#647382"
+                font.pixelSize: 10
+                elide: Text.ElideRight
+            }
+            Rectangle {
+                visible: root.chartType === "lineClusteredColumn"
+                width: visible ? 9 : 0
+                height: 2
+                color: "#C65911"
+            }
+            Text {
+                visible: root.chartType === "lineClusteredColumn"
+                text: root.lineSeriesLabel || "Line"
+                color: "#647382"
+                font.pixelSize: 10
+                elide: Text.ElideRight
+            }
         }
     }
 
@@ -2017,6 +2111,23 @@ Rectangle {
     onSeriesColorChanged: chart.requestPaint()
     onShowDataLabelsChanged: chart.requestPaint()
     onShowLegendChanged: chart.requestPaint()
+    onLegendPositionChanged: chart.requestPaint()
+    onShowTitleChanged: chart.requestPaint()
+    onTitleFontSizeChanged: chart.requestPaint()
+    onTitleColorChanged: chart.requestPaint()
+    onTitleAlignChanged: chart.requestPaint()
+    onShowXAxisChanged: chart.requestPaint()
+    onShowXTitleChanged: chart.requestPaint()
+    onShowYAxisChanged: chart.requestPaint()
+    onShowYTitleChanged: chart.requestPaint()
+    onShowGridlinesChanged: chart.requestPaint()
+    onDataLabelColorChanged: chart.requestPaint()
+    onShowBackgroundChanged: chart.requestPaint()
+    onBackgroundColorChanged: chart.requestPaint()
+    onBackgroundTransparencyChanged: chart.requestPaint()
+    onShowBorderChanged: chart.requestPaint()
+    onVisualBorderColorChanged: chart.requestPaint()
+    onVisualBorderRadiusChanged: chart.requestPaint()
     onChartTypeChanged: chart.requestPaint()
     onEmptyMessageChanged: chart.requestPaint()
     onSelectedChanged: chart.requestPaint()
