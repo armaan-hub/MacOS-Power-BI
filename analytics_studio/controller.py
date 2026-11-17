@@ -2220,17 +2220,129 @@ class StudioController(QObject):
         if not self._selected_visual:
             return []
 
-
         page = self._active_page()
         if not page:
             return []
         visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
         if not visual:
             return []
-            
+
+        v_type = str(visual.get("type", ""))
+        non_chart_types = {"button", "text_box", "image", "shape", "card", "table", "matrix"}
+        is_chart = v_type not in non_chart_types and not v_type.startswith("shape:")
+
+        if is_chart:
+            # Chart visuals: Visual tab and General tab with toggle keys
+            visual_tab_groups = [
+                {
+                    "tab": "Visual",
+                    "name": "X-axis",
+                    "toggleKey": "show_x_axis",
+                    "toggleValue": bool(visual.get("show_x_axis", True)),
+                    "properties": [
+                        {"key": "show_x_title", "label": "Title", "type": "boolean", "value": bool(visual.get("show_x_title", False))},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Y-axis",
+                    "toggleKey": "show_y_axis",
+                    "toggleValue": bool(visual.get("show_y_axis", True)),
+                    "properties": [
+                        {"key": "show_y_title", "label": "Title", "type": "boolean", "value": bool(visual.get("show_y_title", False))},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Gridlines",
+                    "toggleKey": "show_gridlines",
+                    "toggleValue": bool(visual.get("show_gridlines", True)),
+                    "properties": [],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Colors",
+                    "toggleKey": None,
+                    "toggleValue": False,
+                    "properties": [
+                        {"key": "color", "label": "Color", "type": "color", "value": visual.get("color", "#0078D4")},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Data labels",
+                    "toggleKey": "show_data_labels",
+                    "toggleValue": bool(visual.get("show_data_labels", False)),
+                    "properties": [
+                        {"key": "data_label_color", "label": "Color", "type": "color", "value": visual.get("data_label_color", "#425466")},
+                    ],
+                },
+                {
+                    "tab": "Visual",
+                    "name": "Legend",
+                    "toggleKey": "show_legend",
+                    "toggleValue": bool(visual.get("show_legend", False)),
+                    "properties": [
+                        {"key": "legend_position", "label": "Position", "type": "choice", "value": visual.get("legend_position", "top"), "options": ["top", "bottom"]},
+                    ],
+                },
+            ]
+
+            general_tab_groups = [
+                {
+                    "tab": "General",
+                    "name": "Properties",
+                    "toggleKey": None,
+                    "toggleValue": False,
+                    "properties": [
+                        {"key": "x", "label": "X Position", "type": "number", "value": visual.get("x", 10)},
+                        {"key": "y", "label": "Y Position", "type": "number", "value": visual.get("y", 10)},
+                        {"key": "width", "label": "Width", "type": "number", "value": visual.get("width", 300)},
+                        {"key": "height", "label": "Height", "type": "number", "value": visual.get("height", 200)},
+                    ],
+                },
+                {
+                    "tab": "General",
+                    "name": "Title",
+                    "toggleKey": "show_title",
+                    "toggleValue": bool(visual.get("show_title", True)),
+                    "properties": [
+                        {"key": "title", "label": "Text", "type": "string", "value": visual.get("title", "")},
+                        {"key": "title_font_size", "label": "Font size", "type": "number", "value": visual.get("title_font_size", 14)},
+                        {"key": "title_color", "label": "Font color", "type": "color", "value": visual.get("title_color", "#283746")},
+                        {"key": "title_align", "label": "Alignment", "type": "choice", "value": visual.get("title_align", "left"), "options": ["left", "center", "right"]},
+                    ],
+                },
+                {
+                    "tab": "General",
+                    "name": "Effects > Background",
+                    "toggleKey": "show_background",
+                    "toggleValue": bool(visual.get("show_background", True)),
+                    "properties": [
+                        {"key": "background_color", "label": "Color", "type": "color", "value": visual.get("background_color", "#FFFFFF")},
+                        {"key": "background_transparency", "label": "Transparency", "type": "number", "value": visual.get("background_transparency", 0)},
+                    ],
+                },
+                {
+                    "tab": "General",
+                    "name": "Effects > Visual border",
+                    "toggleKey": "show_border",
+                    "toggleValue": bool(visual.get("show_border", True)),
+                    "properties": [
+                        {"key": "border_color", "label": "Color", "type": "color", "value": visual.get("border_color", "#d9e0e6")},
+                        {"key": "border_radius", "label": "Rounded corners px", "type": "number", "value": visual.get("border_radius", 7)},
+                    ],
+                },
+            ]
+            return visual_tab_groups + general_tab_groups
+
+        # Non-chart visuals: put under General, keep type-specific group and existing properties
         groups = [
             {
+                "tab": "General",
                 "name": "General",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "title", "label": "Title Text", "type": "string", "value": visual.get("title", "")},
                     {"key": "x", "label": "X Position", "type": "number", "value": visual.get("x", 10)},
@@ -2240,7 +2352,10 @@ class StudioController(QObject):
                 ]
             },
             {
+                "tab": "General",
                 "name": "Data Colors",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "color", "label": "Primary Color", "type": "color", "value": visual.get("color", "#0078D4")},
                     {"key": "show_data_labels", "label": "Data Labels", "type": "boolean", "value": visual.get("show_data_labels", False)},
@@ -2248,7 +2363,10 @@ class StudioController(QObject):
                 ]
             },
             {
+                "tab": "General",
                 "name": "Action",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "actionUrl", "label": "Web URL", "type": "string", "value": visual.get("actionUrl", "")},
                     {"key": "text", "label": "Button Text", "type": "string", "value": visual.get("text", "")},
@@ -2257,14 +2375,20 @@ class StudioController(QObject):
         ]
         if visual.get("type") == "text_box":
             groups.insert(1, {
+                "tab": "General",
                 "name": "Text",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "text", "label": "Text", "type": "string", "value": visual.get("text", "")},
                 ],
             })
         if visual.get("type") == "image":
             groups.insert(1, {
+                "tab": "General",
                 "name": "Image",
+                "toggleKey": None,
+                "toggleValue": False,
                 "properties": [
                     {"key": "image_path", "label": "Image path", "type": "string", "value": visual.get("image_path", "")},
                 ],
@@ -13184,7 +13308,7 @@ class StudioController(QObject):
             else:
                 y = min(710.0, max(0.0, float(visual.get("y", 0))))
                 normalized = min(max(10.0, normalized), 720.0 - y)
-        elif property_key == "color":
+        elif property_key in {"color", "title_color", "data_label_color", "background_color", "border_color"}:
             normalized = str(value)
             if (
                 len(normalized) != 7
@@ -13193,11 +13317,61 @@ class StudioController(QObject):
             ):
                 self._set_status("Enter a color in #RRGGBB format.")
                 return
-        elif property_key in {"show_data_labels", "show_legend"}:
+        elif property_key in {
+            "show_data_labels", "show_legend", "show_title",
+            "show_x_axis", "show_x_title", "show_y_axis", "show_y_title",
+            "show_gridlines", "show_background", "show_border"
+        }:
             if type(value) is not bool:
                 self._set_status("Choose whether to show this visual element.")
                 return
             normalized = value
+        elif property_key == "title_font_size":
+            if isinstance(value, bool):
+                self._set_status("Enter a font size between 8 and 40.")
+                return
+            try:
+                normalized = float(value)
+            except (TypeError, ValueError):
+                self._set_status("Enter a font size between 8 and 40.")
+                return
+            if not math.isfinite(normalized) or not (8 <= normalized <= 40):
+                self._set_status("Enter a font size between 8 and 40.")
+                return
+        elif property_key == "title_align":
+            normalized = str(value)
+            if normalized not in {"left", "center", "right"}:
+                self._set_status("Choose an alignment of left, center, or right.")
+                return
+        elif property_key == "legend_position":
+            normalized = str(value)
+            if normalized not in {"top", "bottom"}:
+                self._set_status("Choose a legend position of top or bottom.")
+                return
+        elif property_key == "background_transparency":
+            if isinstance(value, bool):
+                self._set_status("Enter a transparency between 0 and 100.")
+                return
+            try:
+                normalized = float(value)
+            except (TypeError, ValueError):
+                self._set_status("Enter a transparency between 0 and 100.")
+                return
+            if not math.isfinite(normalized) or not (0 <= normalized <= 100):
+                self._set_status("Enter a transparency between 0 and 100.")
+                return
+        elif property_key == "border_radius":
+            if isinstance(value, bool):
+                self._set_status("Enter a border radius between 0 and 30.")
+                return
+            try:
+                normalized = float(value)
+            except (TypeError, ValueError):
+                self._set_status("Enter a border radius between 0 and 30.")
+                return
+            if not math.isfinite(normalized) or not (0 <= normalized <= 30):
+                self._set_status("Enter a border radius between 0 and 30.")
+                return
         elif property_key == "text" and visual.get("type") in {"button", "text_box"}:
             normalized = str(value)
         elif property_key == "actionUrl" and visual.get("type") == "button":

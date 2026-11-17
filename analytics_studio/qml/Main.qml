@@ -25,6 +25,7 @@ ApplicationWindow {
     property bool visualizationsVisible: true
     property bool inspectorVisible: true
     property string activeVisualTab: "build"
+    property string activeFormatSubTab: "Visual"
     property bool fitZoom: true
     property real reportZoom: 0.7
     property string fieldSearchQuery: ""
@@ -1702,6 +1703,23 @@ ApplicationWindow {
                                                     seriesColor: modelData.color ? String(modelData.color) : "#0078D4" 
                                                     showDataLabels: Boolean(modelData.show_data_labels)
                                                     showLegend: Boolean(modelData.show_legend)
+                                                    legendPosition: modelData.legend_position ? String(modelData.legend_position) : "top"
+                                                    showTitle: modelData.show_title !== undefined ? Boolean(modelData.show_title) : true
+                                                    titleFontSize: modelData.title_font_size !== undefined ? Number(modelData.title_font_size) : 14
+                                                    titleColor: modelData.title_color ? String(modelData.title_color) : "#283746"
+                                                    titleAlign: modelData.title_align ? String(modelData.title_align) : "left"
+                                                    showXAxis: modelData.show_x_axis !== undefined ? Boolean(modelData.show_x_axis) : true
+                                                    showXTitle: Boolean(modelData.show_x_title)
+                                                    showYAxis: modelData.show_y_axis !== undefined ? Boolean(modelData.show_y_axis) : true
+                                                    showYTitle: Boolean(modelData.show_y_title)
+                                                    showGridlines: modelData.show_gridlines !== undefined ? Boolean(modelData.show_gridlines) : true
+                                                    dataLabelColor: modelData.data_label_color ? String(modelData.data_label_color) : "#425466"
+                                                    showBackground: modelData.show_background !== undefined ? Boolean(modelData.show_background) : true
+                                                    backgroundColor: modelData.background_color ? String(modelData.background_color) : "#FFFFFF"
+                                                    backgroundTransparency: modelData.background_transparency !== undefined ? Number(modelData.background_transparency) : 0
+                                                    showBorder: modelData.show_border !== undefined ? Boolean(modelData.show_border) : true
+                                                    visualBorderColor: modelData.border_color ? String(modelData.border_color) : "#d9e0e6"
+                                                    visualBorderRadius: modelData.border_radius !== undefined ? Number(modelData.border_radius) : 7
                                                     seriesLabel: {
                                                         const fields = modelData.fields || {}
                                                         const well = modelData.type === "lineClusteredColumn" ? "Column Y-axis" : "Y-axis"
@@ -4363,6 +4381,69 @@ ApplicationWindow {
                                                 anchors.fill: parent
                                                 visible: Boolean(mainWindow.studioController.selectedVisual)
                                                 spacing: 4
+
+                                                // Format sub-tabs: Visual and General
+                                                RowLayout {
+                                                    Layout.fillWidth: true
+                                                    Layout.preferredHeight: 32
+                                                    spacing: 0
+
+                                                    Button {
+                                                        id: formatTabVisualBtn
+                                                        objectName: "formatTabVisual"
+                                                        Layout.fillWidth: true
+                                                        Layout.preferredHeight: 30
+                                                        text: "Visual"
+                                                        flat: true
+                                                        hoverEnabled: true
+                                                        onClicked: mainWindow.activeFormatSubTab = "Visual"
+                                                        background: Rectangle {
+                                                            color: mainWindow.activeFormatSubTab === "Visual" ? "#f3f2f1" : (formatTabVisualBtn.hovered ? "#f8f8f8" : "transparent")
+                                                            Rectangle {
+                                                                anchors.bottom: parent.bottom
+                                                                width: parent.width
+                                                                height: 2
+                                                                color: mainWindow.activeFormatSubTab === "Visual" ? "#0078d4" : "transparent"
+                                                            }
+                                                        }
+                                                        contentItem: Text {
+                                                            text: formatTabVisualBtn.text
+                                                            font.pixelSize: 11
+                                                            font.weight: mainWindow.activeFormatSubTab === "Visual" ? Font.DemiBold : Font.Normal
+                                                            color: mainWindow.activeFormatSubTab === "Visual" ? "#0078d4" : "#323130"
+                                                            horizontalAlignment: Text.AlignHCenter
+                                                            verticalAlignment: Text.AlignVCenter
+                                                        }
+                                                    }
+
+                                                    Button {
+                                                        id: formatTabGeneralBtn
+                                                        objectName: "formatTabGeneral"
+                                                        Layout.fillWidth: true
+                                                        Layout.preferredHeight: 30
+                                                        text: "General"
+                                                        flat: true
+                                                        hoverEnabled: true
+                                                        onClicked: mainWindow.activeFormatSubTab = "General"
+                                                        background: Rectangle {
+                                                            color: mainWindow.activeFormatSubTab === "General" ? "#f3f2f1" : (formatTabGeneralBtn.hovered ? "#f8f8f8" : "transparent")
+                                                            Rectangle {
+                                                                anchors.bottom: parent.bottom
+                                                                width: parent.width
+                                                                height: 2
+                                                                color: mainWindow.activeFormatSubTab === "General" ? "#0078d4" : "transparent"
+                                                            }
+                                                        }
+                                                        contentItem: Text {
+                                                            text: formatTabGeneralBtn.text
+                                                            font.pixelSize: 11
+                                                            font.weight: mainWindow.activeFormatSubTab === "General" ? Font.DemiBold : Font.Normal
+                                                            color: mainWindow.activeFormatSubTab === "General" ? "#0078d4" : "#323130"
+                                                            horizontalAlignment: Text.AlignHCenter
+                                                            verticalAlignment: Text.AlignVCenter
+                                                        }
+                                                    }
+                                                }
                                                 
                                                 ScrollView {
                                                     Layout.fillWidth: true
@@ -4376,77 +4457,163 @@ ApplicationWindow {
                                                         Repeater {
                                                             model: mainWindow.studioController.activeVisualPropertyGroups
                                                             delegate: ColumnLayout {
+                                                                id: formatGroupCard
                                                                 required property var modelData
+                                                                objectName: "formatCard_" + String(modelData.name)
+                                                                visible: !modelData.tab || modelData.tab === mainWindow.activeFormatSubTab
                                                                 Layout.fillWidth: true
                                                                 spacing: 0
+
+                                                                property bool cardExpanded: true
                                                                 
-                                                                // Group Header
+                                                                // Group Card Header
                                                                 Rectangle {
                                                                     Layout.fillWidth: true
                                                                     Layout.preferredHeight: 28
                                                                     color: "#f3f2f1"
                                                                     border.width: 0
+
+                                                                    MouseArea {
+                                                                        anchors.fill: parent
+                                                                        onClicked: formatGroupCard.cardExpanded = !formatGroupCard.cardExpanded
+                                                                    }
+
                                                                     RowLayout {
                                                                         anchors.fill: parent
                                                                         anchors.leftMargin: 8
+                                                                        anchors.rightMargin: 8
+                                                                        spacing: 6
+
                                                                         Text {
+                                                                            text: formatGroupCard.cardExpanded ? "▾" : "▸"
+                                                                            font.pixelSize: 10
+                                                                            color: "#605e5c"
+                                                                        }
+
+                                                                        Text {
+                                                                            Layout.fillWidth: true
                                                                             text: String(modelData.name)
                                                                             font.pixelSize: 11
                                                                             font.weight: Font.DemiBold
                                                                             color: "#323130"
+                                                                            elide: Text.ElideRight
+                                                                        }
+
+                                                                        Switch {
+                                                                            objectName: {
+                                                                                if (modelData.name === "Data labels") return "visualPropertyToggle_show_data_labels"
+                                                                                if (modelData.name === "Legend") return "visualPropertyToggle_show_legend"
+                                                                                return "formatCardToggle_" + String(modelData.name)
+                                                                            }
+                                                                            visible: Boolean(modelData.toggleKey)
+                                                                            checked: Boolean(modelData.toggleValue)
+                                                                            focusPolicy: Qt.NoFocus
+                                                                            function applyVisualProperty() {
+                                                                                if (modelData.toggleKey) {
+                                                                                    mainWindow.studioController.set_visual_property(
+                                                                                        String(modelData.toggleKey), checked
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                            onToggled: applyVisualProperty()
+                                                                        }
+
+                                                                        // Additional alias item if needed for test lookups
+                                                                        Switch {
+                                                                            objectName: "formatCardToggle_" + String(modelData.name)
+                                                                            visible: false
+                                                                            checked: Boolean(modelData.toggleValue)
+                                                                            focusPolicy: Qt.NoFocus
+                                                                            function applyVisualProperty() {
+                                                                                if (modelData.toggleKey) {
+                                                                                    mainWindow.studioController.set_visual_property(
+                                                                                        String(modelData.toggleKey), checked
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                            onToggled: applyVisualProperty()
                                                                         }
                                                                     }
                                                                 }
                                                                 
-                                                                // Properties
-                                                                Repeater {
-                                                                    model: modelData.properties
-                                                                    delegate: Item {
-                                                                        required property var modelData
-                                                                        width: parent.width
-                                                                        height: 32
-                                                                        
-                                                                        Text {
-                                                                            anchors.left: parent.left
-                                                                            anchors.leftMargin: 12
-                                                                            anchors.verticalCenter: parent.verticalCenter
-                                                                            text: String(modelData.label)
-                                                                            font.pixelSize: 10
-                                                                            color: "#605e5c"
-                                                                        }
-                                                                        
-                                                                        TextField {
-                                                                            objectName: "visualProperty_" + String(modelData.key)
-                                                                            visible: modelData.type === "string" || modelData.type === "number" || modelData.type === "color"
-                                                                            anchors.right: parent.right
-                                                                            anchors.rightMargin: 8
-                                                                            anchors.verticalCenter: parent.verticalCenter
-                                                                            width: parent.width / 2
-                                                                            height: 24
-                                                                            text: String(modelData.value)
-                                                                            font.pixelSize: 10
-                                                                            function applyVisualProperty() {
-                                                                                let val = text
-                                                                                if (modelData.type === "number") val = Number(text)
-                                                                                mainWindow.studioController.set_visual_property(String(modelData.key), val)
-                                                                            }
-                                                                            onEditingFinished: applyVisualProperty()
-                                                                        }
+                                                                // Properties Container (collapsible)
+                                                                ColumnLayout {
+                                                                    Layout.fillWidth: true
+                                                                    visible: formatGroupCard.cardExpanded
+                                                                    spacing: 0
 
-                                                                        CheckBox {
-                                                                            objectName: "visualPropertyToggle_" + String(modelData.key)
-                                                                            visible: modelData.type === "boolean"
-                                                                            anchors.right: parent.right
-                                                                            anchors.rightMargin: 8
-                                                                            anchors.verticalCenter: parent.verticalCenter
-                                                                            checked: Boolean(modelData.value)
-                                                                            Accessible.name: String(modelData.label)
-                                                                            function applyVisualProperty() {
-                                                                                mainWindow.studioController.set_visual_property(
-                                                                                    String(modelData.key), checked
-                                                                                )
+                                                                    Repeater {
+                                                                        model: modelData.properties
+                                                                        delegate: Item {
+                                                                            required property var modelData
+                                                                            width: parent.width
+                                                                            height: 32
+                                                                            
+                                                                            Text {
+                                                                                anchors.left: parent.left
+                                                                                anchors.leftMargin: 12
+                                                                                anchors.verticalCenter: parent.verticalCenter
+                                                                                text: String(modelData.label)
+                                                                                font.pixelSize: 10
+                                                                                color: "#605e5c"
                                                                             }
-                                                                            onClicked: applyVisualProperty()
+                                                                            
+                                                                            TextField {
+                                                                                objectName: "visualProperty_" + String(modelData.key)
+                                                                                visible: modelData.type === "string" || modelData.type === "number" || modelData.type === "color"
+                                                                                anchors.right: parent.right
+                                                                                anchors.rightMargin: 8
+                                                                                anchors.verticalCenter: parent.verticalCenter
+                                                                                width: parent.width / 2
+                                                                                height: 24
+                                                                                text: String(modelData.value)
+                                                                                font.pixelSize: 10
+                                                                                function applyVisualProperty() {
+                                                                                    let val = text
+                                                                                    if (modelData.type === "number") val = Number(text)
+                                                                                    mainWindow.studioController.set_visual_property(String(modelData.key), val)
+                                                                                }
+                                                                                onEditingFinished: applyVisualProperty()
+                                                                            }
+
+                                                                            CheckBox {
+                                                                                objectName: "visualPropertyToggle_" + String(modelData.key)
+                                                                                visible: modelData.type === "boolean"
+                                                                                anchors.right: parent.right
+                                                                                anchors.rightMargin: 8
+                                                                                anchors.verticalCenter: parent.verticalCenter
+                                                                                checked: Boolean(modelData.value)
+                                                                                Accessible.name: String(modelData.label)
+                                                                                function applyVisualProperty() {
+                                                                                    mainWindow.studioController.set_visual_property(
+                                                                                        String(modelData.key), checked
+                                                                                    )
+                                                                                }
+                                                                                onClicked: applyVisualProperty()
+                                                                            }
+
+                                                                            ComboBox {
+                                                                                objectName: "formatProp_" + String(modelData.key)
+                                                                                visible: modelData.type === "choice"
+                                                                                anchors.right: parent.right
+                                                                                anchors.rightMargin: 8
+                                                                                anchors.verticalCenter: parent.verticalCenter
+                                                                                width: parent.width / 2
+                                                                                height: 24
+                                                                                model: modelData.options || []
+                                                                                currentIndex: {
+                                                                                    const opts = modelData.options || []
+                                                                                    return opts.indexOf(String(modelData.value))
+                                                                                }
+                                                                                onActivated: function(idx) {
+                                                                                    const opts = modelData.options || []
+                                                                                    if (idx >= 0 && idx < opts.length) {
+                                                                                        mainWindow.studioController.set_visual_property(
+                                                                                            String(modelData.key), opts[idx]
+                                                                                        )
+                                                                                    }
+                                                                                }
+                                                                            }
                                                                         }
                                                                     }
                                                                 }

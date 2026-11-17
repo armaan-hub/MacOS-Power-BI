@@ -146,6 +146,13 @@ def test_format_tab_commits_general_visual_property_edits(tmp_path: Path) -> Non
         )
         format_tab.click()
         app.processEvents()
+        # Task 189 (2026-11-17): Power BI opens Format on the Visual tab; Title is on General.
+        format_general_tab = next(
+            item for item in items(window.contentItem())
+            if item.objectName() == "formatTabGeneral"
+        )
+        format_general_tab.click()
+        app.processEvents()
         title_field = next(
             item for item in items(window.contentItem())
             if item.objectName() == "visualProperty_title" and item.isVisible()
