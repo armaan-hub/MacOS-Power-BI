@@ -152,7 +152,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
             self.assertEqual(validate_function_result("whole_number", value), value)
             self.assertEqual(validate_typed_scalar("whole_number", value), value)
         for value in (minimum - 1, maximum + 1):
-            with self.subTest(value=value):
+            with self.subTest(value=str(value)):
                 for validate in (
                     lambda: coerce_function_argument("whole_number", value),
                     lambda: validate_function_result("whole_number", value),
