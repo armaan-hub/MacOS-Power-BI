@@ -291,6 +291,20 @@ _GROUP_COLUMN_OPERATIONS = {
     "max",
     "count_distinct_values",
 }
+# Optional third element of a Table.Group aggregation (Task 216). Stored exactly as
+# Power BI's Group By dialog writes it; matched case-insensitively.
+GROUP_AGGREGATION_M_TYPES = (
+    "Int64.Type",
+    "type number",
+    "type nullable number",
+    "type text",
+    "type nullable text",
+    "Number.Type",
+    "Text.Type",
+    "Currency.Type",
+    "type any",
+)
+GROUP_AGGREGATION_M_TYPES_FOLDED = {item.casefold(): item for item in GROUP_AGGREGATION_M_TYPES}
 _PIVOT_AGGREGATIONS = {
     "none",
     "count_all",
@@ -830,11 +844,19 @@ def validate_steps(
                     raise TransformationError(
                         f"Aggregation {aggregate_index} in step {index} has an unsupported operation."
                     )
-                if set(aggregate) != expected_fields or any(
+                # "m_type" is optional (Task 216): the M type Power BI writes as the third element.
+                optional_fields = set(aggregate) - expected_fields
+                if not optional_fields <= {"m_type"} or not expected_fields <= set(aggregate) or any(
                     not isinstance(value, str) for value in aggregate.values()
                 ):
                     raise TransformationError(
                         f"Aggregation {aggregate_index} in step {index} has missing or invalid fields."
+                    )
+                if "m_type" in aggregate and (
+                    aggregate["m_type"].strip().casefold() not in GROUP_AGGREGATION_M_TYPES_FOLDED
+                ):
+                    raise TransformationError(
+                        f"Aggregation {aggregate_index} in step {index} has an unsupported M type."
                     )
                 new_name = aggregate["new_name"].strip()
                 if not new_name:
@@ -2072,13 +2094,9 @@ def column_types_after_steps(
                 operation = aggregate["operation"]
                 if operation in _GROUP_ROW_OPERATIONS or operation == "count_distinct_values":
                     aggregate_type = "whole_number"
-                elif operation in {"average", "median"}:
+                elif operation in {"sum", "average", "median"}:
+                    # Task 216: Power BI's Sum/Average/Median give a Decimal Number column.
                     aggregate_type = "decimal_number"
-                elif operation == "sum":
-                    source_type = previous_types.get(aggregate["column"], "text")
-                    aggregate_type = (
-                        "whole_number" if source_type == "whole_number" else "decimal_number"
-                    )
                 else:
                     aggregate_type = previous_types.get(aggregate["column"], "text")
                 types[aggregate["new_name"]] = aggregate_type

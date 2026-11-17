@@ -2511,6 +2511,7 @@ class GroupByDialog(QDialog):
                     new_name=str(agg.get("new_name", "")),
                     operation=str(agg.get("operation", "count_rows")),
                     column=str(agg.get("column", "")),
+                    m_type=agg.get("m_type"),
                 )
         else:
             self.basic_radio.setChecked(True)
@@ -2642,6 +2643,7 @@ class GroupByDialog(QDialog):
         new_name: str = "",
         operation: str = "count_rows",
         column: str = "",
+        m_type: str | None = None,
     ) -> dict[str, Any]:
         i = len(self._agg_rows)
         row_widget = QWidget(self._agg_rows_container)
@@ -2695,6 +2697,10 @@ class GroupByDialog(QDialog):
             "op_combo": op_combo,
             "col_combo": col_combo,
             "menu_button": menu_button,
+            # Task 216: a stored M type is kept only while the loaded operation and column are unchanged.
+            "m_type": m_type,
+            "loaded_operation": operation,
+            "loaded_column": column,
         }
         self._agg_rows.append(row_data)
         self._agg_rows_layout.addWidget(row_widget)
@@ -2815,6 +2821,11 @@ class GroupByDialog(QDialog):
             }
             if op not in {"count_rows", "count_distinct_rows"}:
                 agg["column"] = row_data["col_combo"].currentText().strip()
+            # Task 216: keep a loaded M type only when this row is still the loaded operation and column.
+            if row_data.get("m_type") and op == row_data.get("loaded_operation") and (
+                agg.get("column", "") == row_data.get("loaded_column", "")
+            ):
+                agg["m_type"] = row_data["m_type"]
             aggregations.append(agg)
 
         return {
