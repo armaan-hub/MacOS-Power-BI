@@ -4,6 +4,11 @@
     PYTHONPATH=. python tools/parity_check.py --tests    # ... plus the pytest suite and the real-app run (tools/app_smoke.py)
     PYTHONPATH=. python tools/parity_check.py --accept   # lock every item that matches now (do this after a verified slice)
     PYTHONPATH=. python tools/parity_check.py --freeze   # re-ask Power BI (VM + Power BI Desktop open) for the DAX batteries
+    PYTHONPATH=. python tools/parity_check.py --sample 20 [--seed 1]   # quick task gate: 20 answers per battery file, read-only
+    PYTHONPATH=. python tools/parity_check.py --only NAME [--sample N] # full replay of the named battery files, others sampled, read-only
+
+A sampled or --only run is read-only: it writes neither PARITY_LEDGER.md nor baseline.json, and it cannot be combined with
+--accept or --freeze.  Its last line is PARITY GATE (SAMPLE) PASSED or FAILED.
 
 Exit code 1 when a locked item stopped matching, any item differs from Power BI, the app crashed on an expression or the
 imported VAT table changed.  Items Power BI answers but the app still refuses are listed as pending work (gap-reject),
@@ -14,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import random
 import re
 import subprocess
 import tempfile
@@ -79,14 +85,37 @@ def status(powerbi: str, ours: str) -> str:
     return "gap-reject" if ours.startswith("LOCAL-REJECT") and not powerbi.startswith("ERR") else "DIFF"
 
 
-def replay_dax() -> list[dict]:
+def _pick(name: str, items: list[dict], sample: int | None, seed: int) -> list[dict]:
+    """A seeded sample of `sample` items, in file order; the whole list when it is None or not larger than the sample."""
+    if sample is None or len(items) <= sample:
+        return items
+    chosen = sorted(random.Random(f"{name}:{seed}").sample(range(len(items)), sample))
+    return [items[i] for i in chosen]
+
+
+def saved_total() -> int:
+    """How many saved Power BI answers exist (DAX batteries plus table reports), sampled or not."""
+    total = 0
+    for name in DAX_BATTERIES:
+        file = PARITY / f"{name}.json"
+        if file.exists():
+            total += len(json.loads(file.read_text())["items"])
+    for spec in TABLES.values():
+        if spec["report"].exists():
+            total += len(json.loads(spec["report"].read_text())["measures"])
+    return total
+
+
+def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None = None) -> list[dict]:
     rows = []
+    full = set(only or [])
     for name in DAX_BATTERIES:
         file = PARITY / f"{name}.json"
         if not file.exists():
             rows.append({"group": name, "expr": "", "powerbi": "", "ours": "", "status": "NOT-FROZEN", "id": name})
             continue
-        for item in json.loads(file.read_text())["items"]:
+        items = json.loads(file.read_text())["items"]
+        for item in _pick(name, items, None if name in full else sample, seed):
             ours = dax.local(item["expr"])
             rows.append({"group": name, "expr": item["expr"], "powerbi": item["powerbi"], "ours": ours,
                          "status": status(item["powerbi"], ours), "id": f"{name}:{item['expr']}"})
@@ -211,7 +240,21 @@ def main() -> int:
     parser.add_argument("--freeze", action="store_true", help="re-ask the live Power BI for the DAX batteries")
     parser.add_argument("--accept", action="store_true", help="lock every item that matches now")
     parser.add_argument("--tests", action="store_true", help="also run pytest and tools/app_smoke.py")
+    parser.add_argument("--sample", type=int, default=None, metavar="N", help="replay only N seeded answers per battery file (read-only)")
+    parser.add_argument("--seed", type=int, default=0, help="seed for --sample")
+    parser.add_argument("--only", action="append", default=[], metavar="NAME", help="replay this battery file in full (repeatable; read-only)")
     args = parser.parse_args()
+    partial = args.sample is not None or bool(args.only)
+    if partial and (args.accept or args.freeze):
+        print("error: --accept and --freeze need the full replay; they cannot be combined with --sample or --only", file=sys.stderr)
+        return 2
+    if args.sample is not None and args.sample < 1:
+        print("error: --sample needs N >= 1", file=sys.stderr)
+        return 2
+    unknown = [n for n in args.only if n not in DAX_BATTERIES]
+    if unknown:
+        print("error: unknown battery name(s) for --only:", ", ".join(unknown), file=sys.stderr)
+        return 2
     if args.freeze:
         freeze()
     baseline = json.loads(BASELINE.read_text()) if BASELINE.exists() else {"locked": [], "import_digests": {}}
@@ -232,7 +275,7 @@ def main() -> int:
                                      stdout=log, stderr=subprocess.DEVNULL, text=True)
             smoke.log = log
 
-    dax_rows = replay_dax()
+    dax_rows = replay_dax(args.sample, args.seed, args.only)
     table_rows, digests, notes = replay_tables()
     results = dax_rows + table_rows
 
@@ -250,7 +293,7 @@ def main() -> int:
         if old and old != digest:
             failures.append(f"table {name}: imported data changed since it was locked (digest {digest[:12]} vs {old[:12]})")
 
-    if args.accept and not failures:
+    if args.accept and not failures and not partial:
         baseline["locked"] = sorted(locked | {r["id"] for r in results if r["status"] == "match"})
         baseline["import_digests"] = {**baseline.get("import_digests", {}), **digests}
         PARITY.mkdir(exist_ok=True)
@@ -269,8 +312,19 @@ def main() -> int:
             if smoke.returncode or "0 different" not in line or "reopen: True" not in out:
                 failures.append(f"real-app run failed: {line}")
 
-    write_ledger(results, baseline, failures, notes)
     counts = {s: sum(1 for r in results if r["status"] == s) for s in ("match", "gap-reject", "DIFF", "CRASH")}
+    if partial:
+        # read-only: no PARITY_LEDGER.md, no baseline.json
+        print(f"replayed {len(results)} Power BI answers: {counts}; locked {len(locked)}")
+        for n in notes:
+            print("note:", n)
+        for f in failures:
+            print("FAIL:", f)
+        print(f"sampled {len(results)} of {saved_total()} saved answers")
+        print("PARITY GATE (SAMPLE)", "FAILED" if failures else "PASSED")
+        return 1 if failures else 0
+
+    write_ledger(results, baseline, failures, notes)
     print(f"replayed {len(results)} Power BI answers: {counts}; locked {len(locked)}")
     for n in notes:
         print("note:", n)

@@ -2790,9 +2790,12 @@ def _step_to_m_call(
             "Splitter.SplitTextByEachDelimiter("
             f"{{{_m_string(step['delimiter'])}}}, QuoteStyle.None{from_end_arg})"
         )
+        # Task 209: Power BI's answer is a null for a missing part, so no default argument is emitted,
+        # unless the step keeps the old explicit "" default (missing_part == "", v84 migration).
+        default_arg = f", {_m_string('')}" if step.get("missing_part") == "" else ""
         return (
             f"Table.SplitColumn({previous}, {_m_string(step['column'])}, "
-            f"{splitter}, {names}, {_m_string('')})"
+            f"{splitter}, {names}{default_arg})"
         )
     if op == "split_column_by_positions":
         positions = "{" + ", ".join(map(str, step["positions"])) + "}"
@@ -2801,18 +2804,21 @@ def _step_to_m_call(
             for index in range(1, len(step["positions"]) + 1)
         ])
         splitter = f"Splitter.SplitTextByPositions({positions})"
+        # Task 209: no default argument, so a missing part is null.
         return (
             f"Table.SplitColumn({previous}, {_m_string(step['column'])}, "
-            f"{splitter}, {names}, {_m_string('')})"
+            f"{splitter}, {names})"
         )
     if op == "split_column_by_each_delimiter":
         splitter = (
             f"Splitter.SplitTextByDelimiter({_m_string(step['delimiter'])}, QuoteStyle.None)"
         )
         split_count = _m_dynamic_split_count(previous, step["column"], step["delimiter"])
+        # Task 209: no default argument, so a missing part is null, unless missing_part == "" keeps the old default.
+        default_arg = f", {_m_string('')}" if step.get("missing_part") == "" else ""
         return (
             f"Table.SplitColumn({previous}, {_m_string(step['column'])}, "
-            f"{splitter}, {split_count}, {_m_string('')})"
+            f"{splitter}, {split_count}{default_arg})"
         )
     if op == "split_column_to_rows":
         column = step["column"]
@@ -3124,9 +3130,16 @@ def _parse_text_splitter(value: str) -> tuple[str, str, bool]:
 
 
 def _parse_split_column(arguments: list[str], previous_name: str) -> dict[str, Any]:
-    if len(arguments) != 4:
+    # Task 209: Power BI leaves a missing part null, so the default argument is optional now. A script that still
+    # passes the old explicit "" default keeps its blank-text behaviour (flagged with missing_part below).
+    if len(arguments) not in (3, 4):
         raise PowerQueryMScriptError(
-            "Table.SplitColumn supports only literal split shapes with an explicit blank default."
+            "Table.SplitColumn supports only literal split shapes with an optional empty-text default."
+        )
+    legacy_blank_default = len(arguments) == 4
+    if legacy_blank_default and _parse_string(arguments[3]) != "":
+        raise PowerQueryMScriptError(
+            "Table.SplitColumn default must be an empty-text value when one is given."
         )
     column = _parse_string(arguments[0])
     splitter_match = _CALL.fullmatch(arguments[1].strip())
@@ -3148,20 +3161,12 @@ def _parse_split_column(arguments: list[str], previous_name: str) -> dict[str, A
             raise PowerQueryMScriptError(
                 "A positional split must use the local numbered output column names."
             )
-        if _parse_string(arguments[3]) != "":
-            raise PowerQueryMScriptError(
-                "A positional split must use an empty-text default to match the local table model."
-            )
         step = {"op": "split_column_by_positions", "column": column, "positions": positions}
         try:
             return validate_steps([step])[0]
         except TransformationError as exc:
             raise PowerQueryMScriptError(str(exc)) from exc
     split_kind, delimiter, from_end = _parse_text_splitter(arguments[1])
-    if _parse_string(arguments[3]) != "":
-        raise PowerQueryMScriptError(
-            "Table.SplitColumn must use an empty-text default to match the local table model."
-        )
     if split_kind == "first":
         names = _parse_string_list(arguments[2])
         expected = [f"{column}.1", f"{column}.2"]
@@ -3172,17 +3177,22 @@ def _parse_split_column(arguments: list[str], previous_name: str) -> dict[str, A
         step = {"op": "split_column", "column": column, "delimiter": delimiter}
         if from_end:
             step["from_end"] = True
+        if legacy_blank_default:
+            step["missing_part"] = ""
         return step
     expected_count = _m_dynamic_split_count(_m_name_reference(previous_name), column, delimiter)
     if _compact_m_whitespace(expected_count) != _compact_m_whitespace(arguments[2]):
         raise PowerQueryMScriptError(
             "Splitting every delimiter must derive its output width from the current table."
         )
-    return {
+    step = {
         "op": "split_column_by_each_delimiter",
         "column": column,
         "delimiter": delimiter,
     }
+    if legacy_blank_default:
+        step["missing_part"] = ""
+    return step
 
 
 def _m_dynamic_split_count(previous_name: str, column: str, delimiter: str) -> str:

@@ -70,7 +70,8 @@ class SplitColumnEachDelimiterLifecycleTests(unittest.TestCase):
         headers = ["Code.1", "Code.2", "Code.3", "Code.4", "Amount"]
         expected_rows = [
             {"Code.1": "A", "Code.2": "", "Code.3": "C", "Code.4": "", "Amount": 10},
-            {"Code.1": "x", "Code.2": "y", "Code.3": "", "Code.4": "", "Amount": 20},
+            # Task 209: parts a row does not have are null (Power BI answer); real empty cells stay "".
+            {"Code.1": "x", "Code.2": "y", "Code.3": None, "Code.4": None, "Amount": 20},
             {"Code.1": "", "Code.2": "z", "Code.3": "", "Code.4": "", "Amount": 30},
         ]
         self.assertEqual(dialog._preview_candidate.headers, headers)
@@ -101,7 +102,8 @@ class SplitColumnEachDelimiterLifecycleTests(unittest.TestCase):
         self.assertEqual(reopened._headers, ["Code.1", "Code.2", "Amount"])
         self.assertEqual(reopened._rows, [
             {"Code.1": "M", "Code.2": "N", "Amount": 40},
-            {"Code.1": "", "Code.2": "", "Amount": 50},
+            # Task 209: Code.2 is padding for a row with one part, so it is null (Power BI answer).
+            {"Code.1": "", "Code.2": None, "Amount": 50},
         ])
 
         self.source_path.write_text(

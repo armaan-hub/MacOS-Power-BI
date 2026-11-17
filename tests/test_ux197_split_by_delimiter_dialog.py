@@ -121,7 +121,8 @@ class SplitColumnByDelimiterDialogTests(TestCase):
             [{"op": "split_column", "column": "Text", "delimiter": ",", "from_end": True}],
         )
         self.assertEqual(res.headers, ["Text.1", "Text.2"])
-        self.assertEqual(res.rows[0], {"Text.1": "abc", "Text.2": ""})
+        # Task 209: a missing second part is null (Power BI answer), not "".
+        self.assertEqual(res.rows[0], {"Text.1": "abc", "Text.2": None})
 
     def test_split_at_radios_and_rows_columns(self) -> None:
         source = _sample_source()

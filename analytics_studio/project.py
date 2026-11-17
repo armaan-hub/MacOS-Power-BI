@@ -15,7 +15,7 @@ from uuid import uuid4
 
 
 FORMAT_ID = "com.analytics-studio.project"
-FORMAT_VERSION = 83
+FORMAT_VERSION = 84
 MAX_M_SCRIPT_LENGTH = 32_000
 REPORT_THEMES = {
     "Default": {"primary": "#0078D4", "secondary": "#107C71"},
@@ -421,6 +421,8 @@ def validate_project(value: Any) -> dict[str, Any]:
             value = _migrate_v81_to_v82(value)
         elif version == 82:
             value = _migrate_v82_to_v83(value)
+        elif version == 83:
+            value = _migrate_v83_to_v84(value)
         else:
             raise UnsupportedProjectVersion(f"Project format version {version} is not supported.")
         version = value.get("format_version")
@@ -2154,4 +2156,30 @@ def _migrate_v82_to_v83(value: dict[str, Any]) -> dict[str, Any]:
     """Enable saved M sparse-boundary row transformations."""
     migrated = deepcopy(value)
     migrated["format_version"] = 83
+    return migrated
+
+
+def _migrate_v83_to_v84(value: dict[str, Any]) -> dict[str, Any]:
+    """Keep the old explicit "" missing part on saved split steps (Task 209).
+
+    Projects saved before Task 209 replayed a missing split part as "". Steps without a
+    missing_part key get missing_part = "" so they keep that behaviour; new UI steps stay keyless (null).
+    """
+    migrated = deepcopy(value)
+    sources = migrated.get("data_sources")
+    if isinstance(sources, list):
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            steps = source.get("transform_steps")
+            if not isinstance(steps, list):
+                continue
+            for step in steps:
+                if (
+                    isinstance(step, dict)
+                    and step.get("op") in ("split_column", "split_column_by_each_delimiter")
+                    and "missing_part" not in step
+                ):
+                    step["missing_part"] = ""
+    migrated["format_version"] = 84
     return migrated

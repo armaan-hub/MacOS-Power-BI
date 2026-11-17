@@ -55,7 +55,8 @@ class SplitColumnLifecycleTests(unittest.TestCase):
         self.assertEqual(dialog._preview_candidate.rows, [
             {"Id": "A", "Code.1": "dept", "Code.2": "001"},
             {"Id": "B", "Code.1": "west", "Code.2": "lake"},
-            {"Id": "C", "Code.1": "unknown", "Code.2": ""},
+            # Task 209: a missing second part is null (Power BI answer), not "".
+            {"Id": "C", "Code.1": "unknown", "Code.2": None},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
