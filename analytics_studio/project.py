@@ -1067,9 +1067,36 @@ def validate_project(value: Any) -> dict[str, Any]:
             for key in ("shape_map_file", "shape_map_key", "shape_map_object"):
                 if key in visual and not isinstance(visual[key], str):
                     raise ProjectFileError(f"Report visual {key} must be a string.")
-            for key in ("show_data_labels", "show_legend"):
+            for key in ("show_data_labels", "show_legend", "show_title", "show_x_axis", "show_x_title", "show_y_axis", "show_y_title", "show_gridlines", "show_background", "show_border"):
                 if key in visual and type(visual[key]) is not bool:
                     raise ProjectFileError(f"Report visual {key} must be a boolean.")
+            for key in ("title_color", "data_label_color", "background_color", "border_color"):
+                color_val = visual.get(key)
+                if color_val is not None and (
+                    not isinstance(color_val, str)
+                    or len(color_val) != 7
+                    or color_val[0] != "#"
+                    or any(character not in "0123456789abcdefABCDEF" for character in color_val[1:])
+                ):
+                    raise ProjectFileError(f"Report visual {key} must use #RRGGBB hex values.")
+            if "title_font_size" in visual:
+                font_size = visual["title_font_size"]
+                if isinstance(font_size, bool) or not isinstance(font_size, (int, float)) or not (8 <= font_size <= 40):
+                    raise ProjectFileError("Report visual title_font_size must be between 8 and 40.")
+            if "title_align" in visual:
+                if visual["title_align"] not in {"left", "center", "right"}:
+                    raise ProjectFileError("Report visual title_align must be left, center, or right.")
+            if "legend_position" in visual:
+                if visual["legend_position"] not in {"top", "bottom"}:
+                    raise ProjectFileError("Report visual legend_position must be top or bottom.")
+            if "background_transparency" in visual:
+                trans = visual["background_transparency"]
+                if isinstance(trans, bool) or not isinstance(trans, (int, float)) or not (0 <= trans <= 100):
+                    raise ProjectFileError("Report visual background_transparency must be between 0 and 100.")
+            if "border_radius" in visual:
+                radius = visual["border_radius"]
+                if isinstance(radius, bool) or not isinstance(radius, (int, float)) or not (0 <= radius <= 30):
+                    raise ProjectFileError("Report visual border_radius must be between 0 and 30.")
             group_id = visual.get("group_id")
             if group_id is not None:
                 if not isinstance(group_id, str) or not group_id.strip():
