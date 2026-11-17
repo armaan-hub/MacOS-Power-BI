@@ -23,7 +23,8 @@ If the user explicitly tells Claude to code something, that instruction applies 
 
 Codex (OpenAI Codex CLI, free ChatGPT plan, small quota) builds when Antigravity and OpenCode are out of tokens. Claude Opus 5.5 (Team-Planner) starts it headless with `codex exec` on one brief at a time, inside a worktree such as `/Users/armaan/wt-ux-NNN` on branch `antigravity/ux-NNN`. Every Builder limit above applies to Codex. In addition:
 
-- **Read the brief first.** It names the files, lines, step shapes and tests. Do not explore beyond what the brief needs, because the quota is small.
+- **Read the brief first.** It names the files, lines, step shapes and tests. Do not explore beyond what the brief needs, because the quota is small. Do not read `HANDOFF.md`, the work logs or the ledger.
+- **The brief is your permission.** In a worktree that Claude created for you, the "Active agent" line in `HANDOFF.md` and the "Who is active" section below do not apply. Each coder works in its own worktree.
 - **Stay in the worktree.** Never edit the main repo folder, other worktrees, `~/.claude`, or anything outside the worktree.
 - **Tests.** Run only the test files the brief names, with `QT_QPA_PLATFORM=offscreen` and `-p no:cacheprovider`. Never run the full parity gate; Claude runs it.
 - **Existing tests.** Never change, skip or delete an existing test unless the brief says so. If one breaks, stop and report `BLOCKED:` with the test name and the output.
