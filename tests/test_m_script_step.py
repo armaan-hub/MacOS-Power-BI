@@ -206,9 +206,23 @@ class EditorFallbackTests(unittest.TestCase):
             self.assertTrue(m_script_matches_steps(text, "Sales", steps, initial_column_types=INITIAL_TYPES), name)
 
     def test_mapped_call_in_a_refused_form_stays_an_editor_error(self) -> None:
-        for name, script in self.scripts("Grouped", "Pivot", "Unpivot").items():
+        # Task 216: Power BI's typed Group By form is now an editor step (Power BI screen check 2026-11-17)
+        for name, script in self.scripts("Pivot", "Unpivot").items():
             with self.assertRaises(PowerQueryMScriptError, msg=name):
                 parse_m_query_script(query_script(script), "Sales", initial_column_types=INITIAL_TYPES)
+
+    def test_the_typed_group_by_script_is_an_editor_step(self) -> None:
+        # Task 216: Power BI's Group By dialog writes this typed Table.Group text; the editor now maps it.
+        script = self.scripts("Grouped")["Grouped"]
+        names, steps = parse_m_query_script(query_script(script), "Sales", initial_column_types=INITIAL_TYPES)
+        self.assertIsNone(names)
+        self.assertEqual([step["op"] for step in steps], ["group_by"])
+        self.assertEqual(steps[-1]["columns"], ["Region"])
+        self.assertEqual(
+            steps[-1]["aggregations"],
+            [{"new_name": "Total", "operation": "sum", "column": "Units", "m_type": "type number"},
+             {"new_name": "Rows", "operation": "count_rows"}],
+        )
 
     def test_a_literal_source_is_not_a_fallback(self) -> None:
         script = self.scripts("Joined")["Joined"]  # its Source is a literal table: the editor cannot bind it
