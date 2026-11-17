@@ -254,18 +254,18 @@ def equals(a: MValue, b: MValue) -> bool:
         return a.columns == b.columns and len(a.rows) == len(b.rows) and all(
             all(equals(force(x), force(y)) for x, y in zip(ra, rb)) for ra, rb in zip(a.rows, b.rows))
     if kind == "type":
-        # Power BI answer check 2026-11-17: a facet type (Int64.Type) and the table type with its column types are
-        # compared as well (type table [W = Int64.Type] is not type table [W = number])
-        return (a.name == b.name and a.nullable == b.nullable and a.label == b.label
-                and _type_fields_equal(a.fields, b.fields))
+        # Power BI answer check 2026-11-18: a constructed type (type table [a = number], type {number},
+        # type [a = number], a function type) is equal only to the same value; a primitive type (with its
+        # nullability and facet label) compares by value
+        if _is_constructed_type(a) or _is_constructed_type(b):
+            return a is b
+        return a.name == b.name and a.nullable == b.nullable and a.label == b.label
     return a is b
 
 
-def _type_fields_equal(a: Optional[tuple], b: Optional[tuple]) -> bool:
-    if a is None or b is None:
-        return a is None and b is None
-    return len(a) == len(b) and all(
-        x[0] == y[0] and x[2] == y[2] and equals(x[1], y[1]) for x, y in zip(a, b))
+def _is_constructed_type(t: V.TypeValue) -> bool:
+    return (t.fields is not None or t.item is not None or t.signature is not None or t.open_record
+            or t.raw_fields is not None)
 
 
 _COMPARABLE = frozenset({"logical", "number", "text", "date", "time", "datetime", "datetimezone",
