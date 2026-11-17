@@ -1158,6 +1158,24 @@ class _PowerQueryValueFilterDialog(QDialog):
 
 _COLUMN_MENU_VALUE_LIMIT = 1_000
 _NOT_SUPPORTED_YET = "Not supported yet"
+
+# Power BI's Change Type list (header type-icon menu and Power Query ribbon
+# Data Type dropdown): label, convert_type option value, is_locale_op.
+_POWER_BI_CHANGE_TYPE_SPECS: tuple[tuple[str, str | None, bool], ...] = (
+    ("Decimal Number", "decimal_number", False),
+    ("Fixed decimal number", "fixed_decimal", False),
+    ("Whole Number", "whole_number", False),
+    ("Percentage", "percentage", False),
+    ("Date/Time", "datetime", False),
+    ("Date", "date", False),
+    ("Time", "time", False),
+    ("Date/Time/Timezone", "datetime_zone", False),
+    ("Duration", "duration", False),
+    ("Text", "text", False),
+    ("True/False", "boolean", False),
+    ("Binary", "binary", False),
+    ("Using Locale...", "convert_type_using_locale", True),
+)
 _NUMBER_COLUMN_TYPES = frozenset({
     "whole_number", "decimal_number", "fixed_decimal", "decimal", "currency",
     "percentage", "number",
@@ -4510,15 +4528,32 @@ class TransformDataDialog(QDialog):
             ("Edit Source Settings", self._edit_source_settings, True),
             ("Delete Query", self._delete_selected_query, True),
         ]
-        data_type_menu_items = [
-            ("Text", lambda: self._select_ribbon_data_type("text"), True),
-            ("Whole Number", lambda: self._select_ribbon_data_type("whole_number"), True),
-            ("Decimal Number", lambda: self._select_ribbon_data_type("decimal_number"), True),
-            ("Boolean", lambda: self._select_ribbon_data_type("boolean"), True),
-            ("Date", lambda: self._select_ribbon_data_type("date"), True),
-            ("Date/Time", lambda: self._select_ribbon_data_type("datetime"), True),
-            ("Time", lambda: self._select_ribbon_data_type("time"), True),
-        ]
+        # The probe switches operation_combo, which shows the settings panel
+        # through _configure_editor; keep the panel as it was at startup.
+        settings_checked = self.step_settings_toggle.isChecked()
+        ribbon_convert_types = self._supported_convert_types()
+        self.step_settings_toggle.setChecked(settings_checked)
+        ribbon_locale_supported = (
+            self.operation_combo.findData("convert_type_using_locale") >= 0
+        )
+        data_type_menu_items: list[tuple[str, Any, bool]] = []
+        for label, op_or_type, is_locale_op in _POWER_BI_CHANGE_TYPE_SPECS:
+            if is_locale_op:
+                data_type_menu_items.append((
+                    label,
+                    lambda: self._select_ribbon_operation("convert_type_using_locale"),
+                    ribbon_locale_supported,
+                ))
+            elif op_or_type in ribbon_convert_types:
+                data_type_menu_items.append((
+                    label,
+                    lambda target_type=str(op_or_type): self._select_ribbon_data_type(
+                        target_type
+                    ),
+                    True,
+                ))
+            else:
+                data_type_menu_items.append((label, lambda: None, False))
         home_groups = [
             ("Close", [action(
                 "Close &\nLoad",
@@ -7571,6 +7606,25 @@ class TransformDataDialog(QDialog):
 
         return menu
 
+    def _supported_convert_types(self) -> set[str]:
+        """Valid convert_type options, read from option_combo."""
+        saved_op = self.operation_combo.currentData()
+        convert_type_idx = self.operation_combo.findData("convert_type")
+        valid_convert_types: set[str] = set()
+        if convert_type_idx >= 0:
+            self.operation_combo.setCurrentIndex(convert_type_idx)
+            self._configure_editor()
+            for opt_idx in range(self.option_combo.count()):
+                val = self.option_combo.itemData(opt_idx)
+                if val:
+                    valid_convert_types.add(str(val))
+            if saved_op is not None:
+                restore_idx = self.operation_combo.findData(saved_op)
+                if restore_idx >= 0:
+                    self.operation_combo.setCurrentIndex(restore_idx)
+                    self._configure_editor()
+        return valid_convert_types
+
     def _build_change_type_menu(
         self, logical_index: int, parent: QWidget | None = None
     ) -> QMenu:
@@ -7590,40 +7644,9 @@ class TransformDataDialog(QDialog):
         menu.setObjectName("powerQueryChangeTypeMenu")
         menu.setToolTipsVisible(True)
 
-        type_specs: list[tuple[str, str | None, bool]] = [
-            ("Decimal Number", "decimal_number", False),
-            ("Fixed decimal number", "fixed_decimal", False),
-            ("Whole Number", "whole_number", False),
-            ("Percentage", "percentage", False),
-            ("Date/Time", "datetime", False),
-            ("Date", "date", False),
-            ("Time", "time", False),
-            ("Date/Time/Timezone", "datetime_zone", False),
-            ("Duration", "duration", False),
-            ("Text", "text", False),
-            ("True/False", "boolean", False),
-            ("Binary", "binary", False),
-            ("Using Locale...", "convert_type_using_locale", True),
-        ]
+        valid_convert_types = self._supported_convert_types()
 
-        # Valid convert_type options from option_combo
-        saved_op = self.operation_combo.currentData()
-        convert_type_idx = self.operation_combo.findData("convert_type")
-        valid_convert_types: set[str] = set()
-        if convert_type_idx >= 0:
-            self.operation_combo.setCurrentIndex(convert_type_idx)
-            self._configure_editor()
-            for opt_idx in range(self.option_combo.count()):
-                val = self.option_combo.itemData(opt_idx)
-                if val:
-                    valid_convert_types.add(str(val))
-            if saved_op is not None:
-                restore_idx = self.operation_combo.findData(saved_op)
-                if restore_idx >= 0:
-                    self.operation_combo.setCurrentIndex(restore_idx)
-                    self._configure_editor()
-
-        for label, op_or_type, is_locale_op in type_specs:
+        for label, op_or_type, is_locale_op in _POWER_BI_CHANGE_TYPE_SPECS:
             action = QAction(label, menu)
             action.setCheckable(True)
             if not is_locale_op and op_or_type == current_type:
