@@ -8,6 +8,7 @@ executed as Python or sent to an M runtime.
 
 from __future__ import annotations
 
+from datetime import date, datetime
 import re
 import unicodedata
 from decimal import Decimal, DecimalException
@@ -1284,6 +1285,45 @@ def _parse_pivot_aggregation(value: str) -> str | None:
         return None
 
 
+def _parse_is_earliest_latest_m(rhs: str, previous_name: str) -> dict[str, Any] | None:
+    text = rhs.strip()
+    if not text.casefold().startswith("let"):
+        return None
+    pattern = (
+        r"^\s*let\s+([a-zA-Z0-9_]+)\s*=\s*List\.(Min|Max)\s*\(\s*"
+        r"(#\"(?:[^\"]|\"\")+\"|[a-zA-Z0-9_]+)\s*"
+        r"(\[#\"(?:[^\"]|\"\")+\"\]|\[[A-Za-z0-9_]+\])\s*\)\s+in\s+Table\.SelectRows\s*\(\s*"
+        r"(#\"(?:[^\"]|\"\")+\"|[a-zA-Z0-9_]+)\s*,\s*each\s+"
+        r"(\[#\"(?:[^\"]|\"\")+\"\]|\[[A-Za-z0-9_]+\])\s*=\s*\1\s*\)\s*$"
+    )
+    m = re.match(pattern, text, re.IGNORECASE | re.DOTALL)
+    if not m:
+        return None
+    var_name, func, list_table, list_col, sel_table, sel_col = m.groups()
+    op = "is_earliest" if func.casefold() == "min" else "is_latest"
+
+    def norm_tbl(t: str) -> str:
+        if t.startswith('#"') and t.endswith('"'):
+            return t[2:-1].replace('""', '"')
+        return t
+
+    def norm_col(c: str) -> str:
+        if c.startswith('[#"') and c.endswith('"]'):
+            return c[3:-2].replace('""', '"')
+        return c[1:-1]
+
+    t1 = norm_tbl(list_table)
+    t2 = norm_tbl(sel_table)
+    c1 = norm_col(list_col)
+    c2 = norm_col(sel_col)
+
+    if t1.casefold() != previous_name.casefold() or t2.casefold() != previous_name.casefold():
+        return None
+    if c1 != c2:
+        return None
+    return {"op": "filter_rows", "column": c1, "operator": op, "value": ""}
+
+
 def _parse_table_call(
     rhs: str,
     previous_name: str,
@@ -1294,6 +1334,9 @@ def _parse_table_call(
     sparse_boundary_helper: str | None = None,
 ) -> list[dict[str, Any]]:
     if rhs.strip().casefold().startswith("let"):
+        earliest_latest = _parse_is_earliest_latest_m(rhs, previous_name)
+        if earliest_latest is not None:
+            return [earliest_latest]
         return [_parse_keep_duplicates_m_expression(rhs, previous_name)]
     match = _CALL.fullmatch(rhs.strip())
     if match is None:
@@ -1991,9 +2034,75 @@ def _parse_row_predicate(
     return _parse_row_predicate_tree(tree)
 
 
+def _parse_date_m_predicate(pred_str: str) -> tuple[str, str, str] | None:
+    pattern = (
+        r"^\s*(\[#\"(?:[^\"]|\"\")+\"\]|\[[A-Za-z0-9_]+\])\s*"
+        r"(<|<=|>|>=|=)\s*"
+        r"(#(?:date|datetime)\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+"
+        r"(?:\s*,\s*\d+\s*,\s*\d+\s*,\s*\d+)?\s*\))\s*$"
+    )
+    m = re.match(pattern, pred_str.strip())
+    if not m:
+        return None
+    raw_col, op_sym, raw_val = m.groups()
+    if raw_col.startswith('[#"') and raw_col.endswith('"]'):
+        col = raw_col[3:-2].replace('""', '"')
+    else:
+        col = raw_col[1:-1]
+
+    val_m = re.fullmatch(
+        r"#(date|datetime)\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)"
+        r"(?:\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+))?\s*\)",
+        raw_val.strip(),
+    )
+    if not val_m:
+        return None
+    kind, y, mo, d, h, mi, s = val_m.groups()
+    if kind == "date":
+        val = f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+    else:
+        val = f"{int(y):04d}-{int(mo):02d}-{int(d):02d} {int(h or 0):02d}:{int(mi or 0):02d}:{int(s or 0):02d}"
+
+    op_map = {
+        "<": "date_before",
+        ">": "date_after",
+        "<=": "less_than_or_equal",
+        ">=": "greater_than_or_equal",
+        "=": "equals",
+    }
+    return col, op_map[op_sym], val
+
+
+def _parse_m_date_row_filter(expression: str) -> list[dict[str, Any]] | None:
+    cleaned = expression.strip()
+    if cleaned.startswith("(") and cleaned.endswith(")"):
+        cleaned = cleaned[1:-1].strip()
+    parts = [p.strip() for p in cleaned.split(" and ")]
+    parsed_parts = [_parse_date_m_predicate(p) for p in parts]
+    if any(p is None for p in parsed_parts):
+        return None
+    if len(parsed_parts) == 1:
+        col, op, val = parsed_parts[0]  # type: ignore[misc]
+        return [{"op": "filter_rows", "column": col, "operator": op, "value": val}]
+    if len(parsed_parts) == 2:
+        (c1, op1, v1), (c2, op2, v2) = parsed_parts  # type: ignore[misc]
+        if c1 == c2 and op1 == "greater_than_or_equal" and op2 == "less_than_or_equal":
+            return [{
+                "op": "filter_rows_advanced",
+                "clauses": [
+                    {"column": c1, "operator": "greater_than_or_equal", "value": v1, "join": "and"},
+                    {"column": c2, "operator": "less_than_or_equal", "value": v2, "join": "and"},
+                ],
+            }]
+    return None
+
+
 def _parse_row_filter(
     expression: str, *, parameter_names: set[str] | None = None
 ) -> list[dict[str, Any]]:
+    date_filter = _parse_m_date_row_filter(expression)
+    if date_filter is not None:
+        return date_filter
     try:
         tree = compile_expression(
             _decode_m_expression_literals(expression),
@@ -2248,9 +2357,62 @@ def _parse_null_or_empty_filter(
     return column, "is_blank" if tree[1] == "or" else "is_not_blank"
 
 
-def _filter_clause_to_m_predicate(clause: dict[str, str]) -> str:
+def _m_date_literal(value: str, column_type: str | None = None) -> str:
+    s = str(value).strip()
+    dt = None
+    is_dt = False
+    if column_type == "datetime" or " " in s or "T" in s:
+        try:
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            is_dt = True
+        except ValueError:
+            pass
+    if dt is None:
+        try:
+            dt = date.fromisoformat(s)
+            is_dt = False
+        except ValueError:
+            pass
+    if dt is None:
+        try:
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            is_dt = True
+        except ValueError as exc:
+            raise PowerQueryMScriptError(
+                f"Date filter value {value!r} is not a valid date or datetime."
+            ) from exc
+    if column_type == "datetime":
+        is_dt = True
+    if is_dt:
+        return (
+            f"#datetime({dt.year}, {dt.month}, {dt.day}, "
+            f"{getattr(dt, 'hour', 0)}, {getattr(dt, 'minute', 0)}, {getattr(dt, 'second', 0)})"
+        )
+    return f"#date({dt.year}, {dt.month}, {dt.day})"
+
+
+def _filter_clause_to_m_predicate(
+    clause: dict[str, str], input_column_types: dict[str, str] | None = None
+) -> str:
     column = _m_field(clause["column"])
     operator = clause["operator"]
+    col_type = (input_column_types or {}).get(clause["column"])
+    if operator == "date_before":
+        date_lit = _m_date_literal(clause["value"], col_type)
+        return f"{column} < {date_lit}"
+    if operator == "date_after":
+        date_lit = _m_date_literal(clause["value"], col_type)
+        return f"{column} > {date_lit}"
+    if operator in {"greater_than_or_equal", "less_than_or_equal"} and (
+        col_type in {"date", "datetime"}
+        or re.match(r"^\d{4}-\d{2}-\d{2}", str(clause.get("value", "")).strip())
+    ):
+        try:
+            date_lit = _m_date_literal(clause["value"], col_type)
+            sym = ">=" if operator == "greater_than_or_equal" else "<="
+            return f"{column} {sym} {date_lit}"
+        except PowerQueryMScriptError:
+            pass
     if operator == "is_null":
         return f"{column} = null"
     if operator == "is_not_null":
@@ -2350,6 +2512,12 @@ def _step_to_m_call(
     if op == "rename_column":
         pair = "{" + _m_string(step["column"]) + ", " + _m_string(step["new_name"]) + "}"
         return f"Table.RenameColumns({previous}, {{{pair}}})"
+    if op == "filter_rows" and step["operator"] in {"is_earliest", "is_latest"}:
+        fn = "List.Min" if step["operator"] == "is_earliest" else "List.Max"
+        var = "earliest" if step["operator"] == "is_earliest" else "latest"
+        col = _m_field(step["column"])
+        ref = _m_reference(previous)
+        return f"let {var} = {fn}({ref}{col}) in Table.SelectRows({ref}, each {col} = {var})"
     if op in {"filter_rows", "filter_rows_advanced"}:
         clauses = ([{
             "column": step["column"], "operator": step["operator"],
@@ -2358,7 +2526,7 @@ def _step_to_m_call(
         }] if op == "filter_rows" else step["clauses"])
         groups: list[list[str]] = []
         for clause in clauses:
-            expression = _filter_clause_to_m_predicate(clause)
+            expression = _filter_clause_to_m_predicate(clause, input_column_types)
             if clause["join"] == "or":
                 groups.append([expression])
             elif groups:

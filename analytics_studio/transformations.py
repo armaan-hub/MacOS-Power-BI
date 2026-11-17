@@ -258,10 +258,20 @@ _FILTER_OPERATORS = {
     "greater_than_or_equal",
     "less_than",
     "less_than_or_equal",
+    "date_before",
+    "date_after",
+    "date_between",
+    "is_earliest",
+    "is_latest",
 }
 FILTER_OPERATORS_WITHOUT_VALUE = frozenset({
     "is_null", "is_not_null", "is_blank", "is_not_blank",
+    "is_earliest", "is_latest",
 })
+_DATE_FILTER_OPERATORS = {
+    "date_before",
+    "date_after",
+}
 _NUMERIC_FILTER_OPERATORS = {
     "greater_than",
     "greater_than_or_equal",
@@ -3328,12 +3338,57 @@ def _column_index(headers: list[str], column: str) -> int:
         raise TransformationError(f"Column {column!r} does not exist.") from exc
 
 
+def _parse_row_date_or_datetime(v: Any) -> date | datetime | None:
+    if v is None or v == "":
+        return None
+    if isinstance(v, (datetime, date)):
+        return v
+    s = str(v).strip()
+    if not s:
+        return None
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        pass
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        pass
+    return None
+
+
+def _to_comparable_datetime(val: date | datetime) -> datetime:
+    if isinstance(val, datetime):
+        return val
+    return datetime.combine(val, datetime.min.time())
+
+
 def _filter_rows(rows: list[dict[str, str]], column: str, operator: str, expected: str) -> list[dict[str, str]]:
-    prepared_expected = (
-        _parse_number(expected)
-        if operator in _NUMERIC_FILTER_OPERATORS
-        else expected
-    )
+    if operator in {"is_earliest", "is_latest"}:
+        parsed_items: list[tuple[datetime, dict[str, str]]] = []
+        for row in rows:
+            val = row[column]
+            if is_cell_error(val):
+                continue
+            parsed = _parse_row_date_or_datetime(val)
+            if parsed is not None:
+                parsed_items.append((_to_comparable_datetime(parsed), row))
+        if not parsed_items:
+            return []
+        if operator == "is_earliest":
+            target_dt = min(item[0] for item in parsed_items)
+        else:
+            target_dt = max(item[0] for item in parsed_items)
+        return [row for dt, row in parsed_items if dt == target_dt]
+
+    if operator in _DATE_FILTER_OPERATORS:
+        parsed_expected = _parse_row_date_or_datetime(expected)
+        prepared_expected = _to_comparable_datetime(parsed_expected) if parsed_expected is not None else None
+    elif operator in _NUMERIC_FILTER_OPERATORS:
+        prepared_expected = _parse_number(expected)
+    else:
+        prepared_expected = expected
+
     return [
         row
         for row_index, row in enumerate(rows, 1)
@@ -3348,17 +3403,23 @@ def _filter_rows_advanced(
     headers: list[str],
     clauses: list[dict[str, str]],
 ) -> list[dict[str, str]]:
-    prepared_clauses: list[tuple[str, str, str | Decimal, str]] = []
+    prepared_clauses: list[tuple[str, str, Any, str]] = []
     for clause in clauses:
         column = clause["column"]
         _column_index(headers, column)
         operator = clause["operator"]
         value = clause["value"]
-        expected: str | Decimal = (
-            _parse_number(value)
-            if operator in _NUMERIC_FILTER_OPERATORS
-            else value
-        )
+        parsed_dt = _parse_row_date_or_datetime(value)
+        if operator in _DATE_FILTER_OPERATORS:
+            expected: Any = _to_comparable_datetime(parsed_dt) if parsed_dt is not None else None
+        elif operator in {"greater_than_or_equal", "less_than_or_equal"} and parsed_dt is not None and any(
+            _parse_row_date_or_datetime(r[column]) is not None for r in rows if r.get(column) not in (None, "")
+        ):
+            expected = _to_comparable_datetime(parsed_dt)
+        elif operator in _NUMERIC_FILTER_OPERATORS:
+            expected = _parse_number(value)
+        else:
+            expected = value
         prepared_clauses.append((column, operator, expected, clause["join"]))
 
     filtered: list[dict[str, str]] = []
@@ -3384,13 +3445,36 @@ def _filter_value_matches(
     value: Any,
     column: str,
     operator: str,
-    expected: str | Decimal,
+    expected: Any,
     row_index: int,
 ) -> bool:
     if is_cell_error(value):
+        if operator in _DATE_FILTER_OPERATORS or isinstance(expected, datetime):
+            return False
         raise TransformationError(
             f"Cannot evaluate row {row_index} of column {column!r}: {value.message}"
         )
+    if operator in _DATE_FILTER_OPERATORS or (
+        isinstance(expected, datetime) and operator in {"greater_than_or_equal", "less_than_or_equal", "equals", "not_equals"}
+    ):
+        if value is None or value == "":
+            return False
+        parsed_val = _parse_row_date_or_datetime(value)
+        if parsed_val is None or expected is None:
+            return False
+        val_dt = _to_comparable_datetime(parsed_val)
+        if operator == "date_before":
+            return val_dt < expected
+        if operator == "date_after":
+            return val_dt > expected
+        if operator == "greater_than_or_equal":
+            return val_dt >= expected
+        if operator == "less_than_or_equal":
+            return val_dt <= expected
+        if operator == "equals":
+            return val_dt == expected
+        if operator == "not_equals":
+            return val_dt != expected
     if operator in _NUMERIC_FILTER_OPERATORS:
         if value is None or value == "":
             return False
