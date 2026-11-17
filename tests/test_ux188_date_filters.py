@@ -7,7 +7,7 @@ from unittest.mock import patch
 from PySide6.QtWidgets import QApplication, QDialog
 
 from analytics_studio.file_import import ImportCandidate
-from analytics_studio.power_query_m import m_compatibility_issues, parse_m_script, steps_to_m_script
+from analytics_studio.power_query_m import PowerQueryMScriptError, m_compatibility_issues, parse_m_script, steps_to_m_script
 from analytics_studio.transformations import (
     TransformationError,
     apply_transformations,
@@ -279,9 +279,25 @@ class TestDateFiltersFollowUp(unittest.TestCase):
         for step in (
             {"op": "filter_rows", "column": "D", "operator": "date_before", "value": "2026-08-01"},
             {"op": "filter_rows", "column": "D", "operator": "is_earliest", "value": ""},
+            {"op": "filter_rows", "column": "D", "operator": "is_latest", "value": ""},
         ):
             with self.subTest(step=step):
-                if step["operator"] == "is_earliest":
-                    continue
                 with self.assertRaises(TransformationError):
                     column_types_after_steps(["D"], [step], initial_types={"D": "text"})
+
+    def test_convert_type_text_then_is_earliest_raises(self) -> None:
+        steps = [
+            {"op": "convert_type", "column": "D", "type": "text"},
+            {"op": "filter_rows", "column": "D", "operator": "is_earliest", "value": ""},
+        ]
+        with self.assertRaises(TransformationError):
+            column_types_after_steps(["D"], steps, initial_types={"D": "date"})
+
+    def test_equals_with_date_literal_stays_unsupported(self) -> None:
+        m = (
+            'let\n    Source = #"Sales",\n'
+            '    #"Filtered Rows" = Table.SelectRows(Source, each [D] = #date(2026, 8, 1))\n'
+            'in\n    #"Filtered Rows"'
+        )
+        with self.assertRaises(PowerQueryMScriptError):
+            parse_m_script(m, "Sales", initial_column_types={"D": "date"})

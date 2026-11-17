@@ -1824,7 +1824,9 @@ def column_types_after_steps(
         if op == "convert_type":
             known_type_columns.add(step["column"])
         date_filter_columns: list[str] = []
-        if op == "filter_rows" and step["operator"] in _DATE_FILTER_OPERATORS:
+        if op == "filter_rows" and step["operator"] in (
+            _DATE_FILTER_OPERATORS | {"is_earliest", "is_latest"}
+        ):
             date_filter_columns = [step["column"]]
         elif op == "filter_rows_advanced":
             date_filter_columns = [

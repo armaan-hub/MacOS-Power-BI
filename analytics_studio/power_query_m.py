@@ -2068,8 +2068,9 @@ def _parse_date_m_predicate(pred_str: str) -> tuple[str, str, str] | None:
         ">": "date_after",
         "<=": "date_on_or_before",
         ">=": "date_on_or_after",
-        "=": "equals",
     }
+    if op_sym not in op_map:
+        return None
     return col, op_map[op_sym], val
 
 
