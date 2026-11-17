@@ -606,7 +606,15 @@ def _replace_with_replacer(lst: MValue, old: MValue, new: MValue, replacer: MVal
 # ---- predicates and transforms -----------------------------------------------------
 
 def _select(lst: MValue, predicate: MValue) -> MValue:
-    return V.List(tuple(raw for raw in _items(lst) if _logical(_apply(predicate, raw))))
+    # Power BI answer (Task 214b): a null condition drops the item; a non-logical, non-null condition still raises.
+    kept = []
+    for raw in _items(lst):
+        verdict = _apply(predicate, raw)
+        if isinstance(verdict, V.Null):
+            continue
+        if _logical(verdict):
+            kept.append(raw)
+    return V.List(tuple(kept))
 
 
 def _transform(lst: MValue, transform: MValue) -> MValue:

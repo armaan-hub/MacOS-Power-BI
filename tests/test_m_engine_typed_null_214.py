@@ -67,5 +67,51 @@ class TypedNullCellTests(unittest.TestCase):
         )
 
 
+class NullConditionTests(unittest.TestCase):
+    """Task 214b: Power BI answers (live, headless, 2026-11-17), verbatim."""
+
+    def test_214b_select_rows_null_condition_drops_all_rows(self):
+        self.assertEqual(
+            evaluate_to_text('Table.RowCount(Table.SelectRows(#table({"A"},{{1},{2}}), each null))'),
+            "V:number:0",
+        )
+
+    def test_214b_select_rows_null_result_drops_only_null_row(self):
+        self.assertEqual(
+            evaluate_to_text('Table.RowCount(Table.SelectRows(#table({"A"},{{1},{null}}), each [A] > 0))'),
+            "V:number:1",
+        )
+
+    def test_214b_select_rows_text_condition_still_raises(self):
+        self.assertEqual(
+            evaluate_to_text('Table.RowCount(Table.SelectRows(#table({"A"},{{1},{2}}), each "x"))'),
+            'ERR:Expression.Error: We cannot convert the value "x" to type Logical.',
+        )
+
+    def test_214b_select_rows_not_of_null_drops_null_row(self):
+        self.assertEqual(
+            evaluate_to_text('Table.RowCount(Table.SelectRows(#table({"A"},{{1},{null}}), each not ([A] > 0)))'),
+            "V:number:0",
+        )
+
+    def test_214b_select_rows_equal_null_keeps_null_row(self):
+        self.assertEqual(
+            evaluate_to_text('Table.RowCount(Table.SelectRows(#table({"A"},{{1},{null}}), each [A] = null))'),
+            "V:number:1",
+        )
+
+    def test_214b_list_select_drops_null_condition_item(self):
+        self.assertEqual(
+            evaluate_to_text("List.Select({1, null, 2}, each _ > 1)"),
+            "V:list:[number:2]",
+        )
+
+    def test_214b_list_select_all_null_conditions_gives_empty_list(self):
+        self.assertEqual(
+            evaluate_to_text("List.Select({1, 2}, each null)"),
+            "V:list:[]",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
