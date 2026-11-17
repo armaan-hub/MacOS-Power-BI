@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 (Task 194 shipped as Iteration 276; next Task 195 (Group By dialog), Task 196 (Replace Values dialog), Task 197 (Split Column by Delimiter dialog); Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
+**Active agent:** Claude Opus 5.5 (Task 195 shipped as Iteration 277; next Task 196 (Replace Values dialog), Task 197 (Split Column by Delimiter dialog); Antigravity and OpenCode code, Haiku when both are out of quota, Sonnet heads review)
 **Branch in use:** main
 **Working tree clean:** yes
 
