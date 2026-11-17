@@ -15,8 +15,9 @@ QUERY_FUNCTION_TYPES = (
 )
 _NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]{0,119}\Z")
 _RESERVED_NAMES = {
-    "source", "let", "in", "true", "false", "null", "and", "or",
-    "not", "if", "then", "else",
+    "source", "and", "as", "each", "else", "error", "false", "if", "in", "is",
+    "let", "meta", "not", "null", "or", "otherwise", "section", "shared",
+    "then", "true", "try", "type",
 }
 _M_NAMESPACE_ROOTS = {
     "binary", "combiner", "comparer", "date", "datetime", "datetimezone",

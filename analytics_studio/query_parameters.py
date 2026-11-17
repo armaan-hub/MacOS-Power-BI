@@ -11,8 +11,9 @@ from typing import Any
 MAX_QUERY_PARAMETERS = 128
 _NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]{0,119}\Z")
 _RESERVED_NAMES = {
-    "source", "let", "in", "true", "false", "null", "and", "or",
-    "not", "if", "then", "else",
+    "source", "and", "as", "each", "else", "error", "false", "if", "in", "is",
+    "let", "meta", "not", "null", "or", "otherwise", "section", "shared",
+    "then", "true", "try", "type",
 }
 QUERY_PARAMETER_TYPES = (
     "text", "whole_number", "decimal_number", "boolean", "date", "datetime",
