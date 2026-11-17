@@ -2732,10 +2732,20 @@ def _pivot_column(
                 result[pivot_value] = None
             elif aggregation == "none":
                 if len(members) != 1:
-                    raise TransformationError(
-                        "Cannot pivot without aggregation: multiple values exist for "
-                        f"a row-key/category pair ({pivot_value!r})."
+                    # Task 215b: Power BI keeps a repeated row-key/category pair as an
+                    # error cell (Expression.Error) instead of failing the step.
+                    origin = lineaged_row({}, *(row for _, row in members))
+                    result[pivot_value] = PowerQueryCellError(
+                        reason="Expression.Error",
+                        message=(
+                            "There were too many elements in the enumeration to "
+                            "complete the operation."
+                        ),
+                        row=None,
+                        source_rows=tuple(origin.source_rows),
+                        source_rows_truncated=bool(origin.source_rows_truncated),
                     )
+                    continue
                 result[pivot_value] = members[0][1][value_column]
             elif aggregation == "count_all":
                 result[pivot_value] = len(members)
