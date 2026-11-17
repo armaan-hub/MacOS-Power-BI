@@ -2754,3 +2754,9 @@ Tasks 197-199 shipped together on one gate. 197: Split Column by Delimiter dialo
 Transform > Pivot Column opens a modal Pivot Column dialog with Values Column and collapsed Advanced options (8 aggregations); default Sum like Power BI (was Don't aggregate); gear-edit opens it prefilled. Engine and M unchanged; no existing tests changed. Details and VM doubts in docs/plans/2026-11-17-ux-200.md.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 4997 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.
+
+## 2026-11-17 — Iteration 281 (Task 201-204 m-keywords-remove-errors: M keyword names quoted, Remove Errors on selected columns, reserved M names, test cleanup)
+
+Batch of four tasks on one gate. 201: M keywords used as names are written #"each" and bare keyword names are refused (M spec). 202: Remove Errors uses the selected columns like Power BI, right-click entry enabled. 203: lowercase M keywords refused as parameter/function names, Type/Error still valid. 204: unused test import removed. First tasks coded by OpenCode (free model) and Codex (free plan). Details in docs/plans/2026-11-17-ux-201-204.md.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 5015 passed; replay 540401: 537362 match, 3039 refused, 0 DIFF, 0 CRASH; lock unchanged at 537342. Real app 575/575 equal and 1,500 fresh probes with 0 wrong. No saved Power BI answer was edited. Claude Opus 5.5 planned, Antigravity, OpenCode and Codex coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval.

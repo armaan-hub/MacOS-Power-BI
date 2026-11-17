@@ -52,6 +52,15 @@ from analytics_studio.query_engine import QueryError, append_candidates
 
 MAX_M_SCRIPT_LENGTH = 32_000
 _IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
+_M_KEYWORDS = frozenset({
+    "and", "as", "each", "else", "error", "false", "if", "in", "is", "let",
+    "meta", "not", "null", "or", "otherwise", "section", "shared", "then",
+    "true", "try", "type",
+})
+
+
+def _is_regular_identifier(text: str) -> bool:
+    return bool(_IDENTIFIER.fullmatch(text)) and text not in _M_KEYWORDS
 _CALL = re.compile(r"([A-Za-z_][A-Za-z0-9_.]*)\s*\((.*)\)\Z", re.DOTALL)
 _LIVE_EVALUATION_ROWS = 5000
 _M_LOCALE_TYPES = {"whole_number", "decimal_number", "date", "datetime", "time"}
@@ -247,7 +256,7 @@ def _m_script_parts(script: str) -> tuple[str | None, list[str], str]:
     if first_equals < 0:
         raise PowerQueryMScriptError("Step 1 must use Name = expression.")
     source_name = bindings[0][:first_equals].strip()
-    if not _IDENTIFIER.fullmatch(source_name):
+    if not _is_regular_identifier(source_name):
         return None, bindings[1:], body[in_position + 2:].strip()
     return source_name, bindings[1:], body[in_position + 2:].strip()
 
@@ -384,7 +393,7 @@ def _parse_m_query_script(
                 raise PowerQueryMScriptError(
                     "Only one canonical sparse-boundary helper binding is supported."
                 )
-            if not _IDENTIFIER.fullmatch(name):
+            if not _is_regular_identifier(name):
                 raise PowerQueryMScriptError(
                     "The sparse-boundary helper must use a simple M identifier."
                 )
@@ -1341,7 +1350,7 @@ def _parse_table_call(
             return [earliest_latest]
         return [_parse_keep_duplicates_m_expression(rhs, previous_name)]
     clean_rhs = rhs.strip()
-    if _IDENTIFIER.fullmatch(clean_rhs) or (clean_rhs.startswith('#"') and clean_rhs.endswith('"')):
+    if _is_regular_identifier(clean_rhs) or (clean_rhs.startswith('#"') and clean_rhs.endswith('"')):
         try:
             ref_name = _parse_name(clean_rhs)
         except PowerQueryMScriptError:
@@ -3143,7 +3152,7 @@ def _m_dynamic_split_count(previous_name: str, column: str, delimiter: str) -> s
 
 
 def _m_name_reference(name: str) -> str:
-    return name if _IDENTIFIER.fullmatch(name) else _m_quoted_name(name)
+    return name if _is_regular_identifier(name) else _m_quoted_name(name)
 
 
 def _parse_split_to_rows(
@@ -3872,7 +3881,7 @@ def _expect_count(function: str, arguments: list[str], count: int) -> None:
 
 def _parse_name(value: str) -> str:
     text = value.strip()
-    if _IDENTIFIER.fullmatch(text):
+    if _is_regular_identifier(text):
         return text
     return _parse_quoted(text, prefix="#")
 
@@ -4209,7 +4218,7 @@ def _m_quoted_name(value: str) -> str:
 
 
 def _m_reference(value: str) -> str:
-    return value if _IDENTIFIER.fullmatch(value) else _m_quoted_name(value)
+    return value if _is_regular_identifier(value) else _m_quoted_name(value)
 
 
 def _m_string_list(values: list[str]) -> str:
