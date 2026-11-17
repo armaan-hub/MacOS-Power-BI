@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-17, after Iteration 270 / Task 187 ux-187, 4887, Claude Opus 5.5 planned, Advanced Editor M syntax colours; opens read-only when steps cannot be shown as M coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest Antigravity passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 188 Date Filters gate, Task 189 Format pane gate, Task 190 Line and stacked column (Antigravity)
+**Latest status (2026-11-17, after Iteration 271 / Task 188 ux-188, 4902, Claude Opus 5.5 planned, Date Filters Before/After/Between/Is Earliest/Is Latest coded, Sonnet 5.5 reviewed and tested, Opus shipped under the user's delegated approval):** pytest Antigravity and Haiku passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 540401 answers with 537362 match, 3039 refused, 0 DIFF, 0 CRASH, locked 537342. Next: Task 189 Format pane gate, Task 190 Line and stacked column gate, Task 191 Insert Step After (Antigravity)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
