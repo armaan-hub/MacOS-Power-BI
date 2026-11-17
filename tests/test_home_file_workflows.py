@@ -32,6 +32,7 @@ from analytics_studio.import_preview_dialog import FileImportPreviewDialog
 from analytics_studio.inline_data import parse_pasted_table, sample_candidate
 from analytics_studio.measure_dialog import MeasureDialog
 from analytics_studio.local_table_dialogs import (
+    ChooseColumnsDialog,
     CustomColumnDialog,
     EnterDataDialog,
     TransformDataDialog,
@@ -1482,6 +1483,13 @@ in
                         button.click()
                         self.assertIsNotNone(dialog._conditional_dialog)
                         dialog._conditional_dialog.reject()
+                    elif operation == "keep_columns":
+                        # Task 177 (2026-11-16): Choose Columns opens Power BI's own dialog
+                        button.click()
+                        open_dialogs = [d for d in dialog.findChildren(ChooseColumnsDialog) if d.isVisible()]
+                        self.assertEqual(len(open_dialogs), 1)
+                        self.assertEqual(dialog.step_list.count(), 0)
+                        open_dialogs[0].reject()
                     elif operation in direct_operations:
                         # Power BI applies these immediately from the selected column.
                         fresh = TransformDataDialog(raw)
