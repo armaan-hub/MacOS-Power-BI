@@ -1161,6 +1161,15 @@ _NOT_SUPPORTED_YET = "Not supported yet"
 
 # Power BI's Change Type list (header type-icon menu and Power Query ribbon
 # Data Type dropdown): label, convert_type option value, is_locale_op.
+_CONVERT_TYPE_OPTIONS: tuple[tuple[str, str], ...] = (
+    ("Text", "text"),
+    ("Whole number", "whole_number"),
+    ("Decimal number", "decimal_number"),
+    ("Boolean", "boolean"),
+    ("Date (YYYY-MM-DD)", "date"),
+    ("Date/time (ISO 8601)", "datetime"),
+    ("Time (ISO 8601)", "time"),
+)
 _POWER_BI_CHANGE_TYPE_SPECS: tuple[tuple[str, str | None, bool], ...] = (
     ("Decimal Number", "decimal_number", False),
     ("Fixed decimal number", "fixed_decimal", False),
@@ -4528,11 +4537,7 @@ class TransformDataDialog(QDialog):
             ("Edit Source Settings", self._edit_source_settings, True),
             ("Delete Query", self._delete_selected_query, True),
         ]
-        # The probe switches operation_combo, which shows the settings panel
-        # through _configure_editor; keep the panel as it was at startup.
-        settings_checked = self.step_settings_toggle.isChecked()
         ribbon_convert_types = self._supported_convert_types()
-        self.step_settings_toggle.setChecked(settings_checked)
         ribbon_locale_supported = (
             self.operation_combo.findData("convert_type_using_locale") >= 0
         )
@@ -7607,23 +7612,8 @@ class TransformDataDialog(QDialog):
         return menu
 
     def _supported_convert_types(self) -> set[str]:
-        """Valid convert_type options, read from option_combo."""
-        saved_op = self.operation_combo.currentData()
-        convert_type_idx = self.operation_combo.findData("convert_type")
-        valid_convert_types: set[str] = set()
-        if convert_type_idx >= 0:
-            self.operation_combo.setCurrentIndex(convert_type_idx)
-            self._configure_editor()
-            for opt_idx in range(self.option_combo.count()):
-                val = self.option_combo.itemData(opt_idx)
-                if val:
-                    valid_convert_types.add(str(val))
-            if saved_op is not None:
-                restore_idx = self.operation_combo.findData(saved_op)
-                if restore_idx >= 0:
-                    self.operation_combo.setCurrentIndex(restore_idx)
-                    self._configure_editor()
-        return valid_convert_types
+        """Valid convert_type values, from _CONVERT_TYPE_OPTIONS (touches no widget)."""
+        return {value for _label, value in _CONVERT_TYPE_OPTIONS}
 
     def _build_change_type_menu(
         self, logical_index: int, parent: QWidget | None = None
@@ -8627,13 +8617,8 @@ class TransformDataDialog(QDialog):
             self.option_combo.addItem("Before delimiter", "before")
             self.option_combo.addItem("After delimiter", "after")
         elif op == "convert_type":
-            self.option_combo.addItem("Text", "text")
-            self.option_combo.addItem("Whole number", "whole_number")
-            self.option_combo.addItem("Decimal number", "decimal_number")
-            self.option_combo.addItem("Boolean", "boolean")
-            self.option_combo.addItem("Date (YYYY-MM-DD)", "date")
-            self.option_combo.addItem("Date/time (ISO 8601)", "datetime")
-            self.option_combo.addItem("Time (ISO 8601)", "time")
+            for option_label, option_value in _CONVERT_TYPE_OPTIONS:
+                self.option_combo.addItem(option_label, option_value)
         elif op == "convert_type_using_locale":
             self.option_combo.addItem("Whole number", "whole_number")
             self.option_combo.addItem("Decimal number", "decimal_number")

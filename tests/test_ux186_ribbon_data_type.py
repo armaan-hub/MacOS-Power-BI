@@ -111,5 +111,37 @@ class RibbonDataTypeTests(unittest.TestCase):
         self.assertEqual([a.text() for a in _menu_actions(menu)], _EXPECTED_LABELS)
 
 
+    def _editor_state(self, dialog: TransformDataDialog) -> tuple:
+        return (
+            dialog.step_settings_toggle.isChecked(),
+            dialog.operation_combo.currentData(),
+            dialog.step_list.count(),
+        )
+
+    def test_building_header_menu_leaves_editor_state_unchanged(self) -> None:
+        dialog = self.make()
+        before = self._editor_state(dialog)
+        dialog._build_change_type_menu(1)
+        self.assertEqual(self._editor_state(dialog), before)
+
+    def test_showing_ribbon_data_type_menu_leaves_editor_state_unchanged(self) -> None:
+        dialog = self.make()
+        before = self._editor_state(dialog)
+        self.ribbon_menu(dialog)
+        self.assertEqual(self._editor_state(dialog), before)
+
+    def test_supported_convert_types_match_option_combo_values(self) -> None:
+        dialog = self.make()
+        index = dialog.operation_combo.findData("convert_type")
+        self.assertGreaterEqual(index, 0)
+        dialog.operation_combo.setCurrentIndex(index)
+        combo_values = {
+            str(dialog.option_combo.itemData(i))
+            for i in range(dialog.option_combo.count())
+            if dialog.option_combo.itemData(i)
+        }
+        self.assertEqual(dialog._supported_convert_types(), combo_values)
+
+
 if __name__ == "__main__":
     unittest.main()
