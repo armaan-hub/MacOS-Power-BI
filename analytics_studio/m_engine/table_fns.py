@@ -305,11 +305,12 @@ def _projection_matches(names: list, row: tuple, criteria: V.Record) -> bool:
 
 
 def _check_cell(value: MValue, kind: str) -> None:
-    base, _type_name, nullable = _parts(kind)
+    base, _type_name, _nullable = _parts(kind)
+    # Power BI accepts a null cell in any typed column (Task 214 answer check); the column type and
+    # its IsNullable metadata are kept unchanged.
     if isinstance(value, V.Null):
-        if not nullable:
-            raise _unsupported(f"{base} column with a null cell")
-    elif base != "any" and V.kind_of(value) != base:
+        return
+    if base != "any" and V.kind_of(value) != base:
         raise _unsupported(f"{base} column with a cell of another type")
 
 
@@ -1193,7 +1194,15 @@ def _find_text(table: MValue, text: MValue) -> MValue:
 def _select_rows(table: MValue, predicate: MValue) -> MValue:
     t = _table(table)
     names = _names_of(t)
-    return V.Table(t.columns, tuple(row for row in t.rows if _truth(_apply(predicate, _record(names, row)))))
+    # Power BI answer (Task 214, item 41): a null predicate result drops the row instead of raising.
+    kept = []
+    for row in t.rows:
+        verdict = _apply(predicate, _record(names, row))
+        if isinstance(verdict, V.Null):
+            continue
+        if _truth(verdict):
+            kept.append(row)
+    return V.Table(t.columns, tuple(kept))
 
 
 def _remove_rows(table: MValue, offset: MValue, count: MValue) -> MValue:
