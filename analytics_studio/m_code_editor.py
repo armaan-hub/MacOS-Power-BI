@@ -2,11 +2,197 @@
 
 from __future__ import annotations
 
+import re
+
 from PySide6.QtCore import QRect, QSize, Qt
-from PySide6.QtGui import QColor, QFont, QFontDatabase, QKeyEvent, QPainter, QTextCursor
+from PySide6.QtGui import (
+    QColor,
+    QFont,
+    QFontDatabase,
+    QKeyEvent,
+    QPainter,
+    QSyntaxHighlighter,
+    QTextCharFormat,
+    QTextCursor,
+    QTextDocument,
+)
 from PySide6.QtWidgets import QPlainTextEdit, QWidget
 
 INDENT = "    "
+
+
+class MSyntaxHighlighter(QSyntaxHighlighter):
+    """Syntax highlighter for Power Query M code matching Power BI Advanced Editor."""
+
+    STATE_NORMAL = 0
+    STATE_BLOCK_COMMENT = 1
+    STATE_STRING = 2
+
+    COLOR_KEYWORD = QColor("#0000FF")
+    COLOR_STRING = QColor("#A31515")
+    COLOR_COMMENT = QColor("#008000")
+    COLOR_NUMBER = QColor("#098658")
+    COLOR_INTRINSIC = QColor("#001080")
+
+    KEYWORDS = {
+        "let", "in", "each", "if", "then", "else", "try", "otherwise",
+        "and", "or", "not", "as", "is", "meta", "type", "error",
+        "section", "shared", "true", "false", "null",
+    }
+
+    _NUMBER_RE = re.compile(
+        r"^(?:0[xX][0-9a-fA-F]+|(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?)"
+    )
+
+    def __init__(self, parent: QTextDocument | None = None) -> None:
+        super().__init__(parent)
+        self._fmt_keyword = QTextCharFormat()
+        self._fmt_keyword.setForeground(self.COLOR_KEYWORD)
+
+        self._fmt_string = QTextCharFormat()
+        self._fmt_string.setForeground(self.COLOR_STRING)
+
+        self._fmt_comment = QTextCharFormat()
+        self._fmt_comment.setForeground(self.COLOR_COMMENT)
+
+        self._fmt_number = QTextCharFormat()
+        self._fmt_number.setForeground(self.COLOR_NUMBER)
+
+        self._fmt_intrinsic = QTextCharFormat()
+        self._fmt_intrinsic.setForeground(self.COLOR_INTRINSIC)
+
+    def highlightBlock(self, text: str) -> None:  # noqa: N802 - Qt override
+        i = 0
+        n = len(text)
+        state = self.previousBlockState()
+        if state == -1:
+            state = self.STATE_NORMAL
+
+        while i < n:
+            if state == self.STATE_BLOCK_COMMENT:
+                end = text.find("*/", i)
+                if end != -1:
+                    self.setFormat(i, end + 2 - i, self._fmt_comment)
+                    i = end + 2
+                    state = self.STATE_NORMAL
+                else:
+                    self.setFormat(i, n - i, self._fmt_comment)
+                    i = n
+                continue
+
+            if state == self.STATE_STRING:
+                start = i
+                closed = False
+                while i < n:
+                    if text[i] == '"':
+                        if i + 1 < n and text[i + 1] == '"':
+                            i += 2
+                        else:
+                            i += 1
+                            closed = True
+                            break
+                    else:
+                        i += 1
+                self.setFormat(start, i - start, self._fmt_string)
+                if closed:
+                    state = self.STATE_NORMAL
+                continue
+
+            # In STATE_NORMAL
+            # Line comment
+            if text.startswith("//", i):
+                self.setFormat(i, n - i, self._fmt_comment)
+                i = n
+                continue
+
+            # Block comment
+            if text.startswith("/*", i):
+                end = text.find("*/", i + 2)
+                if end != -1:
+                    self.setFormat(i, end + 2 - i, self._fmt_comment)
+                    i = end + 2
+                else:
+                    self.setFormat(i, n - i, self._fmt_comment)
+                    i = n
+                    state = self.STATE_BLOCK_COMMENT
+                continue
+
+            # Quoted identifier #"..."
+            if text.startswith('#"', i):
+                start = i
+                i += 2
+                closed = False
+                while i < n:
+                    if text[i] == '"':
+                        if i + 1 < n and text[i + 1] == '"':
+                            i += 2
+                        else:
+                            i += 1
+                            closed = True
+                            break
+                    else:
+                        i += 1
+                self.setFormat(start, i - start, self._fmt_string)
+                if not closed:
+                    state = self.STATE_STRING
+                continue
+
+            # String literal "..."
+            if text[i] == '"':
+                start = i
+                i += 1
+                closed = False
+                while i < n:
+                    if text[i] == '"':
+                        if i + 1 < n and text[i + 1] == '"':
+                            i += 2
+                        else:
+                            i += 1
+                            closed = True
+                            break
+                    else:
+                        i += 1
+                self.setFormat(start, i - start, self._fmt_string)
+                if not closed:
+                    state = self.STATE_STRING
+                continue
+
+            # #identifier intrinsics: #date, #datetime, #table, #duration, etc.
+            if text[i] == "#" and i + 1 < n and (text[i + 1].isalpha() or text[i + 1] == "_"):
+                start = i
+                i += 1
+                while i < n and (text[i].isalnum() or text[i] == "_"):
+                    i += 1
+                self.setFormat(start, i - start, self._fmt_intrinsic)
+                continue
+
+            # Numbers
+            if (
+                text[i].isdigit() or (text[i] == "." and i + 1 < n and text[i + 1].isdigit())
+            ) and (i == 0 or not (text[i - 1].isalnum() or text[i - 1] == "_")):
+                match = self._NUMBER_RE.match(text[i:])
+                if match:
+                    length = len(match.group(0))
+                    if i + length >= n or not (text[i + length].isalpha() or text[i + length] == "_"):
+                        self.setFormat(i, length, self._fmt_number)
+                        i += length
+                        continue
+
+            # Identifiers / Keywords
+            if text[i].isalpha() or text[i] == "_":
+                start = i
+                while i < n and (text[i].isalnum() or text[i] == "_"):
+                    i += 1
+                word = text[start:i]
+                preceded_by_dot = (start > 0 and text[start - 1] == ".")
+                followed_by_dot = (i < n and text[i] == ".")
+                if not preceded_by_dot and not followed_by_dot and word in self.KEYWORDS:
+                    self.setFormat(start, i - start, self._fmt_keyword)
+                continue
+
+            i += 1
+
+        self.setCurrentBlockState(state)
 
 
 class _LineNumberArea(QWidget):
@@ -33,10 +219,22 @@ class MCodeEditor(QPlainTextEdit):
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         self.setTabStopDistance(self.fontMetrics().horizontalAdvance(" ") * len(INDENT))
         self.setUndoRedoEnabled(True)
+        self.highlighter = MSyntaxHighlighter(self.document())
         self.line_number_area = _LineNumberArea(self)
         self.blockCountChanged.connect(self._update_margin)
         self.updateRequest.connect(self._scroll_line_numbers)
         self._update_margin()
+
+    def format_at(self, block_number: int, column: int) -> QTextCharFormat | None:
+        """Expose text char format at a given block number and column for tests."""
+        block = self.document().findBlockByNumber(block_number)
+        if not block.isValid():
+            return None
+        formats = block.layout().formats()
+        for f in formats:
+            if f.start <= column < f.start + f.length:
+                return QTextCharFormat(f.format)
+        return None
 
     # ---- line numbers -------------------------------------------------
     def line_number_width(self) -> int:
