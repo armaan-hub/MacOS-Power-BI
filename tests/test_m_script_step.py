@@ -53,10 +53,12 @@ APP_TYPES_OF_PB = {
     "number": {"whole_number", "decimal_number"}, "text": {"text"}, "date": {"date"}, "datetime": {"datetime"},
     "time": {"time"}, "logical": {"boolean"}, "any": {"any"},
 }
-# The four scripts the engine refuses on purpose: a nested table cell, a number result, a column of mixed
-# types (an engine gap) and a non-finite number (the app does not store one).
-REFUSED_SCRIPTS = {"Joined", "Profile", "Unpivot", "Err"}
-MINIMUM_EXACT_SCRIPTS = 28
+# The scripts the engine refuses on purpose: a nested table cell, a number result and a non-finite number (the
+# app does not store one). Before Task 220 a fourth, "Unpivot" (a column of mixed types), was refused as an engine gap.
+# Task 220: "Unpivot" left this set. The engine now computes Table.Unpivot over columns of the same kind with
+# different facets (Int64 + number gives Number.Type) and the result equals Power BI's saved answer.
+REFUSED_SCRIPTS = {"Joined", "Profile", "Err"}
+MINIMUM_EXACT_SCRIPTS = 29  # Task 220: 32 scripts, 3 refused, so Unpivot is now the 29th exact one
 
 
 def spec() -> dict:
@@ -243,9 +245,12 @@ class ScriptRunRefusalTests(unittest.TestCase):
                 "let Source = Sales, Count = Table.RowCount(Source) in Count"), initial_types=INITIAL_TYPES)
 
     def test_an_engine_gap_is_refused_with_the_engine_message(self) -> None:
-        unpivot = next(item["script"] for item in spec()["scripts"] if item["name"] == "Unpivot")
+        # Task 220: the spec "Unpivot" script no longer serves here because the engine now computes it. Power BI
+        # answers UNREPRESENTABLE for a text item in the Table.ColumnsOfType list and the engine deliberately
+        # refuses it, so this is a stable engine gap.
+        script = ('let Source = Sales, R = Table.SelectColumns(Source, Table.ColumnsOfType(Source, {"text"})) in R')
         with self.assertRaisesRegex(TransformationError, "not supported by this engine yet"):
-            apply_transformations(source_candidate(), step_for(unpivot), initial_types=INITIAL_TYPES)
+            apply_transformations(source_candidate(), step_for(script), initial_types=INITIAL_TYPES)
 
     def test_a_nested_table_cell_is_refused(self) -> None:
         joined = next(item["script"] for item in spec()["scripts"] if item["name"] == "Joined")

@@ -650,6 +650,16 @@ def _rename_columns(table: MValue, renames: MValue, missing: MValue) -> MValue:
     return V.Table(tuple((name, kind) for name, (_, kind) in zip(names, t.columns)), t.rows)
 
 
+def _prefix_columns(table: MValue, prefix: MValue) -> MValue:
+    t = _table(table)
+    p = _text(prefix)
+    names = [f"{p}.{name}" for name in _names_of(t)]
+    for i, name in enumerate(names):
+        if name in names[:i]:  # the same duplicate-name error Table.RenameColumns gives
+            raise _exists(name)
+    return V.Table(tuple((name, kind) for name, (_, kind) in zip(names, t.columns)), t.rows)
+
+
 def _transform_pairs(transforms: MValue) -> list:
     """The ``{name, function}`` or ``{name, function, type}`` entries as (name, function, kind or None)."""
     items = _items(transforms)
@@ -758,12 +768,19 @@ def _replaced_kind(replacer: V.Function, old_kind: str, new: MValue) -> str:
     if not _is_library(replacer, "Replacer.ReplaceValue"):
         return _function_spec(replacer)
     base, type_name, _nullable = _parts(old_kind)
+    if base == "date" and isinstance(new, V.Date):  # a date replacement keeps Date.Type (Power BI answer check)
+        return old_kind
+    if base == "date" and isinstance(new, V.Null):  # a null makes the date column nullable Date? (same check)
+        return _col(type_name, True)
     if base not in ("any", "number", "text"):
         raise _unsupported("replacement in a " + base + " column")
     if base == "any":
         return old_kind
     if isinstance(new, V.Null):
         return _col(type_name, True)
+    if base == "number" and type_name != "number" and isinstance(new, V.Number):
+        # a facet column (Int64/Int32/Currency) becomes Number.Type for a non-null number replacement
+        return _col("Number.Type", _nullable)
     return old_kind if V.kind_of(new) == base else "any"
 
 
@@ -1465,11 +1482,25 @@ def _unpivot_table(t: V.Table, unpivot: list, others: list, attr: str, value_nam
     if attr in other_names or value_name in other_names or attr == value_name:
         raise _unsupported("unpivot name that is already a column")
     kinds = {t.columns[j][1] for j in unpivot}
-    if len(kinds) > 1:
-        raise _unsupported("unpivot of columns with different types")
     if not kinds:
         raise _unsupported("unpivot of no columns")
-    value_kind = _col(_parts(kinds.pop())[1], False)  # unpivoted nulls are dropped: the column is never null
+    details = {_parts(kind)[:2] for kind in kinds}
+    if len(details) == 1:
+        value_kind = _col(next(iter(details))[1], False)  # unpivoted nulls are dropped: the column is never null
+    elif len({base for base, _ in details}) == 1:  # same base kind, different facets: Number.Type (Power BI)
+        value_kind = _col(_PRIMITIVE_TYPE_NAMES[next(iter(details))[0]] + ".Type", False)
+    elif "any" in kinds:
+        # an untyped column among different base kinds: Any.Type NOT nullable, the same kind the
+        # all-columns-untyped case produces (Power BI answer check 2026-11-18). A temporal mix among the
+        # other unpivoted columns (date + datetime + untyped) is the one shape Power BI answers with the
+        # NULLABLE Any, whose rule this engine has not measured: refuse that shape instead of guessing
+        # (Power BI answer check 2026-11-18, batch 23 item 1).
+        bases = {_parts(kind)[0] for kind in kinds if kind != "any"}
+        if len(bases) >= 2 and any(base not in ("number", "text") for base in bases):
+            raise _unsupported("unpivot of different temporal types with an untyped column")
+        value_kind = _col("Any.Type", False)
+    else:
+        value_kind = "any"  # different base kinds: Any.Type (Power BI)
     columns = tuple(t.columns[j] for j in others) + ((attr, "text"), (value_name, value_kind))
     rows = []
     for row in t.rows:
@@ -1910,6 +1941,7 @@ TABLE_GLOBALS: dict = {
                                     _reorder_columns),
     "Table.RenameColumns": _native((("table", False), ("renames", False), ("missingField", True)),
                                    _rename_columns),
+    "Table.PrefixColumns": _native((("table", False), ("prefix", False)), _prefix_columns),
     "Table.TransformColumns": _native((("table", False), ("transforms", False),
                                        ("defaultTransformation", True), ("missingField", True)),
                                       _transform_columns),
