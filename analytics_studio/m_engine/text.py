@@ -948,6 +948,21 @@ def _new_guid() -> MValue:
     return V.Text(str(uuid.uuid4()))
 
 
+def _guid_from(value: MValue) -> MValue:
+    if isinstance(value, V.Null):
+        return value
+    if not isinstance(value, V.Text):
+        raise V.convert_error(value, V.TypeValue("text"))
+    raw = value.value.strip()
+    if raw.startswith("{") and raw.endswith("}"):
+        raw = raw[1:-1]
+    try:
+        parsed = uuid.UUID(raw)
+    except Exception:
+        raise MError("DataFormat.Error", "We couldn't convert to a guid.", fmt="We couldn't convert to a guid.")
+    return V.Text(str(parsed))
+
+
 # ---- the table added to the stdlib ----------------------------------------------
 
 TEXT_GLOBALS: dict = {
@@ -1008,6 +1023,7 @@ TEXT_GLOBALS: dict = {
     "Text.ToBinary": _native((("text", False), ("encoding", True)), _text_to_binary),
     "Text.InferNumberType": _native((("text", False), ("options", True)), _infer_number_type),
     "Text.NewGuid": _native((), lambda: _new_guid()),
+    "Guid.From": _native((("value", False),), _guid_from),
 }
 
 

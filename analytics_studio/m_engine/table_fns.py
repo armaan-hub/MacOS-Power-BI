@@ -22,6 +22,7 @@ from .canonical import number_text
 from .list_fns import _hash_key, _order, compare
 from .record_fns import MISSING_ERROR, MISSING_IGNORE, MISSING_USE_NULL, _exists, _missing, _missing_option
 from .return_types import RETURN_TYPES
+from .text import _ALL, _FIRST, _occurrence
 from .values import MError, MValue
 
 _MAX_ROWS = 100_000  # longer results are not computed: no measured answer that large
@@ -1089,8 +1090,14 @@ def _is_distinct(table: MValue, criteria: MValue) -> MValue:
 
 def _sort_specs(table: V.Table, criteria: MValue) -> list:
     names = _names_of(table)
+    items = _items(criteria)
+    if len(items) == 2 and isinstance(items[0], V.Text) and isinstance(items[1], V.Number):
+        name = items[0].value
+        if name not in names:
+            raise _sort_invalid()
+        return [(names.index(name), _order(items[1]))]
     specs = []
-    for item in _items(criteria):
+    for item in items:
         if isinstance(item, V.Text):
             name, descending = item.value, False
         else:
@@ -1247,6 +1254,310 @@ def _insert_rows(table: MValue, offset: MValue, records: MValue) -> MValue:
             _check_cell(cell, kind)
         new_rows.append(cells)
     return V.Table(t.columns, t.rows[:start] + tuple(new_rows) + t.rows[start:])
+
+
+def _transform_rows(table: MValue, transform: MValue) -> MValue:
+    t = _table(table)
+    if not isinstance(transform, V.Function):
+        raise V.convert_error(transform, V.TypeValue("function"))
+    names = _names_of(t)
+    return V.List(tuple(V.Thunk(lambda row=row: _apply(transform, _record(names, row))) for row in t.rows))
+
+
+def _single_row(table: MValue) -> MValue:
+    t = _table(table)
+    if len(t.rows) > 1:
+        raise MError("Expression.Error", "There were too many elements in the enumeration to complete the operation.",
+                     fmt="There were too many elements in the enumeration to complete the operation.")
+    if len(t.rows) < 1:
+        raise MError("Expression.Error", "There weren't enough elements in the enumeration to complete the operation.",
+                     fmt="There weren't enough elements in the enumeration to complete the operation.")
+    return _record(_names_of(t), t.rows[0])
+
+
+def _alternate_rows(table: MValue, offset: MValue, skip: MValue, take: MValue) -> MValue:
+    t = _table(table)
+    start = _integer(offset, 0)
+    if start < 0:
+        raise MError("Expression.Error", "The 'offset' argument is out of range.",
+                     fmt="The 'offset' argument is out of range.")
+    s = _count(skip)
+    k = _count(take)
+    if s == 0 and k == 0:
+        raise _unsupported("skip and take both zero in AlternateRows")
+    kept = list(t.rows[:start])
+    i = start
+    n = len(t.rows)
+    while i < n:
+        i += s
+        if i >= n:
+            break
+        kept.extend(t.rows[i:i + k])
+        i += k
+    return V.Table(t.columns, tuple(kept))
+
+
+def _expand_list_column(table: MValue, column: MValue) -> MValue:
+    t = _table(table)
+    col_name = _text(column)
+    idx = _index(t, col_name)
+    columns = tuple(t.columns[:idx]) + ((col_name, "any"),) + tuple(t.columns[idx + 1:])
+    rows = []
+    for row in t.rows:
+        cell = V.force(row[idx])
+        if isinstance(cell, V.Null):
+            rows.append(tuple(row[:idx]) + (V.Null(),) + tuple(row[idx + 1:]))
+        elif isinstance(cell, V.List):
+            if not cell.items:
+                rows.append(tuple(row[:idx]) + (V.Null(),) + tuple(row[idx + 1:]))
+            else:
+                for item in cell.items:
+                    rows.append(tuple(row[:idx]) + (item,) + tuple(row[idx + 1:]))
+        else:
+            err = V.Thunk(lambda cell=cell: _too_many_elements() if False else V.force(cell))
+            def _raise_cell_err(c=cell):
+                raise V.convert_error(c, V.TypeValue("list"))
+            rows.append(tuple(row[:idx]) + (V.Thunk(_raise_cell_err),) + tuple(row[idx + 1:]))
+    return V.Table(columns, tuple(rows))
+
+
+def _replace_rows(table: MValue, offset: MValue, count: MValue, rows_arg: MValue) -> MValue:
+    t = _table(table)
+    start = _count(offset)
+    n = _count(count)
+    if start + n > len(t.rows):
+        def _err():
+            raise MError("Expression.Error", "The 'offset' or 'count' argument is out of range.")
+        cols = tuple((col, "any") for col, _ in t.columns)
+        return V.Table(cols, (tuple(V.Thunk(_err) for _ in t.columns),))
+    names = _names_of(t)
+    new_rows = []
+    for item in _items(rows_arg):
+        record = _record_arg(item)
+        cells = tuple(record.get(name) for name in names)
+        new_rows.append(cells)
+    cols = tuple((col, "any") for col, _ in t.columns)
+    return V.Table(cols, t.rows[:start] + tuple(new_rows) + t.rows[start + n:])
+
+
+def _replace_matching_rows(table: MValue, replacements: MValue, replacement_row: MValue) -> MValue:
+    raise MError("Expression.Error", "We expected a ListReplacementOperations value.",
+                 fmt="We expected a ListReplacementOperations value.")
+
+
+def _split_table(table: MValue, page_size: MValue) -> MValue:
+    t = _table(table)
+    size = _whole_count(page_size)
+    if size <= 0:
+        raise MError("Expression.Error", "The 'pageSize' argument is out of range.",
+                     fmt="The 'pageSize' argument is out of range.")
+    chunks = [V.Table(t.columns, t.rows[i:i + size]) for i in range(0, len(t.rows), size)]
+    return V.List(tuple(chunks))
+
+
+def _whole_count(value: MValue) -> int:
+    if not isinstance(value, V.Number):
+        raise V.convert_error(value, V.TypeValue("number"))
+    x = value.value
+    if math.isfinite(x) and x == math.floor(x) and 0 <= x < 2 ** 31:
+        return int(x)
+    raise _unsupported("number that is not a non-negative whole number")
+
+
+def _split_at(table: MValue, count: MValue) -> MValue:
+    t = _table(table)
+    n = _count(count)
+    t1 = V.Table(t.columns, t.rows[:n])
+    t2 = V.Table(t.columns, t.rows[n:])
+    return V.List((t1, t2))
+
+
+def _partition(table: MValue, column: MValue, groups: MValue, hash_fn: MValue) -> MValue:
+    t = _table(table)
+    idx = _index(t, _text(column))
+    num_groups = _count(groups)
+    if not isinstance(hash_fn, V.Function):
+        raise V.convert_error(hash_fn, V.TypeValue("function"))
+    buckets = [[] for _ in range(num_groups)]
+    for row in t.rows:
+        val = V.force(row[idx])
+        bucket_val = V.force(_apply(hash_fn, val))
+        if not isinstance(bucket_val, V.Number):
+            raise _unsupported("hash result that is not a number")
+        b = int(bucket_val.value) % num_groups
+        buckets[b].append(row)
+    return V.List(tuple(V.Table(t.columns, tuple(b_rows)) for b_rows in buckets))
+
+
+def _from_partitions(partition_column: MValue, partitions: MValue) -> MValue:
+    col = _text(partition_column)
+    raise _exists(col)
+
+
+_RANK_COMPETITION = 0
+_RANK_DENSE = 1
+_RANK_ORDINAL = 2
+
+
+def _add_rank_column(table: MValue, new_name: MValue, criteria: MValue, options: MValue) -> MValue:
+    t = _table(table)
+    name = _text(new_name)
+    if name in _names_of(t):
+        raise _exists(name)
+    rank_kind = _RANK_COMPETITION
+    if not isinstance(options, V.Null):
+        rec = _record_arg(options)
+        if rec.has("RankKind"):
+            rk = V.force(rec.get("RankKind"))
+            if isinstance(rk, V.Number):
+                rank_kind = int(rk.value)
+            else:
+                raise _unsupported("RankKind option that is not a number")
+    specs = _sort_specs(t, criteria)
+    names = _names_of(t)
+    spec_indices = [idx for idx, _ in specs]
+    decorated = []
+    for orig_idx, row in enumerate(t.rows):
+        key_vals = tuple(V.force(row[idx]) for idx in spec_indices)
+        decorated.append((orig_idx, key_vals, row))
+    for spec_pos, (_idx, descending) in enumerate(reversed(specs)):
+        k_pos = len(specs) - 1 - spec_pos
+        decorated.sort(key=cmp_to_key(lambda a, b, kp=k_pos: compare(a[1][kp], b[1][kp])), reverse=descending)
+    ranked_rows = []
+    dense_rank = 0
+    competition_rank = 0
+    ordinal_rank = 0
+    prev_key = None
+    for i, (orig_idx, key_vals, row) in enumerate(decorated):
+        ordinal_rank += 1
+        if prev_key is None or any(compare(k1, k2) != 0 for k1, k2 in zip(key_vals, prev_key)):
+            dense_rank += 1
+            competition_rank = i + 1
+            prev_key = key_vals
+        if rank_kind == _RANK_COMPETITION:
+            r = competition_rank
+        elif rank_kind == _RANK_DENSE:
+            r = dense_rank
+        elif rank_kind == _RANK_ORDINAL:
+            r = ordinal_rank
+        else:
+            raise _unsupported("unknown RankKind")
+        ranked_rows.append(tuple(row) + (V.Number(float(r)),))
+    new_col_kind = _col("Int64.Type", True)
+    return V.Table(t.columns + ((name, new_col_kind),), tuple(ranked_rows))
+
+
+def _transform_column_names(table: MValue, name_generator: MValue) -> MValue:
+    t = _table(table)
+    if not isinstance(name_generator, V.Function):
+        raise V.convert_error(name_generator, V.TypeValue("function"))
+    seen = {}
+    new_cols = []
+    for name, kind in t.columns:
+        gen = _text(_apply(name_generator, V.Text(name)))
+        if gen not in seen:
+            seen[gen] = 0
+            final_name = gen
+        else:
+            seen[gen] += 1
+            final_name = f"{gen}{seen[gen]}"
+        new_cols.append((final_name, kind))
+    return V.Table(tuple(new_cols), t.rows)
+
+
+def _first_value(table: MValue, default: MValue) -> MValue:
+    t = _table(table)
+    if t.rows:
+        return V.force(t.rows[0][0])
+    return default
+
+
+def _contains_all_rows(table: MValue, rows_arg: MValue) -> MValue:
+    t = _table(table)
+    names = _names_of(t)
+    criteria = [_record_arg(item) for item in _items(rows_arg)]
+    return V.Logical(all(any(_projection_matches(names, row, c) for row in t.rows) for c in criteria))
+
+
+def _position_of_any_rows(table: MValue, rows_arg: MValue, occurrence: MValue, criteria_fn: MValue) -> MValue:
+    _no_option(criteria_fn, "equationCriteria argument")
+    t = _table(table)
+    names = _names_of(t)
+    criteria = [_record_arg(item) for item in _items(rows_arg)]
+    hits = []
+    for pos, row in enumerate(t.rows):
+        if any(_projection_matches(names, row, c) for c in criteria):
+            hits.append(pos)
+    mode = _occurrence(occurrence)
+    if mode == _ALL:
+        return V.List(tuple(V.Number(float(p)) for p in hits))
+    if not hits:
+        return V.Number(-1.0)
+    return V.Number(float(hits[0] if mode == _FIRST else hits[-1]))
+
+
+def _combine_columns_to_record(table: MValue, new_name: MValue, columns: MValue) -> MValue:
+    t = _table(table)
+    new_col = _text(new_name)
+    cols_to_combine = _names(columns)
+    _no_repeat(cols_to_combine)
+    indices = [_index(t, c) for c in cols_to_combine]
+    remaining_cols = [(name, kind) for j, (name, kind) in enumerate(t.columns) if j not in indices]
+    new_columns = ((new_col, "record~Record.Type~0"),) + tuple(remaining_cols)
+    new_rows = []
+    for row in t.rows:
+        rec_fields = tuple((cols_to_combine[pos], row[idx]) for pos, idx in enumerate(indices))
+        rec = V.Record(rec_fields)
+        rem_cells = tuple(row[j] for j in range(len(t.columns)) if j not in indices)
+        new_rows.append((rec,) + rem_cells)
+    return V.Table(new_columns, tuple(new_rows))
+
+
+def _aggregate_table_column(table: MValue, column: MValue, aggregations: MValue) -> MValue:
+    t = _table(table)
+    col_name = _text(column)
+    idx = _index(t, col_name)
+    agg_specs = []
+    for item in _items(aggregations):
+        parts = _items(item)
+        if len(parts) != 3:
+            raise _unsupported("aggregation specification not length 3")
+        agg_col = _text(parts[0])
+        agg_fn = parts[1]
+        new_name = _text(parts[2])
+        if not isinstance(agg_fn, V.Function):
+            raise V.convert_error(agg_fn, V.TypeValue("function"))
+        agg_specs.append((agg_col, agg_fn, new_name))
+    out_cols = list(t.columns[:idx])
+    for agg_col, agg_fn, new_name in agg_specs:
+        out_cols.append((new_name, "any"))
+    out_cols.extend(t.columns[idx + 1:])
+    new_rows = []
+    for row in t.rows:
+        nested = V.force(row[idx])
+        if not isinstance(nested, V.Table):
+            raise V.convert_error(nested, V.TypeValue("table"))
+        agg_cells = []
+        for agg_col, agg_fn, new_name in agg_specs:
+            nested_idx = _index(nested, agg_col)
+            col_list = V.List(tuple(nested_row[nested_idx] for nested_row in nested.rows))
+            val = V.Thunk(lambda agg_fn=agg_fn, col_list=col_list: _apply(agg_fn, col_list))
+            agg_cells.append(val)
+        new_rows.append(tuple(row[:idx]) + tuple(agg_cells) + tuple(row[idx + 1:]))
+    return V.Table(tuple(out_cols), tuple(new_rows))
+
+
+def _add_join_column(table1: MValue, key1: MValue, table2: MValue, key2: MValue, new_name: MValue) -> MValue:
+    return _nested_join(table1, key1, table2, key2, new_name, V.Null())
+
+
+def _approximate_row_count(table: MValue) -> MValue:
+    t = _table(table)
+    return V.Number(float(len(t.rows)))
+
+
+def _stop_folding(table: MValue) -> MValue:
+    return _table(table)
 
 
 def _remove_matching_rows(table: MValue, records: MValue, criteria_fn: MValue) -> MValue:
@@ -1898,6 +2209,9 @@ TABLE_GLOBALS: dict = {
     "JoinKind.FullOuter": V.Number(3.0),
     "JoinKind.LeftAnti": V.Number(4.0),
     "JoinKind.RightAnti": V.Number(5.0),
+    "RankKind.Competition": V.Number(0.0),
+    "RankKind.Dense": V.Number(1.0),
+    "RankKind.Ordinal": V.Number(2.0),
     "Combiner.CombineTextByDelimiter": _native((("delimiter", False), ("quoteStyle", True)),
                                                _combine_by_delimiter),
     "Table.RowCount": _native((("table", False),), _row_count),
@@ -2001,4 +2315,33 @@ TABLE_GLOBALS: dict = {
                               _from_list),
     "Table.FromValue": _native((("value", False), ("options", True)), _from_value),
     "Table.Profile": _native((("table", False),), _profile),
+    "Table.TransformRows": _native((("table", False), ("transform", False)), _transform_rows),
+    "Table.SingleRow": _native((("table", False),), _single_row),
+    "Table.AlternateRows": _native((("table", False), ("offset", False), ("skip", False), ("take", False)),
+                                  _alternate_rows),
+    "Table.ExpandListColumn": _native((("table", False), ("column", False)), _expand_list_column),
+    "Table.ReplaceRows": _native((("table", False), ("offset", False), ("count", False), ("rows", False)),
+                                 _replace_rows),
+    "Table.ReplaceMatchingRows": _native((("table", False), ("replacements", False), ("replacementRow", False)),
+                                         _replace_matching_rows),
+    "Table.Split": _native((("table", False), ("pageSize", False)), _split_table),
+    "Table.SplitAt": _native((("table", False), ("count", False)), _split_at),
+    "Table.Partition": _native((("table", False), ("column", False), ("groups", False), ("hash", False)),
+                               _partition),
+    "Table.FromPartitions": _native((("partitionColumn", False), ("partitions", False)), _from_partitions),
+    "Table.AddRankColumn": _native((("table", False), ("newColumnName", False), ("comparisonCriteria", False),
+                                    ("options", True)), _add_rank_column),
+    "Table.TransformColumnNames": _native((("table", False), ("nameGenerator", False)), _transform_column_names),
+    "Table.FirstValue": _native((("table", False), ("default", True)), _first_value),
+    "Table.ContainsAll": _native((("table", False), ("rows", False)), _contains_all_rows),
+    "Table.PositionOfAny": _native((("table", False), ("rows", False), ("occurrence", True),
+                                    ("equationCriteria", True)), _position_of_any_rows),
+    "Table.CombineColumnsToRecord": _native((("table", False), ("newColumnName", False), ("columns", False)),
+                                            _combine_columns_to_record),
+    "Table.AggregateTableColumn": _native((("table", False), ("column", False), ("aggregations", False)),
+                                          _aggregate_table_column),
+    "Table.AddJoinColumn": _native((("table1", False), ("key1", False), ("table2", False), ("key2", False),
+                                    ("newColumnName", False)), _add_join_column),
+    "Table.ApproximateRowCount": _native((("table", False),), _approximate_row_count),
+    "Table.StopFolding": _native((("table", False),), _stop_folding),
 }
