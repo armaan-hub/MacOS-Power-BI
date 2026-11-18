@@ -50,7 +50,7 @@ KEYWORDS = frozenset({
 })
 
 _WORD = r"[^\W\d]\w*"
-_IDENT_RE = re.compile(rf"{_WORD}(?:\.{_WORD})*")
+_IDENT_RE = re.compile(rf"{_WORD}(?:\.(?:{_WORD}|\d[A-Za-z_]\w*))*")
 _HASH_IDENT_RE = re.compile(r"#[^\W\d]\w*(?:\.[^\W\d]\w*)*")
 _NUMBER_RE = re.compile(r"0[xX][0-9A-Fa-f]+|(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?")
 _FIELD_RE = re.compile(
