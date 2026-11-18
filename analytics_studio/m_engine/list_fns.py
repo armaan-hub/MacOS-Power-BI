@@ -1197,22 +1197,25 @@ class _NetRandom:
 def _list_random(count: MValue, seed: MValue = V.Null()) -> MValue:
     if not isinstance(count, V.Number):
         raise V.convert_error(count, V.TypeValue("number"))
-    c = _whole(count)
+    cx = count.value
+    if math.isnan(cx) or math.isinf(cx) or cx != math.floor(cx):
+        raise V.generic_error("The number is out of range of a 32 bit integer value.")
+    c = int(cx)
     if c < 0:
         raise V.generic_error("The 'count' argument is out of range.")
-    if c == 0:
-        return V.List(())
-    c = _bounded(c)
     if not isinstance(seed, V.Null):
         if not isinstance(seed, V.Number):
             raise V.convert_error(seed, V.TypeValue("number"))
         sx = seed.value
         if math.isnan(sx) or math.isinf(sx) or sx != math.floor(sx):
             raise _unsupported("List.Random seed that is not a whole number")
-        s = int(sx)
-        if s < -2147483648 or s > 2147483647:
+        if sx < -2147483648 or sx > 2147483647:
             raise _unsupported("List.Random seed outside 32-bit integer range")
-        gen = _NetRandom(s)
+    if c == 0:
+        return V.List(())
+    c = _bounded(c)
+    if not isinstance(seed, V.Null):
+        gen = _NetRandom(int(seed.value))
         return V.List(tuple(V.Number(gen.Sample()) for _ in range(c)))
     import random
     return V.List(tuple(V.Number(random.random()) for _ in range(c)))

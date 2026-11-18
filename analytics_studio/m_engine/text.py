@@ -829,7 +829,7 @@ def _text_to_binary(value: MValue, encoding: MValue = V.Null()) -> MValue:
     return V.Binary(_encode(text, page))
 
 
-def _encode(text: str, page) -> bytes:
+def _encode(text: str, page, fallback_question: bool = False) -> bytes:
     whole = re.sub("[\ud800-\udfff]", "\ufffd", text)  # a lone surrogate becomes U+FFFD in the Unicode pages
     if page is None or page == 65001:
         return whole.encode("utf-8")
@@ -857,6 +857,8 @@ def _encode(text: str, page) -> bytes:
             except UnicodeEncodeError:
                 if codec == "cp1252" and code in _CP1252_PASS_THROUGH:
                     out.append(code)
+                elif fallback_question:
+                    out.append(0x3F)
                 else:
                     raise _unpinned("character that has no exact match in this code page")
     return bytes(out)

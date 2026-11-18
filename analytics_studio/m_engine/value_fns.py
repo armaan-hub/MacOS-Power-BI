@@ -1448,7 +1448,8 @@ def _character_from_number(value: MValue) -> MValue:
     code = int(x)
     if code <= 0xFFFF:
         if 0xD800 <= code <= 0xDFFF:
-            raise _unsupported("lone surrogate character")
+            raise MError("Expression.Error", "We couldn't convert to Character.",
+                         fmt="We couldn't convert to Character.")
         return V.Text(chr(code))
     rest = code - 0x10000
     # a character outside the BMP is two UTF-16 units; Power BI cannot print the pair (UNREPRESENTABLE)
@@ -1619,30 +1620,22 @@ def _binary_decompress(binary: MValue, compressionType: MValue) -> MValue:
         except Exception:
             raise MError("DataFormat.Error", "Found invalid data while decoding.")
     # GZip (0):
-    if data[:2] == b"\x1f\x8b" and len(data) < 10:
-        raise _unsupported("truncated gzip header")
-    d = zlib.decompressobj(16 + zlib.MAX_WBITS)
+    if not data.startswith(b"\x1f\x8b"):
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    if len(data) <= 10:
+        return V.Binary(b"")
+    d = zlib.decompressobj(-15)
     try:
-        res = d.decompress(data)
-    except zlib.error as err:
-        msg = str(err)
-        if "incorrect data check" in msg or "incorrect length check" in msg or "invalid" in msg or "incorrect header check" in msg:
+        res = d.decompress(data[10:])
+    except Exception:
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    if len(d.unused_data) >= 8:
+        expected_crc, expected_isize = struct.unpack("<II", d.unused_data[:8])
+        actual_crc = zlib.crc32(res) & 0xffffffff
+        actual_isize = len(res) & 0xffffffff
+        if actual_crc != expected_crc or actual_isize != expected_isize:
             raise MError("DataFormat.Error", "Found invalid data while decoding.")
-        raise _unsupported(f"unsupported gzip error: {msg}")
-    if d.eof:
-        return V.Binary(res)
-    # Missing trailing ISIZE (truncated by 4 bytes): try appending 4-byte expected ISIZE
-    d2 = zlib.decompressobj(16 + zlib.MAX_WBITS)
-    try:
-        dummy_isize = struct.pack("<I", len(res) & 0xffffffff)
-        res2 = d2.decompress(data + dummy_isize)
-        if d2.eof:
-            return V.Binary(res2)
-    except zlib.error as err:
-        msg = str(err)
-        if "incorrect data check" in msg:
-            raise MError("DataFormat.Error", "Found invalid data while decoding.")
-    raise _unsupported("truncated gzip body without trailer")
+    return V.Binary(res)
 
 
 def _binary_range(value: MValue, offset: MValue, count: MValue) -> MValue:
@@ -2042,7 +2035,7 @@ def _lines_to_binary(lines: MValue, lineSeparator: MValue = V.Null(), encoding: 
     text_val = _lines_to_text(lines, lineSeparator)
     page = _encoding_page(encoding)
     _check_page(page)
-    raw = _encode(text_val.value, page)
+    raw = _encode(text_val.value, page, fallback_question=True)
     if isinstance(includeByteOrderMark, V.Logical) and includeByteOrderMark.value:
         bom = None
         if page is None or page == 65001:
