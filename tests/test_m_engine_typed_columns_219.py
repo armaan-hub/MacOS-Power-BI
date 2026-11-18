@@ -142,6 +142,53 @@ BATCH17_PAIRS = [
     ),
 ]
 
+BATCH18_PAIRS = [
+    (
+        'Table.Join(#table({"K","W"},{{"a",1}}), "K", #table({"K","V"},{{"a",9}}), "K")',
+        'V:table:cols=["K":"any","W":"any","V":"any"];rows=[list:[text:"a",number:1,number:9]]',
+    ),
+    (
+        'Table.Join(#table({"K","W"},{{"a",1},{"b",2}}), "K", #table({"K","V"},{{"a",9}}), "K", JoinKind.LeftAnti)',
+        'ERR:Expression.Error: A join operation cannot result in a table with duplicate column names ("K").',
+    ),
+    (
+        'Table.Join(#table({"K","W"},{{"a",1}}), "K", #table({"K","V"},{{"a",9}}), "K", JoinKind.LeftOuter)',
+        'ERR:Expression.Error: A join operation cannot result in a table with duplicate column names ("K").',
+    ),
+    (
+        'Table.Join(#table({"K","W","J"},{{"a",1,2}}), {"K","W"}, #table({"K","V","Z"},{{"a",1,9}}), {"K","V"})',
+        'V:table:cols=["K":"any","W":"any","J":"any","V":"any","Z":"any"];rows=[list:[text:"a",number:1,number:2,number:1,number:9]]',
+    ),
+    (
+        'Table.ColumnsOfType(#table(type table [K = text, W = Int64.Type, N = number, C = Currency.Type, X = table, Y = list], {}), {type table})',
+        'V:list:[text:"X"]',
+    ),
+    (
+        'Table.ColumnsOfType(#table(type table [K = text, W = Int64.Type, N = number, C = Currency.Type, X = table, Y = list], {}), {type list})',
+        'V:list:[text:"Y"]',
+    ),
+    (
+        'Table.Join(#table({"K","W"},{{"a",1}}), "K", #table({"K","W"},{{"a",9}}), "K")',
+        'ERR:Expression.Error: A join operation cannot result in a table with duplicate column names ("W").',
+    ),
+    (
+        'Table.Join(#table({"K","W"},{{"a",1}}), "K", #table({"Q","K"},{{"a","z"}}), "Q")',
+        'ERR:Expression.Error: A join operation cannot result in a table with duplicate column names ("K").',
+    ),
+    (
+        'Table.NestedJoin(#table({"K","W"},{{"a",1},{"b",2}}), {"K"}, #table({"K","V"},{{"a",9}}), {"K"}, "J", JoinKind.Inner)',
+        'V:table:cols=["K":"any","W":"any","J":"table"];rows=[list:[text:"a",number:1,table:cols=["K":"any","V":"any"];rows=[list:[text:"a",number:9]]]]',
+    ),
+    (
+        'Table.Join(#table({"A","B"},{{"a",1}}), "A", #table({"A","C"},{{"a",2}}), "A")',
+        'V:table:cols=["A":"any","B":"any","C":"any"];rows=[list:[text:"a",number:1,number:2]]',
+    ),
+    (
+        'Table.Join(#table({"K","W"},{{"a",1}}), "K", #table({"K","V"},{{"a",9}}), "K", JoinKind.FullOuter)',
+        'ERR:Expression.Error: A join operation cannot result in a table with duplicate column names ("K").',
+    ),
+]
+
 
 @pytest.mark.parametrize("probe,expected", BATCH16_PAIRS)
 def test_batch16_power_bi_answers(probe: str, expected: str) -> None:
@@ -151,6 +198,17 @@ def test_batch16_power_bi_answers(probe: str, expected: str) -> None:
 @pytest.mark.parametrize("probe,expected", BATCH17_PAIRS)
 def test_batch17_power_bi_answers(probe: str, expected: str) -> None:
     assert evaluate_to_text(probe) == expected
+
+
+@pytest.mark.parametrize("probe,expected", BATCH18_PAIRS)
+def test_batch18_power_bi_answers(probe: str, expected: str) -> None:
+    assert evaluate_to_text(probe) == expected
+
+
+def test_batch18_item9_columns_of_type_unrepresentable_refused() -> None:
+    expr = 'Table.ColumnsOfType(#table(type table [K = text, W = Int64.Type, N = number, C = Currency.Type, X = table, Y = list], {}), {"text"})'
+    res = evaluate_to_text(expr)
+    assert res.startswith("ERR:")
 
 
 def test_table_combine_three_tables_distinct_facets_does_not_crash() -> None:

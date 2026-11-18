@@ -1571,20 +1571,35 @@ def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MVal
     left row matches (its right rows in right order), a LeftOuter join with no match or a single left row, and a
     LeftAnti join (the unmatched left rows in left order)."""
     join_kind = _JOIN_INNER if isinstance(kind, V.Null) else _count(kind)
-    if join_kind not in (_JOIN_INNER, _JOIN_LEFT_OUTER, _JOIN_LEFT_ANTI):
-        raise _unsupported("join kind other than Inner, LeftOuter or LeftAnti")
     left, right = _table(table1), _table(table2)
     left_idx = _join_key_indexes(left, key1)
     right_idx = _join_key_indexes(right, key2)
     if len(left_idx) != len(right_idx):
         raise _unsupported("join keys of different lengths")
-    for _name, kind_ in left.columns + right.columns:
+
+    dedup_right_indexes = set()
+    if join_kind == _JOIN_INNER:
+        for l_i, r_i in zip(left_idx, right_idx):
+            if left.columns[l_i][0] == right.columns[r_i][0]:
+                dedup_right_indexes.add(r_i)
+
+    right_non_key = [i for i in range(len(right.columns)) if i not in dedup_right_indexes]
+    right_cols = tuple(right.columns[i] for i in right_non_key)
+
+    seen = set()
+    for col_name, _ in left.columns + right_cols:
+        if col_name in seen:
+            msg = f'A join operation cannot result in a table with duplicate column names ("{col_name}").'
+            raise MError("Expression.Error", msg, fmt=msg)
+        seen.add(col_name)
+
+    if join_kind not in (_JOIN_INNER, _JOIN_LEFT_OUTER, _JOIN_LEFT_ANTI):
+        raise _unsupported("join kind other than Inner, LeftOuter or LeftAnti")
+
+    for _name, kind_ in left.columns + right_cols:
         if kind_ != "any" and join_kind != _JOIN_INNER:
             raise _unsupported("join of typed columns")
-    right_non_key = [i for i, (name, _) in enumerate(right.columns) if i not in right_idx or name not in _names_of(left)]
-    right_cols = tuple(right.columns[i] for i in right_non_key)
-    if len(set(_names_of(left) + [c[0] for c in right_cols])) != len(left.columns) + len(right_cols):
-        raise _unsupported("join with a repeated column name")
+
     index = _join_index(right, right_idx)
     left_keys = [_join_key(row, left_idx) for row in left.rows]
     matched = sum(1 for key in left_keys if key in index)
