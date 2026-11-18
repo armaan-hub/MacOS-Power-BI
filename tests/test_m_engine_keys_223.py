@@ -116,6 +116,72 @@ PAIRS = [
     # batch 31 item 16
     ('Table.Keys(Table.RemoveFirstN(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),1))',
      'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 0
+    ('Table.Keys(Table.Group(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),"W",{{"S", each List.Sum([V]), type number}}))',
+     'V:list:[record:["Columns"=list:[text:"W"],"Primary"=true]]'),
+    # batch 32 item 1
+    ('Table.Keys(Table.Group(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K","V"},true),"K",{{"S", each List.Sum([V]), type number}}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=true]]'),
+    # batch 32 item 2
+    ('Table.Keys(Table.Group(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K","V"},true),{"K","V"},{{"S", each List.Sum([V]), type number}}))',
+     'V:list:[record:["Columns"=list:[text:"K",text:"V"],"Primary"=true]]'),
+    # batch 32 item 3
+    ('Table.Keys(Table.Group(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{"K","W"},{{"S", each List.Sum([V]), type number}}))',
+     'V:list:[record:["Columns"=list:[text:"K",text:"W"],"Primary"=true]]'),
+    # batch 32 item 4
+    ('Table.Keys(Table.Group(Table.FirstN(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),0),"K",{{"S", each List.Sum([V]), type number}}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=true]]'),
+    # batch 32 item 5
+    ('Table.Keys(Table.Group(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),"K",{{"S", each List.Sum([V]), type number}}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=true]]'),
+    # batch 32 item 6
+    ('Table.Keys(Table.Distinct(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{"W"}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 7
+    ('Table.Keys(Table.Distinct(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{"K"}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 8
+    ('Table.Keys(Table.TransformColumnTypes(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{{"K", type text}}))',
+     'V:list:[]'),
+    # batch 32 item 9
+    ('Table.Keys(Table.TransformColumnTypes(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{{"K", Int64.Type}}))',
+     'V:list:[]'),
+    # batch 32 item 10
+    ('Table.Keys(Table.TransformColumnTypes(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{{"V", type text}}, "en-US"))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 11
+    ('Table.Keys(Table.TransformColumns(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{{"V", each _ + 1}}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 12
+    ('Table.Keys(Table.TransformColumns(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{{"K", each _ & "z"}}))',
+     'V:list:[]'),
+    # batch 32 item 13
+    ('Table.Keys(Table.SelectColumns(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{"K","V"}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 14
+    ('Table.Keys(Table.SelectColumns(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{"V","W"}))',
+     'V:list:[]'),
+    # batch 32 item 18
+    ('Table.Keys(Table.ReplaceValue(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),"a","q",Replacer.ReplaceValue,{"K"}))',
+     'V:list:[]'),
+    # batch 32 item 19
+    ('Table.Keys(Table.FillDown(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),{"W"}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 20
+    ('Table.Keys(Table.Reverse(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false)))',
+     'ERR:Expression.Error: The import Table.Reverse matches no exports. Did you miss a module reference?'),
+    # batch 32 item 21
+    ('Table.Keys(Table.Range(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),1,1))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 22
+    ('Table.Keys(Table.RemoveRows(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),0,1))',
+     'V:list:[]'),
+    # batch 32 item 23
+    ('Table.Keys(Table.DuplicateColumn(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),"K","K2"))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 32 item 24
+    ('Table.Keys(Table.AddIndexColumn(Table.AddKey(#table(type table [K = text, V = Int64.Type, W = text], {{"a",1,"x"},{"b",2,"x"},{"a",3,"y"}}),{"K"},false),"I",0,1))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
 ]
 
 
@@ -125,9 +191,9 @@ def test_m_engine_keys_and_schema_pairs(probe: str, expected: str):
 
 
 def test_unmeasured_key_propagation_refusal():
-    # Calling an unmeasured table function (e.g. Table.SelectColumns) on a table with keys sets keys_unmeasured
+    # Calling an unmeasured table function (e.g. Table.SplitColumn) on a table with keys sets keys_unmeasured
     # Calling Table.Keys on such a table must refuse with _unsupported
-    probe = 'Table.Keys(Table.SelectColumns(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1}}), {"K"}, false), {"K"}))'
+    probe = 'Table.Keys(Table.SplitColumn(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a-1",1}}), {"K"}, false), "K", Splitter.SplitTextByDelimiter("-"), {"K1","K2"}))'
     assert evaluate_to_text(probe) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
 
 
@@ -180,11 +246,11 @@ def test_review_fix_value_replace_type():
 
 def test_review_fix_add_key_replace_keys_unmeasured_propagation():
     # Finding 3: AddKey / ReplaceKeys on unmeasured table keeps unmeasured flag
-    # (using unmeasured table function e.g. Table.SelectColumns)
-    p_add_after_unmeasured = 'Table.Keys(Table.AddKey(Table.SelectColumns(Table.AddKey(#table({"A"}, {{1},{2}}), {"A"}, false), {"A"}), {"A"}, false))'
+    # (using unmeasured table function e.g. Table.SplitColumn)
+    p_add_after_unmeasured = 'Table.Keys(Table.AddKey(Table.SplitColumn(Table.AddKey(#table({"A"}, {{"1-2"},{"2-3"}}), {"A"}, false), "A", Splitter.SplitTextByDelimiter("-"), {"A1","A2"}), {"A1"}, false))'
     assert evaluate_to_text(p_add_after_unmeasured) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
 
-    p_rep_after_unmeasured = 'Table.Keys(Table.ReplaceKeys(Table.SelectColumns(Table.AddKey(#table({"A"}, {{1},{2}}), {"A"}, false), {"A"}), {[Columns={"A"}, Primary=false]}))'
+    p_rep_after_unmeasured = 'Table.Keys(Table.ReplaceKeys(Table.SplitColumn(Table.AddKey(#table({"A"}, {{"1-2"},{"2-3"}}), {"A"}, false), "A", Splitter.SplitTextByDelimiter("-"), {"A1","A2"}), {[Columns={"A1"}, Primary=false]}))'
     assert evaluate_to_text(p_rep_after_unmeasured) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
 
 

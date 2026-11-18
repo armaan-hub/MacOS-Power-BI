@@ -50,6 +50,14 @@ _MEASURED_KEY_PROPAGATORS = {
     "_reorder_columns",
     "_combine",
     "_group",
+    "_range",
+    "_duplicate_column",
+    "_add_index_column",
+    "_fill_down",
+    "_remove_rows",
+    "_select_columns",
+    "_transform_columns",
+    "_replace_value_table",
 }
 
 
@@ -685,8 +693,8 @@ def _range(table: MValue, offset: MValue, count: MValue) -> MValue:
     t = _table(table)
     start = _count(offset)
     if isinstance(count, V.Null):
-        return V.Table(t.columns, t.rows[start:])
-    return V.Table(t.columns, t.rows[start:start + _count(count)])
+        return V.Table(t.columns, t.rows[start:], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(t.columns, t.rows[start:start + _count(count)], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _repeat(table: MValue, count: MValue) -> MValue:
@@ -724,7 +732,17 @@ def _select_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
             columns.append((name, "null"))
             picks.append(None)
     rows = tuple(tuple(row[i] if i is not None else V.Null() for i in picks) for row in t.rows)
-    return V.Table(tuple(columns), rows)
+    new_keys = None
+    if t.keys is not None:
+        kept_keys = []
+        wanted_set = set(wanted)
+        for k in t.keys:
+            cols_val = k.get("Columns")
+            cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
+            if all(c in wanted_set for c in cols):
+                kept_keys.append(k)
+        new_keys = tuple(kept_keys)
+    return V.Table(tuple(columns), rows, meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _remove_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
@@ -887,7 +905,17 @@ def _transform_columns(table: MValue, transforms: MValue, default: MValue, missi
         rows.append(tuple(cells))
     columns = tuple((name, _transformed_kind(fns[i][0], fns[i][1], kind) if i in fns else kind)
                     for i, (name, kind) in enumerate(t.columns))
-    return V.Table(columns, tuple(rows))
+    new_keys = None
+    if t.keys is not None:
+        kept_keys = []
+        transformed_names = {t.columns[i][0] for i in fns}
+        for k in t.keys:
+            cols_val = k.get("Columns")
+            cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
+            if not any(c in transformed_names for c in cols):
+                kept_keys.append(k)
+        new_keys = tuple(kept_keys)
+    return V.Table(columns, tuple(rows), meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _conversion_culture(culture: MValue) -> Optional[str]:
@@ -925,7 +953,17 @@ def _transform_column_types(table: MValue, transforms: MValue, culture: MValue) 
         rows.append(tuple(cells))
     columns = tuple((name, _col(changes[i], True) if i in changes else kind)
                     for i, (name, kind) in enumerate(t.columns))
-    return V.Table(columns, tuple(rows), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    new_keys = None
+    if t.keys is not None:
+        kept_keys = []
+        transformed_names = {t.columns[i][0] for i in changes}
+        for k in t.keys:
+            cols_val = k.get("Columns")
+            cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
+            if not any(c in transformed_names for c in cols):
+                kept_keys.append(k)
+        new_keys = tuple(kept_keys)
+    return V.Table(columns, tuple(rows), meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _replaced_kind(replacer: V.Function, old_kind: str, new: MValue) -> str:
@@ -965,7 +1003,34 @@ def _replace_value_table(table: MValue, old: MValue, new: MValue, replacer: MVal
             cells[i] = V.Thunk(lambda cell=row[i]: _apply(replacer, V.force(cell), old, new))
         rows.append(tuple(cells))
     kinds = {i: _replaced_kind(replacer, t.columns[i][1], new) for i in targets}
-    return V.Table(tuple((name, kinds.get(i, kind)) for i, (name, kind) in enumerate(t.columns)), tuple(rows))
+
+    # Key propagation:
+    # Table.ReplaceValue on a key column: key dropped.
+    # For ReplaceValue on only non-key columns, unmeasured -> unmeasured flag.
+    new_keys = None
+    new_unmeasured = t.keys_unmeasured
+    if t.keys is not None:
+        kept_keys = []
+        replaced_set = set(names)
+        dropped_any_key = False
+        for k in t.keys:
+            cols_val = k.get("Columns")
+            cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
+            if any(c in replaced_set for c in cols):
+                dropped_any_key = True
+            else:
+                kept_keys.append(k)
+        if dropped_any_key:
+            new_keys = tuple(kept_keys)
+        else:
+            # Replaced only non-key columns -> unmeasured flag
+            new_keys = None
+            new_unmeasured = True
+    elif t.keys_unmeasured:
+        new_unmeasured = True
+
+    return V.Table(tuple((name, kinds.get(i, kind)) for i, (name, kind) in enumerate(t.columns)), tuple(rows),
+                   meta=t.meta, keys=new_keys, keys_unmeasured=new_unmeasured)
 
 
 def _fill(table: MValue, columns: MValue, down: bool) -> MValue:
@@ -985,7 +1050,15 @@ def _fill(table: MValue, columns: MValue, down: bool) -> MValue:
             else:
                 last = value
                 rows[r][i] = value
-    return V.Table(t.columns, tuple(tuple(row) for row in rows))
+    return V.Table(t.columns, tuple(tuple(row) for row in rows), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+
+
+def _fill_down(t: MValue, c: MValue) -> MValue:
+    return _fill(t, c, True)
+
+
+def _fill_up(t: MValue, c: MValue) -> MValue:
+    return _fill(t, c, False)
 
 
 def _add_column(table: MValue, name: MValue, selector: MValue, kind: MValue) -> MValue:
@@ -1015,7 +1088,8 @@ def _add_index_column(table: MValue, name: MValue, start: MValue, step: MValue, 
     first = _integer(start, 0)
     increment = _integer(step, 1)
     rows = tuple(tuple(row) + (V.Number(float(first + i * increment)),) for i, row in enumerate(t.rows))
-    return V.Table(t.columns + ((new, explicit if explicit is not None else "number"),), rows)
+    return V.Table(t.columns + ((new, explicit if explicit is not None else "number"),), rows,
+                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _duplicate_column(table: MValue, source: MValue, name: MValue, kind: MValue) -> MValue:
@@ -1026,7 +1100,8 @@ def _duplicate_column(table: MValue, source: MValue, name: MValue, kind: MValue)
     if new in _names_of(t):
         raise _unsupported("duplicate onto an existing column name")
     rows = tuple(tuple(row) + (row[i],) for row in t.rows)
-    return V.Table(t.columns + ((new, explicit if explicit is not None else t.columns[i][1]),), rows)
+    return V.Table(t.columns + ((new, explicit if explicit is not None else t.columns[i][1]),), rows,
+                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 _EXTRA_LIST, _EXTRA_ERROR, _EXTRA_IGNORE = 0, 1, 2
@@ -1404,7 +1479,8 @@ def _remove_rows(table: MValue, offset: MValue, count: MValue) -> MValue:
     n = _count_or(count, 1)
     if start + n > len(t.rows):
         raise _unsupported("removal past the last row")
-    return V.Table(t.columns, t.rows[:start] + t.rows[start + n:])
+    return V.Table(t.columns, t.rows[:start] + t.rows[start + n:],
+                   meta=t.meta, keys=(), keys_unmeasured=False)
 
 
 def _insert_rows(table: MValue, offset: MValue, records: MValue) -> MValue:
@@ -1949,21 +2025,13 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
     columns += tuple((name, kind if kind is not None else _function_spec(fn)) for name, fn, kind in aggs)
 
     # Key propagation for Table.Group:
-    # On a KEYED input table (single group column, given as text "K" or {"K"}):
-    # result Table.Keys is exactly one record [Columns=<the group columns>, Primary=true].
-    # Group by several columns, or any other shape, is unmeasured -> mark the result keys_unmeasured.
-    # Group on a KEYLESS input: leave today's behaviour (Table.Keys -> {}), it is unmeasured but unchanged.
-    if bool(t.keys or t.keys_unmeasured):
-        if len(key_names) == 1 and not t.keys_unmeasured:
-            group_key_record = V.Record((
-                ("Columns", V.List((V.Text(key_names[0]),))),
-                ("Primary", V.Logical(True)),
-            ))
-            return V.Table(columns, tuple(rows), meta=t.meta, keys=(group_key_record,), keys_unmeasured=False)
-        else:
-            return V.Table(columns, tuple(rows), meta=t.meta, keys=None, keys_unmeasured=True)
-
-    return V.Table(columns, tuple(rows))
+    # Table.Group (any input, keyed or keyless, one or several group columns, group column equal to a key or not):
+    # result keys = exactly one record [Columns = the group columns in the order given, Primary = true]
+    group_key_record = V.Record((
+        ("Columns", V.List(tuple(V.Text(name) for name in key_names))),
+        ("Primary", V.Logical(True)),
+    ))
+    return V.Table(columns, tuple(rows), meta=t.meta, keys=(group_key_record,), keys_unmeasured=False)
 
 
 def _aggregate_kind(fn: V.Function, column_kind: str) -> str:
@@ -2578,8 +2646,8 @@ TABLE_GLOBALS: dict = {
                                            ("culture", True)), _transform_column_types),
     "Table.ReplaceValue": _native((("table", False), ("oldValue", False), ("newValue", False),
                                    ("replacer", False), ("columns", True)), _replace_value_table),
-    "Table.FillDown": _native((("table", False), ("columns", False)), lambda t, c: _fill(t, c, True)),
-    "Table.FillUp": _native((("table", False), ("columns", False)), lambda t, c: _fill(t, c, False)),
+    "Table.FillDown": _native((("table", False), ("columns", False)), _fill_down),
+    "Table.FillUp": _native((("table", False), ("columns", False)), _fill_up),
     "Table.Distinct": _native((("table", False), ("equationCriteria", True)), _distinct),
     "Table.IsDistinct": _native((("table", False), ("equationCriteria", True)), _is_distinct),
     "Table.Sort": _native((("table", False), ("comparisonCriteria", False)), _sort),
