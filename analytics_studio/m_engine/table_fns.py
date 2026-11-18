@@ -1519,7 +1519,10 @@ def combine_tables(parts: list) -> V.Table:
         full = len(present) == len(parts)
         details = {_parts(kind)[:2] for kind in present}
         if len(details) > 1 and len({base for base, _ in details}) == 1:
-            raise _unsupported("combined column of different types of the same kind")
+            base = next(iter(details))[0]
+            nullable = (not full) or any(_parts(kind)[2] for kind in present)
+            columns.append((name, _col(_PRIMITIVE_TYPE_NAMES[base] + ".Type", nullable)))
+            continue
         if len(details) > 1:
             columns.append((name, "any"))
             continue
@@ -1576,9 +1579,11 @@ def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MVal
     if len(left_idx) != len(right_idx):
         raise _unsupported("join keys of different lengths")
     for _name, kind_ in left.columns + right.columns:
-        if kind_ != "any" and (join_kind != _JOIN_INNER or "~" in kind_):
+        if kind_ != "any" and join_kind != _JOIN_INNER:
             raise _unsupported("join of typed columns")
-    if len(set(_names_of(left) + _names_of(right))) != len(left.columns) + len(right.columns):
+    right_non_key = [i for i, (name, _) in enumerate(right.columns) if i not in right_idx or name not in _names_of(left)]
+    right_cols = tuple(right.columns[i] for i in right_non_key)
+    if len(set(_names_of(left) + [c[0] for c in right_cols])) != len(left.columns) + len(right_cols):
         raise _unsupported("join with a repeated column name")
     index = _join_index(right, right_idx)
     left_keys = [_join_key(row, left_idx) for row in left.rows]
@@ -1586,7 +1591,7 @@ def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MVal
     if (join_kind == _JOIN_INNER and matched > 1) or \
             (join_kind == _JOIN_LEFT_OUTER and matched > 0 and len(left_keys) > 1):
         raise _unsupported("join that lists several left rows in a hash order")
-    absent = (V.Null(),) * len(right.columns)
+    absent = (V.Null(),) * len(right_cols)
     rows = []
     for row, key in zip(left.rows, left_keys):
         matches = index.get(key, [])
@@ -1594,15 +1599,16 @@ def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MVal
             if not matches:
                 rows.append(tuple(row) + absent)
         elif matches:
-            rows += [tuple(row) + tuple(match) for match in matches]
+            rows += [tuple(row) + tuple(match[i] for i in right_non_key) for match in matches]
         elif join_kind == _JOIN_LEFT_OUTER:
             rows.append(tuple(row) + absent)
-    return V.Table(left.columns + right.columns, tuple(rows))
+    return V.Table(left.columns + right_cols, tuple(rows))
 
 
 def _nested_join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, new_name: MValue,
                  kind: MValue) -> MValue:
-    if _join_kind(kind, _JOIN_LEFT_OUTER) != _JOIN_LEFT_OUTER:
+    join_kind = _join_kind(kind, _JOIN_LEFT_OUTER)
+    if join_kind not in (_JOIN_LEFT_OUTER, _JOIN_INNER):
         raise _unsupported("nested join kind other than LeftOuter")
     left, right = _table(table1), _table(table2)
     left_idx = _join_key_indexes(left, key1)
@@ -1612,12 +1618,14 @@ def _nested_join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, new
     new = _text(new_name)
     if new in _names_of(left):
         raise _unsupported("nested column over an existing column name")
-    if any(kind_ != "any" for _, kind_ in right.columns):
+    if join_kind != _JOIN_INNER and any(kind_ != "any" for _, kind_ in right.columns):
         raise _unsupported("nested join of typed columns")
     index = _join_index(right, right_idx)
     rows = []
     for row in left.rows:
         matches = tuple(index.get(_join_key(row, left_idx), []))
+        if join_kind == _JOIN_INNER and not matches:
+            continue
         rows.append(tuple(row) + (V.Table(right.columns, matches),))
     return V.Table(left.columns + ((new, "table"),), tuple(rows))
 
@@ -1756,12 +1764,20 @@ def _profile(table: MValue) -> MValue:
 
 def _columns_of_type(table: MValue, types: MValue) -> MValue:
     t = _table(table)
-    wanted = []
-    for type_value in _items(types):
-        if not isinstance(type_value, V.TypeValue) or type_value.name in ("any", "anynonnull"):
+    items = _items(types)
+    if not items:
+        return V.List(())
+    wanted = set()
+    for type_value in items:
+        if not isinstance(type_value, V.TypeValue):
             raise _unsupported("column type filter")
-        wanted.append(type_value.name)
-    return V.List(tuple(V.Text(name) for name, kind in t.columns if _plain(kind) in wanted))
+        name = type_value.name
+        if name in ("any", "anynonnull"):
+            return V.List(tuple(V.Text(col_name) for col_name, _ in t.columns))
+        if name not in _PRIMITIVES:
+            raise _unsupported("column type filter")
+        wanted.add(name)
+    return V.List(tuple(V.Text(name) for name, kind in t.columns if _parts(kind)[0] in wanted))
 
 
 # ---- cell access used by the evaluator ----------------------------------------

@@ -752,15 +752,16 @@ def _column_type(kind: str) -> V.TypeValue:
 
 
 def _value_type(value: MValue) -> MValue:
+    cached = value.__dict__.get("_type_value")
+    if cached is not None:
+        return cached
     if isinstance(value, V.Table):
         # Power BI answer check 2026-11-17: Value.Type of a table is its table type with each column's type.
         # The same table value gives the same type value (Power BI answer check 2026-11-18: identity), so the
         # type is kept on the table.
-        cached = value.__dict__.get("_type_value")
-        if cached is None:
-            cached = V.TypeValue("table", fields=tuple((name, _column_type(kind), False)
-                                                       for name, kind in value.columns))
-            object.__setattr__(value, "_type_value", cached)
+        cached = V.TypeValue("table", fields=tuple((name, _column_type(kind), False)
+                                                   for name, kind in value.columns))
+        object.__setattr__(value, "_type_value", cached)
         return cached
     if isinstance(value, V.Number) and value.subtype is not None:
         # Power BI's Value.Type of an Int64 cell is not a value this engine has measured (the saved answer for
@@ -784,6 +785,27 @@ def _value_type(value: MValue) -> MValue:
             ret = value.return_type
             return V.TypeValue("function", signature=(params, ret))
     return V.TypeValue(V.kind_of(value))
+
+
+def _value_replace_type(value: MValue, type_value: MValue) -> MValue:
+    if not isinstance(type_value, V.TypeValue):
+        raise V.convert_error(type_value, V.TypeValue("type"))
+    if isinstance(value, V.Table):
+        if type_value.name != "table" or type_value.fields is None:
+            raise _unsupported("Value.ReplaceType with non-table type on a table")
+        if len(type_value.fields) != len(value.columns):
+            raise MError("Expression.Error", "We cannot convert the specified value to the specified type.",
+                         fmt="We cannot convert the specified value to the specified type.")
+        from .table_fns import _type_spec, _parts, _col
+        new_cols = []
+        for (col_name, _), (_field_name, field_type, _) in zip(value.columns, type_value.fields):
+            spec = _type_spec(field_type)
+            _base, type_name, _ = _parts(spec)
+            new_cols.append((col_name, _col(type_name, False)))
+        return V.Table(tuple(new_cols), value.rows)
+    out = V.with_meta(value, value.meta)
+    object.__setattr__(out, "_type_value", type_value)
+    return out
 
 
 def _value_metadata(value: MValue) -> MValue:
@@ -1307,6 +1329,7 @@ VALUE_GLOBALS: dict = {
     "Value.Multiply": _native((("x", False), ("y", False)), _arith("*")),
     "Value.Divide": _native((("x", False), ("y", False)), _arith("/")),
     "Value.Type": _native((("value", False),), _value_type),
+    "Value.ReplaceType": _native((("value", False), ("type", False)), _value_replace_type),
     "Value.Metadata": _native((("value", False),), _value_metadata),
     "Value.ReplaceMetadata": _native((("value", False), ("metadata", False)), _value_replace_metadata),
     "Value.RemoveMetadata": _native((("value", False),), _value_remove_metadata),
