@@ -29,6 +29,7 @@ from .list_fns import _key as _list_key
 from .table_fns import _unsupported
 from .return_types import RETURN_TYPES
 from .values import MError, MValue
+from .binary_format import BINARY_FORMAT_GLOBALS
 
 _MAX_SLOT = 10_000_000
 
@@ -2430,3 +2431,4 @@ _MORE_GLOBALS: dict = {
     **_TYPE_CONSTANTS,
 }
 VALUE_GLOBALS.update(_MORE_GLOBALS)
+VALUE_GLOBALS.update(BINARY_FORMAT_GLOBALS)
