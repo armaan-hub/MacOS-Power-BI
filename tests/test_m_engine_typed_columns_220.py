@@ -1,9 +1,10 @@
 """Tests for Task 220: M engine Unpivot, ReplaceValue and PrefixColumns column types follow Power BI.
 
 Tests Table.Unpivot, Table.UnpivotOtherColumns, Table.ReplaceValue and Table.PrefixColumns.
-Includes all 42 probe / answer pairs from batch 19 and batch 20, plus all 22 probe / answer
-pairs from batch 21 and batch 22, as exact string matches, plus two no-crash cases Power BI
-did not answer.
+Includes all 42 probe / answer pairs from batch 19 and batch 20, all 22 probe / answer pairs from
+batch 21 and batch 22, and all 9 probes of batch 23, as exact string matches (batch 23's date +
+datetime + untyped item is accepted only as a refusal or as Power BI's nullable answer), plus two
+no-crash cases Power BI did not answer.
 """
 
 import pytest
@@ -313,3 +314,75 @@ def test_batch21_power_bi_answers(probe: str, expected: str) -> None:
 @pytest.mark.parametrize("probe,expected", BATCH22_PAIRS)
 def test_batch22_power_bi_answers(probe: str, expected: str) -> None:
     assert evaluate_to_text(probe) == expected
+
+
+BATCH23_TABLE = ('Table.Schema(Table.Unpivot(#table(type table [X = Int64.Type, I = Int32.Type, '
+                 'C = Currency.Type, D = date, DT = datetime, A = any, K = text, NK = nullable text, '
+                 'NN = nullable number], {{1, 2, 3.5, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, '
+                 '"k", "z", 4}}), ')
+
+# Batch 23: unpivoting columns of this table, answered by Power BI on 2026-11-18. Every pair is
+# verbatim; the one item Power BI answers with the NULLABLE Any (date + datetime + untyped) is kept
+# apart below and refused instead of guessed.
+BATCH23_PAIRS = [
+    (
+        BATCH23_TABLE + '{"C","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"X",text:"Int64.Type",false],list:[text:"I",text:"Int32.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"NN",text:"Number.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        BATCH23_TABLE + '{"K","X","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"I",text:"Int32.Type",false],list:[text:"C",text:"Currency.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"NN",text:"Number.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        BATCH23_TABLE + '{"X","I","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"C",text:"Currency.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"NN",text:"Number.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        BATCH23_TABLE + '{"NK","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"X",text:"Int64.Type",false],list:[text:"I",text:"Int32.Type",false],list:[text:"C",text:"Currency.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"K",text:"Text.Type",false],list:[text:"NN",text:"Number.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        BATCH23_TABLE + '{"NN","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"X",text:"Int64.Type",false],list:[text:"I",text:"Int32.Type",false],list:[text:"C",text:"Currency.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        BATCH23_TABLE + '{"D","K","DT"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"X",text:"Int64.Type",false],list:[text:"I",text:"Int32.Type",false],list:[text:"C",text:"Currency.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"NK",text:"Text.Type",true],list:[text:"NN",text:"Number.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",true]]',
+    ),
+    (
+        BATCH23_TABLE + '{"C","D"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"X",text:"Int64.Type",false],list:[text:"I",text:"Int32.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"NN",text:"Number.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",true]]',
+    ),
+    (
+        BATCH23_TABLE + '{"X","NN","K"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"I",text:"Int32.Type",false],list:[text:"C",text:"Currency.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"NK",text:"Text.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",true]]',
+    ),
+]
+
+# Batch 23 item 1: unpivoting date, datetime and an untyped column. Power BI answers the value column
+# with the NULLABLE Any, whose rule behind this shape is unknown; the engine must never return the
+# non-nullable Any, so either refusal or Power BI's nullable answer is accepted.
+BATCH23_DT_ANY_PROBE = BATCH23_TABLE + '{"D","DT","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]'
+BATCH23_DT_ANY_POWER_BI_ANSWER = (
+    'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"X",text:"Int64.Type",false],'
+    'list:[text:"I",text:"Int32.Type",false],list:[text:"C",text:"Currency.Type",false],list:[text:"K",text:"Text.Type",false],'
+    'list:[text:"NK",text:"Text.Type",true],list:[text:"NN",text:"Number.Type",true],list:[text:"Atr",text:"Text.Type",false],'
+    'list:[text:"Val",text:"Any.Type",true]]'
+)
+BATCH23_DT_ANY_REFUSAL = (
+    'ERR:Expression.Error: The unpivot of different temporal types with an untyped column '
+    'is not supported by this engine yet.'
+)
+
+
+@pytest.mark.parametrize("probe,expected", BATCH23_PAIRS)
+def test_batch23_power_bi_answers(probe: str, expected: str) -> None:
+    assert evaluate_to_text(probe) == expected
+
+
+def test_batch23_unpivot_date_datetime_any_is_refused_or_nullable() -> None:
+    """The engine must not return the non-nullable Any for date + datetime + an untyped column."""
+    assert evaluate_to_text(BATCH23_DT_ANY_PROBE) in [
+        BATCH23_DT_ANY_POWER_BI_ANSWER,
+        BATCH23_DT_ANY_REFUSAL,
+    ]

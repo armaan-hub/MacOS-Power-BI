@@ -1491,7 +1491,13 @@ def _unpivot_table(t: V.Table, unpivot: list, others: list, attr: str, value_nam
         value_kind = _col(_PRIMITIVE_TYPE_NAMES[next(iter(details))[0]] + ".Type", False)
     elif "any" in kinds:
         # an untyped column among different base kinds: Any.Type NOT nullable, the same kind the
-        # all-columns-untyped case produces (Power BI answer check 2026-11-18)
+        # all-columns-untyped case produces (Power BI answer check 2026-11-18). A temporal mix among the
+        # other unpivoted columns (date + datetime + untyped) is the one shape Power BI answers with the
+        # NULLABLE Any, whose rule this engine has not measured: refuse that shape instead of guessing
+        # (Power BI answer check 2026-11-18, batch 23 item 1).
+        bases = {_parts(kind)[0] for kind in kinds if kind != "any"}
+        if len(bases) >= 2 and any(base not in ("number", "text") for base in bases):
+            raise _unsupported("unpivot of different temporal types with an untyped column")
         value_kind = _col("Any.Type", False)
     else:
         value_kind = "any"  # different base kinds: Any.Type (Power BI)
