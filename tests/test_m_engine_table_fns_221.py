@@ -101,3 +101,21 @@ def test_fix4_partition_hash_out_of_range() -> None:
     assert res_neg == "ERR:Expression.Error: The hash result outside 0..groups-1 is not supported by this engine yet."
     res_out = evaluate_to_text('Table.Partition(#table({"id"}, {{1}}), "id", 2, each 5)')
     assert res_out == "ERR:Expression.Error: The hash result outside 0..groups-1 is not supported by this engine yet."
+
+
+def test_fix5_partition_hash_equal_to_groups_wraps() -> None:
+    # Measured in Power BI: hash 2 with 2 groups wraps to bucket 0.
+    res = evaluate_to_text('List.Transform(Table.Partition(#table({"id"},{{1},{2}}),"id",2,each 2), each Table.RowCount(_))')
+    assert res == "V:list:[number:2,number:0]"
+
+
+def test_fix5_partition_hash_groups_minus_one_works() -> None:
+    res = evaluate_to_text('List.Transform(Table.Partition(#table({"id"},{{1},{2}}),"id",2,each 1), each Table.RowCount(_))')
+    assert res == "V:list:[number:0,number:2]"
+
+
+def test_fix5_partition_zero_groups_refuses_cleanly() -> None:
+    res = evaluate_to_text('Table.Partition(#table({"id"},{{1}}),"id",0,each 0)')
+    assert res.startswith("ERR:")
+    assert "not supported by this engine yet" in res
+    assert "ZeroDivisionError" not in res

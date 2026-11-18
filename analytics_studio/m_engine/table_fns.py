@@ -1381,6 +1381,8 @@ def _partition(table: MValue, column: MValue, groups: MValue, hash_fn: MValue) -
     t = _table(table)
     idx = _index(t, _text(column))
     num_groups = _count(groups)
+    if num_groups == 0:
+        raise _unsupported("partition with zero groups")
     if not isinstance(hash_fn, V.Function):
         raise V.convert_error(hash_fn, V.TypeValue("function"))
     buckets = [[] for _ in range(num_groups)]
