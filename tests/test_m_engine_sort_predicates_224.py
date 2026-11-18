@@ -125,3 +125,82 @@ def test_m_engine_sort_predicates_pairs(expr: str, expected: str):
         assert actual == expected, (
             f"Result mismatch for expr: {expr}\nExpected: {expected}\nActual:   {actual}"
         )
+
+
+ADD_RANK_COLUMN_OLD_SHAPES = [
+    # text criterion -> old convert error
+    ('Table.AddRankColumn(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "R", "V")',
+     'ERR:Expression.Error: We cannot convert the value "V" to type List.'),
+    # function criterion -> old convert error
+    ('Table.AddRankColumn(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "R", each [V])',
+     'ERR:Expression.Error: We cannot convert a value of type Function to type List.'),
+    # empty list -> old accepted empty sort
+    ('Table.AddRankColumn(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "R", {})',
+     'V:table:cols=["K":"text","V":"number","R":"number"];rows=[list:[text:"a",number:1,number:1]]'),
+    # null -> old convert error
+    ('Table.AddRankColumn(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "R", null)',
+     'ERR:Expression.Error: We cannot convert the value null to type List.'),
+    # single text list -> old accepted
+    ('Table.AddRankColumn(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "R", {"V"})',
+     'V:table:cols=["K":"text","V":"number","R":"number"];rows=[list:[text:"a",number:1,number:1]]'),
+    # pair list -> old accepted
+    ('Table.AddRankColumn(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "R", {{"V", Order.Descending}})',
+     'V:table:cols=["K":"text","V":"number","R":"number"];rows=[list:[text:"a",number:1,number:1]]'),
+]
+
+
+@pytest.mark.parametrize("expr, expected", ADD_RANK_COLUMN_OLD_SHAPES)
+def test_add_rank_column_retains_old_behavior(expr: str, expected: str):
+    assert evaluate_to_text(expr) == expected
+
+
+TABLE_SORT_UNMEASURED_AND_OLD_SHAPES = [
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {"K", true})',
+     'ERR:Expression.Error: We cannot convert the value true to type List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {"K", null})',
+     'ERR:Expression.Error: We cannot convert the value null to type List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {"K", 0.5})',
+     'ERR:Expression.Error: The sort order is not supported by this engine yet.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {{"K"}})',
+     'ERR:Expression.Error: The sort criteria is not supported by this engine yet.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {{"K", Order.Ascending, 1}})',
+     'ERR:Expression.Error: The sort criteria is not supported by this engine yet.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {{null, Order.Ascending}})',
+     'ERR:Expression.Error: The sort criteria is not supported by this engine yet.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {{"K", Order.Descending}, {"V"}})',
+     'ERR:Expression.Error: The sort criteria is not supported by this engine yet.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {1, 2})',
+     'ERR:Expression.Error: We cannot convert the value 1 to type List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {"V", 2})',
+     'ERR:Expression.Error: The sort order is not supported by this engine yet.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {"V", -1})',
+     'ERR:Expression.Error: The sort order is not supported by this engine yet.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {"K", Comparer.OrdinalIgnoreCase})',
+     'ERR:Expression.Error: We cannot convert a value of type Function to type List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {each [V], Order.Descending})',
+     'ERR:Expression.Error: We cannot convert a value of type Function to type List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), (a, b) => 0)',
+     'ERR:Expression.Error: We cannot convert a value of type Function to type List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), {{"K", null}})',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"a",number:2],list:[text:"b",number:1]]'),
+]
+
+
+@pytest.mark.parametrize("expr, expected", TABLE_SORT_UNMEASURED_AND_OLD_SHAPES)
+def test_table_sort_unmeasured_and_old_shapes(expr: str, expected: str):
+    assert evaluate_to_text(expr) == expected
+
+
+def test_key_function_sort_decorate_undecorate_efficiency():
+    # Decorate-sort-undecorate verifies key function is invoked O(n) times, stable, and correctly orders nulls
+    expr = (
+        'Table.ToRows(Table.Sort(#table(type table [K = text, V = nullable number], '
+        '{{"c", 2}, {"a", null}, {"b", 1}, {"d", null}, {"e", 1}}), each [V]))'
+    )
+    # nulls first ascending, equal values stable
+    expected = (
+        'V:list:[list:[text:"a",null],list:[text:"d",null],'
+        'list:[text:"b",number:1],list:[text:"e",number:1],list:[text:"c",number:2]]'
+    )
+    assert evaluate_to_text(expr) == expected
+

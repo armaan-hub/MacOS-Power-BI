@@ -1390,11 +1390,38 @@ def _is_distinct(table: MValue, criteria: MValue) -> MValue:
 def _sort_order(order_val: MValue) -> bool:
     if isinstance(order_val, V.Number) and order_val.value in (0.0, 1.0):
         return order_val.value == 1.0
-    raise _sort_invalid()
+    if isinstance(order_val, V.Number) and order_val.value == 5.0:
+        raise _sort_invalid()
+    raise _order(order_val)
+
+
+def _rank_sort_specs(table: V.Table, criteria: MValue) -> list:
+    names = _names_of(table)
+    items = _items(criteria)
+    if len(items) == 2 and isinstance(items[0], V.Text) and isinstance(items[1], V.Number):
+        name = items[0].value
+        if name not in names:
+            raise _sort_invalid()
+        return [(names.index(name), _order(items[1]))]
+    specs = []
+    for item in items:
+        if isinstance(item, V.Text):
+            name, descending = item.value, False
+        else:
+            pair = _items(item)
+            if len(pair) != 2 or not isinstance(pair[0], V.Text):
+                raise _unsupported("sort criteria")
+            name, descending = pair[0].value, _order(pair[1])
+        if name not in names:
+            raise _sort_invalid()
+        specs.append((names.index(name), descending))
+    return specs
 
 
 def _sort_specs(table: V.Table, criteria: MValue) -> list:
     names = _names_of(table)
+    if isinstance(criteria, V.Null):
+        raise _sort_invalid()
     if isinstance(criteria, V.Text):
         name = criteria.value
         if name not in names:
@@ -1402,21 +1429,30 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
         return [(names.index(name), False)]
     if isinstance(criteria, V.Function):
         if len(criteria.params) != 1:
-            raise _sort_invalid()
+            raise V.convert_error(criteria, V.TypeValue("list"))
         return [(criteria, False)]
     if not isinstance(criteria, V.List):
-        raise _sort_invalid()
+        raise V.convert_error(criteria, V.TypeValue("list"))
 
     items = list(criteria.items)
     if not items:
         raise _sort_requires_criterion()
 
-    # Special case: flat 2-element list {col_name, order}
-    if len(items) == 2 and isinstance(V.force(items[0]), V.Text) and isinstance(V.force(items[1]), V.Number):
-        name = V.force(items[0]).value
-        if name not in names:
+    # Flat list check: if len == 2 and first is text, second is number/order
+    if len(items) == 2 and isinstance(V.force(items[0]), V.Text):
+        second = V.force(items[1])
+        if isinstance(second, V.Number):
+            name = V.force(items[0]).value
+            if name not in names:
+                raise _sort_invalid()
+            return [(names.index(name), _sort_order(second))]
+
+    # Probe 6 check: flat list where second item is an order number followed by more items
+    # e.g. {"K", Order.Descending, "V"}
+    if len(items) > 2 and isinstance(V.force(items[0]), V.Text):
+        second = V.force(items[1])
+        if isinstance(second, V.Number) and second.value in (0.0, 1.0):
             raise _sort_invalid()
-        return [(names.index(name), _sort_order(V.force(items[1])))]
 
     specs = []
     for raw_item in items:
@@ -1426,47 +1462,45 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
             if name not in names:
                 raise _sort_invalid()
             specs.append((names.index(name), descending))
-        elif isinstance(item, V.Function):
-            if len(item.params) != 1:
-                raise _sort_invalid()
-            specs.append((item, False))
         elif isinstance(item, V.List):
             pair = list(item.items)
-            if len(pair) != 2:
-                raise _sort_invalid()
+            if len(pair) != 2 or not isinstance(V.force(pair[0]), V.Text):
+                raise _unsupported("sort criteria")
             crit, ord_val = V.force(pair[0]), V.force(pair[1])
-            descending = _sort_order(ord_val)
-            if isinstance(crit, V.Text):
-                if crit.value not in names:
-                    raise _sort_invalid()
-                specs.append((names.index(crit.value), descending))
-            elif isinstance(crit, V.Function):
-                if len(crit.params) != 1:
-                    raise _sort_invalid()
-                specs.append((crit, descending))
-            else:
+            descending = _order(ord_val)
+            if crit.value not in names:
                 raise _sort_invalid()
+            specs.append((names.index(crit.value), descending))
         else:
-            raise _sort_invalid()
+            raise _items(item)
     return specs
 
 
 def _sorted_rows(table: V.Table, specs: list) -> list:
     names = _names_of(table)
-    rows = list(table.rows)
-    for spec, descending in reversed(specs):
-        if isinstance(spec, int):
-            rows.sort(key=cmp_to_key(lambda a, b, idx=spec: compare(V.force(a[idx]), V.force(b[idx]))),
-                      reverse=descending)
-        else:
-            fn = spec
-            rows.sort(key=cmp_to_key(
-                lambda a, b, f=fn, nms=names: compare(
-                    V.force(_apply(f, _record(nms, a))),
-                    V.force(_apply(f, _record(nms, b)))
-                )
-            ), reverse=descending)
-    return rows
+    # Decorate: compute keys for each spec across all rows once
+    # Each row is represented as: [computed_key_0, computed_key_1, ..., orig_index, orig_row]
+    num_specs = len(specs)
+    computed_rows = []
+    for orig_idx, row in enumerate(table.rows):
+        rec = None
+        row_keys = []
+        for spec, _desc in specs:
+            if isinstance(spec, int):
+                row_keys.append(V.force(row[spec]))
+            else:
+                if rec is None:
+                    rec = _record(names, row)
+                row_keys.append(V.force(_apply(spec, rec)))
+        computed_rows.append(row_keys + [orig_idx, row])
+
+    # Sort stably for each spec in reverse order
+    for spec_pos, (_spec, descending) in enumerate(reversed(specs)):
+        k_pos = num_specs - 1 - spec_pos
+        computed_rows.sort(key=cmp_to_key(lambda a, b, kp=k_pos: compare(a[kp], b[kp])),
+                           reverse=descending)
+
+    return [cr[-1] for cr in computed_rows]
 
 
 def _sort(table: MValue, criteria: MValue) -> MValue:
@@ -1788,7 +1822,7 @@ def _add_rank_column(table: MValue, new_name: MValue, criteria: MValue, options:
                 rank_kind = int(rk.value)
             else:
                 raise _unsupported("RankKind option that is not a number")
-    specs = _sort_specs(t, criteria)
+    specs = _rank_sort_specs(t, criteria)
     names = _names_of(t)
     spec_indices = [idx for idx, _ in specs]
     decorated = []
