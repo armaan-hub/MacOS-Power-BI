@@ -65,6 +65,57 @@ PAIRS = [
     # batch 30 item 4
     ('Table.Join(#table(type table [K2 = text, W = Int64.Type], {{"a",10},{"c",30},{"a",11}}), "K2", #table(type table [K = text, V = Int64.Type], {{"a",1},{"a",2},{"b",3},{"a",4},{"b",5}}), "K", JoinKind.RightAnti)',
      'V:table:cols=["K2":"text","W":"number","K":"text","V":"number"];rows=[list:[null,null,text:"b",number:3],list:[null,null,text:"b",number:5]]'),
+    # batch 31 item 0
+    ('Table.Keys(Value.ReplaceType(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false), type table [K = text, V = Int64.Type]))',
+     'V:list:[]'),
+    # batch 31 item 1
+    ('Table.Keys(Value.ReplaceType(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false), type table [K = text, V = text]))',
+     'V:list:[]'),
+    # batch 31 item 2
+    ('Table.Keys(Value.ReplaceType(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false), type table [K = nullable text, V = nullable number]))',
+     'V:list:[]'),
+    # batch 31 item 3
+    ('Table.Keys(Value.ReplaceType(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K","V"},true), type table [K = text, V = Int64.Type]))',
+     'V:list:[]'),
+    # batch 31 item 4
+    ('Table.Keys(Value.ReplaceType(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false), type table [A = text, B = Int64.Type]))',
+     'V:list:[]'),
+    # batch 31 item 5
+    ('Table.Keys(Value.ReplaceType(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}), type table [K = text, V = Int64.Type]))',
+     'V:list:[]'),
+    # batch 31 item 6
+    ('Table.Keys(Table.Group(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),{"K"},{{"T", each _, type table}}){0}[T])',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 7
+    ('Table.Keys(Table.Group(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),{"K"},{{"T", each _, type table}}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=true]]'),
+    # batch 31 item 8
+    ('Table.Keys(Table.Group(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),"K",{{"S", each List.Sum([V]), type number}}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=true]]'),
+    # batch 31 item 9
+    ('Table.Keys(Table.Buffer(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false)))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 10
+    ('Table.Keys(Table.FirstN(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),2))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 11
+    ('Table.Keys(Table.Distinct(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false)))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 12
+    ('Table.Keys(Table.Skip(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),1))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 13
+    ('Table.Keys(Table.TransformColumnTypes(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),{{"V", type text}}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 14
+    ('Table.Keys(Table.ReorderColumns(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),{"V","K"}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 15
+    ('Table.Keys(Table.Combine({Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false)}))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
+    # batch 31 item 16
+    ('Table.Keys(Table.RemoveFirstN(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1},{"b",2},{"a",3}}),{"K"},false),1))',
+     'V:list:[record:["Columns"=list:[text:"K"],"Primary"=false]]'),
 ]
 
 
@@ -74,9 +125,9 @@ def test_m_engine_keys_and_schema_pairs(probe: str, expected: str):
 
 
 def test_unmeasured_key_propagation_refusal():
-    # Calling an unmeasured table function on a table with keys sets keys_unmeasured
+    # Calling an unmeasured table function (e.g. Table.SelectColumns) on a table with keys sets keys_unmeasured
     # Calling Table.Keys on such a table must refuse with _unsupported
-    probe = 'Table.Keys(Table.Buffer(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1}}), {"K"}, false)))'
+    probe = 'Table.Keys(Table.SelectColumns(Table.AddKey(#table(type table [K = text, V = Int64.Type], {{"a",1}}), {"K"}, false), {"K"}))'
     assert evaluate_to_text(probe) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
 
 
@@ -102,8 +153,8 @@ def test_comparer_speed_and_refusal():
 
 
 def test_review_fix_nested_and_operator_unmeasured():
-    # Finding 1: Table.Combine({keyed})
-    p_combine = 'Table.Keys(Table.Combine({Table.AddKey(#table({"A"}, {{1}}), {"A"}, false)}))'
+    # Finding 1 & fix 2: Table.Combine with 2+ tables keeps unmeasured
+    p_combine = 'Table.Keys(Table.Combine({Table.AddKey(#table({"A"}, {{1}}), {"A"}, false), #table({"A"}, {{2}})}))'
     assert evaluate_to_text(p_combine) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
 
     # Finding 1: & operator on tables
@@ -122,22 +173,19 @@ def test_review_fix_nested_and_operator_unmeasured():
 
 
 def test_review_fix_value_replace_type():
-    # Finding 2: Value.ReplaceType preserves keys on clean keyed table
+    # Measured Power BI behaviour (items 0-5): Value.ReplaceType on a keyed table drops keys
     p_repl = 'Table.Keys(Value.ReplaceType(Table.AddKey(#table({"A"}, {{1}}), {"A"}, false), type table [A = text]))'
-    assert evaluate_to_text(p_repl) == 'V:list:[record:["Columns"=list:[text:"A"],"Primary"=false]]'
-
-    # Preserves unmeasured status if input was unmeasured
-    p_repl_unmeasured = 'Table.Keys(Value.ReplaceType(Table.Skip(Table.AddKey(#table({"A"}, {{1},{2}}), {"A"}, false), 1), type table [A = text]))'
-    assert evaluate_to_text(p_repl_unmeasured) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
+    assert evaluate_to_text(p_repl) == 'V:list:[]'
 
 
 def test_review_fix_add_key_replace_keys_unmeasured_propagation():
     # Finding 3: AddKey / ReplaceKeys on unmeasured table keeps unmeasured flag
-    p_add_after_skip = 'Table.Keys(Table.AddKey(Table.Skip(Table.AddKey(#table({"A"}, {{1},{2}}), {"A"}, false), 1), {"A"}, false))'
-    assert evaluate_to_text(p_add_after_skip) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
+    # (using unmeasured table function e.g. Table.SelectColumns)
+    p_add_after_unmeasured = 'Table.Keys(Table.AddKey(Table.SelectColumns(Table.AddKey(#table({"A"}, {{1},{2}}), {"A"}, false), {"A"}), {"A"}, false))'
+    assert evaluate_to_text(p_add_after_unmeasured) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
 
-    p_rep_after_skip = 'Table.Keys(Table.ReplaceKeys(Table.Skip(Table.AddKey(#table({"A"}, {{1},{2}}), {"A"}, false), 1), {[Columns={"A"}, Primary=false]}))'
-    assert evaluate_to_text(p_rep_after_skip) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
+    p_rep_after_unmeasured = 'Table.Keys(Table.ReplaceKeys(Table.SelectColumns(Table.AddKey(#table({"A"}, {{1},{2}}), {"A"}, false), {"A"}), {[Columns={"A"}, Primary=false]}))'
+    assert evaluate_to_text(p_rep_after_unmeasured) == 'ERR:Expression.Error: The Table.Keys on a table with unmeasured key propagation is not supported by this engine yet.'
 
 
 def test_review_fix_add_key_unmeasured_shapes():

@@ -803,7 +803,7 @@ def _value_replace_type(value: MValue, type_value: MValue) -> MValue:
             _base, type_name, _ = _parts(spec)
             new_cols.append((col_name, _col(type_name, False)))
         return V.Table(tuple(new_cols), value.rows, meta=value.meta,
-                       keys=value.keys, keys_unmeasured=value.keys_unmeasured)
+                       keys=(), keys_unmeasured=False)
     out = V.with_meta(value, value.meta)
     object.__setattr__(out, "_type_value", type_value)
     return out

@@ -33,7 +33,7 @@ _GROUP_LOCAL, _GROUP_GLOBAL = 0, 1
 
 # ---- helpers ----------------------------------------------------------------
 
-# Names of the 5 measured key-propagating functions (plus AddKey/ReplaceKeys)
+# Names of measured key-propagating functions (plus AddKey/ReplaceKeys)
 _MEASURED_KEY_PROPAGATORS = {
     "_sort",
     "_select_rows",
@@ -42,6 +42,14 @@ _MEASURED_KEY_PROPAGATORS = {
     "_add_column",
     "_add_key",
     "_replace_keys",
+    "_buffer",
+    "_first_n",
+    "_distinct",
+    "_remove_first_n",
+    "_transform_column_types",
+    "_reorder_columns",
+    "_combine",
+    "_group",
 }
 
 
@@ -653,7 +661,7 @@ def _reverse_rows(table: MValue) -> MValue:
 
 def _first_n(table: MValue, count: MValue) -> MValue:
     t = _table(table)
-    return V.Table(t.columns, t.rows[:_count(count)])
+    return V.Table(t.columns, t.rows[:_count(count)], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _last_n(table: MValue, count: MValue) -> MValue:
@@ -664,7 +672,7 @@ def _last_n(table: MValue, count: MValue) -> MValue:
 
 def _remove_first_n(table: MValue, count: MValue) -> MValue:
     t = _table(table)
-    return V.Table(t.columns, t.rows[_count_or(count, 1):])
+    return V.Table(t.columns, t.rows[_count_or(count, 1):], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _remove_last_n(table: MValue, count: MValue) -> MValue:
@@ -756,7 +764,8 @@ def _reorder_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
         if name not in current:
             raise _column_missing(name)
     order = [current.index(name) for name in wanted] + [i for i, name in enumerate(current) if name not in wanted]
-    return V.Table(tuple(t.columns[i] for i in order), tuple(tuple(row[i] for i in order) for row in t.rows))
+    return V.Table(tuple(t.columns[i] for i in order), tuple(tuple(row[i] for i in order) for row in t.rows),
+                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _rename_pairs(renames: MValue) -> list:
@@ -916,7 +925,7 @@ def _transform_column_types(table: MValue, transforms: MValue, culture: MValue) 
         rows.append(tuple(cells))
     columns = tuple((name, _col(changes[i], True) if i in changes else kind)
                     for i, (name, kind) in enumerate(t.columns))
-    return V.Table(columns, tuple(rows))
+    return V.Table(columns, tuple(rows), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _replaced_kind(replacer: V.Function, old_kind: str, new: MValue) -> str:
@@ -1231,7 +1240,7 @@ def _distinct(table: MValue, criteria: MValue) -> MValue:
             continue
         seen.add(key)
         rows.append(row)
-    return V.Table(t.columns, tuple(rows))
+    return V.Table(t.columns, tuple(rows), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _is_distinct(table: MValue, criteria: MValue) -> MValue:
@@ -1918,7 +1927,7 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
             else:
                 grouped_runs.append((key_cells, [row]))
         for key_cells, members in grouped_runs:
-            group_table = V.Table(t.columns, tuple(members))
+            group_table = V.Table(t.columns, tuple(members), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
             rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
     else:
         # Fast hash-based path for Global grouping (O(N) instead of O(N^2))
@@ -1933,11 +1942,27 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
         for key in order:
             members = groups[key]
             key_cells = tuple(members[0][i] for i in key_indexes)
-            group_table = V.Table(t.columns, tuple(members))
+            group_table = V.Table(t.columns, tuple(members), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
             rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
 
     columns = tuple((name, t.columns[i][1]) for name, i in zip(key_names, key_indexes))
     columns += tuple((name, kind if kind is not None else _function_spec(fn)) for name, fn, kind in aggs)
+
+    # Key propagation for Table.Group:
+    # On a KEYED input table (single group column, given as text "K" or {"K"}):
+    # result Table.Keys is exactly one record [Columns=<the group columns>, Primary=true].
+    # Group by several columns, or any other shape, is unmeasured -> mark the result keys_unmeasured.
+    # Group on a KEYLESS input: leave today's behaviour (Table.Keys -> {}), it is unmeasured but unchanged.
+    if bool(t.keys or t.keys_unmeasured):
+        if len(key_names) == 1 and not t.keys_unmeasured:
+            group_key_record = V.Record((
+                ("Columns", V.List((V.Text(key_names[0]),))),
+                ("Primary", V.Logical(True)),
+            ))
+            return V.Table(columns, tuple(rows), meta=t.meta, keys=(group_key_record,), keys_unmeasured=False)
+        else:
+            return V.Table(columns, tuple(rows), meta=t.meta, keys=None, keys_unmeasured=True)
+
     return V.Table(columns, tuple(rows))
 
 
@@ -2127,6 +2152,10 @@ def combine_tables(parts: list) -> V.Table:
         current = _names_of(part)
         for row in part.rows:
             rows.append(tuple(row[current.index(name)] if name in current else V.Null() for name in names))
+    if len(parts) == 1:
+        single = parts[0]
+        return V.Table(tuple(columns), tuple(rows), meta=single.meta,
+                       keys=single.keys, keys_unmeasured=single.keys_unmeasured)
     unmeasured = any(bool(part.keys or part.keys_unmeasured) for part in parts)
     return V.Table(tuple(columns), tuple(rows), keys_unmeasured=unmeasured)
 
