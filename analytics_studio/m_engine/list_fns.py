@@ -1204,7 +1204,14 @@ def _list_random(count: MValue, seed: MValue = V.Null()) -> MValue:
         return V.List(())
     c = _bounded(c)
     if not isinstance(seed, V.Null):
-        s = _whole(seed)
+        if not isinstance(seed, V.Number):
+            raise V.convert_error(seed, V.TypeValue("number"))
+        sx = seed.value
+        if math.isnan(sx) or math.isinf(sx) or sx != math.floor(sx):
+            raise _unsupported("List.Random seed that is not a whole number")
+        s = int(sx)
+        if s < -2147483648 or s > 2147483647:
+            raise _unsupported("List.Random seed outside 32-bit integer range")
         gen = _NetRandom(s)
         return V.List(tuple(V.Number(gen.Sample()) for _ in range(c)))
     import random

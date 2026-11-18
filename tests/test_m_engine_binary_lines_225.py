@@ -197,6 +197,181 @@ PAIRS = [
     # batch35_13
     ('Binary.ToText(Binary.Compress(Text.ToBinary(""), Compression.GZip), BinaryEncoding.Hex)',
      'V:text:""'),
+
+    # batch36_6
+    ('List.Random(3, "x")',
+     'ERR:Expression.Error: We cannot convert the value "x" to type Number.'),
+    # batch36_8
+    ('List.Random(3, 0)',
+     'V:list:[number:0.72624326996795985,number:0.81732535959096875,number:0.76802268939466345]'),
+    # batch36_9
+    ('List.Random(3, -5)',
+     'V:list:[number:0.33836984091362443,number:0.28441844754126783,number:0.26296264178257561]'),
+    # batch36_10
+    ('DateTime.FromFileTime(null)',
+     'V:null'),
+    # batch36_11
+    ('DateTime.FromFileTime("x")',
+     'ERR:Expression.Error: We cannot convert the value "x" to type Number.'),
+    # batch36_12
+    ('DateTimeZone.FromFileTime()',
+     'ERR:Expression.Error: 0 arguments were passed to a function which expects 1.'),
+    # batch36_13
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("1f8b0800000000000400f348cdc9c907008289d1f705000000", BinaryEncoding.Hex), Compression.GZip), BinaryEncoding.Hex)',
+     'V:text:"48656c6c6f"'),
+    # batch36_14
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("1f8b0800000000000400f348cdc9c907008289d1f805000000", BinaryEncoding.Hex), Compression.GZip), BinaryEncoding.Hex)',
+     'ERR:DataFormat.Error: Found invalid data while decoding.'),
+    # batch36_15
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("1f8b0800000000000400f348cdc9c907008289d1f706000000", BinaryEncoding.Hex), Compression.GZip), BinaryEncoding.Hex)',
+     'ERR:DataFormat.Error: Found invalid data while decoding.'),
+    # batch36_16
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("1f8b0800000000000400f348cdc9c907008289d1f7", BinaryEncoding.Hex), Compression.GZip), BinaryEncoding.Hex)',
+     'V:text:"48656c6c6f"'),
+    # batch36_17
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("1f8b0800000000000400f348cdc9c907008289d1f7050000001f8b0800000000000400f348cdc9c907008289d1f705000000", BinaryEncoding.Hex), Compression.GZip), BinaryEncoding.Hex)',
+     'V:text:"48656c6c6f"'),
+    # batch36_18
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("1f8b0800000000000400f348cdc9c907008289d1f705000000ff", BinaryEncoding.Hex), Compression.GZip), BinaryEncoding.Hex)',
+     'V:text:"48656c6c6f"'),
+    # batch36_19
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("f348cdc9c90700ff", BinaryEncoding.Hex), Compression.Deflate), BinaryEncoding.Hex)',
+     'V:text:"48656c6c6f"'),
+    # batch36_20
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("f348cdc9", BinaryEncoding.Hex), Compression.Deflate), BinaryEncoding.Hex)',
+     'V:text:"48656c"'),
+    # batch36_21
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("", BinaryEncoding.Hex), Compression.GZip), BinaryEncoding.Hex)',
+     'V:text:""'),
+    # batch36_22
+    ('Binary.ToText(Binary.Decompress(Binary.FromText("", BinaryEncoding.Hex), Compression.Deflate), BinaryEncoding.Hex)',
+     'V:text:""'),
+    # batch36_23
+    ('Binary.ToText(Binary.Compress(null, Compression.GZip), BinaryEncoding.Hex)',
+     'V:null'),
+    # batch36_24
+    ('Binary.ToText(Binary.Decompress(null, Compression.GZip), BinaryEncoding.Hex)',
+     'V:null'),
+    # batch36_25
+    ('Binary.ToText(Binary.Compress(Text.ToBinary("a"), 0.5), BinaryEncoding.Hex)',
+     "ERR:Expression.Error: The value for a 'Compression.Type' enumeration was not one of the allowed values: 'Compression.None, Compression.GZip, Compression.Deflate, Compression.Snappy, Compression.Brotli, Compression.LZ4, Compression.Zstandard'."),
+    # batch36_26
+    ('Binary.ToText(Binary.Compress(Text.ToBinary("a"), 1.5), BinaryEncoding.Hex)',
+     "ERR:Expression.Error: The value for a 'Compression.Type' enumeration was not one of the allowed values: 'Compression.None, Compression.GZip, Compression.Deflate, Compression.Snappy, Compression.Brotli, Compression.LZ4, Compression.Zstandard'."),
+    # batch36_27
+    ('Binary.ApproximateLength("abc")',
+     'ERR:Expression.Error: We cannot convert the value "abc" to type Binary.'),
+    # batch36_28
+    ('Binary.ApproximateLength(5)',
+     'ERR:Expression.Error: We cannot convert the value 5 to type Binary.'),
+    # batch36_29
+    ('Lines.FromBinary(null)',
+     'ERR:Expression.Error: We cannot convert the value null to type Binary.'),
+    # batch36_30
+    ('Lines.FromBinary(Text.ToBinary("a#(lf)b"), null, null, 1201)',
+     'V:list:[text:"愊"]'),
+    # batch36_31
+    ('Lines.FromBinary(Text.ToBinary("a#(lf)b"), null, null, 12000)',
+     'V:list:[]'),
+    # batch36_32
+    ('Lines.FromBinary(Text.ToBinary("a#(lf)b"), null, null, 437)',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_33
+    ('Lines.FromBinary(Text.ToBinary("a#(lf)b"), null, null, 28591)',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_34
+    ('Lines.FromBinary(Text.ToBinary("a#(lf)b"), null, null, 20127)',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_35
+    ('Lines.FromBinary(Text.ToBinary("a#(lf)b"), null, null, 1252)',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_36
+    ('Lines.FromBinary(Text.ToBinary("a#(lf)b"), null, null, 99999)',
+     'ERR:Expression.Error: The text encoding is invalid.'),
+    # batch36_37
+    ('Lines.FromBinary(Binary.FromText("efbbbf610a62", BinaryEncoding.Hex))',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_38
+    ('Lines.FromBinary(Binary.FromText("efbbbf610a62", BinaryEncoding.Hex), null, null, 65001)',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_39
+    ('Lines.FromBinary(Binary.FromText("fffe61000a006200", BinaryEncoding.Hex), null, null, 65001)',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_40
+    ('Lines.FromBinary(Binary.FromText("fffe61000a006200", BinaryEncoding.Hex))',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_41
+    ('Lines.FromBinary(Binary.FromText("feff0061000a0062", BinaryEncoding.Hex))',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_42
+    ('Lines.FromBinary(Binary.FromText("610a62", BinaryEncoding.Hex), null, null, 1200)',
+     'V:list:[text:"\u0a61"]'),
+    # batch36_43
+    ('Lines.FromBinary(Binary.FromText("610d0a620d0a", BinaryEncoding.Hex), null, true)',
+     'V:list:[text:"a\\r\\n",text:"b\\r\\n"]'),
+    # batch36_44
+    ('Lines.FromBinary(Binary.FromText("610d0a620d0a", BinaryEncoding.Hex), null, false)',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_45
+    ('Lines.FromBinary(Binary.FromText("610d620a", BinaryEncoding.Hex))',
+     'V:list:[text:"a",text:"b"]'),
+    # batch36_46
+    ('Lines.FromBinary(Binary.FromText("0a0a610a", BinaryEncoding.Hex))',
+     'V:list:[text:"",text:"",text:"a"]'),
+    # batch36_47
+    ('Lines.FromBinary(Binary.FromText("6120620a", BinaryEncoding.Hex))',
+     'V:list:[text:"a b"]'),
+    # batch36_48
+    ('Lines.FromBinary(Binary.FromText("e9", BinaryEncoding.Hex), null, null, 1252)',
+     'V:list:[text:"é"]'),
+    # batch36_49
+    ('Lines.FromBinary(Binary.FromText("e9", BinaryEncoding.Hex))',
+     'V:list:[]'),
+    # batch36_50
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 1200, true), BinaryEncoding.Hex)',
+     'V:text:"fffe61000d000a00"'),
+    # batch36_51
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 1201, true), BinaryEncoding.Hex)',
+     'V:text:"feff0061000d000a"'),
+    # batch36_52
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 1252, true), BinaryEncoding.Hex)',
+     'V:text:"610d0a"'),
+    # batch36_53
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 20127, true), BinaryEncoding.Hex)',
+     'V:text:"610d0a"'),
+    # batch36_54
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 65001, true), BinaryEncoding.Hex)',
+     'V:text:"efbbbf610d0a"'),
+    # batch36_55
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, null, 1), BinaryEncoding.Hex)',
+     'ERR:Expression.Error: We cannot convert the value 1 to type Logical.'),
+    # batch36_56
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, null, "x"), BinaryEncoding.Hex)',
+     'ERR:Expression.Error: We cannot convert the value "x" to type Logical.'),
+    # batch36_57
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, null, null), BinaryEncoding.Hex)',
+     'V:text:"610d0a"'),
+    # batch36_58
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 1201), BinaryEncoding.Hex)',
+     'V:text:"0061000d000a"'),
+    # batch36_59
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 12000), BinaryEncoding.Hex)',
+     'V:text:"fffe0000610000000d0000000a000000"'),
+    # batch36_60
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 20127), BinaryEncoding.Hex)',
+     'V:text:"610d0a"'),
+    # batch36_61
+    ('Binary.ToText(Lines.ToBinary({"é"}, null, 20127), BinaryEncoding.Hex)',
+     'V:text:"3f0d0a"'),
+    # batch36_62
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 437), BinaryEncoding.Hex)',
+     'V:text:"610d0a"'),
+    # batch36_63
+    ('Binary.ToText(Lines.ToBinary({"a"}, null, 99999), BinaryEncoding.Hex)',
+     'ERR:Expression.Error: The text encoding is invalid.'),
+    # batch36_64
+    ('Lines.ToBinary(null)',
+     'ERR:Expression.Error: We cannot convert the value null to type List.'),
 ]
 
 @pytest.mark.parametrize("probe, expected", PAIRS)
@@ -211,8 +386,42 @@ def test_clock_refusal_datetimezone_from_file_time():
     res_dt = evaluate_to_text("DateTime.FromFileTime(0)")
     assert res_dt.startswith("ERR:Expression.Error: The DateTime.FromFileTime (depends on the clock"), res_dt
 
-def test_lines_to_binary_bom_and_separators():
-    # Additional check for unseeded List.Random bounds
+def test_list_random_unseeded_bounds():
+    # Check unseeded List.Random bounds
     assert evaluate_to_text("List.Count(List.Random(10))") == "V:number:10"
     assert evaluate_to_text("List.Max(List.Random(20)) < 1") == "V:true"
     assert evaluate_to_text("List.Min(List.Random(20)) >= 0") == "V:true"
+
+def test_list_random_1000_prefix():
+    # Items 0 and 1: test the first 100 values of each against the measured Power BI answers
+    act0 = evaluate_to_text("List.Random(1000, 7)")
+    prefix0 = 'V:list:[number:0.38322046929189024,number:0.87125568272138743,number:0.66093862273774051,number:0.052261705534654534,number:0.36643333237917786,number:0.67616944139644941,number:0.042423949131008214,number:0.95396869301515108,number:0.843566656039826,number:0.85496214118551561,number:0.4490199803602975,number:0.93231581660561069,number:0.44481648478881292,number:0.11129876324501763,number:0.88195431320087725,number:0.40201326478366428,number:0.80488364482525909,number:0.33534237059547678,number:0.86667385365193428,number:0.025025969848514521,number:0.74700167623674574,number:0.56540866595013473,number:0.17493724784578069,number:0.47804635366333942,number:0.38598197809699086,number:0.028565215891490324,number:0.95237340543063986,number:0.024876000371238216,number:0.48030640626340471,number:0.7186270848469003,number:0.77136876563139667,number:0.29717494002411837,number:0.11203963081913051,number:0.16403814366275357,number:0.086947837884979243,number:0.066329704628479536,number:0.82883943609373623,number:0.15149623255780723,number:0.54190520734614933,number:0.93207671583261187,number:0.87900083180470434,number:0.66073937558603446,number:0.12398461956716357,number:0.065599488590657479,number:0.59774979324906585,number:0.95924514763022084,number:0.71870968012079117,number:0.56687005170009563,number:0.83068100494829988,number:0.14650033700582588,number:0.22332884614510873,number:0.87363001186104028,number:0.7071329838163839,number:0.91405643658435742,number:0.59652107795538434,number:0.81781180334175552,number:0.69631843487560674,number:0.182892269074401,number:0.66627972743766373,number:0.3378681164876875,number:0.72379603596580966,number:0.017547948759769998,number:0.47366228675174632,number:0.12493957119292559,number:0.083593375554118943,number:0.1518450403361791,number:0.82027618578648021,number:0.28077834112605932,number:0.024350925360038377,number:0.81562460857239771,number:0.573173828689928,number:0.65338741226745178,number:0.79343716324932745,number:0.93459713781932241,number:0.1460251380438102,number:0.0862623006507113,number:0.44142404638297111,number:0.10933775925512321,number:0.88029656041427351,number:0.42673683046677,number:0.30985553577069919,number:0.38550335373054417,number:0.19419499542293836,number:0.33380606925757883,number:0.49529823870179163,number:0.89773875377035639,number:0.59004195620773447,number:0.19798319423477315,number:0.56751706570736926,number:0.26913603454322371,number:0.37001126975287274,number:0.64594716701933519,number:0.48521650512014353,number:0.20403709085846183,number:0.20828067986680227,number:0.86145288304493428,number:0.18707708883428811,number:0.999045048374238,number:0.98200611303653851,number:0.44590475291288678'
+    assert act0.startswith(prefix0), act0[:100]
+
+    act1 = evaluate_to_text("List.Random(1000, 12345)")
+    prefix1 = 'V:list:[number:0.066746934813795109,number:0.070159508879370752,number:0.77476513514982781,number:0.51113926875923721,number:0.79749055849271389,number:0.827308291023275,number:0.16595879530811627,number:0.73613062348967917,number:0.26021636475818993,number:0.5060048510814108,number:0.23027372231254062,number:0.38714044326317515,number:0.21598061510174563,number:0.020810884898906055,number:0.13483360229750796,number:0.740831733560577,number:0.19509106790418321,number:0.88703956589430555,number:0.861100613540551,number:0.35886506380460459,number:0.10370226022959791,number:0.52958305158167285,number:0.35875501686649164,number:0.707505481181436,number:0.58047483189984916,number:0.6205483226201256,number:0.73249663167283718,number:0.74788273998903243,number:0.39625106071878741,number:0.24525723990297749,number:0.68634507231709785,number:0.21054619374244762,number:0.51753758663196936,number:0.48539096512151464,number:0.25280545291155831,number:0.77077884914855421,number:0.002578939312407253,number:0.48391211427930375,number:0.44795790335534041,number:0.48646042658316924,number:0.71157739065195313,number:0.45124772584589556,number:0.26995235694104447,number:0.28304051388196672,number:0.635241387242098,number:0.29477864610719434,number:0.36953359626677518,number:0.8526806765481274,number:0.17566556398554964,number:0.852200557874609,number:0.6443545756136787,number:0.61583341453961726,number:0.44152083547856696,number:0.49669684306564593,number:0.030103534939747087,number:0.53716388323212227,number:0.71140449201287914,number:0.067259653968391772,number:0.93066443685938816,number:0.17694223587258823,number:0.09481165935043788,number:0.41807605531908387,number:0.33987956277089171,number:0.014959124855212461,number:0.819659778764313,number:0.019727528570092995,number:0.86960285663120584,number:0.730589649980231,number:0.76800543198734772,number:0.3640547531489538,number:0.7382527942481697,number:0.71117895362487948,number:0.43908166253896508,number:0.37464018695738177,number:0.64728767315265145,number:0.65245453438370238,number:0.25963069464062838,number:0.075714502984524937,number:0.072264093939337928,number:0.28569618579265482,number:0.25101472635335043,number:0.87981595512470978,number:0.57221717600348276,number:0.54405050284417833,number:0.60090266428929873,number:0.070511657777480627,number:0.76902535826388063,number:0.020840743566323417,number:0.45528743018176754,number:0.715641569679436,number:0.059374357135675085,number:0.93531928534401543,number:0.55324767741991565,number:0.27101566748275219,number:0.39164876723273134,number:0.29350133533286926,number:0.11136816307500384,number:0.254993232085832,number:0.46338073511765371,number:0.615513858672005'
+    assert act1.startswith(prefix1), act1[:100]
+
+def test_list_random_unrepresentable_refusal():
+    # Items 2, 3, 4, 5, 7 refuse with "not supported by this engine yet"
+    for probe in [
+        "List.Random(3, 2147483648)",
+        "List.Random(3, -2147483649)",
+        "List.Random(3, 4294967296)",
+        "List.Random(3, 1.5)",
+        "List.Random(3, 0.5)",
+    ]:
+        res = evaluate_to_text(probe)
+        assert "not supported by this engine yet" in res, (probe, res)
+
+def test_lines_to_binary_bom_and_separators():
+    # Real BOM and separator test
+    # UTF-8 with BOM and CRLF
+    res_utf8_bom = evaluate_to_text('Binary.ToText(Lines.ToBinary({"hello", "world"}, null, 65001, true), BinaryEncoding.Hex)')
+    assert res_utf8_bom == 'V:text:"efbbbf68656c6c6f0d0a776f726c640d0a"'
+    # UTF-16 LE with BOM and comma separator
+    res_utf16_bom = evaluate_to_text('Binary.ToText(Lines.ToBinary({"a", "b"}, ",", 1200, true), BinaryEncoding.Hex)')
+    assert res_utf16_bom == 'V:text:"fffe61002c0062002c00"'
+    # UTF-8 with custom delimiter and no BOM
+    res_delim = evaluate_to_text('Binary.ToText(Lines.ToBinary({"x", "y"}, "|", 65001, false), BinaryEncoding.Hex)')
+    assert res_delim == 'V:text:"787c797c"'

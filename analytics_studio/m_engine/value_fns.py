@@ -1515,6 +1515,9 @@ def _binary_from_text(text: MValue, encoding: MValue) -> MValue:
 def _binary_to_text(value: MValue, encoding: MValue) -> MValue:
     import base64
 
+    if isinstance(value, V.Null):
+        _encoding(encoding)
+        return V.Null()
     data = _binary_of(value).value
     if _encoding(encoding) == _HEX:
         return V.Text(data.hex())
@@ -1552,7 +1555,16 @@ def _binary_buffer(value: MValue) -> MValue:
     return _binary_of(value)
 
 
+_COMPRESSION_ENUM_ERROR = (
+    "The value for a 'Compression.Type' enumeration was not one of the allowed values: "
+    "'Compression.None, Compression.GZip, Compression.Deflate, Compression.Snappy, "
+    "Compression.Brotli, Compression.LZ4, Compression.Zstandard'."
+)
+
+
 def _compress_type(compression: MValue) -> int:
+    import math
+
     if isinstance(compression, V.Null):
         raise V.convert_error(compression, V.TypeValue("number"))
     if not isinstance(compression, V.Number):
@@ -1562,6 +1574,8 @@ def _compress_type(compression: MValue) -> int:
         return 0
     if val == 1.0:
         return 1
+    if math.isnan(val) or math.isinf(val) or val != math.floor(val):
+        raise V.generic_error(_COMPRESSION_ENUM_ERROR)
     raise V.generic_error("We don't support that type of compression in this context.")
 
 
@@ -1569,8 +1583,10 @@ def _binary_compress(binary: MValue, compressionType: MValue) -> MValue:
     import struct
     import zlib
 
-    b = _binary_of(binary)
     ctype = _compress_type(compressionType)
+    if isinstance(binary, V.Null):
+        return V.Null()
+    b = _binary_of(binary)
     data = b.value
     if not data:
         return V.Binary(b"")
@@ -1586,21 +1602,47 @@ def _binary_compress(binary: MValue, compressionType: MValue) -> MValue:
 
 
 def _binary_decompress(binary: MValue, compressionType: MValue) -> MValue:
+    import struct
     import zlib
 
-    b = _binary_of(binary)
     ctype = _compress_type(compressionType)
+    if isinstance(binary, V.Null):
+        return V.Null()
+    b = _binary_of(binary)
     data = b.value
     if not data:
         return V.Binary(b"")
+    if ctype == 1:
+        d = zlib.decompressobj(-15)
+        try:
+            return V.Binary(d.decompress(data))
+        except Exception:
+            raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    # GZip (0):
+    if data[:2] == b"\x1f\x8b" and len(data) < 10:
+        raise _unsupported("truncated gzip header")
+    d = zlib.decompressobj(16 + zlib.MAX_WBITS)
     try:
-        if ctype == 1:
-            decomp = zlib.decompress(data, -15)
-        else:
-            decomp = zlib.decompress(data, 16 + zlib.MAX_WBITS)
-    except Exception:
-        raise MError("DataFormat.Error", "Found invalid data while decoding.")
-    return V.Binary(decomp)
+        res = d.decompress(data)
+    except zlib.error as err:
+        msg = str(err)
+        if "incorrect data check" in msg or "incorrect length check" in msg or "invalid" in msg or "incorrect header check" in msg:
+            raise MError("DataFormat.Error", "Found invalid data while decoding.")
+        raise _unsupported(f"unsupported gzip error: {msg}")
+    if d.eof:
+        return V.Binary(res)
+    # Missing trailing ISIZE (truncated by 4 bytes): try appending 4-byte expected ISIZE
+    d2 = zlib.decompressobj(16 + zlib.MAX_WBITS)
+    try:
+        dummy_isize = struct.pack("<I", len(res) & 0xffffffff)
+        res2 = d2.decompress(data + dummy_isize)
+        if d2.eof:
+            return V.Binary(res2)
+    except zlib.error as err:
+        msg = str(err)
+        if "incorrect data check" in msg:
+            raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    raise _unsupported("truncated gzip body without trailer")
 
 
 def _binary_range(value: MValue, offset: MValue, count: MValue) -> MValue:
@@ -1934,15 +1976,63 @@ def _lines_from_text(text: MValue, quote: MValue, include_separators: MValue) ->
     return V.List(tuple(V.Text(line) for line in lines))
 
 
-def _lines_from_binary(value: MValue, quote: MValue = V.Null(), include_separators: MValue = V.Null(), encoding: MValue = V.Null()) -> MValue:
-    from .text import _decode, _encoding_page, _check_page  # local import: text imports value_fns
+_DECODE_CODECS = {
+    65001: "utf-8",
+    1200: "utf-16-le",
+    1201: "utf-16-be",
+    12000: "utf-32-le",
+    12001: "utf-32-be",
+}
+_DECODE_SINGLE_BYTE = {0: "cp1252", 1252: "cp1252", 28591: "latin-1", 437: "cp437"}
+_DECODE_BOMS = ((b"\xef\xbb\xbf", 65001), (b"\xff\xfe", 1200), (b"\xfe\xff", 1201))
 
-    if isinstance(value, V.Null):
-        return V.Null()
+
+def _lines_from_binary(value: MValue, quote: MValue = V.Null(), include_separators: MValue = V.Null(), encoding: MValue = V.Null()) -> MValue:
+    import codecs
+    from .text import _encoding_page, _check_page  # local import: text imports value_fns
+
     b = _binary_of(value)
     page = _encoding_page(encoding)
     _check_page(page)
-    text = _decode(b.value, page)
+
+    data = b.value
+    # BOM check: BOM wins over explicit encoding (measured item 39)
+    if data[:4] == b"\xff\xfe\x00\x00":
+        page = 12000
+        data = data[4:]
+    elif data[:4] == b"\x00\x00\xfe\xff":
+        page = 12001
+        data = data[4:]
+    else:
+        for mark, code in _DECODE_BOMS:
+            if data.startswith(mark):
+                page = code
+                data = data[len(mark):]
+                break
+    if page is None:
+        page = 65001
+
+    if page in _DECODE_CODECS:
+        name = _DECODE_CODECS[page]
+        decoder = codecs.getincrementaldecoder(name)()
+        try:
+            text = decoder.decode(data, final=False)
+        except UnicodeDecodeError:
+            raise _unsupported("invalid character sequence in the middle")
+    elif page == 20127:
+        text = "".join(chr(byte) if byte < 128 else "?" for byte in data)
+    elif page in _DECODE_SINGLE_BYTE:
+        codec = _DECODE_SINGLE_BYTE[page]
+        out = []
+        for byte in data:
+            try:
+                out.append(bytes((byte,)).decode(codec))
+            except UnicodeDecodeError:
+                out.append(chr(byte))
+        text = "".join(out)
+    else:
+        raise _unsupported(f"unsupported text encoding {page}")
+
     return _lines_from_text(V.Text(text), quote, include_separators)
 
 
