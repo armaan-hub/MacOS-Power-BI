@@ -1,8 +1,9 @@
 """Tests for Task 220: M engine Unpivot, ReplaceValue and PrefixColumns column types follow Power BI.
 
 Tests Table.Unpivot, Table.UnpivotOtherColumns, Table.ReplaceValue and Table.PrefixColumns.
-Includes all 42 probe / answer pairs from batch 19 and batch 20 as exact string matches,
-plus two no-crash cases Power BI did not answer.
+Includes all 42 probe / answer pairs from batch 19 and batch 20, plus all 22 probe / answer
+pairs from batch 21 and batch 22, as exact string matches, plus two no-crash cases Power BI
+did not answer.
 """
 
 import pytest
@@ -207,3 +208,108 @@ def test_replace_value_date_column_with_null_replacement() -> None:
             '#date(2024,1,1), null, Replacer.ReplaceValue, {"D"}))[[Name],[TypeName]]')
     res = evaluate_to_text(expr)
     assert res.startswith("V:") or res.startswith("ERR:Expression.Error:")
+
+
+BATCH21_PAIRS = [
+    (
+        'Type.IsNullable(Type.TableColumn(Value.Type(Table.ReplaceValue(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), 1, 5, Replacer.ReplaceValue, {"W"})), "W"))',
+        'V:true',
+    ),
+    (
+        'Type.IsNullable(Type.TableColumn(Value.Type(Table.ReplaceValue(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), 1, 5, Replacer.ReplaceValue, {"X"})), "X"))',
+        'V:false',
+    ),
+    (
+        'Type.IsNullable(Type.TableColumn(Value.Type(Table.ReplaceValue(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), 1, null, Replacer.ReplaceValue, {"X"})), "X"))',
+        'V:true',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), {"D","DT"}, "A2", "V"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"A2",text:"Text.Type",false],list:[text:"V",text:"Any.Type",true]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), {"X","A"}, "A2", "V"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"K",text:"Text.Type",false],list:[text:"A2",text:"Text.Type",false],list:[text:"V",text:"Any.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), {"X","W"}, "A2", "V"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"A2",text:"Text.Type",false],list:[text:"V",text:"Int64.Type",false]]',
+    ),
+    (
+        'Table.ColumnNames(Table.PrefixColumns(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), ""))',
+        'V:list:[text:".W",text:".X",text:".D",text:".DT",text:".A",text:".K"]',
+    ),
+    (
+        'Table.Schema(Table.ReplaceValue(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), #date(2024,1,1), null, Replacer.ReplaceValue, {"D"}))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",true],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.ReplaceValue(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), 1, 5, Replacer.ReplaceValue, {"W"}))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Number.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, K = text], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, "k"}, {null, 2, #date(2024,2,1), #datetime(2024,2,1,0,0,0), 8, "m"}}), {"X"}, "A2", "V"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"A2",text:"Text.Type",false],list:[text:"V",text:"Int64.Type",false]]',
+    ),
+]
+
+BATCH22_PAIRS = [
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"X","K"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",true]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"X","D"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",true]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"A","K"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A2",text:"Any.Type",true],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"A","A2"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"W","K"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",true]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"K","NK"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Text.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"X","NK"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",true]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"D","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A2",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"N2","A"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A2",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Any.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.Unpivot(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), {"X","W"}, "Atr", "Val"))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false],list:[text:"Atr",text:"Text.Type",false],list:[text:"Val",text:"Int64.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.ReplaceValue(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), #date(2024,1,1), null, Replacer.ReplaceValue, {"D"}))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Int64.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",true],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false]]',
+    ),
+    (
+        'Table.Schema(Table.ReplaceValue(#table(type table [W = nullable Int64.Type, X = Int64.Type, D = date, DT = datetime, A = any, A2 = any, K = text, NK = nullable text, N2 = number], {{1, 1, #date(2024,1,1), #datetime(2024,1,1,0,0,0), 7, 8, "k", "z", 1.5}}), 1, 5, Replacer.ReplaceValue, {"W"}))[[Name],[TypeName],[IsNullable]]',
+        'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"W",text:"Number.Type",true],list:[text:"X",text:"Int64.Type",false],list:[text:"D",text:"Date.Type",false],list:[text:"DT",text:"DateTime.Type",false],list:[text:"A",text:"Any.Type",true],list:[text:"A2",text:"Any.Type",true],list:[text:"K",text:"Text.Type",false],list:[text:"NK",text:"Text.Type",true],list:[text:"N2",text:"Number.Type",false]]',
+    ),
+]
+
+
+@pytest.mark.parametrize("probe,expected", BATCH21_PAIRS)
+def test_batch21_power_bi_answers(probe: str, expected: str) -> None:
+    assert evaluate_to_text(probe) == expected
+
+
+@pytest.mark.parametrize("probe,expected", BATCH22_PAIRS)
+def test_batch22_power_bi_answers(probe: str, expected: str) -> None:
+    assert evaluate_to_text(probe) == expected

@@ -770,6 +770,8 @@ def _replaced_kind(replacer: V.Function, old_kind: str, new: MValue) -> str:
     base, type_name, _nullable = _parts(old_kind)
     if base == "date" and isinstance(new, V.Date):  # a date replacement keeps Date.Type (Power BI answer check)
         return old_kind
+    if base == "date" and isinstance(new, V.Null):  # a null makes the date column nullable Date? (same check)
+        return _col(type_name, True)
     if base not in ("any", "number", "text"):
         raise _unsupported("replacement in a " + base + " column")
     if base == "any":
@@ -1487,6 +1489,10 @@ def _unpivot_table(t: V.Table, unpivot: list, others: list, attr: str, value_nam
         value_kind = _col(next(iter(details))[1], False)  # unpivoted nulls are dropped: the column is never null
     elif len({base for base, _ in details}) == 1:  # same base kind, different facets: Number.Type (Power BI)
         value_kind = _col(_PRIMITIVE_TYPE_NAMES[next(iter(details))[0]] + ".Type", False)
+    elif "any" in kinds:
+        # an untyped column among different base kinds: Any.Type NOT nullable, the same kind the
+        # all-columns-untyped case produces (Power BI answer check 2026-11-18)
+        value_kind = _col("Any.Type", False)
     else:
         value_kind = "any"  # different base kinds: Any.Type (Power BI)
     columns = tuple(t.columns[j] for j in others) + ((attr, "text"), (value_name, value_kind))
