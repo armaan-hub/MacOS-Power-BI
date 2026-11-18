@@ -1305,6 +1305,16 @@ DURATION_GLOBALS: dict = {
 
 def _clock_refusal(name: str):
     """A function whose answer depends on the clock or the machine's zone: an explicit ERR, whatever the argument."""
+    if name.endswith(".FromFileTime"):
+        def invoke_fft(fileTime: MValue) -> MValue:
+            if isinstance(fileTime, V.Null):
+                return V.Null()
+            if not isinstance(fileTime, V.Number):
+                raise V.convert_error(fileTime, V.TypeValue("number"))
+            raise _unsupported(f"{name} (depends on the clock or the machine's time zone)")
+
+        return _native((("fileTime", False),), invoke_fft)
+
     def invoke(*_args: MValue) -> MValue:
         raise _unsupported(f"{name} (depends on the clock or the machine's time zone)")
 
@@ -1321,7 +1331,7 @@ _CLOCK_NAMES = (
     *(f"DateTimeZone.{prefix}{span}" for prefix in ("IsInCurrent", "IsInNext", "IsInPrevious")
       for span in ("Day", "Week", "Month", "Quarter", "Year", "Hour", "Minute", "Second")),
     "DateTimeZone.IsInYearToDate", "DateTimeZone.LocalNow", "DateTimeZone.UtcNow",
-    "DateTimeZone.FixedLocalNow", "DateTimeZone.FixedUtcNow",
+    "DateTimeZone.FixedLocalNow", "DateTimeZone.FixedUtcNow", "DateTimeZone.FromFileTime",
     "Time.IsInCurrentHour", "Time.IsInNextHour", "Time.IsInPreviousHour",
 )
 

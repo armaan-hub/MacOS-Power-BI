@@ -1803,6 +1803,16 @@ def _from_partitions(partition_column: MValue, partitions: MValue) -> MValue:
     raise _unsupported("Table.FromPartitions")
 
 
+def _table_partition_key(table: MValue) -> MValue:
+    _table(table)
+    return V.Null()
+
+
+def _table_partition_values(table: MValue) -> MValue:
+    _table(table)
+    return V.Table((), [()])
+
+
 _RANK_COMPETITION = 0
 _RANK_DENSE = 1
 _RANK_ORDINAL = 2
@@ -2858,6 +2868,8 @@ TABLE_GLOBALS: dict = {
     "Table.Partition": _native((("table", False), ("column", False), ("groups", False), ("hash", False)),
                                _partition),
     "Table.FromPartitions": _native((("partitionColumn", False), ("partitions", False)), _from_partitions),
+    "Table.PartitionKey": _native((("table", False),), _table_partition_key),
+    "Table.PartitionValues": _native((("table", False),), _table_partition_values),
     "Table.AddRankColumn": _native((("table", False), ("newColumnName", False), ("comparisonCriteria", False),
                                     ("options", True)), _add_rank_column),
     "Table.TransformColumnNames": _native((("table", False), ("nameGenerator", False)), _transform_column_names),

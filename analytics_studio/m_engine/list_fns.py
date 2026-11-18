@@ -1147,6 +1147,77 @@ def _union(lists: MValue, criteria: MValue) -> MValue:
     return V.List(tuple(out))
 
 
+class _NetRandom:
+    MBIG = 2147483647
+    MSEED = 161803398
+    MZ = 0
+
+    def __init__(self, seed: int):
+        self.SeedArray = [0] * 56
+        subtraction = abs(self.MBIG if seed == -2147483648 else seed)
+        mj = self.MSEED - subtraction
+        self.SeedArray[55] = mj
+        mk = 1
+        for i in range(1, 55):
+            ii = (21 * i) % 55
+            self.SeedArray[ii] = mk
+            mk = mj - mk
+            if mk < 0:
+                mk += self.MBIG
+            mj = self.SeedArray[ii]
+        for k in range(1, 5):
+            for i in range(1, 56):
+                self.SeedArray[i] -= self.SeedArray[1 + (i + 30) % 55]
+                if self.SeedArray[i] < 0:
+                    self.SeedArray[i] += self.MBIG
+        self.inext = 0
+        self.inextp = 21
+
+    def InternalSample(self) -> int:
+        locINext = self.inext + 1
+        locINextp = self.inextp + 1
+        if locINext >= 56:
+            locINext = 1
+        if locINextp >= 56:
+            locINextp = 1
+        retVal = self.SeedArray[locINext] - self.SeedArray[locINextp]
+        if retVal == self.MBIG:
+            retVal -= 1
+        if retVal < 0:
+            retVal += self.MBIG
+        self.SeedArray[locINext] = retVal
+        self.inext = locINext
+        self.inextp = locINextp
+        return retVal
+
+    def Sample(self) -> float:
+        return self.InternalSample() * (1.0 / self.MBIG)
+
+
+def _list_random(count: MValue, seed: MValue = V.Null()) -> MValue:
+    if not isinstance(count, V.Number):
+        raise V.convert_error(count, V.TypeValue("number"))
+    c = _whole(count)
+    if c < 0:
+        raise V.generic_error("The 'count' argument is out of range.")
+    if c == 0:
+        return V.List(())
+    c = _bounded(c)
+    if not isinstance(seed, V.Null):
+        if not isinstance(seed, V.Number):
+            raise V.convert_error(seed, V.TypeValue("number"))
+        sx = seed.value
+        if math.isnan(sx) or math.isinf(sx) or sx != math.floor(sx):
+            raise _unsupported("List.Random seed that is not a whole number")
+        s = int(sx)
+        if s < -2147483648 or s > 2147483647:
+            raise _unsupported("List.Random seed outside 32-bit integer range")
+        gen = _NetRandom(s)
+        return V.List(tuple(V.Number(gen.Sample()) for _ in range(c)))
+    import random
+    return V.List(tuple(V.Number(random.random()) for _ in range(c)))
+
+
 # ---- registration -----------------------------------------------------------------
 
 LIST_GLOBALS: dict = {
@@ -1167,6 +1238,7 @@ LIST_GLOBALS: dict = {
     "List.Reverse": _native((("list", False),), _reverse),
     "List.Positions": _native((("list", False),), _positions),
     "List.Buffer": _native((("list", False),), _buffer),
+    "List.Random": _native((("count", False), ("seed", True)), _list_random),
     "List.RemoveNulls": _native((("list", False),), _remove_nulls),
     "List.Numbers": _native((("start", False), ("count", False), ("increment", True)), _numbers),
     "List.Union": _native((("lists", False), ("equationCriteria", True)), _union),
