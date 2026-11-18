@@ -1448,7 +1448,8 @@ def _character_from_number(value: MValue) -> MValue:
     code = int(x)
     if code <= 0xFFFF:
         if 0xD800 <= code <= 0xDFFF:
-            raise _unsupported("lone surrogate character")
+            raise MError("Expression.Error", "We couldn't convert to Character.",
+                         fmt="We couldn't convert to Character.")
         return V.Text(chr(code))
     rest = code - 0x10000
     # a character outside the BMP is two UTF-16 units; Power BI cannot print the pair (UNREPRESENTABLE)
@@ -1619,30 +1620,64 @@ def _binary_decompress(binary: MValue, compressionType: MValue) -> MValue:
         except Exception:
             raise MError("DataFormat.Error", "Found invalid data while decoding.")
     # GZip (0):
-    if data[:2] == b"\x1f\x8b" and len(data) < 10:
-        raise _unsupported("truncated gzip header")
-    d = zlib.decompressobj(16 + zlib.MAX_WBITS)
-    try:
-        res = d.decompress(data)
-    except zlib.error as err:
-        msg = str(err)
-        if "incorrect data check" in msg or "incorrect length check" in msg or "invalid" in msg or "incorrect header check" in msg:
+    if not data.startswith(b"\x1f\x8b"):
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    if len(data) <= 10:
+        return V.Binary(b"")
+    cm = data[2]
+    if cm != 8:
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    flg = data[3]
+    if flg & 0xE0:
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+
+    idx = 10
+    # FEXTRA (bit 2 = 0x04)
+    if flg & 0x04:
+        if len(data) < idx + 2:
+            return V.Binary(b"")
+        xlen = int.from_bytes(data[idx:idx + 2], "little")
+        idx += 2
+        if len(data) < idx + xlen:
+            return V.Binary(b"")
+        idx += xlen
+
+    # FNAME (bit 3 = 0x08)
+    if flg & 0x08:
+        zero_pos = data.find(b"\x00", idx)
+        if zero_pos == -1:
+            return V.Binary(b"")
+        idx = zero_pos + 1
+
+    # FCOMMENT (bit 4 = 0x10)
+    if flg & 0x10:
+        zero_pos = data.find(b"\x00", idx)
+        if zero_pos == -1:
+            return V.Binary(b"")
+        idx = zero_pos + 1
+
+    # FHCRC (bit 1 = 0x02)
+    if flg & 0x02:
+        if len(data) < idx + 2:
+            raise _unsupported("FHCRC header CRC truncated inside 2 bytes")
+        expected_hcrc = int.from_bytes(data[idx:idx + 2], "little")
+        actual_hcrc = zlib.crc32(data[:idx]) & 0xffff
+        if actual_hcrc != expected_hcrc:
             raise MError("DataFormat.Error", "Found invalid data while decoding.")
-        raise _unsupported(f"unsupported gzip error: {msg}")
-    if d.eof:
-        return V.Binary(res)
-    # Missing trailing ISIZE (truncated by 4 bytes): try appending 4-byte expected ISIZE
-    d2 = zlib.decompressobj(16 + zlib.MAX_WBITS)
+        idx += 2
+
+    d = zlib.decompressobj(-15)
     try:
-        dummy_isize = struct.pack("<I", len(res) & 0xffffffff)
-        res2 = d2.decompress(data + dummy_isize)
-        if d2.eof:
-            return V.Binary(res2)
-    except zlib.error as err:
-        msg = str(err)
-        if "incorrect data check" in msg:
+        res = d.decompress(data[idx:])
+    except Exception:
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    if len(d.unused_data) >= 8:
+        expected_crc, expected_isize = struct.unpack("<II", d.unused_data[:8])
+        actual_crc = zlib.crc32(res) & 0xffffffff
+        actual_isize = len(res) & 0xffffffff
+        if actual_crc != expected_crc or actual_isize != expected_isize:
             raise MError("DataFormat.Error", "Found invalid data while decoding.")
-    raise _unsupported("truncated gzip body without trailer")
+    return V.Binary(res)
 
 
 def _binary_range(value: MValue, offset: MValue, count: MValue) -> MValue:
@@ -2042,7 +2077,7 @@ def _lines_to_binary(lines: MValue, lineSeparator: MValue = V.Null(), encoding: 
     text_val = _lines_to_text(lines, lineSeparator)
     page = _encoding_page(encoding)
     _check_page(page)
-    raw = _encode(text_val.value, page)
+    raw = _encode(text_val.value, page, fallback_question=True)
     if isinstance(includeByteOrderMark, V.Logical) and includeByteOrderMark.value:
         bom = None
         if page is None or page == 65001:

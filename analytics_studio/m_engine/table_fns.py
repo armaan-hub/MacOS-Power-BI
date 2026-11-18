@@ -54,6 +54,7 @@ _MEASURED_KEY_PROPAGATORS = {
     "_duplicate_column",
     "_add_index_column",
     "_fill_down",
+    "_fill_up",
     "_remove_rows",
     "_select_columns",
     "_transform_columns",
@@ -965,11 +966,11 @@ def _transform_columns(table: MValue, transforms: MValue, default: MValue, missi
     new_keys = None
     if t.keys is not None:
         kept_keys = []
-        transformed_names = {t.columns[i][0] for i in fns}
+        non_identity_transforms = {t.columns[i][0] for i, (fn, _) in fns.items() if getattr(fn, "origin", None) != "identity"}
         for k in t.keys:
             cols_val = k.get("Columns")
             cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
-            if not any(c in transformed_names for c in cols):
+            if not any(c in non_identity_transforms for c in cols):
                 kept_keys.append(k)
         new_keys = tuple(kept_keys)
     return V.Table(columns, tuple(rows), meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
@@ -1063,26 +1064,18 @@ def _replace_value_table(table: MValue, old: MValue, new: MValue, replacer: MVal
 
     # Key propagation:
     # Table.ReplaceValue on a key column: key dropped.
-    # For ReplaceValue on only non-key columns, unmeasured -> unmeasured flag.
+    # Replacing only non-key columns keeps keys.
     new_keys = None
     new_unmeasured = t.keys_unmeasured
     if t.keys is not None:
         kept_keys = []
         replaced_set = set(names)
-        dropped_any_key = False
         for k in t.keys:
             cols_val = k.get("Columns")
             cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
-            if any(c in replaced_set for c in cols):
-                dropped_any_key = True
-            else:
+            if not any(c in replaced_set for c in cols):
                 kept_keys.append(k)
-        if dropped_any_key:
-            new_keys = tuple(kept_keys)
-        else:
-            # Replaced only non-key columns -> unmeasured flag
-            new_keys = None
-            new_unmeasured = True
+        new_keys = tuple(kept_keys)
     elif t.keys_unmeasured:
         new_unmeasured = True
 
