@@ -243,6 +243,8 @@ def _binary_format_binary(length: MValue = V.Null()) -> V.Function:
     if _is_format_fn(length):
         sub_reader = getattr(length, "_reader_fn")
         kind = getattr(length, _FORMAT_KIND, "")
+        if kind in ("text", "record", "null"):
+            raise _unsupported("binary format binary length format of unsupported kind")
         if kind not in ("primitive", "transform"):
             raise V.generic_error("The specified binary format value cannot be used to read a length.")
 
@@ -257,7 +259,7 @@ def _binary_format_binary(length: MValue = V.Null()) -> V.Function:
             if k < 0:
                 raise V.generic_error("The specified binary format value cannot be used to read a length.")
             if next_pos + k > len(b):
-                raise _eof_error(len(b))
+                raise _unsupported("binary format reading past end of input")
             return V.Binary(b[next_pos:next_pos + k]), next_pos + k
 
         return _make_format(read_fmt_len, kind="binary")
@@ -267,7 +269,7 @@ def _binary_format_binary(length: MValue = V.Null()) -> V.Function:
 
     def read_fixed(b: bytes, pos: int, byte_order: int) -> Tuple[MValue, int]:
         if pos + n > len(b):
-            raise _eof_error(len(b))
+            raise _unsupported("binary format reading past end of input")
         return V.Binary(b[pos:pos + n]), pos + n
 
     return _make_format(read_fixed, kind="binary")
@@ -303,11 +305,18 @@ def _binary_format_length(binaryFormat: MValue, length: MValue) -> V.Function:
     return _make_format(read_length, kind="length")
 
 
+def _decode_binary_format_text(slice_b: bytes, page: int) -> str:
+    if page == 850:
+        return slice_b.decode("cp850")
+    return _decode(slice_b, page)
+
+
 def _binary_format_text(length: MValue, encoding: MValue = V.Null()) -> V.Function:
     page = _encoding_page(encoding)
     if page == 0:
         page = 1252
-    _check_page(page)
+    if page != 850:
+        _check_page(page)
 
     if _is_format_fn(length):
         len_reader = getattr(length, "_reader_fn")
@@ -315,9 +324,9 @@ def _binary_format_text(length: MValue, encoding: MValue = V.Null()) -> V.Functi
             len_val, p2 = len_reader(b, pos, byte_order)
             n = _check_int32_len(len_val)
             if p2 + n > len(b):
-                raise _eof_error(len(b))
+                raise _unsupported("binary format reading past end of input")
             slice_b = b[p2:p2 + n]
-            s = _decode(slice_b, page)
+            s = _decode_binary_format_text(slice_b, page)
             return V.Text(s), p2 + n
         return _make_format(read_dynamic_text, kind="text")
 
@@ -327,7 +336,7 @@ def _binary_format_text(length: MValue, encoding: MValue = V.Null()) -> V.Functi
         if pos + n > len(b):
             raise _eof_error(len(b))
         slice_b = b[pos:pos + n]
-        s = _decode(slice_b, page)
+        s = _decode_binary_format_text(slice_b, page)
         return V.Text(s), pos + n
 
     return _make_format(read_text, kind="text")
@@ -347,30 +356,53 @@ def _binary_format_list(binaryFormat: MValue, countOrCondition: MValue = V.Null(
             items = []
             curr = pos
             while curr < len(b):
-                val, curr = sub_reader(b, curr, byte_order)
+                try:
+                    val, next_pos = sub_reader(b, curr, byte_order)
+                except MError:
+                    raise _unsupported("binary format reading past end of input")
+                if next_pos <= curr:
+                    raise _unsupported("zero-width binary format list item")
+                curr = next_pos
                 items.append(val)
             return V.List(tuple(items)), curr
         return _make_format(read_until_eof, kind="list")
 
     if _is_format_fn(countOrCondition):
+        count_kind = getattr(countOrCondition, _FORMAT_KIND, "")
+        if count_kind in ("text", "record", "null"):
+            raise _unsupported("binary format list count format of unsupported kind")
         count_reader = getattr(countOrCondition, "_reader_fn")
         def read_dynamic_count(b: bytes, pos: int, byte_order: int) -> Tuple[MValue, int]:
             c_val, curr = count_reader(b, pos, byte_order)
             count = _check_int64_len(c_val, param_name="count")
+            if count > 10_000_000:
+                raise _unsupported("binary format list count exceeds limit")
             items = []
             for _ in range(count):
-                val, curr = sub_reader(b, curr, byte_order)
+                if curr >= len(b):
+                    raise _unsupported("binary format reading past end of input")
+                val, next_pos = sub_reader(b, curr, byte_order)
+                if next_pos <= curr and count > 100_000:
+                    raise _unsupported("zero-width binary format list item")
+                curr = next_pos
                 items.append(val)
             return V.List(tuple(items)), curr
         return _make_format(read_dynamic_count, kind="list")
 
     if isinstance(countOrCondition, V.Number):
         count = _check_int64_len(countOrCondition, param_name="count")
+        if count > 10_000_000:
+            raise _unsupported("binary format list count exceeds limit")
         def read_fixed_count(b: bytes, pos: int, byte_order: int) -> Tuple[MValue, int]:
             curr = pos
             items = []
             for _ in range(count):
-                val, curr = sub_reader(b, curr, byte_order)
+                if curr >= len(b):
+                    raise _unsupported("binary format reading past end of input")
+                val, next_pos = sub_reader(b, curr, byte_order)
+                if next_pos <= curr and count > 100_000:
+                    raise _unsupported("zero-width binary format list item")
+                curr = next_pos
                 items.append(val)
             return V.List(tuple(items)), curr
         return _make_format(read_fixed_count, kind="list")
@@ -381,12 +413,21 @@ def _binary_format_list(binaryFormat: MValue, countOrCondition: MValue = V.Null(
         def read_while_cond(b: bytes, pos: int, byte_order: int) -> Tuple[MValue, int]:
             curr = pos
             items = []
+            stopped = False
             while curr < len(b):
-                val, curr = sub_reader(b, curr, byte_order)
+                val, next_pos = sub_reader(b, curr, byte_order)
+                if next_pos <= curr:
+                    raise _unsupported("zero-width binary format list item")
+                curr = next_pos
                 items.append(val)
                 cond_res = apply_function(countOrCondition, [val])
                 if isinstance(cond_res, V.Logical) and not cond_res.value:
+                    stopped = True
                     break
+                if not isinstance(cond_res, V.Logical) or cond_res.value is True:
+                    pass
+            if not stopped:
+                raise _unsupported("binary format predicate never turned false")
             return V.List(tuple(items)), curr
         return _make_format(read_while_cond, kind="list")
 
@@ -446,6 +487,10 @@ def _binary_format_record(record: MValue) -> V.Function:
         raise V.convert_error(record, V.TypeValue("record"))
 
     fields = list(record.fields)
+    for name, field_val in fields:
+        val = V.force(field_val)
+        if isinstance(val, V.Function) and not _is_format_fn(val):
+            raise _unsupported("binary format function in record")
 
     def read_record(b: bytes, pos: int, byte_order: int) -> Tuple[MValue, int]:
         curr = pos
@@ -473,6 +518,9 @@ def _binary_format_choice(
         raise V.convert_error(length, V.TypeValue("function"))
     if not _is_format_fn(length):
         raise V.generic_error("The value isn't a binary format value.")
+    len_kind = getattr(length, _FORMAT_KIND, "")
+    if len_kind in ("text", "record", "null"):
+        raise _unsupported("binary format choice length format of unsupported kind")
     if not isinstance(binaryFormat, V.Function):
         raise V.convert_error(binaryFormat, V.TypeValue("function"))
 
@@ -523,7 +571,7 @@ BINARY_FORMAT_GLOBALS: dict[str, MValue] = {
     "BinaryFormat.Decimal": _make_primitive_format(_read_decimal),
     "BinaryFormat.7BitEncodedUnsignedInteger": _make_primitive_format(_read_7bit_uint),
     "BinaryFormat.7BitEncodedSignedInteger": _make_primitive_format(_read_7bit_sint),
-    "BinaryFormat.Null": _make_primitive_format(_read_null),
+    "BinaryFormat.Null": _make_format(_read_null, kind="null"),
 
     # Constructors
     "BinaryFormat.Binary": V.Function(

@@ -705,7 +705,7 @@ def _text_format(format_string: MValue, arguments: MValue, culture: MValue = V.N
 
 INVALID_ENCODING = "The text encoding is invalid."
 BOM_MISMATCH = "The unicode byte order marks didn't match the specified encoding."
-_SINGLE_BYTE = {0: "cp1252", 1252: "cp1252", 28591: "latin-1", 437: "cp437", 850: "cp850"}  # 0 is this machine's ANSI page
+_SINGLE_BYTE = {0: "cp1252", 1252: "cp1252", 28591: "latin-1", 437: "cp437"}  # 0 is this machine's ANSI page
 _UNICODE_PAGES = (65001, 1200, 1201, 12000, 12001)
 _ASCII_PAGE = 20127
 _CP1252_PASS_THROUGH = (0x81, 0x8D, 0x8F, 0x90, 0x9D)  # .NET maps these bytes to the same code point
