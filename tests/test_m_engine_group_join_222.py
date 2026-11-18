@@ -64,3 +64,36 @@ def test_m_engine_group_join_datetimezones_222(probe: str, expected: str) -> Non
     if expected == "UNREPRESENTABLE":
         pytest.skip("Answer is unrepresentable in engine")
     assert evaluate_to_text(probe) == expected
+
+
+def test_fix1_global_grouping_performance() -> None:
+    # 3000 distinct keys in Global grouping runs in linear time (~0.01s), not quadratic
+    probe = 'Table.RowCount(Table.Group(#table({"K"}, List.Transform(List.Numbers(1, 3000), each {_})), "K", {}))'
+    assert evaluate_to_text(probe) == 'V:number:3000'
+
+
+def test_fix2_refuse_nan_and_unhashable_keys() -> None:
+    nan_probe = 'Table.Group(#table({"K"}, {{#nan}}), "K", {})'
+    assert evaluate_to_text(nan_probe) == 'ERR:Expression.Error: The value without an equality key is not supported by this engine yet.'
+    list_probe = 'Table.Group(#table({"K"}, {{{1}}}), "K", {})'
+    assert evaluate_to_text(list_probe) == 'ERR:Expression.Error: The value without an equality key is not supported by this engine yet.'
+
+
+def test_fix3_refuse_differing_comparer() -> None:
+    probe = 'Table.Group(#table({"K"}, {{"a"},{"A"}}), "K", {}, GroupKind.Global, Comparer.OrdinalIgnoreCase)'
+    assert evaluate_to_text(probe) == 'ERR:Expression.Error: The comparer whose behavior differs from ordinal equality on actual keys is not supported by this engine yet.'
+
+
+def test_fix4_right_anti_and_right_semi_schema() -> None:
+    probe_anti = 'Table.Schema(Table.Join(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "K", #table(type table [K2 = text, W = Int64.Type], {{"b",2}}), "K2", JoinKind.RightAnti))[[Name],[TypeName],[IsNullable]]'
+    expected_anti = 'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"K",text:"Text.Type",true],list:[text:"V",text:"Int64.Type",true],list:[text:"K2",text:"Text.Type",false],list:[text:"W",text:"Int64.Type",false]]'
+    assert evaluate_to_text(probe_anti) == expected_anti
+
+    probe_semi = 'Table.Schema(Table.Join(#table(type table [K = text, V = Int64.Type], {{"a",1}}), "K", #table(type table [K2 = text, W = Int64.Type], {{"a",2}}), "K2", JoinKind.RightSemi))[[Name],[TypeName],[IsNullable]]'
+    expected_semi = 'V:table:cols=["Name":"text","TypeName":"text","IsNullable":"logical"];rows=[list:[text:"K",text:"Text.Type",true],list:[text:"V",text:"Int64.Type",true],list:[text:"K2",text:"Text.Type",false],list:[text:"W",text:"Int64.Type",false]]'
+    assert evaluate_to_text(probe_semi) == expected_semi
+
+
+def test_fix5_list_datetimezones_negative_fractional_count() -> None:
+    probe = 'List.DateTimeZones(#datetimezone(2026,1,1,0,0,0,0,0), -0.5, #duration(1,0,0,0))'
+    assert evaluate_to_text(probe) == 'ERR:Expression.Error: The List.DateTimeZones count in (-1, 0) is not supported by this engine yet.'

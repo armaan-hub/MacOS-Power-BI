@@ -1697,19 +1697,8 @@ def _group_kind(value: MValue) -> int:
     return int(x)
 
 
-def _group_key_eq(comparer: MValue) -> Callable[[tuple, tuple], bool]:
-    if isinstance(comparer, V.Null):
-        return lambda k1, k2: all(_equals(a, b) for a, b in zip(k1, k2))
-    if not isinstance(comparer, V.Function):
-        raise _unsupported("comparer argument of Table.Group")
-    from .value_fns import _equal_for
-    cell_eq = _equal_for(comparer)
-    return lambda k1, k2: all(cell_eq(a, b) for a, b in zip(k1, k2))
-
-
 def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, comparer: MValue) -> MValue:
     group_kind = _group_kind(kind)
-    eq = _group_key_eq(comparer)
     t = _table(table)
     key_names = _names(keys)
     if not key_names:
@@ -1719,30 +1708,53 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
     aggs = _aggregates(aggregates)
     _unique_or_refuse(key_names + [name for name, _fn, _kind in aggs])
 
-    grouped_runs: list[tuple[tuple, list]] = []
+    # Validate keys for hashability / equality key support
+    for row in t.rows:
+        _key(tuple(V.force(row[i]) for i in key_indexes))
+
+    if not isinstance(comparer, V.Null):
+        if not isinstance(comparer, V.Function):
+            raise _unsupported("comparer argument of Table.Group")
+        from .value_fns import _equal_for
+        cell_eq = _equal_for(comparer)
+        # Refuse any non-null comparer whose behavior differs from ordinal equality on actual keys
+        all_keys = [tuple(V.force(row[i]) for i in key_indexes) for row in t.rows]
+        for i in range(len(all_keys)):
+            for j in range(i + 1, len(all_keys)):
+                k1, k2 = all_keys[i], all_keys[j]
+                ord_eq = all(_equals(a, b) for a, b in zip(k1, k2))
+                cmp_eq = all(cell_eq(a, b) for a, b in zip(k1, k2))
+                if ord_eq != cmp_eq:
+                    raise _unsupported("comparer whose behavior differs from ordinal equality on actual keys")
+
+    rows = []
     if group_kind == _GROUP_LOCAL:
+        grouped_runs: list[tuple[tuple, list]] = []
         for row in t.rows:
             key_cells = tuple(V.force(row[i]) for i in key_indexes)
-            if grouped_runs and eq(key_cells, grouped_runs[-1][0]):
+            if grouped_runs and all(_equals(a, b) for a, b in zip(key_cells, grouped_runs[-1][0])):
                 grouped_runs[-1][1].append(row)
             else:
                 grouped_runs.append((key_cells, [row]))
+        for key_cells, members in grouped_runs:
+            group_table = V.Table(t.columns, tuple(members))
+            rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
     else:
+        # Fast hash-based path for Global grouping (O(N) instead of O(N^2))
+        groups: dict = {}
+        order = []
         for row in t.rows:
-            key_cells = tuple(V.force(row[i]) for i in key_indexes)
-            found = False
-            for prev_key, members in grouped_runs:
-                if eq(key_cells, prev_key):
-                    members.append(row)
-                    found = True
-                    break
-            if not found:
-                grouped_runs.append((key_cells, [row]))
+            key = _key(tuple(V.force(row[i]) for i in key_indexes))
+            if key not in groups:
+                groups[key] = []
+                order.append(key)
+            groups[key].append(row)
+        for key in order:
+            members = groups[key]
+            key_cells = tuple(members[0][i] for i in key_indexes)
+            group_table = V.Table(t.columns, tuple(members))
+            rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
 
-    rows = []
-    for key_cells, members in grouped_runs:
-        group_table = V.Table(t.columns, tuple(members))
-        rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
     columns = tuple((name, t.columns[i][1]) for name, i in zip(key_names, key_indexes))
     columns += tuple((name, kind if kind is not None else _function_spec(fn)) for name, fn, kind in aggs)
     return V.Table(columns, tuple(rows))
@@ -1993,9 +2005,15 @@ def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MVal
         raise _unsupported("join kind other than Inner, LeftOuter, LeftAnti, RightAnti, LeftSemi or RightSemi")
 
     if join_kind in (_JOIN_LEFT_ANTI, _JOIN_RIGHT_ANTI, _JOIN_LEFT_SEMI, _JOIN_RIGHT_SEMI):
-        # Power BI schema: left columns retain their types, right columns become nullable
-        nullable_right_cols = tuple((name, _col(_parts(k)[1], True)) for name, k in right_cols)
-        result_cols = left.columns + nullable_right_cols
+        # Power BI schema: for Left* kinds, left columns retain their types and right columns become nullable.
+        # For Right* kinds, by symmetry with Left* kinds (where the unmatched side columns become nullable),
+        # left columns become nullable because rows hold nulls on the unmatched left side.
+        if join_kind in (_JOIN_LEFT_ANTI, _JOIN_LEFT_SEMI):
+            nullable_right_cols = tuple((name, _col(_parts(k)[1], True)) for name, k in right_cols)
+            result_cols = left.columns + nullable_right_cols
+        else:
+            nullable_left_cols = tuple((name, _col(_parts(k)[1], True)) for name, k in left.columns)
+            result_cols = nullable_left_cols + right_cols
 
         left_index = _join_index(left, left_idx)
         right_index = _join_index(right, right_idx)

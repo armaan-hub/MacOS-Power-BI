@@ -1090,9 +1090,11 @@ def _datetime_zones(start: MValue, count: MValue, step: MValue) -> MValue:
     x = count.value
     if math.isnan(x) or math.isinf(x):
         raise _unsupported("List argument that is not finite")
-    total = int(math.ceil(x))
-    if total < 0:
+    if -1 < x < 0:
+        raise _unsupported("List.DateTimeZones count in (-1, 0)")
+    if x <= -1:
         raise MError("Expression.Error", COUNT_MESSAGE)
+    total = int(math.ceil(x))
     _bounded(total)
     if not isinstance(start, V.DateTimeZone):
         raise V.convert_error(start, V.TypeValue("datetimezone"))
