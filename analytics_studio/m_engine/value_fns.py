@@ -802,7 +802,8 @@ def _value_replace_type(value: MValue, type_value: MValue) -> MValue:
             spec = _type_spec(field_type)
             _base, type_name, _ = _parts(spec)
             new_cols.append((col_name, _col(type_name, False)))
-        return V.Table(tuple(new_cols), value.rows)
+        return V.Table(tuple(new_cols), value.rows, meta=value.meta,
+                       keys=(), keys_unmeasured=False)
     out = V.with_meta(value, value.meta)
     object.__setattr__(out, "_type_value", type_value)
     return out
