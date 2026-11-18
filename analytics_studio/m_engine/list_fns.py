@@ -1084,6 +1084,28 @@ def _date_times(start: MValue, count: MValue, step: MValue) -> MValue:
     return _series(start, count, step, "datetime")
 
 
+def _datetime_zones(start: MValue, count: MValue, step: MValue) -> MValue:
+    if not isinstance(count, V.Number):
+        raise V.convert_error(count, V.TypeValue("number"))
+    x = count.value
+    if math.isnan(x) or math.isinf(x):
+        raise _unsupported("List argument that is not finite")
+    if -1 < x < 0:
+        raise _unsupported("List.DateTimeZones count in (-1, 0)")
+    if x <= -1:
+        raise MError("Expression.Error", COUNT_MESSAGE)
+    total = int(math.ceil(x))
+    _bounded(total)
+    if not isinstance(start, V.DateTimeZone):
+        raise V.convert_error(start, V.TypeValue("datetimezone"))
+    if not isinstance(step, V.Duration):
+        raise V.convert_error(step, V.TypeValue("duration"))
+    out = []
+    for i in range(total):
+        out.append(V.make_datetimezone(start.ticks + i * step.ticks, start.offset_minutes))
+    return V.List(tuple(out))
+
+
 def _value_is(value: MValue, type_value: MValue) -> MValue:
     if not isinstance(type_value, V.TypeValue):
         raise V.convert_error(type_value, V.TypeValue("type"))
@@ -1210,4 +1232,5 @@ LIST_GLOBALS: dict = {
     "List.Times": _native((("start", False), ("count", False), ("step", False)), _times),
     "List.Durations": _native((("start", False), ("count", False), ("step", False)), _durations),
     "List.DateTimes": _native((("start", False), ("count", False), ("step", False)), _date_times),
+    "List.DateTimeZones": _native((("start", False), ("count", False), ("step", False)), _datetime_zones),
 }

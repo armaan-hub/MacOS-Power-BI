@@ -79,7 +79,7 @@ _GROUPS = {
         'Int8.From',
     ),
     ('List.Type', False): (
-        'List.Alternate', 'List.Buffer', 'List.Combine', 'List.DateTimes', 'List.Dates', 'List.Difference',
+        'List.Alternate', 'List.Buffer', 'List.Combine', 'List.DateTimeZones', 'List.DateTimes', 'List.Dates', 'List.Difference',
         'List.Distinct', 'List.Durations', 'List.FindText', 'List.Generate', 'List.InsertRange', 'List.Intersect',
         'List.MaxN', 'List.MinN', 'List.Modes', 'List.Numbers', 'List.Positions', 'List.Range', 'List.RemoveFirstN',
         'List.RemoveItems', 'List.RemoveLastN', 'List.RemoveMatchingItems', 'List.RemoveNulls', 'List.RemoveRange',

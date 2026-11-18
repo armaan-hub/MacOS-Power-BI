@@ -26,7 +26,9 @@ from .text import _ALL, _FIRST, _occurrence
 from .values import MError, MValue
 
 _MAX_ROWS = 100_000  # longer results are not computed: no measured answer that large
-_JOIN_INNER, _JOIN_LEFT_OUTER, _JOIN_LEFT_ANTI = 0, 1, 4
+_JOIN_INNER, _JOIN_LEFT_OUTER, _JOIN_RIGHT_OUTER, _JOIN_FULL_OUTER = 0, 1, 2, 3
+_JOIN_LEFT_ANTI, _JOIN_RIGHT_ANTI, _JOIN_LEFT_SEMI, _JOIN_RIGHT_SEMI = 4, 5, 6, 7
+_GROUP_LOCAL, _GROUP_GLOBAL = 0, 1
 
 
 # ---- helpers ----------------------------------------------------------------
@@ -1683,9 +1685,20 @@ def _aggregates(value: MValue) -> list:
     return out
 
 
+def _group_kind(value: MValue) -> int:
+    if isinstance(value, V.Null):
+        return _GROUP_GLOBAL
+    if not isinstance(value, V.Number):
+        raise V.convert_error(value, V.TypeValue("number"))
+    x = value.value
+    if math.isnan(x) or math.isinf(x) or x not in (_GROUP_LOCAL, _GROUP_GLOBAL):
+        msg = "The value for a 'GroupKind.Type' enumeration was not one of the allowed values: 'GroupKind.Local, GroupKind.Global'."
+        raise MError("Expression.Error", msg, fmt=msg)
+    return int(x)
+
+
 def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, comparer: MValue) -> MValue:
-    _no_option(kind, "groupKind argument")
-    _no_option(comparer, "comparer argument")
+    group_kind = _group_kind(kind)
     t = _table(table)
     key_names = _names(keys)
     if not key_names:
@@ -1694,20 +1707,54 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
     key_indexes = [_index(t, name) for name in key_names]
     aggs = _aggregates(aggregates)
     _unique_or_refuse(key_names + [name for name, _fn, _kind in aggs])
-    groups: dict = {}
-    order = []
+
+    # Validate keys for hashability / equality key support
     for row in t.rows:
-        key = _key(tuple(V.force(row[i]) for i in key_indexes))
-        if key not in groups:
-            groups[key] = []
-            order.append(key)
-        groups[key].append(row)
+        _key(tuple(V.force(row[i]) for i in key_indexes))
+
+    if not isinstance(comparer, V.Null):
+        if not isinstance(comparer, V.Function):
+            raise _unsupported("comparer argument of Table.Group")
+        from .value_fns import _equal_for
+        cell_eq = _equal_for(comparer)
+        # Refuse any non-null comparer whose behavior differs from ordinal equality on actual keys
+        all_keys = [tuple(V.force(row[i]) for i in key_indexes) for row in t.rows]
+        for i in range(len(all_keys)):
+            for j in range(i + 1, len(all_keys)):
+                k1, k2 = all_keys[i], all_keys[j]
+                ord_eq = all(_equals(a, b) for a, b in zip(k1, k2))
+                cmp_eq = all(cell_eq(a, b) for a, b in zip(k1, k2))
+                if ord_eq != cmp_eq:
+                    raise _unsupported("comparer whose behavior differs from ordinal equality on actual keys")
+
     rows = []
-    for key in order:
-        members = groups[key]
-        key_cells = tuple(members[0][i] for i in key_indexes)
-        group_table = V.Table(t.columns, tuple(members))
-        rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
+    if group_kind == _GROUP_LOCAL:
+        grouped_runs: list[tuple[tuple, list]] = []
+        for row in t.rows:
+            key_cells = tuple(V.force(row[i]) for i in key_indexes)
+            if grouped_runs and all(_equals(a, b) for a, b in zip(key_cells, grouped_runs[-1][0])):
+                grouped_runs[-1][1].append(row)
+            else:
+                grouped_runs.append((key_cells, [row]))
+        for key_cells, members in grouped_runs:
+            group_table = V.Table(t.columns, tuple(members))
+            rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
+    else:
+        # Fast hash-based path for Global grouping (O(N) instead of O(N^2))
+        groups: dict = {}
+        order = []
+        for row in t.rows:
+            key = _key(tuple(V.force(row[i]) for i in key_indexes))
+            if key not in groups:
+                groups[key] = []
+                order.append(key)
+            groups[key].append(row)
+        for key in order:
+            members = groups[key]
+            key_cells = tuple(members[0][i] for i in key_indexes)
+            group_table = V.Table(t.columns, tuple(members))
+            rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
+
     columns = tuple((name, t.columns[i][1]) for name, i in zip(key_names, key_indexes))
     columns += tuple((name, kind if kind is not None else _function_spec(fn)) for name, fn, kind in aggs)
     return V.Table(columns, tuple(rows))
@@ -1930,11 +1977,7 @@ def _join_kind(value: MValue, default: int) -> int:
 
 
 def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MValue) -> MValue:
-    """Inner, LeftOuter and LeftAnti joins. When several left rows appear in the result, Power BI lists them in an
-    order that depends on the hash of the keys (neither the left order nor the right order), which this engine does
-    not reproduce: such a join is not computed. The answers it does compute are an Inner join in which at most one
-    left row matches (its right rows in right order), a LeftOuter join with no match or a single left row, and a
-    LeftAnti join (the unmatched left rows in left order)."""
+    """Inner, LeftOuter, LeftAnti, RightAnti, LeftSemi, RightSemi joins."""
     join_kind = _JOIN_INNER if isinstance(kind, V.Null) else _count(kind)
     left, right = _table(table1), _table(table2)
     left_idx = _join_key_indexes(left, key1)
@@ -1958,8 +2001,45 @@ def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MVal
             raise MError("Expression.Error", msg, fmt=msg)
         seen.add(col_name)
 
-    if join_kind not in (_JOIN_INNER, _JOIN_LEFT_OUTER, _JOIN_LEFT_ANTI):
-        raise _unsupported("join kind other than Inner, LeftOuter or LeftAnti")
+    if join_kind not in (_JOIN_INNER, _JOIN_LEFT_OUTER, _JOIN_LEFT_ANTI, _JOIN_RIGHT_ANTI, _JOIN_LEFT_SEMI, _JOIN_RIGHT_SEMI):
+        raise _unsupported("join kind other than Inner, LeftOuter, LeftAnti, RightAnti, LeftSemi or RightSemi")
+
+    if join_kind in (_JOIN_LEFT_ANTI, _JOIN_RIGHT_ANTI, _JOIN_LEFT_SEMI, _JOIN_RIGHT_SEMI):
+        # Power BI schema: for Left* kinds, left columns retain their types and right columns become nullable.
+        # For Right* kinds, by symmetry with Left* kinds (where the unmatched side columns become nullable),
+        # left columns become nullable because rows hold nulls on the unmatched left side.
+        if join_kind in (_JOIN_LEFT_ANTI, _JOIN_LEFT_SEMI):
+            nullable_right_cols = tuple((name, _col(_parts(k)[1], True)) for name, k in right_cols)
+            result_cols = left.columns + nullable_right_cols
+        else:
+            nullable_left_cols = tuple((name, _col(_parts(k)[1], True)) for name, k in left.columns)
+            result_cols = nullable_left_cols + right_cols
+
+        left_index = _join_index(left, left_idx)
+        right_index = _join_index(right, right_idx)
+        left_keys = [_join_key(row, left_idx) for row in left.rows]
+        right_keys = [_join_key(row, right_idx) for row in right.rows]
+
+        absent_left = (V.Null(),) * len(left.columns)
+        absent_right = (V.Null(),) * len(right_cols)
+        rows = []
+        if join_kind == _JOIN_LEFT_ANTI:
+            for row, key in zip(left.rows, left_keys):
+                if key not in right_index:
+                    rows.append(tuple(row) + absent_right)
+        elif join_kind == _JOIN_RIGHT_ANTI:
+            for row, key in zip(right.rows, right_keys):
+                if key not in left_index:
+                    rows.append(absent_left + tuple(row[i] for i in right_non_key))
+        elif join_kind == _JOIN_LEFT_SEMI:
+            for row, key in zip(left.rows, left_keys):
+                if key in right_index:
+                    rows.append(tuple(row) + absent_right)
+        elif join_kind == _JOIN_RIGHT_SEMI:
+            for row, key in zip(right.rows, right_keys):
+                if key in left_index:
+                    rows.append(absent_left + tuple(row[i] for i in right_non_key))
+        return V.Table(result_cols, tuple(rows))
 
     for _name, kind_ in left.columns + right_cols:
         if kind_ != "any" and join_kind != _JOIN_INNER:
@@ -1975,10 +2055,7 @@ def _join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, kind: MVal
     rows = []
     for row, key in zip(left.rows, left_keys):
         matches = index.get(key, [])
-        if join_kind == _JOIN_LEFT_ANTI:
-            if not matches:
-                rows.append(tuple(row) + absent)
-        elif matches:
+        if matches:
             rows += [tuple(row) + tuple(match[i] for i in right_non_key) for match in matches]
         elif join_kind == _JOIN_LEFT_OUTER:
             rows.append(tuple(row) + absent)
@@ -2232,6 +2309,10 @@ TABLE_GLOBALS: dict = {
     "JoinKind.FullOuter": V.Number(3.0),
     "JoinKind.LeftAnti": V.Number(4.0),
     "JoinKind.RightAnti": V.Number(5.0),
+    "JoinKind.LeftSemi": V.Number(6.0),
+    "JoinKind.RightSemi": V.Number(7.0),
+    "GroupKind.Local": V.Number(0.0),
+    "GroupKind.Global": V.Number(1.0),
     "RankKind.Competition": V.Number(0.0),
     "RankKind.Dense": V.Number(1.0),
     "RankKind.Ordinal": V.Number(2.0),
