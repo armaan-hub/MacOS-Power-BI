@@ -133,7 +133,7 @@ _GROUPS = {
         'Single.From',
     ),
     ('Table.Type', False): (
-        'Record.ToTable', 'Table.AddColumn', 'Table.AddIndexColumn', 'Table.Buffer', 'Table.Combine',
+        'Record.ToTable', 'Table.AddColumn', 'Table.AddIndexColumn', 'Table.AddKey', 'Table.Buffer', 'Table.Combine',
         'Table.CombineColumns', 'Table.DemoteHeaders', 'Table.Distinct', 'Table.DuplicateColumn',
         'Table.ExpandRecordColumn', 'Table.ExpandTableColumn', 'Table.FillDown', 'Table.FillUp', 'Table.FindText',
         'Table.FirstN', 'Table.FromColumns', 'Table.FromList', 'Table.FromRecords', 'Table.FromRows',
@@ -141,7 +141,7 @@ _GROUPS = {
         'Table.MinN', 'Table.NestedJoin', 'Table.Pivot', 'Table.Profile', 'Table.PromoteHeaders', 'Table.Range',
         'Table.RemoveColumns', 'Table.RemoveFirstN', 'Table.RemoveLastN', 'Table.RemoveMatchingRows',
         'Table.RemoveRows', 'Table.RemoveRowsWithErrors', 'Table.RenameColumns', 'Table.ReorderColumns',
-        'Table.Repeat', 'Table.ReplaceErrorValues', 'Table.ReplaceValue', 'Table.ReverseRows', 'Table.Schema', 'Table.SelectColumns',
+        'Table.Repeat', 'Table.ReplaceErrorValues', 'Table.ReplaceKeys', 'Table.ReplaceValue', 'Table.ReverseRows', 'Table.Schema', 'Table.SelectColumns',
         'Table.SelectRows', 'Table.SelectRowsWithErrors', 'Table.Skip', 'Table.Sort', 'Table.SplitColumn',
         'Table.TransformColumnTypes', 'Table.TransformColumns', 'Table.Transpose', 'Table.Unpivot',
         'Table.UnpivotOtherColumns', 'Type.TableSchema',

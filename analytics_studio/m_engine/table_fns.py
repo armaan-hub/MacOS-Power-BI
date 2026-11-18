@@ -33,11 +33,34 @@ _GROUP_LOCAL, _GROUP_GLOBAL = 0, 1
 
 # ---- helpers ----------------------------------------------------------------
 
+# Names of the 5 measured key-propagating functions (plus AddKey/ReplaceKeys)
+_MEASURED_KEY_PROPAGATORS = {
+    "_sort",
+    "_select_rows",
+    "_rename_columns",
+    "_remove_columns",
+    "_add_column",
+    "_add_key",
+    "_replace_keys",
+}
+
+
 def _native(params: tuple, fn: Callable[..., MValue], return_type: Optional[V.TypeValue] = None) -> V.Function:
     specs = tuple(V.ParamSpec(name, None, optional) for name, optional in params)
 
     def invoke(bound: list) -> MValue:
-        return fn(*[V.force(item) for item in bound])
+        args = [V.force(item) for item in bound]
+        result = fn(*args)
+        # Central key propagation check
+        # If any Table argument carries keys and fn is not one of the 5 measured propagators,
+        # mark returned Table keys_unmeasured.
+        fn_name = getattr(fn, "__name__", "")
+        if fn_name not in _MEASURED_KEY_PROPAGATORS:
+            has_keys = any(isinstance(a, V.Table) and a.keys for a in args)
+            if has_keys and isinstance(result, V.Table):
+                import dataclasses
+                result = dataclasses.replace(result, keys_unmeasured=True)
+        return result
 
     return V.Function(specs, invoke, return_type)
 
@@ -456,8 +479,52 @@ def _column(table: MValue, name: MValue) -> MValue:
 
 
 def _keys(table: MValue) -> MValue:
-    _table(table)
+    t = _table(table)
+    if t.keys_unmeasured:
+        raise _unsupported("Table.Keys on a table with unmeasured key propagation")
+    if t.keys is not None:
+        return V.List(t.keys)
     return V.List(())
+
+
+def _add_key(table: MValue, columns: MValue, is_primary: MValue) -> MValue:
+    t = _table(table)
+    cols = _names(columns)
+    if not cols:
+        raise _unsupported("AddKey with empty column list")
+    current_names = _names_of(t)
+    for col in cols:
+        if col not in current_names:
+            raise _column_missing(col)
+    primary = _truth(is_primary)
+    key_record = V.Record((
+        ("Columns", V.List(tuple(V.Text(c) for c in cols))),
+        ("Primary", V.Logical(primary)),
+    ))
+    new_keys = (t.keys or ()) + (key_record,)
+    return V.Table(t.columns, t.rows, meta=t.meta, keys=new_keys, keys_unmeasured=False)
+
+
+def _replace_keys(table: MValue, keys: MValue) -> MValue:
+    t = _table(table)
+    items = _items(keys)
+    new_keys = []
+    for item in items:
+        if not isinstance(item, V.Record):
+            raise V.convert_error(item, V.TypeValue("record"))
+        cols_val = item.get("Columns")
+        if cols_val is None:
+            raise _unsupported("key record without Columns field")
+        cols = _names(cols_val)
+        primary_val = item.get("Primary")
+        if primary_val is None:
+            raise _unsupported("key record without Primary field")
+        primary = _truth(primary_val)
+        new_keys.append(V.Record((
+            ("Columns", V.List(tuple(V.Text(c) for c in cols))),
+            ("Primary", V.Logical(primary)),
+        )))
+    return V.Table(t.columns, t.rows, meta=t.meta, keys=tuple(new_keys), keys_unmeasured=False)
 
 
 def _has_columns(table: MValue, names: MValue) -> MValue:
@@ -603,7 +670,19 @@ def _remove_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
     keep = [i for i, (name, _) in enumerate(t.columns) if name not in wanted]
     if not keep and t.rows:
         raise _unsupported("table without columns but with rows")
-    return V.Table(tuple(t.columns[i] for i in keep), tuple(tuple(row[i] for i in keep) for row in t.rows))
+    # Key propagation: RemoveColumns of a key column drops that key
+    new_keys = None
+    if t.keys is not None:
+        kept_keys = []
+        wanted_set = set(wanted)
+        for k in t.keys:
+            cols_val = k.get("Columns")
+            cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
+            if not any(c in wanted_set for c in cols):
+                kept_keys.append(k)
+        new_keys = tuple(kept_keys)
+    return V.Table(tuple(t.columns[i] for i in keep), tuple(tuple(row[i] for i in keep) for row in t.rows),
+                   meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _reorder_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
@@ -650,7 +729,22 @@ def _rename_columns(table: MValue, renames: MValue, missing: MValue) -> MValue:
         if new in names:
             raise _exists(new)
         names[names.index(old)] = new
-    return V.Table(tuple((name, kind) for name, (_, kind) in zip(names, t.columns)), t.rows)
+    # Key propagation: RenameColumns renames the key's column names
+    new_keys = None
+    if t.keys is not None:
+        rename_map = dict(pairs)
+        renamed_keys = []
+        for k in t.keys:
+            cols_val = k.get("Columns")
+            cols = [c.value for c in cols_val.items] if isinstance(cols_val, V.List) else []
+            new_cols = tuple(V.Text(rename_map.get(c, c)) for c in cols)
+            renamed_keys.append(V.Record((
+                ("Columns", V.List(new_cols)),
+                ("Primary", k.get("Primary")),
+            )))
+        new_keys = tuple(renamed_keys)
+    return V.Table(tuple((name, kind) for name, (_, kind) in zip(names, t.columns)), t.rows,
+                   meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _prefix_columns(table: MValue, prefix: MValue) -> MValue:
@@ -838,7 +932,8 @@ def _add_column(table: MValue, name: MValue, selector: MValue, kind: MValue) -> 
     for row in t.rows:
         cell = V.Thunk(lambda row=row: _apply(selector, _record(names, row)))
         rows.append(tuple(row) + (cell,))
-    return V.Table(t.columns + ((new, new_kind),), tuple(rows))
+    return V.Table(t.columns + ((new, new_kind),), tuple(rows),
+                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _add_index_column(table: MValue, name: MValue, start: MValue, step: MValue, kind: MValue) -> MValue:
@@ -1123,7 +1218,8 @@ def _sorted_rows(rows: list, specs: list) -> list:
 
 def _sort(table: MValue, criteria: MValue) -> MValue:
     t = _table(table)
-    return V.Table(t.columns, tuple(_sorted_rows(t.rows, _sort_specs(t, criteria))))
+    return V.Table(t.columns, tuple(_sorted_rows(t.rows, _sort_specs(t, criteria))),
+                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _extreme_rows(table: V.Table, column: MValue, descending: bool) -> list:
@@ -1228,7 +1324,8 @@ def _select_rows(table: MValue, predicate: MValue) -> MValue:
             continue
         if _truth(verdict):
             kept.append(row)
-    return V.Table(t.columns, tuple(kept))
+    return V.Table(t.columns, tuple(kept),
+                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _remove_rows(table: MValue, offset: MValue, count: MValue) -> MValue:
@@ -1718,14 +1815,35 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
         from .value_fns import _equal_for
         cell_eq = _equal_for(comparer)
         # Refuse any non-null comparer whose behavior differs from ordinal equality on actual keys
-        all_keys = [tuple(V.force(row[i]) for i in key_indexes) for row in t.rows]
-        for i in range(len(all_keys)):
-            for j in range(i + 1, len(all_keys)):
-                k1, k2 = all_keys[i], all_keys[j]
-                ord_eq = all(_equals(a, b) for a, b in zip(k1, k2))
-                cmp_eq = all(cell_eq(a, b) for a, b in zip(k1, k2))
-                if ord_eq != cmp_eq:
-                    raise _unsupported("comparer whose behavior differs from ordinal equality on actual keys")
+        if group_kind == _GROUP_LOCAL:
+            # Local grouping only compares adjacent runs
+            last_key = None
+            for row in t.rows:
+                k = tuple(V.force(row[i]) for i in key_indexes)
+                if last_key is not None:
+                    ord_eq = all(_equals(a, b) for a, b in zip(k, last_key))
+                    cmp_eq = all(cell_eq(a, b) for a, b in zip(k, last_key))
+                    if ord_eq != cmp_eq:
+                        raise _unsupported("comparer whose behavior differs from ordinal equality on actual keys")
+                last_key = k
+        else:
+            # Global grouping: distinct keys by ordinal equality
+            distinct_keys = []
+            seen_keys = set()
+            for row in t.rows:
+                k = tuple(V.force(row[i]) for i in key_indexes)
+                hk = _key(k)
+                if hk not in seen_keys:
+                    seen_keys.add(hk)
+                    distinct_keys.append(k)
+            if len(distinct_keys) > 500:
+                raise _unsupported("Table.Group with comparer on more than 500 distinct keys")
+            for i in range(len(distinct_keys)):
+                for j in range(i + 1, len(distinct_keys)):
+                    k1, k2 = distinct_keys[i], distinct_keys[j]
+                    cmp_eq = all(cell_eq(a, b) for a, b in zip(k1, k2))
+                    if cmp_eq:  # Since k1 != k2 ordinally, if comparer considers them equal, it differs
+                        raise _unsupported("comparer whose behavior differs from ordinal equality on actual keys")
 
     rows = []
     if group_kind == _GROUP_LOCAL:
@@ -2378,6 +2496,8 @@ TABLE_GLOBALS: dict = {
     "Table.MinN": _native((("table", False), ("column", False), ("countOrCondition", False)), _min_n),
     "Table.Group": _native((("table", False), ("key", False), ("aggregatedColumns", False),
                             ("groupKind", True), ("comparer", True)), _group),
+    "Table.AddKey": _native((("table", False), ("columns", False), ("isPrimary", False)), _add_key),
+    "Table.ReplaceKeys": _native((("table", False), ("keys", False)), _replace_keys),
     "Table.AddColumn": _native((("table", False), ("newColumnName", False), ("columnGenerator", False),
                                 ("columnType", True)), _add_column),
     "Table.AddIndexColumn": _native((("table", False), ("newColumnName", False), ("initialValue", True),
