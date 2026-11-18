@@ -16,6 +16,7 @@ import math
 from functools import cmp_to_key
 from typing import Callable, Optional
 
+from . import ast as A
 from . import column_types
 from . import values as V
 from .canonical import number_text
@@ -1411,6 +1412,24 @@ def _rank_sort_specs(table: V.Table, criteria: MValue) -> list:
     return specs
 
 
+def _is_literal_expr(node: A.Node) -> bool:
+    if isinstance(node, (A.NumberLiteral, A.TextLiteral, A.NullLiteral, A.LogicalLiteral)):
+        return True
+    if isinstance(node, A.UnaryOp) and node.op in ("+", "-") and isinstance(node.operand, A.NumberLiteral):
+        return True
+    return False
+
+
+def _fn_is_constant_key(fn: V.Function) -> bool:
+    ast = getattr(fn, "ast", None)
+    if ast is None:
+        return False
+    body = ast.body if hasattr(ast, "body") else ast
+    if not isinstance(body, A.ListExpr):
+        return False
+    return all(_is_literal_expr(item) for item in body.items)
+
+
 def _sort_specs(table: V.Table, criteria: MValue) -> list:
     names = _names_of(table)
     if isinstance(criteria, V.Null):
@@ -1434,18 +1453,26 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
     # Flat list check: if len == 2 and first is text, second is number/order
     if len(items) == 2 and isinstance(V.force(items[0]), V.Text):
         second = V.force(items[1])
+        if isinstance(second, V.Function) and len(second.params) != 1:
+            raise _items(second)
         if isinstance(second, V.Number):
             name = V.force(items[0]).value
             if name not in names:
                 raise _sort_invalid()
             return [(names.index(name), _sort_order(second))]
 
-    # Probe 6 check: flat list where second item is an order number followed by more items
-    # e.g. {"K", Order.Descending, "V"}
-    if len(items) > 2 and isinstance(V.force(items[0]), V.Text):
+    # Flat list check: if len == 2 and first is function, second is null or order
+    if len(items) == 2 and isinstance(V.force(items[0]), V.Function):
         second = V.force(items[1])
-        if isinstance(second, V.Number) and second.value in (0.0, 1.0):
+        if isinstance(second, V.Null):
             raise _sort_invalid()
+        if isinstance(second, V.Number) and second.value in (0.0, 1.0):
+            # Unmeasured: {each [V], Order.Descending} -> error like main
+            raise _items(V.force(items[0]))
+
+    # Flat list check: if len > 2 and any item after the first is an order number
+    if len(items) > 2 and any(isinstance(V.force(it), V.Number) and V.force(it).value in (0.0, 1.0) for it in items):
+        raise _sort_invalid()
 
     specs = []
     for raw_item in items:
@@ -1455,15 +1482,42 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
             if name not in names:
                 raise _sort_invalid()
             specs.append((names.index(name), descending))
+        elif isinstance(item, V.Function):
+            if len(item.params) != 1:
+                raise _sort_invalid()
+            specs.append((item, False))
         elif isinstance(item, V.List):
             pair = list(item.items)
-            if len(pair) != 2 or not isinstance(V.force(pair[0]), V.Text):
+            if len(pair) == 0:
+                raise _sort_invalid()
+            if len(pair) == 1:
+                crit0 = V.force(pair[0])
+                if isinstance(crit0, V.Function):
+                    raise _sort_invalid()
+                raise _unsupported("sort criteria")
+            if len(pair) > 2:
+                p1 = V.force(pair[1])
+                if isinstance(p1, V.Number) and p1.value == 1.0:
+                    third = V.force(pair[2])
+                    if isinstance(third, V.Text) or (isinstance(third, V.Number) and third.value in (0.0, 1.0)):
+                        raise _sort_invalid()
                 raise _unsupported("sort criteria")
             crit, ord_val = V.force(pair[0]), V.force(pair[1])
-            descending = _order(ord_val)
-            if crit.value not in names:
+            if isinstance(ord_val, (V.Logical, V.Text)) or (isinstance(ord_val, V.Number) and ord_val.value == 5.0):
                 raise _sort_invalid()
-            specs.append((names.index(crit.value), descending))
+            if isinstance(crit, V.Function) and isinstance(ord_val, V.Null):
+                raise _sort_invalid()
+            descending = _order(ord_val)
+            if isinstance(crit, V.Text):
+                if crit.value not in names:
+                    raise _sort_invalid()
+                specs.append((names.index(crit.value), descending))
+            elif isinstance(crit, V.Function):
+                if len(crit.params) != 1:
+                    raise _sort_invalid()
+                specs.append((crit, descending))
+            else:
+                raise _unsupported("sort criteria")
         else:
             raise _items(item)
     return specs
@@ -1488,8 +1542,10 @@ def _sorted_rows(table: V.Table, specs: list) -> list:
         computed_rows.append(row_keys + [orig_idx, row])
 
     # Sort stably for each spec in reverse order
-    for spec_pos, (_spec, descending) in enumerate(reversed(specs)):
+    for spec_pos, (spec, descending) in enumerate(reversed(specs)):
         k_pos = num_specs - 1 - spec_pos
+        if not isinstance(spec, int) and _fn_is_constant_key(spec):
+            continue
         computed_rows.sort(key=cmp_to_key(lambda a, b, kp=k_pos: compare(a[kp], b[kp])),
                            reverse=descending)
 

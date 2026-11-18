@@ -194,7 +194,7 @@ def _closure(params: tuple, return_type: Optional[V.TypeValue], body: A.Node, en
     if (return_type is None and len(params) == 1 and isinstance(body, A.Identifier)
             and body.name == params[0].name and not body.inclusive):
         origin = "identity"
-    return V.Function(specs, invoke, return_type, None, origin)
+    return V.Function(specs, invoke, return_type, None, origin, False, body)
 
 
 # ---- logical -----------------------------------------------------------------
@@ -626,7 +626,7 @@ def evaluate(node: A.Node, env: Env) -> MValue:
         origin = ("identity" if isinstance(node.body, A.Identifier) and node.body.name == "_"
                   and not node.body.inclusive else "closure")
         return V.Function((V.ParamSpec("_"),), lambda bound: evaluate(node.body, Env({"_": bound[0]}, env)),
-                          None, None, origin)
+                          None, None, origin, False, node.body)
     if isinstance(node, A.FunctionLiteral):
         return _closure(node.params, type_of_node(node.return_type, env) if node.return_type else None,
                         node.body, env)

@@ -217,6 +217,8 @@ class Function(MValue):
     origin: Optional[str] = None
     # Function.From: the arguments are passed on as given, whatever their number or type (measured)
     variadic: bool = False
+    # AST of the function body or expression (for closure inspection, e.g. constant key detection in Table.Sort)
+    ast: Optional[Any] = None
 
 
 @dataclass(frozen=True, eq=False)
