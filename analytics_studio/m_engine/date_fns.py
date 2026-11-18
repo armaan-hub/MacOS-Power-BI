@@ -1306,6 +1306,12 @@ DURATION_GLOBALS: dict = {
 def _clock_refusal(name: str):
     """A function whose answer depends on the clock or the machine's zone: an explicit ERR, whatever the argument."""
     def invoke(*_args: MValue) -> MValue:
+        if name.endswith(".FromFileTime") and _args:
+            val = V.force(_args[0])
+            if isinstance(val, V.Null):
+                return V.Null()
+            if not isinstance(val, V.Number):
+                raise V.convert_error(val, V.TypeValue("number"))
         raise _unsupported(f"{name} (depends on the clock or the machine's time zone)")
 
     return V.Function((V.ParamSpec("value", None, True),), lambda bound: invoke(*bound))
@@ -1321,7 +1327,7 @@ _CLOCK_NAMES = (
     *(f"DateTimeZone.{prefix}{span}" for prefix in ("IsInCurrent", "IsInNext", "IsInPrevious")
       for span in ("Day", "Week", "Month", "Quarter", "Year", "Hour", "Minute", "Second")),
     "DateTimeZone.IsInYearToDate", "DateTimeZone.LocalNow", "DateTimeZone.UtcNow",
-    "DateTimeZone.FixedLocalNow", "DateTimeZone.FixedUtcNow",
+    "DateTimeZone.FixedLocalNow", "DateTimeZone.FixedUtcNow", "DateTimeZone.FromFileTime",
     "Time.IsInCurrentHour", "Time.IsInNextHour", "Time.IsInPreviousHour",
 )
 

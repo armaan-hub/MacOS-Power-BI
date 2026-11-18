@@ -1296,6 +1296,13 @@ def _table_keys(t: MValue) -> MValue:
     return V.List(())
 
 
+def _type_table_partition_key(t: MValue) -> MValue:
+    x = _type_arg(t)
+    if x.name != "table" or x.fields is None:
+        raise _unsupported("Type.TablePartitionKey of a type that is not a table type")
+    return V.Null()
+
+
 # ---- registration ------------------------------------------------------------
 
 VALUE_GLOBALS: dict = {
@@ -1343,6 +1350,7 @@ VALUE_GLOBALS: dict = {
     "Type.TableRow": _native((("tableType", False),), _table_row),
     "Type.TableColumn": _native((("tableType", False), ("column", False)), _table_column),
     "Type.TableKeys": _native((("tableType", False),), _table_keys),
+    "Type.TablePartitionKey": _native((("tableType", False),), _type_table_partition_key),
     "Type.IsOpenRecord": _native((("type", False),), _is_open_record),
     "Type.OpenRecord": _native((("type", False),), lambda t: _record_type(t, True)),
     "Type.ClosedRecord": _native((("type", False),), lambda t: _record_type(t, False)),
@@ -1530,6 +1538,69 @@ def _binary_from_list(value: MValue) -> MValue:
 
 def _binary_length(value: MValue) -> MValue:
     return V.Number(float(len(_binary_of(value).value)))
+
+
+def _binary_approximate_length(value: MValue) -> MValue:
+    if isinstance(value, V.Null):
+        return V.Null()
+    return V.Number(float(len(_binary_of(value).value)))
+
+
+def _binary_buffer(value: MValue) -> MValue:
+    if isinstance(value, V.Null):
+        return V.Null()
+    return _binary_of(value)
+
+
+def _compress_type(compression: MValue) -> int:
+    if isinstance(compression, V.Null):
+        raise V.convert_error(compression, V.TypeValue("number"))
+    if not isinstance(compression, V.Number):
+        raise V.convert_error(compression, V.TypeValue("number"))
+    val = compression.value
+    if val == 0.0:
+        return 0
+    if val == 1.0:
+        return 1
+    raise V.generic_error("We don't support that type of compression in this context.")
+
+
+def _binary_compress(binary: MValue, compressionType: MValue) -> MValue:
+    import struct
+    import zlib
+
+    b = _binary_of(binary)
+    ctype = _compress_type(compressionType)
+    data = b.value
+    if not data:
+        return V.Binary(b"")
+    c = zlib.compressobj(6, zlib.DEFLATED, -15)
+    raw_deflate = c.compress(data) + c.flush()
+    if ctype == 1:
+        return V.Binary(raw_deflate)
+    # GZip (0):
+    header = bytes([0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00])
+    crc = struct.pack("<I", zlib.crc32(data) & 0xffffffff)
+    length = struct.pack("<I", len(data) & 0xffffffff)
+    return V.Binary(header + raw_deflate + crc + length)
+
+
+def _binary_decompress(binary: MValue, compressionType: MValue) -> MValue:
+    import zlib
+
+    b = _binary_of(binary)
+    ctype = _compress_type(compressionType)
+    data = b.value
+    if not data:
+        return V.Binary(b"")
+    try:
+        if ctype == 1:
+            decomp = zlib.decompress(data, -15)
+        else:
+            decomp = zlib.decompress(data, 16 + zlib.MAX_WBITS)
+    except Exception:
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    return V.Binary(decomp)
 
 
 def _binary_range(value: MValue, offset: MValue, count: MValue) -> MValue:
@@ -1863,6 +1934,40 @@ def _lines_from_text(text: MValue, quote: MValue, include_separators: MValue) ->
     return V.List(tuple(V.Text(line) for line in lines))
 
 
+def _lines_from_binary(value: MValue, quote: MValue = V.Null(), include_separators: MValue = V.Null(), encoding: MValue = V.Null()) -> MValue:
+    from .text import _decode, _encoding_page, _check_page  # local import: text imports value_fns
+
+    if isinstance(value, V.Null):
+        return V.Null()
+    b = _binary_of(value)
+    page = _encoding_page(encoding)
+    _check_page(page)
+    text = _decode(b.value, page)
+    return _lines_from_text(V.Text(text), quote, include_separators)
+
+
+def _lines_to_binary(lines: MValue, lineSeparator: MValue = V.Null(), encoding: MValue = V.Null(), includeByteOrderMark: MValue = V.Null()) -> MValue:
+    from .text import _encode, _encoding_page, _check_page  # local import: text imports value_fns
+
+    text_val = _lines_to_text(lines, lineSeparator)
+    page = _encoding_page(encoding)
+    _check_page(page)
+    raw = _encode(text_val.value, page)
+    if isinstance(includeByteOrderMark, V.Logical) and includeByteOrderMark.value:
+        bom = None
+        if page is None or page == 65001:
+            bom = b"\xef\xbb\xbf"
+        elif page == 1200:
+            bom = b"\xff\xfe"
+        elif page == 1201:
+            bom = b"\xfe\xff"
+        if bom:
+            raw = bom + raw
+    elif not isinstance(includeByteOrderMark, (V.Null, V.Logical)):
+        raise V.convert_error(includeByteOrderMark, V.TypeValue("logical"))
+    return V.Binary(raw)
+
+
 def _lines_to_text(lines: MValue, separator: MValue) -> MValue:
     """Lines.ToText: every line is followed by the separator (CRLF unless a text is given)."""
     if not isinstance(lines, V.List):
@@ -2167,19 +2272,29 @@ _MORE_GLOBALS: dict = {
     "Occurrence.Repeating": V.Number(2.0),
     "BinaryEncoding.Base64": V.Number(0.0),
     "BinaryEncoding.Hex": V.Number(1.0),
+    "Compression.GZip": V.Number(0.0),
+    "Compression.Deflate": V.Number(1.0),
     "Binary.FromText": _native((("text", False), ("encoding", True)), _binary_from_text),
     "Binary.ToText": _native((("binary", False), ("encoding", True)), _binary_to_text),
     "Binary.ToList": _native((("binary", False),), _binary_to_list),
     "Binary.FromList": _native((("list", False),), _binary_from_list),
     "Binary.Length": _native((("binary", False),), _binary_length),
+    "Binary.ApproximateLength": _native((("binary", False),), _binary_approximate_length),
+    "Binary.Buffer": _native((("binary", False),), _binary_buffer),
+    "Binary.Compress": _native((("binary", False), ("compressionType", False)), _binary_compress),
+    "Binary.Decompress": _native((("binary", False), ("compressionType", False)), _binary_decompress),
     "Binary.Range": _native((("binary", False), ("offset", False), ("count", True)), _binary_range),
     "Binary.Split": _native((("binary", False), ("pageSize", False)), _binary_split),
     "Binary.From": _native((("value", False), ("encoding", True)), _binary_from),
     "Binary.Combine": _native((("binaries", False),), _binary_combine),
     "Json.Document": _native((("jsonText", False), ("encoding", True)), _json_document),
     "Json.FromValue": _native((("value", False), ("encoding", True)), _json_from_value),
+    "Lines.FromBinary": _native((("binary", False), ("quoteStyle", True), ("includeLineSeparators", True),
+                                 ("encoding", True)), _lines_from_binary),
     "Lines.FromText": _native((("text", False), ("quoteStyle", True), ("includeLineSeparators", True)),
                               _lines_from_text),
+    "Lines.ToBinary": _native((("lines", False), ("lineSeparator", True), ("encoding", True),
+                               ("includeByteOrderMark", True)), _lines_to_binary),
     "Lines.ToText": _native((("lines", False), ("lineSeparator", True)), _lines_to_text),
     "Uri.EscapeDataString": _native((("data", False),), _uri_escape),
     "Uri.Combine": _native((("baseUri", False), ("relativeUri", False)), _uri_combine),
