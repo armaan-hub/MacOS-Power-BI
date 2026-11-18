@@ -230,6 +230,11 @@ def _sort_invalid() -> MError:
                   fmt="The specified sort criteria is invalid.")
 
 
+def _sort_requires_criterion() -> MError:
+    return MError("Expression.Error", "'Table.Sort' requires at least one sort criterion.",
+                  fmt="'Table.Sort' requires at least one sort criterion.")
+
+
 def _distinct_invalid() -> MError:
     return MError("Expression.Error", "The specified distinct criteria is invalid.",
                   fmt="The specified distinct criteria is invalid.")
@@ -667,25 +672,77 @@ def _reverse_rows(table: MValue) -> MValue:
     return V.Table(t.columns, tuple(reversed(t.rows)))
 
 
-def _first_n(table: MValue, count: MValue) -> MValue:
+def _first_n(table: MValue, countOrCondition: MValue) -> MValue:
     t = _table(table)
-    return V.Table(t.columns, t.rows[:_count(count)], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    if isinstance(countOrCondition, V.Function):
+        if len(countOrCondition.params) != 1:
+            raise _unsupported("predicate function with arity != 1")
+        names = _names_of(t)
+        kept = []
+        for row in t.rows:
+            verdict = _apply(countOrCondition, _record(names, row))
+            if not isinstance(verdict, V.Logical):
+                raise _unsupported("predicate returning non-logical value")
+            if not verdict.value:
+                break
+            kept.append(row)
+        return V.Table(t.columns, tuple(kept), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(t.columns, t.rows[:_count(countOrCondition)], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
-def _last_n(table: MValue, count: MValue) -> MValue:
+def _last_n(table: MValue, countOrCondition: MValue) -> MValue:
     t = _table(table)
-    n = _count(count)
+    if isinstance(countOrCondition, V.Function):
+        if len(countOrCondition.params) != 1:
+            raise _unsupported("predicate function with arity != 1")
+        names = _names_of(t)
+        kept_rev = []
+        for row in reversed(t.rows):
+            verdict = _apply(countOrCondition, _record(names, row))
+            if not isinstance(verdict, V.Logical):
+                raise _unsupported("predicate returning non-logical value")
+            if not verdict.value:
+                break
+            kept_rev.append(row)
+        return V.Table(t.columns, tuple(reversed(kept_rev)))
+    n = _count(countOrCondition)
     return V.Table(t.columns, t.rows[max(0, len(t.rows) - n):])
 
 
-def _remove_first_n(table: MValue, count: MValue) -> MValue:
+def _remove_first_n(table: MValue, countOrCondition: MValue) -> MValue:
     t = _table(table)
-    return V.Table(t.columns, t.rows[_count_or(count, 1):], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    if isinstance(countOrCondition, V.Function):
+        if len(countOrCondition.params) != 1:
+            raise _unsupported("predicate function with arity != 1")
+        names = _names_of(t)
+        drop_count = 0
+        for row in t.rows:
+            verdict = _apply(countOrCondition, _record(names, row))
+            if not isinstance(verdict, V.Logical):
+                raise _unsupported("predicate returning non-logical value")
+            if not verdict.value:
+                break
+            drop_count += 1
+        return V.Table(t.columns, t.rows[drop_count:], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(t.columns, t.rows[_count_or(countOrCondition, 1):], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
-def _remove_last_n(table: MValue, count: MValue) -> MValue:
+def _remove_last_n(table: MValue, countOrCondition: MValue) -> MValue:
     t = _table(table)
-    n = _count_or(count, 1)
+    if isinstance(countOrCondition, V.Function):
+        if len(countOrCondition.params) != 1:
+            raise _unsupported("predicate function with arity != 1")
+        names = _names_of(t)
+        drop_count = 0
+        for row in reversed(t.rows):
+            verdict = _apply(countOrCondition, _record(names, row))
+            if not isinstance(verdict, V.Logical):
+                raise _unsupported("predicate returning non-logical value")
+            if not verdict.value:
+                break
+            drop_count += 1
+        return V.Table(t.columns, t.rows[:len(t.rows) - drop_count])
+    n = _count_or(countOrCondition, 1)
     return V.Table(t.columns, t.rows[:max(0, len(t.rows) - n)])
 
 
@@ -1330,40 +1387,92 @@ def _is_distinct(table: MValue, criteria: MValue) -> MValue:
     return V.Logical(True)
 
 
+def _sort_order(order_val: MValue) -> bool:
+    if isinstance(order_val, V.Number) and order_val.value in (0.0, 1.0):
+        return order_val.value == 1.0
+    raise _sort_invalid()
+
+
 def _sort_specs(table: V.Table, criteria: MValue) -> list:
     names = _names_of(table)
-    items = _items(criteria)
-    if len(items) == 2 and isinstance(items[0], V.Text) and isinstance(items[1], V.Number):
-        name = items[0].value
+    if isinstance(criteria, V.Text):
+        name = criteria.value
         if name not in names:
             raise _sort_invalid()
-        return [(names.index(name), _order(items[1]))]
+        return [(names.index(name), False)]
+    if isinstance(criteria, V.Function):
+        if len(criteria.params) != 1:
+            raise _sort_invalid()
+        return [(criteria, False)]
+    if not isinstance(criteria, V.List):
+        raise _sort_invalid()
+
+    items = list(criteria.items)
+    if not items:
+        raise _sort_requires_criterion()
+
+    # Special case: flat 2-element list {col_name, order}
+    if len(items) == 2 and isinstance(V.force(items[0]), V.Text) and isinstance(V.force(items[1]), V.Number):
+        name = V.force(items[0]).value
+        if name not in names:
+            raise _sort_invalid()
+        return [(names.index(name), _sort_order(V.force(items[1])))]
+
     specs = []
-    for item in items:
+    for raw_item in items:
+        item = V.force(raw_item)
         if isinstance(item, V.Text):
             name, descending = item.value, False
+            if name not in names:
+                raise _sort_invalid()
+            specs.append((names.index(name), descending))
+        elif isinstance(item, V.Function):
+            if len(item.params) != 1:
+                raise _sort_invalid()
+            specs.append((item, False))
+        elif isinstance(item, V.List):
+            pair = list(item.items)
+            if len(pair) != 2:
+                raise _sort_invalid()
+            crit, ord_val = V.force(pair[0]), V.force(pair[1])
+            descending = _sort_order(ord_val)
+            if isinstance(crit, V.Text):
+                if crit.value not in names:
+                    raise _sort_invalid()
+                specs.append((names.index(crit.value), descending))
+            elif isinstance(crit, V.Function):
+                if len(crit.params) != 1:
+                    raise _sort_invalid()
+                specs.append((crit, descending))
+            else:
+                raise _sort_invalid()
         else:
-            pair = _items(item)
-            if len(pair) != 2 or not isinstance(pair[0], V.Text):
-                raise _unsupported("sort criteria")
-            name, descending = pair[0].value, _order(pair[1])
-        if name not in names:
             raise _sort_invalid()
-        specs.append((names.index(name), descending))
     return specs
 
 
-def _sorted_rows(rows: list, specs: list) -> list:
-    rows = list(rows)
-    for index, descending in reversed(specs):
-        rows.sort(key=cmp_to_key(lambda a, b, index=index: compare(V.force(a[index]), V.force(b[index]))),
-                  reverse=descending)
+def _sorted_rows(table: V.Table, specs: list) -> list:
+    names = _names_of(table)
+    rows = list(table.rows)
+    for spec, descending in reversed(specs):
+        if isinstance(spec, int):
+            rows.sort(key=cmp_to_key(lambda a, b, idx=spec: compare(V.force(a[idx]), V.force(b[idx]))),
+                      reverse=descending)
+        else:
+            fn = spec
+            rows.sort(key=cmp_to_key(
+                lambda a, b, f=fn, nms=names: compare(
+                    V.force(_apply(f, _record(nms, a))),
+                    V.force(_apply(f, _record(nms, b)))
+                )
+            ), reverse=descending)
     return rows
 
 
 def _sort(table: MValue, criteria: MValue) -> MValue:
     t = _table(table)
-    return V.Table(t.columns, tuple(_sorted_rows(t.rows, _sort_specs(t, criteria))),
+    specs = _sort_specs(t, criteria)
+    return V.Table(t.columns, tuple(_sorted_rows(t, specs)),
                    meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
@@ -1373,7 +1482,8 @@ def _extreme_rows(table: V.Table, column: MValue, descending: bool) -> list:
     if name not in names:
         raise _sort_invalid()
     # among equal values Power BI answers the last row (and lists the later rows first)
-    return _sorted_rows(list(reversed(table.rows)), [(names.index(name), descending)])
+    reversed_table = V.Table(table.columns, tuple(reversed(table.rows)))
+    return _sorted_rows(reversed_table, [(names.index(name), descending)])
 
 
 def _max(table: MValue, column: MValue, default: MValue) -> MValue:
