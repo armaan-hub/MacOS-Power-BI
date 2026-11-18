@@ -16,6 +16,7 @@ import math
 from functools import cmp_to_key
 from typing import Callable, Optional
 
+from . import ast as A
 from . import column_types
 from . import values as V
 from .canonical import number_text
@@ -1411,6 +1412,77 @@ def _rank_sort_specs(table: V.Table, criteria: MValue) -> list:
     return specs
 
 
+def _ast_references_param(node: A.Node, param_names: set) -> bool:
+    if isinstance(node, A.FieldSelector):
+        return "_" in param_names
+    if isinstance(node, A.Identifier):
+        return node.name in param_names
+    if isinstance(node, A.EachExpr):
+        inner_params = param_names - {"_"}
+        return _ast_references_param(node.body, inner_params)
+    if isinstance(node, A.FunctionLiteral):
+        shadowed = {p.name for p in node.params}
+        inner_params = param_names - shadowed
+        return any(_ast_references_param(f, inner_params) for f in [node.return_type, node.body] if f)
+    if isinstance(node, A.LetExpr):
+        for b in node.bindings:
+            if _ast_references_param(b.value, param_names):
+                return True
+        return _ast_references_param(node.body, param_names)
+    for field, val in getattr(node, "__dict__", {}).items():
+        if isinstance(val, A.Node):
+            if _ast_references_param(val, param_names):
+                return True
+        elif isinstance(val, (tuple, list)):
+            for item in val:
+                if isinstance(item, A.Node):
+                    if _ast_references_param(item, param_names):
+                        return True
+                elif isinstance(item, (A.RecordField, A.LetBinding)):
+                    for v in getattr(item, "__dict__", {}).values():
+                        if isinstance(v, A.Node) and _ast_references_param(v, param_names):
+                            return True
+    return False
+
+
+def _fn_is_constant_key(fn: V.Function) -> bool:
+    if getattr(fn, "ast", None) is None:
+        return False
+    param_names = {p.name for p in fn.params}
+    return not _ast_references_param(fn.ast, param_names)
+
+
+def _parse_sort_criterion(item: MValue, names: list) -> tuple:
+    val = V.force(item)
+    if isinstance(val, V.Text):
+        if val.value not in names:
+            raise _sort_invalid()
+        return (names.index(val.value), False)
+    if isinstance(val, V.Function):
+        if len(val.params) != 1:
+            raise _sort_invalid()
+        return (val, False)
+    if isinstance(val, V.List):
+        pair = list(val.items)
+        if len(pair) != 2:
+            raise _sort_invalid()
+        crit = V.force(pair[0])
+        ord_val = V.force(pair[1])
+        if not (isinstance(ord_val, V.Number) and ord_val.value in (0.0, 1.0)):
+            raise _sort_invalid()
+        descending = (ord_val.value == 1.0)
+        if isinstance(crit, V.Text):
+            if crit.value not in names:
+                raise _sort_invalid()
+            return (names.index(crit.value), descending)
+        if isinstance(crit, V.Function):
+            if len(crit.params) != 1:
+                raise _sort_invalid()
+            return (crit, descending)
+        raise _sort_invalid()
+    raise _sort_invalid()
+
+
 def _sort_specs(table: V.Table, criteria: MValue) -> list:
     names = _names_of(table)
     if isinstance(criteria, V.Null):
@@ -1431,41 +1503,23 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
     if not items:
         raise _sort_requires_criterion()
 
-    # Flat list check: if len == 2 and first is text, second is number/order
-    if len(items) == 2 and isinstance(V.force(items[0]), V.Text):
-        second = V.force(items[1])
-        if isinstance(second, V.Number):
-            name = V.force(items[0]).value
-            if name not in names:
-                raise _sort_invalid()
-            return [(names.index(name), _sort_order(second))]
-
-    # Probe 6 check: flat list where second item is an order number followed by more items
-    # e.g. {"K", Order.Descending, "V"}
-    if len(items) > 2 and isinstance(V.force(items[0]), V.Text):
+    # Flat list check: if len == 2 and second is an Order value (0.0 or 1.0)
+    if len(items) == 2:
         second = V.force(items[1])
         if isinstance(second, V.Number) and second.value in (0.0, 1.0):
+            first = V.force(items[0])
+            descending = (second.value == 1.0)
+            if isinstance(first, V.Text):
+                if first.value not in names:
+                    raise _sort_invalid()
+                return [(names.index(first.value), descending)]
+            if isinstance(first, V.Function) and len(first.params) == 1:
+                return [(first, descending)]
             raise _sort_invalid()
 
     specs = []
     for raw_item in items:
-        item = V.force(raw_item)
-        if isinstance(item, V.Text):
-            name, descending = item.value, False
-            if name not in names:
-                raise _sort_invalid()
-            specs.append((names.index(name), descending))
-        elif isinstance(item, V.List):
-            pair = list(item.items)
-            if len(pair) != 2 or not isinstance(V.force(pair[0]), V.Text):
-                raise _unsupported("sort criteria")
-            crit, ord_val = V.force(pair[0]), V.force(pair[1])
-            descending = _order(ord_val)
-            if crit.value not in names:
-                raise _sort_invalid()
-            specs.append((names.index(crit.value), descending))
-        else:
-            raise _items(item)
+        specs.append(_parse_sort_criterion(raw_item, names))
     return specs
 
 
@@ -1488,8 +1542,10 @@ def _sorted_rows(table: V.Table, specs: list) -> list:
         computed_rows.append(row_keys + [orig_idx, row])
 
     # Sort stably for each spec in reverse order
-    for spec_pos, (_spec, descending) in enumerate(reversed(specs)):
+    for spec_pos, (spec, descending) in enumerate(reversed(specs)):
         k_pos = num_specs - 1 - spec_pos
+        if not isinstance(spec, int) and _fn_is_constant_key(spec):
+            continue
         computed_rows.sort(key=cmp_to_key(lambda a, b, kp=k_pos: compare(a[kp], b[kp])),
                            reverse=descending)
 
