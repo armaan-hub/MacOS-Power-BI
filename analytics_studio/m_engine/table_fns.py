@@ -1384,7 +1384,7 @@ def _is_distinct(table: MValue, criteria: MValue) -> MValue:
 def _sort_order(order_val: MValue) -> bool:
     if isinstance(order_val, V.Number) and order_val.value in (0.0, 1.0):
         return order_val.value == 1.0
-    if isinstance(order_val, V.Number) and order_val.value == 5.0:
+    if isinstance(order_val, V.Number) and order_val.value in (2.0, -1.0, 5.0):
         raise _sort_invalid()
     raise _order(order_val)
 
@@ -1412,75 +1412,22 @@ def _rank_sort_specs(table: V.Table, criteria: MValue) -> list:
     return specs
 
 
-def _ast_references_param(node: A.Node, param_names: set) -> bool:
-    if isinstance(node, A.FieldSelector):
-        return "_" in param_names
-    if isinstance(node, A.Identifier):
-        return node.name in param_names
-    if isinstance(node, A.EachExpr):
-        inner_params = param_names - {"_"}
-        return _ast_references_param(node.body, inner_params)
-    if isinstance(node, A.FunctionLiteral):
-        shadowed = {p.name for p in node.params}
-        inner_params = param_names - shadowed
-        return any(_ast_references_param(f, inner_params) for f in [node.return_type, node.body] if f)
-    if isinstance(node, A.LetExpr):
-        for b in node.bindings:
-            if _ast_references_param(b.value, param_names):
-                return True
-        return _ast_references_param(node.body, param_names)
-    for field, val in getattr(node, "__dict__", {}).items():
-        if isinstance(val, A.Node):
-            if _ast_references_param(val, param_names):
-                return True
-        elif isinstance(val, (tuple, list)):
-            for item in val:
-                if isinstance(item, A.Node):
-                    if _ast_references_param(item, param_names):
-                        return True
-                elif isinstance(item, (A.RecordField, A.LetBinding)):
-                    for v in getattr(item, "__dict__", {}).values():
-                        if isinstance(v, A.Node) and _ast_references_param(v, param_names):
-                            return True
+def _is_literal_expr(node: A.Node) -> bool:
+    if isinstance(node, (A.NumberLiteral, A.TextLiteral, A.NullLiteral, A.LogicalLiteral)):
+        return True
+    if isinstance(node, A.UnaryOp) and node.op in ("+", "-") and isinstance(node.operand, A.NumberLiteral):
+        return True
     return False
 
 
 def _fn_is_constant_key(fn: V.Function) -> bool:
-    if getattr(fn, "ast", None) is None:
+    ast = getattr(fn, "ast", None)
+    if ast is None:
         return False
-    param_names = {p.name for p in fn.params}
-    return not _ast_references_param(fn.ast, param_names)
-
-
-def _parse_sort_criterion(item: MValue, names: list) -> tuple:
-    val = V.force(item)
-    if isinstance(val, V.Text):
-        if val.value not in names:
-            raise _sort_invalid()
-        return (names.index(val.value), False)
-    if isinstance(val, V.Function):
-        if len(val.params) != 1:
-            raise _sort_invalid()
-        return (val, False)
-    if isinstance(val, V.List):
-        pair = list(val.items)
-        if len(pair) != 2:
-            raise _sort_invalid()
-        crit = V.force(pair[0])
-        ord_val = V.force(pair[1])
-        if not (isinstance(ord_val, V.Number) and ord_val.value in (0.0, 1.0)):
-            raise _sort_invalid()
-        descending = (ord_val.value == 1.0)
-        if isinstance(crit, V.Text):
-            if crit.value not in names:
-                raise _sort_invalid()
-            return (names.index(crit.value), descending)
-        if isinstance(crit, V.Function):
-            if len(crit.params) != 1:
-                raise _sort_invalid()
-            return (crit, descending)
-        raise _sort_invalid()
-    raise _sort_invalid()
+    body = ast.body if hasattr(ast, "body") else ast
+    if not isinstance(body, A.ListExpr):
+        return False
+    return all(_is_literal_expr(item) for item in body.items)
 
 
 def _sort_specs(table: V.Table, criteria: MValue) -> list:
@@ -1503,23 +1450,73 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
     if not items:
         raise _sort_requires_criterion()
 
-    # Flat list check: if len == 2 and second is an Order value (0.0 or 1.0)
-    if len(items) == 2:
+    # Flat list check: if len == 2 and first is text, second is number/order
+    if len(items) == 2 and isinstance(V.force(items[0]), V.Text):
         second = V.force(items[1])
-        if isinstance(second, V.Number) and second.value in (0.0, 1.0):
-            first = V.force(items[0])
-            descending = (second.value == 1.0)
-            if isinstance(first, V.Text):
-                if first.value not in names:
-                    raise _sort_invalid()
-                return [(names.index(first.value), descending)]
-            if isinstance(first, V.Function) and len(first.params) == 1:
-                return [(first, descending)]
+        if isinstance(second, (V.Null, V.Logical)):
             raise _sort_invalid()
+        if isinstance(second, V.Function) and len(second.params) != 1:
+            raise _items(second)
+        if isinstance(second, V.Number):
+            name = V.force(items[0]).value
+            if name not in names:
+                raise _sort_invalid()
+            return [(names.index(name), _sort_order(second))]
+
+    # Flat list check: if len == 2 and first is function, second is null or order
+    if len(items) == 2 and isinstance(V.force(items[0]), V.Function):
+        second = V.force(items[1])
+        if isinstance(second, V.Null):
+            raise _sort_invalid()
+        if isinstance(second, V.Number) and second.value in (0.0, 1.0):
+            # Unmeasured: {each [V], Order.Descending} -> error like main
+            raise _items(V.force(items[0]))
+
+    # Flat list check: if len > 2 and any item after the first is an order number
+    if len(items) > 2 and any(isinstance(V.force(it), V.Number) and V.force(it).value in (0.0, 1.0) for it in items):
+        raise _sort_invalid()
 
     specs = []
     for raw_item in items:
-        specs.append(_parse_sort_criterion(raw_item, names))
+        item = V.force(raw_item)
+        if isinstance(item, V.Text):
+            name, descending = item.value, False
+            if name not in names:
+                raise _sort_invalid()
+            specs.append((names.index(name), descending))
+        elif isinstance(item, V.Function):
+            if len(item.params) != 1:
+                raise _sort_invalid()
+            specs.append((item, False))
+        elif isinstance(item, V.List):
+            pair = list(item.items)
+            if len(pair) == 0 or len(pair) == 1:
+                raise _sort_invalid()
+            if len(pair) > 2:
+                p1 = V.force(pair[1])
+                if isinstance(p1, V.Number) and p1.value == 1.0:
+                    third = V.force(pair[2])
+                    if isinstance(third, V.Text) or (isinstance(third, V.Number) and third.value in (0.0, 1.0)):
+                        raise _sort_invalid()
+                raise _unsupported("sort criteria")
+            crit, ord_val = V.force(pair[0]), V.force(pair[1])
+            if isinstance(ord_val, (V.Logical, V.Text)) or (isinstance(ord_val, V.Number) and ord_val.value in (2.0, -1.0, 5.0)):
+                raise _sort_invalid()
+            if isinstance(crit, V.Function) and isinstance(ord_val, V.Null):
+                raise _sort_invalid()
+            descending = _order(ord_val)
+            if isinstance(crit, V.Text):
+                if crit.value not in names:
+                    raise _sort_invalid()
+                specs.append((names.index(crit.value), descending))
+            elif isinstance(crit, V.Function):
+                if len(crit.params) != 1:
+                    raise _sort_invalid()
+                specs.append((crit, descending))
+            else:
+                raise _unsupported("sort criteria")
+        else:
+            raise _items(item)
     return specs
 
 

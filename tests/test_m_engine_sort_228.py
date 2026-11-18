@@ -67,6 +67,42 @@ BATCH42_PAIRS = [
     ("let r = try List.Buffer(Table.ToRows(Table.Sort(#table(type table [K = text, V = Int64.Type, W = text], {{\"a\",3,\"x\"},{\"b\",1,\"y\"},{\"a\",2,\"z\"},{\"b\",1,\"x\"},{\"c\",null,\"y\"}}),each [V]/0))) in if r[HasError] then \"ERR:\"&r[Error][Message] else Text.Combine(List.Transform(r[Value],each Text.Combine({_{0},Text.From(_{1}),_{2}},\"\")),\"|\")", "V:text:\"cy|a3x|b1y|a2z|b1x\""),
 ]
 
+CONSTANT_KEY_EXTRA_PAIRS = [
+    # Non-literal constant bodies behave like main (raising comparison operator errors or ordinary sort)
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each List.Numbers(1,2))',
+     'ERR:Expression.Error: We cannot apply operator < to types List and List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each {1..2})',
+     'ERR:Expression.Error: We cannot apply operator < to types List and List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each {Number.Random()})',
+     'ERR:Expression.Error: We cannot apply operator < to types List and List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each List.Transform({1},each _))',
+     'ERR:Expression.Error: We cannot apply operator < to types List and List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), let f=(x)=>{x} in each f(1))',
+     'ERR:Expression.Error: We cannot apply operator < to types List and List.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each each 1)',
+     'ERR:Expression.Error: We cannot apply operator < to types Function and Function.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each (x)=>x)',
+     'ERR:Expression.Error: We cannot apply operator < to types Function and Function.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each [a=1,b=2])',
+     'ERR:Expression.Error: We cannot apply operator < to types Record and Record.'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each null)',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"b",number:1],list:[text:"a",number:2]]'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each 1)',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"b",number:1],list:[text:"a",number:2]]'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each "x")',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"b",number:1],list:[text:"a",number:2]]'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each [V]=1)',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"a",number:2],list:[text:"b",number:1]]'),
+    # Literal list constant bodies tie and do not raise < operator errors
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each {1})',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"b",number:1],list:[text:"a",number:2]]'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each {"a"})',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"b",number:1],list:[text:"a",number:2]]'),
+    ('Table.Sort(#table(type table [K = text, V = Int64.Type], {{"b",1},{"a",2}}), each {})',
+     'V:table:cols=["K":"text","V":"number"];rows=[list:[text:"b",number:1],list:[text:"a",number:2]]'),
+]
+
+
 @pytest.mark.parametrize("probe, expected", BATCH40_PAIRS)
 def test_batch40_item(probe: str, expected: str) -> None:
     assert evaluate_to_text(probe) == expected
@@ -79,4 +115,9 @@ def test_batch41_item(probe: str, expected: str) -> None:
 
 @pytest.mark.parametrize("probe, expected", BATCH42_PAIRS)
 def test_batch42_item(probe: str, expected: str) -> None:
+    assert evaluate_to_text(probe) == expected
+
+
+@pytest.mark.parametrize("probe, expected", CONSTANT_KEY_EXTRA_PAIRS)
+def test_constant_key_extra_item(probe: str, expected: str) -> None:
     assert evaluate_to_text(probe) == expected
