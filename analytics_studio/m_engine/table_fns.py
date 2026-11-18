@@ -1314,7 +1314,6 @@ def _expand_list_column(table: MValue, column: MValue) -> MValue:
                 for item in cell.items:
                     rows.append(tuple(row[:idx]) + (item,) + tuple(row[idx + 1:]))
         else:
-            err = V.Thunk(lambda cell=cell: _too_many_elements() if False else V.force(cell))
             def _raise_cell_err(c=cell):
                 raise V.convert_error(c, V.TypeValue("list"))
             rows.append(tuple(row[:idx]) + (V.Thunk(_raise_cell_err),) + tuple(row[idx + 1:]))
@@ -1340,9 +1339,15 @@ def _replace_rows(table: MValue, offset: MValue, count: MValue, rows_arg: MValue
     return V.Table(cols, t.rows[:start] + tuple(new_rows) + t.rows[start + n:])
 
 
-def _replace_matching_rows(table: MValue, replacements: MValue, replacement_row: MValue) -> MValue:
-    raise MError("Expression.Error", "We expected a ListReplacementOperations value.",
-                 fmt="We expected a ListReplacementOperations value.")
+def _replace_matching_rows(table: MValue, replacements: MValue, equation_criteria: MValue = V.Null()) -> MValue:
+    _table(table)
+    if isinstance(replacements, V.List):
+        items = replacements.items
+        # Measured error check for invalid replacement operations list (e.g. answers 24/25)
+        if any(not (isinstance(V.force(it), V.List) and len(it.items) == 2) for it in items):
+            raise MError("Expression.Error", "We expected a ListReplacementOperations value.",
+                         fmt="We expected a ListReplacementOperations value.")
+    raise _unsupported("Table.ReplaceMatchingRows")
 
 
 def _split_table(table: MValue, page_size: MValue) -> MValue:
@@ -1361,7 +1366,7 @@ def _whole_count(value: MValue) -> int:
     x = value.value
     if math.isfinite(x) and x == math.floor(x) and 0 <= x < 2 ** 31:
         return int(x)
-    raise _unsupported("number that is not a non-negative whole number")
+    raise _unsupported("value that is not a non-negative whole number")
 
 
 def _split_at(table: MValue, count: MValue) -> MValue:
@@ -1384,14 +1389,27 @@ def _partition(table: MValue, column: MValue, groups: MValue, hash_fn: MValue) -
         bucket_val = V.force(_apply(hash_fn, val))
         if not isinstance(bucket_val, V.Number):
             raise _unsupported("hash result that is not a number")
-        b = int(bucket_val.value) % num_groups
+        x = bucket_val.value
+        if not (math.isfinite(x) and x == math.floor(x)):
+            raise _unsupported("hash result that is not a whole number")
+        if x < 0 or x > num_groups:
+            raise _unsupported("hash result outside 0..groups-1")
+        b = int(x) % num_groups
         buckets[b].append(row)
     return V.List(tuple(V.Table(t.columns, tuple(b_rows)) for b_rows in buckets))
 
 
 def _from_partitions(partition_column: MValue, partitions: MValue) -> MValue:
     col = _text(partition_column)
-    raise _exists(col)
+    if isinstance(partitions, V.List):
+        for part in partitions.items:
+            part_val = V.force(part)
+            if isinstance(part_val, V.List) and len(part_val.items) >= 2:
+                tbl_val = V.force(part_val.items[1])
+                if isinstance(tbl_val, V.Table):
+                    if col in _names_of(tbl_val):
+                        raise _exists(col)
+    raise _unsupported("Table.FromPartitions")
 
 
 _RANK_COMPETITION = 0
@@ -1503,6 +1521,9 @@ def _combine_columns_to_record(table: MValue, new_name: MValue, columns: MValue)
     _no_repeat(cols_to_combine)
     indices = [_index(t, c) for c in cols_to_combine]
     remaining_cols = [(name, kind) for j, (name, kind) in enumerate(t.columns) if j not in indices]
+    remaining_names = {name for name, _ in remaining_cols}
+    if new_col in remaining_names:
+        raise _exists(new_col)
     new_columns = ((new_col, "record~Record.Type~0"),) + tuple(remaining_cols)
     new_rows = []
     for row in t.rows:
@@ -2322,7 +2343,7 @@ TABLE_GLOBALS: dict = {
     "Table.ExpandListColumn": _native((("table", False), ("column", False)), _expand_list_column),
     "Table.ReplaceRows": _native((("table", False), ("offset", False), ("count", False), ("rows", False)),
                                  _replace_rows),
-    "Table.ReplaceMatchingRows": _native((("table", False), ("replacements", False), ("replacementRow", False)),
+    "Table.ReplaceMatchingRows": _native((("table", False), ("replacements", False), ("equationCriteria", True)),
                                          _replace_matching_rows),
     "Table.Split": _native((("table", False), ("pageSize", False)), _split_table),
     "Table.SplitAt": _native((("table", False), ("count", False)), _split_at),

@@ -72,3 +72,32 @@ PAIRS = [
 def test_m_engine_table_fns_221(probe: str, expected: str) -> None:
     actual = evaluate_to_text(probe)
     assert actual == expected
+
+
+def test_fix1_from_partitions_no_clash() -> None:
+    # Clashing column raises _exists (measured answer check); non-clashing column refuses as unsupported.
+    res = evaluate_to_text('Table.FromPartitions("p", {{1,#table({"A"},{{1}})}})')
+    assert res == "ERR:Expression.Error: The Table.FromPartitions is not supported by this engine yet."
+
+
+def test_fix2_replace_matching_rows_optional_criteria() -> None:
+    # 2-arg call is accepted by arity; valid unmeasured replacement list refuses as unsupported.
+    res2 = evaluate_to_text('Table.ReplaceMatchingRows(#table({"id"},{{1}}), {{[id=1],[id=9]}})')
+    assert res2 == "ERR:Expression.Error: The Table.ReplaceMatchingRows is not supported by this engine yet."
+    # 3-arg call is also accepted by arity.
+    res3 = evaluate_to_text('Table.ReplaceMatchingRows(#table({"id"},{{1}}), {{[id=1],[id=9]}}, "id")')
+    assert res3 == "ERR:Expression.Error: The Table.ReplaceMatchingRows is not supported by this engine yet."
+
+
+def test_fix3_combine_columns_to_record_clashing_name() -> None:
+    # New column name that clashes with a remaining column raises _exists duplicate-column error.
+    res = evaluate_to_text('Table.CombineColumnsToRecord(#table({"id","nm"},{{1,2}}),"id",{"nm"})')
+    assert res == "ERR:Expression.Error: The field 'id' already exists in the record."
+
+
+def test_fix4_partition_hash_out_of_range() -> None:
+    # Hash results outside 0..groups-1 refuse as unsupported.
+    res_neg = evaluate_to_text('Table.Partition(#table({"K","V"}, {{"a",1}}), "V", 2, each -1)')
+    assert res_neg == "ERR:Expression.Error: The hash result outside 0..groups-1 is not supported by this engine yet."
+    res_out = evaluate_to_text('Table.Partition(#table({"id"}, {{1}}), "id", 2, each 5)')
+    assert res_out == "ERR:Expression.Error: The hash result outside 0..groups-1 is not supported by this engine yet."
