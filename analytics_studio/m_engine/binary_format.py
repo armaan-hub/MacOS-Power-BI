@@ -8,6 +8,7 @@ from __future__ import annotations
 import codecs
 import math
 import struct
+import threading
 from decimal import Decimal
 from typing import Callable, Optional, Tuple, Any
 
@@ -93,12 +94,37 @@ def _is_format_fn(fn: Any) -> bool:
     return isinstance(fn, V.Function) and getattr(fn, _FORMAT_FLAG, False)
 
 
+_CONTEXT_STATE = threading.local()
+
+
+class _FormatContext:
+    def __init__(self, limit: int = 1_000_000):
+        self.limit = limit
+        self.item_count = 0
+
+    def record_items(self, count: int = 1):
+        self.item_count += count
+        if self.item_count > self.limit:
+            raise _unsupported("binary format result too large")
+
+
+def _get_format_context() -> Optional[_FormatContext]:
+    return getattr(_CONTEXT_STATE, "current", None)
+
+
 def _make_format(reader_fn: Callable[[bytes, int, int], Tuple[MValue, int]], kind: str = "primitive") -> V.Function:
     """Creates a binary format function that takes one binary argument."""
     def invoke(bound: list) -> MValue:
         b_val = _check_binary(V.force(bound[0]))
-        val, _ = reader_fn(b_val, 0, _BYTE_ORDER_BIG)
-        return val
+        top_level = getattr(_CONTEXT_STATE, "current", None) is None
+        if top_level:
+            _CONTEXT_STATE.current = _FormatContext()
+        try:
+            val, _ = reader_fn(b_val, 0, _BYTE_ORDER_BIG)
+            return val
+        finally:
+            if top_level:
+                _CONTEXT_STATE.current = None
 
     fn = V.Function((V.ParamSpec("binary", None, False),), invoke)
     object.__setattr__(fn, _FORMAT_FLAG, True)
@@ -377,13 +403,17 @@ def _binary_format_list(binaryFormat: MValue, countOrCondition: MValue = V.Null(
             count = _check_int64_len(c_val, param_name="count")
             if count > 10_000_000:
                 raise _unsupported("binary format list count exceeds limit")
+            ctx = _get_format_context()
+            if ctx is not None:
+                ctx.record_items(count)
             items = []
             for _ in range(count):
-                if curr >= len(b):
-                    raise _unsupported("binary format reading past end of input")
-                val, next_pos = sub_reader(b, curr, byte_order)
-                if next_pos <= curr and count > 100_000:
-                    raise _unsupported("zero-width binary format list item")
+                try:
+                    val, next_pos = sub_reader(b, curr, byte_order)
+                except MError as err:
+                    if err.reason == "DataFormat.Error" and "The end of the input was reached before the value could be read" in err.message:
+                        raise _unsupported("binary format reading past end of input")
+                    raise
                 curr = next_pos
                 items.append(val)
             return V.List(tuple(items)), curr
@@ -394,14 +424,18 @@ def _binary_format_list(binaryFormat: MValue, countOrCondition: MValue = V.Null(
         if count > 10_000_000:
             raise _unsupported("binary format list count exceeds limit")
         def read_fixed_count(b: bytes, pos: int, byte_order: int) -> Tuple[MValue, int]:
+            ctx = _get_format_context()
+            if ctx is not None:
+                ctx.record_items(count)
             curr = pos
             items = []
             for _ in range(count):
-                if curr >= len(b):
-                    raise _unsupported("binary format reading past end of input")
-                val, next_pos = sub_reader(b, curr, byte_order)
-                if next_pos <= curr and count > 100_000:
-                    raise _unsupported("zero-width binary format list item")
+                try:
+                    val, next_pos = sub_reader(b, curr, byte_order)
+                except MError as err:
+                    if err.reason == "DataFormat.Error" and "The end of the input was reached before the value could be read" in err.message:
+                        raise _unsupported("binary format reading past end of input")
+                    raise
                 curr = next_pos
                 items.append(val)
             return V.List(tuple(items)), curr

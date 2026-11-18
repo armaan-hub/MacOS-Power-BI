@@ -1034,6 +1034,29 @@ PAIRS = [
      'V:number:1'),
     ('BinaryFormat.7BitEncodedSignedInteger(#binary({1}))',
      'V:number:-1'),
+    # Task 229 fix 2: Batch 46 pairs (Power BI measured count-mode zero-width items)
+    ('let r = try BinaryFormat.List(BinaryFormat.Null,3)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[null,null,null]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Null,0)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Null,1)(#binary({})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[null]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Record([]),2)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[record:[],record:[]]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Binary(0),2)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[binary:,binary:]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Text(0),2)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[text:"",text:""]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.List(BinaryFormat.Null,2),2)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[list:[null,null],list:[null,null]]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.List(BinaryFormat.Byte,0),2)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[list:[],list:[]]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Record([a=BinaryFormat.Null]),2)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[record:["a"=null],record:["a"=null]]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Null,100)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Null,1000)(#binary({})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:' + str(['null'] * 1000).replace("'", "").replace(' ', '')),
+    ('let r = try BinaryFormat.List(BinaryFormat.Length(BinaryFormat.Byte,1),2)(#binary({1,2})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[number:1,number:2]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.Transform(BinaryFormat.Null,each 1),2)(#binary({1})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]', 'V:list:[number:1,number:1]'),
+    # Task 229 fix 2: nested over-limit refusals
+    ('let r = try BinaryFormat.List(BinaryFormat.List(BinaryFormat.Null,100000),100000)(#binary({1,2,3})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]',
+     'V:list:[text:"E",text:"Expression.Error",text:"The binary format result too large is not supported by this engine yet."]'),
+    ('let r = try BinaryFormat.List(BinaryFormat.List(BinaryFormat.Null,100000),1000)(#binary({1,2,3})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]',
+     'V:list:[text:"E",text:"Expression.Error",text:"The binary format result too large is not supported by this engine yet."]'),
+    ('BinaryFormat.List(BinaryFormat.List(BinaryFormat.Null,100000),100000)(#binary({1,2,3}))',
+     'ERR:Expression.Error: The binary format result too large is not supported by this engine yet.'),
+    ('BinaryFormat.List(BinaryFormat.List(BinaryFormat.Null,100000),1000)(#binary({1,2,3}))',
+     'ERR:Expression.Error: The binary format result too large is not supported by this engine yet.'),
 ]
 
 
