@@ -1624,9 +1624,51 @@ def _binary_decompress(binary: MValue, compressionType: MValue) -> MValue:
         raise MError("DataFormat.Error", "Found invalid data while decoding.")
     if len(data) <= 10:
         return V.Binary(b"")
+    cm = data[2]
+    if cm != 8:
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+    flg = data[3]
+    if flg & 0xE0:
+        raise MError("DataFormat.Error", "Found invalid data while decoding.")
+
+    idx = 10
+    # FEXTRA (bit 2 = 0x04)
+    if flg & 0x04:
+        if len(data) < idx + 2:
+            return V.Binary(b"")
+        xlen = int.from_bytes(data[idx:idx + 2], "little")
+        idx += 2
+        if len(data) < idx + xlen:
+            return V.Binary(b"")
+        idx += xlen
+
+    # FNAME (bit 3 = 0x08)
+    if flg & 0x08:
+        zero_pos = data.find(b"\x00", idx)
+        if zero_pos == -1:
+            return V.Binary(b"")
+        idx = zero_pos + 1
+
+    # FCOMMENT (bit 4 = 0x10)
+    if flg & 0x10:
+        zero_pos = data.find(b"\x00", idx)
+        if zero_pos == -1:
+            return V.Binary(b"")
+        idx = zero_pos + 1
+
+    # FHCRC (bit 1 = 0x02)
+    if flg & 0x02:
+        if len(data) < idx + 2:
+            raise _unsupported("FHCRC header CRC truncated inside 2 bytes")
+        expected_hcrc = int.from_bytes(data[idx:idx + 2], "little")
+        actual_hcrc = zlib.crc32(data[:idx]) & 0xffff
+        if actual_hcrc != expected_hcrc:
+            raise MError("DataFormat.Error", "Found invalid data while decoding.")
+        idx += 2
+
     d = zlib.decompressobj(-15)
     try:
-        res = d.decompress(data[10:])
+        res = d.decompress(data[idx:])
     except Exception:
         raise MError("DataFormat.Error", "Found invalid data while decoding.")
     if len(d.unused_data) >= 8:
