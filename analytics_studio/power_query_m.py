@@ -2997,6 +2997,8 @@ def _m_group_aggregation(
     Group By dialog: count_rows -> Int64.Type; sum/average/median -> ``type number``
     on a whole/decimal number column and ``type text`` on a text column, when the
     input column type is known. Everything else is written without a type.
+    Task 218 adds min: Power BI's Group By dialog answers are ``type text`` for
+    Min of a text column and ``type number`` for Min of a Currency (decimal) column.
     """
     expression = _m_group_expression(aggregate)
     stored = aggregate.get("m_type")
@@ -3008,6 +3010,12 @@ def _m_group_aggregation(
     if operation in {"sum", "average", "median"} and "column" in aggregate:
         source_type = (input_column_types or {}).get(aggregate["column"])
         if source_type in {"whole_number", "decimal_number"}:
+            return f"{expression}, type number"
+        if source_type == "text":
+            return f"{expression}, type text"
+    if operation == "min" and "column" in aggregate:
+        source_type = (input_column_types or {}).get(aggregate["column"])
+        if source_type == "decimal_number":
             return f"{expression}, type number"
         if source_type == "text":
             return f"{expression}, type text"
