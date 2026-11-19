@@ -520,6 +520,15 @@ class ModelDataViewTests(unittest.TestCase):
         self.app.processEvents()
 
         def find_region_filter_button() -> QQuickItem:
+            # The header view deletes replaced delegates late; emitting on a
+            # doomed one is silently ignored. Wait until one button is left.
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline and sum(
+                1 for item in _quick_items(window.contentItem())
+                if item.objectName() == "dataViewFilterColumn_0"
+                and item.isVisible()
+            ) > 1:
+                QTest.qWait(10)
             filter_buttons = [
                 item for item in _quick_items(window.contentItem())
                 if item.objectName() == "dataViewFilterColumn_0"
