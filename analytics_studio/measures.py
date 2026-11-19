@@ -56,7 +56,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_subnormal, dax_swi_ties, dax_time_sets, dax_typed, dax_visual_calc_fns
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_failing_type_tests, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_subnormal, dax_swi_ties, dax_time_sets, dax_typed, dax_visual_calc_fns
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -9982,6 +9982,13 @@ def evaluate_measures(
         return dax_swi_ties.run_with_tie_orders(run, lambda first, second: repr(first) == repr(second))
     except dax_swi_ties.TieRefused as error:
         raise MeasureError(str(error)) from error
+    except MeasureError:
+        # Task 235: a type test of an expression whose evaluation fails is answered by the static type of the expression where the saved Power BI
+        # answers settle it (analytics_studio/dax_failing_type_tests.py); every other shape keeps its error or refusal
+        settled = dax_failing_type_tests.answer_measures(measures, measure_names, table_context)
+        if settled is None:
+            raise
+        return settled
 
 
 def _nan_walk_measured(table_node: Any, body: Any) -> bool:
