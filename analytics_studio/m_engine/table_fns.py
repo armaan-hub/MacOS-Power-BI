@@ -251,44 +251,6 @@ def _distinct_invalid() -> MError:
                   fmt="The specified distinct criteria is invalid.")
 
 
-class _LazyRows:
-    def __init__(self, compute):
-        self._compute = compute
-        self._cached = None
-
-    def _get(self):
-        if self._cached is None:
-            self._cached = tuple(self._compute())
-        return self._cached
-
-    def __iter__(self):
-        return iter(self._get())
-
-    def __len__(self):
-        return len(self._get())
-
-    def __getitem__(self, item):
-        return self._get()[item]
-
-    def __reversed__(self):
-        return reversed(self._get())
-
-    def __bool__(self):
-        return bool(self._get())
-
-    def __add__(self, other):
-        return self._get() + tuple(other)
-
-    def __radd__(self, other):
-        return tuple(other) + self._get()
-
-    def __mul__(self, n):
-        return self._get() * n
-
-    def __rmul__(self, n):
-        return n * self._get()
-
-
 def _table(value: MValue) -> V.Table:
     if isinstance(value, V.Table):
         return value
@@ -2285,7 +2247,8 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
             group_table = V.Table(t.columns, tuple(members), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
             rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
     else:
-        groups = {}
+        # Fast hash-based path for Global grouping (O(N) instead of O(N^2))
+        groups: dict = {}
         order = []
         for row in t.rows:
             key = _key(tuple(V.force(row[i]) for i in key_indexes))
@@ -2302,6 +2265,9 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
     columns = tuple((name, t.columns[i][1]) for name, i in zip(key_names, key_indexes))
     columns += tuple((name, kind if kind is not None else _function_spec(fn)) for name, fn, kind in aggs)
 
+    # Key propagation for Table.Group:
+    # Table.Group (any input, keyed or keyless, one or several group columns, group column equal to a key or not):
+    # result keys = exactly one record [Columns = the group columns in the order given, Primary = true]
     group_key_record = V.Record((
         ("Columns", V.List(tuple(V.Text(name) for name in key_names))),
         ("Primary", V.Logical(True)),

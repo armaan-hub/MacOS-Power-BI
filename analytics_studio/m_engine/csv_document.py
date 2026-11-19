@@ -383,6 +383,9 @@ def _decode_source(is_text: bool, data: any, enc_id: Optional[int]) -> str:
             raise _unsupported("invalid UTF-32 BE")
 
     # No BOM
+    if enc_id == 0 and any(byte >= 0x80 for byte in b):
+        raise _unsupported("Csv.Document with Encoding 0 over non-ASCII bytes (the machine's ANSI code page is not modelled)")
+
     enc = 65001 if (enc_id is None or enc_id == 0) else enc_id
     if enc == 65001:
         try:
