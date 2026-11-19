@@ -1681,6 +1681,11 @@ def _binary_decompress(binary: MValue, compressionType: MValue) -> MValue:
     return V.Binary(res)
 
 
+def _binary_infer_content_type(binary: MValue) -> MValue:
+    from .binary_infer import _binary_infer_content_type as _infer
+    return _infer(binary)
+
+
 def _binary_range(value: MValue, offset: MValue, count: MValue) -> MValue:
     data = _binary_of(value).value
     start = _whole(offset, 0)
@@ -2409,6 +2414,7 @@ _MORE_GLOBALS: dict = {
     "Binary.Buffer": _native((("binary", False),), _binary_buffer),
     "Binary.Compress": _native((("binary", False), ("compressionType", False)), _binary_compress),
     "Binary.Decompress": _native((("binary", False), ("compressionType", False)), _binary_decompress),
+    "Binary.InferContentType": _native((("binary", False),), _binary_infer_content_type),
     "Binary.Range": _native((("binary", False), ("offset", False), ("count", True)), _binary_range),
     "Binary.Split": _native((("binary", False), ("pageSize", False)), _binary_split),
     "Binary.From": _native((("value", False), ("encoding", True)), _binary_from),
