@@ -1511,7 +1511,8 @@ def _binary_from_text(text: MValue, encoding: MValue) -> MValue:
     if isinstance(text, V.Null):
         _encoding(encoding)
         return V.Null()
-    return _decode_text(_text_arg(text), _encoding(encoding))
+    decoded = _decode_text(_text_arg(text), _encoding(encoding))
+    return V.Binary(decoded.value, solid=True)
 
 
 def _binary_to_text(value: MValue, encoding: MValue) -> MValue:
@@ -1538,7 +1539,7 @@ def _binary_from_list(value: MValue) -> MValue:
     built = binary_from_list(value)
     if built.bad:
         raise _unsupported("list of values that are not bytes")
-    return built
+    return V.Binary(built.value, built.meta)  # not solid: the chunking of the source binary is not carried over
 
 
 def _binary_length(value: MValue) -> MValue:
@@ -1686,6 +1687,11 @@ def _binary_infer_content_type(binary: MValue) -> MValue:
     return _infer(binary)
 
 
+def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: Optional[MValue] = None, extraValues: Optional[MValue] = None, encoding: Optional[MValue] = None) -> MValue:
+    from .csv_document import _csv_document as _doc
+    return _doc(source, columns, delimiter, extraValues, encoding)
+
+
 def _binary_range(value: MValue, offset: MValue, count: MValue) -> MValue:
     data = _binary_of(value).value
     start = _whole(offset, 0)
@@ -1718,12 +1724,21 @@ def _binary_from(value: MValue, encoding: MValue) -> MValue:
 
 
 def _binary_combine(binaries: MValue) -> MValue:
+    items = _list_items(binaries)
     out = b""
-    for cell in _list_items(binaries):
+    for cell in items:
         if not isinstance(cell, V.Binary) or cell.bad:
             raise _unsupported("Binary.Combine of a value that is not a binary")
         out += cell.value
-    return V.Binary(out)
+    # Power BI detects a byte-order mark depending on how the binary is chunked: a first chunk shorter than the
+    # mark hides it. Only a combine whose first chunk is solid and (with 2+ items) at least 4 bytes is solid.
+    if not items:
+        solid = False
+    elif len(items) == 1:
+        solid = items[0].solid
+    else:
+        solid = all(cell.solid for cell in items) and len(items[0].value) >= 4
+    return V.Binary(out, solid=solid)
 
 
 # ---- Json, Lines, Uri --------------------------------------------------------
@@ -2415,6 +2430,7 @@ _MORE_GLOBALS: dict = {
     "Binary.Compress": _native((("binary", False), ("compressionType", False)), _binary_compress),
     "Binary.Decompress": _native((("binary", False), ("compressionType", False)), _binary_decompress),
     "Binary.InferContentType": _native((("binary", False),), _binary_infer_content_type),
+    "Csv.Document": _native((("source", False), ("columns", True), ("delimiter", True), ("extraValues", True), ("encoding", True)), _csv_document),
     "Binary.Range": _native((("binary", False), ("offset", False), ("count", True)), _binary_range),
     "Binary.Split": _native((("binary", False), ("pageSize", False)), _binary_split),
     "Binary.From": _native((("value", False), ("encoding", True)), _binary_from),

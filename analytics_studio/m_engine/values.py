@@ -159,6 +159,9 @@ class Binary(MValue):
     value: bytes
     meta: Optional["Record"] = None
     bad: bool = False  # built from out-of-range numbers: Power BI cannot serialize it
+    # solid: the bytes come from a trusted construction whose byte-order-mark behaviour in Csv.Document is
+    # measured (#binary, Text.ToBinary, Binary.FromText, a Binary.Combine that keeps a whole first chunk).
+    solid: bool = field(default=False, compare=False)
 
 
 @dataclass(frozen=True, eq=False)

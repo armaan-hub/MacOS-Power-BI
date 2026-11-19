@@ -130,7 +130,7 @@ def _binary(items: MValue) -> MValue:
             bad = True
         else:
             data.append(int(x))
-    return V.Binary(bytes(data), bad=bad)
+    return V.Binary(bytes(data), bad=bad, solid=True)
 
 
 _EN_US = ("", "en-us", "en", "en-gb", "en-au", "en-ca", "en-ie", "en-in", "en-nz", "en-za")  # same upper-casing
@@ -313,7 +313,9 @@ def _table_from_records(records: MValue, columns: MValue = V.Null(), missing: MV
 
     def cell(row: V.Record, name: str):
         if row.has(name):
-            return row.get(name)
+            for field_name, item in row.fields:
+                if field_name == name:
+                    return item
         return V.Thunk(lambda: (_ for _ in ()).throw(MError(
             "Expression.Error", f"The field '{name}' of the record wasn't found.")))
 
