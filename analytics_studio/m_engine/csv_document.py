@@ -156,6 +156,15 @@ def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: O
         # 4. Delimiter
         d_val = rec.get('Delimiter')
         if d_val is not None:
+            if cs_val is not None and isinstance(cs_val, V.Number) and cs_val.value == 1.0:
+                is_single_char = False
+                if isinstance(d_val, V.Text):
+                    s = d_val.value
+                    utf16_len = len(s) + sum(1 for c in s if ord(c) > 0xFFFF)
+                    if utf16_len == 1:
+                        is_single_char = True
+                if not is_single_char:
+                    raise _unsupported("Csv.Document record form QuoteAlways with non-single-char delimiter")
             delim_str = _validate_delimiter_record(d_val)
         else:
             delim_str = ','

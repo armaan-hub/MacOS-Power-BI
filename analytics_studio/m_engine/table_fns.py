@@ -171,7 +171,7 @@ def _type_spec(type_value: MValue) -> str:
     if not isinstance(type_value, V.TypeValue) or type_value.name not in _PRIMITIVES:
         raise _unsupported("column type")
     if type_value.name == "anynonnull":
-        return _col("Any.Type", False)
+        return _col("Any.Type", type_value.nullable)
     nullable = type_value.nullable or type_value.name in _NULLABLE_BY_DEFAULT
     if type_value.label is not None:  # a subtype constant such as Int64.Type keeps its own TypeName
         return _col(type_value.label, nullable)
@@ -275,6 +275,18 @@ class _LazyRows:
 
     def __bool__(self):
         return bool(self._get())
+
+    def __add__(self, other):
+        return self._get() + tuple(other)
+
+    def __radd__(self, other):
+        return tuple(other) + self._get()
+
+    def __mul__(self, n):
+        return self._get() * n
+
+    def __rmul__(self, n):
+        return n * self._get()
 
 
 def _table(value: MValue) -> V.Table:
@@ -765,8 +777,9 @@ def _remove_first_n(table: MValue, countOrCondition: MValue) -> MValue:
             drop_count += 1
         return V.Table(t.columns, t.rows[drop_count:], keys=t.keys, keys_unmeasured=t.keys_unmeasured)
     cnt = _count_or(countOrCondition, 1)
-    meta = t.meta if (cnt == 0 and t.meta is not None and t.meta.has("FirstRowMayContainHeaders")) else None
-    return V.Table(t.columns, t.rows[cnt:], meta=meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    if cnt == 0 and t.meta is not None and len(t.meta.fields) > 0:
+        raise _unsupported("Table.Skip(T, 0) or Table.RemoveFirstN(T, 0) on a table with metadata")
+    return V.Table(t.columns, t.rows[cnt:], keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _remove_last_n(table: MValue, countOrCondition: MValue) -> MValue:
@@ -1632,7 +1645,7 @@ def _min(table: MValue, column: MValue, default: MValue) -> MValue:
 
 def _max_n(table: MValue, column: MValue, count: MValue) -> MValue:
     t = _table(table)
-    if not isinstance(column, V.Text):
+    if not isinstance(column, V.Text) or column.value not in _names_of(t):
         raise _sort_invalid()
     cnt = _count(count)
     return V.Table(t.columns, _LazyRows(lambda: _extreme_rows(t, column, True)[:cnt]))
@@ -1640,7 +1653,7 @@ def _max_n(table: MValue, column: MValue, count: MValue) -> MValue:
 
 def _min_n(table: MValue, column: MValue, count: MValue) -> MValue:
     t = _table(table)
-    if not isinstance(column, V.Text):
+    if not isinstance(column, V.Text) or column.value not in _names_of(t):
         raise _sort_invalid()
     cnt = _count(count)
     return V.Table(t.columns, _LazyRows(lambda: _extreme_rows(t, column, False)[:cnt]))
@@ -2490,7 +2503,7 @@ def combine_tables(parts: list) -> V.Table:
             rows.append(tuple(row[current.index(name)] if name in current else V.Null() for name in names))
     if len(parts) == 1:
         single = parts[0]
-        return V.Table(tuple(columns), tuple(rows),
+        return V.Table(tuple(columns), tuple(rows), meta=single.meta,
                        keys=single.keys, keys_unmeasured=single.keys_unmeasured)
     unmeasured = any(bool(part.keys or part.keys_unmeasured) for part in parts)
     return V.Table(tuple(columns), tuple(rows), keys_unmeasured=unmeasured)
@@ -2790,14 +2803,21 @@ def _columns_of_type(table: MValue, types: MValue) -> MValue:
             if not isinstance(type_value, V.TypeValue):
                 raise _unsupported("column type filter")
             name = type_value.name
+            if name in ("list", "record", "table", "function"):
+                if type_value.item is not None or type_value.fields is not None or type_value.signature is not None:
+                    raise _unsupported("constructed column type filter")
             if name == "any":
                 match = True
                 break
             if name == "anynonnull":
-                if not is_nullable:
+                if not type_value.nullable:
+                    if not is_nullable:
+                        match = True
+                        break
+                    continue
+                else:
                     match = True
                     break
-                continue
             if name not in _PRIMITIVES:
                 raise _unsupported("column type filter")
             if name == base:
