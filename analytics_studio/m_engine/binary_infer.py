@@ -61,13 +61,13 @@ def _binary_infer_content_type(binary: MValue) -> MValue:
         bom_len = 2
 
     # Refusals:
-    # 1) Raw window contains NUL and no BOM. Measured in review batch r_nul
-    # (NUL at offsets 1024+ => null): a NUL inside the first 1024 bytes is
-    # refused, while a NUL past a long NUL-free prefix (which settles the
-    # encoding) gives [Content.Type = null], returned after the quote check
-    # below.
+    # 1) Raw window contains NUL and no BOM. Measured NUL at offsets
+    # 1000,1023,1024,1025,2000,3000 => null (review batch r_nul); NUL below
+    # offset 1000 refused: unmeasured/odd behaviour measured at offsets <= 200.
+    # Past a settled (NUL-free) prefix the content is not text:
+    # [Content.Type = null], returned after the quote check below.
     nul_no_bom = (not has_bom) and (0x00 in window)
-    if nul_no_bom and (0x00 in window[:1024]):
+    if nul_no_bom and (0x00 in window[:1000]):
         raise _unsupported("Binary.InferContentType over raw binary containing NUL")
 
     # 2) Truncated input with UTF-16/UTF-32 BOM or any input >= 65536 with byte >= 0x80
