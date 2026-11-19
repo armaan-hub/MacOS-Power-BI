@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from unittest.mock import patch
 
@@ -12,6 +13,7 @@ from PySide6.QtGui import QImage
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 from PySide6.QtQuick import QQuickItem
 from PySide6.QtQuickControls2 import QQuickStyle
+from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
@@ -31,6 +33,17 @@ def _items(item: QQuickItem):
     yield item
     for child in item.childItems():
         yield from _items(child)
+
+
+def _wait_until(condition, timeout_seconds: float = 5.0) -> bool:
+    # Bounded poll: the Image in the report canvas loads asynchronously, so a
+    # single processEvents() can return before it is Ready on a loaded machine.
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if condition():
+            return True
+        QTest.qWait(10)
+    return bool(condition())
 
 
 def test_static_visuals_insert_render_edit_and_reopen(tmp_path: Path) -> None:
@@ -72,10 +85,16 @@ def test_static_visuals_insert_render_edit_and_reopen(tmp_path: Path) -> None:
         controller.resize_visual(shape_id, 130, 90)
         app.processEvents()
 
-        quick_items = list(_items(window.contentItem()))
-        text_area = next(item for item in quick_items if item.objectName() == f"reportTextInput_{text_visual_id}")
-        image_container = next(item for item in quick_items if item.objectName() == f"reportImageContainer_{image_visual_id}")
-        shape_item = next(item for item in quick_items if item.objectName() == f"reportShape_{shape_id}")
+        def _find(name: str):
+            return next((item for item in _items(window.contentItem()) if item.objectName() == name), None)
+
+        text_name = f"reportTextInput_{text_visual_id}"
+        image_name = f"reportImageContainer_{image_visual_id}"
+        shape_name = f"reportShape_{shape_id}"
+        assert _wait_until(lambda: all(_find(n) is not None for n in (text_name, image_name, shape_name)))
+        text_area = _find(text_name)
+        image_container = _find(image_name)
+        shape_item = _find(shape_name)
         assert text_area.property("text") == "Notes for the report"
         controller.selectVisual(text_visual["title"])
         text_area.forceActiveFocus()
@@ -83,7 +102,7 @@ def test_static_visuals_insert_render_edit_and_reopen(tmp_path: Path) -> None:
         app.processEvents()
         assert next(item for item in controller.activeVisualObjects if item["id"] == text_visual_id)["text"] == "Typed on the canvas"
         assert image_container.property("isImageVisual") is True
-        assert image_container.property("imageReady") is True
+        assert _wait_until(lambda: image_container.property("imageReady") is True)
         assert shape_item.property("isShapeVisual") is True
         assert next(item for item in controller.activeVisualObjects if item["id"] == shape_id)["width"] == 130
 
