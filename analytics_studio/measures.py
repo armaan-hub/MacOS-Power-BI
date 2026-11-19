@@ -9982,10 +9982,10 @@ def evaluate_measures(
         return dax_swi_ties.run_with_tie_orders(run, lambda first, second: repr(first) == repr(second))
     except dax_swi_ties.TieRefused as error:
         raise MeasureError(str(error)) from error
-    except MeasureError:
+    except MeasureError as failure:
         # Task 235: a type test of an expression whose evaluation fails is answered by the static type of the expression where the saved Power BI
         # answers settle it (analytics_studio/dax_failing_type_tests.py); every other shape keeps its error or refusal
-        settled = dax_failing_type_tests.answer_measures(measures, measure_names, table_context)
+        settled = dax_failing_type_tests.answer_measures(measures, measure_names, table_context, str(failure))
         if settled is None:
             raise
         return settled

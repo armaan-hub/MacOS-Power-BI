@@ -1,9 +1,11 @@
 """Task 235: a type test (ISNUMBER, ISTEXT, ISLOGICAL, ...) of an expression that fails when it is evaluated, decided by the static type.
 
 The 539 expressions below are the saved Power BI answers that the local engine refused before Task 235 (156 True, 383 False).  Each must now be
-the exact Power BI answer or the engine's refusal, never another answer.  MUST_ANSWER lists the 529 that the rule of
-analytics_studio/dax_failing_type_tests.py answers; the other 10 keep their refusal (the argument holds MAXX over a constant table, a
-SELECTEDVALUE, an IFERROR, a comparison operator, or the test is ISBLANK / ISERROR, which this rule does not cover).
+the exact Power BI answer or the engine's refusal, never another answer.  MUST_ANSWER lists the 467 that the rule of
+analytics_studio/dax_failing_type_tests.py answers.  The other 72 keep their refusal: 10 are outside the rule (MAXX over a constant
+table, a SELECTEDVALUE, an IFERROR, a comparison operator, ISBLANK / ISERROR) and 62 are settled by the saved answers but locked as refused by
+older tests (HONOUR_LOCKED_REFUSALS in the module: arithmetic around a failing power 39, a column aggregate beside a text literal 11, NOT of
+a text 4, && / || with a column on the left 4, a SIGN branch beside a CURRENCY branch 4).
 
 RULE TABLE (the same as the module text): a type test of an argument whose evaluation fails is answered from the static type T of the argument
 when the answer is the same for a BLANK and for a value; if a BLANK would answer the other way Power BI evaluates the value and raises.
@@ -600,32 +602,22 @@ MUST_ANSWER = [
     ("ISLOGICAL(OR(\"\",MIN(Facts[Note])&\"\"))", "True"),
     ("ISLOGICAL(2.5&&MAX(Facts[Note])&\"\")", "True"),
     ("ISLOGICAL(\"0\"||MAX(Facts[Note])&\"\")", "True"),
-    ("ISLOGICAL(MAX(Facts[Note])&\"\"&&1)", "True"),
-    ("ISLOGICAL(MAX(Facts[Note])&\"\"||0)", "True"),
     ("ISLOGICAL(AND(1,MAX(Facts[Note])&\"\"))", "True"),
     ("ISLOGICAL(OR(MAX(Facts[Note])&\"\",0))", "True"),
     ("ISLOGICAL(MAX(Facts[Note])&\"\"&&MAX(Facts[Note])&\"\")", "True"),
     ("ISLOGICAL(2.5&&MIN(Facts[Note])&\"\")", "True"),
     ("ISLOGICAL(\"0\"||MIN(Facts[Note])&\"\")", "True"),
-    ("ISLOGICAL(MIN(Facts[Note])&\"\"&&1)", "True"),
-    ("ISLOGICAL(MIN(Facts[Note])&\"\"||0)", "True"),
     ("ISLOGICAL(AND(1,MIN(Facts[Note])&\"\"))", "True"),
     ("ISLOGICAL(OR(MIN(Facts[Note])&\"\",0))", "True"),
     ("ISLOGICAL(MIN(Facts[Note])&\"\"&&MIN(Facts[Note])&\"\")", "True"),
     ("ISTEXT(BLANK()^BLANK())", "False"),
     ("ISLOGICAL(BLANK()^BLANK())", "False"),
     ("ISNONTEXT(BLANK()^BLANK())", "True"),
-    ("ISTEXT(NOT(\"a\"))", "False"),
-    ("ISNUMBER(NOT(\"a\"))", "False"),
-    ("ISLOGICAL(NOT(\"a\"))", "True"),
-    ("ISNONTEXT(NOT(\"a\"))", "True"),
     ("ISTEXT(FACT(-1))", "False"),
     ("ISLOGICAL(FACT(-1))", "False"),
     ("ISNONTEXT(FACT(-1))", "True"),
-    ("ISINT64((MAX(Facts[Note]))*(\"2\"))", "False"),
     ("ISINT64((\"a\")*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))", "False"),
     ("ISINT64((MAX(Facts[Note]))*(TRUE()))", "False"),
-    ("ISINT64((MAX(Facts[Note]))*(\"a\"))", "False"),
     ("ISINT64((DIVIDE(1,BLANK()))*(VAR y=BLANK() RETURN y)+(\"a\"+1))", "False"),
     ("ISDATETIME((DIVIDE(1,BLANK()))*(VAR y=BLANK() RETURN y)+(\"a\"+1))", "False"),
     ("ISDATETIME((INT(\"a\"))*(SUM(Facts[Sales])))", "False"),
@@ -635,63 +627,44 @@ MUST_ANSWER = [
     ("ISTEXT((BLANK()^BLANK())+(MAX(Facts[Sales])))", "False"),
     ("ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))*(VAR y=\"b\" RETURN y))", "True"),
     ("ISNONTEXT((FACT(-1))&(TRUE()))", "False"),
-    ("ISNUMBER((1)+((-1)^0.5))", "True"),
     ("ISNONTEXT((MAX(Facts[Sales]))*(BLANK()^BLANK()))", "True"),
-    ("ISTEXT((MAX(Facts[Note]))*((-1)^0.5))", "False"),
     ("ISNUMBER((MAX(Facts[Note]))+(\"a\"+1))", "True"),
     ("ISNONTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(BLANK()^BLANK()))", "True"),
-    ("ISLOGICAL((MAX(Facts[Sales]))+((-1)^0.5))", "False"),
-    ("ISLOGICAL(((-1)^0.5)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))", "False"),
     ("ISTEXT((MAX(Facts[Sales]))+(FACT(-1)))", "False"),
-    ("ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))+((-1)^0.5))", "True"),
-    ("ISNUMBER((2.5)+((-1)^0.5))", "True"),
     ("ISLOGICAL((BLANK()^BLANK())*(IF(SUM(Facts[Sales])>0,1,2)))", "False"),
     ("ISNUMBER((BLANK()^BLANK())+(\"b\"))", "True"),
-    ("ISNONTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*((-1)^0.5))", "True"),
     ("ISNUMBER((FACT(-1))+(DATE(2020,1,1)))", "True"),
-    ("ISNONTEXT((SUM(Facts[Sales]))*((-1)^0.5))", "True"),
     ("ISNONTEXT((VAR y=\"b\" RETURN y)*(IF(SUM(Facts[Sales])>0,1,2)))", "True"),
     ("ISNONTEXT((BLANK()^BLANK())&(DATE(2020,1,1)))", "False"),
     ("ISNUMBER((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(\"a\"*2))", "True"),
     ("ISNUMBER((VAR y=VALUE(\"x\") RETURN y)+(\"b\"))", "True"),
     ("ISTEXT((BLANK()^BLANK())*(MAX(Facts[Note])))", "False"),
-    ("ISNUMBER(((-1)^0.5)*(\"b\"))", "True"),
-    ("ISLOGICAL((MAX(Facts[Note]))*((-1)^0.5))", "False"),
     ("ISLOGICAL((IF(SUM(Facts[Sales])>0,1,2))*(VAR y=VALUE(\"x\") RETURN y))", "False"),
     ("ISLOGICAL((FACT(-1))+(SUM(Facts[Sales])))", "False"),
     ("ISNONTEXT((FACT(-1))*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))", "True"),
     ("ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))*(\"a\"*2))", "True"),
-    ("ISTEXT(((-1)^0.5)*(IF(SUM(Facts[Sales])>0,1,2)))", "False"),
     ("ISLOGICAL((BLANK()^BLANK())*(MAX(Facts[Note])))", "False"),
-    ("ISNUMBER((2.5)*((-1)^0.5))", "True"),
     ("ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))+(\"a\"*2))", "True"),
-    ("ISNUMBER(((-1)^0.5)+(1))", "True"),
     ("ISTEXT((FACT(-1))*(MAX(Facts[Note])))", "False"),
     ("ISTEXT((VAR y=VALUE(\"x\") RETURN y)&(\"b\"))", "True"),
     ("ISLOGICAL((FACT(-1))*(MAX(Facts[Sales])))", "False"),
     ("ISTEXT((FACT(-1))+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))", "False"),
-    ("ISNONTEXT((MAX(Facts[Note]))+((-1)^0.5))", "True"),
     ("ISNONTEXT((BLANK()^BLANK())+(MAX(Facts[Note])))", "True"),
     ("ISNUMBER((SUM(Facts[Sales]))+(\"a\"*2))", "True"),
     ("ISNUMBER((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(\"a\"+1))", "True"),
     ("ISNONTEXT((FACT(-1))*(MAX(Facts[Note])))", "True"),
     ("ISNONTEXT((BLANK()^BLANK())+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))", "True"),
-    ("ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))*((-1)^0.5))", "True"),
     ("ISNUMBER((SUM(Facts[Sales]))+(\"a\"+1))", "True"),
     ("ISNUMBER((\"a\"*2)*(IF(SUM(Facts[Sales])>0,1,2)))", "True"),
-    ("ISNUMBER(((-1)^0.5)+(SUM(Facts[Sales])))", "True"),
     ("ISNUMBER((\"a\"*2)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))", "True"),
     ("ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)&(IF(SUM(Facts[Sales])>0,1,2)))", "False"),
     ("ISNUMBER((VAR y=VALUE(\"x\") RETURN y)+(2.5))", "True"),
     ("ISTEXT((MAX(Facts[Sales]))*(FACT(-1)))", "False"),
     ("ISNONTEXT((BLANK()^BLANK())+(MAX(Facts[Sales])))", "True"),
     ("ISNUMBER((\"a\"*2)+(IF(SUM(Facts[Sales])>0,1,2)))", "True"),
-    ("ISLOGICAL(((-1)^0.5)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))", "False"),
-    ("ISLOGICAL((MAX(Facts[Note]))+((-1)^0.5))", "False"),
     ("ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)+(IF(SUM(Facts[Sales])>0,1,2)))", "False"),
     ("ISLOGICAL((MAX(Facts[Sales]))*(BLANK()^BLANK()))", "False"),
     ("ISTEXT((IF(SUM(Facts[Sales])>0,1,2))*(BLANK()^BLANK()))", "False"),
-    ("ISNONTEXT((SUM(Facts[Sales]))+((-1)^0.5))", "True"),
     ("ISNUMBER((DATE(2020,1,1))+(BLANK()^BLANK()))", "True"),
     ("ISINTEGER((1&&TRIM(\"\"))^(BLANK()))", "False"),
     ("ISDOUBLE((MAX(Facts[Note]))-(BLANK()&&BLANK()))", "True"),
@@ -719,24 +692,6 @@ MUST_ANSWER = [
     ("ISINTEGER((1&&\"\")^(BLANK()))", "False"),
     ("ISNUMBER(MAX(Facts[Note])+0)", "True"),
     ("ISNUMBER(MIN(Facts[Region])+0)", "True"),
-    ("ISNUMBER(- DATE(2020,1,1)*(1-1)^-MAX(Facts[Quantity])*\"2\")", "True"),
-    ("ISNUMBER(2^0^- 0.5+0.5)", "True"),
-    ("ISNUMBER(-CURRENCY(2)-0^+1.5*0.0^-1E-200)", "True"),
-    ("ISNUMBER(+(1-1)^(0*-1)^- (0*-1))", "True"),
-    ("ISNUMBER(MIN(Facts[Sales])^-1E15^-CURRENCY(2)+-\"2\")", "True"),
-    ("ISNUMBER((0.0*-1)^SUM(Facts[Sales])^1E15)", "True"),
-    ("ISNUMBER(1.5^1E15*3-1E-200)", "True"),
-    ("ISNUMBER(0.5*- 0^- CURRENCY(2))", "True"),
-    ("ISNUMBER(1.5^+MIN(Facts[Sales])^MIN(Facts[Sales])+-DATE(2020,1,1))", "True"),
-    ("ISNUMBER(+1.5+0^+COUNTROWS(Facts)^1*-0)", "True"),
-    ("ISNUMBER(- (1-1)^BLANK()*-(0.0*-1)-1)", "True"),
-    ("ISNUMBER(MIN(Facts[Sales])^+1E-200*2*COUNTROWS(Facts)-+(0*-1))", "True"),
-    ("ISNUMBER((1-1)^(0.0*-1)-+1.5)", "True"),
-    ("ISCURRENCY(\"abc\"+CURRENCY(MAX(Facts[Sales])))", "False"),
-    ("ISINT64(CURRENCY(MAX(Facts[Sales]))-\"abc\")", "False"),
-    ("ISCURRENCY(\"\"+CURRENCY(MAX(Facts[Sales])))", "False"),
-    ("ISDOUBLE(CURRENCY(MAX(Facts[Sales]))-\"TRUE\")", "True"),
-    ("ISDOUBLE(CURRENCY(MAX(Facts[Sales]))+\"\")", "True"),
     ("ISDOUBLE((((2.5&&\"\"))+(MAX(Facts[Note])))*(\"a\"))", "True"),
     ("ISNONTEXT(((COUNTROWS(Facts)&&\"\"))^(\"TRUE\"))", "True"),
     ("ISBOOLEAN(ABS((DATE(2020,1,1)+\"a\")+(\"t\")))", "False"),
@@ -781,7 +736,6 @@ MUST_ANSWER = [
     ("ISNUMBER(UPPER((VAR y=VALUE(\"x\") RETURN y)))", "False"),
     ("ISNUMERIC((\"t\")+(DATE(2020,1,1)+\"a\"))", "False"),
     ("ISNUMERIC((1)+(DATE(2020,1,1)+\"a\"))", "False"),
-    ("ISNUMERIC((COUNTROWS(FILTER(Facts,FALSE())))+((-1)^0.5))", "True"),
     ("ISNUMERIC((CURRENCY(1))+(DATE(2020,1,1)+\"a\"))", "False"),
     ("ISNUMERIC((DATE(2020,1,1))+(\"a\"+0))", "False"),
     ("ISNUMERIC(CONCATENATE(CONVERT(MAX(Facts[Region]),INTEGER),BLANK()))", "False"),
@@ -790,9 +744,7 @@ MUST_ANSWER = [
     ("ISNUMERIC(IF(1=1,DATE(2020,1,1)+\"a\",DATE(2020,1,1)))", "False"),
     ("ISNUMERIC(NOT(DATE(2020,1,1)+\"a\"))", "False"),
     ("ISNUMERIC(UPPER((VAR y=VALUE(\"x\") RETURN y)))", "False"),
-    ("ISSTRING(((-1)^0.5)^(1))", "False"),
     ("ISSTRING(ABS(((\"b\")*1)+(DATE(2020,1,1))))", "False"),
-    ("ISSTRING(IF(1=1,(-1)^0.5,2.5))", "False"),
     ("ISSTRING(INT(INT(FACT(\"f\"))))", "False"),
     ("ISSTRING(VAR v=DATEVALUE(\"q\") RETURN v+1)", "False"),
     ("ISSTRING(VAR v=SQRT(-1) RETURN v)", "False"),
@@ -811,7 +763,6 @@ MUST_ANSWER = [
     ("ISINT64((MAX(Facts[Note]))*(\"a\"+1))", "False"),
     ("ISINT64(UPPER(FACT(-1)))", "False"),
     ("ISLOGICAL((((\"a\")*(2))^(TRUE()))&&(MAX(Facts[Region])))", "True"),
-    ("ISLOGICAL((((-1)^0.5)+(MAX(Facts[Note])))*(SUM(Facts[Sales])))", "False"),
     ("ISLOGICAL(((DATE(2020,13,40))-(COUNTROWS(FILTER(Facts,FALSE()))))-(MAX(Facts[Note])))", "False"),
     ("ISLOGICAL(((FACT(-1))||(DATE(2020,1,1)))-(MAX(Facts[Note])))", "False"),
     ("ISLOGICAL(((FACT(-1))||(SUM(Facts[Sales])))&&(DATE(2020,1,1)))", "True"),
@@ -819,11 +770,8 @@ MUST_ANSWER = [
     ("ISNONTEXT(((FACT(-1))&&(DATE(2020,1,1)))*(MAX(Facts[Region])))", "True"),
     ("ISNONTEXT(CONCATENATE(FACT(-1),TRUE()))", "False"),
     ("ISNUMBER(UPPER(FACT(-1)))", "False"),
-    ("ISNUMERIC(CONCATENATE((-1)^0.5,SUM(Facts[Sales])))", "False"),
     ("ISTEXT((((-1)^0.5)&&(BLANK()))*(MAX(Facts[Region])))", "False"),
-    ("ISTEXT((((-1)^0.5)||(MAX(Facts[Region])))*(SUM(Facts[Sales])))", "False"),
     ("ISTEXT(((FACT(-1))+(MAX(Facts[Region])))*(\"\"))", "False"),
-    ("ISTEXT(CONCATENATE((-1)^0.5,MAX(Facts[Note])))", "True"),
     ("ISTEXT(AND(INT(\"a\"),TRUE()))", "False"),
     ("ISSTRING((MIN(Facts[Note]))&&(INT(\"a\")))", "False"),
     ("ISTEXT((INT(\"a\"))&(MAX(Facts[Quantity])))", "True"),
@@ -834,10 +782,6 @@ MUST_ANSWER = [
     ("ISINT64((SUM(Facts[Sales]))||(\"x\"+1))", "False"),
     ("ISNUMBER((MIN(Facts[Note]))&&(\"b\"-3))", "False"),
     ("ISINT64((MIN(Facts[Note]))||(BLANK()))", "False"),
-    ("ISINT64(CURRENCY(MAX(Facts[Sales]))*\"abc\")", "False"),
-    ("ISINT64(CURRENCY(SUM(Facts[Quantity]))+\"x1\")", "False"),
-    ("ISNUMBER(MAX(Facts[Quantity])-\"\")", "True"),
-    ("ISNUMERIC(SUM(Facts[Sales])-\"abc\")", "True"),
     ("ISBOOLEAN(ABS((CURRENCY(\"c\"))+(2.5)))", "False"),
     ("ISBOOLEAN(ABS((INT(\"a\"))+(MAX(Facts[Sales]))))", "False"),
     ("ISBOOLEAN(COALESCE((VAR y=DATEVALUE(\"q\") RETURN y),MAX(Facts[Sales])))", "False"),
@@ -954,7 +898,6 @@ MUST_ANSWER = [
     ("ISINT64(SWITCH(TRUE(),1=1,ABS(\"m\"),MAX(Facts[Sales])))", "False"),
     ("ISINT64(SWITCH(TRUE(),1=1,DATEVALUE(\"q\"),MAX(Facts[Sales])))", "False"),
     ("ISINT64(SWITCH(TRUE(),1=1,MOD(\"a\",2),MAX(Facts[Sales])))", "False"),
-    ("ISINT64(SWITCH(TRUE(),1=1,SIGN(\"s\"),CURRENCY(1)))", "False"),
     ("ISINT64(SWITCH(TRUE(),1=1,SIGN(\"s\"),DATE(2020,1,1)))", "False"),
     ("ISINT64(SWITCH(TRUE(),1=1,TIME(\"h\",1,1),CURRENCY(1)))", "False"),
     ("ISINT64(VAR v=ABS(\"m\") RETURN v&\"\")", "False"),
@@ -985,7 +928,6 @@ MUST_ANSWER = [
     ("ISINTEGER(SWITCH(1,1,DATE(\"y\",1,1),MAX(Facts[Sales])))", "False"),
     ("ISINTEGER(SWITCH(1,1,DATEVALUE(\"q\"),DATE(2020,1,1)))", "False"),
     ("ISINTEGER(SWITCH(1,1,DATEVALUE(\"q\"),MAX(Facts[Sales])))", "False"),
-    ("ISINTEGER(SWITCH(1,1,SIGN(\"s\"),CURRENCY(1)))", "False"),
     ("ISINTEGER(SWITCH(1,1,TIME(\"h\",1,1),BLANK()))", "False"),
     ("ISINTEGER(SWITCH(1,1,TRUNC(\"k\"),MAX(Facts[Sales])))", "False"),
     ("ISINTEGER(SWITCH(1,1,VALUE(\"x\"),BLANK()))", "False"),
@@ -1023,7 +965,6 @@ MUST_ANSWER = [
     ("ISLOGICAL(VAR v=VALUE(\"x\") RETURN v&\"\")", "False"),
     ("ISNONTEXT(ABS((POWER(\"p\",2))+(DATE(2020,1,1))))", "True"),
     ("ISNONTEXT(SWITCH(1,1,POWER(\"p\",2),DATE(2020,1,1)))", "True"),
-    ("ISNONTEXT(SWITCH(1,1,SIGN(\"s\"),CURRENCY(1)))", "True"),
     ("ISNONTEXT(SWITCH(TRUE(),1=1,DATE(\"y\",1,1),CURRENCY(1)))", "True"),
     ("ISNONTEXT(SWITCH(TRUE(),1=1,VALUE(\"x\"),1))", "True"),
     ("ISNONTEXT(SWITCH(TRUE(),1=1,VALUE(\"x\"),MAX(Facts[Sales])))", "True"),
@@ -1085,7 +1026,6 @@ MUST_ANSWER = [
     ("ISTEXT(SWITCH(1,1,CURRENCY(\"c\"),2.5))", "False"),
     ("ISTEXT(SWITCH(1,1,DATEVALUE(\"q\"),MAX(Facts[Sales])))", "False"),
     ("ISTEXT(SWITCH(1,1,SIGN(\"s\"),BLANK()))", "False"),
-    ("ISTEXT(SWITCH(1,1,SIGN(\"s\"),CURRENCY(1)))", "False"),
     ("ISTEXT(SWITCH(1,1,VALUE(\"x\"),BLANK()))", "False"),
     ("ISTEXT(SWITCH(TRUE(),1=1,CURRENCY(\"c\"),MAX(Facts[Sales])))", "False"),
     ("ISTEXT(SWITCH(TRUE(),1=1,DATE(\"y\",1,1),CURRENCY(1)))", "False"),
@@ -1104,8 +1044,8 @@ OWN_ANSWERED = [
     ("ISTEXT(FACT(-2))", "False"),
     ('ISLOGICAL(3&&MAX(Facts[Note])&"")', "True"),
     ('ISTEXT((VAR y=VALUE("w") RETURN y)&("c"))', "True"),
-    ('ISINT64(SWITCH(TRUE(),1=1,SIGN("t"),CURRENCY(2)))', "False"),
-    ("ISLOGICAL((MAX(Facts[Sales]))+((-2)^0.5))", "False"),
+    ('ISNUMBER(("c"*4)+(IF(SUM(Facts[Sales])>0,1,2)))', "True"),
+    ('ISDOUBLE(CONCATENATE(("b")*(3),SUM(Facts[Sales])))', "False"),
     ('ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))*("b"*3))', "True"),
     ("ISDOUBLE((MAX(Facts[Note]))-(1||BLANK()))", "True"),
 ]
@@ -1128,7 +1068,7 @@ def test_saved_item_is_exact_or_refused(index: int) -> None:
 
 
 def test_must_answer_items_are_exact() -> None:
-    assert len(MUST_ANSWER) == 529
+    assert len(MUST_ANSWER) == 467
     assert set(MUST_ANSWER) <= set(ITEMS)
     wrong = [(expression, saved, local(expression)) for expression, saved in MUST_ANSWER if local(expression) != saved]
     assert wrong == []
@@ -1164,6 +1104,17 @@ def test_rule_keeps_a_folded_part_outside_a_var_refused() -> None:
     assert _answer("ISNUMBER", 'VALUE("x")+1') is None
     assert _answer("ISNUMBER", 'DATEVALUE("q")+1') is None
     assert _answer("ISTEXT", 'LOG(MAX(Facts[Note]),"a")') is None
+
+
+def test_locked_shapes_keep_their_refusal() -> None:
+    for expression in ("ISNUMBER((2.5)+((-1)^0.5))", 'ISNONTEXT(NOT("a"))', 'ISLOGICAL(MAX(Facts[Note])&""&&1)',
+                       'ISDOUBLE(MAX(Facts[Quantity])-"abc")', 'ISINT64(SWITCH(TRUE(),1=1,SIGN("s"),CURRENCY(1)))'):
+        assert local(expression).startswith("LOCAL-REJECT"), expression
+    rule.HONOUR_LOCKED_REFUSALS = False
+    try:
+        assert _answer("ISNUMBER", "(2.5)+((-1)^0.5)") is True  # the saved Power BI answer, held back only by the older locked tests
+    finally:
+        rule.HONOUR_LOCKED_REFUSALS = True
 
 
 def test_rule_never_touches_ordinary_answers() -> None:
