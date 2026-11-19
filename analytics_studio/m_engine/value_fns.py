@@ -1511,7 +1511,8 @@ def _binary_from_text(text: MValue, encoding: MValue) -> MValue:
     if isinstance(text, V.Null):
         _encoding(encoding)
         return V.Null()
-    return _decode_text(_text_arg(text), _encoding(encoding))
+    decoded = _decode_text(_text_arg(text), _encoding(encoding))
+    return V.Binary(decoded.value, solid=True)
 
 
 def _binary_to_text(value: MValue, encoding: MValue) -> MValue:
@@ -1538,7 +1539,7 @@ def _binary_from_list(value: MValue) -> MValue:
     built = binary_from_list(value)
     if built.bad:
         raise _unsupported("list of values that are not bytes")
-    return built
+    return V.Binary(built.value, built.meta)  # not solid: the chunking of the source binary is not carried over
 
 
 def _binary_length(value: MValue) -> MValue:
@@ -1729,8 +1730,15 @@ def _binary_combine(binaries: MValue) -> MValue:
         if not isinstance(cell, V.Binary) or cell.bad:
             raise _unsupported("Binary.Combine of a value that is not a binary")
         out += cell.value
-    first_chunk = len(items[0].value) if len(items) > 1 else None
-    return V.Binary(out, first_chunk=first_chunk)
+    # Power BI detects a byte-order mark depending on how the binary is chunked: a first chunk shorter than the
+    # mark hides it. Only a combine whose first chunk is solid and (with 2+ items) at least 4 bytes is solid.
+    if not items:
+        solid = False
+    elif len(items) == 1:
+        solid = items[0].solid
+    else:
+        solid = all(cell.solid for cell in items) and len(items[0].value) >= 4
+    return V.Binary(out, solid=solid)
 
 
 # ---- Json, Lines, Uri --------------------------------------------------------

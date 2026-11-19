@@ -130,7 +130,7 @@ def _binary(items: MValue) -> MValue:
             bad = True
         else:
             data.append(int(x))
-    return V.Binary(bytes(data), bad=bad)
+    return V.Binary(bytes(data), bad=bad, solid=True)
 
 
 _EN_US = ("", "en-us", "en", "en-gb", "en-au", "en-ca", "en-ie", "en-in", "en-nz", "en-za")  # same upper-casing

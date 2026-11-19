@@ -826,7 +826,7 @@ def _text_to_binary(value: MValue, encoding: MValue = V.Null()) -> MValue:
         return V.Null()
     text = _text(value)
     _check_page(page)
-    return V.Binary(_encode(text, page))
+    return V.Binary(_encode(text, page), solid=True)
 
 
 def _encode(text: str, page, fallback_question: bool = False) -> bytes:
