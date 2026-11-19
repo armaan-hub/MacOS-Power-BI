@@ -45,6 +45,11 @@ _BYTE_ORDER_ERR = (
     "'ByteOrder.LittleEndian, ByteOrder.BigEndian'."
 )
 
+_BINARY_OCCURRENCE_ERR = (
+    "The value for a 'BinaryOccurrence.Type' enumeration was not one of the allowed values: "
+    "'BinaryOccurrence.Optional, BinaryOccurrence.Required, BinaryOccurrence.Repeating'."
+)
+
 
 def _eof_error(pos: int) -> MError:
     return MError(
@@ -577,8 +582,116 @@ def _binary_format_choice(
     return _make_format(read_choice, kind="choice")
 
 
-def _binary_format_group(*args) -> MValue:
-    raise _unsupported("binary format group")
+def _binary_format_group(
+    binaryFormat: MValue,
+    group: MValue,
+    extra: MValue = V.Null(),
+    lastKey: MValue = V.Null(),
+) -> V.Function:
+    from .evaluator import apply_function, equals
+
+    if not isinstance(binaryFormat, V.Function):
+        raise V.convert_error(binaryFormat, V.TypeValue("function"))
+    if not _is_format_fn(binaryFormat):
+        raise V.generic_error("The value isn't a binary format value.")
+
+    if not isinstance(group, V.List):
+        raise V.convert_error(group, V.TypeValue("list"))
+
+    parsed_group = []
+    seen_keys = []
+    for item in group.items:
+        forced_item = V.force(item)
+        if not isinstance(forced_item, V.List):
+            raise V.convert_error(forced_item, V.TypeValue("list"))
+        if len(forced_item.items) < 3:
+            raise V.generic_error("The specified binary format group item was invalid.")
+        k = V.force(forced_item.items[0])
+        fmt = V.force(forced_item.items[1])
+        occ = V.force(forced_item.items[2])
+
+        if not isinstance(occ, V.Number):
+            raise V.convert_error(occ, V.TypeValue("number"))
+        if occ.value not in (0.0, 1.0, 2.0):
+            raise V.generic_error(_BINARY_OCCURRENCE_ERR)
+        occ_int = int(occ.value)
+
+        for prev_k in seen_keys:
+            if equals(prev_k, k):
+                raise V.generic_error("The specified binary format group item was invalid.")
+        seen_keys.append(k)
+
+        if not _is_format_fn(fmt):
+            raise V.generic_error("The value isn't a binary format value.")
+
+        parsed_group.append((k, fmt, occ_int))
+
+    if not isinstance(extra, V.Null):
+        if not isinstance(extra, V.Function):
+            raise V.convert_error(extra, V.TypeValue("function"))
+
+    key_reader = getattr(binaryFormat, "_reader_fn")
+
+    def read_group(b: bytes, pos: int, byte_order: int) -> Tuple[MValue, int]:
+        values = [None if occ != 2 else [] for _, _, occ in parsed_group]
+        seen_flags = [False] * len(parsed_group)
+        curr = pos
+
+        while curr < len(b):
+            key_val, curr = key_reader(b, curr, byte_order)
+            matched_idx = None
+            for idx, (gk, _, _) in enumerate(parsed_group):
+                if equals(gk, key_val):
+                    matched_idx = idx
+                    break
+
+            if matched_idx is None:
+                if not isinstance(lastKey, V.Null) and equals(key_val, lastKey):
+                    break
+                if isinstance(extra, V.Null):
+                    raise MError("DataFormat.Error", "An unknown item was encountered in the input.")
+                extra_fmt = apply_function(extra, [key_val])
+                if not _is_format_fn(extra_fmt):
+                    raise V.generic_error("The value isn't a binary format value.")
+                extra_reader = getattr(extra_fmt, "_reader_fn")
+                _, curr = extra_reader(b, curr, byte_order)
+            else:
+                _, item_fmt, occ = parsed_group[matched_idx]
+                if occ in (0, 1):
+                    if seen_flags[matched_idx]:
+                        if not isinstance(extra, V.Null):
+                            extra_fmt = apply_function(extra, [key_val])
+                            if not _is_format_fn(extra_fmt):
+                                raise V.generic_error("The value isn't a binary format value.")
+                            extra_reader = getattr(extra_fmt, "_reader_fn")
+                            _, curr = extra_reader(b, curr, byte_order)
+                        else:
+                            raise MError("DataFormat.Error", "An unknown item was encountered in the input.")
+                    else:
+                        seen_flags[matched_idx] = True
+                        item_reader = getattr(item_fmt, "_reader_fn")
+                        item_val, curr = item_reader(b, curr, byte_order)
+                        values[matched_idx] = item_val
+                else:  # Repeating (2)
+                    seen_flags[matched_idx] = True
+                    item_reader = getattr(item_fmt, "_reader_fn")
+                    item_val, curr = item_reader(b, curr, byte_order)
+                    values[matched_idx].append(item_val)
+
+        for idx, (_, _, occ) in enumerate(parsed_group):
+            if occ == 1 and not seen_flags[idx]:
+                raise MError("DataFormat.Error", "An item was expected but didn't appear in the input.")
+
+        result_items = []
+        for idx, (_, _, occ) in enumerate(parsed_group):
+            if occ == 2:
+                result_items.append(V.List(tuple(values[idx])))
+            else:
+                result_items.append(V.Null() if values[idx] is None else values[idx])
+
+        return V.List(tuple(result_items)), curr
+
+    return _make_format(read_group, kind="group")
 
 
 # ---- Format singletons and table ---------------------------------------------
@@ -591,6 +704,11 @@ BINARY_FORMAT_GLOBALS: dict[str, MValue] = {
     # ByteOrder Enum
     "ByteOrder.LittleEndian": V.Number(0.0),
     "ByteOrder.BigEndian": V.Number(1.0),
+
+    # BinaryOccurrence Enum
+    "BinaryOccurrence.Optional": V.Number(0.0),
+    "BinaryOccurrence.Required": V.Number(1.0),
+    "BinaryOccurrence.Repeating": V.Number(2.0),
 
     # Primitive formats
     "BinaryFormat.Byte": _make_primitive_format(_read_byte),
@@ -654,6 +772,8 @@ BINARY_FORMAT_GLOBALS: dict[str, MValue] = {
             V.ParamSpec("item", None, True),
             V.ParamSpec("count", None, True),
         ),
-        lambda bound: _binary_format_group(*bound),
+        lambda bound: _binary_format_group(
+            V.force(bound[0]), V.force(bound[1]), V.force(bound[2]), V.force(bound[3])
+        ),
     ),
 }
