@@ -2782,3 +2782,38 @@ Function: `Csv.Document` (M engine: `analytics_studio/m_engine/csv_document.py`,
 Backlog, engine gaps found by the reviews (wrong on main too, NOT fixed in this task): predicates like `each [x] > 1` evaluated eagerly where Power BI stays lazy; `Table.Keys(Table.Distinct(T))` returns [] (Power BI returns the all-columns key); `Table.CombineColumns` / `Table.AddRankColumn` missing-column messages; `Table.ReplaceRows` schema type of text columns; `Table.ExpandListColumn` over a text cell does not error; `Text.ToBinary` 3-argument form missing; `#binary("base64text")` unsupported; `Table.TransformColumnTypes` with a culture on text columns to Int64 gives an error value; `List.Distinct` treats a split-combine binary as equal to a plain one (Power BI: different); `Table.FromRows` column forms 2 / [a=1] / {1,2}; `Value.ReplaceType` nullable number; `Value.ReplaceMetadata(T, null)`; `None.Type` / `Type.Type` missing; `Character.ToNumber` on a lone surrogate.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401: 537,362 match, 0 DIFF, 0 CRASH, 3,039 gap-reject unchanged; locked 537,342. pytest 32,683 passed, 26 xfailed. No saved Power BI answer was edited. Merge commit e88c49e.
+
+
+## 2026-11-20 — Iteration 305 (Task 235: DAX type tests over failing expressions, Chapter 1b)
+
+Function family: the type tests ISNUMBER, ISNUMERIC, ISTEXT, ISSTRING, ISLOGICAL, ISBOOLEAN, ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL, ISCURRENCY, ISDATETIME and ISNONTEXT, applied to an expression whose evaluation fails. New module `analytics_studio/dax_failing_type_tests.py`, hooked into `evaluate_measures` in `analytics_studio/measures.py` (the `except MeasureError` path). When the evaluation fails, the test is answered from the expression's static type (the existing `_static_numeric_type` and `_never_blank`), but only inside constructs known to hide the failure. Lazy constructs: text beside `+`, `-`, `*`; `^`; INT, ABS, ROUND, TRUNC, SIGN, EXP, POWER, MOD, FACT, CEILING, CURRENCY, CONVERT, UPPER, CONCATENATE. Folded constructs, answered only as a VAR binding or a SWITCH result: VALUE, DATEVALUE, TIMEVALUE, DATE, TIME, EDATE, WEEKDAY, SQRT, LN, DIVIDE. Never answered: division, a bare column read, SELECTEDVALUE, LOG, LOG10, ERROR, FORMAT, LEFT, SIN, iterators, IFERROR, a comparison outside an IF or SWITCH condition, SUM of a text column.
+
+Result on the 539 saved items: 467 are now answered exactly; 72 stay refused (10 lie outside the rule; 62 are settled by saved Power BI answers but are held refused because older locked tests require the refusal). Setting `HONOUR_LOCKED_REFUSALS=False` in the module would answer 529 of 539 with 0 wrong, once these older assertions are updated with the user's approval: `test_iteration109_never_blank_zero_10`, `test_iteration140_type_tests_errors_40`, `test_iteration150_type_tests_columns_50`, `test_iteration154_typeerr_fail_54`.
+
+Limit: the hook applies only when a single measure's top node is the type test and a table context with column types exists.
+
+Review (Sonnet, read-only): all 539 saved items re-evaluated, 0 wrong; 429 fresh shapes probed, 308 answered, and all 308 equal Power BI on the guest, 0 mismatches; 22 shapes that Power BI answers are still refused by the engine (gaps); a sample of 260 other saved items was unchanged.
+
+Roles: Sonnet coded (commits 3942287 and c1de629), Sonnet reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved answers: 537,829 match (was 537,362), gap-reject 2,572 (was 3,039), 0 DIFF, 0 CRASH. pytest 33,244 passed (561 new in `tests/test_dax_type_tests_235.py`). No saved Power BI answer was edited. Merge commit 3dba44d.
+
+**Catch-up note.** Iterations 285-303 (Tasks 215-233) were never written into these docs. From the `git log` merge messages (Task 226 has no merge commit of its own):
+- Task 215 and 215b: Pivot repeated pairs give error cells (app and engine); keyword record field names.
+- Task 216: Group By writes Power BI's column types and accepts typed scripts.
+- Task 217: type context accepts type values like Int64.Type; type equality follows Power BI.
+- Task 218: Group By Min writes Power BI's column type.
+- Task 219: M engine keeps and combines typed columns (Value.ReplaceType, Table.Combine, typed Inner joins).
+- Task 220: Unpivot, ReplaceValue and PrefixColumns column types follow Power BI.
+- Task 221: 21 table and Guid functions added (TransformRows, SingleRow, Partition, AddRankColumn and more).
+- Task 222: Table.Group GroupKind.Local/Global, semi and anti joins, List.DateTimeZones.
+- Task 223: Table.AddKey, ReplaceKeys, Keys with key propagation.
+- Task 224: Table.Sort bare-column and key-function criteria; predicate Skip/FirstN/LastN.
+- Task 225: Binary.Compress/Decompress/Buffer, Lines.FromBinary/ToBinary, seeded List.Random, partition-key functions.
+- Task 227: key propagation for FillUp/ReplaceValue/TransformColumns, GZip header flags, Lines.ToBinary, List.Random.
+- Task 228: Table.Sort key-function lists, mixed criteria, invalid-criteria errors.
+- Task 229: BinaryFormat family (integers, floats, Text, List, Record, Choice and more).
+- Task 230: Table.Sort returns Power BI's invalid-criteria error for measured shapes.
+- Task 231: two flaky UI tests made to wait for the real condition.
+- Task 232: BinaryFormat.Group and BinaryOccurrence.
+- Task 233: Binary.InferContentType.
