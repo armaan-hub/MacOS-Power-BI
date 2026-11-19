@@ -1384,7 +1384,7 @@ def _is_distinct(table: MValue, criteria: MValue) -> MValue:
 def _sort_order(order_val: MValue) -> bool:
     if isinstance(order_val, V.Number) and order_val.value in (0.0, 1.0):
         return order_val.value == 1.0
-    if isinstance(order_val, V.Number) and order_val.value == 5.0:
+    if isinstance(order_val, V.Number) and order_val.value in (2.0, -1.0, 5.0):
         raise _sort_invalid()
     raise _order(order_val)
 
@@ -1453,6 +1453,8 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
     # Flat list check: if len == 2 and first is text, second is number/order
     if len(items) == 2 and isinstance(V.force(items[0]), V.Text):
         second = V.force(items[1])
+        if isinstance(second, (V.Null, V.Logical)):
+            raise _sort_invalid()
         if isinstance(second, V.Function) and len(second.params) != 1:
             raise _items(second)
         if isinstance(second, V.Number):
@@ -1488,13 +1490,8 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
             specs.append((item, False))
         elif isinstance(item, V.List):
             pair = list(item.items)
-            if len(pair) == 0:
+            if len(pair) == 0 or len(pair) == 1:
                 raise _sort_invalid()
-            if len(pair) == 1:
-                crit0 = V.force(pair[0])
-                if isinstance(crit0, V.Function):
-                    raise _sort_invalid()
-                raise _unsupported("sort criteria")
             if len(pair) > 2:
                 p1 = V.force(pair[1])
                 if isinstance(p1, V.Number) and p1.value == 1.0:
@@ -1503,7 +1500,7 @@ def _sort_specs(table: V.Table, criteria: MValue) -> list:
                         raise _sort_invalid()
                 raise _unsupported("sort criteria")
             crit, ord_val = V.force(pair[0]), V.force(pair[1])
-            if isinstance(ord_val, (V.Logical, V.Text)) or (isinstance(ord_val, V.Number) and ord_val.value == 5.0):
+            if isinstance(ord_val, (V.Logical, V.Text)) or (isinstance(ord_val, V.Number) and ord_val.value in (2.0, -1.0, 5.0)):
                 raise _sort_invalid()
             if isinstance(crit, V.Function) and isinstance(ord_val, V.Null):
                 raise _sort_invalid()
