@@ -55,7 +55,7 @@ def _validate_encoding(encoding: Optional[MValue], is_text: bool) -> Optional[in
         raise V.generic_error(f'We cannot convert the value "{encoding.value}" to type Number.')
     if isinstance(encoding, V.Number):
         val = encoding.value
-        if math.isnan(val) or math.isinf(val) or not val.is_integer() or val >= 2147483648:
+        if math.isnan(val) or math.isinf(val) or not val.is_integer() or val >= 2147483648 or val < -2147483648:
             raise V.generic_error("The number is out of range of a 32 bit integer value.")
         enc_id = int(val)
         if enc_id in _VALID_ENCODING_IDS:
@@ -390,10 +390,12 @@ def _decode_source(is_text: bool, data: any, enc_id: Optional[int]) -> str:
             raise _unsupported("invalid UTF-32 BE")
 
     # No BOM
-    if enc_id == 0 and any(byte >= 0x80 for byte in b):
-        raise _unsupported("Csv.Document with Encoding 0 over non-ASCII bytes (the machine's ANSI code page is not modelled)")
-
-    enc = 65001 if enc_id is None else enc_id
+    if enc_id == 0:
+        if any(byte >= 0x80 for byte in b):
+            raise _unsupported("Csv.Document with Encoding 0 over non-ASCII bytes (the machine's ANSI code page is not modelled)")
+        enc = 65001
+    else:
+        enc = 65001 if enc_id is None else enc_id
     if enc == 65001:
         try:
             s = b.decode('utf-8')
