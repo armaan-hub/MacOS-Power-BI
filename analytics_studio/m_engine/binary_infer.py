@@ -61,13 +61,11 @@ def _binary_infer_content_type(binary: MValue) -> MValue:
         bom_len = 2
 
     # Refusals:
-    # 1) Raw window contains NUL and no BOM. Encoding detection from a stray
-    # NUL is only partly measured for short input (measured: short inputs with
-    # a NUL behave differently), so refuse when the first 1024 bytes -- the
-    # prefix detection can settle itself from -- contain a NUL. With a long
-    # NUL-free prefix the encoding is settled and the content is not text:
-    # measured (5000 x "a") + {0,1,2} => [Content.Type = null], returned
-    # after the quote check below.
+    # 1) Raw window contains NUL and no BOM. Measured in review batch r_nul
+    # (NUL at offsets 1024+ => null): a NUL inside the first 1024 bytes is
+    # refused, while a NUL past a long NUL-free prefix (which settles the
+    # encoding) gives [Content.Type = null], returned after the quote check
+    # below.
     nul_no_bom = (not has_bom) and (0x00 in window)
     if nul_no_bom and (0x00 in window[:1024]):
         raise _unsupported("Binary.InferContentType over raw binary containing NUL")
@@ -102,15 +100,10 @@ def _binary_infer_content_type(binary: MValue) -> MValue:
     else:
         text = payload.decode("utf-8", errors="replace")
 
-    # Refusal: decoded window contains a double quote that could affect the
-    # parse (checked before binary control chars). A quote is inert, and the
-    # answer computable, when it cannot change any count: the window has no
-    # line break and no delimiter character and does not open with a quote
-    # (measured: A"B => text/csv). Once structure is present the quote rule
-    # is only partly measured, so refuse rather than guess.
+    # Refusal: decoded window contains U+0022 (checked first, right after
+    # decoding, before the NUL return and the binary control-char check).
     if '"' in text:
-        if text[:1] == '"' or any(c in text for c in "\r\n,;:|\t\x01"):
-            raise _unsupported("Binary.InferContentType over text that contains a double quote")
+        raise _unsupported("Binary.InferContentType over text that contains a double quote")
 
     # NUL past a settled (NUL-free) prefix: the content is not text
     # (measured: Content.Type = null).
@@ -134,27 +127,44 @@ def _binary_infer_content_type(binary: MValue) -> MValue:
     if not rows:
         return V.Record((("Content.Type", V.Null()),))
 
+    # W whitespace field count of a row: runs of space/tab/VT collapse, and
+    # a leading or trailing run still adds an empty field (fields = runs + 1).
+    def _w_field_count(row: str) -> int:
+        runs = 0
+        in_run = False
+        for ch in row:
+            if ch in _W_CHARS:
+                if not in_run:
+                    runs += 1
+                    in_run = True
+            elif ch == "\x85":
+                # NEL does not start a whitespace run and does not interrupt an ongoing whitespace run
+                pass
+            else:
+                in_run = False
+        return runs + 1
+
+    w_counts = [_w_field_count(row) for row in rows]
+
+    # Refusal: the rows separated by whitespace are ragged (their W field
+    # counts differ) and every row has at least two W fields. Power BI then
+    # answers with a fixed-width layout record (Csv.PotentialPositions) and
+    # no Csv.PotentialDelimiters; that value is not measured, so refuse
+    # rather than guess. Checked after the null checks above (control chars
+    # and no rows give null first).
+    if len(set(w_counts)) > 1 and min(w_counts) >= 2:
+        raise _unsupported(
+            "Binary.InferContentType over ragged whitespace-separated rows "
+            "(fixed-width layout)"
+        )
+
     # Compute statistics per delimiter
     table_rows = []
     for d in DELIMITERS:
         if d != "W":
             field_counts = [row.count(d) + 1 for row in rows]
         else:
-            field_counts = []
-            for row in rows:
-                runs = 0
-                in_run = False
-                for ch in row:
-                    if ch in _W_CHARS:
-                        if not in_run:
-                            runs += 1
-                            in_run = True
-                    elif ch == "\x85":
-                        # NEL does not start a whitespace run and does not interrupt an ongoing whitespace run
-                        pass
-                    else:
-                        in_run = False
-                field_counts.append(runs + 1)
+            field_counts = w_counts
 
         max_cols = max(field_counts)
         max_rows = len(field_counts)
