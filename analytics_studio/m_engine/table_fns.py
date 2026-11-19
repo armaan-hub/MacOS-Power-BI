@@ -2190,8 +2190,6 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
     aggs = _aggregates(aggregates)
     _unique_or_refuse(key_names + [name for name, _fn, _kind in aggs])
 
-
-
     # Validate keys for hashability / equality key support
     for row in t.rows:
         _key(tuple(V.force(row[i]) for i in key_indexes))
@@ -2236,7 +2234,7 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
 
     rows = []
     if group_kind == _GROUP_LOCAL:
-        grouped_runs = []
+        grouped_runs: list[tuple[tuple, list]] = []
         for row in t.rows:
             key_cells = tuple(V.force(row[i]) for i in key_indexes)
             if grouped_runs and all(_equals(a, b) for a, b in zip(key_cells, grouped_runs[-1][0])):

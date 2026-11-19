@@ -269,6 +269,10 @@ def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: O
     if any(c in delim_str for c in ('\r', '\n', '"')):
         raise _unsupported("Csv.Document with CR, LF, or quote as delimiter")
 
+    if not is_record_form and delim_str == "":
+        if any(c not in ('\r', '\n') and c.isspace() for c in text_str):
+            raise _unsupported("Csv.Document with an empty delimiter over text that contains whitespace")
+
     # Parse rows
     if not text_str:
         rows_data = []
