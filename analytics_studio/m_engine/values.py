@@ -159,6 +159,7 @@ class Binary(MValue):
     value: bytes
     meta: Optional["Record"] = None
     bad: bool = False  # built from out-of-range numbers: Power BI cannot serialize it
+    first_chunk: Optional[int] = field(default=None, compare=False)
 
 
 @dataclass(frozen=True, eq=False)

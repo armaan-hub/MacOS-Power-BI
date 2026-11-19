@@ -258,6 +258,13 @@ def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: O
     if any(0xD800 <= ord(c) <= 0xDFFF for c in delim_str):
         raise _unsupported("Csv.Document with surrogate delimiter")
 
+    if not is_text:
+        fc = getattr(source, 'first_chunk', None)
+        if fc is not None and fc < 4 and fc < len(src_data) and len(src_data) > 0 and src_data[0] in (0xEF, 0xFF, 0xFE, 0x00):
+            bom_len = 3 if src_data[0] == 0xEF else (4 if (src_data.startswith(b'\xff\xfe\x00\x00') or src_data.startswith(b'\x00\x00\xfe\xff')) else 2)
+            if fc < bom_len:
+                raise _unsupported("Csv.Document over a combined binary whose first chunk is shorter than a byte-order mark")
+
     # Decode source to text
     text_str = _decode_source(is_text, src_data, enc_id)
 

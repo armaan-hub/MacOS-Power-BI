@@ -1723,12 +1723,14 @@ def _binary_from(value: MValue, encoding: MValue) -> MValue:
 
 
 def _binary_combine(binaries: MValue) -> MValue:
+    items = _list_items(binaries)
     out = b""
-    for cell in _list_items(binaries):
+    for cell in items:
         if not isinstance(cell, V.Binary) or cell.bad:
             raise _unsupported("Binary.Combine of a value that is not a binary")
         out += cell.value
-    return V.Binary(out)
+    first_chunk = len(items[0].value) if len(items) > 1 else None
+    return V.Binary(out, first_chunk=first_chunk)
 
 
 # ---- Json, Lines, Uri --------------------------------------------------------
