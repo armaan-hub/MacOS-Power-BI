@@ -197,6 +197,7 @@ class Table(MValue):
     meta: Optional["Record"] = None
     keys: Optional[tuple] = None  # tuple of Record (Columns, Primary)
     keys_unmeasured: bool = False
+    row_error: Optional[Any] = None
 
 
 @dataclass(frozen=True, eq=False)

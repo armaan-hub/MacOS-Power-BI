@@ -1686,6 +1686,11 @@ def _binary_infer_content_type(binary: MValue) -> MValue:
     return _infer(binary)
 
 
+def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: Optional[MValue] = None, extraValues: Optional[MValue] = None, encoding: Optional[MValue] = None) -> MValue:
+    from .csv_document import _csv_document as _doc
+    return _doc(source, columns, delimiter, extraValues, encoding)
+
+
 def _binary_range(value: MValue, offset: MValue, count: MValue) -> MValue:
     data = _binary_of(value).value
     start = _whole(offset, 0)
@@ -2415,6 +2420,7 @@ _MORE_GLOBALS: dict = {
     "Binary.Compress": _native((("binary", False), ("compressionType", False)), _binary_compress),
     "Binary.Decompress": _native((("binary", False), ("compressionType", False)), _binary_decompress),
     "Binary.InferContentType": _native((("binary", False),), _binary_infer_content_type),
+    "Csv.Document": _native((("source", False), ("columns", True), ("delimiter", True), ("extraValues", True), ("encoding", True)), _csv_document),
     "Binary.Range": _native((("binary", False), ("offset", False), ("count", True)), _binary_range),
     "Binary.Split": _native((("binary", False), ("pageSize", False)), _binary_split),
     "Binary.From": _native((("value", False), ("encoding", True)), _binary_from),

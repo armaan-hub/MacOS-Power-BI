@@ -478,6 +478,8 @@ def _to_records(table: MValue) -> MValue:
 
 def _to_rows(table: MValue) -> MValue:
     t = _table(table)
+    if t.row_error:
+        raise t.row_error
     return V.List(tuple(V.List(tuple(row)) for row in t.rows))
 
 
@@ -2782,6 +2784,8 @@ TABLE_GLOBALS: dict = {
     "ExtraValues.Ignore": V.Number(2.0),
     "QuoteStyle.None": V.Number(0.0),
     "QuoteStyle.Csv": V.Number(1.0),
+    "CsvStyle.QuoteAfterDelimiter": V.Number(0.0),
+    "CsvStyle.QuoteAlways": V.Number(1.0),
     "JoinKind.Inner": V.Number(0.0),
     "JoinKind.LeftOuter": V.Number(1.0),
     "JoinKind.RightOuter": V.Number(2.0),
