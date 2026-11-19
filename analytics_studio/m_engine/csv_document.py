@@ -1,3 +1,4 @@
+import math
 from typing import Optional, List, Tuple
 from . import values as V
 from .values import MValue, MError, TypeValue
@@ -5,7 +6,18 @@ from .table_fns import _unsupported, _type_spec, _col, _PRIMITIVES
 from .csv_codepages import CODEPAGES
 
 _KNOWN_FIELDS = ('Delimiter', 'Columns', 'Encoding', 'CsvStyle', 'QuoteStyle', 'ExtraValues')
-_INVALID_ENCODINGS = frozenset([2, 3, 4, 5, 10, 100, 300, 1000, 1199, 1202, 12002, 28600, 28604, 65002, 99999])
+_VALID_ENCODING_IDS = frozenset([
+    0, 37, 437, 500, 708, 720, 737, 775, 850, 852, 855, 857, 858, 860, 861, 862, 863, 864, 865, 866,
+    869, 870, 874, 875, 932, 936, 949, 950, 1026, 1047, 1140, 1141, 1142, 1143, 1144, 1145, 1146,
+    1147, 1148, 1149, 1200, 1201, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257, 1258, 1361, 10000,
+    10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008, 10010, 10017, 10021, 10029, 10079, 10081,
+    10082, 12000, 12001, 20000, 20001, 20002, 20003, 20004, 20005, 20105, 20106, 20107, 20108, 20127,
+    20261, 20269, 20273, 20277, 20278, 20280, 20284, 20285, 20290, 20297, 20420, 20423, 20424, 20833,
+    20838, 20866, 20871, 20880, 20905, 20924, 20932, 20936, 20949, 21025, 21866, 28591, 28592, 28593,
+    28594, 28595, 28596, 28597, 28598, 28599, 28603, 28605, 29001, 38598, 50220, 50221, 50222, 50225,
+    50227, 51932, 51936, 51949, 52936, 54936, 57002, 57003, 57004, 57005, 57006, 57007, 57008, 57009,
+    57010, 57011, 65000, 65001
+])
 _KNOWN_SINGLE_BYTE = CODEPAGES
 
 def _validate_delimiter_record(val: MValue) -> str:
@@ -38,17 +50,19 @@ def _validate_source(source: MValue) -> Tuple[bool, any]:
 
 def _validate_encoding(encoding: Optional[MValue], is_text: bool) -> Optional[int]:
     if is_text or encoding is None or isinstance(encoding, V.Null):
-        return 0
+        return None
     if isinstance(encoding, V.Text):
         raise V.generic_error(f'We cannot convert the value "{encoding.value}" to type Number.')
     if isinstance(encoding, V.Number):
         val = encoding.value
-        if not val.is_integer():
-            raise _unsupported("Csv.Document non-integer encoding")
+        if math.isnan(val) or math.isinf(val) or not val.is_integer() or val >= 2147483648:
+            raise V.generic_error("The number is out of range of a 32 bit integer value.")
         enc_id = int(val)
-        if enc_id < 0 or enc_id == 1 or enc_id in _INVALID_ENCODINGS:
-            raise V.generic_error("The text encoding is invalid.")
-        return enc_id
+        if enc_id in _VALID_ENCODING_IDS:
+            return enc_id
+        if enc_id == 2147483647:
+            raise _unsupported("Csv.Document encoding 2147483647")
+        raise V.generic_error("The text encoding is invalid.")
     raise _unsupported("Csv.Document encoding of unexpected type")
 
 
@@ -220,14 +234,7 @@ def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: O
         is_text, src_data = _validate_source(source)
 
         # 4. encoding invalid (binary sources only)
-        enc_id = 0
-        if not is_text and encoding is not None and not isinstance(encoding, V.Null):
-            val = encoding.value
-            if not val.is_integer():
-                raise _unsupported("Csv.Document non-integer encoding")
-            enc_id = int(val)
-            if enc_id < 0 or enc_id == 1 or enc_id in _INVALID_ENCODINGS:
-                raise V.generic_error("The text encoding is invalid.")
+        enc_id = _validate_encoding(encoding, is_text)
 
         # 5. extraValues enum check
         if extraValues is None or isinstance(extraValues, V.Null):
@@ -386,7 +393,7 @@ def _decode_source(is_text: bool, data: any, enc_id: Optional[int]) -> str:
     if enc_id == 0 and any(byte >= 0x80 for byte in b):
         raise _unsupported("Csv.Document with Encoding 0 over non-ASCII bytes (the machine's ANSI code page is not modelled)")
 
-    enc = 65001 if (enc_id is None or enc_id == 0) else enc_id
+    enc = 65001 if enc_id is None else enc_id
     if enc == 65001:
         try:
             s = b.decode('utf-8')
