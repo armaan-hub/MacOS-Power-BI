@@ -388,6 +388,20 @@ PAIRS = [
     # batch45_33
     ('let r = try BinaryFormat.Group(BinaryFormat.Byte,{{0,BinaryFormat.Byte,1},{1,BinaryFormat.Byte,1}},null,0)(#binary({2,9,0,6})) in if r[HasError] then {"E", r[Error][Reason], r[Error][Message]} else r[Value]',
      'V:list:[text:"E",text:"DataFormat.Error",text:"An unknown item was encountered in the input."]'),
+
+    # Task 232 fix: zero-width key formats on non-empty input
+    ('BinaryFormat.Group(BinaryFormat.Null,{{null,BinaryFormat.Null,BinaryOccurrence.Repeating}})(#binary({1,2,3,4}))',
+     'ERR:Expression.Error: The zero-width binary format group key is not supported by this engine yet.'),
+    ('BinaryFormat.Group(BinaryFormat.Null,{},each BinaryFormat.Null)(#binary({1,2,3,4}))',
+     'ERR:Expression.Error: The zero-width binary format group key is not supported by this engine yet.'),
+    ('BinaryFormat.Group(BinaryFormat.Text(0),{{null,BinaryFormat.Null,BinaryOccurrence.Repeating}})(#binary({1,2,3,4}))',
+     'ERR:Expression.Error: The zero-width binary format group key is not supported by this engine yet.'),
+    ('BinaryFormat.Group(BinaryFormat.Record([]),{{null,BinaryFormat.Null,BinaryOccurrence.Repeating}})(#binary({1,2,3,4}))',
+     'ERR:Expression.Error: The zero-width binary format group key is not supported by this engine yet.'),
+
+    # Task 232 fix: Repeating accumulation over modest input (1000 items)
+    ('BinaryFormat.Group(BinaryFormat.Byte, {{0, BinaryFormat.Byte, BinaryOccurrence.Repeating}})(#binary({' + ', '.join(['0, 42'] * 1000) + '}))',
+     'V:list:[list:[' + ','.join(['number:42'] * 1000) + ']]'),
 ]
 
 

@@ -636,9 +636,14 @@ def _binary_format_group(
         values = [None if occ != 2 else [] for _, _, occ in parsed_group]
         seen_flags = [False] * len(parsed_group)
         curr = pos
+        ctx = _get_format_context()
 
         while curr < len(b):
-            key_val, curr = key_reader(b, curr, byte_order)
+            key_val, next_curr = key_reader(b, curr, byte_order)
+            if next_curr <= curr:
+                raise _unsupported("zero-width binary format group key")
+            curr = next_curr
+
             matched_idx = None
             for idx, (gk, _, _) in enumerate(parsed_group):
                 if equals(gk, key_val):
@@ -653,6 +658,8 @@ def _binary_format_group(
                 extra_fmt = apply_function(extra, [key_val])
                 if not _is_format_fn(extra_fmt):
                     raise V.generic_error("The value isn't a binary format value.")
+                if ctx is not None:
+                    ctx.record_items(1)
                 extra_reader = getattr(extra_fmt, "_reader_fn")
                 _, curr = extra_reader(b, curr, byte_order)
             else:
@@ -663,6 +670,8 @@ def _binary_format_group(
                             extra_fmt = apply_function(extra, [key_val])
                             if not _is_format_fn(extra_fmt):
                                 raise V.generic_error("The value isn't a binary format value.")
+                            if ctx is not None:
+                                ctx.record_items(1)
                             extra_reader = getattr(extra_fmt, "_reader_fn")
                             _, curr = extra_reader(b, curr, byte_order)
                         else:
@@ -674,6 +683,8 @@ def _binary_format_group(
                         values[matched_idx] = item_val
                 else:  # Repeating (2)
                     seen_flags[matched_idx] = True
+                    if ctx is not None:
+                        ctx.record_items(1)
                     item_reader = getattr(item_fmt, "_reader_fn")
                     item_val, curr = item_reader(b, curr, byte_order)
                     values[matched_idx].append(item_val)
