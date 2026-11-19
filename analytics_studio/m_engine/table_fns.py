@@ -67,9 +67,18 @@ def _carries_keys(val: MValue) -> bool:
     if isinstance(val, V.Table):
         return bool(val.keys or val.keys_unmeasured)
     if isinstance(val, V.List):
-        return any(_carries_keys(V.force(item)) for item in val.items)
+        for item in val.items:
+            # Don't force thunks to check keys unless it's already computed
+            actual = item._value if isinstance(item, V.Thunk) and getattr(item, '_computed', False) else item
+            if not isinstance(actual, V.Thunk) and _carries_keys(actual):
+                return True
+        return False
     if isinstance(val, V.Record):
-        return any(_carries_keys(V.force(item)) for _, item in val.fields)
+        for _, item in val.fields:
+            actual = item._value if isinstance(item, V.Thunk) and getattr(item, '_computed', False) else item
+            if not isinstance(actual, V.Thunk) and _carries_keys(actual):
+                return True
+        return False
     return False
 
 
@@ -240,6 +249,32 @@ def _sort_requires_criterion() -> MError:
 def _distinct_invalid() -> MError:
     return MError("Expression.Error", "The specified distinct criteria is invalid.",
                   fmt="The specified distinct criteria is invalid.")
+
+
+class _LazyRows:
+    def __init__(self, compute):
+        self._compute = compute
+        self._cached = None
+
+    def _get(self):
+        if self._cached is None:
+            self._cached = tuple(self._compute())
+        return self._cached
+
+    def __iter__(self):
+        return iter(self._get())
+
+    def __len__(self):
+        return len(self._get())
+
+    def __getitem__(self, item):
+        return self._get()[item]
+
+    def __reversed__(self):
+        return reversed(self._get())
+
+    def __bool__(self):
+        return bool(self._get())
 
 
 def _table(value: MValue) -> V.Table:
@@ -634,7 +669,8 @@ def _schema(table: MValue) -> MValue:
 
 
 def _buffer(table: MValue) -> MValue:
-    return _table(table)
+    t = _table(table)
+    return V.Table(t.columns, t.rows, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _demote_headers(table: MValue) -> MValue:
@@ -644,7 +680,8 @@ def _demote_headers(table: MValue) -> MValue:
         raise _unsupported("demoted headers of a table without columns")
     header = tuple(V.Text(name) for name in names)
     columns = tuple((f"Column{i}", "any") for i in range(1, len(names) + 1))
-    return V.Table(columns, (header,) + t.rows)
+    meta_rec = V.Record((("ShouldInferTableType", V.Null()),))
+    return V.Table(columns, (header,) + t.rows, meta=meta_rec)
 
 
 def _promote_headers(table: MValue, options: MValue) -> MValue:
@@ -689,8 +726,8 @@ def _first_n(table: MValue, countOrCondition: MValue) -> MValue:
             if not verdict.value:
                 break
             kept.append(row)
-        return V.Table(t.columns, tuple(kept), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
-    return V.Table(t.columns, t.rows[:_count(countOrCondition)], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+        return V.Table(t.columns, tuple(kept), keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(t.columns, t.rows[:_count(countOrCondition)], keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _last_n(table: MValue, countOrCondition: MValue) -> MValue:
@@ -726,8 +763,10 @@ def _remove_first_n(table: MValue, countOrCondition: MValue) -> MValue:
             if not verdict.value:
                 break
             drop_count += 1
-        return V.Table(t.columns, t.rows[drop_count:], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
-    return V.Table(t.columns, t.rows[_count_or(countOrCondition, 1):], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+        return V.Table(t.columns, t.rows[drop_count:], keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    cnt = _count_or(countOrCondition, 1)
+    meta = t.meta if (cnt == 0 and t.meta is not None and t.meta.has("FirstRowMayContainHeaders")) else None
+    return V.Table(t.columns, t.rows[cnt:], meta=meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _remove_last_n(table: MValue, countOrCondition: MValue) -> MValue:
@@ -753,8 +792,8 @@ def _range(table: MValue, offset: MValue, count: MValue) -> MValue:
     t = _table(table)
     start = _count(offset)
     if isinstance(count, V.Null):
-        return V.Table(t.columns, t.rows[start:], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
-    return V.Table(t.columns, t.rows[start:start + _count(count)], meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+        return V.Table(t.columns, t.rows[start:], keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(t.columns, t.rows[start:start + _count(count)], keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _repeat(table: MValue, count: MValue) -> MValue:
@@ -802,7 +841,7 @@ def _select_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
             if all(c in wanted_set for c in cols):
                 kept_keys.append(k)
         new_keys = tuple(kept_keys)
-    return V.Table(tuple(columns), rows, meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(tuple(columns), rows, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _remove_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
@@ -829,7 +868,7 @@ def _remove_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
                 kept_keys.append(k)
         new_keys = tuple(kept_keys)
     return V.Table(tuple(t.columns[i] for i in keep), tuple(tuple(row[i] for i in keep) for row in t.rows),
-                   meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
+                   keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _reorder_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
@@ -846,7 +885,7 @@ def _reorder_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
     for slot, name in zip(specified_slots, wanted):
         order[slot] = current.index(name)
     return V.Table(tuple(t.columns[i] for i in order), tuple(tuple(row[i] for i in order) for row in t.rows),
-                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+                   keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _rename_pairs(renames: MValue) -> list:
@@ -895,7 +934,7 @@ def _rename_columns(table: MValue, renames: MValue, missing: MValue) -> MValue:
             )))
         new_keys = tuple(renamed_keys)
     return V.Table(tuple((name, kind) for name, (_, kind) in zip(names, t.columns)), t.rows,
-                   meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
+                   keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _prefix_columns(table: MValue, prefix: MValue) -> MValue:
@@ -978,7 +1017,7 @@ def _transform_columns(table: MValue, transforms: MValue, default: MValue, missi
             if not any(c in non_identity_transforms for c in cols):
                 kept_keys.append(k)
         new_keys = tuple(kept_keys)
-    return V.Table(columns, tuple(rows), meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(columns, tuple(rows), keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _conversion_culture(culture: MValue) -> Optional[str]:
@@ -1026,7 +1065,7 @@ def _transform_column_types(table: MValue, transforms: MValue, culture: MValue) 
             if not any(c in transformed_names for c in cols):
                 kept_keys.append(k)
         new_keys = tuple(kept_keys)
-    return V.Table(columns, tuple(rows), meta=t.meta, keys=new_keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(columns, tuple(rows), keys=new_keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _replaced_kind(replacer: V.Function, old_kind: str, new: MValue) -> str:
@@ -1085,7 +1124,7 @@ def _replace_value_table(table: MValue, old: MValue, new: MValue, replacer: MVal
         new_unmeasured = True
 
     return V.Table(tuple((name, kinds.get(i, kind)) for i, (name, kind) in enumerate(t.columns)), tuple(rows),
-                   meta=t.meta, keys=new_keys, keys_unmeasured=new_unmeasured)
+                   keys=new_keys, keys_unmeasured=new_unmeasured)
 
 
 def _fill(table: MValue, columns: MValue, down: bool) -> MValue:
@@ -1093,19 +1132,21 @@ def _fill(table: MValue, columns: MValue, down: bool) -> MValue:
     names = _names(columns)
     _no_repeat(names)
     targets = [_index(t, name) for name in names]
-    rows = [list(row) for row in t.rows]
-    order = list(range(len(rows))) if down else list(range(len(rows) - 1, -1, -1))
-    for i in targets:
-        last = None
-        for r in order:
-            value = V.force(rows[r][i])
-            if isinstance(value, V.Null):
-                if last is not None:
-                    rows[r][i] = last
-            else:
-                last = value
-                rows[r][i] = value
-    return V.Table(t.columns, tuple(tuple(row) for row in rows), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    def _compute():
+        rows = [list(row) for row in t.rows]
+        order = list(range(len(rows))) if down else list(range(len(rows) - 1, -1, -1))
+        for i in targets:
+            last = None
+            for r in order:
+                value = V.force(rows[r][i])
+                if isinstance(value, V.Null):
+                    if last is not None:
+                        rows[r][i] = last
+                else:
+                    last = value
+                    rows[r][i] = value
+        return tuple(tuple(row) for row in rows)
+    return V.Table(t.columns, _LazyRows(_compute), keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _fill_down(t: MValue, c: MValue) -> MValue:
@@ -1131,7 +1172,7 @@ def _add_column(table: MValue, name: MValue, selector: MValue, kind: MValue) -> 
         cell = V.Thunk(lambda row=row: _apply(selector, _record(names, row)))
         rows.append(tuple(row) + (cell,))
     return V.Table(t.columns + ((new, new_kind),), tuple(rows),
-                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+                   keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _add_index_column(table: MValue, name: MValue, start: MValue, step: MValue, kind: MValue) -> MValue:
@@ -1144,7 +1185,7 @@ def _add_index_column(table: MValue, name: MValue, start: MValue, step: MValue, 
     increment = _integer(step, 1)
     rows = tuple(tuple(row) + (V.Number(float(first + i * increment)),) for i, row in enumerate(t.rows))
     return V.Table(t.columns + ((new, explicit if explicit is not None else "number"),), rows,
-                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+                   keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _duplicate_column(table: MValue, source: MValue, name: MValue, kind: MValue) -> MValue:
@@ -1156,7 +1197,7 @@ def _duplicate_column(table: MValue, source: MValue, name: MValue, kind: MValue)
         raise _unsupported("duplicate onto an existing column name")
     rows = tuple(tuple(row) + (row[i],) for row in t.rows)
     return V.Table(t.columns + ((new, explicit if explicit is not None else t.columns[i][1]),), rows,
-                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+                   keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 _EXTRA_LIST, _EXTRA_ERROR, _EXTRA_IGNORE = 0, 1, 2
@@ -1334,6 +1375,9 @@ def _expand_table_column(table: MValue, column: MValue, names_arg: MValue, new_a
         cell = V.force(row[i])
         if not isinstance(cell, V.Table):
             raise V.convert_error(cell, V.TypeValue("table"))
+        for name in field_names:
+            if name not in _names_of(cell):
+                raise _unsupported("expansion of a missing nested column")
         picks = [_index(cell, name) for name in field_names]
         for k in picks:
             if cell.columns[k][1] != "any":
@@ -1363,14 +1407,16 @@ def _criteria_indexes(table: V.Table, criteria: MValue) -> list:
 def _distinct(table: MValue, criteria: MValue) -> MValue:
     t = _table(table)
     indexes = _criteria_indexes(t, criteria)
-    seen, rows = set(), []
-    for row in t.rows:
-        key = _key(tuple(V.force(row[i]) for i in indexes))
-        if key in seen:
-            continue
-        seen.add(key)
-        rows.append(row)
-    return V.Table(t.columns, tuple(rows), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    def _compute():
+        seen, rows = set(), []
+        for row in t.rows:
+            key = _key(tuple(V.force(row[i]) for i in indexes))
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(row)
+        return rows
+    return V.Table(t.columns, _LazyRows(_compute), keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _is_distinct(table: MValue, criteria: MValue) -> MValue:
@@ -1556,12 +1602,14 @@ def _sorted_rows(table: V.Table, specs: list) -> list:
 def _sort(table: MValue, criteria: MValue) -> MValue:
     t = _table(table)
     specs = _sort_specs(t, criteria)
-    return V.Table(t.columns, tuple(_sorted_rows(t, specs)),
-                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+    return V.Table(t.columns, _LazyRows(lambda: _sorted_rows(t, specs)),
+                   keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _extreme_rows(table: V.Table, column: MValue, descending: bool) -> list:
-    name = _text(column)
+    if not isinstance(column, V.Text):
+        raise _sort_invalid()
+    name = column.value
     names = _names_of(table)
     if name not in names:
         raise _sort_invalid()
@@ -1584,14 +1632,18 @@ def _min(table: MValue, column: MValue, default: MValue) -> MValue:
 
 def _max_n(table: MValue, column: MValue, count: MValue) -> MValue:
     t = _table(table)
-    rows = _extreme_rows(t, column, True)[:_count(count)]
-    return V.Table(t.columns, tuple(rows))
+    if not isinstance(column, V.Text):
+        raise _sort_invalid()
+    cnt = _count(count)
+    return V.Table(t.columns, _LazyRows(lambda: _extreme_rows(t, column, True)[:cnt]))
 
 
 def _min_n(table: MValue, column: MValue, count: MValue) -> MValue:
     t = _table(table)
-    rows = _extreme_rows(t, column, False)[:_count(count)]
-    return V.Table(t.columns, tuple(rows))
+    if not isinstance(column, V.Text):
+        raise _sort_invalid()
+    cnt = _count(count)
+    return V.Table(t.columns, _LazyRows(lambda: _extreme_rows(t, column, False)[:cnt]))
 
 
 def _contains(table: MValue, record: MValue) -> MValue:
@@ -1674,7 +1726,7 @@ def _remove_rows(table: MValue, offset: MValue, count: MValue) -> MValue:
     if start + n > len(t.rows):
         raise _unsupported("removal past the last row")
     return V.Table(t.columns, t.rows[:start] + t.rows[start + n:],
-                   meta=t.meta, keys=(), keys_unmeasured=False)
+                   keys=(), keys_unmeasured=False)
 
 
 def _insert_rows(table: MValue, offset: MValue, records: MValue) -> MValue:
@@ -1740,7 +1792,11 @@ def _expand_list_column(table: MValue, column: MValue) -> MValue:
     t = _table(table)
     col_name = _text(column)
     idx = _index(t, col_name)
-    col_type = "text~Text.Type~1" if (t.meta and t.meta.has("FirstRowMayContainHeaders")) else "any"
+    if t.meta and t.meta.has("FirstRowMayContainHeaders"):
+        base, type_name, _ = _parts(t.columns[idx][1])
+        if base == "list" or type_name == "List.Type":
+            raise _unsupported("Table.ExpandListColumn on Csv.Document table with ExtraValues.List")
+    col_type = "any"
     columns = tuple(t.columns[:idx]) + ((col_name, col_type),) + tuple(t.columns[idx + 1:])
     rows = []
     for row in t.rows:
@@ -1825,20 +1881,29 @@ def _partition(table: MValue, column: MValue, groups: MValue, hash_fn: MValue) -
         raise _unsupported("partition with zero groups")
     if not isinstance(hash_fn, V.Function):
         raise V.convert_error(hash_fn, V.TypeValue("function"))
-    buckets = [[] for _ in range(num_groups)]
-    for row in t.rows:
-        val = V.force(row[idx])
-        bucket_val = V.force(_apply(hash_fn, val))
-        if not isinstance(bucket_val, V.Number):
-            raise _unsupported("hash result that is not a number")
-        x = bucket_val.value
-        if not (math.isfinite(x) and x == math.floor(x)):
-            raise _unsupported("hash result that is not a whole number")
-        if x < 0 or x > num_groups:
-            raise _unsupported("hash result outside 0..groups-1")
-        b = int(x) % num_groups
-        buckets[b].append(row)
-    return V.List(tuple(V.Table(t.columns, tuple(b_rows)) for b_rows in buckets))
+    def _compute_buckets():
+        buckets = [[] for _ in range(num_groups)]
+        for row in t.rows:
+            val = V.force(row[idx])
+            bucket_val = V.force(_apply(hash_fn, val))
+            if not isinstance(bucket_val, V.Number):
+                raise _unsupported("hash result that is not a number")
+            x = bucket_val.value
+            if not (math.isfinite(x) and x == math.floor(x)):
+                raise _unsupported("hash result that is not a whole number")
+            if x < 0 or x > num_groups:
+                raise _unsupported("hash result outside 0..groups-1")
+            b = int(x) % num_groups
+            buckets[b].append(row)
+        return buckets
+
+    cached_buckets = [None]
+    def _get_bucket(b):
+        if cached_buckets[0] is None:
+            cached_buckets[0] = _compute_buckets()
+        return cached_buckets[0][b]
+
+    return V.List(tuple(V.Table(t.columns, _LazyRows(lambda b=b: _get_bucket(b))) for b in range(num_groups)))
 
 
 def _from_partitions(partition_column: MValue, partitions: MValue) -> MValue:
@@ -2156,9 +2221,7 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
     aggs = _aggregates(aggregates)
     _unique_or_refuse(key_names + [name for name, _fn, _kind in aggs])
 
-    # Validate keys for hashability / equality key support
-    for row in t.rows:
-        _key(tuple(V.force(row[i]) for i in key_indexes))
+
 
     if not isinstance(comparer, V.Null):
         if not isinstance(comparer, V.Function):
@@ -2198,45 +2261,45 @@ def _group(table: MValue, keys: MValue, aggregates: MValue, kind: MValue, compar
                         if cmp_eq:  # Since k1 != k2 ordinally, if comparer considers them equal, it differs
                             raise _unsupported("comparer whose behavior differs from ordinal equality on actual keys")
 
-    rows = []
-    if group_kind == _GROUP_LOCAL:
-        grouped_runs: list[tuple[tuple, list]] = []
+    def _compute():
         for row in t.rows:
-            key_cells = tuple(V.force(row[i]) for i in key_indexes)
-            if grouped_runs and all(_equals(a, b) for a, b in zip(key_cells, grouped_runs[-1][0])):
-                grouped_runs[-1][1].append(row)
-            else:
-                grouped_runs.append((key_cells, [row]))
-        for key_cells, members in grouped_runs:
-            group_table = V.Table(t.columns, tuple(members), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
-            rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
-    else:
-        # Fast hash-based path for Global grouping (O(N) instead of O(N^2))
-        groups: dict = {}
-        order = []
-        for row in t.rows:
-            key = _key(tuple(V.force(row[i]) for i in key_indexes))
-            if key not in groups:
-                groups[key] = []
-                order.append(key)
-            groups[key].append(row)
-        for key in order:
-            members = groups[key]
-            key_cells = tuple(members[0][i] for i in key_indexes)
-            group_table = V.Table(t.columns, tuple(members), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
-            rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
+            _key(tuple(V.force(row[i]) for i in key_indexes))
+        rows = []
+        if group_kind == _GROUP_LOCAL:
+            grouped_runs = []
+            for row in t.rows:
+                key_cells = tuple(V.force(row[i]) for i in key_indexes)
+                if grouped_runs and all(_equals(a, b) for a, b in zip(key_cells, grouped_runs[-1][0])):
+                    grouped_runs[-1][1].append(row)
+                else:
+                    grouped_runs.append((key_cells, [row]))
+            for key_cells, members in grouped_runs:
+                group_table = V.Table(t.columns, tuple(members), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+                rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
+        else:
+            groups = {}
+            order = []
+            for row in t.rows:
+                key = _key(tuple(V.force(row[i]) for i in key_indexes))
+                if key not in groups:
+                    groups[key] = []
+                    order.append(key)
+                groups[key].append(row)
+            for key in order:
+                members = groups[key]
+                key_cells = tuple(members[0][i] for i in key_indexes)
+                group_table = V.Table(t.columns, tuple(members), meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+                rows.append(key_cells + tuple(V.Thunk(lambda fn=fn, g=group_table: _apply(fn, g)) for _name, fn, _kind in aggs))
+        return tuple(rows)
 
     columns = tuple((name, t.columns[i][1]) for name, i in zip(key_names, key_indexes))
     columns += tuple((name, kind if kind is not None else _function_spec(fn)) for name, fn, kind in aggs)
 
-    # Key propagation for Table.Group:
-    # Table.Group (any input, keyed or keyless, one or several group columns, group column equal to a key or not):
-    # result keys = exactly one record [Columns = the group columns in the order given, Primary = true]
     group_key_record = V.Record((
         ("Columns", V.List(tuple(V.Text(name) for name in key_names))),
         ("Primary", V.Logical(True)),
     ))
-    return V.Table(columns, tuple(rows), meta=t.meta, keys=(group_key_record,), keys_unmeasured=False)
+    return V.Table(columns, _LazyRows(_compute), keys=(group_key_record,), keys_unmeasured=False)
 
 
 def _aggregate_kind(fn: V.Function, column_kind: str) -> str:
@@ -2427,7 +2490,7 @@ def combine_tables(parts: list) -> V.Table:
             rows.append(tuple(row[current.index(name)] if name in current else V.Null() for name in names))
     if len(parts) == 1:
         single = parts[0]
-        return V.Table(tuple(columns), tuple(rows), meta=single.meta,
+        return V.Table(tuple(columns), tuple(rows),
                        keys=single.keys, keys_unmeasured=single.keys_unmeasured)
     unmeasured = any(bool(part.keys or part.keys_unmeasured) for part in parts)
     return V.Table(tuple(columns), tuple(rows), keys_unmeasured=unmeasured)
@@ -2561,24 +2624,31 @@ def _nested_join(table1: MValue, key1: MValue, table2: MValue, key2: MValue, new
         raise _unsupported("nested column over an existing column name")
     if join_kind != _JOIN_INNER and any(kind_ != "any" for _, kind_ in right.columns):
         raise _unsupported("nested join of typed columns")
-    index = _join_index(right, right_idx)
-    rows = []
-    for row in left.rows:
-        matches = tuple(index.get(_join_key(row, left_idx), []))
-        if join_kind == _JOIN_INNER and not matches:
-            continue
-        rows.append(tuple(row) + (V.Table(right.columns, matches),))
-    return V.Table(left.columns + ((new, "table"),), tuple(rows))
+    def _compute():
+        index = _join_index(right, right_idx)
+        rows = []
+        for row in left.rows:
+            matches = tuple(index.get(_join_key(row, left_idx), []))
+            if join_kind == _JOIN_INNER and not matches:
+                continue
+            rows.append(tuple(row) + (V.Table(right.columns, matches),))
+        return tuple(rows)
+    return V.Table(left.columns + ((new, "table"),), _LazyRows(_compute))
 
 
 # ---- constructors -----------------------------------------------------------
 
 def _from_rows(rows: MValue, columns: MValue) -> MValue:
-    lists = [_items(row) for row in _items(rows)]
+    if not isinstance(rows, V.List):
+        raise V.convert_error(rows, V.TypeValue("list"))
+    raw_rows = [V.force(r) for r in rows.items]
+    for r in raw_rows:
+        if not isinstance(r, V.List):
+            raise V.convert_error(r, V.TypeValue("list"))
     if isinstance(columns, V.Null):
-        if not lists:
+        if not raw_rows:
             raise _unsupported("table of no rows and no column names")
-        cols = [(f"Column{k}", "any") for k in range(1, len(lists[0]) + 1)]
+        cols = [(f"Column{k}", "any") for k in range(1, len(raw_rows[0].items) + 1)]
     elif isinstance(columns, V.TypeValue) and columns.name == "table":
         cols = _literal_columns(columns)
     else:
@@ -2586,10 +2656,10 @@ def _from_rows(rows: MValue, columns: MValue) -> MValue:
         cols = [(name, "any") for name in names]
     names = [c[0] for c in cols]
     _no_repeat(names)
-    for cells in lists:
-        if len(cells) != len(cols):
+    for r in raw_rows:
+        if len(r.items) != len(cols):
             raise _unsupported("row whose length differs from the column count")
-    return V.Table(tuple(cols), tuple(tuple(cells) for cells in lists))
+    return V.Table(tuple(cols), tuple(tuple(r.items) for r in raw_rows))
 
 
 def _list_column_kind(lst: V.List) -> str:
@@ -2720,9 +2790,14 @@ def _columns_of_type(table: MValue, types: MValue) -> MValue:
             if not isinstance(type_value, V.TypeValue):
                 raise _unsupported("column type filter")
             name = type_value.name
-            if name in ("any", "anynonnull"):
+            if name == "any":
                 match = True
                 break
+            if name == "anynonnull":
+                if not is_nullable:
+                    match = True
+                    break
+                continue
             if name not in _PRIMITIVES:
                 raise _unsupported("column type filter")
             if name == base:

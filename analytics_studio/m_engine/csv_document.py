@@ -65,10 +65,10 @@ def _validate_columns(cols: Optional[MValue]) -> Tuple[Optional[int], Optional[L
         return None, None, None
     if isinstance(cols, V.Number):
         v = cols.value
-        if not v.is_integer():
+        if not v.is_integer() or v < -2147483648 or v > 2147483647:
             raise V.generic_error("The number is out of range of a 32 bit integer value.")
         int_v = int(v)
-        if int_v < 0 or int_v > 2147483647:
+        if int_v < 0:
             raise V.generic_error("The columns parameter must be null, specify the number of columns, specify a list of column names, or specify a table type.")
         if int_v > 1000000:
             raise _unsupported("columns number above 1,000,000")
@@ -91,10 +91,15 @@ def _validate_columns(cols: Optional[MValue]) -> Tuple[Optional[int], Optional[L
             return 0, [], []
         names = []
         types = []
-        for fname, ftype, _ in cols.fields:
+        seen = set()
+        for fname, ftype, optional in cols.fields:
+            if optional:
+                raise _unsupported("Csv.Document with a malformed table type")
+            if fname in seen:
+                raise _unsupported("Csv.Document with a malformed table type")
+            seen.add(fname)
             names.append(fname)
             types.append(_type_spec(ftype))
-        _check_duplicate_names(names)
         return len(names), names, types
     raise V.generic_error("The columns parameter must be null, specify the number of columns, specify a list of column names, or specify a table type.")
 
@@ -106,6 +111,10 @@ def _split_row(row_str: str, delim: str) -> List[str]:
 
 
 def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: Optional[MValue] = None, extraValues: Optional[MValue] = None, encoding: Optional[MValue] = None) -> MValue:
+    # A. List as delimiter in positional form raised FIRST before any other validation
+    if isinstance(delimiter, V.List):
+        raise _unsupported("Csv.Document with a list as the delimiter")
+
     # Check if record form or positional form
     is_record_form = isinstance(columns, V.Record)
 
@@ -184,13 +193,9 @@ def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: O
                 raise _unsupported("Csv.Document encoding of unexpected type")
 
         # 2. delimiter text conversion
-        is_list_delim = False
         if delimiter is not None and not isinstance(delimiter, V.Null):
             if isinstance(delimiter, V.Text):
                 delim_str = delimiter.value
-            elif isinstance(delimiter, V.List):
-                is_list_delim = True
-                delim_str = ','
             elif isinstance(delimiter, V.Number):
                 v = delimiter.value
                 num_str = str(int(v)) if v.is_integer() else str(v)
@@ -232,8 +237,7 @@ def _csv_document(source: MValue, columns: Optional[MValue] = None, delimiter: O
         # 6. columns check
         col_count, col_names, col_types = _validate_columns(columns)
 
-        if is_list_delim:
-            raise _unsupported("Csv.Document with list delimiter")
+
 
     if any(0xD800 <= ord(c) <= 0xDFFF for c in delim_str):
         raise _unsupported("Csv.Document with surrogate delimiter")
