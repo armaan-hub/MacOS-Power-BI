@@ -34,6 +34,20 @@ def _binary_infer_content_type(binary: MValue) -> MValue:
     b_val = _binary_of(binary)
     data = b_val.value
 
+    # Refusal 0: the input is not pure ASCII. Power BI adds a third field
+    # Content.Encoding for non-ASCII input (65001 for a UTF-8 BOM or valid
+    # multi-byte UTF-8, 1200 for a UTF-16 LE BOM, 1201 for UTF-16 BE, 12000
+    # for UTF-32 LE), and its presence rule (absent for some invalid UTF-8 and
+    # for a high byte in the last row only) is not measured. So refuse before
+    # any BOM detection, decoding or NUL logic -- the WHOLE input is tested,
+    # not the window. Every BOM (EF BB BF, FF FE, FE FF), every UTF-16/UTF-32
+    # text, U+0085, U+00A0 and all multi-byte text have bytes >= 0x80.
+    if not data.isascii():
+        raise _unsupported(
+            "Binary.InferContentType over non-ASCII binary "
+            "(Content.Encoding is not measured)"
+        )
+
     # 1. Window: only first 65536 bytes
     window = data[:65536]
     is_truncated = len(data) >= 65536
