@@ -478,8 +478,6 @@ def _to_records(table: MValue) -> MValue:
 
 def _to_rows(table: MValue) -> MValue:
     t = _table(table)
-    if t.row_error:
-        raise t.row_error
     return V.List(tuple(V.List(tuple(row)) for row in t.rows))
 
 
@@ -668,7 +666,8 @@ def _promote_headers(table: MValue, options: MValue) -> MValue:
             raise _unsupported("header that is not text")
     _unique_or_refuse(names)
     columns = tuple((name, kind) for name, (_, kind) in zip(names, t.columns))
-    return V.Table(columns, t.rows[1:])
+    meta_rec = V.Record((("ShouldInferTableType", V.Null()),))
+    return V.Table(columns, t.rows[1:], meta=meta_rec)
 
 
 def _reverse_rows(table: MValue) -> MValue:
@@ -842,7 +841,10 @@ def _reorder_columns(table: MValue, names: MValue, missing: MValue) -> MValue:
     for name in wanted:
         if name not in current:
             raise _column_missing(name)
-    order = [current.index(name) for name in wanted] + [i for i, name in enumerate(current) if name not in wanted]
+    specified_slots = sorted(current.index(name) for name in wanted)
+    order = list(range(len(current)))
+    for slot, name in zip(specified_slots, wanted):
+        order[slot] = current.index(name)
     return V.Table(tuple(t.columns[i] for i in order), tuple(tuple(row[i] for i in order) for row in t.rows),
                    meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
@@ -1662,7 +1664,7 @@ def _select_rows(table: MValue, predicate: MValue) -> MValue:
         if _truth(verdict):
             kept.append(row)
     return V.Table(t.columns, tuple(kept),
-                   meta=t.meta, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
+                   meta=None, keys=t.keys, keys_unmeasured=t.keys_unmeasured)
 
 
 def _remove_rows(table: MValue, offset: MValue, count: MValue) -> MValue:
@@ -1738,7 +1740,8 @@ def _expand_list_column(table: MValue, column: MValue) -> MValue:
     t = _table(table)
     col_name = _text(column)
     idx = _index(t, col_name)
-    columns = tuple(t.columns[:idx]) + ((col_name, "any"),) + tuple(t.columns[idx + 1:])
+    col_type = "text~Text.Type~1" if (t.meta and t.meta.has("FirstRowMayContainHeaders")) else "any"
+    columns = tuple(t.columns[:idx]) + ((col_name, col_type),) + tuple(t.columns[idx + 1:])
     rows = []
     for row in t.rows:
         cell = V.force(row[idx])
@@ -2575,14 +2578,18 @@ def _from_rows(rows: MValue, columns: MValue) -> MValue:
     if isinstance(columns, V.Null):
         if not lists:
             raise _unsupported("table of no rows and no column names")
-        names = [f"Column{k}" for k in range(1, len(lists[0]) + 1)]
+        cols = [(f"Column{k}", "any") for k in range(1, len(lists[0]) + 1)]
+    elif isinstance(columns, V.TypeValue) and columns.name == "table":
+        cols = _literal_columns(columns)
     else:
         names = _names(columns)
+        cols = [(name, "any") for name in names]
+    names = [c[0] for c in cols]
     _no_repeat(names)
     for cells in lists:
-        if len(cells) != len(names):
+        if len(cells) != len(cols):
             raise _unsupported("row whose length differs from the column count")
-    return V.Table(tuple((name, "any") for name in names), tuple(tuple(cells) for cells in lists))
+    return V.Table(tuple(cols), tuple(tuple(cells) for cells in lists))
 
 
 def _list_column_kind(lst: V.List) -> str:
@@ -2705,17 +2712,27 @@ def _columns_of_type(table: MValue, types: MValue) -> MValue:
     items = _items(types)
     if not items:
         return V.List(())
-    wanted = set()
-    for type_value in items:
-        if not isinstance(type_value, V.TypeValue):
-            raise _unsupported("column type filter")
-        name = type_value.name
-        if name in ("any", "anynonnull"):
-            return V.List(tuple(V.Text(col_name) for col_name, _ in t.columns))
-        if name not in _PRIMITIVES:
-            raise _unsupported("column type filter")
-        wanted.add(name)
-    return V.List(tuple(V.Text(name) for name, kind in t.columns if _parts(kind)[0] in wanted))
+    matched = []
+    for col_name, kind in t.columns:
+        base, type_name, is_nullable = _parts(kind)
+        match = False
+        for type_value in items:
+            if not isinstance(type_value, V.TypeValue):
+                raise _unsupported("column type filter")
+            name = type_value.name
+            if name in ("any", "anynonnull"):
+                match = True
+                break
+            if name not in _PRIMITIVES:
+                raise _unsupported("column type filter")
+            if name == base:
+                if not type_value.nullable and is_nullable:
+                    continue
+                match = True
+                break
+        if match:
+            matched.append(V.Text(col_name))
+    return V.List(tuple(matched))
 
 
 # ---- cell access used by the evaluator ----------------------------------------
