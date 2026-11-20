@@ -737,7 +737,8 @@ class FixAPowerFailureInTypeTestsTests(unittest.TestCase):
         self.assertIn("not modelled", _local("ISNUMBER(MIN(Facts[Sales])^0.5+1)"))  # Power BI: True, but ISNUMBER(2/0+0.0^0.0) is the error
 
     def test_arithmetic_around_a_failing_power_is_refused(self) -> None:
-        for expression in ("ISNUMBER(+1.5+0^+COUNTROWS(Facts)^1*-0)", "ISNUMBER(2/0+0.0^+(0.0*-1))", "ISNUMBER(1.5^- 0.0^-1E15/2)", "ISNUMBER(0^(BLANK()/2))"):
+        self.assertEqual("True", _local("ISNUMBER(+1.5+0^+COUNTROWS(Facts)^1*-0)"))  # Power BI: True (saved answer, never10_extra)
+        for expression in ("ISNUMBER(2/0+0.0^+(0.0*-1))", "ISNUMBER(1.5^- 0.0^-1E15/2)", "ISNUMBER(0^(BLANK()/2))"):
             self.assertIn("not modelled", _local(expression), expression)
         self.assertEqual("False", _local("ISNUMBER(COUNTROWS(FILTER(Facts,FALSE()))^-1)"))
 

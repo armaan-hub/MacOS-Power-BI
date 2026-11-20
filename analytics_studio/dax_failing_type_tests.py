@@ -34,17 +34,6 @@ THE HIDING GRAMMAR (what may stand inside the argument for the failure not to sh
                                                 SWITCH result, a column read outside an aggregate, SELECTEDVALUE, LOG, LOG10, ERROR, FORMAT,
                                                 LEFT, SIN, iterators, comparison operators outside an IF / SWITCH condition, IFERROR,
                                                 SUM of a text column
-
-SHAPES KEPT REFUSED BECAUSE EXISTING LOCKED TESTS REQUIRE THE REFUSAL (HONOUR_LOCKED_REFUSALS)
-    The saved Power BI answers settle these shapes, but older tests lock them as refused ("not modelled", measured both ways, fewer than five
-    rows).  They stay refused until those tests are updated; set HONOUR_LOCKED_REFUSALS to False to answer them as well:
-        - a failure that the engine reported as arithmetic around a failing power (tests/test_iteration109_never_blank_zero_10.py,
-          tests/test_iteration140_type_tests_errors_40.py) or as a currency range overflow (CURRENCY(1E15)*2, test_iteration109 ...)
-        - NOT of a text literal at the top (test_iteration140 ...errors_40: ISNONTEXT(NOT("a")))
-        - && / || whose left operand reads a column and whose right operand is a literal (ISLOGICAL(MAX(Facts[Note])&""&&1), same test)
-        - one + - * of a column aggregate (or CURRENCY of it) and a text literal (tests/test_iteration150_type_tests_columns_50.py, the Task 60
-          promotion table owns that cell)
-        - a SWITCH / IF with a SIGN branch beside a CURRENCY branch (tests/test_iteration154_typeerr_fail_54.py STILL_REFUSED)
 """
 
 from __future__ import annotations
@@ -74,9 +63,7 @@ _AGGREGATES = frozenset({"MAX", "MIN", "SUM"})
 _LITERALS = frozenset({"number", "string", "boolean", "blank", "blank_comment", "var"})
 _CONVERT_KEYWORDS = frozenset({"INTEGER", "INT64", "DOUBLE", "CURRENCY", "DECIMAL", "BOOLEAN", "STRING", "DATETIME"})
 _NUMERIC = frozenset({"int64", "double", "currency", "decimal"})
-HONOUR_LOCKED_REFUSALS = True  # see the module text: shapes that older tests lock as refused although the saved Power BI answers settle them
 _ANSWERABLE_FAILURES = ("Cannot convert value", "An argument of function", "A type test of a failing value", "A type test of arithmetic around a failing power")
-_LOCKED_FAILURES = ("A type test of arithmetic around a failing power", "The result of a conversion or arithmetic operation")
 
 
 def _column_type(node: Any, columns: dict[str, dict[str, str]]) -> str | None:
@@ -241,31 +228,18 @@ def _walk(node: Any):
             yield from _walk(child)
 
 
-def _locked_shape(argument: Any, columns: dict[str, dict[str, str]]) -> bool:
-    """The shapes that older locked tests keep refused (see the module text)."""
-    kind = argument[0]
-    if kind == "call" and str(argument[1]).upper() == "NOT" and len(argument[2]) == 1 and argument[2][0][0] == "string":
-        return True
-    if kind == "logical" and _reads_column(argument[2]) and argument[3][0] in {"number", "string", "boolean"}:
-        return True
-    if kind == "binary" and argument[1] in {"+", "-", "*"}:
-        def leaf(operand: Any) -> bool:
-            if operand[0] == "call" and str(operand[1]).upper() == "CURRENCY" and len(operand[2]) == 1:
-                operand = operand[2][0]
-            return operand[0] == "call" and _aggregate(operand, columns)
-
-        pair = (argument[2], argument[3])
-        if any(leaf(a) and b[0] == "string" for a, b in (pair, pair[::-1])):
+def _without_saved_answer(function: str, argument: Any, columns: dict[str, dict[str, str]]) -> bool:
+    """Two shapes with no saved Power BI answer at all, so they keep their refusal (older tests assert it):
+    a number literal beside a power of a column aggregate and a number literal (ISNUMBER(MIN(Facts[Sales])^0.5+1)), and
+    ISDOUBLE of a column aggregate of a whole-number column beside a text literal (ISDOUBLE(MAX(Facts[Quantity])-"abc"))."""
+    if argument[0] != "binary" or argument[1] not in {"+", "-", "*"}:
+        return False
+    left, right = argument[2], argument[3]
+    for a, b in ((left, right), (right, left)):
+        if _literal_number(b) and a[0] == "binary" and a[1] == "^" and a[2][0] == "call" and _aggregate(a[2], columns) and _literal_number(a[3]):
             return True
-    for part in _walk(argument):
-        if part[0] == "call" and str(part[1]).upper() in {"SWITCH", "IF"}:
-            if str(part[1]).upper() == "SWITCH":
-                pairs = list(part[2][1:])
-                results = [pairs[i + 1] for i in range(0, len(pairs) - 1, 2)] + ([pairs[-1]] if len(pairs) % 2 else [])
-            else:
-                results = list(part[2][1:])
-            names = {str(r[1]).upper() for r in results if r[0] == "call"}
-            if "SIGN" in names and "CURRENCY" in names:
+        if function.upper() == "ISDOUBLE" and b[0] == "string" and a[0] == "call" and _aggregate(a, columns):
+            if (_column_type(a[2][0], columns) or "").casefold() in {"whole_number", "integer", "int64", "int"}:
                 return True
     return False
 
@@ -277,7 +251,7 @@ def answer(function: str, argument: Any, columns: dict[str, dict[str, str]]) -> 
     function = function.upper()
     if function not in TYPE_TESTS or not isinstance(argument, tuple) or not argument or not hides(argument, columns):
         return None
-    if HONOUR_LOCKED_REFUSALS and _locked_shape(argument, columns):
+    if _without_saved_answer(function, argument, columns):
         return None
     static_type = measures._static_numeric_type(argument, columns, {})
     if static_type not in _STATIC_TYPES:
@@ -301,8 +275,6 @@ def answer_measures(measures_list: list[dict[str, str]], measure_names: list[str
         return None
     if failure and not failure.startswith(_ANSWERABLE_FAILURES):
         return None  # only the failures of the saved answers are hidden (a text conversion, a POWER / FACT range, an older refusal of these shapes)
-    if HONOUR_LOCKED_REFUSALS and failure.startswith(_LOCKED_FAILURES):
-        return None
     item = measures_list[0]
     name = item.get("name", "")
     if measure_names is not None and [str(n).casefold() for n in measure_names] != [str(name).casefold()]:

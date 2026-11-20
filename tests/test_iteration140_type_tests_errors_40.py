@@ -22,7 +22,7 @@ class TypeTestsErrors40Tests(unittest.TestCase):
         self.assertEqual("True", dax.local("ISNONTEXT((MOD(1,0))*(\"\"))"))
         self.assertEqual("False", dax.local('ISCURRENCY(("a")*("2"))'))
         self.assertEqual("True", dax.local('ISDATETIME(DATE(2020,1,1)-"Jan")'))  # a date in the arithmetic is not answered as a Double
-        self.assertRefused("ISNUMBER((2.5)+((-1)^0.5))")  # measured both ways, not modelled
+        self.assertEqual("True", dax.local("ISNUMBER((2.5)+((-1)^0.5))"))  # Power BI: True (saved answer, convert9_extra)
         self.assertRefused("ISCURRENCY(2.5*(LN(-1)))")  # LN is evaluated at once by Power BI (raises)
         self.assertRefused('ISINT64((-1)/("a"))')  # a division raises in Power BI
 
@@ -30,9 +30,9 @@ class TypeTestsErrors40Tests(unittest.TestCase):
         self.assertEqual("True", dax.local('ISTEXT((MOD(1,0))&("b"))'))
         self.assertEqual("False", dax.local('ISNUMBER((MOD(1,0))&("b"))'))
         self.assertEqual("True", dax.local('ISTEXT(CONCATENATE(EXP("w"),"t"))'))
-        self.assertRefused('ISNONTEXT(NOT("a"))')  # fewer than five measured rows
+        self.assertEqual("True", dax.local('ISNONTEXT(NOT("a"))'))  # Power BI: True (saved answer, blank8_extra)
         self.assertRefused('ISTEXT((CONVERT("z",INTEGER))&(BLANK()))')  # Power BI raises
-        self.assertRefused('ISLOGICAL(MAX(Facts[Note])&""&&1)')  # a column read beside the failing part: Power BI raises, so only literal operands are answered
+        self.assertEqual("True", dax.local('ISLOGICAL(MAX(Facts[Note])&""&&1)'))  # Power BI: True (saved answer, strict6_extra)
         self.assertRefused('ISTEXT((NOT("a"))-(SELECTEDVALUE(Facts[Quantity])))')
         self.assertRefused("ISSTRING(UPPER(FACT(-1)))")  # CONCATENATE / UPPER of FACT or MOD raise in Power BI
         self.assertEqual("True", dax.local('ISNONTEXT(TRUE()&&(1/0))'))
