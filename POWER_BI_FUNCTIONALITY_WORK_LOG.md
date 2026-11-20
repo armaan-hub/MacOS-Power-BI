@@ -2841,3 +2841,18 @@ Review (Sonnet, read-only): 190 fresh shapes, 0 wrong values: 115 exact, 54 same
 Roles: Sonnet coded (commit dfbe8af) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved answers: 537,891 match, 2,510 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 33,807 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 0630e74.
+
+## 2026-11-20 — Iteration 308 (Task 238: DAX type tests over failing expressions that Power BI answers now answer too, Chapter 1b)
+
+Function family: same as Tasks 235 to 237 (type tests over an expression whose evaluation fails). Task 238 answers the 36 target shapes that the engine still refused where Power BI answers a value. All changes are in `analytics_studio/dax_failing_type_tests.py`:
+- `_OVERFLOW_FAILURE` joins the answerable failures: a Currency overflow of literals only, with + - *, answers by static type. `/`, columns, aggregates and VAR stay refused.
+- `_text_divide` and `_without_text_divide`: an inline DIVIDE(text), or ABS(DIVIDE(text)), answers under ISTEXT, ISSTRING, ISNONTEXT, ISLOGICAL, ISBOOLEAN, ISINTEGER, ISINT64, ISDECIMAL, ISCURRENCY and ISDATETIME. ISNUMBER, ISNUMERIC, ISDOUBLE and a text third argument stay refused, because Power BI errors there.
+- A power of an aggregate +/- n answers. ISDOUBLE(SUM/MAX/MIN(col) +/- "text") answers True; `*` and `/` stay refused.
+
+New tests in tests/test_dax_type_tests_gaps_238.py (151 tests). Two old tests updated with measured Power BI answers: tests/test_iteration109_never_blank_zero_10.py (ISNUMBER(CURRENCY(1E15)*2) True, ISNUMBER(MIN(Facts[Sales])^0.5+1) True) and tests/test_iteration150_type_tests_columns_50.py (the refused example is now ISDOUBLE(MAX(Facts[Quantity])*"abc")).
+
+Review (Sonnet, read-only): 211 fresh probes against Power BI: 147 agree, 64 refused (36 are Power BI errors too, 28 are Power BI answers), 0 wrong. Real app 8 of 8 as expected. The 28 refused shapes where Power BI answers are the Task 239 backlog: Currency overflow inside bigger expressions, DIVIDE of text inside bigger expressions, VAR holding a power, COUNT/AVERAGE beside text (brief /Users/armaan/pbi_scratch/brief239.md).
+
+Roles: Sonnet coded (commit 2d2b66b) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved answers: 537,891 match, 2,510 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 33,958 passed (26 xfailed; 36:01). No saved Power BI answer was edited. Merge commit 23411fd.
