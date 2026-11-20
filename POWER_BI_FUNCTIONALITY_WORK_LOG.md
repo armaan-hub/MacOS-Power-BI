@@ -2856,3 +2856,21 @@ Review (Sonnet, read-only): 211 fresh probes against Power BI: 147 agree, 64 ref
 Roles: Sonnet coded (commit 2d2b66b) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved answers: 537,891 match, 2,510 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 33,958 passed (26 xfailed; 36:01). No saved Power BI answer was edited. Merge commit 23411fd.
+
+## 2026-11-20 — Iteration 309 (Task 239: more DAX type tests over failing expressions that Power BI answers now answer too, Chapter 1b)
+
+Function family: same as Tasks 235 to 238 (type tests over an expression whose evaluation fails). Task 239 answers the 28 more shapes that the engine still refused where Power BI answers a value, in four groups:
+- G1: Currency overflow inside bigger expressions: beside aggregates and comparisons, inside INT/ROUND/ABS/SIGN/TRUNC, in IF/SWITCH(TRUE()) conditions, in VAR forms, as a DIVIDE argument.
+- G2: DIVIDE of text inside +1, unary minus, &"a", nested ABS/ROUND/DIVIDE, an aggregate argument, a VAR text, and a sum of DIVIDEs.
+- G3: a VAR holding a power of an aggregate (x+1, x-1, 1-x, x*2).
+- G4: COUNT/COUNTA/AVERAGE/DISTINCTCOUNT/COUNTROWS beside a text literal with + and -.
+
+Guards: mixed-type IF/SWITCH/COALESCE branches stay refused. In `analytics_studio/measures.py` two wrong answers fixed: ISNUMBER(VAR x=DIVIDE("zz",2)...) and ISNUMERIC of a power of an aggregate are now refused, as Power BI errors there. Coder probes: 5,720 expressions, 0 new wrong.
+
+Review (Sonnet, read-only): 291 fresh probes against Power BI: 242 answered and all equal, 0 wrong, 99 newly answered versus main. Real app 242 of 242 equal.
+
+Known: 6 older wrong answers in exotic mixed-type shapes, present on main before Task 239. Task 240 fixes them first (brief /Users/armaan/pbi_scratch/brief240.md, branch antigravity/dax-type-test-wrongs-240): Part A fix the 6 wrong answers, Part B more measured refused shapes; then M-engine gaps and the Chapter 3 Group By dialog check.
+
+Roles: Sonnet coded (commit 0eb53af) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,893 match, 2,508 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 34,382 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 28c8126.
