@@ -8762,6 +8762,7 @@ def _normalize_model_column_types(model: Any) -> dict[str, dict[str, str]]:
 
 
 _TABLE_VARIABLE = "\0"  # the columns of a table variable sit beside the tables, under this prefix and the variable's name
+_NUMERIC_VARIABLE = "\x00numeric:"  # Task 240: prefix of the keys that hold the numeric static type of a VAR beside its comparison type
 
 
 def _join_column_types(types: list[str | None]) -> str:
@@ -8912,6 +8913,22 @@ def _is_never_blank_logical(node: Any) -> bool:
     return isinstance(node, tuple) and bool(node) and (node[0] in {"boolean", "comparison"} or (node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]))
 
 
+_VARIANT_FOLD = [0]  # Task 240: above zero while a type test is evaluated (the Variant typing below is measured for type tests only)
+
+
+def _variant_taken_type(node: Any, columns: Any, variables: Any) -> str | None:
+    """Task 240 (measured): the number function of a Variant IF / SWITCH with constant conditions has the type of the branch the Variant takes
+    (1+TRUNC(IF(FALSE(),"t",SUM(whole))) is an Int64); None when node is no such Variant."""
+    if not _VARIANT_FOLD[0] or not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() in {"IF", "IF.EAGER", "SWITCH"}):
+        return None
+    args = node[2]
+    res_nodes = list(args[1:]) if str(node[1]).upper() != "SWITCH" else [args[i] for i in range(2, len(args), 2)] + ([args[-1]] if len(args) >= 4 and len(args) % 2 == 0 else [])
+    if _unify_numeric_types([_static_numeric_type(r, columns, variables) for r in res_nodes]) is not None:
+        return None
+    chosen = dax_failing_type_tests.constant_branch(args, switch=str(node[1]).upper() == "SWITCH")
+    return None if chosen is None else _static_numeric_type(chosen, columns, variables)
+
+
 def _static_numeric_type(
     node: Any,
     model: Any = None,
@@ -8988,6 +9005,8 @@ def _static_numeric_type(
     if kind == "unary":
         op, child = node[1], node[2]
         t = _static_numeric_type(child, columns, variables)
+        if t is None and op in {"+", "-"}:
+            t = _variant_taken_type(child, columns, variables)
         if op == "+":
             if t in {"int64", "double", "currency", "datetime", "blank"}:
                 return t
@@ -9122,26 +9141,34 @@ def _static_numeric_type(
         return None
     if fn in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC"}:
         at = _static_numeric_type(args[0], columns, variables) if args else None
+        if args and at is None:
+            at = _variant_taken_type(args[0], columns, variables)
         if at in {"int64", "double", "currency"}:
             return at
+        if at == "blank":
+            return "blank"  # Task 240 (measured): ROUND / ROUNDUP / ROUNDDOWN / TRUNC of BLANK() is a BLANK again, so CURRENCY(2)-ROUND(BLANK(),-1) keeps the Currency
         return "int64" if at == "bool" else "double"
     if fn == "INT":
         at = _static_numeric_type(args[0], columns, variables) if args else None
         if at == "currency":
             return "currency"
+        if at == "blank":
+            return "blank"  # Task 240 (measured): INT(BLANK()) is a BLANK again
         return "int64" if at in {"int64", "double", "text", "bool"} else None
     if fn in {"EVEN", "ODD"}:
         at = _static_numeric_type(args[0], columns, variables) if args else None
         return at if at in {"int64", "double", "currency"} else None
     if fn == "ABS":
         at = _static_numeric_type(args[0], columns, variables) if args else None
-        if at in {"int64", "double", "currency"}:
-            return at
+        if at in {"int64", "double", "currency", "blank"}:
+            return at  # Task 240 (measured): ABS(BLANK()) is a BLANK again
         return {"bool": "int64", "text": "double", "datetime": "double"}.get(at or "")
     if fn in {"FLOOR", "CEILING", "MROUND", "MOD", "ISO.CEILING"}:
         if len(args) != 2 and not (fn == "ISO.CEILING" and len(args) == 1):
             return None
         lt = _static_numeric_type(args[0], columns, variables)
+        if lt is None and fn == "MOD":
+            lt = _variant_taken_type(args[0], columns, variables)
         # Task 150 (measured): an omitted ISO.CEILING significance is 1, a whole number, so ISO.CEILING(x) has the type of CEILING(x,1)
         rt = "int64" if len(args) == 1 else _static_numeric_type(args[1], columns, variables)
         if fn == "MOD":
@@ -9206,6 +9233,10 @@ def _static_numeric_type(
         else:
             res_nodes = list(args)
         types = [_static_numeric_type(r, columns, variables) for r in res_nodes]
+        if fn in {"IF", "IF.EAGER", "SWITCH"} and _VARIANT_FOLD[0] and _unify_numeric_types(types) is None:
+            taken = _variant_taken_type(node, columns, variables)
+            if taken is not None:
+                return taken  # Task 240 (measured): a Variant IF / SWITCH with constant conditions has the type of the branch it takes
         if fn == "IFERROR" and types[:1] and types[0] in {"int64", "double", "currency"} and types[1:] == ["text"]:
             return types[0]  # Part B: the replacement text only shows where the number is an error
         known = {t for t in types if t != "blank"}
@@ -9864,6 +9895,7 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
         for name, value in node[1]:
             _reject_mismatched_comparison_types(value, columns, scope)
             scope[str(name)] = _static_type(value, columns, scope)
+            scope[_NUMERIC_VARIABLE + str(name)] = _static_numeric_type(value, columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in scope.items() if key.startswith(_NUMERIC_VARIABLE)})  # Task 240: the numeric type of a VAR, read by the type tests below
             columns[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(value, columns, {})
         _reject_mismatched_comparison_types(node[2], columns, scope)
         return
@@ -9902,7 +9934,7 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                     raise MeasureError("Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.")
         elif function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
             if arguments and not unevaluated:
-                st = _static_numeric_type(arguments[0], columns, variables)
+                st = _static_numeric_type(arguments[0], columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in variables.items() if key.startswith(_NUMERIC_VARIABLE)})
                 if st is None:
                     raise MeasureError(f"Cannot determine static type for function {function}.")
         elif function in {"ISONORAFTER", "ISAFTER"}:
@@ -21124,6 +21156,10 @@ def _evaluate_measures_once(
             or task136_text_over_logical_literal(arguments[0])
         ):
             raise dax_typed.refusal("A type test over a failing conversion of data, a failing DATE in a text function or a text function over a logical literal is not modelled by the local engine.")  # Task 136: Power BI raises these (add-on) or is not measured
+        if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
+            unmeasured = dax_failing_type_tests.unmeasured_shape(function, arguments[0], lambda held: _static_numeric_type(held, *static_scope()), False, variable_nodes)
+            if unmeasured is not None:
+                raise dax_typed.refusal(f"A type test over {unmeasured} is not modelled by the local engine.")  # Task 240: Power BI answers these differently from the static type
         try:
             values = [evaluate(argument, row_context, allow_text=True) for argument in arguments]
         except _CurrencyConversionError:
@@ -21134,6 +21170,10 @@ def _evaluate_measures_once(
                 raise
             values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
         except (MeasureRuntimeError, _HardError) as failure:
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
+                failed_shape = dax_failing_type_tests.unmeasured_shape(function, arguments[0], lambda held: _static_numeric_type(held, *static_scope()), True, variable_nodes)
+                if failed_shape is not None:
+                    raise dax_typed.refusal(f"A type test over {failed_shape} is not modelled by the local engine.") from failure
             if function in _TYPE_TESTS and len(arguments) == 1:
                 bare = _task135_bare_answer(function, arguments[0])  # Task 135: a bare conversion of a text literal is answered by its static type
                 if bare is not None:
@@ -21321,7 +21361,11 @@ def _evaluate_measures_once(
                         answer = st_ans
             if answer is None:
                 raise
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and dax_failing_type_tests.value_needed(function, arguments[0], answer):
+                raise dax_typed.refusal("A type test of a failing value Power BI may raise the error for is not modelled by the local engine.") from failure  # Task 240: the answer needs the value of an argument that can be BLANK
             return answer
+        if function == "ISNUMERIC" and len(arguments) == 1 and dax_dates.is_date(values[0]) and static_type_of(arguments[0]) in {"int64", "double", "currency", "decimal"}:
+            return True  # Task 240 (measured): ISNUMERIC(IF(TRUE(),TIME(1,0,0),2.5)) is True, the IF is a Double whichever branch it takes
         values = [  # a Double of 1E15 or more that is about to become text prints with an exponent (Task 19 Part G)
             double_as_text(argument, value, row_context) if index in dax_typed.TEXT_ARGUMENTS.get(function, ()) else value
             for index, (argument, value) in enumerate(zip(arguments, values))
@@ -24064,6 +24108,12 @@ def _evaluate_measures_once(
                 return False
             return value
         if function in _TYPED_ARITY:
+            if function in _TYPE_TESTS and function != "ISBLANK":
+                _VARIANT_FOLD[0] += 1
+                try:
+                    return evaluate_typed_function(function, arguments, row_context)
+                finally:
+                    _VARIANT_FOLD[0] -= 1
             return evaluate_typed_function(function, arguments, row_context)
         if function in _LOOKUP_ARITY and function not in {"GENERATESERIES", "ROW"}:
             return evaluate_lookup_function(function, arguments, row_context)
