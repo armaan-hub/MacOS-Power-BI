@@ -8913,20 +8913,63 @@ def _is_never_blank_logical(node: Any) -> bool:
     return isinstance(node, tuple) and bool(node) and (node[0] in {"boolean", "comparison"} or (node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]))
 
 
+_CONTEXT_DEPTH = [0]  # Task 241 (review): above zero while the static check walks below a CALCULATE / iterator / FILTER (a Variant there is decided in another context)
+_STATIC_PASS_VALUE: list[Any] = [None]  # Task 241: while the query is checked after it ran, a function that computes a condition for the Variant typing below
+
+
+def _typed_with_variants(node: Any, columns: Any, variables: Any) -> str | None:
+    """Task 241: the static numeric type of node, a Variant under a number function typed by the branch the data takes (only while the checked query is evaluated)."""
+    hook = _STATIC_PASS_VALUE[0]
+    if hook is None or _CONTEXT_DEPTH[0] or dax_failing_type_tests.context_changing(node) or not dax_failing_type_tests.variant_pattern(node, lambda held: _static_numeric_type(held, columns, variables)):
+        return _static_numeric_type(node, columns, variables)
+    held_hook = dax_failing_type_tests.CONDITION_VALUE[0]
+    dax_failing_type_tests.CONDITION_VALUE[0] = hook
+    _VARIANT_FOLD[0] += 1
+    try:
+        return _static_numeric_type(node, columns, variables)
+    finally:
+        _VARIANT_FOLD[0] -= 1
+        dax_failing_type_tests.CONDITION_VALUE[0] = held_hook
+
+
 _VARIANT_FOLD = [0]  # Task 240: above zero while a type test is evaluated (the Variant typing below is measured for type tests only)
+
+
+def _plain_branch_types(res_nodes: list[Any], columns: Any, variables: Any) -> list[str | None]:
+    """Task 241: the static types of the result branches of an IF / SWITCH / COALESCE as the query is typed before any Variant takes its branch
+    (a branch that holds a Variant has no type of its own yet, so the IF around it is a Variant too)."""
+    held = _VARIANT_FOLD[0]
+    _VARIANT_FOLD[0] = 0
+    try:
+        return [_static_numeric_type(r, columns, variables) for r in res_nodes]
+    finally:
+        _VARIANT_FOLD[0] = held
 
 
 def _variant_taken_type(node: Any, columns: Any, variables: Any) -> str | None:
     """Task 240 (measured): the number function of a Variant IF / SWITCH with constant conditions has the type of the branch the Variant takes
     (1+TRUNC(IF(FALSE(),"t",SUM(whole))) is an Int64); None when node is no such Variant."""
-    if not _VARIANT_FOLD[0] or not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() in {"IF", "IF.EAGER", "SWITCH"}):
+    if not _VARIANT_FOLD[0] or not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE"}):
         return None
     args = node[2]
-    res_nodes = list(args[1:]) if str(node[1]).upper() != "SWITCH" else [args[i] for i in range(2, len(args), 2)] + ([args[-1]] if len(args) >= 4 and len(args) % 2 == 0 else [])
-    if _unify_numeric_types([_static_numeric_type(r, columns, variables) for r in res_nodes]) is not None:
+    name = str(node[1]).upper()
+    res_nodes = list(args) if name == "COALESCE" else list(args[1:]) if name != "SWITCH" else [args[i] for i in range(2, len(args), 2)] + ([args[-1]] if len(args) >= 4 and len(args) % 2 == 0 else [])
+    plain_types = _plain_branch_types(res_nodes, columns, variables)
+    if _unify_numeric_types(plain_types) is not None:
         return None
-    chosen = dax_failing_type_tests.constant_branch(args, switch=str(node[1]).upper() == "SWITCH")
-    return None if chosen is None else _static_numeric_type(chosen, columns, variables)
+    chosen = dax_failing_type_tests.constant_branch(args, switch=name == "SWITCH", coalesce=name == "COALESCE")
+    if chosen is None:
+        return None
+    taken = _static_numeric_type(chosen, columns, variables)
+    numbers = [held for held in plain_types if held in {"int64", "double", "currency", "datetime"}]
+    if taken in {"int64", "double", "currency"} and len(set(numbers)) > 1 and plain_types[:1] not in (["int64"], ["double"], ["currency"], ["datetime"]):
+        # Task 241 (measured, 1,458 SWITCH probes): when the first result is no number (a text, a Boolean) the number results of a SWITCH are unified and the taken
+        # number has that type (SWITCH(TRUE(),c,"7",c2,2,2.5) is a Double whichever number runs); when the first result is a number every number keeps its own type
+        united = _unify_numeric_types(numbers)
+        if name != "SWITCH" or united not in {"int64", "double", "currency"}:
+            return None  # IF / COALESCE of this shape are not measured
+        return united
+    return taken
 
 
 def _static_numeric_type(
@@ -9154,7 +9197,7 @@ def _static_numeric_type(
             return "currency"
         if at == "blank":
             return "blank"  # Task 240 (measured): INT(BLANK()) is a BLANK again
-        return "int64" if at in {"int64", "double", "text", "bool"} else None
+        return "int64" if at in {"int64", "double", "text", "bool", "datetime"} else None  # Task 241 (measured): INT of a date is an Int64
     if fn in {"EVEN", "ODD"}:
         at = _static_numeric_type(args[0], columns, variables) if args else None
         return at if at in {"int64", "double", "currency"} else None
@@ -9167,11 +9210,15 @@ def _static_numeric_type(
         if len(args) != 2 and not (fn == "ISO.CEILING" and len(args) == 1):
             return None
         lt = _static_numeric_type(args[0], columns, variables)
-        if lt is None and fn == "MOD":
+        if lt is None and fn in {"MOD", "CEILING", "FLOOR", "MROUND"}:
             lt = _variant_taken_type(args[0], columns, variables)
         # Task 150 (measured): an omitted ISO.CEILING significance is 1, a whole number, so ISO.CEILING(x) has the type of CEILING(x,1)
         rt = "int64" if len(args) == 1 else _static_numeric_type(args[1], columns, variables)
         if fn == "MOD":
+            if lt == "blank" and rt == "int64":
+                return "blank"  # Task 241 (measured): MOD(BLANK(),3) is a BLANK
+            if lt in {"bool", "datetime"} and rt in {"int64", "double"}:
+                return "double"  # Task 241 (measured): MOD(TRUE(),3) and MOD(DATE(2020,1,1),3) are Doubles
             if (lt, rt) == ("int64", "int64"):
                 return "int64"
             if "currency" in (lt, rt) and {lt, rt} <= {"currency", "int64"}:
@@ -9180,6 +9227,10 @@ def _static_numeric_type(
                 if lt is not None or rt is not None:
                     return "double"
             return None
+        if lt == "blank" and rt == "int64":
+            return "blank"  # Task 241 (measured): CEILING / FLOOR / MROUND of BLANK() is a BLANK
+        if lt in {"text", "bool", "datetime"} and rt in {"int64", "double", "currency"}:
+            lt = "int64"  # Task 241 (measured): CEILING / FLOOR / MROUND of a text number, a Boolean or a date have the type of their multiple, as an Int64 does
         if lt not in {"int64", "double", "currency"} or rt not in {"int64", "double", "currency"}:
             return None
         if rt == "currency":
@@ -9233,7 +9284,7 @@ def _static_numeric_type(
         else:
             res_nodes = list(args)
         types = [_static_numeric_type(r, columns, variables) for r in res_nodes]
-        if fn in {"IF", "IF.EAGER", "SWITCH"} and _VARIANT_FOLD[0] and _unify_numeric_types(types) is None:
+        if fn in {"IF", "IF.EAGER", "SWITCH", "COALESCE"} and _VARIANT_FOLD[0] and (_unify_numeric_types(types) is None or _unify_numeric_types(_plain_branch_types(res_nodes, columns, variables)) is None):
             taken = _variant_taken_type(node, columns, variables)
             if taken is not None:
                 return taken  # Task 240 (measured): a Variant IF / SWITCH with constant conditions has the type of the branch it takes
@@ -9895,7 +9946,7 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
         for name, value in node[1]:
             _reject_mismatched_comparison_types(value, columns, scope)
             scope[str(name)] = _static_type(value, columns, scope)
-            scope[_NUMERIC_VARIABLE + str(name)] = _static_numeric_type(value, columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in scope.items() if key.startswith(_NUMERIC_VARIABLE)})  # Task 240: the numeric type of a VAR, read by the type tests below
+            scope[_NUMERIC_VARIABLE + str(name)] = _typed_with_variants(value, columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in scope.items() if key.startswith(_NUMERIC_VARIABLE)})  # Task 240: the numeric type of a VAR, read by the type tests below
             columns[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(value, columns, {})
         _reject_mismatched_comparison_types(node[2], columns, scope)
         return
@@ -9934,7 +9985,7 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                     raise MeasureError("Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.")
         elif function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
             if arguments and not unevaluated:
-                st = _static_numeric_type(arguments[0], columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in variables.items() if key.startswith(_NUMERIC_VARIABLE)})
+                st = _typed_with_variants(arguments[0], columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in variables.items() if key.startswith(_NUMERIC_VARIABLE)})
                 if st is None:
                     raise MeasureError(f"Cannot determine static type for function {function}.")
         elif function in {"ISONORAFTER", "ISAFTER"}:
@@ -9982,13 +10033,18 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                 f"DAX comparison operations do not support comparing values of type {_type_display(left)} with values of type {_type_display(right)}. "
                 "Consider using the VALUE or FORMAT function to convert one of the values."
             )
-    for part in node[1:]:
-        if isinstance(part, tuple) and part and isinstance(part[0], str):
-            _reject_mismatched_comparison_types(part, columns, variables, unevaluated=unevaluated)
-        elif isinstance(part, (tuple, list, frozenset)):
-            for item in part:
-                if isinstance(item, tuple):
-                    _reject_mismatched_comparison_types(item, columns, variables, unevaluated=unevaluated)
+    shifted = dax_failing_type_tests.is_context_call(node)
+    _CONTEXT_DEPTH[0] += shifted
+    try:
+        for part in node[1:]:
+            if isinstance(part, tuple) and part and isinstance(part[0], str):
+                _reject_mismatched_comparison_types(part, columns, variables, unevaluated=unevaluated)
+            elif isinstance(part, (tuple, list, frozenset)):
+                for item in part:
+                    if isinstance(item, tuple):
+                        _reject_mismatched_comparison_types(item, columns, variables, unevaluated=unevaluated)
+    finally:
+        _CONTEXT_DEPTH[0] -= shifted
 
 
 
@@ -21694,8 +21750,21 @@ def _evaluate_measures_once(
             column_types[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(bound, column_types, scope)
         return column_types, scope
 
+    def variant_value(node: tuple[Any, ...], held_row_context: Any) -> tuple[bool, Any] | None:
+        """Task 241: the value of a condition (or of a COALESCE argument) that decides the branch a Variant takes, computed from the data as the query does."""
+        held_hook = dax_failing_type_tests.CONDITION_VALUE[0]
+        dax_failing_type_tests.CONDITION_VALUE[0] = None  # a Variant inside the condition itself is typed by literal conditions only
+        try:
+            return True, evaluate(node, held_row_context, allow_text=True)
+        except Exception:  # an error, a refusal or a stop: the branch is not decided here, the shape stays refused
+            return None
+        finally:
+            dax_failing_type_tests.CONDITION_VALUE[0] = held_hook
+
     def static_type_of(node: tuple[Any, ...]) -> str | None:
-        """The static type of an expression, asked once per node: it does not depend on the row."""
+        """The static type of an expression, asked once per node: it does not depend on the row (except while a type test types a Variant: Task 241)."""
+        if _VARIANT_FOLD[0] and dax_failing_type_tests.CONDITION_VALUE[0] is not None and any(isinstance(held, tuple) and len(held) == 3 and held[0] == "call" and str(held[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE"} for held in _walk_nodes(node)):
+            return _static_numeric_type(node, *static_scope())  # Task 241: a Variant is typed by the branch the data takes now, so it is not asked once
         if id(node) not in static_type_of_nodes:
             static_type_of_nodes[id(node)] = _static_numeric_type(node, *static_scope())
         return static_type_of_nodes[id(node)]
@@ -24110,9 +24179,16 @@ def _evaluate_measures_once(
         if function in _TYPED_ARITY:
             if function in _TYPE_TESTS and function != "ISBLANK":
                 _VARIANT_FOLD[0] += 1
+                held_hook = dax_failing_type_tests.CONDITION_VALUE[0]
+                dax_failing_type_tests.CONDITION_VALUE[0] = (
+                    (lambda held_node, held_row=row_context: variant_value(held_node, held_row))
+                    if len(arguments) == 1 and not dax_failing_type_tests.context_changing(arguments[0], variable_nodes) and dax_failing_type_tests.variant_pattern(arguments[0], lambda held: _static_numeric_type(held, *static_scope()), variable_nodes)
+                    else None
+                )  # Task 241: the data decides the branch of a Variant only under a number function
                 try:
                     return evaluate_typed_function(function, arguments, row_context)
                 finally:
+                    dax_failing_type_tests.CONDITION_VALUE[0] = held_hook
                     _VARIANT_FOLD[0] -= 1
             return evaluate_typed_function(function, arguments, row_context)
         if function in _LOOKUP_ARITY and function not in {"GENERATESERIES", "ROW"}:
@@ -25625,8 +25701,13 @@ def _evaluate_measures_once(
         }
         for ctx in contexts_by_id.values()
     }
-    for item in selected:
-        _reject_mismatched_comparison_types(parsed[item["name"].casefold()], column_types_by_table)
+    held_hook = _STATIC_PASS_VALUE[0]
+    _STATIC_PASS_VALUE[0] = lambda held_node: variant_value(held_node, None)  # Task 241: the static check types a Variant under a number function by the branch the data takes
+    try:
+        for item in selected:
+            _reject_mismatched_comparison_types(parsed[item["name"].casefold()], column_types_by_table)
+    finally:
+        _STATIC_PASS_VALUE[0] = held_hook
     for value in results.values():
         if dax_dates.is_date(value) and not value.is_infinite():
             dax_dates.date_text(value)  # a date that cannot be shown (before day zero, past 9999) is refused here, not when a card formats it

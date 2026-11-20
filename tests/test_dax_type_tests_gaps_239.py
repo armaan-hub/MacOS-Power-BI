@@ -420,7 +420,6 @@ ERRORS = [
 ]
 
 STILL_REFUSED = [
-    ('ISDOUBLE(-(COALESCE(AVERAGE(Facts[Quantity]),TRUE())))', 'True'),
     ('ISLOGICAL(POWER((-CURRENCY(2E15)*4)<CURRENCY(3E15)*3,2))', 'False'),
     ('ISTEXT(DIVIDE(2,"cd")+COUNTA(Facts[Note])-"u"-IF(FALSE(),"s",MAX(Facts[Quantity])^0.3))', 'False'),
 ]
@@ -462,5 +461,5 @@ def test_this_file_holds_enough_shapes() -> None:
     assert len(SEED) == 28
     assert len(ANSWERED) >= 240
     assert len(ERRORS) >= 110
-    assert len(STILL_REFUSED) == 3  # Task 240 answered the other 22 (see tests/test_dax_type_tests_wrongs_240.py)
+    assert len(STILL_REFUSED) == 2  # Task 240 answered 22 (see tests/test_dax_type_tests_wrongs_240.py), Task 241 answered ISDOUBLE(-(COALESCE(AVERAGE(Facts[Quantity]),TRUE()))) = True (see tests/test_dax_type_tests_variants_241.py)
     assert len(FIXED_WRONG_ANSWERS) == 4
