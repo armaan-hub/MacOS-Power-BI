@@ -6334,6 +6334,8 @@ def _has_call(node: Any, names: frozenset[str]) -> bool:
 
 
 _ITERATOR_BRANCH_CALLS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "PRODUCTX", "MEDIANX", "GEOMEANX"})
+_MEASURED_ITERATOR_BRANCH_CALLS = frozenset({"SUMX", "MAXX", "MINX"})  # Task 244: AVERAGEX and an IFERROR / SWITCH / SELECTEDVALUE Variant column stay refused (not measured right)
+_UNMEASURED_VARIANT_CALLS = frozenset({"SWITCH", "SELECTEDVALUE", "GENERATE", "GENERATEALL", "UNION", "CROSSJOIN", "EXCEPT", "INTERSECT", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "TREATAS", "DATATABLE", "GROUPBY", "ROW"})
 
 
 def _variant_iterator_in_branch(argument: Any) -> bool:
@@ -6346,6 +6348,15 @@ def _variant_iterator_in_branch(argument: Any) -> bool:
                 if isinstance(inner, tuple) and len(inner) > 2 and inner[0] in {"call", "table_call"} and str(inner[1]).upper() in _ITERATOR_BRANCH_CALLS and inner[2]:
                     for built in _walk_nodes(inner[2][0]):
                         if isinstance(built, tuple) and len(built) > 2 and built[0] in {"call", "table_call"} and str(built[1]).upper() in _BUILT_TABLE_CALLS and _has_call(built, _CONDITIONAL_CALLS):
+                            if (
+                                str(inner[1]).upper() in _MEASURED_ITERATOR_BRANCH_CALLS and not _has_call(built, _UNMEASURED_VARIANT_CALLS)
+                                and all(
+                                    len(held[2]) == 2 and held[2][1][0] == "number"  # only a number as the IFERROR fallback is measured (a text fallback is typed differently)
+                                    for held in _walk_nodes(built)
+                                    if isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() == "IFERROR"
+                                )
+                            ):
+                                continue  # Task 244: measured on Power BI, the type of the taken branch is what the local engine computes
                             return True
     return False
 
@@ -10569,6 +10580,7 @@ def _evaluate_measures_once(
     eff_suppressed: dict[str, dict[str, Any]] = {}  # table -> casefolded column -> the outer filter object the shadow replaced
     eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
     eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
+    eff_group_meta: dict[str, dict[str, Any]] = {}  # Task 244: table -> the group of a SUMMARIZE column over that table as a set of whole rows (see summarize_group_value)
     eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
     eff_sc_args: dict[str, dict[str, tuple[Any, Any]]] = {}  # SUMMARIZECOLUMNS TREATAS filter arguments: table -> casefolded column -> (filter object it set, outer filter it replaced)
     eff_blocked = False
@@ -10788,18 +10800,33 @@ def _evaluate_measures_once(
         replace. Filters on other columns and the context transition do not count. None when the filter context cannot say."""
         table_id = source_context["id"]
         wanted = {column.casefold() for column in columns}
+        group_columns = {  # Task 244: the columns the group of a SUMMARIZE column over this table (a set of whole rows) still filters
+            column.casefold() for shape in _context_shapes(evaluation_contexts_by_id.get(table_id, {})) if shape.get("group_whole") for column in shape["active"]
+        } if table_id in eff_group_meta else frozenset()
         cleared = {header.casefold() for header in source_context["headers"]} - wanted
         for folded, outer in eff_suppressed.get(table_id, {}).items():
             if current_filter(table_id, folded) is outer:  # still the outer filter the shadow replaced
                 cleared.add(folded)
         for folded, key_rows in eff_group_keys.get(table_id, {}).items():
-            if current_filter(table_id, folded) is key_rows:  # a group key still stands as the SUMMARIZE row set
+            if current_filter(table_id, folded) is key_rows or folded in group_columns:  # a group key still stands as the SUMMARIZE row set
                 if folded in wanted and eff_rank_table:
                     cleared.discard(folded)  # Power BI: RANKX(ALLSELECTED(col), ...) in a SUMMARIZE column ranks within the group's key
                 elif folded in wanted or any((table_id, name) in eff_touched for name in wanted):
                     cleared.add(folded)  # a key inside the columns asked for, or after a modifier touched them, drops out
                 else:
                     cleared.discard(folded)  # a key outside them narrows the answer to its group
+        if table_id in eff_group_meta and "filter_table_rows" in evaluation_contexts_by_id[table_id]:
+            raise MeasureError("ALLSELECTED of columns inside a column added by SUMMARIZE beside a table filter on the same table is not modelled by the local engine.")  # Task 244
+        if group_columns and eff_group_meta[table_id]["key_count"] >= 2 and any(held_table == table_id for held_table, _column in eff_touched):
+            raise MeasureError("ALLSELECTED of columns inside a column added by SUMMARIZE after a filter on another group-by column of the same table is not modelled by the local engine.")  # Task 244
+        if group_columns and any(
+            str(column).casefold() in eff_group_keys.get(table_id, {}) and str(column).casefold() not in wanted
+            for column in evaluation_contexts_by_id[table_id].get("filter_column_extra", {})
+        ):
+            raise MeasureError("ALLSELECTED of columns inside a column added by SUMMARIZE beside a KEEPFILTERS filter on a group-by column is not modelled by the local engine.")  # Task 244
+        for folded in group_columns:  # Task 244: the rest of the group's whole rows is not seen by ALLSELECTED, whatever column it asks for
+            if folded not in eff_group_keys.get(table_id, {}):
+                cleared.add(folded)
         replaced_outer: list[Any] = []
         for folded, (set_by_transition, outer) in eff_transition.get(table_id, {}).items():
             if current_filter(table_id, folded) is set_by_transition:  # still only the row's context transition
@@ -12281,6 +12308,29 @@ def _evaluate_measures_once(
             merged = {**merged, source["id"]: (source, kept)}
         visible = {t: v for t, v in merged.items() if t != source["id"] and t not in hidden_keys}
         hidden = {t: v for t, v in merged.items() if t not in visible}
+        if source["id"] in own and not unknown_tables and not blank_partners and not hidden_keys and not visible and not any(t != source["id"] for t in hidden):
+            # Task 244 (measured): the group of a SUMMARIZE over one table is a set of whole rows of it; a CALCULATE filter or ALL on a column
+            # of the group (inside the added column) keeps constraining the other columns by those rows' values, instead of replacing the key
+            headers = tuple(source["headers"])
+            whole = shape_projection_rows(source, members, headers)
+            key_rows = {column.casefold(): rows for column, rows in own[source["id"]][1].items()}
+            outer_state = evaluation_contexts_by_id.get(source["id"], {})
+            meta = {
+                "source": source, "keys": key_rows, "objects": whole, "key_count": len(key_rows),
+                "outer": {header.casefold(): current_filter(source["id"], header.casefold()) for header in headers},  # the filters outside the group, which ALLSELECTED sees again
+                "outer_plain": not (_context_shapes(outer_state) or "filter_table_rows" in outer_state or eff_sc_args),
+                "layers": eff_layers, "suppressed": dict(eff_suppressed), "transition": dict(eff_transition),  # the shadow of SUMMARIZE's input table, which ALLSELECTED puts back
+            }
+            own = {source["id"]: (source, {column: whole for column in headers}, [{"columns": headers, "rows": whole, "active": headers, "dirty": False, "whole_row": True, "group_whole": True}], {}, {}, frozenset(key_rows))}
+            held_meta = eff_group_meta.get(source["id"])
+            eff_group_meta[source["id"]] = meta
+            try:
+                return with_column_filters(own, lambda: evaluate(expression), "keys")
+            finally:
+                if held_meta is None:
+                    eff_group_meta.pop(source["id"], None)
+                else:
+                    eff_group_meta[source["id"]] = held_meta
         return with_column_filters(own, lambda: with_column_filters(hidden_keys, lambda: with_column_filters(
             hidden, lambda: with_column_filters(visible, lambda: evaluate(expression), False), True), True), "keys")
 
@@ -17914,7 +17964,7 @@ def _evaluate_measures_once(
             assert target_context is not None
             table_id = target_context["id"]
             if "filter_table_rows" in target_context and "filter_shapes" not in target_context or (
-                _context_shapes(target_context) and not shapes_ok
+                _context_shapes(target_context) and not shapes_ok and not all(shape.get("group_whole") for shape in _context_shapes(target_context))  # Task 244: the group of a SUMMARIZE column is a set of whole rows too
             ):
                 raise MeasureError(
                     "Boolean CALCULATE filters cannot replace a table-valued FILTER rowset yet."
@@ -18685,6 +18735,84 @@ def _evaluate_measures_once(
             target["filter_context_complete"] = False
             updated_filter_roots.add(one_id)
 
+    def group_state_plain(meta: dict[str, Any]) -> bool:
+        """Task 244: the table holds only the group SUMMARIZE made (and the filters set on it since), no iterator beside it, no table filter, no KEEPFILTERS."""
+        table_id = meta["source"]["id"]
+        state = evaluation_contexts_by_id[table_id]
+        return not (
+            not meta["outer_plain"] or len(eff_layers) > len(meta["layers"]) or any(layer.table != table_id for layer in eff_layers if layer not in meta["layers"])
+            or eff_suppressed != meta["suppressed"] or eff_transition != meta["transition"]
+            or "filter_table_rows" in state or any(not shape.get("group_whole") for shape in _context_shapes(state)) or state.get("filter_column_extra")
+        )
+
+    def group_allselected_state(meta: dict[str, Any], wanted: Any, keep_wanted_keys: bool = False) -> tuple[Any, dict[str, Any], list[str], dict[str, Any]]:
+        """Task 244 (measured): what ALLSELECTED(X) sees inside a column added by SUMMARIZE over one table: the rows of that table (in the filters outside the group) that agree
+        with the group on the group-by columns that are not in X, narrowed by the rows SUMMARIZE iterates and by what a CALCULATE around has filtered since.
+        Returns (those rows, the filters set on the table since, the columns cleared since, the group-by columns kept)."""
+        source = meta["source"]
+        table_id = source["id"]
+        headers = tuple(source["headers"])
+        if not group_state_plain(meta):
+            raise MeasureError("ALLSELECTED inside a column added by SUMMARIZE after a filter of another kind on the same table is not modelled by the local engine.")
+        explicit = {column for held_table, column in eff_touched if held_table == table_id}
+        explicit_rows = {column: current_filter(table_id, column) for column in explicit}
+        cleared_here = [header for header in headers if header.casefold() in explicit and explicit_rows[header.casefold()] is None]
+        explicit_rows = {column: rows for column, rows in explicit_rows.items() if rows is not None and rows is not meta["objects"]}
+        kept_keys = {folded: rows for folded, rows in meta["keys"].items() if wanted is not None and (keep_wanted_keys or folded not in wanted)}
+        held_rows = [*kept_keys.values()]
+        layer_rows = []
+        for layer in meta["layers"]:  # the rows SUMMARIZE iterates (its input table) are put back whole when ALLSELECTED touches their columns; the outer filters its input already carries (not those of an ALL(table) input)
+            if layer.table == table_id and (wanted is None or wanted & {column.casefold() for column in layer.columns}):
+                layer_rows.append(frozenset(
+                    index for index, base_row in enumerate(source["rows"])
+                    if row_key(typed_cell(source, column, base_row.get(column)) for column in layer.columns) in layer.tuples
+                ))
+        outer_held = [rows for rows in meta["outer"].values() if rows is not None]
+        if (explicit_rows or cleared_here) and layer_rows and outer_held and any(
+            not all(index in rows for index in layer) for layer in layer_rows for rows in outer_held
+        ):
+            raise MeasureError("ALLSELECTED inside a column added by SUMMARIZE after a filter on the same table, over a table that ignores the filters outside, is not modelled by the local engine.")  # Task 244
+        held_rows += layer_rows if layer_rows else outer_held
+        allowed: Any = None
+        for rows in held_rows:
+            allowed = rows if allowed is None else meet_rows(allowed, rows)
+        if allowed is None:
+            allowed = frozenset(range(len(source["rows"])))
+        return allowed, explicit_rows, cleared_here, kept_keys
+
+    def allselected_in_group(expression: tuple[Any, ...], dropped: dict[str, frozenset[str] | None], meta: dict[str, Any]) -> Any:
+        """Task 244 (measured): CALCULATE(e, ALLSELECTED(X)) inside a column added by SUMMARIZE over one table puts the group back as the rows group_allselected_state names;
+        the filters a CALCULATE around set on the table are applied again on it (they replace its columns like a filter beside ALLSELECTED does)."""
+        nonlocal eff_touched
+        source = meta["source"]
+        table_id = source["id"]
+        headers = tuple(source["headers"])
+        wanted = dropped[table_id]
+        allowed, explicit_rows, cleared_here, kept_keys = group_allselected_state(meta, wanted)
+        new_meta = {**meta, "keys": kept_keys, "objects": allowed}
+        entry = (source, {header: allowed for header in headers}, [{"columns": headers, "rows": allowed, "active": headers, "dirty": False, "whole_row": True, "group_whole": True}], {}, {}, frozenset(kept_keys), True)
+        held_meta = eff_group_meta[table_id]
+        eff_group_meta[table_id] = new_meta
+        saved_touched = eff_touched
+        eff_touched = eff_touched | {(table_id, header.casefold()) for header in headers if wanted is None or header.casefold() in wanted}
+        header_by_key = {header.casefold(): header for header in headers}
+
+        def with_explicit_filters() -> Any:
+            def filtered() -> Any:
+                if not explicit_rows:
+                    return evaluate(expression)
+                return with_column_filters(
+                    {table_id: (source, {header_by_key[column]: rows for column, rows in explicit_rows.items()}, [], {}, {})}, lambda: evaluate(expression), False)
+            if not cleared_here:
+                return filtered()
+            return evaluate_with_filter_clear(("thunk", filtered), ("call", "REMOVEFILTERS", tuple(("reference", source["name"], header) for header in cleared_here)), "REMOVEFILTERS")
+
+        try:
+            return with_column_filters({table_id: entry}, with_explicit_filters, "keys")
+        finally:
+            eff_group_meta[table_id] = held_meta
+            eff_touched = saved_touched
+
     def evaluate_with_filter_clear(
         expression: tuple[Any, ...],
         modifier: tuple[Any, ...],
@@ -18718,6 +18846,12 @@ def _evaluate_measures_once(
             dropped = {}
         if not dropped:
             return evaluate_with_filter_clear_core(expression, modifier, function, *rest, **named)
+        group_meta = eff_group_meta.get(next(iter(dropped))) if function == "ALLSELECTED" and len(dropped) == 1 else None
+        if group_meta is not None and group_state_plain(group_meta):
+            return allselected_in_group(expression, dropped, group_meta)
+        if group_meta is not None and evaluation_contexts_by_id[group_meta["source"]["id"]].get("filter_column_extra"):
+            raise MeasureError("ALLSELECTED inside a column added by SUMMARIZE after a KEEPFILTERS filter on the same table is not modelled by the local engine.")  # Task 244
+
         if function == "ALLSELECTED" and eff_active():
             # CALCULATE(e, ALLSELECTED(X)): what X holds of the context transition or of an outer filter a shadow replaced is
             # cleared, then every shadow touching X is put back whole (outer and explicit filters on X stay)
@@ -19261,12 +19395,19 @@ def _evaluate_measures_once(
                     elif folded in new_suppressed.get(table_id, {}) and before is new_suppressed[table_id][folded]:
                         new_suppressed[table_id] = {**new_suppressed[table_id], folded: merged_rows}
             elif transition == "keys":  # SUMMARIZE group keys: seen by ALLSELECTED on columns they do not belong to
-                new_keys[table_id] = {**new_keys.get(table_id, {}), **{column.casefold(): rows for column, rows in column_rows.items()}}
+                key_names = entry[5] if len(entry) > 5 else None  # Task 244: the group-by columns only, when the group is filtered as whole rows
+                new_keys[table_id] = {**({} if len(entry) > 6 and entry[6] else new_keys.get(table_id, {})), **{
+                    column.casefold(): rows for column, rows in column_rows.items() if key_names is None or column.casefold() in key_names
+                }}
             elif transition:  # the row's values become filters ALLSELECTED never sees
                 new_transition[table_id] = {**new_transition.get(table_id, {}), **{
                     column.casefold(): (rows, current_filter(table_id, column.casefold())) for column, rows in column_rows.items()
                 }}  # the filter object it set, and the outer filter it replaced (which ALLSELECTED still sees)
             else:  # an explicit filter replaces the shadow on its columns
+                if table_id in eff_group_meta and len(touched) >= 2 and eff_transition.get(table_id) and any(
+                    shape.get("group_whole") for shape in _context_shapes(updated_by_id.get(table_id, base_context))
+                ):
+                    raise MeasureError("A CALCULATE filter on several columns inside an iterator over a group-by column, inside a column added by SUMMARIZE over that table, is not modelled by the local engine.")  # Task 244: unsure how the rest of the group's whole rows stands under a context transition
                 replaced = touched - frozenset(column.casefold() for column in (entry[3] if len(entry) > 3 else {}))
                 for shape in (entry[2] if len(entry) > 2 else []):
                     replaced |= frozenset(column.casefold() for column in shape["columns"])
