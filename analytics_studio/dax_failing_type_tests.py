@@ -982,20 +982,63 @@ _CONTEXT_CALLS = frozenset({
     "EARLIEST", "RANKX", "CONTAINS", "LOOKUPVALUE", "RELATED", "RELATEDTABLE", "SELECTEDVALUE", "HASONEVALUE", "ISFILTERED", "ISCROSSFILTERED", "ISINSCOPE",
 })
 
+_CONTEXT_CALLS_BELOW = frozenset({  # Task 242: the names that also change the filter or row context; a Variant decided below one of them stays refused (a Variant beside one is not touched)
+    "TOTALYTD", "TOTALQTD", "TOTALMTD", "DATESYTD", "DATESQTD", "DATESMTD", "DATEADD", "SAMEPERIODLASTYEAR", "PARALLELPERIOD", "DATESBETWEEN", "DATESINPERIOD",
+    "PREVIOUSDAY", "PREVIOUSMONTH", "PREVIOUSQUARTER", "PREVIOUSYEAR", "NEXTDAY", "NEXTMONTH", "NEXTQUARTER", "NEXTYEAR",
+    "FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE", "OPENINGBALANCEMONTH", "OPENINGBALANCEQUARTER", "OPENINGBALANCEYEAR", "CLOSINGBALANCEMONTH",
+    "CLOSINGBALANCEQUARTER", "CLOSINGBALANCEYEAR", "CROSSJOIN", "UNION", "EXCEPT", "INTERSECT", "WINDOW", "OFFSET", "INDEX", "ORDERBY", "PARTITIONBY",
+    "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "RANK", "ROWNUMBER", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL", "ADDMISSINGITEMS",
+    "SUBSTITUTEWITHINDEX", "TOPNSKIP", "TOPNPERLEVEL", "FILTERS", "HASONEFILTER", "ALLCROSSFILTERED", "SELECTEDMEASURE", "CURRENTGROUP",
+})
+
 
 def is_context_call(node: Any) -> bool:
     """Task 241 (review): a call that changes the filter or row context of what it holds (CALCULATE, FILTER, an iterator ...)."""
     if not (isinstance(node, tuple) and len(node) > 2 and node[0] == "call"):
         return False
     name = str(node[1]).upper()
-    return name in _CONTEXT_CALLS or (re.fullmatch(r"[A-Z]+X(\.[A-Z]+)?", name) is not None and name not in {"MAX", "INDEX"})  # SUMX, MAXX, STDEVX.S ... (MAX is no iterator)
+    return name in _CONTEXT_CALLS or name in _CONTEXT_CALLS_BELOW or (re.fullmatch(r"[A-Z]+X(\.[A-Z]+)?", name) is not None and name not in {"MAX", "INDEX"})  # SUMX, MAXX, STDEVX.S ... (MAX is no iterator)
+
+
+def selected_alternate(node: Any) -> Any:
+    """Task 242: the alternate result of a node that is SELECTEDVALUE(column, alternate) with a real (not BLANK) alternate, else None."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() == "SELECTEDVALUE" and len(node[2]) == 2):
+        return None
+    reference, alternate = node[2]
+    if not (isinstance(reference, tuple) and reference and reference[0] == "reference") or not isinstance(alternate, tuple) or not alternate:
+        return None
+    if alternate[0] in {"blank", "blank_comment"} or (alternate[0] == "call" and str(alternate[1]).upper() == "BLANK" and not alternate[2]):
+        return None
+    return alternate
+
+
+def selected_variant_inside(argument: Any, variables: dict[str, Any] | None, type_of: Any) -> bool:
+    """Task 242: the argument holds (below a function, an operator or a VAR) a SELECTEDVALUE(column, alternate) whose alternate is of another class than its column:
+    its type is the alternate's or the column's by the filter context, which Power BI decided differently from the static type (measured:
+    ISINTEGER(SELECTEDVALUE(Facts[Region],1)+1) is True, the static type said Double). Unsure => refused."""
+    numbers = {"int64", "double", "currency"}
+    for node in _walk(_expand_variables(argument, variables)):
+        alternate = selected_alternate(node)
+        if alternate is None:
+            continue
+        column_type, alternate_type = type_of(node[2][0]), type_of(alternate)
+        if column_type is not None and (column_type == alternate_type or (column_type in numbers and alternate_type in numbers)):
+            continue
+        return True
+    return False
 
 
 def context_changing(argument: Any, variables: dict[str, Any] | None = None) -> bool:
     """Task 241 (review): the argument holds a call that changes the filter or row context. A Variant below it is decided in that context, which the typing does
     not see, so it stays refused (unsure => refuse)."""
     argument = _expand_variables(argument, variables)
-    return any(is_context_call(node) for node in _walk(argument))
+    if any(is_context_call(node) and str(node[1]).upper() not in _CONTEXT_CALLS_BELOW for node in _walk(argument)):
+        return True
+    return any(  # Task 242: below one of the added names a Variant (IF / SWITCH / COALESCE) is decided in that context
+        node[0] == "call" and str(node[1]).upper() in _CONTEXT_CALLS_BELOW and any(
+            inner[0] == "call" and str(inner[1]).upper() in _VARIANT_CALLS for inner in _walk(node)
+        ) for node in _walk(argument) if len(node) > 2
+    )
 
 
 def variant_pattern(argument: Any, type_of: Any, variables: dict[str, Any] | None = None) -> bool:

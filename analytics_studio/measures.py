@@ -441,6 +441,7 @@ def _consume_infinity(thunk: Any) -> Any:
 _CURRENCY_LIMIT = Decimal("922337203685477.5807")  # the Currency type's range
 _DBL_MIN = dax_typed.DBL_MIN  # smallest positive normal IEEE double; 0 < |x| < _DBL_MIN is subnormal
 _DBL_MIN_FLOAT = dax_typed.DBL_MIN_FLOAT
+_SUBTYPE_TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISDATETIME"})  # Task 242: the tests whose answer is the static number type
 _TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISDATETIME", "ISBOOLEAN", "ISSTRING", "ISNUMERIC", "ISBLANK"})
 
 
@@ -9144,7 +9145,12 @@ def _static_numeric_type(
         return None
     fn, args = node[1], node[2]
     if fn == "SELECTEDVALUE" and args and args[0][0] == "reference":
-        return _static_numeric_type(args[0], columns, variables)  # live Power BI (Part A): SELECTEDVALUE of a column has the column's type, so a date stays a date and a number stays a number
+        column_type = _static_numeric_type(args[0], columns, variables)  # live Power BI (Part A): SELECTEDVALUE of a column has the column's type, so a date stays a date and a number stays a number
+        if len(args) == 2 and column_type in {"int64", "double", "currency"}:
+            alternate_type = _static_numeric_type(args[1], columns, variables)
+            if alternate_type in {"int64", "double", "currency"} or (alternate_type == "datetime" and column_type != "currency"):
+                return _unify_numeric_types([column_type, alternate_type])  # Task 242 (measured): beside a number column a number alternate is unified with it (SELECTEDVALUE(Facts[Sales],1) is a Double, SELECTEDVALUE(Facts[Quantity],1.5) a Double), a date beside an Int64 / Double column too
+        return column_type
     if fn == "XNPV" and len(args) == 4 and _static_numeric_type(args[1], columns, variables) == "currency":
         return "currency"
     if fn in _CURRENCY_AMOUNT_POSITIONS and _currency_amount_call(fn, len(args), lambda pos: _static_numeric_type(args[pos], columns, variables)):
@@ -9988,6 +9994,12 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                 st = _typed_with_variants(arguments[0], columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in variables.items() if key.startswith(_NUMERIC_VARIABLE)})
                 if st is None:
                     raise MeasureError(f"Cannot determine static type for function {function}.")
+                alternate = dax_failing_type_tests.selected_alternate(arguments[0])
+                if alternate is not None and _typed_with_variants(alternate, columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in variables.items() if key.startswith(_NUMERIC_VARIABLE)}) is None:
+                    value_hook = _STATIC_PASS_VALUE[0]
+                    taken = None if _CONTEXT_DEPTH[0] or value_hook is None else value_hook(arguments[0])
+                    if taken is None or not (taken[1] is None or isinstance(taken[1], str)):  # a BLANK or a text answer is False whatever the type (measured)
+                        raise MeasureError(f"Cannot determine static type for function {function}.")  # Task 242: beside a column of several values the alternate is the answer, so its type must be known too
         elif function in {"ISONORAFTER", "ISAFTER"}:
             for i in range(0, len(arguments) - 1, 3):
                 left_t = _static_type(arguments[i], columns, variables)
@@ -21750,6 +21762,53 @@ def _evaluate_measures_once(
             column_types[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(bound, column_types, scope)
         return column_types, scope
 
+    def selected_distinct_values(reference: tuple[Any, ...], function: str) -> dict[tuple[Any, ...], Any]:
+        """The distinct values of a column in the current filter context, as SELECTEDVALUE and HASONEVALUE read them (the visible blank member counts as one BLANK)."""
+        value_context, value_column = resolve_table(reference[1], reference[2])
+        refuse_one_to_one_blank_reader(value_context["id"], function)
+        seen_values: dict[tuple[Any, ...], Any] = {}
+        for row_index, source_row in enumerate(rows_by_table_id[value_context["id"]], 1):
+            value = source_row.get(value_column)
+            _reject_power_query_error(value, value_column, row_index)
+            seen_values.setdefault(cell_key(ascii_fold(value) if isinstance(value, str) else value), value)
+        if (  # Task 83 (live Power BI, scope-fns-73): the visible blank member of the table is one BLANK value, as VALUES lists it
+            value_context["id"] in unknown_member_ids
+            and not unknown_member_hidden(value_context["id"])
+            and cell_key(None) not in seen_values
+            and unknown_member_passes_remaining_filters(
+                evaluation_contexts_by_id.get(value_context["id"], value_context), evaluation_contexts_by_id, evaluation_filter_ids,
+            )
+        ):
+            seen_values[cell_key(None)] = None
+        return seen_values
+
+    def taken_alternate_arguments(function: str, arguments: tuple[tuple[Any, ...], ...], row_context: Any) -> tuple[tuple[Any, ...], ...] | None:
+        """Task 242 (measured): SELECTEDVALUE(column, alternate) beside a column of several values (or none) is its alternate result, so a number-type test of it
+        has the type of that alternate (ISINTEGER(SELECTEDVALUE(Facts[Region],1)) is True; with one Region selected it is the column's Text).
+        The test is then run on the alternate itself, which brings all its Variant rules along."""
+        if function not in _SUBTYPE_TYPE_TESTS or len(arguments) != 1:
+            return arguments
+        alternate = dax_failing_type_tests.selected_alternate(arguments[0])
+        if alternate is None:
+            if dax_failing_type_tests.selected_variant_inside(arguments[0], variable_nodes, static_type_of):
+                raise dax_typed.refusal("A type test over a SELECTEDVALUE with an alternate of another type, below a function, an operator or a VAR, is not modelled by the local engine.")  # Task 242: only the bare SELECTEDVALUE is measured
+            return arguments
+        column_type, alternate_type = static_type_of(arguments[0][2][0]), static_type_of(alternate)
+        numbers = {"int64", "double", "currency"}
+        if any(dax_failing_type_tests.selected_alternate(node) is not None for node in _walk_nodes(alternate) if isinstance(node, tuple) and node):
+            raise dax_typed.refusal("A type test of a SELECTEDVALUE whose alternate is itself a SELECTEDVALUE with an alternate is not modelled by the local engine.")  # Task 242: the inner one has the type of its own alternate (measured), not stacked here
+        if (column_type in numbers and alternate_type in numbers) or (column_type in {"int64", "double"} and alternate_type == "datetime"):
+            return arguments  # unified with the column (see _static_numeric_type)
+        if column_type is not None and column_type == alternate_type:
+            return arguments
+        if column_type not in numbers and column_type != "text":
+            raise dax_typed.refusal("A type test of a SELECTEDVALUE of a date or True/False column with an alternate of another type is not modelled by the local engine.")  # unsure: only text and number columns are measured
+        if len(selected_distinct_values(arguments[0][2][0], "SELECTEDVALUE")) == 1:
+            return arguments
+        if alternate_type is None and isinstance(evaluate(alternate, row_context, allow_text=True), str):
+            return None  # a Variant alternate that takes a text is a Text (measured: ISINTEGER(SELECTEDVALUE(Facts[Region],IF(MAX(Facts[Sales])>15,"abc",7))) is False)
+        return (alternate,)
+
     def variant_value(node: tuple[Any, ...], held_row_context: Any) -> tuple[bool, Any] | None:
         """Task 241: the value of a condition (or of a COALESCE argument) that decides the branch a Variant takes, computed from the data as the query does."""
         held_hook = dax_failing_type_tests.CONDITION_VALUE[0]
@@ -24177,6 +24236,9 @@ def _evaluate_measures_once(
                 return False
             return value
         if function in _TYPED_ARITY:
+            arguments = taken_alternate_arguments(function, arguments, row_context)
+            if arguments is None:
+                return False
             if function in _TYPE_TESTS and function != "ISBLANK":
                 _VARIANT_FOLD[0] += 1
                 held_hook = dax_failing_type_tests.CONDITION_VALUE[0]
@@ -25414,21 +25476,7 @@ def _evaluate_measures_once(
             return delimiter.join(text for _, text in entries) if entries else None
         if function in _COLUMN_SCALAR_ARITY:
             value_context, value_column = resolve_table(arguments[0][1], arguments[0][2])
-            refuse_one_to_one_blank_reader(value_context["id"], function)
-            seen_values: dict[tuple[Any, ...], Any] = {}
-            for row_index, source_row in enumerate(rows_by_table_id[value_context["id"]], 1):
-                value = source_row.get(value_column)
-                _reject_power_query_error(value, value_column, row_index)
-                seen_values.setdefault(cell_key(ascii_fold(value) if isinstance(value, str) else value), value)
-            if (  # Task 83 (live Power BI, scope-fns-73): the visible blank member of the table is one BLANK value, as VALUES lists it
-                value_context["id"] in unknown_member_ids
-                and not unknown_member_hidden(value_context["id"])
-                and cell_key(None) not in seen_values
-                and unknown_member_passes_remaining_filters(
-                    evaluation_contexts_by_id.get(value_context["id"], value_context), evaluation_contexts_by_id, evaluation_filter_ids,
-                )
-            ):
-                seen_values[cell_key(None)] = None
+            seen_values = selected_distinct_values(arguments[0], function)
             if function == "HASONEVALUE":
                 return len(seen_values) == 1
             if len(seen_values) != 1:
