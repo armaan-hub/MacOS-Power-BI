@@ -2938,3 +2938,23 @@ Next: Task 243; then M-engine gaps and the Chapter 3 Group By dialog check.
 Roles: Sonnet coded (commit 3cf23d4) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 38,581 passed (26 xfailed; 1 flaky test, tests/test_static_visual_lifecycle.py::test_static_visuals_insert_render_edit_and_reopen, failed only beside other tests and passed alone). No saved Power BI answer was edited. Merge commit 59c4d51.
+
+## 2026-11-21 — Iteration 313 (Task 243: Variant columns of SUMMARIZE / SUMMARIZECOLUMNS / ROW / GENERATE are typed like ADDCOLUMNS ones; SUMMARIZE over a filtered source groups only the kept rows, Chapter 1b)
+
+Function family: same as Tasks 235 to 242 (type tests over an expression whose evaluation fails), now table builders.
+- Columns added by SUMMARIZE, SUMMARIZECOLUMNS, ROW or GENERATE that hold a Variant (IF, SWITCH, COALESCE or IFERROR mixing text and numbers) are typed like ADDCOLUMNS ones, through the new helper variant_extension_columns in measures.py.
+- Iterators over such a column read only its numbers. If every group holds text, the result is BLANK. This fixes ISSTRING(MAXX(SUMMARIZE(...COALESCE(MAX(Facts[Note]),0)),[s])), which now gives False like Power BI.
+- Value bug fixed: summarize_group_value ignored the filtered source rows when the model has one table, so SUMMARIZE over FILTER, TOPN or CALCULATETABLE added up every row of each group. Groups now use only the rows the source keeps (partial_source).
+- Still refused: group order for a TOPN source or a reordered filtered source; ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL and ISCURRENCY of an IF, SWITCH or COALESCE with a MAXX, MINX, SUMX or AVERAGEX branch over a Variant column (Power BI types these by the branch taken); text conversion errors inside iterators over built tables; TOPN with mixed True/False and number keys; AVERAGEX of a Variant column with a Currency branch.
+- ROW, DATATABLE and SAMPLE were added to _CONTEXT_CALLS_BELOW in dax_failing_type_tests.py.
+
+Coder probes: about 34.5k fresh rows, 0 wrong (main had 1,411 wrong). Earlier measured rows: 66,329, 0 wrong and 0 lost. Type-test battery: 38,851 rows, 0 changed. New tests/test_dax_summarize_type_tests_243.py. REA was not run on msmdsrv; the authority is the Power BI answer check.
+
+Review round 1 (Sonnet, read-only): FAIL, with 1 wrong (probe 223, an IF branch that is MAXX over an ADDCOLUMNS Variant column) and an over-broad SUMMARIZE-over-filter refusal. Both were fixed (commit 8f2435c).
+Re-review (Sonnet, read-only): 310 fresh probes against Power BI (180 value, 130 type test). Branch 186 right / 1 wrong / 123 refused; main 205 / 11 / 94; 0 regressions. 29 type-test rows main answered right are now refused (a coverage cost). The first review's 330 rows on the branch: 248 right, 0 wrong. Real app 67 of 67 matched Power BI; targeted tests 6,010 passed. The 1 wrong is pre-existing on main: CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"s",CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1)),[s]*2),Facts[Quantity]>1) local 92, Power BI 66.
+
+Next: Task 244 (fix the CALCULATE-in-SUMMARIZE value wrong above; try to win back the 29 over-refused conditional-over-Variant-iterator rows by measuring the taken-branch rule). Backlog unchanged: ROUND of a Currency above 1E14; MROUND, BITAND and text functions of a failing number; remaining Variant refusals; M-engine gaps; the Chapter 3 Group By dialog check.
+
+Roles: Sonnet coded (commits 7f34861, 8f2435c) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 40,369 passed (26 xfailed, 8,287 subtests passed). No saved Power BI answer was edited. Merge commit ce803ed.
