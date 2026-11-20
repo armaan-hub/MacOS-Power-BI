@@ -502,7 +502,7 @@ class FixF5CurrencyTests(unittest.TestCase):
 
     def test_arithmetic_overflow_inside_a_type_test_is_still_an_error(self) -> None:
         self.assertTrue(_is_error("ISNUMBER((1/0)*(CURRENCY(2)))"))
-        self.assertTrue(_is_error("ISNUMBER(CURRENCY(1E15)*2)"))
+        self.assertEqual("True", _local("ISNUMBER(CURRENCY(1E15)*2)"))  # Task 238: Power BI answers True (the static type decides; only a division of it is an error)
 
 
 _ARITHMETIC_ERROR = "LOCAL-REJECT"
@@ -703,7 +703,7 @@ class FixTypeTestOfOperatorOverflowTests(unittest.TestCase):
     def test_a_function_argument_failure_still_propagates(self) -> None:
         self.assertTrue(_is_error("ISNUMBER(SQRT(-1))"))
         self.assertTrue(_is_error("ISNUMBER((1/0)*(CURRENCY(2)))"))
-        self.assertTrue(_is_error("ISNUMBER(CURRENCY(1E15)*2)"))
+        self.assertEqual("True", _local("ISNUMBER(CURRENCY(1E15)*2)"))  # Task 238: Power BI answers True (the static type decides; only a division of it is an error)
         self.assertTrue(_is_error("ISCURRENCY(CURRENCY(MAX(Facts[Quantity])*1E15))"))
 
     def test_a_bare_failure_is_unchanged(self) -> None:
@@ -734,7 +734,7 @@ class FixAPowerFailureInTypeTestsTests(unittest.TestCase):
                            "ISDOUBLE(MIN(Facts[Sales])^0.5)", "ISNUMBER(COUNTROWS(Facts)/SUM(Facts[Sales])*+MIN(Facts[Sales])^0.5)"):
             self.assertTrue(_is_error(expression), expression)
         self.assertEqual("False", _local("ISCURRENCY(SUM(Facts[Sales])^1E5)"))
-        self.assertIn("not modelled", _local("ISNUMBER(MIN(Facts[Sales])^0.5+1)"))  # Power BI: True, but ISNUMBER(2/0+0.0^0.0) is the error
+        self.assertEqual("True", _local("ISNUMBER(MIN(Facts[Sales])^0.5+1)"))  # Task 238: Power BI answers True (measured); ISNUMBER(2/0+0.0^0.0) stays the error
 
     def test_arithmetic_around_a_failing_power_is_refused(self) -> None:
         self.assertEqual("True", _local("ISNUMBER(+1.5+0^+COUNTROWS(Facts)^1*-0)"))  # Power BI: True (saved answer, never10_extra)
