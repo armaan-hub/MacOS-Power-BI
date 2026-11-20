@@ -38,6 +38,7 @@ THE HIDING GRAMMAR (what may stand inside the argument for the failure not to sh
 
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 from typing import Any
 
@@ -814,14 +815,15 @@ def constant_branch(arguments: Any, switch: bool = False, coalesce: bool = False
 
 
 _LAZY_NUMBER_CALLS = frozenset({"SIGN", "EXP", "POWER"})  # Task 241 (measured): the number functions of a text that is no number that Power BI answers by their type (no error)
-_PRESERVING_CALLS = frozenset({"TRUNC", "ROUND", "ROUNDUP", "ROUNDDOWN", "ABS", "MOD", "SIGN", "INT", "CEILING", "FLOOR", "MROUND"})
+_PRESERVING_CALLS = frozenset({"TRUNC", "ROUND", "ROUNDUP", "ROUNDDOWN", "ABS", "MOD", "SIGN", "INT"})
+_MULTIPLE_CALLS = frozenset({"CEILING", "FLOOR", "MROUND"})  # Task 241: counted with the number functions only while the evaluator decides the Variant (outside a changed context)
 
 
-def _preserving_operand(node: Any) -> Any:
+def _preserving_operand(node: Any, extended: bool = False) -> Any:
     """The operand of a unary sign or of TRUNC / ROUND / ROUNDUP / ROUNDDOWN / ABS / MOD / SIGN (a number function that keeps the type of what it reads), else None."""
     if node[0] == "unary" and node[1] in {"+", "-"}:
         return node[2]
-    if node[0] == "call" and str(node[1]).upper() in _PRESERVING_CALLS and node[2]:
+    if node[0] == "call" and (str(node[1]).upper() in _PRESERVING_CALLS or ((extended or CONDITION_VALUE[0] is not None) and str(node[1]).upper() in _MULTIPLE_CALLS)) and node[2]:
         return node[2][0]
     return None
 
@@ -917,7 +919,7 @@ def unmeasured_shape(function: str, argument: Any, type_of: Any, failed: bool, v
             consumed.add(id(node[2]))
         elif node[0] == "binary" and node[1] in {"+", "-", "*", "/", "^"}:
             consumed.update({id(node[2]), id(node[3])})
-        elif node[0] == "call" and (str(node[1]).upper() in _ARITHMETIC_RESULT_CALLS or str(node[1]).upper() in _PRESERVING_CALLS or str(node[1]).upper() in {"YEAR", "MONTH", "DAY", "SQRT", "LN", "SIN", "COS", "TAN", "DEGREES", "RADIANS"}):
+        elif node[0] == "call" and (str(node[1]).upper() in _ARITHMETIC_RESULT_CALLS or str(node[1]).upper() in _PRESERVING_CALLS or str(node[1]).upper() in _MULTIPLE_CALLS or str(node[1]).upper() in {"YEAR", "MONTH", "DAY", "SQRT", "LN", "SIN", "COS", "TAN", "DEGREES", "RADIANS"}):
             consumed.update(id(argument_node) for argument_node in node[2])
     for node in _walk(argument):
         if CONDITION_VALUE[0] is not None and _variant_call(node, type_of) and id(node) in consumed and id(node) not in sign_operands and _variant_exposed(argument, type_of, False, True):
@@ -930,7 +932,7 @@ def unmeasured_shape(function: str, argument: Any, type_of: Any, failed: bool, v
         ):
             return "a numeric function of a Variant"  # measured: ISDOUBLE(-(TRUNC(IF(TRUE(),"t",AVERAGE(x))))) is an error, ISDOUBLE(1+TRUNC(IF(FALSE(),"t",SUM(whole)))) is False (the Variant takes the type of its value)
         if node[0] == "call" and str(node[1]).upper() in _VARIANT_CALLS and any(
-            _variant_valued(branch, type_of, function.upper() not in _SUBTYPE_TESTS or not _variant_exposed(argument, type_of)) for branch in _branches(node)
+            _variant_valued(branch, type_of, function.upper() not in _SUBTYPE_TESTS or not _variant_exposed(argument, type_of) or (argument[0] == "call" and str(argument[1]).upper() in {"EXP", "POWER"})) for branch in _branches(node)
         ):
             return "a Variant chosen by IF / SWITCH / COALESCE"  # its type is only known at run time, so it is not unified with the other branch (measured: IF(TRUE(),x,ROUND(OV)) is an Int64)
         if node[0] == "comparison":
@@ -974,12 +976,34 @@ def _variant_exposed(node: Any, type_of: Any, text_ok: bool = True, wide: bool =
     return False
 
 
+_CONTEXT_CALLS = frozenset({
+    "CALCULATE", "CALCULATETABLE", "FILTER", "ALL", "ALLEXCEPT", "ALLSELECTED", "ALLNOBLANKROW", "REMOVEFILTERS", "KEEPFILTERS", "TREATAS", "USERELATIONSHIP",
+    "CROSSFILTER", "VALUES", "DISTINCT", "ADDCOLUMNS", "SELECTCOLUMNS", "GENERATE", "GENERATEALL", "SUMMARIZE", "SUMMARIZECOLUMNS", "GROUPBY", "TOPN", "EARLIER",
+    "EARLIEST", "RANKX", "CONTAINS", "LOOKUPVALUE", "RELATED", "RELATEDTABLE", "SELECTEDVALUE", "HASONEVALUE", "ISFILTERED", "ISCROSSFILTERED", "ISINSCOPE",
+})
+
+
+def is_context_call(node: Any) -> bool:
+    """Task 241 (review): a call that changes the filter or row context of what it holds (CALCULATE, FILTER, an iterator ...)."""
+    if not (isinstance(node, tuple) and len(node) > 2 and node[0] == "call"):
+        return False
+    name = str(node[1]).upper()
+    return name in _CONTEXT_CALLS or (re.fullmatch(r"[A-Z]+X(\.[A-Z]+)?", name) is not None and name not in {"MAX", "INDEX"})  # SUMX, MAXX, STDEVX.S ... (MAX is no iterator)
+
+
+def context_changing(argument: Any, variables: dict[str, Any] | None = None) -> bool:
+    """Task 241 (review): the argument holds a call that changes the filter or row context. A Variant below it is decided in that context, which the typing does
+    not see, so it stays refused (unsure => refuse)."""
+    argument = _expand_variables(argument, variables)
+    return any(is_context_call(node) for node in _walk(argument))
+
+
 def variant_pattern(argument: Any, type_of: Any, variables: dict[str, Any] | None = None) -> bool:
     """Task 241: the argument of a type test holds a number function (sign, ROUND family, INT, ABS, SIGN, TRUNC, MOD) or arithmetic of a Variant IF / SWITCH /
     COALESCE (branches of different classes). Only then does the evaluator decide the branch the Variant takes from the data."""
     argument = _expand_variables(argument, variables)
     for node in _walk(argument):
-        operand = _preserving_operand(node)
+        operand = _preserving_operand(node, True)
         if operand is not None and _variant_call(operand, type_of):
             return True
         if node[0] == "call" and str(node[1]).upper() in {"EXP", "POWER"} and node[2] and _variant_call(node[2][0], type_of):

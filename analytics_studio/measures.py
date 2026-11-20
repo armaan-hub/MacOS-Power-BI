@@ -8913,13 +8913,14 @@ def _is_never_blank_logical(node: Any) -> bool:
     return isinstance(node, tuple) and bool(node) and (node[0] in {"boolean", "comparison"} or (node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]))
 
 
+_CONTEXT_DEPTH = [0]  # Task 241 (review): above zero while the static check walks below a CALCULATE / iterator / FILTER (a Variant there is decided in another context)
 _STATIC_PASS_VALUE: list[Any] = [None]  # Task 241: while the query is checked after it ran, a function that computes a condition for the Variant typing below
 
 
 def _typed_with_variants(node: Any, columns: Any, variables: Any) -> str | None:
     """Task 241: the static numeric type of node, a Variant under a number function typed by the branch the data takes (only while the checked query is evaluated)."""
     hook = _STATIC_PASS_VALUE[0]
-    if hook is None or not dax_failing_type_tests.variant_pattern(node, lambda held: _static_numeric_type(held, columns, variables)):
+    if hook is None or _CONTEXT_DEPTH[0] or dax_failing_type_tests.context_changing(node) or not dax_failing_type_tests.variant_pattern(node, lambda held: _static_numeric_type(held, columns, variables)):
         return _static_numeric_type(node, columns, variables)
     held_hook = dax_failing_type_tests.CONDITION_VALUE[0]
     dax_failing_type_tests.CONDITION_VALUE[0] = hook
@@ -10032,13 +10033,18 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                 f"DAX comparison operations do not support comparing values of type {_type_display(left)} with values of type {_type_display(right)}. "
                 "Consider using the VALUE or FORMAT function to convert one of the values."
             )
-    for part in node[1:]:
-        if isinstance(part, tuple) and part and isinstance(part[0], str):
-            _reject_mismatched_comparison_types(part, columns, variables, unevaluated=unevaluated)
-        elif isinstance(part, (tuple, list, frozenset)):
-            for item in part:
-                if isinstance(item, tuple):
-                    _reject_mismatched_comparison_types(item, columns, variables, unevaluated=unevaluated)
+    shifted = dax_failing_type_tests.is_context_call(node)
+    _CONTEXT_DEPTH[0] += shifted
+    try:
+        for part in node[1:]:
+            if isinstance(part, tuple) and part and isinstance(part[0], str):
+                _reject_mismatched_comparison_types(part, columns, variables, unevaluated=unevaluated)
+            elif isinstance(part, (tuple, list, frozenset)):
+                for item in part:
+                    if isinstance(item, tuple):
+                        _reject_mismatched_comparison_types(item, columns, variables, unevaluated=unevaluated)
+    finally:
+        _CONTEXT_DEPTH[0] -= shifted
 
 
 
@@ -24176,7 +24182,7 @@ def _evaluate_measures_once(
                 held_hook = dax_failing_type_tests.CONDITION_VALUE[0]
                 dax_failing_type_tests.CONDITION_VALUE[0] = (
                     (lambda held_node, held_row=row_context: variant_value(held_node, held_row))
-                    if len(arguments) == 1 and dax_failing_type_tests.variant_pattern(arguments[0], lambda held: _static_numeric_type(held, *static_scope()), variable_nodes)
+                    if len(arguments) == 1 and not dax_failing_type_tests.context_changing(arguments[0], variable_nodes) and dax_failing_type_tests.variant_pattern(arguments[0], lambda held: _static_numeric_type(held, *static_scope()), variable_nodes)
                     else None
                 )  # Task 241: the data decides the branch of a Variant only under a number function
                 try:
