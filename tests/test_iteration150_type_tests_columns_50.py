@@ -13,6 +13,7 @@ from tools import dax_oracle_diff as dax
 # (expression, Power BI answer) pairs for measured leaf classes (Task 60, Part B of the spec)
 ANSWERED = (
     ('ISDOUBLE(MAX(Facts[Sales])-"abc")', "True"),
+    ('ISDOUBLE(CURRENCY(MAX(Facts[Sales]))-"TRUE")', "True"),  # saved answer currency11_extra
     ('ISINT64(MAX(Facts[Sales])*"")', "False"),
     ('ISINT64(""+MAX(Facts[Sales]))', "False"),
     ('ISDOUBLE(""+CURRENCY(MAX(Facts[Sales])))', "True"),
@@ -28,7 +29,6 @@ RAISES_REFUSED = (
 
 # A column-read arithmetic outside the measured leaf classes (its saved class disagrees with the static type) stays refused
 OUTSIDE_MEASURED = (
-    'ISDOUBLE(CURRENCY(MAX(Facts[Sales]))-"TRUE")',  # the Currency[Double] - Text cell has ISINT64 evidence only
     'ISDOUBLE(MAX(Facts[Quantity])-"abc")',  # Int64 minus Text: no ISDOUBLE evidence in that type cell
     'ISDOUBLE(MAX(Facts[Sales])/"abc")',  # the Double / Text cell holds error rows
     'ISNUMBER(CURRENCY(MIN(Facts[Quantity]))*"")',  # Power BI raises; the (ISNUMBER, *, Currency, Text) rows were all CURRENCY of a literal, so Currency[Int64] has no evidence

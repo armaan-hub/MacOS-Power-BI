@@ -59,7 +59,7 @@ PART_B = (
     ('ISTEXT((DATE("y",1,1))+(BLANK()))', 'ERR:Exception calling "Read" with "0" argument(s): "Query (1, 32) Cannot convert value \'y\' of type Text to type Integer."'),
 )
 
-# still refused: a SIGN branch beside a number (the grid disagrees on the test: ISDECIMAL errors, ISINT64 is False)
+# a SIGN branch beside a number: ISINT64 answers False (saved answer); the ISDECIMAL variant raises in Power BI and stays refused (ERRORS list)
 STILL_REFUSED = (
     ('ISINT64(SWITCH(TRUE(),1=1,SIGN("s"),CURRENCY(1)))', "False"),
 )
@@ -89,11 +89,11 @@ class TypeErrFail54Tests(unittest.TestCase):
                 self.assertTrue(powerbi.startswith("ERR"))
                 self.assertEqual(status(powerbi, ours), "match")
 
-    def test_still_refused_family_stays_refused(self):
+    def test_sign_beside_currency_branch_answers_the_saved_answer(self):
         for expression, powerbi in STILL_REFUSED:
             with self.subTest(expression=expression):
                 self.assertFalse(powerbi.startswith("ERR"))
-                self.assertIn(REFUSAL, dax.local(expression))
+                self.assertEqual(dax.local(expression), powerbi)  # saved answer typeerr54_extra: False
 
 
 if __name__ == "__main__":
