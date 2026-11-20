@@ -2899,3 +2899,24 @@ Next: Task 241 (brief /Users/armaan/pbi_scratch/brief241.md, branch antigravity/
 Roles: Sonnet coded (commit f19c474) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,893 match, 2,508 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 35,466 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 2b0a172.
+
+## 2026-11-20 — Iteration 311 (Task 241: a number function of a Variant (IF/SWITCH/COALESCE mixing text, number, Boolean, date) is typed by the branch the data takes, Chapter 1b)
+
+Function family: same as Tasks 235 to 240 (type tests over an expression whose evaluation fails), now the Variant shapes Task 240 had to refuse.
+- A number function (unary minus, SIGN, ABS, INT, TRUNC, ROUND*, MOD, CEILING, FLOOR, MROUND, + - * /, MONTH, YEAR, SIN, COS, SQRT, EXP, POWER) of a Variant is typed by the branch the data takes.
+- A taken text that is no number errors in Power BI and stays refused (except SIGN/EXP/POWER).
+- A SWITCH whose first result is no number unifies its number results.
+- Typing gaps closed: INT(date) is Int64; MOD(TRUE()/date,3) is Double; MOD/CEILING/FLOOR/MROUND of BLANK is BLANK; CEILING/FLOOR/MROUND of a text number/Boolean/date take the multiple's type.
+- Fixed a bug present on main: ISBOOLEAN(DIVIDE(SQRT(COALESCE(BLANK(),"t","1x")),MIN(...))) answered False, Power BI raises; now refused.
+
+Review 1 FAILED: 3 wrong of 442 fresh probes (the condition was decided on the whole table, not in the enclosing CALCULATE filter; a taken text under CALCULATE answered instead of refusing). Fix (9975120): a Variant whose decision sits under CALCULATE/CALCULATETABLE/FILTER/iterators/ALL*/VALUES/SELECTEDVALUE/EARLIER etc. stays refused.
+
+Review 2 (Sonnet, read-only): 441 fresh probes against Power BI. Branch 261 right, 2 wrong, 178 refused; main 226 right, 2 wrong; 0 regressions. The 2 wrong are identical on main (a Variant as SELECTEDVALUE's alternate result) and are queued as Task 242 together with missing context-call names (TOTALYTD, DATEADD, CROSSJOIN, WINDOW, LOOKUPVALUE ...). Real app: 53 of the sample equal to local.
+
+Coder measurements: 22,058 fresh Power BI probes in two Facts datasets, 0 wrong. Saved measured rows 35,094: 23,514 right (+1,216 over main), 0 wrong. 539 of the 1,011 rows Task 240 stopped answering recovered. Saved batteries: 38,851 type tests unchanged.
+
+Next: Task 242 (SELECTEDVALUE alternate-result Variants plus the missing context-call names); then M-engine gaps and the Chapter 3 Group By dialog check.
+
+Roles: Sonnet coded (commits 7e8ca7e, 9975120) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 37,356 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 6b3f2a4.
