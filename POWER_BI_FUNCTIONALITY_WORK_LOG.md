@@ -2920,3 +2920,21 @@ Next: Task 242 (SELECTEDVALUE alternate-result Variants plus the missing context
 Roles: Sonnet coded (commits 7e8ca7e, 9975120) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 37,356 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 6b3f2a4.
+
+## 2026-11-20 — Iteration 312 (Task 242: ISINTEGER/ISINT64/ISDOUBLE/ISDECIMAL/ISCURRENCY/ISDATETIME of SELECTEDVALUE(column, alternate) follow the alternate when several values or none are selected; context-changing names keep a Variant below them refused, Chapter 1b)
+
+Function family: same as Tasks 235 to 241 (type tests over an expression whose evaluation fails), now SELECTEDVALUE's alternate result and the context-call names Task 241 had to leave.
+- Part A: ISINTEGER/ISINT64/ISDOUBLE/ISDECIMAL/ISCURRENCY/ISDATETIME of SELECTEDVALUE(column, alternate) follow the alternate when the filter context holds several values or none, and the column type when one value is selected.
+- A number or date alternate beside a number column is unified with the column (SELECTEDVALUE(Facts[Sales],1) is a Double). Wrapped, nested, VAR, and date/Boolean-column forms stay refused.
+- Fixed the 2 pre-existing wrong rows from Task 241's review, e.g. ISINTEGER(SELECTEDVALUE(Facts[Region],ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))))) is now True like Power BI.
+- Part B: 58 context-changing names (TOTALYTD/QTD/MTD, DATESYTD.., DATEADD, SAMEPERIODLASTYEAR, PARALLELPERIOD, DATESBETWEEN, DATESINPERIOD, PREVIOUS*/NEXT*, FIRSTNONBLANK(VALUE), LASTNONBLANK(VALUE), OPENING/CLOSINGBALANCE*, CROSSJOIN, UNION, EXCEPT, INTERSECT, WINDOW, OFFSET, INDEX, ORDERBY, PARTITIONBY, NATURALINNER/LEFTOUTERJOIN, ...) keep a Variant decided below them refused.
+
+Coder probes: 8,378 rows on two Facts tables; combined measured set 66,033 rows: 0 wrong (main 622 wrong). 349 answers right only by luck are now refused. Battery rescan of 38,851 rows: no change. New tests/test_dax_selectedvalue_variant_242.py; no old test changed.
+
+Review (Sonnet, read-only): 296 fresh probes against Power BI. Branch 195 right / 1 wrong / 100 refused versus main 200 / 17 / 79; 0 regressions; 12 gained; 17 lucky-right lost to refusal. Real app 69 of 69 matched; targeted 4,624 passed. The 1 wrong is pre-existing on main: ISSTRING(MAXX(SUMMARIZE(Facts,Facts[Region],"s",COALESCE(MAX(Facts[Note]),0)),[s])) local True, Power BI False; queued as Task 243 (table builders SUMMARIZE/ADDCOLUMNS/GROUPBY/SUMMARIZECOLUMNS/SELECTCOLUMNS under type tests).
+
+Next: Task 243; then M-engine gaps and the Chapter 3 Group By dialog check.
+
+Roles: Sonnet coded (commit 3cf23d4) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 38,581 passed (26 xfailed; 1 flaky test, tests/test_static_visual_lifecycle.py::test_static_visuals_insert_render_edit_and_reopen, failed only beside other tests and passed alone). No saved Power BI answer was edited. Merge commit 59c4d51.
