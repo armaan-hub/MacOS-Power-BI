@@ -96,7 +96,7 @@ class MeasuredLeafClasses(unittest.TestCase):
     def test_rule_follows_column_type_not_name(self):
         cases = (
             ("Revenue", "decimal_number", (('ISDOUBLE(MAX(T[{n}])-"abc")', "True"), ('ISINT64(MAX(T[{n}])*"")', "False"))),
-            ("Count", "whole_number", (('ISINT64(MAX(T[{n}])-"abc")', "False"), ('ISDOUBLE(MAX(T[{n}])*"")', "True"))),
+            ("Count", "whole_number", (('ISINT64(MAX(T[{n}])-"abc")', "False"), ('ISDOUBLE(MAX(T[{n}])*"5")', "True"))),
         )
         for name, kind, expected in cases:
             for template, powerbi in expected:

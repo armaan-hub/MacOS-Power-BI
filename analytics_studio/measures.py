@@ -5806,6 +5806,21 @@ def _task135_supertype(first: str | None, second: str | None) -> str | None:
     return None
 
 
+def _failing_text_times_aggregate(node: Any, held: Callable[[str], Any]) -> bool:
+    """Task 237 (Power BI answer check): a product of a data-reading numeric aggregate (MIN / MAX / SUM / AVERAGE / COUNT / COUNTROWS / DISTINCTCOUNT, or CURRENCY of one)
+    and a text literal that is no number: Power BI raises the conversion error through ISDOUBLE / ISNUMBER / ISNUMERIC (and ISDECIMAL / ISCURRENCY for a Currency product)
+    instead of answering by the static type; the same text beside + or - is answered (measured)."""
+    if not isinstance(node, tuple) or len(node) != 4 or node[0] != "binary" or node[1] != "*":
+        return False
+    for text, other in ((node[2], node[3]), (node[3], node[2])):
+        if not _task135_failing_literal(text) or not isinstance(other, tuple) or other[:1] != ("call",) or len(other[2]) != 1:
+            continue
+        inner = other[2][0] if str(other[1]).upper() == "CURRENCY" and isinstance(other[2][0], tuple) and other[2][0][:1] == ("call",) else other
+        if isinstance(inner, tuple) and inner[:1] == ("call",) and str(inner[1]).upper() in {"MIN", "MAX", "SUM", "AVERAGE", "COUNT", "COUNTROWS", "DISTINCTCOUNT"} and not _reads_no_data(inner, held):
+            return True
+    return False
+
+
 def _structural_type_answer(function: str, argument: tuple[Any, ...], columns: dict[str, dict[str, str]] | None = None) -> bool | None:
     """Task 50: a type test of an argument whose evaluation failed, answered by the argument's static type alone.
     Measured on Power BI: only the families below answered (every other failing shape raised or is unmeasured, so None: the caller keeps its old behaviour).
@@ -21133,6 +21148,10 @@ def _evaluate_measures_once(
                 # A bare failing call or arithmetic around it is not touched (measured True: ISINT64(INT("b")), ISDOUBLE(ABS("m")), ISINTEGER(SIGN("s"))).
                 if static_type_of(arguments[0]) in _TASK64_OWN_TYPE[function]:
                     raise
+            if function in {"ISDOUBLE", "ISNUMBER", "ISNUMERIC", "ISDECIMAL", "ISCURRENCY"} and len(arguments) == 1 and (isinstance(failure, _TextConversionFailure) or "Cannot convert value" in str(failure)) and (
+                _failing_text_times_aggregate(arguments[0], variable_nodes.get) and static_type_answer(function, static_type_of(arguments[0])) is True
+            ):
+                raise  # Task 237: a type test whose answer is True by the type shows the conversion error (Power BI raised it for every measured aggregate * "k9")
             if function in _TYPE_TESTS and len(arguments) == 1:
                 task64 = task64_family(function, arguments[0], row_context)  # Task 64: the measured families of a failing value (before the static answer)
                 if task64 == "refuse":
