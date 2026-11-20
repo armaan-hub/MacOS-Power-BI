@@ -63,7 +63,9 @@ _AGGREGATES = frozenset({"MAX", "MIN", "SUM"})
 _LITERALS = frozenset({"number", "string", "boolean", "blank", "blank_comment", "var"})
 _CONVERT_KEYWORDS = frozenset({"INTEGER", "INT64", "DOUBLE", "CURRENCY", "DECIMAL", "BOOLEAN", "STRING", "DATETIME"})
 _NUMERIC = frozenset({"int64", "double", "currency", "decimal"})
-_ANSWERABLE_FAILURES = ("Cannot convert value", "An argument of function", "A type test of a failing value", "A type test of arithmetic around a failing power")
+_OVERFLOW_FAILURE = "The result of a conversion or arithmetic operation is either too large or too small."
+_ANSWERABLE_FAILURES = ("Cannot convert value", "An argument of function", "A type test of a failing value", "A type test of arithmetic around a failing power", _OVERFLOW_FAILURE)
+_TEXT_DIVIDE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISNONTEXT", "ISBOOLEAN", "ISLOGICAL", "ISDATETIME", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISSTRING"})
 
 
 def _column_type(node: Any, columns: dict[str, dict[str, str]]) -> str | None:
@@ -229,18 +231,65 @@ def _walk(node: Any):
 
 
 def _without_saved_answer(function: str, argument: Any, columns: dict[str, dict[str, str]]) -> bool:
-    """Two shapes with no saved Power BI answer at all, so they keep their refusal (older tests assert it):
-    a number literal beside a power of a column aggregate and a number literal (ISNUMBER(MIN(Facts[Sales])^0.5+1)), and
-    ISDOUBLE of a column aggregate of a whole-number column beside a text literal (ISDOUBLE(MAX(Facts[Quantity])-"abc"))."""
+    """Shapes Power BI raises for or that were not measured, so they keep their refusal:
+    a number literal multiplied by a power of a column aggregate (ISNUMBER(MIN(Facts[Sales])^0.5*2) is an error in Power BI for ISNUMBER, ISNUMERIC and
+    ISDOUBLE; the other tests are not answered either), and ISDOUBLE of a column aggregate of a whole-number column multiplied by a text literal
+    (Task 238: with + or - Power BI answers True, with * it raises, with / it raises).  Plus and minus of the same shapes are answered by the static type."""
     if argument[0] != "binary" or argument[1] not in {"+", "-", "*"}:
         return False
     left, right = argument[2], argument[3]
     for a, b in ((left, right), (right, left)):
-        if _literal_number(b) and a[0] == "binary" and a[1] == "^" and a[2][0] == "call" and _aggregate(a[2], columns) and _literal_number(a[3]):
+        if argument[1] == "*" and _literal_number(b) and a[0] == "binary" and a[1] == "^" and a[2][0] == "call" and _aggregate(a[2], columns) and _literal_number(a[3]):
             return True
-        if function.upper() == "ISDOUBLE" and b[0] == "string" and a[0] == "call" and _aggregate(a, columns):
+        if argument[1] == "*" and function.upper() == "ISDOUBLE" and b[0] == "string" and a[0] == "call" and _aggregate(a, columns):
             if (_column_type(a[2][0], columns) or "").casefold() in {"whole_number", "integer", "int64", "int"}:
                 return True
+    return False
+
+
+def _text_divide(node: Any) -> bool:
+    """DIVIDE of two or three literals of which at least one is a text literal (inline, not held by a VAR)."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() == "DIVIDE" and len(node[2]) in {2, 3}):
+        return False
+    arguments = node[2]
+    if not all(isinstance(a, tuple) and a and a[0] in {"number", "string", "blank", "blank_comment"} for a in arguments):
+        return False
+    if len(arguments) == 3 and arguments[2][0] == "string":
+        return False  # a text alternate result raises in Power BI (ISINT64(DIVIDE("zz",3,"q")) is an error)
+    return any(a[0] == "string" for a in arguments[:2])
+
+
+def _without_text_divide(function: str, argument: Any) -> Any:
+    """Task 238: ISINTEGER(DIVIDE(1,"zz")) and ABS(DIVIDE("zz",2)) in a type test whose answer does not depend on the value are decided by the type of DIVIDE
+    (double), so the failing text is replaced by a number DIVIDE of the same type.  ISNUMBER / ISNUMERIC / ISDOUBLE of it are errors in Power BI and stay refused."""
+    from . import measures
+
+    if function not in _TEXT_DIVIDE_TESTS:
+        return argument
+    inner = argument
+    if isinstance(argument, tuple) and len(argument) == 3 and argument[0] == "call" and str(argument[1]).upper() == "ABS" and len(argument[2]) == 1:
+        inner = argument[2][0]
+    if not _text_divide(inner):
+        return argument
+    plain = measures.parse_expression("DIVIDE(1,2)")
+    return plain if inner is argument else (argument[0], argument[1], [plain])
+
+
+def _literal_only(node: Any) -> bool:
+    """Number / text literals with + - * & and CURRENCY / ABS of them: no column, no aggregate, no VAR, no division."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind in {"number", "string"}:
+        return True
+    if kind == "unary":
+        return node[1] in {"+", "-"} and _literal_only(node[2])
+    if kind == "binary":
+        return node[1] in {"+", "-", "*"} and _literal_only(node[2]) and _literal_only(node[3])
+    if kind == "concat":
+        return _literal_only(node[1]) and _literal_only(node[2])
+    if kind == "call":
+        return str(node[1]).upper() in {"CURRENCY", "ABS"} and bool(node[2]) and all(_literal_only(a) for a in node[2])
     return False
 
 
@@ -249,7 +298,10 @@ def answer(function: str, argument: Any, columns: dict[str, dict[str, str]]) -> 
     from . import measures  # imported late: measures imports this module
 
     function = function.upper()
-    if function not in TYPE_TESTS or not isinstance(argument, tuple) or not argument or not hides(argument, columns):
+    if function not in TYPE_TESTS or not isinstance(argument, tuple) or not argument:
+        return None
+    argument = _without_text_divide(function, argument)
+    if not hides(argument, columns):
         return None
     if _without_saved_answer(function, argument, columns):
         return None
@@ -285,6 +337,8 @@ def answer_measures(measures_list: list[dict[str, str]], measure_names: list[str
         return None
     if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() in TYPE_TESTS and len(node[2]) == 1):
         return None
+    if failure.startswith(_OVERFLOW_FAILURE) and not _literal_only(node[2][0]):
+        return None  # Task 238: only the overflow of literals; the overflow of a Currency product that reads rows shows through ISCURRENCY / ISNUMBER, a division raises
     columns = measures._normalize_model_column_types(table_context)
     result = answer(str(node[1]), node[2][0], columns)
     return None if result is None else {name: result}

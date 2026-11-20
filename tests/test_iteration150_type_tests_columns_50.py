@@ -29,7 +29,7 @@ RAISES_REFUSED = (
 
 # A column-read arithmetic outside the measured leaf classes (its saved class disagrees with the static type) stays refused
 OUTSIDE_MEASURED = (
-    'ISDOUBLE(MAX(Facts[Quantity])-"abc")',  # Int64 minus Text: no ISDOUBLE evidence in that type cell
+    'ISDOUBLE(MAX(Facts[Quantity])*"abc")',  # Int64 times Text: Power BI raises (Task 238: with + or - it answers True, see tests/test_dax_type_tests_gaps_238.py)
     'ISDOUBLE(MAX(Facts[Sales])/"abc")',  # the Double / Text cell holds error rows
     'ISNUMBER(CURRENCY(MIN(Facts[Quantity]))*"")',  # Power BI raises; the (ISNUMBER, *, Currency, Text) rows were all CURRENCY of a literal, so Currency[Int64] has no evidence
 )
