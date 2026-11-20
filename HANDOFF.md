@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Sonnet 5.5 coder and reviewer, Opus planner only (Iteration 305 / Task 235 DAX type tests over failing expressions merged as 3dba44d, gate passed 575/575, 0 different; backlog is in the work log). Until Sat 2026-11-21 12:59 pm (Mac local time) the user set Opus = planner only, Sonnet = coder and reviewer (no coding to Haiku/Antigravity/Codex/OpenCode); Antigravity is idle.
+**Active agent:** Claude Sonnet 5.5 coder and reviewer, Opus planner only (Iteration 307 / Task 237 whole-number aggregate times a text literal under ISDOUBLE/ISNUMBER/ISNUMERIC/ISDECIMAL/ISCURRENCY now raises the Power BI error, merged as 0630e74, gate passed 575/575, 0 different; Task 238 next: the 36 type-test shapes still refused where Power BI answers a value; backlog is in the work log). Until Sat 2026-11-21 12:59 pm (Mac local time) the user set Opus = planner only, Sonnet = coder and reviewer (no coding to Haiku/Antigravity/Codex/OpenCode); Antigravity is idle.
 **Previous active agent line (2026-11-17):** Claude Opus 5.5 (Iterations 283-284 / Tasks 208-214 shipped, Chapter 1 closed and tagged; Chapter 3 open: next a VM screen session for Power BI's Group By and Split dialog output, then ux_backlog; Haiku codes, Sonnet heads review)
 **Branch in use:** main
 **Working tree clean:** yes

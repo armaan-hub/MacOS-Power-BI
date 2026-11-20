@@ -2817,3 +2817,27 @@ Roles: Sonnet coded (commits 3942287 and c1de629), Sonnet reviewed, Opus planned
 - Task 231: two flaky UI tests made to wait for the real condition.
 - Task 232: BinaryFormat.Group and BinaryOccurrence.
 - Task 233: Binary.InferContentType.
+
+## 2026-11-20 — Iteration 306 (Task 236: DAX type tests over failing expressions answered also where older tests held them refused, Chapter 1b)
+
+Function family: same as Task 235 (ISNUMBER, ISNUMERIC, ISTEXT, ISSTRING, ISLOGICAL, ISBOOLEAN, ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL, ISCURRENCY, ISDATETIME, ISNONTEXT over an expression whose evaluation fails). Task 236 removes the `HONOUR_LOCKED_REFUSALS` locked-shape list from `analytics_studio/dax_failing_type_tests.py`. The 62 shapes that older tests held refused are now answered, as the saved Power BI answers say (Power BI answer check). Six old test assertions were changed to the saved Power BI answer.
+
+Result on the 539 saved items: 529 now match exactly (was 467 after Task 235); 10 stay refused. The static check keeps `ISNUMBER(MIN(Facts[Sales])^0.5+1)` and `ISDOUBLE(MAX(Facts[Quantity])-"abc")` refused; Power BI actually answers True for them, so the refusal is harmless.
+
+Review (Sonnet, read-only): 177 fresh shapes checked, 4 differ. All 4 are already wrong on main: a whole-number aggregate, or `CURRENCY(MAX(Facts[Sales]))`, times a text literal under ISDOUBLE or ISDECIMAL answers True, while Power BI raises "Cannot convert value ... to type Number". Not fixed here; Task 237 is in progress.
+
+Roles: Sonnet coded (commit cd6eb36) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved answers: 537,891 match (was 537,829), 2,510 refused (was 2,572), 0 DIFF, 0 CRASH, locked 537,342. pytest 33,244 passed (26 xfailed). No saved Power BI answer was edited. Merge commit a9ebbae.
+
+## 2026-11-20 — Iteration 307 (Task 237: a whole-number aggregate times a text literal under ISDOUBLE/ISNUMBER/ISNUMERIC/ISDECIMAL/ISCURRENCY raises Power BI's error, Chapter 1b)
+
+Function family: same as Tasks 235 and 236 (type tests over an expression whose evaluation fails). Task 237 fixes 4 earlier wrong answers: a whole-number aggregate, or `CURRENCY(MAX(...))`, times a text literal under ISDOUBLE, ISNUMBER, ISNUMERIC, ISDECIMAL or ISCURRENCY answered True, while Power BI raises "Cannot convert value ... to type Number". The engine now raises the same error (`_failing_text_times_aggregate` in analytics_studio/measures.py, hooked in `evaluate_measures`). The same text beside + or - stays answered, as Power BI answers it.
+
+One existing test edit: in tests/test_iteration150_type_tests_columns_50.py, `ISDOUBLE(MAX(T[Count])*"")` became `*"5"`, because Power BI measured an error for the "" form. New tests in tests/test_dax_type_tests_wrong_237.py with the Power BI rows hardcoded.
+
+Review (Sonnet, read-only): 190 fresh shapes, 0 wrong values: 115 exact, 54 same error text, 21 still refused where Power BI answers a value (36 shapes in all). Those are the Task 238 backlog.
+
+Roles: Sonnet coded (commit dfbe8af) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved answers: 537,891 match, 2,510 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 33,807 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 0630e74.
