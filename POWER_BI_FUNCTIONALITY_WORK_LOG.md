@@ -2874,3 +2874,28 @@ Known: 6 older wrong answers in exotic mixed-type shapes, present on main before
 Roles: Sonnet coded (commit 0eb53af) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,893 match, 2,508 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 34,382 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 28c8126.
+
+## 2026-11-20 — Iteration 310 (Task 240: DAX type tests that answered wrongly now refuse or answer like Power BI, and more measured shapes answered, Chapter 1b)
+
+Function family: same as Tasks 235 to 239 (type tests over an expression whose evaluation fails). Part A fixes the 6 wrong answers named in Task 239; all came from the evaluator fallback / static typing in `analytics_studio/measures.py`:
+- A True-by-type answer on a possibly-BLANK argument now needs the value.
+- Numeric functions of a Variant (IF/SWITCH/COALESCE mixing text and numbers) refuse unless a constant condition decides the branch.
+- A failing Variant under arithmetic refuses.
+- Number-versus-text/Boolean comparisons refuse.
+- ROUND/ROUNDUP/ROUNDDOWN/TRUNC/INT/ABS(BLANK()) stay BLANK (and keep the Currency type).
+- ROUNDDOWN/CEILING/EVEN/ODD/DEGREES/SIN/COS/YEAR/MONTH/DAY/GCD around a failing value refuse.
+- ISNUMERIC(IF(TRUE(),TIME(1,0,0),2.5)) is True.
+
+Part B answers more shapes that were refused: ROUND/ROUNDUP of a Currency overflow; VAR powers of aggregates (root cause: a type-vocabulary mix-up in `_reject_mismatched_comparison_types`); COUNT/COUNTBLANK of a text column beside text; IF with an overflow condition and same-class branches (including DATE); DIVIDE with a hiding argument; same-class comparisons with failing parts.
+
+Coder measured set of 34,770 expressions: wrong 929 -> 0, answered 20,406 -> 22,104. Cost: about 570 to 800 rows that main answered correctly are now refused (mostly Variant shapes). Saved batteries: 38,851 type tests rescanned, 0 lost, 0 changed, 0 wrong.
+
+Tests: new `tests/test_dax_type_tests_wrongs_240.py`; in `tests/test_dax_type_tests_gaps_239.py` 22 STILL_REFUSED shapes moved to answered (measured).
+
+Review (Sonnet, read-only): 330 fresh probes against Power BI. Branch 0 wrong versus main 18 wrong (all 18 fixed), 24 newly answered, 14 lost (Variant numeric functions with a data-dependent condition). Real app 200 of 200 equal.
+
+Next: Task 241 (brief /Users/armaan/pbi_scratch/brief241.md, branch antigravity/dax-type-test-variants-241): Variant shapes (IF/SWITCH/COALESCE mixing text and numbers) under numeric functions and type tests, recover the lost rows with measured rules; then M-engine gaps and the Chapter 3 Group By dialog check.
+
+Roles: Sonnet coded (commit f19c474) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,893 match, 2,508 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 35,466 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 2b0a172.
