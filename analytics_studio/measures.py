@@ -6326,7 +6326,30 @@ def _iterator_over_built_table(node: Any) -> bool:
     return False
 
 
-_FILTER_FREE_CALLS = frozenset({"ALL", "ALLSELECTED", "ALLEXCEPT", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLCROSSFILTERED"})  # Task 243: an added column that clears the filter of the group does not see the rows of the filtered table either
+_CONDITIONAL_CALLS = frozenset({"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR", "SELECTEDVALUE"})
+
+
+def _has_call(node: Any, names: frozenset[str]) -> bool:
+    return any(isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() in names for held in _walk_nodes(node))
+
+
+_ITERATOR_BRANCH_CALLS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "PRODUCTX", "MEDIANX", "GEOMEANX"})
+
+
+def _variant_iterator_in_branch(argument: Any) -> bool:
+    """Task 243 (review): an IF / SWITCH / COALESCE / IFERROR one of whose result branches is an iterator over a table built with a conditional (Variant) added column."""
+    for held in _walk_nodes(argument):
+        if not (isinstance(held, tuple) and len(held) > 2 and held[0] == "call" and str(held[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}):
+            continue
+        for branch in _variant_result_branches(held):
+            for inner in _walk_nodes(branch):
+                if isinstance(inner, tuple) and len(inner) > 2 and inner[0] in {"call", "table_call"} and str(inner[1]).upper() in _ITERATOR_BRANCH_CALLS and inner[2]:
+                    for built in _walk_nodes(inner[2][0]):
+                        if isinstance(built, tuple) and len(built) > 2 and built[0] in {"call", "table_call"} and str(built[1]).upper() in _BUILT_TABLE_CALLS and _has_call(built, _CONDITIONAL_CALLS):
+                            return True
+    return False
+
+
 _ROW_SUBSET_CALLS = frozenset({"FILTER", "TOPN", "CALCULATETABLE", "SAMPLE", "TOPNSKIP", "TOPNPERLEVEL", "EXCEPT", "INTERSECT"})
 
 
@@ -6351,6 +6374,26 @@ def _reads_filter_state_of(expression: Any, columns: Iterable[str] | None) -> bo
             continue
         arguments = held[2] if isinstance(held[2], (tuple, list)) else (held[2],)
         if any(isinstance(argument, tuple) and argument and argument[0] == "reference" and len(argument) > 2 and (wanted is None or str(argument[2]).casefold() in wanted) for argument in arguments):
+            return True
+    return False
+
+
+_DATE_CALLS = frozenset({"DATE", "TIME", "DATEVALUE", "TIMEVALUE", "EDATE", "EOMONTH", "NOW", "TODAY", "UTCNOW", "UTCTODAY", "DATEADD", "CALENDAR"})
+
+
+def _is_type_test_measure(node: Any) -> bool:
+    """Task 243 (review): the measure is a type test, also inside CALCULATE: only its answer, not the display of a value, is read."""
+    while isinstance(node, tuple) and len(node) > 2 and node[0] == "call" and str(node[1]).upper() in {"CALCULATE", "CALCULATETABLE"} and node[2]:
+        node = node[2][0]
+    return isinstance(node, tuple) and len(node) > 2 and node[0] == "call" and str(node[1]).upper() in dax_failing_type_tests.TYPE_TESTS
+
+
+def _variant_iterator_date_mix(node: Any) -> bool:
+    """Task 243 (review): an IF / SWITCH / COALESCE with a date-valued branch beside a branch that is an iterator over a Variant column."""
+    for held in _walk_nodes(node):
+        if not (isinstance(held, tuple) and len(held) > 2 and held[0] == "call" and str(held[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}):
+            continue
+        if _variant_iterator_in_branch(held) and any(_has_call(branch, _DATE_CALLS) for branch in _variant_result_branches(held)):
             return True
     return False
 
@@ -12195,6 +12238,7 @@ def _evaluate_measures_once(
         expression: tuple[Any, ...], group_context: dict[str, Any], group_row: dict[str, Any], source: dict[str, Any], members: list[int],
         key_columns: dict[str, str], unknown_tables: frozenset[str] = frozenset(),
         blank_partners: list[tuple[dict[str, Any], frozenset[int]]] = [],
+        partial_source: bool = False,
     ) -> Any:
         """An extension column of SUMMARIZE: the group is the set of rows of the summarized table it holds, which also filter the
         tables on that table's one side to the rows they reach (live Power BI: SUMMARIZE(Fact, Fact[Qty], "x", CALCULATE(SUM(Cal[Year])))
@@ -12230,8 +12274,8 @@ def _evaluate_measures_once(
         for header, source_column in key_columns.items():
             key_rows = one_side_value_index(source, source_column).get(cell_key(group_row[header]), frozenset()) if group_row.get(header) is not None else allowed
             own.setdefault(source["id"], (source, {}))[1][source_column] = key_rows
-        if not any(t != source["id"] for t in merged) and not unknown_tables:
-            merged = {}
+        if not any(t != source["id"] for t in merged) and not unknown_tables and not partial_source:
+            merged = {}  # Task 243 (review): a source that keeps only some rows (FILTER, TOPN ...) still narrows the group to those rows
         elif source["id"] in merged and source["id"] in own:  # a key column of the group keeps standing as the key
             kept = {c: r for c, r in merged[source["id"]][1].items() if c not in own[source["id"]][1]}
             merged = {**merged, source["id"]: (source, kept)}
@@ -12611,6 +12655,7 @@ def _evaluate_measures_once(
             return selected_context, selected_rows
         if function == "SUMMARIZE":
             summarize_id = id(argument)  # the loop over the group columns below rebinds `argument`
+            summarize_node = argument
             context, rows = table_argument_value(arguments[0])
             split = next((i for i, a in enumerate(arguments[1:], 1) if a[0] == "string"), len(arguments))
             group_columns = []
@@ -12699,23 +12744,7 @@ def _evaluate_measures_once(
 
             source_base = contexts_by_id.get(context["id"]) if not context.get("derived") else None
             source_positions = {id(r): i for i, r in enumerate(source_base["rows"])} if source_base is not None else {}
-            if names and summarize_id not in bare_rollup_allowed and _row_subset_source(arguments[0], variable_nodes.get) and source_base is not None and len(rows) != len(source_base["rows"]) and any(
-                not _reads_no_data(expression, variable_nodes.get) and not any(isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() in _FILTER_FREE_CALLS for held in _walk_nodes(expression))
-                for expression in expressions
-            ):
-                # Task 243 (measured): the extension columns of a SUMMARIZE over a filtered or sampled table (FILTER, TOPN, CALCULATETABLE ...) see only the rows of that table in Power BI; the engine counts every
-                # row of the group.  A table that keeps every row of each group it holds (FILTER on a group column) is not touched.
-                full_group_size: dict[tuple[Any, ...], int] = {}
-                kept_group_size: dict[tuple[Any, ...], int] = {}
-                for held_rows, sizes in ((source_base["rows"], full_group_size), (rows, kept_group_size)):
-                    for held_row in held_rows:
-                        held_typed = typed_row(context, held_row)
-                        if related_groups:
-                            held_typed = {**held_typed, **{c: group[2](held_typed) for c, group in related_groups.items()}}
-                        held_key = row_key(held_typed[c] for c in group_columns)
-                        sizes[held_key] = sizes.get(held_key, 0) + 1
-                if related_groups or any(full_group_size.get(key) != size for key, size in kept_group_size.items()):
-                    raise MeasureError("SUMMARIZE over a filtered table with added columns is not modelled by the local engine.")
+            partial_source = bool(names) and source_base is not None and _row_subset_source(arguments[0], variable_nodes.get) and len(rows) != len(source_base["rows"])
             detail_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
             detail_members: dict[tuple[Any, ...], list[int]] = {}
             typed_rows: list[dict[str, Any]] = []
@@ -12849,6 +12878,7 @@ def _evaluate_measures_once(
                                     {c: g[2].key_column for c, g in related_groups.items() if g[2].key_column and c not in rolled_up},
                                     frozenset(g[0]["id"] for c, g in related_groups.items() if group_row.get(c) is None),
                                     blank_partner_rows(group_row),
+                                    partial_source=partial_source,
                                 )
                             else:
                                 row[name] = evaluate_with_context_transition(expression, row_ctx, group_row, keys=True)
@@ -12881,6 +12911,17 @@ def _evaluate_measures_once(
                 summarized[0]["rollup_level_count"] = rollup_level_count if out_rows else 0
             if summary_variant and variant_has_date_branch(context, names, expressions, summary_variant):
                 order_undecided_levels.append(True)  # Task 243 (measured): a Variant column that takes a date beside a text came out of a FILTER in an order the engine does not model
+            if partial_source and not related_groups:
+                base_order: dict[tuple[Any, ...], int] = {}
+                for held_row in source_base["rows"]:
+                    base_order.setdefault(row_key(typed_row(context, held_row)[c] for c in group_columns), len(base_order))
+                kept_positions = [base_order.get(key, -1) for key in detail_keys]
+                if kept_positions != sorted(kept_positions) or -1 in kept_positions:
+                    order_undecided_levels.append(True)  # Task 243 (review, measured): the groups of a filtered table whose first rows no longer come in the order of the groups of the whole table came out in an order the engine does not model
+            elif partial_source:
+                order_undecided_levels.append(True)
+            if names and _has_call(arguments[0], frozenset({"TOPN", "TOPNSKIP", "TOPNPERLEVEL", "SAMPLE"})):
+                order_undecided_levels.append(True)  # Task 243 (review, measured): the groups of a SUMMARIZE over a TOPN come in an order the engine does not model
             if order_undecided_levels or any(_reads_filter_state_of(expression, None) for expression in expressions):
                 summarized[0]["order_undecided"] = True  # Task 243 (measured): the groups come in an order the engine does not model when an added column reads the filter state of a group column (HASONEVALUE, SELECTEDVALUE, VALUES ...)
             return summarized
@@ -22098,7 +22139,7 @@ def _evaluate_measures_once(
         return operand_types == ["int64", "int64"]
 
     nan_date_extreme: list[str] = []
-    type_test_stack: list[str] = []  # Task 243: the type tests being evaluated, innermost last
+    type_test_stack: list[tuple[str, Any]] = []  # Task 243: the type tests being evaluated (name, argument), innermost last
     xnpv_depth = [0]  # Part A: how many XNPV calls are being evaluated (their arguments keep the exact arithmetic)
     iferror_depth = [0]  # how many IFERROR first arguments are being evaluated (a VAR is evaluated where it is bound, so outside them)
 
@@ -23524,7 +23565,7 @@ def _evaluate_measures_once(
                 raise MeasureError(f"{function} over a Variant that holds a number type with dates inside is not supported in the local engine.")
             variant_body, number_dates = body_kind in {"variant", "variant_dates"}, body_kind == "numdate"
             if (
-                type_test_stack and type_test_stack[-1] in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISDATETIME"} and context.get("variant_columns")
+                type_test_stack and type_test_stack[-1][0] in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISDATETIME"} and context.get("variant_columns")
                 and function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} and _variant_column_in_result_branch(arguments[1], context["variant_columns"])
             ):
                 # Task 243 (measured): a conditional that returns a Variant column in one of its branches is typed by the value it takes, not by the unified branch types
@@ -24503,8 +24544,11 @@ def _evaluate_measures_once(
                     if len(arguments) == 1 and not dax_failing_type_tests.context_changing(arguments[0], variable_nodes) and dax_failing_type_tests.variant_pattern(arguments[0], lambda held: _static_numeric_type(held, *static_scope()), variable_nodes)
                     else None
                 )  # Task 241: the data decides the branch of a Variant only under a number function
-                type_test_stack.append(function)
+                type_test_stack.append((function, arguments[0] if len(arguments) == 1 else None))
                 try:
+                    if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"} and len(arguments) == 1 and _variant_iterator_in_branch(arguments[0]):
+                        # Task 243 (review): a branch that is an iterator over a Variant column makes the conditional typed by the branch taken; the engine unifies the branch types
+                        raise MeasureError("A number-type test of a conditional whose branch is an iterator over a Variant column is not modelled by the local engine.")
                     return evaluate_typed_function(function, arguments, row_context)
                 finally:
                     type_test_stack.pop()
@@ -26011,6 +26055,8 @@ def _evaluate_measures_once(
     _STATIC_PASS_VALUE[0] = lambda held_node: variant_value(held_node, None)  # Task 241: the static check types a Variant under a number function by the branch the data takes
     try:
         for item in selected:
+            if not _is_type_test_measure(parsed[item["name"].casefold()]) and _variant_iterator_date_mix(parsed[item["name"].casefold()]):
+                raise MeasureError("A conditional whose branches are a date and an iterator over a Variant column is not modelled by the local engine.")  # Task 243 (review): Power BI shows the date as a number
             _reject_mismatched_comparison_types(parsed[item["name"].casefold()], column_types_by_table)
     finally:
         _STATIC_PASS_VALUE[0] = held_hook
