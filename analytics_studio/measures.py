@@ -21176,7 +21176,7 @@ def _evaluate_measures_once(
                 raise dax_typed.refusal("A type test of arithmetic around a failing power is not modelled by the local engine.") from failure
             hidden = function in _TYPE_TESTS and len(arguments) == 1 and (
                 (isinstance(failure, _StaticTypeFailure) and (
-                    not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISDOUBLE"}
+                    not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISNUMERIC", "ISDOUBLE"}
                 ))
                 or (arguments[0][0] == "comparison")
                 or (isinstance(failure, _HardError) and _has_kind(arguments[0], {"let"}) and not _has_bare_error(arguments[0])
@@ -21269,7 +21269,7 @@ def _evaluate_measures_once(
                 ):
                     can_resolve_static = True
                     if function in {"ISNUMBER", "ISDOUBLE", "ISNUMERIC", "ISINTEGER", "ISINT64"}:
-                        if arg0[0] in {"let", "call"} and (arg0[0] == "let" or str(arg0[1]).upper() in {"IF", "SWITCH", "COALESCE"}):
+                        if arg0[0] in {"let", "call", "var"} and (arg0[0] in {"let", "var"} or str(arg0[1]).upper() in {"IF", "SWITCH", "COALESCE"}):
                             can_resolve_static = False
                         elif any(isinstance(n, tuple) and n and (n[0] in {"reference", "table"} or (n[0] == "call" and str(n[1]).upper() in {"SUM", "MAX", "MIN", "AVERAGE", "COUNTROWS", "CALCULATE", "SUMX", "MAXX", "FILTER"})) for n in _walk_nodes(arg0)):
                             can_resolve_static = False
