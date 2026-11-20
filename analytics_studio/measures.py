@@ -6314,6 +6314,119 @@ def _needs_scan(node: Any, held: Callable[[str], Any], in_row: bool = False, see
     return operands_scan(arguments)
 
 
+_BUILT_TABLE_CALLS = frozenset({"ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE", "SUMMARIZECOLUMNS", "GROUPBY", "GENERATE", "GENERATEALL", "ROW", "DATATABLE", "UNION", "CROSSJOIN", "EXCEPT", "INTERSECT", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "TREATAS"})
+
+
+def _iterator_over_built_table(node: Any) -> bool:
+    """Task 243: the node holds an iterator (SUMX, MAXX, ...) whose table holds a call that builds a table (ADDCOLUMNS, SUMMARIZE, GROUPBY ...)."""
+    for held in _walk_nodes(node):
+        if isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() in _ALL_ITERATORS | {"CONCATENATEX", "PRODUCTX", "MEDIANX", "GEOMEANX"} and held[2]:
+            if any(isinstance(inner, tuple) and len(inner) > 2 and inner[0] in {"call", "table_call"} and str(inner[1]).upper() in _BUILT_TABLE_CALLS for inner in _walk_nodes(held[2][0])):
+                return True
+    return False
+
+
+_CONDITIONAL_CALLS = frozenset({"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR", "SELECTEDVALUE"})
+
+
+def _has_call(node: Any, names: frozenset[str]) -> bool:
+    return any(isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() in names for held in _walk_nodes(node))
+
+
+_ITERATOR_BRANCH_CALLS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "PRODUCTX", "MEDIANX", "GEOMEANX"})
+
+
+def _variant_iterator_in_branch(argument: Any) -> bool:
+    """Task 243 (review): an IF / SWITCH / COALESCE / IFERROR one of whose result branches is an iterator over a table built with a conditional (Variant) added column."""
+    for held in _walk_nodes(argument):
+        if not (isinstance(held, tuple) and len(held) > 2 and held[0] == "call" and str(held[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}):
+            continue
+        for branch in _variant_result_branches(held):
+            for inner in _walk_nodes(branch):
+                if isinstance(inner, tuple) and len(inner) > 2 and inner[0] in {"call", "table_call"} and str(inner[1]).upper() in _ITERATOR_BRANCH_CALLS and inner[2]:
+                    for built in _walk_nodes(inner[2][0]):
+                        if isinstance(built, tuple) and len(built) > 2 and built[0] in {"call", "table_call"} and str(built[1]).upper() in _BUILT_TABLE_CALLS and _has_call(built, _CONDITIONAL_CALLS):
+                            return True
+    return False
+
+
+_ROW_SUBSET_CALLS = frozenset({"FILTER", "TOPN", "CALCULATETABLE", "SAMPLE", "TOPNSKIP", "TOPNPERLEVEL", "EXCEPT", "INTERSECT"})
+
+
+def _row_subset_source(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
+    """Task 243: the table argument is built by a call that keeps only some rows of its source (FILTER, TOPN, CALCULATETABLE ...), also through a VAR."""
+    if not (isinstance(node, tuple) and node):
+        return False
+    if node[0] == "var" and len(node) == 2 and node[1] not in seen:
+        bound = held(node[1])
+        return bound is not None and _row_subset_source(bound, held, seen | {node[1]})
+    return node[0] in {"call", "table_call"} and len(node) > 2 and str(node[1]).upper() in _ROW_SUBSET_CALLS
+
+
+_FILTER_STATE_CALLS = frozenset({"HASONEVALUE", "SELECTEDVALUE", "VALUES", "DISTINCT", "ISFILTERED", "ISCROSSFILTERED", "FILTERS", "HASONEFILTER", "ISINSCOPE"})
+
+
+def _reads_filter_state_of(expression: Any, columns: Iterable[str] | None) -> bool:
+    """Task 243: the expression asks for the filter state (HASONEVALUE, SELECTEDVALUE, VALUES ...) of one of these columns (of any column when None)."""
+    wanted = None if columns is None else {str(column).casefold() for column in columns}
+    for held in _walk_nodes(expression):
+        if not (isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() in _FILTER_STATE_CALLS):
+            continue
+        arguments = held[2] if isinstance(held[2], (tuple, list)) else (held[2],)
+        if any(isinstance(argument, tuple) and argument and argument[0] == "reference" and len(argument) > 2 and (wanted is None or str(argument[2]).casefold() in wanted) for argument in arguments):
+            return True
+    return False
+
+
+_DATE_CALLS = frozenset({"DATE", "TIME", "DATEVALUE", "TIMEVALUE", "EDATE", "EOMONTH", "NOW", "TODAY", "UTCNOW", "UTCTODAY", "DATEADD", "CALENDAR"})
+
+
+def _is_type_test_measure(node: Any) -> bool:
+    """Task 243 (review): the measure is a type test, also inside CALCULATE: only its answer, not the display of a value, is read."""
+    while isinstance(node, tuple) and len(node) > 2 and node[0] == "call" and str(node[1]).upper() in {"CALCULATE", "CALCULATETABLE"} and node[2]:
+        node = node[2][0]
+    return isinstance(node, tuple) and len(node) > 2 and node[0] == "call" and str(node[1]).upper() in dax_failing_type_tests.TYPE_TESTS
+
+
+def _variant_iterator_date_mix(node: Any) -> bool:
+    """Task 243 (review): an IF / SWITCH / COALESCE with a date-valued branch beside a branch that is an iterator over a Variant column."""
+    for held in _walk_nodes(node):
+        if not (isinstance(held, tuple) and len(held) > 2 and held[0] == "call" and str(held[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}):
+            continue
+        if _variant_iterator_in_branch(held) and any(_has_call(branch, _DATE_CALLS) for branch in _variant_result_branches(held)):
+            return True
+    return False
+
+
+def _variant_column_in_result_branch(body: Any, variant_columns: Iterable[str]) -> bool:
+    """Task 243: the body is an IF / SWITCH / COALESCE / IFERROR one of whose result branches reads a Variant column (the body that is only that column is typed elsewhere)."""
+    held = {str(name).casefold() for name in variant_columns}
+    if not (isinstance(body, tuple) and len(body) > 2 and body[0] == "call" and str(body[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}):
+        return False
+    return any(
+        str(reference[2]).casefold() in held
+        for branch in _variant_result_branches(body) for reference in _iter_reference_nodes(branch) if len(reference) > 2
+    )
+
+
+def _variant_result_branches(node: Any) -> list[Any]:
+    """Task 243: the result branches of an IF / SWITCH / COALESCE (nested ones followed), the nodes that carry the value."""
+    if not isinstance(node, tuple) or not node:
+        return []
+    if node[0] == "call":
+        name, args = node[1], node[2]
+        if name in {"IF", "IF.EAGER"} and len(args) >= 2:
+            return [r for branch in args[1:3] for r in _variant_result_branches(branch)]
+        if name == "SWITCH" and len(args) >= 3:
+            branches = list(args[2::2]) + (list(args[-1:]) if len(args) % 2 == 0 else [])
+            return [r for branch in branches for r in _variant_result_branches(branch)]
+        if name == "COALESCE":
+            return [r for branch in args for r in _variant_result_branches(branch)]
+        if name == "CALCULATE" and args:
+            return _variant_result_branches(args[0])
+    return [node]
+
+
 def _static_blank(node: Any, held: Callable[[str], Any], truth: Callable[[Any], bool | None], seen: frozenset[str] = frozenset()) -> bool:
     """True when Power BI knows this operand is BLANK without looking at any row (BITAND, BITLSHIFT and BITRSHIFT then skip their other operand).
 
@@ -12125,6 +12238,7 @@ def _evaluate_measures_once(
         expression: tuple[Any, ...], group_context: dict[str, Any], group_row: dict[str, Any], source: dict[str, Any], members: list[int],
         key_columns: dict[str, str], unknown_tables: frozenset[str] = frozenset(),
         blank_partners: list[tuple[dict[str, Any], frozenset[int]]] = [],
+        partial_source: bool = False,
     ) -> Any:
         """An extension column of SUMMARIZE: the group is the set of rows of the summarized table it holds, which also filter the
         tables on that table's one side to the rows they reach (live Power BI: SUMMARIZE(Fact, Fact[Qty], "x", CALCULATE(SUM(Cal[Year])))
@@ -12160,8 +12274,8 @@ def _evaluate_measures_once(
         for header, source_column in key_columns.items():
             key_rows = one_side_value_index(source, source_column).get(cell_key(group_row[header]), frozenset()) if group_row.get(header) is not None else allowed
             own.setdefault(source["id"], (source, {}))[1][source_column] = key_rows
-        if not any(t != source["id"] for t in merged) and not unknown_tables:
-            merged = {}
+        if not any(t != source["id"] for t in merged) and not unknown_tables and not partial_source:
+            merged = {}  # Task 243 (review): a source that keeps only some rows (FILTER, TOPN ...) still narrows the group to those rows
         elif source["id"] in merged and source["id"] in own:  # a key column of the group keeps standing as the key
             kept = {c: r for c, r in merged[source["id"]][1].items() if c not in own[source["id"]][1]}
             merged = {**merged, source["id"]: (source, kept)}
@@ -12189,6 +12303,67 @@ def _evaluate_measures_once(
             return "matching local data types" in str(error) or "same local data type" in str(error)
         return False
 
+    def variant_has_date_branch(source_context: dict[str, Any], names: list[str], expressions: list[tuple[Any, ...]], variant: frozenset[str]) -> bool:
+        """Task 243: one of the Variant columns has a result branch of the date type."""
+        columns = {**static_scope()[0], "": {str(h).casefold(): str(t).casefold() for h, t in source_context.get("column_types", {}).items()}}
+        for name, expression in zip(names, expressions):
+            if name.casefold() not in variant:
+                continue
+            try:
+                if any(_static_numeric_type(branch, columns, variable_kinds) == "datetime" for branch in _variant_result_branches(expression)):
+                    return True
+            except MeasureError:
+                return True
+        return False
+
+    def variant_currency_names(source_context: dict[str, Any], names: list[str], expressions: list[tuple[Any, ...]], variant: frozenset[str], inherited: Iterable[str] = ()) -> frozenset[str]:
+        """Task 243: the Variant columns one of whose result branches is a Currency (or that read such a column): AVERAGEX of them under a type test
+        is a Currency in Power BI (measured: ISCURRENCY(AVERAGEX(ADDCOLUMNS(..., "s", IF(c, CURRENCY(3), "x")), [s])) is True) where the engine typed it as a Double."""
+        columns = {**static_scope()[0], "": {str(h).casefold(): str(t).casefold() for h, t in source_context.get("column_types", {}).items()}}
+        held = {str(name).casefold() for name in inherited}
+        found: set[str] = set()
+        for name, expression in zip(names, expressions):
+            if name.casefold() not in variant:
+                continue
+            if any(str(reference[2]).casefold() in held for reference in _iter_reference_nodes(expression) if len(reference) > 2):
+                found.add(name.casefold())
+                continue
+            try:
+                if any(_static_numeric_type(branch, columns, variable_kinds) == "currency" for branch in _variant_result_branches(expression)):
+                    found.add(name.casefold())
+            except MeasureError:
+                found.add(name.casefold())  # unsure => treated as holding a Currency
+        return frozenset(found)
+
+    def variant_extension_columns(source_context: dict[str, Any], source_rows: list[dict[str, Any]], names: list[str], expressions: list[tuple[Any, ...]]) -> tuple[frozenset[str], frozenset[str], frozenset[str]]:
+        """Task 243: the columns a SUMMARIZE / SUMMARIZECOLUMNS adds whose expression is a Variant (an IF / SWITCH / COALESCE whose branches differ in class), typed the
+        way ADDCOLUMNS and SELECTCOLUMNS type theirs: MAXX / MINX / SUMX / AVERAGEX / COUNTX over such a column read only its numbers (measured: MAXX over
+        SUMMARIZE(Facts, Facts[Region], "s", COALESCE(MAX(Facts[Note]), 0)) is BLANK although every group holds a text)."""
+        if not names:
+            return frozenset(), frozenset(), frozenset()
+        frame = (source_context, source_rows[0] if source_rows else ghost_row_of(source_context), 1)
+        variant: set[str] = set()
+        variant_dates: set[str] = set()
+        numdate_names: set[str] = set()
+        for name, expression in zip(names, expressions):
+            if true_false_typed_column(expression, frame):
+                continue
+            kind = iterator_body_kind(expression, frame)
+            if kind is None:
+                try:
+                    kind = iterator_expression_category(expression, frame)
+                except MeasureError:
+                    pass
+            if kind in {"variant", "variant_dates"}:
+                variant.add(name.casefold())
+                if kind == "variant_dates":
+                    variant_dates.add(name.casefold())
+            elif kind == "numdate":
+                numdate_names.add(name.casefold())  # live Power BI (iteration 87): numbers beside dates make a number column whose dates are plain numbers
+            elif is_variant_column_expression(expression, frame, ()):
+                variant.add(name.casefold())
+        return frozenset(variant), frozenset(variant_dates), frozenset(numdate_names)
+
     def refuse_variant_aggregation(function: str, context: dict[str, Any], expression: tuple[Any, ...]) -> None:
         """MAXX / MINX / SUMX / AVERAGEX / COUNTX over a Variant column read only its numbers (live Power BI, iteration 85); the local
         engine reads the values of the rows instead, which gave wrong answers, so it refuses."""
@@ -12210,7 +12385,15 @@ def _evaluate_measures_once(
             return [node]
 
         branch_nodes = result_branch_nodes(expression)
-        if any(str(reference[2]).casefold() in variant for b in branch_nodes for reference in _iter_reference_nodes(b) if len(reference) > 2):
+        read_variant = {str(reference[2]).casefold() for b in branch_nodes for reference in _iter_reference_nodes(b) if len(reference) > 2 and str(reference[2]).casefold() in variant}
+        if read_variant:
+            names_read = [header for header in context.get("headers", []) if str(header).casefold() in read_variant]
+            # Task 243: a column that holds numbers in every row is read as the numbers it holds (a text or a True/False in a row is what Power BI skips or raises for)
+            if names_read and all(
+                row.get(header) is None or (isinstance(row.get(header), Decimal) and not isinstance(row.get(header), bool))
+                for row in context.get("rows", []) for header in names_read
+            ) and not context.get("variant_date_columns"):
+                return
             raise MeasureError(f"{function} over a column whose branches have different types is not supported in the local engine.")
 
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -12461,14 +12644,18 @@ def _evaluate_measures_once(
                         variant_columns.add(name.casefold())
             if variant_columns:
                 selected_context["variant_columns"] = frozenset(variant_columns)
+                selected_context["variant_currency_columns"] = variant_currency_names(context, names, expressions, frozenset(variant_columns), context.get("variant_currency_columns", ()))
             if variant_date_columns:
                 selected_context["variant_date_columns"] = frozenset(variant_date_columns)
+            if context.get("order_undecided"):
+                selected_context["order_undecided"] = True  # Task 243: the rows keep the order of the table they were added to
             if not add:  # the walk order of a selected column is that of the columns it was computed from
                 selected_context["selected_columns"] = True
                 selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
             return selected_context, selected_rows
         if function == "SUMMARIZE":
             summarize_id = id(argument)  # the loop over the group columns below rebinds `argument`
+            summarize_node = argument
             context, rows = table_argument_value(arguments[0])
             split = next((i for i, a in enumerate(arguments[1:], 1) if a[0] == "string"), len(arguments))
             group_columns = []
@@ -12557,6 +12744,7 @@ def _evaluate_measures_once(
 
             source_base = contexts_by_id.get(context["id"]) if not context.get("derived") else None
             source_positions = {id(r): i for i, r in enumerate(source_base["rows"])} if source_base is not None else {}
+            partial_source = bool(names) and source_base is not None and _row_subset_source(arguments[0], variable_nodes.get) and len(rows) != len(source_base["rows"])
             detail_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
             detail_members: dict[tuple[Any, ...], list[int]] = {}
             typed_rows: list[dict[str, Any]] = []
@@ -12690,6 +12878,7 @@ def _evaluate_measures_once(
                                     {c: g[2].key_column for c, g in related_groups.items() if g[2].key_column and c not in rolled_up},
                                     frozenset(g[0]["id"] for c, g in related_groups.items() if group_row.get(c) is None),
                                     blank_partner_rows(group_row),
+                                    partial_source=partial_source,
                                 )
                             else:
                                 row[name] = evaluate_with_context_transition(expression, row_ctx, group_row, keys=True)
@@ -12699,12 +12888,42 @@ def _evaluate_measures_once(
             finally:
                 pop_shadow(saved_shadow)
                 eff_touched = saved_touched
+            summary_variant, summary_variant_dates, summary_numdate = variant_extension_columns(context, rows, names, expressions)
+            for numdate_name in names:
+                if numdate_name.casefold() in summary_numdate:
+                    group_types[numdate_name] = "decimal_number"
+                    static_extension_names.discard(numdate_name)
+                    for out_row in out_rows:
+                        if isinstance(out_row.get(numdate_name), dax_dates.DaxDateTime):
+                            out_row[numdate_name] = Decimal(out_row[numdate_name])
+            for variant_name in names:
+                if variant_name.casefold() in summary_variant:
+                    group_types[variant_name] = "any"  # Task 243: the type of the branches, not of the values the groups hold
+                    static_extension_names.discard(variant_name)
             summarized = derived_table(list(group_columns) + names, out_rows, lineage, group_types, certain_types=static_extension_names)
+            if summary_variant:
+                summarized[0]["variant_columns"] = summary_variant
+                summarized[0]["variant_currency_columns"] = variant_currency_names(context, names, expressions, summary_variant, context.get("variant_currency_columns", ()))
+            if summary_variant_dates:
+                summarized[0]["variant_date_columns"] = summary_variant_dates
             summarized[0]["summarize_groups"] = tuple(group_columns)  # Task 83: a CALCULATE on one of its rows sees these columns in scope
             if has_rollup and not names:
                 summarized[0]["rollup_level_count"] = rollup_level_count if out_rows else 0
-            if order_undecided_levels:
-                summarized[0]["order_undecided"] = True
+            if summary_variant and variant_has_date_branch(context, names, expressions, summary_variant):
+                order_undecided_levels.append(True)  # Task 243 (measured): a Variant column that takes a date beside a text came out of a FILTER in an order the engine does not model
+            if partial_source and not related_groups:
+                base_order: dict[tuple[Any, ...], int] = {}
+                for held_row in source_base["rows"]:
+                    base_order.setdefault(row_key(typed_row(context, held_row)[c] for c in group_columns), len(base_order))
+                kept_positions = [base_order.get(key, -1) for key in detail_keys]
+                if kept_positions != sorted(kept_positions) or -1 in kept_positions:
+                    order_undecided_levels.append(True)  # Task 243 (review, measured): the groups of a filtered table whose first rows no longer come in the order of the groups of the whole table came out in an order the engine does not model
+            elif partial_source:
+                order_undecided_levels.append(True)
+            if names and _has_call(arguments[0], frozenset({"TOPN", "TOPNSKIP", "TOPNPERLEVEL", "SAMPLE"})):
+                order_undecided_levels.append(True)  # Task 243 (review, measured): the groups of a SUMMARIZE over a TOPN come in an order the engine does not model
+            if order_undecided_levels or any(_reads_filter_state_of(expression, None) for expression in expressions):
+                summarized[0]["order_undecided"] = True  # Task 243 (measured): the groups come in an order the engine does not model when an added column reads the filter state of a group column (HASONEVALUE, SELECTEDVALUE, VALUES ...)
             return summarized
         if function == "TOPN":
             count = Decimal(dax_typed.whole(in_row_expression(lambda: evaluate(arguments[0])), "TOPN"))
@@ -12766,6 +12985,9 @@ def _evaluate_measures_once(
                 for position in range(len(keys_spec) - 1, -1, -1):
                     sample = next((item[0][position] for item in found if item[0][position] is not None), None)
                     blank = dax_typed._blank_like(sample) if sample is not None else Decimal(0)
+                    key_classes = {"bool" if isinstance(item[0][position], bool) else "text" if isinstance(item[0][position], str) else "date" if isinstance(item[0][position], dax_dates.DaxDateTime) else "number" for item in found if item[0][position] is not None}
+                    if len(key_classes) > 1:  # Task 243: a True/False beside a number is ranked by Power BI above every number (measured), not by the local order
+                        raise MeasureError("TOPN keys of different types (a number beside text or True/False) are not ordered by the local engine.")
                     try:
                         ranked.sort(
                             # live Power BI (iteration 88): a BLANK ranks below the zero (or the empty text) it compares equal to
@@ -13358,6 +13580,36 @@ def _evaluate_measures_once(
                 return rows_by_table_id[table_id]
             return list(own["filter_rows"]) if "filter_rows" in own else list(own["rows"])
 
+        def with_variant_columns(table: tuple[dict[str, Any], list[dict[str, Any]]]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+            """Task 243: a column of a Variant expression is typed by its branches (see variant_extension_columns), as ADDCOLUMNS types its own."""
+            source = contexts_by_id.get(resolved[0][0]["id"], resolved[0][0]) if resolved else active_context
+            variant, variant_dates, numdate = variant_extension_columns(source, source.get("rows", []), names, stripped)
+            for numdate_name in names:
+                if numdate_name.casefold() in numdate:
+                    table[0]["column_types"] = {**table[0]["column_types"], numdate_name: "decimal_number"}
+                    for out_row in table[1]:
+                        if isinstance(out_row.get(numdate_name), dax_dates.DaxDateTime):
+                            out_row[numdate_name] = Decimal(out_row[numdate_name])
+            if variant:
+                table[0]["variant_columns"] = variant
+                table[0]["variant_currency_columns"] = variant_currency_names(source, names, stripped, variant)
+                table[0]["column_types"] = {**table[0]["column_types"], **{name: "any" for name in names if name.casefold() in variant}}
+                table[0]["explicit_types"] = frozenset(table[0].get("explicit_types", ())) - set(names)
+            if variant_dates:
+                table[0]["variant_date_columns"] = variant_dates
+            if variant and variant_has_date_branch(source, names, stripped, variant):
+                table[0]["order_undecided"] = True  # Task 243: see SUMMARIZE
+            for name, expression in zip(names, stripped):
+                if name.casefold() not in variant:
+                    continue
+                # Task 243 (measured): the groups of a SUMMARIZECOLUMNS come in an order the local engine does not model when a Variant column takes a text
+                # beside a number and two or more of its result branches read data (IF(c, MAX(Facts[Note]), SUM(Facts[Quantity]))); literal branches kept the order
+                results = [branch for branch in _variant_result_branches(expression) if not _reads_no_data(branch, variable_nodes.get)]
+                held = {"text" if isinstance(row.get(name), str) else "number" for row in table[1] if row.get(name) is not None}
+                if len(results) > 1 and len(held) > 1:
+                    table[0]["order_undecided"] = True
+            return table
+
         def compute() -> tuple[dict[str, Any], list[dict[str, Any]]]:
             lineage = {column: (context, column) for context, column in resolved}
             types = {column: context.get("column_types", {}).get(column, "text") for context, column in resolved}
@@ -13420,7 +13672,7 @@ def _evaluate_measures_once(
                     if st is not None:
                         sc_types[name] = st
                         sc_certain.add(name)
-                return derived_table(list(headers) + names, output, lineage, sc_types, certain_types=sc_certain)
+                return with_variant_columns(derived_table(list(headers) + names, output, lineage, sc_types, certain_types=sc_certain))
 
             def detail_combinations() -> list[dict[str, Any]]:
                 by_table_h: dict[str, tuple[dict[str, Any], list[str]]] = {}
@@ -13524,7 +13776,7 @@ def _evaluate_measures_once(
                 if st is not None:
                     sc_types[name] = st
                     sc_certain.add(name)
-            return derived_table(all_headers + names, output, lineage, sc_types, certain_types=sc_certain)
+            return with_variant_columns(derived_table(all_headers + names, output, lineage, sc_types, certain_types=sc_certain))
 
         if not added:
             return compute()
@@ -13612,7 +13864,16 @@ def _evaluate_measures_once(
             if st is not None:
                 gb_types[name] = st
                 gb_certain.add(name)
-        return derived_table(columns + names, output, lineage, gb_types, certain_types=gb_certain)
+        grouped_table = derived_table(columns + names, output, lineage, gb_types, certain_types=gb_certain)
+        group_keys = {column.casefold() for column in columns}
+        for expression in expressions:
+            for reference in (expression[2][1:] if len(expression[2]) > 1 else ()):
+                for read in _direct_column_references(reference):
+                    read_column = next((h for h in context["headers"] if h.casefold() == str(read[2]).casefold()), None)
+                    if read_column is not None and read_column.casefold() not in group_keys and str(context.get("column_types", {}).get(read_column, "")).casefold() in {"text", "string"}:
+                        # Task 243 (measured): the groups of a GROUPBY whose aggregate reads a text column come out in an order the local engine does not model (a count or a sum of a number column kept the order of the first rows)
+                        grouped_table[0]["order_undecided"] = True
+        return grouped_table
 
     def treat_as(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         context, rows = table_argument_value(arguments[0])
@@ -13772,9 +14033,17 @@ def _evaluate_measures_once(
                 output.append({**left, **{h: None for h in right_headers}})
         lineage = {**right_lineage, **base_lineage(left_context)}
         certain = set(left_context.get("explicit_types", ())) | set(right_context.get("explicit_types", ()))
-        return derived_table(list(left_context["headers"]) + right_headers, output, lineage, {**right_types, **left_context.get("column_types", {})},
-                             row_identity=(not left_context.get("derived") or bool(left_context.get("row_identity"))),
-                             certain_types=certain)
+        generated = derived_table(list(left_context["headers"]) + right_headers, output, lineage, {**right_types, **left_context.get("column_types", {})},
+                                  row_identity=(not left_context.get("derived") or bool(left_context.get("row_identity"))),
+                                  certain_types=certain)
+        carried = frozenset(set(left_context.get("variant_columns", ())) | set(right_context.get("variant_columns", ())))  # Task 243: a Variant column of either side stays a Variant
+        if carried:
+            generated[0]["variant_columns"] = carried
+            generated[0]["variant_currency_columns"] = frozenset(set(left_context.get("variant_currency_columns", ())) | set(right_context.get("variant_currency_columns", ())))
+        carried_dates = frozenset(set(left_context.get("variant_date_columns", ())) | set(right_context.get("variant_date_columns", ())))
+        if carried_dates:
+            generated[0]["variant_date_columns"] = carried_dates
+        return generated
 
     def contains_call(node: Any, names: frozenset[str], seen: tuple[str, ...] = ()) -> bool:
         """Whether a call to one of `names` sits anywhere in the expression, also inside a VAR it reads."""
@@ -15736,7 +16005,21 @@ def _evaluate_measures_once(
                 st = _static_numeric_type(pairs[i + 1], table_context, variable_kinds)
                 if st is not None and st in norm_map:
                     row_types[name] = norm_map[st]
-            return derived_table(names, [row], base_types=row_types, certain_types=row_types)
+            row_variant, row_variant_dates, row_numdate = variant_extension_columns(enclosing[0] if enclosing else active_context, [enclosing[1]] if enclosing else active_context.get("rows", []), names, [pairs[i + 1] for i in range(0, len(pairs), 2)])
+            for variant_name in names:
+                if variant_name.casefold() in row_variant:  # Task 243: a Variant value is typed by its branches, as in ADDCOLUMNS
+                    row_types[variant_name] = "any"
+                if variant_name.casefold() in row_numdate:
+                    row_types[variant_name] = "decimal_number"
+                    if isinstance(row.get(variant_name), dax_dates.DaxDateTime):
+                        row[variant_name] = Decimal(row[variant_name])
+            constructed = derived_table(names, [row], base_types=row_types, certain_types=[name for name in row_types if name.casefold() not in row_variant])
+            if row_variant:
+                constructed[0]["variant_columns"] = row_variant
+                constructed[0]["variant_currency_columns"] = variant_currency_names(enclosing[0] if enclosing else active_context, names, [pairs[i + 1] for i in range(0, len(pairs), 2)], row_variant)
+            if row_variant_dates:
+                constructed[0]["variant_date_columns"] = row_variant_dates
+            return constructed
         if argument[0] == "table_call":
             source = argument[2]
             if source[0] not in {"table", "reference"}:
@@ -21238,6 +21521,8 @@ def _evaluate_measures_once(
                 raise
             values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
         except (MeasureRuntimeError, _HardError) as failure:
+            if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1 and (isinstance(failure, _TextConversionFailure) or "Cannot convert value" in str(failure)) and _iterator_over_built_table(arguments[0]):
+                raise  # Task 243 (measured): a text that fails to convert inside an iterator over a table built by ADDCOLUMNS / SELECTCOLUMNS / SUMMARIZE / GROUPBY ... raises under every type test
             if function in _TYPE_TESTS and function != "ISBLANK" and len(arguments) == 1:
                 failed_shape = dax_failing_type_tests.unmeasured_shape(function, arguments[0], lambda held: _static_numeric_type(held, *static_scope()), True, variable_nodes)
                 if failed_shape is not None:
@@ -21854,6 +22139,7 @@ def _evaluate_measures_once(
         return operand_types == ["int64", "int64"]
 
     nan_date_extreme: list[str] = []
+    type_test_stack: list[tuple[str, Any]] = []  # Task 243: the type tests being evaluated (name, argument), innermost last
     xnpv_depth = [0]  # Part A: how many XNPV calls are being evaluated (their arguments keep the exact arithmetic)
     iferror_depth = [0]  # how many IFERROR first arguments are being evaluated (a VAR is evaluated where it is bound, so outside them)
 
@@ -23278,6 +23564,17 @@ def _evaluate_measures_once(
             if body_kind == "variant_dates" and function != "AVERAGEX":
                 raise MeasureError(f"{function} over a Variant that holds a number type with dates inside is not supported in the local engine.")
             variant_body, number_dates = body_kind in {"variant", "variant_dates"}, body_kind == "numdate"
+            if (
+                type_test_stack and type_test_stack[-1][0] in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISDATETIME"} and context.get("variant_columns")
+                and function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} and _variant_column_in_result_branch(arguments[1], context["variant_columns"])
+            ):
+                # Task 243 (measured): a conditional that returns a Variant column in one of its branches is typed by the value it takes, not by the unified branch types
+                # (ISINTEGER(MAXX(SUMMARIZE(..., "s", IFERROR(MAX(Facts[Note]) + 0, "bad")), IF(ISNUMBER([s]), [s], 0))) is True, the unified type is a Double)
+                raise MeasureError("A number-type test of an iterator body that returns a Variant column in a conditional branch is not modelled by the local engine.")
+            if function == "AVERAGEX" and _VARIANT_FOLD[0] and context.get("variant_currency_columns") and any(
+                str(reference[2]).casefold() in context["variant_currency_columns"] for reference in _iter_reference_nodes(arguments[1]) if len(reference) > 2
+            ):
+                raise MeasureError("A type test of AVERAGEX over a Variant column with a Currency branch is not modelled by the local engine.")  # Task 243: Power BI types it as a Currency
             if not variant_body:
                 refuse_variant_aggregation(function, context, arguments[1])
             if function == "MEDIANX" and iteration_rows and (_holds_table_calculate(arguments[0]) or _holds_table_calculate(arguments[1])):
@@ -24247,9 +24544,14 @@ def _evaluate_measures_once(
                     if len(arguments) == 1 and not dax_failing_type_tests.context_changing(arguments[0], variable_nodes) and dax_failing_type_tests.variant_pattern(arguments[0], lambda held: _static_numeric_type(held, *static_scope()), variable_nodes)
                     else None
                 )  # Task 241: the data decides the branch of a Variant only under a number function
+                type_test_stack.append((function, arguments[0] if len(arguments) == 1 else None))
                 try:
+                    if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"} and len(arguments) == 1 and _variant_iterator_in_branch(arguments[0]):
+                        # Task 243 (review): a branch that is an iterator over a Variant column makes the conditional typed by the branch taken; the engine unifies the branch types
+                        raise MeasureError("A number-type test of a conditional whose branch is an iterator over a Variant column is not modelled by the local engine.")
                     return evaluate_typed_function(function, arguments, row_context)
                 finally:
+                    type_test_stack.pop()
                     dax_failing_type_tests.CONDITION_VALUE[0] = held_hook
                     _VARIANT_FOLD[0] -= 1
             return evaluate_typed_function(function, arguments, row_context)
@@ -25753,6 +26055,8 @@ def _evaluate_measures_once(
     _STATIC_PASS_VALUE[0] = lambda held_node: variant_value(held_node, None)  # Task 241: the static check types a Variant under a number function by the branch the data takes
     try:
         for item in selected:
+            if not _is_type_test_measure(parsed[item["name"].casefold()]) and _variant_iterator_date_mix(parsed[item["name"].casefold()]):
+                raise MeasureError("A conditional whose branches are a date and an iterator over a Variant column is not modelled by the local engine.")  # Task 243 (review): Power BI shows the date as a number
             _reject_mismatched_comparison_types(parsed[item["name"].casefold()], column_types_by_table)
     finally:
         _STATIC_PASS_VALUE[0] = held_hook
