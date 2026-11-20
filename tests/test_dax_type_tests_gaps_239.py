@@ -420,31 +420,9 @@ ERRORS = [
 ]
 
 STILL_REFUSED = [
-    ('ISBOOLEAN(ABS((-(CURRENCY(4E15)+CURRENCY(5E15)))=-(CURRENCY(5E14)*CURRENCY(5E14)*2)))', 'False'),
-    ('ISBOOLEAN(IF(POWER(-CURRENCY(2E15)*4,2)>1,DIVIDE(DIVIDE("ab",2),"cd"),MAX(Facts[Sales])))', 'False'),
-    ('ISCURRENCY((COALESCE(CURRENCY(3E15)*3,-CURRENCY(2E15)*4))<>-(TRUE()))', 'False'),
-    ('ISDECIMAL(-((DIVIDE(MAX(Facts[Quantity])^0.3,DIVIDE(DIVIDE("ab",2),"cd")))=TRUNC(1)))', 'False'),
-    ('ISDECIMAL(IF(FALSE()*CURRENCY(3E15)*3>1,DIVIDE(2,"cd"),DIVIDE("ab",3)))', 'False'),
-    ('ISDOUBLE((IF(FALSE(),COUNT(Facts[Sales])+"u",FALSE())))', 'False'),
     ('ISDOUBLE(-(COALESCE(AVERAGE(Facts[Quantity]),TRUE())))', 'True'),
-    ('ISINT64(DIVIDE(-(COUNT(Facts[Sales])+"u"),(CURRENCY(5))<>DIVIDE(DIVIDE("ab",2),"cd")))', 'False'),
-    ('ISINTEGER(SIGN((CURRENCY(3E15)*3)>COUNTROWS(Facts)+"z"))', 'True'),
-    ('ISLOGICAL(-((CURRENCY(4E15)+CURRENCY(5E15))>DATE(2020,1,1)))', 'False'),
-    ('ISLOGICAL(ABS((-(CURRENCY(3E15)*3))=INT(FALSE())))', 'False'),
-    ('ISLOGICAL(DIVIDE(DIVIDE("ab",3),DATE(2020,1,1)))', 'False'),
     ('ISLOGICAL(POWER((-CURRENCY(2E15)*4)<CURRENCY(3E15)*3,2))', 'False'),
-    ('ISNONTEXT(DIVIDE((1),(COUNTA(Facts[Note])-"u")&MAX(Facts[Region])))', 'True'),
-    ('ISNUMBER(((-(TRUE()))<CURRENCY(4E15)+CURRENCY(5E15)-CURRENCY(3E15)*3))', 'False'),
-    ('ISNUMBER((ABS(("v"+COUNT(Facts[Quantity]))<SUM(Facts[Sales]))))', 'True'),
-    ('ISNUMBER(CURRENCY(-((MAX(Facts[Sales]))="v"+COUNT(Facts[Quantity]))))', 'True'),
-    ('ISNUMBER(INT(("v"+COUNT(Facts[Quantity]))>MAX(Facts[Quantity])^0.3))', 'True'),
-    ('ISSTRING(-((CURRENCY(2E15)*5-MAX(Facts[Quantity]))<(MAX(Facts[Quantity]))))', 'False'),
-    ('ISSTRING(DIVIDE(IF(TRUE(),CURRENCY(3E15)*3,-CURRENCY(2E15)*4),(1)))', 'False'),
-    ('ISSTRING(ROUND((DIVIDE(1,"yy"))=DIVIDE("zz",2)+(COUNTA(Facts[Region])+"z"),0))', 'False'),
-    ('ISTEXT((CURRENCY(3))&1+((DIVIDE("ab",MIN(Facts[Sales])))<MAX(Facts[Quantity])))', 'True'),
     ('ISTEXT(DIVIDE(2,"cd")+COUNTA(Facts[Note])-"u"-IF(FALSE(),"s",MAX(Facts[Quantity])^0.3))', 'False'),
-    ('ISTEXT(ROUND((MAX(Facts[Quantity]))=DIVIDE("ab",MIN(Facts[Sales])),0))', 'False'),
-    ('VAR x=COUNTROWS(Facts)+"z" RETURN ISCURRENCY(x<1)', 'False'),
 ]
 
 FIXED_WRONG_ANSWERS = [
@@ -484,5 +462,5 @@ def test_this_file_holds_enough_shapes() -> None:
     assert len(SEED) == 28
     assert len(ANSWERED) >= 240
     assert len(ERRORS) >= 110
-    assert len(STILL_REFUSED) >= 20
+    assert len(STILL_REFUSED) == 3  # Task 240 answered the other 22 (see tests/test_dax_type_tests_wrongs_240.py)
     assert len(FIXED_WRONG_ANSWERS) == 4

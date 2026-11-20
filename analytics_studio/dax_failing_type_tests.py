@@ -57,7 +57,7 @@ _MATCHING_TYPES: dict[str, frozenset[str]] = {  # the static types a type test a
     "ISDECIMAL": frozenset({"currency", "decimal"}), "ISCURRENCY": frozenset({"currency", "decimal"}),
 }
 _ARITHMETIC = frozenset({"+", "-", "*", "^"})  # "/" is never hidden: Power BI raised for every division of a failing value in the saved answers
-_LAZY_CALLS = frozenset({"INT", "ABS", "ROUND", "TRUNC", "SIGN", "EXP", "POWER", "MOD", "FACT", "CEILING", "CURRENCY", "CONVERT", "UPPER", "CONCATENATE"})
+_LAZY_CALLS = frozenset({"INT", "ABS", "ROUND", "ROUNDUP", "TRUNC", "SIGN", "EXP", "POWER", "MOD", "FACT", "CEILING", "CURRENCY", "CONVERT", "UPPER", "CONCATENATE"})
 _FOLDED_CALLS = frozenset({"VALUE", "DATEVALUE", "TIMEVALUE", "DATE", "TIME", "EDATE", "WEEKDAY", "SQRT", "LN", "DIVIDE"})
 _AGGREGATES = frozenset({"MAX", "MIN", "SUM"})
 _LITERALS = frozenset({"number", "string", "boolean", "blank", "blank_comment", "var"})
@@ -65,7 +65,8 @@ _CONVERT_KEYWORDS = frozenset({"INTEGER", "INT64", "DOUBLE", "CURRENCY", "DECIMA
 _NUMERIC = frozenset({"int64", "double", "currency", "decimal"})
 _OVERFLOW_FAILURE = "The result of a conversion or arithmetic operation is either too large or too small."
 _VAR_TYPE_REFUSAL = "Cannot determine static type for function"  # Task 239: the refusal of a type test whose argument is a VAR (only a VAR block is answered for it)
-_ANSWERABLE_FAILURES = ("Cannot convert value", "Iterator DIVIDE argument", "An argument of function", "A type test of a failing value", "A type test of arithmetic around a failing power", _OVERFLOW_FAILURE)
+_ROUND_ARTIFACT = "ROUND, ROUNDUP or ROUNDDOWN of a Currency value"  # Task 240: the refusal of a rounded Currency of 1E14 or more (its text shows an artifact; a type test never reads the text)
+_ANSWERABLE_FAILURES = ("Cannot convert value", "Iterator DIVIDE argument", "An argument of function", "A type test of a failing value", "A type test of arithmetic around a failing power", _OVERFLOW_FAILURE, _ROUND_ARTIFACT)
 
 
 def _column_type(node: Any, columns: dict[str, dict[str, str]]) -> str | None:
@@ -92,18 +93,18 @@ def _aggregate(node: Any, columns: dict[str, dict[str, str]]) -> bool:
     return str(node[1]).upper() != "SUM" or _numeric_column(argument, columns)
 
 
-_COUNTING = frozenset({"COUNT", "COUNTA", "AVERAGE", "DISTINCTCOUNT"})
+_COUNTING = frozenset({"COUNT", "COUNTA", "COUNTBLANK", "AVERAGE", "DISTINCTCOUNT"})
 
 
 def _counting(node: Any, columns: dict[str, dict[str, str]]) -> bool:
-    """Task 239: COUNT / AVERAGE of a numeric column and COUNTA / DISTINCTCOUNT of any column of a loaded table: a number that cannot fail
-    (COUNT or AVERAGE of a text column raises in Power BI and is not accepted)."""
+    """Task 239: AVERAGE of a numeric column and COUNT / COUNTA / COUNTBLANK / DISTINCTCOUNT of any column of a loaded table (Task 240: COUNT and COUNTBLANK
+    of a text column too): a number that cannot fail (AVERAGE of a text column raises in Power BI and is not accepted)."""
     if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() in _COUNTING and len(node[2]) == 1):
         return False
     argument = node[2][0]
     if not (isinstance(argument, tuple) and argument and argument[0] == "reference" and _column_type(argument, columns) is not None):
         return False
-    return str(node[1]).upper() in {"COUNTA", "DISTINCTCOUNT"} or _numeric_column(argument, columns)
+    return str(node[1]).upper() in {"COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT"} or _numeric_column(argument, columns)  # Task 240: COUNT / COUNTBLANK of a text column are answered by Power BI (AVERAGE and SUM of one raise)
 
 
 def _literal_number(node: Any) -> bool:
@@ -127,7 +128,7 @@ def _benign_call(node: Any, columns: dict[str, dict[str, str]]) -> bool:
     return False
 
 
-_ARITHMETIC_CALLS = frozenset({"CURRENCY", "ABS", "INT", "ROUND", "TRUNC", "SIGN"})
+_ARITHMETIC_CALLS = frozenset({"CURRENCY", "ABS", "INT", "ROUND", "ROUNDUP", "TRUNC", "SIGN"})
 
 
 def _arithmetic_only(node: Any, columns: dict[str, dict[str, str]]) -> bool:
@@ -176,12 +177,16 @@ def _condition(node: Any, columns: dict[str, dict[str, str]]) -> bool:
     (Task 239: or of numbers that hold a failing part)."""
     if _simple_condition(node, columns):
         return True
-    return isinstance(node, tuple) and bool(node) and node[0] == "comparison" and all(_number_operand(operand, columns) for operand in (node[2], node[3]))
+    return isinstance(node, tuple) and bool(node) and node[0] == "comparison" and _numeric_comparison(node, columns)  # Task 240: any two operands of one class that hide
 
 
 def _result_branch(node: Any, columns: dict[str, dict[str, str]]) -> bool:
     """Task 239: the branch of an IF / SWITCH whose condition holds a failing part: a number that holds one, or a text literal (measured: IF(O>1,1,2), IF(O>1,O,2), IF(O>1,"a","b"))."""
-    return isinstance(node, tuple) and bool(node) and (node[0] == "string" or _number_operand(node, columns))
+    if isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() in {"DATE", "TIME"}:
+        return _benign_call(node, columns)  # Task 240: a DATE / TIME of whole-number literals (measured: IF(CURRENCY(2E15)*5>1,1,DATE(2020,1,1)))
+    if isinstance(node, tuple) and bool(node) and (node[0] == "string" or _number_operand(node, columns)):
+        return True
+    return isinstance(node, tuple) and bool(node) and hides(node, columns)  # Task 240: any other branch that hides (measured on the saved IF rows)
 
 
 def _common_type(node: Any, columns: dict[str, dict[str, str]]) -> bool:
@@ -219,13 +224,17 @@ def _comparisons_placed(node: Any, allowed: bool = True) -> bool:
     if kind in {"logical", "concat"}:
         return all(_comparisons_placed(child, True) for child in _children(node))
     if kind == "unary":
-        return _comparisons_placed(node[2], node[1] == "not")
+        return _comparisons_placed(node[2], node[1] in {"not", "+", "-"})  # Task 240: -(a<b) is measured
+    if kind == "binary" and node[1] in {"+", "-", "*"}:
+        return _comparisons_placed(node[2], True) and _comparisons_placed(node[3], True)  # Task 240: 1+(a<b), 2*(a<b), (a<b)+1 are measured
     if kind == "call":
         name = str(node[1]).upper()
         arguments = node[2]
+        if name in {"ABS", "INT", "ROUND", "TRUNC", "SIGN", "CURRENCY"}:
+            return all(_comparisons_placed(argument, True) for argument in arguments)  # Task 240: ABS(a<b), INT(a<b), ... are measured
         if name in {"CALCULATE", "COUNTROWS"}:
             return True  # CALCULATE(SUM(column), column = text): the condition is part of the data source that hides() checks
-        if name in {"AND", "OR", "NOT"}:
+        if name in {"AND", "OR", "NOT", "DIVIDE"}:  # Task 240: measured for DIVIDE as well (ISINTEGER(DIVIDE(AGG>1,"w"-COUNT(x))) is False)
             return all(_comparisons_placed(argument, True) for argument in arguments)
         if name == "IF" and arguments:
             return _comparisons_placed(arguments[0], True) and all(_comparisons_placed(argument, False) for argument in arguments[1:])
@@ -259,9 +268,29 @@ def _data_source(node: Any, columns: dict[str, dict[str, str]]) -> bool:
     return False
 
 
+_COMPARISON_CLASS = {"int64": "number", "double": "number", "currency": "number", "decimal": "number", "datetime": "number", "text": "text", "bool": "bool", "blank": "blank"}
+
+
 def _numeric_comparison(node: Any, columns: dict[str, dict[str, str]]) -> bool:
-    """Task 239: a comparison of two numbers that hold failing parts (it is a Boolean that is never BLANK)."""
-    return all(_number_operand(operand, columns) for operand in (node[2], node[3]))
+    """Task 239: a comparison of two numbers that hold failing parts (it is a Boolean that is never BLANK).
+    Task 240: any two operands that hide and have the same class (number / date, text or Boolean; a BLANK beside any): a number beside a text or a Boolean
+    is a compile-time error in Power BI (measured), so it keeps its refusal."""
+    from . import measures
+
+    if all(_number_operand(operand, columns) for operand in (node[2], node[3])):
+        return True
+    classes = []
+    for operand in (node[2], node[3]):
+        if not hides(operand, columns) or not _comparisons_placed(operand, False):
+            return False
+        operand_class = _COMPARISON_CLASS.get(str(measures._static_numeric_type(operand, columns, {})))
+        if operand_class == "blank" and operand[0] not in {"blank", "blank_comment"}:
+            operand_class = "number"  # ROUND(BLANK(),0) is a BLANK in arithmetic but a Number to the comparison check (measured: "s"<>ROUND(BLANK(),0) is an error)
+        classes.append(operand_class)
+    if None in classes:
+        return False
+    known = {kind for kind in classes if kind != "blank"}
+    return len(known) <= 1
 
 
 def hides(node: Any, columns: dict[str, dict[str, str]], folded_allowed: bool = False) -> bool:
@@ -289,8 +318,10 @@ def hides(node: Any, columns: dict[str, dict[str, str]], folded_allowed: bool = 
     arguments = node[2]
     if _data_source(node, columns) or _aggregate(node, columns) or _counting(node, columns):
         return True
-    if name in {"AND", "OR"} and len(arguments) == 2 or name == "NOT" and len(arguments) == 1 or name in {"UPPER", "CONCATENATE", "COALESCE"}:
+    if name in {"AND", "OR"} and len(arguments) == 2 or name == "NOT" and len(arguments) == 1 or name in {"UPPER", "CONCATENATE"}:
         return all(hides(argument, columns) for argument in arguments)
+    if name == "COALESCE":
+        return _common_type(node, columns) and all(hides(argument, columns) for argument in arguments)  # Task 240: a text beside a number is a Variant (measured: VAR x=ROUND(COALESCE("t",x),0) RETURN ISINTEGER(x) is an error)
     if name in _LAZY_CALLS:
         if name == "CONVERT":
             if len(arguments) != 2 or arguments[1][0] != "table" or str(arguments[1][1]).upper() not in _CONVERT_KEYWORDS:
@@ -388,7 +419,11 @@ def _divide_argument(node: Any, columns: dict[str, dict[str, str]]) -> bool:
             return True
         if str(node[1]).upper() == "DIVIDE":
             return _divide_shape(node, columns)
-    return _number_operand(node, columns)  # Task 239: DIVIDE(CURRENCY(3E15)*3,2): a number that holds a failing part
+    if _number_operand(node, columns):
+        return True  # Task 239: DIVIDE(CURRENCY(3E15)*3,2): a number that holds a failing part
+    from . import measures
+
+    return hides(node, columns, True) and measures._static_numeric_type(node, columns, {}) in (_NUMERIC | {"bool", "text", "datetime"})  # Task 240: any other typed part that hides
 
 
 def _divide_shape(node: Any, columns: dict[str, dict[str, str]]) -> bool:
@@ -430,6 +465,8 @@ def _without_text_divide(argument: Any, columns: dict[str, dict[str, str]]) -> A
     if not isinstance(argument, tuple) or not argument:
         return argument
     if _text_divide(argument, columns):
+        if measures._static_numeric_type(argument, columns, {}) == "currency":
+            return measures.parse_expression("DIVIDE(CURRENCY(1),2)")  # Task 240: a Currency over a text is a Currency (ISDECIMAL(DIVIDE(INT(CURRENCY(3E15)*3),"s")) reads the value)
         return measures.parse_expression("DIVIDE(1,2)")
     return _rebuild(argument, lambda child: _without_text_divide(child, columns))
 
@@ -501,6 +538,33 @@ def _overflow_in_literals(node: Any) -> bool:
         except Exception:
             continue
     return False
+
+
+_CURRENCY_LIMIT = Decimal("922337203685477")
+
+
+def _rounddown_as_round(node: Any) -> Any:
+    if not isinstance(node, tuple) or not node:
+        return node
+    if node[0] == "call" and str(node[1]).upper() == "ROUNDDOWN":
+        return ("call", "ROUND", tuple(_rounddown_as_round(argument) for argument in node[2]))
+    return _rebuild(node, _rounddown_as_round)
+
+
+def _rounded_literals(node: Any) -> bool:
+    """Task 240: no column is read, and a ROUNDDOWN has no CURRENCY literal beyond the Currency range (measured: ISNONTEXT(ROUNDDOWN(CURRENCY(2E15)*5,0)) is an error, ROUND and ROUNDUP of it are not)."""
+    if _reads_column(node):
+        return False
+    for sub in _walk(node):
+        if sub[0] == "call" and str(sub[1]).upper() == "ROUNDDOWN":
+            if any(inner[0] == "string" for inner in _walk(sub)):
+                return False  # ROUNDDOWN("s",0) raises (measured)
+            for inner in _walk(sub):
+                if inner[0] == "call" and str(inner[1]).upper() == "CURRENCY" and any(
+                    leaf[0] == "number" and abs(leaf[1]) > _CURRENCY_LIMIT for argument in inner[2] for leaf in _walk(argument)
+                ):
+                    return False
+    return True
 
 
 def _literal_only(node: Any) -> bool:
@@ -575,6 +639,236 @@ def answer_measures(measures_list: list[dict[str, str]], measure_names: list[str
         return None
     if failure.startswith(_OVERFLOW_FAILURE) and not _overflow_in_literals(node[2][0]):
         return None  # Task 238 / 239: only the overflow of a part made of literals; the overflow of a Currency product that reads rows shows through ISCURRENCY / ISNUMBER, a division raises
+    if failure.startswith(_ROUND_ARTIFACT):
+        if not _rounded_literals(node[2][0]):
+            return None  # Task 240: measured only for a Currency made of literals (ROUND / ROUNDUP; ROUNDDOWN too while no CURRENCY literal is beyond the Currency range)
+        node = (node[0], node[1], (_rounddown_as_round(node[2][0]),))  # ROUNDDOWN has the type and the BLANK rule of ROUND; it is no lazy call elsewhere (an overflow under it raised in Power BI)
     columns = measures._normalize_model_column_types(table_context)
     result = answer(str(node[1]), node[2][0], columns)
     return None if result is None else {name: result}
+
+
+def value_needed(function: str, argument: Any, answer: bool) -> bool:
+    """Task 240: the answer was decided by the static type while the argument failed to evaluate; a type test whose answer differs for a BLANK
+    and for a value (True by type, or False for a text under ISNONTEXT) needs the value of an argument that can be BLANK, so the failure shows."""
+    from . import measures
+
+    function = function.upper()
+    depends = (answer is False) if function == "ISNONTEXT" else (answer is True)
+    return depends and not measures._never_blank(argument)
+
+
+_VARIANT_CALLS = frozenset({"IF", "IF.EAGER", "SWITCH", "COALESCE"})
+_RAISING_CALLS = frozenset({
+    "ROUNDDOWN", "CEILING", "EVEN", "ODD", "ISO.CEILING", "DEGREES", "RADIANS", "SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN", "COT", "SINH", "COSH", "TANH",
+    "YEAR", "MONTH", "DAY", "COMBIN", "GCD", "LCM",
+})  # Task 240: Power BI raised the failure of these around a failing value in every probe (ROUND, ROUNDUP, TRUNC, INT, ABS, SIGN, EXP, POWER, MOD, CURRENCY hide it)
+_VARIANT_KINDS = {"int64": "number", "double": "number", "currency": "number", "decimal": "number", "datetime": "number", "text": "text", "bool": "bool"}
+
+
+def _expand_variables(node: Any, held: dict[str, Any] | None, depth: int = 0) -> Any:
+    """node with every VAR read replaced by the expression it holds (a VAR has the type of its value)."""
+    if not isinstance(node, tuple) or not node or depth > 12:
+        return node
+    if node[0] == "var" and held and str(node[1]) in held:
+        return _expand_variables(held[str(node[1])], held, depth + 1)
+    return _rebuild(node, lambda child: _expand_variables(child, held, depth))
+
+
+def _variant_call(node: Any, type_of: Any) -> bool:
+    """Task 240: an IF / SWITCH / COALESCE whose result branches differ in class (text, Boolean, number / date; BLANK beside any): Power BI types it as a Variant,
+    so the type of what is built around it is only known from the value it takes at run time."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and str(node[1]).upper() in _VARIANT_CALLS):
+        return False
+    name = str(node[1]).upper()
+    arguments = list(node[2])
+    if name in {"IF", "IF.EAGER"}:
+        branches = arguments[1:]
+    elif name == "SWITCH":
+        pairs = arguments[1:]
+        branches = [pairs[index] for index in range(1, len(pairs), 2)] + ([pairs[-1]] if len(pairs) % 2 else [])
+    else:
+        branches = arguments
+    kinds = set()
+    for branch in branches:
+        if not isinstance(branch, tuple) or not branch or branch[0] in {"blank", "blank_comment"}:
+            continue
+        kinds.add("text" if branch[0] == "string" else "variant" if _variant_call(branch, type_of) else _VARIANT_KINDS.get(str(type_of(branch)), "other"))
+    return len(kinds) > 1 or "variant" in kinds
+
+
+def _literal_value(node: Any) -> Decimal | None:
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "number":
+        return node[1]
+    if node[0] == "unary" and node[1] in {"+", "-"}:
+        inner = _literal_value(node[2])
+        return None if inner is None else (-inner if node[1] == "-" else inner)
+    return None
+
+
+def _constant_truth(condition: Any) -> bool | None:
+    """True / False of a True/False literal or a comparison of two number literals; None for anything else."""
+    if isinstance(condition, tuple) and condition and condition[0] == "boolean":
+        return bool(condition[1])
+    if isinstance(condition, tuple) and condition and condition[0] == "comparison":
+        left, right = _literal_value(condition[2]), _literal_value(condition[3])
+        if left is not None and right is not None:
+            return {"<": left < right, ">": left > right, "=": left == right, "<>": left != right, "<=": left <= right, ">=": left >= right}.get(condition[1])
+    return None
+
+
+def constant_branch(arguments: Any, switch: bool = False) -> Any:
+    """Task 240: the branch that IF(condition, a, b) or SWITCH(TRUE(), condition, a, ..., default) takes when every condition up to it is a True/False literal or a
+    comparison of two number literals; None otherwise (also when the taken branch is a text literal, BLANK or another Variant, which Power BI evaluates to the
+    text and raises for)."""
+    chosen: Any = None
+    if switch:
+        if len(arguments) < 3 or arguments[0] != ("boolean", True):
+            return None
+        pairs = arguments[1:]
+        for index in range(0, len(pairs) - 1, 2):
+            truth = _constant_truth(pairs[index])
+            if truth is None:
+                return None
+            if truth:
+                chosen = pairs[index + 1]
+                break
+        else:
+            chosen = pairs[-1] if len(pairs) % 2 else None
+    else:
+        if len(arguments) not in {2, 3}:
+            return None
+        truth = _constant_truth(arguments[0])
+        if truth is None:
+            return None
+        chosen = arguments[1] if truth else (arguments[2] if len(arguments) == 3 else None)
+    if chosen is None or not isinstance(chosen, tuple) or not chosen or chosen[0] in {"string", "blank", "blank_comment"}:
+        return None
+    return chosen
+
+
+_PRESERVING_CALLS = frozenset({"TRUNC", "ROUND", "ROUNDUP", "ROUNDDOWN", "ABS", "MOD", "SIGN", "INT"})
+
+
+def _preserving_operand(node: Any) -> Any:
+    """The operand of a unary sign or of TRUNC / ROUND / ROUNDUP / ROUNDDOWN / ABS / MOD / SIGN (a number function that keeps the type of what it reads), else None."""
+    if node[0] == "unary" and node[1] in {"+", "-"}:
+        return node[2]
+    if node[0] == "call" and str(node[1]).upper() in _PRESERVING_CALLS and node[2]:
+        return node[2][0]
+    return None
+
+
+def _branches(node: Any) -> list[Any]:
+    name = str(node[1]).upper()
+    arguments = list(node[2])
+    if name in {"IF", "IF.EAGER"}:
+        return arguments[1:]
+    if name == "SWITCH":
+        pairs = arguments[1:]
+        return [pairs[index] for index in range(1, len(pairs), 2)] + ([pairs[-1]] if len(pairs) % 2 else [])
+    return arguments
+
+
+def _taken_branch(node: Any, type_of: Any) -> Any:
+    """The branch a Variant IF / SWITCH takes when its conditions are constant (and it is no text, BLANK or Variant), else None."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call"):
+        return None
+    name = str(node[1]).upper()
+    chosen = constant_branch(node[2], switch=True) if name == "SWITCH" else constant_branch(node[2]) if name in {"IF", "IF.EAGER"} else None
+    return None if chosen is None or _variant_call(chosen, type_of) else chosen
+
+
+_TYPE_INDEPENDENT_TESTS = frozenset({"ISTEXT", "ISSTRING", "ISLOGICAL", "ISBOOLEAN", "ISNONTEXT"})  # a number function of a Variant is a number whatever type it takes
+
+
+def _texts_convert(node: Any, type_of: Any) -> bool:
+    """Every text branch of the Variant is a literal that reads as a number (ISLOGICAL(TRUNC(IF(c,"7",2.5))) is False, "t" raises when it is taken)."""
+    from . import dax_typed
+
+    for branch in _branches(node):
+        if _variant_call(branch, type_of):
+            if not _texts_convert(branch, type_of):
+                return False
+        elif branch[0] == "string":
+            try:
+                dax_typed.text_to_number(str(branch[1]), dates=True)
+            except Exception:
+                return False
+        elif str(type_of(branch)) == "text":
+            return False
+    return True
+
+
+def _variant_valued(node: Any, type_of: Any) -> bool:
+    """A number built from a Variant that takes a known branch (constant conditions) with a sign, rounding, arithmetic or a call of the number functions above:
+    it is typed by that branch, so beside another branch it is not unified (measured: IF(TRUE(),x,ROUND(CURRENCY(7E14)*20,2)) with x = INT(SWITCH(TRUE(),1>2,"t",2)) is an Int64)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    operand = _preserving_operand(node)
+    if operand is not None:
+        return (_variant_call(operand, type_of) and _taken_branch(operand, type_of) is not None) or _variant_valued(operand, type_of)
+    if node[0] == "binary" and node[1] in {"+", "-", "*"}:
+        return _variant_valued(node[2], type_of) or _variant_valued(node[3], type_of)
+    return False
+
+
+def _walk_inline(node: Any):
+    """Every node outside the values that a VAR block binds (those are the VAR's own, hidden where the VAR holds them)."""
+    if isinstance(node, tuple) and node:
+        yield node
+        for child in ([node[2]] if node[0] == "let" else _children(node)):
+            yield from _walk_inline(child)
+
+
+def unmeasured_shape(function: str, argument: Any, type_of: Any, failed: bool, variables: dict[str, Any] | None = None) -> str | None:
+    """Task 240: the reason a type test of argument stays refused although a static type exists (shapes Power BI answers differently), or None."""
+    raising = [str(node[1]).upper() for node in _walk_inline(argument) if node[0] == "call" and str(node[1]).upper() in _RAISING_CALLS]  # inline only: a VAR that holds a folded call hides it (saved answers: VAR v=MONTH("m") RETURN ISBOOLEAN(v+1) is False)
+    if raising and (failed or _overflow_in_literals(argument)):
+        return f"{raising[0]} of a failing value"
+    argument = _expand_variables(argument, variables)
+    for node in _walk(argument):
+        operand = _preserving_operand(node)
+        if operand is not None and _variant_call(operand, type_of) and _taken_branch(operand, type_of) is None and not (
+            function.upper() in _TYPE_INDEPENDENT_TESTS and _texts_convert(operand, type_of)
+        ):
+            return "a numeric function of a Variant"  # measured: ISDOUBLE(-(TRUNC(IF(TRUE(),"t",AVERAGE(x))))) is an error, ISDOUBLE(1+TRUNC(IF(FALSE(),"t",SUM(whole)))) is False (the Variant takes the type of its value)
+        if node[0] == "call" and str(node[1]).upper() in _VARIANT_CALLS and any(not _variant_call(branch, type_of) and _variant_valued(branch, type_of) for branch in _branches(node)):
+            return "a Variant chosen by IF / SWITCH / COALESCE"  # its type is only known at run time, so it is not unified with the other branch (measured: IF(TRUE(),x,ROUND(OV)) is an Int64)
+        if node[0] == "comparison":
+            left, right = node[2], node[3]
+            if (left[0] == "string") != (right[0] == "string"):
+                other = right if left[0] == "string" else left
+                if type_of(other) in _NUMERIC or (type_of(other) == "blank" and other[0] not in {"blank", "blank_comment"}):
+                    return "a comparison of a number with a text"  # compile-time error in Power BI, also inside a type test that is decided by the type
+            classes = {_VARIANT_KINDS.get(str(type_of(operand))) for operand in (left, right) if operand[0] not in {"blank", "blank_comment"}}
+            if None not in classes and len(classes) > 1:
+                return "a comparison of operands of different classes"  # a number beside a text or a Boolean is a compile-time error in Power BI (measured)
+    if failed and _variant_exposed(argument, type_of):
+        return "a failing Variant"
+    return None
+
+
+_ARITHMETIC_RESULT_CALLS = frozenset({"DIVIDE", "ABS", "INT", "ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "SIGN", "CURRENCY", "EXP", "POWER", "MOD", "CEILING", "FLOOR"})
+
+
+def _variant_exposed(node: Any, type_of: Any) -> bool:
+    """Task 240: a Variant (see _variant_call) whose type reaches the type test through arithmetic only, so the type of the whole argument is only known from the
+    value (measured: ISCURRENCY(SWITCH(1,1,INT(CURRENCY(5E14)*CURRENCY(5E14)*2),COALESCE("s",x-"v"))-y) raises the overflow, ISCURRENCY(SWITCH(1,1,INT(..),2)-y) is False).
+    A comparison, a concatenation or a logical operator fixes the type of the argument, so a Variant below one of them does not count."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if _variant_call(node, type_of):
+        return True
+    kind = node[0]
+    if kind == "unary":
+        return node[1] in {"+", "-"} and _variant_exposed(node[2], type_of)
+    if kind == "binary":
+        return node[1] in {"+", "-", "*", "/", "^"} and (_variant_exposed(node[2], type_of) or _variant_exposed(node[3], type_of))
+    if kind == "call":
+        name = str(node[1]).upper()
+        if name in _ARITHMETIC_RESULT_CALLS or name in _VARIANT_CALLS:
+            return any(_variant_exposed(argument, type_of) for argument in node[2])
+    return False
