@@ -2958,3 +2958,20 @@ Next: Task 244 (fix the CALCULATE-in-SUMMARIZE value wrong above; try to win bac
 Roles: Sonnet coded (commits 7f34861, 8f2435c) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 40,369 passed (26 xfailed, 8,287 subtests passed). No saved Power BI answer was edited. Merge commit ce803ed.
+
+## 2026-11-21 — Iteration 314 (Task 244: a SUMMARIZE extension column sees its group as whole rows of the source table; number-type tests of conditionals with a SUMX/MAXX/MINX branch over a Variant column answered by the branch taken, Chapter 1b)
+
+Function family: same as Tasks 235 to 243 (type tests and values over table builders).
+- Part A: a column added by SUMMARIZE now sees its group as whole rows of the source table (summarize_group_value and eff_group_meta in measures.py, +147 lines). A CALCULATE, ALL, REMOVEFILTERS or VALUES filter inside the column replaces that column's own filter, and the group narrows on the other columns. ALLSELECTED re-derives the group from the remaining group-by columns. CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"s",CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1)),[s]*2),Facts[Quantity]>1) now gives 66 like Power BI; it was 92 before.
+- Refused where Power BI was not matched: a multi-column CALCULATE filter inside an iterator over a group-by column, and some nested ALLSELECTED shapes.
+- Part B: the number-type tests of IF, SWITCH, COALESCE and IFERROR with a SUMX, MAXX or MINX branch over a Variant column (built by IF or COALESCE, or by IFERROR with a number fallback) are answered by the branch actually taken. AVERAGEX, IFERROR with a text fallback, and SWITCH or SELECTEDVALUE builders stay refused. 1,306 rows per table were won back (out of 6,000 probes).
+
+Coder probes: about 40.8k against Power BI across 4 Facts tables. Replay of 539,805 saved answers: 0 lost. New tests/test_dax_summarize_calculate_244.py (823 lines). REA was not run on msmdsrv; the authority is the Power BI answer check.
+
+Review (Sonnet, read-only): 300 fresh probes against Power BI. Branch 249 right / 0 wrong / 51 refused; main 192 / 18 / 90; 0 regressions. Real app 20 of 20 matched Power BI; targeted tests 2,472 passed.
+
+Next: Task 245. Findings already wrong on main and queued: an iterator over VALUES inside a SUMMARIZE extension; derived or nested SUMMARIZE; SUMMARIZECOLUMNS with nested ALLSELECTED; ADDCOLUMNS(SUMMARIZE(...)); CONCATENATEX(VALUES) order; ISBOOLEAN(SWITCH with SUMX over a SUMMARIZECOLUMNS text Variant), where Power BI errors and the local answer is False. Older backlog: ROUND of a Currency above 1E14; MROUND, BITAND and text functions of a failing number; M-engine gaps; the Chapter 3 Group By dialog check.
+
+Roles: Sonnet coded (commit faa2ce3) and reviewed, Opus planned.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 41,053 passed (26 xfailed, 8,287 subtests passed). No saved Power BI answer was edited. Merge commit 270d193.
