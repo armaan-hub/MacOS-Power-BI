@@ -2975,3 +2975,22 @@ Next: Task 245. Findings already wrong on main and queued: an iterator over VALU
 Roles: Sonnet coded (commit faa2ce3) and reviewed, Opus planned.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 41,053 passed (26 xfailed, 8,287 subtests passed). No saved Power BI answer was edited. Merge commit 270d193.
+
+## 2026-11-21 — Iteration 315 (Task 245: a SUMMARIZE over a table value keeps the table's other columns filtered inside the added column; ALLSELECTED over a plain SUMMARIZE-of-SUMMARIZE answered as the flat SUMMARIZE; unmeasured nested-builder shapes refused, Chapter 1b)
+
+Function family: same as Tasks 235 to 244 (type tests and values over table builders).
+- A SUMMARIZE over a table value keeps the table's other columns filtered inside the added column.
+- ALLSELECTED over a plain SUMMARIZE-of-SUMMARIZE is answered as the flat SUMMARIZE.
+- An iterator over VALUES(group column) is evaluated two ways and refused when the two readings differ.
+- Refused where Power BI was not matched: ADDCOLUMNS(SUMMARIZE) with CALCULATETABLE plus ALLSELECTED, or with FILTER(Facts); ISBOOLEAN(SWITCH(...SUMX(SUMMARIZECOLUMNS ...text Variant))), where Power BI errors.
+- Code: analytics_studio/measures.py +254 lines; new tests/test_dax_nested_builders_245.py (209 tests).
+
+Coder: over the Task 244 probe set a2, wrong answers fell from 1,028 to 111; 143 a2 rows that main answered right are now refused (a coverage cost). REA was not run on msmdsrv; the authority is the Power BI answer check.
+
+Review (Sonnet, read-only): 315 fresh probes against Power BI. Branch 259 right / 4 wrong / 52 refused; main 253 / 40 / 22; 0 regressions. The 4 branch wrongs are also wrong on main (Power BI errors, the engine answers): 2 CONCATENATEX over VALUES in an added column, 2 ISLOGICAL/ISNONTEXT over a text Variant column. Real app 20 of 20 matched Power BI.
+
+Next: Task 246. Candidates: Power BI errors where the engine answers (ISLOGICAL/ISNONTEXT over a text Variant column, CONCATENATEX over VALUES in an added column); the remaining 111 a2 wrongs (COUNTROWS(ALLSELECTED(Note)) in a base SUMMARIZE, iterators over VALUES with ALLSELECTED); CONCATENATEX order (Power BI 2,1,0 versus engine 0,1,2). Older backlog: ROUND of a Currency above 1E14; MROUND, BITAND and text functions of a failing number; AVERAGEX and IFERROR text-fallback Variant refusals; M-engine gaps; the Chapter 3 Group By dialog check.
+
+Roles: Sonnet coded (commit 985f979) and reviewed, Opus planned and merged.
+
+**Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 41,261 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 2f62083.
