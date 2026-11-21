@@ -8,8 +8,8 @@ A seeded Facts table (seed 1: Sales decimal, Quantity whole number, Region of fo
 is built at each size and every formula runs alone in a spawned child process, so a formula that hangs costs only its
 own row: the child is killed after --timeout seconds and the row is reported as "timeout".  "seconds" is the wall time
 the evaluation itself took inside the child (building the table is not counted, so the numbers line up with a plain
-timing loop); for a timeout it is the wall time the child was given.  "peak MB" is the peak resident set size the
-operating system reports for terminated children (bytes on macOS, KiB on Linux), a running maximum over the run.
+timing loop); for a timeout it is the wall time the child was given.  "peak MB" is the peak resident set size the operating system reports for the evaluation process
+(bytes on macOS, KiB on Linux).
 Status is ok, refused (the engine declined the expression), crash (it raised something else), timeout, or
 "skipped (over --max-rows)" for a size bigger than the memory budget.  Exit code is always 0: this measures the
 engine, it does not judge it.
@@ -56,6 +56,7 @@ DEFAULT_MAX_ROWS = 2_000_000
 BIG_SIZES = [10_000_000, 100_000_000, 1_000_000_000]
 # Test hook: a child that sleeps this many seconds before evaluating, so the timeout path can be exercised quickly.
 SLEEP_ENV = "PERF_CHECK_SLEEP_SECONDS"
+ALLOC_ENV = "PERF_CHECK_ALLOC_MB"
 
 COLUMNS = [("size", "size"), ("name", "name"), ("seconds", "seconds"), ("peak_mb", "peak MB"),
            ("status", "status"), ("value", "value")]
@@ -76,9 +77,9 @@ def build_rows(row_count: int) -> list[dict]:
     ]
 
 
-def peak_mb() -> float:
-    """Peak resident set size of the terminated children, in MB: macOS reports bytes, Linux KiB."""
-    raw = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+def peak_mb(raw_rss: int | None = None) -> float:
+    """Peak resident set size in MB: macOS reports bytes, Linux KiB."""
+    raw = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss if raw_rss is None else raw_rss
     return round(raw / 1024 if sys.platform.startswith("linux") else raw / (1024 * 1024), 1)
 
 
@@ -88,6 +89,8 @@ def _child_run(payload: tuple[int, str, str], reply) -> None:
     sleep_seconds = float(os.environ.get(SLEEP_ENV, "0") or 0)
     if sleep_seconds > 0:
         time.sleep(sleep_seconds)
+    alloc_mb = float(os.environ.get(ALLOC_ENV, "0") or 0)
+    _holder = bytearray(int(alloc_mb * 1024 * 1024)) if alloc_mb > 0 else None
     rows = build_rows(row_count)
     context = [{"id": "facts", "name": "Facts", "headers": HEADERS, "rows": rows, "column_types": TYPES}]
     status, value = "ok", ""
@@ -103,7 +106,8 @@ def _child_run(payload: tuple[int, str, str], reply) -> None:
     except Exception as error:  # a crash is a finding, not a failure of this tool
         status, value = "crash", repr(error)
     seconds = round(time.perf_counter() - started, 3)
-    reply.send({"seconds": seconds, "status": status, "value": value[:40]})
+    raw_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    reply.send({"seconds": seconds, "status": status, "value": value[:40], "raw_rss": raw_rss})
     reply.close()
 
 
@@ -127,12 +131,12 @@ def run_one(row_count: int, name: str, expression: str, timeout: float) -> dict:
         row["status"] = "timeout"
     elif reader.poll(1):
         result = reader.recv()
-        row.update(seconds=result["seconds"], status=result["status"], value=result["value"][:40])
+        peak = peak_mb(result.get("raw_rss")) if result.get("raw_rss") is not None else ""
+        row.update(seconds=result["seconds"], status=result["status"], value=result["value"][:40], peak_mb=peak)
     else:
         row["status"] = "crash"
         row["value"] = f"child exited {process.exitcode} without a result"[:40]
     reader.close()
-    row["peak_mb"] = peak_mb()
     return row
 
 
@@ -194,7 +198,7 @@ def main(argv: list[str] | None = None) -> list[dict]:
     rows: list[dict] = []
     for size in sizes:
         if size > args.max_rows:
-            rows.append({"size": size, "name": "", "seconds": "", "peak_mb": "",
+            rows.append({"size": size, "name": "-", "seconds": "", "peak_mb": "",
                          "status": "skipped (over --max-rows)", "value": ""})
             continue
         for name in names:
