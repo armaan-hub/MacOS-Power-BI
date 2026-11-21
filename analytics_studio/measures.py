@@ -6333,13 +6333,162 @@ def _has_call(node: Any, names: frozenset[str]) -> bool:
     return any(isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() in names for held in _walk_nodes(node))
 
 
+_VALUES_ITERATOR_CALLS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "GEOMEANX", "FILTER", "COUNTAX"})
+
+
+def _iterates_values_of_column(node: Any) -> bool:
+    """Task 245: an iterator over VALUES(column) / DISTINCT(column) anywhere in the expression."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and len(node) > 2 and node[1] in _VALUES_ITERATOR_CALLS and node[2]:
+        first = node[2][0]
+        if isinstance(first, tuple) and first and first[0] in {"call", "table_call"} and first[1] in {"VALUES", "DISTINCT"} and (
+            first[2][0] == "reference" or (first[0] == "call" and len(first[2]) == 1 and first[2][0][0] == "reference")
+        ):
+            return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_iterates_values_of_column(child) for child in children if isinstance(child, tuple))
+
+
+def _flatten_derived_summarize(node: tuple[Any, ...]) -> tuple[Any, ...] | None:
+    """Task 245 (measured): SUMMARIZE(SUMMARIZE(T, c1, c2..), c1, "n", e) whose added columns read ALLSELECTED holds the groups, and answers, of SUMMARIZE(T, c1, "n", e)."""
+    arguments = node[2]
+    if len(arguments) < 4 or arguments[0][0] != "call" or arguments[0][1] != "SUMMARIZE":
+        return None
+    inner = arguments[0][2]
+    if len(inner) < 2 or inner[0][0] != "table" or any(item[0] != "reference" for item in inner[1:]):
+        return None
+    split = next((i for i, item in enumerate(arguments[1:], 1) if item[0] == "string"), len(arguments))
+    if split == len(arguments) or len(arguments) - split < 2 or (len(arguments) - split) % 2:
+        return None
+    inner_columns = {(str(item[1]).casefold(), str(item[2]).casefold()) for item in inner[1:]}
+    table_name = str(inner[0][1]).casefold()
+    if not all(item[0] == "reference" and (str(item[1]).casefold() or table_name, str(item[2]).casefold()) in inner_columns for item in arguments[1:split]):
+        return None
+    expressions = arguments[split + 1::2]
+    if any(item[0] == "reference" and not item[1] for item in expressions) or not all(_has_call_named(item, {"ALLSELECTED"}) for item in expressions):
+        return None
+    if all(_allselected_columns_outside(item, [str(column[2]) for column in inner[1:]]) for item in expressions):
+        return None  # only columns the inner table does not hold (Note, Sales): the derived reading, not the flat one, is the measured one
+    return ("call", "SUMMARIZE", (inner[0], *arguments[1:]))
+
+
+def _table_valued_allselected(node: Any) -> bool:
+    """Task 245: an ALLSELECTED that is read as a table (not one of the filter arguments of a CALCULATE / CALCULATETABLE)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] in {"call", "table_call"} and len(node) > 2 and node[1] == "ALLSELECTED":
+        return True
+    if node[0] == "call" and len(node) > 2 and node[1] in {"CALCULATE", "CALCULATETABLE"} and isinstance(node[2], tuple):
+        for index, argument in enumerate(node[2]):
+            if index > 0 and isinstance(argument, tuple) and argument and argument[0] in {"call", "table_call"} and argument[1] == "ALLSELECTED":
+                if any(_table_valued_allselected(child) for child in (argument[2] if argument[0] == "call" else (argument[2],)) if isinstance(child, tuple)):
+                    return True
+                continue
+            if _table_valued_allselected(argument):
+                return True
+        return False
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_table_valued_allselected(child) for child in children if isinstance(child, tuple))
+
+
+def _walk_calls(node: Any) -> Iterable[tuple[Any, ...]]:
+    stack = [node]
+    while stack:
+        item = stack.pop()
+        if not isinstance(item, tuple) or not item:
+            continue
+        if item[0] in {"call", "table_call"}:
+            yield item
+        stack.extend(child for child in (item if isinstance(item[0], tuple) else item[1:]) if isinstance(child, tuple))
+
+
+def _allselected_targets(call: tuple[Any, ...]) -> list[tuple[Any, ...]] | None:
+    """The arguments of an ALLSELECTED call (None when it is not one)."""
+    if call[1] != "ALLSELECTED":
+        return None
+    return list(call[2]) if call[0] == "call" else [call[2]]
+
+
+def _comparison_columns(node: Any) -> set[str]:
+    return {str(item[2]).casefold() for item in _walk_nodes(node) if isinstance(item, tuple) and len(item) > 2 and item[0] == "reference"}
+
+
+def _nested_builder_refusal(function: str, arguments: tuple[Any, ...]) -> str | None:
+    """Task 245: shapes of a column added by SUMMARIZECOLUMNS / ADDCOLUMNS over SUMMARIZE where Power BI answers differently from the local engine and no rule was measured."""
+    if function == "SUMMARIZECOLUMNS":
+        split = next((i for i, item in enumerate(arguments) if item[0] == "string"), len(arguments))
+        groups = {str(item[2]).casefold() for item in arguments[:split] if item[0] == "reference"}
+        expressions = arguments[split + 1::2]
+        for expression in expressions:
+            for call in _walk_calls(expression):
+                if call[0] != "call" or call[1] != "CALCULATE" or not call[2]:
+                    continue
+                outer_filters = [item for item in call[2][1:] if item[0] == "comparison"]
+                inner = call[2][0]
+                if outer_filters and inner[0] == "call" and inner[1] == "CALCULATE":  # CALCULATE(CALCULATE(e, ALLSELECTED(X)), filter)
+                    outer_columns = set().union(*(_comparison_columns(item) for item in outer_filters))
+                    for modifier in inner[2][1:]:
+                        targets = _allselected_targets(modifier) if isinstance(modifier, tuple) and modifier and modifier[0] in {"call", "table_call"} else None
+                        if targets is None:
+                            continue
+                        names = {str(target[2]).casefold() for target in targets if target[0] == "reference"}
+                        if any(target[0] != "reference" for target in targets) or (names & groups and not names <= outer_columns):
+                            return "SUMMARIZECOLUMNS added column with ALLSELECTED inside a CALCULATE nested under a CALCULATE filter is not modelled by the local engine."
+                if any(item[0] != "reference" for item in arguments[:split]):
+                    continue  # measured right beside a FILTER table argument (tests/test_allselected_shadow.py)
+                body = call[2][0]
+                comparisons = [
+                    item[2][0] if item[0] == "call" and item[1] == "KEEPFILTERS" and item[2] and item[2][0][0] == "comparison" else item
+                    for item in call[2][1:] if item[0] == "comparison" or (item[0] == "call" and item[1] == "KEEPFILTERS" and item[2] and item[2][0][0] == "comparison")
+                ]
+                for held in _walk_calls(body):
+                    targets = _allselected_targets(held)
+                    if targets is None or any(target[0] != "reference" for target in targets):
+                        continue
+                    names = {str(target[2]).casefold() for target in targets}
+                    if names & groups and any(not _comparison_columns(item) <= names for item in comparisons):
+                        return "A table read of ALLSELECTED(group column) beside a filter on another column, inside a column added by SUMMARIZECOLUMNS, is not modelled by the local engine."
+    elif function == "ADDCOLUMNS" and arguments and arguments[0][0] in {"call", "table_call"} and arguments[0][1] in {"SUMMARIZE", "ADDCOLUMNS"}:
+        held_columns = {str(item[2]).casefold() for source in _walk_calls(arguments[0]) if source[1] == "SUMMARIZE" for item in source[2] if item[0] == "reference"}
+        for expression in arguments[2::2]:
+            for call in _walk_calls(expression):
+                if call[0] == "call" and call[1] == "CALCULATETABLE" and len(call[2]) > 1:
+                    for modifier in call[2][1:]:
+                        if any(
+                            targets is not None and any(target[0] != "reference" or str(target[2]).casefold() in held_columns for target in targets)
+                            for targets in (_allselected_targets(held) for held in _walk_calls(modifier))
+                        ) or (
+                            modifier[0] == "call" and modifier[1] == "FILTER" and modifier[2] and modifier[2][0][0] == "table"
+                        ):
+                            return "CALCULATETABLE with ALLSELECTED or FILTER over a table inside a column added by ADDCOLUMNS over SUMMARIZE is not modelled by the local engine."
+    return None
+
+
+def _allselected_columns_outside(node: Any, headers: Iterable[str]) -> bool:
+    """Task 245: every ALLSELECTED in this expression names only columns that are not among the headers (no ALLSELECTED at all counts too)."""
+    held = {str(header).casefold() for header in headers}
+    stack = [node]
+    while stack:
+        item = stack.pop()
+        if not isinstance(item, tuple) or not item:
+            continue
+        if item[0] in {"call", "table_call"} and len(item) > 2 and item[1] == "ALLSELECTED":
+            arguments = item[2] if item[0] == "call" else (item[2],)
+            if not arguments or any(not isinstance(argument, tuple) or argument[0] != "reference" or str(argument[2]).casefold() in held for argument in arguments):
+                return False
+        stack.extend(child for child in (item if isinstance(item[0], tuple) else item[1:]) if isinstance(child, tuple))
+    return True
+
+
 _ITERATOR_BRANCH_CALLS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "PRODUCTX", "MEDIANX", "GEOMEANX"})
 _MEASURED_ITERATOR_BRANCH_CALLS = frozenset({"SUMX", "MAXX", "MINX"})  # Task 244: AVERAGEX and an IFERROR / SWITCH / SELECTEDVALUE Variant column stay refused (not measured right)
 _UNMEASURED_VARIANT_CALLS = frozenset({"SWITCH", "SELECTEDVALUE", "GENERATE", "GENERATEALL", "UNION", "CROSSJOIN", "EXCEPT", "INTERSECT", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "TREATAS", "DATATABLE", "GROUPBY", "ROW"})
 
 
-def _variant_iterator_in_branch(argument: Any) -> bool:
-    """Task 243 (review): an IF / SWITCH / COALESCE / IFERROR one of whose result branches is an iterator over a table built with a conditional (Variant) added column."""
+def _variant_iterator_in_branch(argument: Any, text_column: bool = False) -> bool:
+    """Task 243 (review): an IF / SWITCH / COALESCE / IFERROR one of whose result branches is an iterator over a table built with a conditional (Variant) added column.
+    text_column (Task 245): only when that table also holds a text literal, and never excused by the Task 244 measured shapes."""
     for held in _walk_nodes(argument):
         if not (isinstance(held, tuple) and len(held) > 2 and held[0] == "call" and str(held[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}):
             continue
@@ -6348,6 +6497,14 @@ def _variant_iterator_in_branch(argument: Any) -> bool:
                 if isinstance(inner, tuple) and len(inner) > 2 and inner[0] in {"call", "table_call"} and str(inner[1]).upper() in _ITERATOR_BRANCH_CALLS and inner[2]:
                     for built in _walk_nodes(inner[2][0]):
                         if isinstance(built, tuple) and len(built) > 2 and built[0] in {"call", "table_call"} and str(built[1]).upper() in _BUILT_TABLE_CALLS and _has_call(built, _CONDITIONAL_CALLS):
+                            if text_column:
+                                if str(held[1]).upper() == "SWITCH" and str(built[1]).upper() in {"SUMMARIZECOLUMNS", "SUMMARIZE", "ADDCOLUMNS"} and str(inner[1]).upper() in {"SUMX", "AVERAGEX", "PRODUCTX"} and any(
+                                    isinstance(coalesced, tuple) and len(coalesced) > 2 and coalesced[0] == "call" and str(coalesced[1]).upper() == "COALESCE" and len(coalesced[2]) == 2
+                                    and coalesced[2][1][0] == "string" and coalesced[2][0][0] in {"call", "table_call"} and str(coalesced[2][0][1]).upper() in {"MIN", "MAX"}
+                                    for coalesced in _walk_nodes(built)  # a column that is text in every group (a text aggregate, a text fallback)
+                                ):
+                                    return True
+                                continue
                             if (
                                 str(inner[1]).upper() in _MEASURED_ITERATOR_BRANCH_CALLS and not _has_call(built, _UNMEASURED_VARIANT_CALLS)
                                 and all(
@@ -10580,6 +10737,8 @@ def _evaluate_measures_once(
     eff_suppressed: dict[str, dict[str, Any]] = {}  # table -> casefolded column -> the outer filter object the shadow replaced
     eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
     eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
+    pending_iteration_drops: set[tuple[str, str]] = set()  # Task 245: the (table, column) a context transition takes from an iterator inside a SUMMARIZE column
+    iterated_key_unfiltered = False  # Task 245: second reading of a column that iterates VALUES(group-by column) (see summarize_group_value)
     eff_group_meta: dict[str, dict[str, Any]] = {}  # Task 244: table -> the group of a SUMMARIZE column over that table as a set of whole rows (see summarize_group_value)
     eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
     eff_sc_args: dict[str, dict[str, tuple[Any, Any]]] = {}  # SUMMARIZECOLUMNS TREATAS filter arguments: table -> casefolded column -> (filter object it set, outer filter it replaced)
@@ -12261,7 +12420,52 @@ def _evaluate_measures_once(
                 queue.append((one_id, frozenset(found)))
         return reached
 
+    def derived_group_extra_filters(
+        context: dict[str, Any], group_columns: list[str], group_row: dict[str, Any], typed_rows: list[dict[str, Any]],
+    ) -> dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] | None:
+        """Task 245: SUMMARIZE over a table value (a derived table with columns from a loaded table): the group is the set of the table's rows that hold the group key,
+        so the table's other columns that come from a loaded table filter the extension column to the values those rows hold."""
+        lineage = context.get("lineage")
+        if not lineage:
+            return None
+        key = row_key(group_row[c] for c in group_columns)
+        members = [typed for typed in typed_rows if row_key(typed[c] for c in group_columns) == key]
+        found: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] = {}
+        for header in context["headers"]:
+            link = lineage.get(header)
+            if link is None or header in group_columns:
+                continue
+            base_context = contexts_by_id.get(link[0]["id"], link[0])
+            wanted = {cell_key(typed[header]) for typed in members}
+            allowed = frozenset(
+                index for index, base_row in enumerate(base_context["rows"])
+                if cell_key(typed_cell(base_context, link[1], base_row.get(link[1]))) in wanted
+            )
+            found.setdefault(base_context["id"], (base_context, {}))[1][link[1]] = allowed
+        return found or None
+
     def summarize_group_value(
+        expression: tuple[Any, ...], group_context: dict[str, Any], group_row: dict[str, Any], source: dict[str, Any], members: list[int],
+        key_columns: dict[str, str], unknown_tables: frozenset[str] = frozenset(),
+        blank_partners: list[tuple[dict[str, Any], frozenset[int]]] = [],
+        partial_source: bool = False,
+    ) -> Any:
+        """Task 245: a column that iterates the values of one column (SUMX(VALUES(c), ...)) is read twice, with and without the measured reading of a
+        transition on a group-by column c (c left unfiltered); where the readings differ the local engine does not know which one Power BI takes."""
+        nonlocal iterated_key_unfiltered
+        if iterated_key_unfiltered or not _iterates_values_of_column(expression):
+            return summarize_group_value_once(expression, group_context, group_row, source, members, key_columns, unknown_tables, blank_partners, partial_source)
+        first = summarize_group_value_once(expression, group_context, group_row, source, members, key_columns, unknown_tables, blank_partners, partial_source)
+        iterated_key_unfiltered = True
+        try:
+            second = summarize_group_value_once(expression, group_context, group_row, source, members, key_columns, unknown_tables, blank_partners, partial_source)
+        finally:
+            iterated_key_unfiltered = False
+        if cell_key(first) != cell_key(second):
+            raise MeasureError("A column added by SUMMARIZE that iterates the values of a group-by column and changes the filters inside is not modelled by the local engine.")
+        return first
+
+    def summarize_group_value_once(
         expression: tuple[Any, ...], group_context: dict[str, Any], group_row: dict[str, Any], source: dict[str, Any], members: list[int],
         key_columns: dict[str, str], unknown_tables: frozenset[str] = frozenset(),
         blank_partners: list[tuple[dict[str, Any], frozenset[int]]] = [],
@@ -12449,6 +12653,10 @@ def _evaluate_measures_once(
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal eff_touched
         function, arguments = argument[1], argument[2]
+        if function in {"SUMMARIZECOLUMNS", "ADDCOLUMNS"}:
+            refusal = _nested_builder_refusal(function, arguments)  # Task 245
+            if refusal is not None:
+                raise MeasureError(refusal)
         if function in {"TOPN", "SAMPLE", "TOPNSKIP", "INDEX", "OFFSET", "WINDOW"} and any(_holds_single_column_topnskip(part, variable_nodes) for part in arguments):
             # Task 143 review (live Power BI, spec3): the rows of a TOPNSKIP over VALUES / ALL of one column come in an order the local engine cannot derive;
             # a tie in TOPN / SAMPLE / TOPNSKIP / INDEX / OFFSET / WINDOW over them would be decided by that order
@@ -12704,6 +12912,9 @@ def _evaluate_measures_once(
                 selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
             return selected_context, selected_rows
         if function == "SUMMARIZE":
+            flattened_summarize = _flatten_derived_summarize(argument)  # Task 245
+            if flattened_summarize is not None:
+                return table_function_rows(flattened_summarize)
             summarize_id = id(argument)  # the loop over the group columns below rebinds `argument`
             summarize_node = argument
             context, rows = table_argument_value(arguments[0])
@@ -12920,6 +13131,7 @@ def _evaluate_measures_once(
                             **group_context,
                             "headers": [c for c in group_columns if c not in rolled_up],
                             "lineage": row_lineage,
+                            "group_frame": True,  # Task 245: the row context of SUMMARIZE's own group, not of an iterator inside the column
                         }
                         for name, expression in zip(names, expressions):
                             if members is not None:
@@ -12931,7 +13143,18 @@ def _evaluate_measures_once(
                                     partial_source=partial_source,
                                 )
                             else:
-                                row[name] = evaluate_with_context_transition(expression, row_ctx, group_row, keys=True)
+                                if context.get("summarize_groups") is not None and context.get("lineage") and not has_rollup and not _allselected_columns_outside(expression, context["headers"]):
+                                    raise MeasureError("ALLSELECTED of a column of a table value, inside a column added by SUMMARIZE over that table value, is modelled only over a plain SUMMARIZE of a table by the local engine.")  # Task 245
+                                if context.get("summarize_groups") is not None and context.get("lineage") and not has_rollup and _table_valued_allselected(expression):
+                                    raise MeasureError("ALLSELECTED read as a table inside a column added by SUMMARIZE over a table value is not modelled by the local engine.")  # Task 245 (measured wrong on Power BI)
+                                extra_filters = derived_group_extra_filters(context, group_columns, group_row, typed_rows) if (context.get("summarize_groups") is not None and not has_rollup and _allselected_columns_outside(expression, context["headers"])) else None
+                                if extra_filters:
+                                    merged_filters = transition_filters(row_ctx, group_row)
+                                    for extra_id, (extra_context, extra_columns) in extra_filters.items():
+                                        merged_filters.setdefault(extra_id, (extra_context, {}))[1].update(extra_columns)
+                                    row[name] = with_column_filters(merged_filters, lambda: evaluate(expression), "keys")
+                                else:
+                                    row[name] = evaluate_with_context_transition(expression, row_ctx, group_row, keys=True)
                     finally:
                         active_subtotal_stack.pop()
                     out_rows.append(row)
@@ -19376,6 +19599,8 @@ def _evaluate_measures_once(
                     return evaluate_with_filter_clear(
                         ("thunk", lambda: wiped_body(names[1:])), ("call", "REMOVEFILTERS", (("table", names[0]),)), "REMOVEFILTERS")
                 return wiped_body()
+        iteration_drops = frozenset(pending_iteration_drops)  # Task 245
+        pending_iteration_drops.clear()
         updated_by_id = {key: dict(value) for key, value in evaluation_contexts_by_id.items()}
         updated_filter_roots = set(evaluation_filter_ids)
         saved_eff = (eff_layers, eff_suppressed, eff_transition, eff_group_keys, eff_touched)
@@ -19440,6 +19665,20 @@ def _evaluate_measures_once(
                 updated_by_id[table_id] = target_context
             updated_column_rows = dict(target_context.get("filter_column_rows", {}))
             overridden = {column.casefold() for column in column_rows if column not in kept_columns}
+            if transition is True and iterated_key_unfiltered and table_id in eff_group_meta and 0 < len(column_rows) < len(base_context["headers"]) and any(
+                shape.get("group_whole") for shape in _context_shapes(target_context)
+            ):
+                # Task 245 (measured): a row of VALUES(c) iterated inside a column added by SUMMARIZE, c a group-by column of the group, leaves c unfiltered;
+                # the group's whole rows keep constraining the other columns by their values there
+                dropped_keys = {column for column in column_rows if column.casefold() in eff_group_meta[table_id]["keys"] and (table_id, column.casefold()) in iteration_drops}
+                if dropped_keys:
+                    column_rows = {column: rows for column, rows in column_rows.items() if column not in dropped_keys}
+                    group_dropped = {column.casefold() for column in dropped_keys}
+                    overridden |= group_dropped
+                    target_context["filter_column_rows"] = {
+                        column: rows for column, rows in target_context.get("filter_column_rows", {}).items() if column.casefold() not in group_dropped
+                    }
+                    updated_column_rows = dict(target_context["filter_column_rows"])
             extra = {
                 column: rows for column, rows in target_context.get("filter_column_extra", {}).items()
                 if column.casefold() not in overridden
@@ -19631,12 +19870,18 @@ def _evaluate_measures_once(
         if row_context is not None and (not frames or frames[-1][1] is not row_context[1]):
             frames.append(row_context)
         merged: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] = {}
+        provided_by_iterator: dict[tuple[str, str], bool] = {}
         for frame in frames:
             iterated_table, row = frame[0], frame[1]
             if not iterated_table.get("headers") or (iterated_table.get("derived") and iterated_table.get("lineage") is None):
                 continue  # the filter-constant placeholder, boolean filter predicate rows, and tables without loaded columns filter nothing
             for table_id, (base_context, column_rows) in transition_filters(iterated_table, row).items():
                 merged.setdefault(table_id, (base_context, {}))[1].update(column_rows)
+                for column in column_rows:
+                    provided_by_iterator[(table_id, column.casefold())] = not iterated_table.get("group_frame")
+        if iterated_key_unfiltered:
+            pending_iteration_drops.clear()
+            pending_iteration_drops.update(key for key, by_iterator in provided_by_iterator.items() if by_iterator)  # Task 245: read by the with_column_filters call that follows
         return merged
 
     legacy_calculate_cache: dict[int, tuple[Any, bool]] = {}
@@ -24687,6 +24932,9 @@ def _evaluate_measures_once(
                 )  # Task 241: the data decides the branch of a Variant only under a number function
                 type_test_stack.append((function, arguments[0] if len(arguments) == 1 else None))
                 try:
+                    if function == "ISBOOLEAN" and len(arguments) == 1 and _variant_iterator_in_branch(arguments[0], text_column=True):
+                        # Task 245 (measured): Power BI types every branch, and an iterator over a text Variant column is an error there whichever branch is taken
+                        raise MeasureError("A boolean-type test of a conditional whose branch is an iterator over a text Variant column is an error in Power BI; the local engine does not evaluate it.")
                     if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"} and len(arguments) == 1 and _variant_iterator_in_branch(arguments[0]):
                         # Task 243 (review): a branch that is an iterator over a Variant column makes the conditional typed by the branch taken; the engine unifies the branch types
                         raise MeasureError("A number-type test of a conditional whose branch is an iterator over a Variant column is not modelled by the local engine.")
