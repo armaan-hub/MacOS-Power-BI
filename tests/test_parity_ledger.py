@@ -30,7 +30,7 @@ class ParityLedgerTests(unittest.TestCase):
 
     def test_locked_items_still_match(self) -> None:
         locked = set(self.baseline["locked"])
-        regressions = [f"{r['id']} ({r['status']})" for r in self.results if r["id"] in locked and r["status"] != "match"]
+        regressions = [f"{r['id']} ({r['status']})" for r in self.results if r["id"] in locked and r["status"] not in {"match", "error-vs-refusal"}]
         self.assertEqual(regressions, [])
 
     def test_imported_tables_are_unchanged(self) -> None:

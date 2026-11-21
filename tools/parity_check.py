@@ -12,7 +12,9 @@ A sampled or --only run is read-only: it writes neither PARITY_LEDGER.md nor bas
 
 Exit code 1 when a locked item stopped matching, any item differs from Power BI, the app crashed on an expression or the
 imported VAT table changed.  Items Power BI answers but the app still refuses are listed as pending work (gap-reject),
-they do not fail the gate.  The result is written to PARITY_LEDGER.md.
+they do not fail the gate.  Items where Power BI gives an error and the app refuses are counted on their own as
+error-vs-refusal: they do not fail the gate either, and --accept locks them with the matches.  Hunt batteries
+(dax_battery_hunt_*.json) carry a Facts table per item.  The result is written to PARITY_LEDGER.md.
 """
 from __future__ import annotations
 
@@ -49,6 +51,9 @@ DAX_BATTERIES = ["dax_battery", "dax_battery_review", "dax_battery_blank_logic",
     "dax_battery_xnpv", "dax_battery_scalar_misc2", "dax_battery_type_tests", "dax_battery_tocsv_tojson", "dax_battery_tocsv_tojson_extra", "dax_battery_tocsv_tojson_extra2", "dax_battery_linest", "dax_battery_linest_extra", "dax_battery_linest_extra2", "dax_battery_linest_extra3", "dax_battery_swi_extra", "dax_battery_swi_extra2", "dax_battery_swi_extra3", "dax_battery_ami_extra", "dax_battery_ami_extra2", "dax_battery_rollup_extra", "dax_battery_rollup_extra2", "dax_battery_rollup_extra3", "dax_battery_table_fns2", "dax_battery_var_scoping", "dax_battery_pending_extra", "dax_battery_pending_extra2", "dax_battery_misc3_extra", "dax_battery_misc3_extra2", "dax_battery_xnpv2", "dax_battery_gaps2", "dax_battery_gaps2_extra", "dax_battery_gaps2_extra2", "dax_battery_variant2_extra", "dax_battery_typed3_extra", "dax_battery_logic4_extra", "dax_battery_typed5_extra", "dax_battery_strict6_extra", "dax_battery_blank8_extra", "dax_battery_convert9_extra", "dax_battery_never10_extra", "dax_battery_currency11_extra", "dax_battery_double12_extra", "dax_battery_big13_extra", "dax_battery_topn14_extra", "dax_battery_trig15_extra", "dax_battery_logical17_extra", "dax_battery_collation18_extra", "dax_battery_textnum19_extra", "dax_battery_types20_extra", "dax_battery_linest21_extra", "dax_battery_swi22_extra", "dax_battery_xirr23_extra", "dax_battery_colstats24_extra", "dax_battery_info25_extra", "dax_battery_info26_extra", "dax_battery_blanktext27_extra", "dax_battery_bigorder28_extra", "dax_battery_naninf29_extra", "dax_battery_datestats30_extra", "dax_battery_typeerr31_extra", "dax_battery_roworder32_extra", "dax_battery_mixed33_extra", "dax_battery_counttext34_extra", "dax_battery_xnpvblank35_extra", "dax_battery_biground36_extra", "dax_battery_datevar37_extra", "dax_battery_oldtimes38_extra", "dax_battery_swiorder39_extra", "dax_battery_typeerr40_extra", "dax_battery_roworder41_extra", "dax_battery_mainfix43_extra", "dax_battery_xirr44_extra", "dax_battery_biground45_extra", "dax_battery_productx46_extra", "dax_battery_failtype47_extra", "dax_battery_missingfns48_extra", "dax_battery_swities49_extra", "dax_battery_typecols50_extra", "dax_battery_varxdates51_extra", "dax_battery_varxtopn52_extra", "dax_battery_maxxnan53_extra", "dax_battery_typeerr54_extra", "dax_battery_orderfree55_extra", "dax_battery_orderaudit56_extra", "dax_battery_orderaudit57_extra", "dax_battery_orderaudit58_extra", "dax_battery_orderaudit59_extra", "dax_battery_rankx60_extra", "dax_battery_rank61_extra", "dax_battery_stats62_extra", "dax_battery_text63_extra", "dax_battery_convert64_extra", "dax_battery_filter65_extra", "dax_battery_clean66_extra", "dax_battery_topndata67_extra",
     "dax_battery_scalar_misc2_extra", "dax_battery_scalar_misc2_extra2",
     "dax_battery_type_tests_extra", "dax_battery_type_tests_extra2"]
+# Measured rows of the hunt, frozen once from the saved probe folders; each item may name its own Facts table ("facts").
+HUNT_BATTERIES = sorted(path.stem for path in PARITY.glob("dax_battery_hunt_*.json"))
+DAX_BATTERIES += HUNT_BATTERIES
 # Real workbooks: the Power BI answers saved by tools/table_oracle_diff.py are replayed against the app's own import.
 TABLES = {
     "VAT": {"path": ROOT / "tests/Data/Vat File -Aug 2026.xlsx", "header_row": 12, "sheet_name": "VAT 5%",
@@ -66,6 +71,8 @@ def freeze() -> None:
     dax.ensure_facts(port)
     try:
         for name in DAX_BATTERIES:
+            if name in HUNT_BATTERIES:  # frozen once; its rows need their own Facts tables, so they are not re-asked here
+                continue
             expressions = json.loads((ROOT / "tools" / f"{name}.json").read_text())
             answers = dax.power_bi(expressions, port)
             assert len(answers) == len(expressions), (name, len(answers), len(expressions))
@@ -78,9 +85,13 @@ def freeze() -> None:
 
 
 def status(powerbi: str, ours: str) -> str:
+    """match, error-vs-refusal (Power BI errors and the app refuses: the same outcome by a different path, shown on its own),
+    gap-reject (Power BI answers, the app refuses), DIFF, or CRASH."""
     if ours.startswith("LOCAL-CRASH"):
         return "CRASH"
-    if dax.same(powerbi, ours) or (powerbi.startswith("ERR") and ours.startswith("LOCAL-REJECT")):
+    if powerbi.startswith("ERR") and ours.startswith("LOCAL-REJECT"):
+        return "error-vs-refusal"
+    if dax.same(powerbi, ours):
         return "match"
     return "gap-reject" if ours.startswith("LOCAL-REJECT") and not powerbi.startswith("ERR") else "DIFF"
 
@@ -114,11 +125,14 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
         if not file.exists():
             rows.append({"group": name, "expr": "", "powerbi": "", "ours": "", "status": "NOT-FROZEN", "id": name})
             continue
-        items = json.loads(file.read_text())["items"]
-        for item in _pick(name, items, None if name in full else sample, seed):
-            ours = dax.local(item["expr"])
+        battery = json.loads(file.read_text())
+        tables = battery.get("facts_tables", {})
+        for item in _pick(name, battery["items"], None if name in full else sample, seed):
+            table = item.get("facts")
+            ours = dax.local(item["expr"], tables[table] if table is not None else None)
+            # an item on its own Facts table is locked under an id that names the table, so one expression can sit on several tables
             rows.append({"group": name, "expr": item["expr"], "powerbi": item["powerbi"], "ours": ours,
-                         "status": status(item["powerbi"], ours), "id": f"{name}:{item['expr']}"})
+                         "status": status(item["powerbi"], ours), "id": f"{name}:{table}|{item['expr']}" if table is not None else f"{name}:{item['expr']}"})
     return rows
 
 
@@ -156,14 +170,14 @@ def write_ledger(results: list[dict], baseline: dict, failures: list[str], notes
         f"Power BI Desktop {baseline.get('powerbi_version', '?')}; the gate replays them against the app on every run.", "",
         "Rule: a slice is finished only when it is compared with Power BI, its items are locked here "
         "(`--accept`) and the gate passes.  Locked items are never re-investigated, only guarded.", "",
-        "| Group | Locked and matching | Match (not yet locked) | Pending (app refuses) | Differs | Crash |",
-        "|---|---|---|---|---|---|",
+        "| Group | Locked and matching | Match (not yet locked) | Error vs refusal | Pending (app refuses) | Differs | Crash |",
+        "|---|---|---|---|---|---|---|",
     ]
     locked = set(baseline.get("locked", []))
     for group, counts in groups.items():
         match_locked = sum(1 for r in results if r["group"] == group and r["status"] == "match" and r["id"] in locked)
         match_all = counts.get("match", 0)
-        lines.append(f"| {group} | {match_locked} | {match_all - match_locked} | {counts.get('gap-reject', 0)} | "
+        lines.append(f"| {group} | {match_locked} | {match_all - match_locked} | {counts.get('error-vs-refusal', 0)} | {counts.get('gap-reject', 0)} | "
                      f"{counts.get('DIFF', 0)} | {counts.get('CRASH', 0)} |")
     pending = [r for r in results if r["status"] == "gap-reject"]
     lines += ["", f"## Pending work ({len(pending)}): Power BI answers, the app refuses", ""]
@@ -286,7 +300,7 @@ def main() -> int:
             failures.append(f"{r['group']}: no saved Power BI answers (run --freeze)")
         elif r["status"] in ("DIFF", "CRASH"):
             failures.append(f"{r['status']} {r['id']}: Power BI {r['powerbi'][:50]} vs app {r['ours'][:80]}")
-        elif r["id"] in locked and r["status"] != "match":
+        elif r["id"] in locked and r["status"] not in ("match", "error-vs-refusal"):
             failures.append(f"REGRESSION (was locked) {r['id']}: Power BI {r['powerbi'][:50]} vs app {r['ours'][:80]}")
     for name, digest in digests.items():
         old = baseline.get("import_digests", {}).get(name)
@@ -294,7 +308,7 @@ def main() -> int:
             failures.append(f"table {name}: imported data changed since it was locked (digest {digest[:12]} vs {old[:12]})")
 
     if args.accept and not failures and not partial:
-        baseline["locked"] = sorted(locked | {r["id"] for r in results if r["status"] == "match"})
+        baseline["locked"] = sorted(locked | {r["id"] for r in results if r["status"] in ("match", "error-vs-refusal")})
         baseline["import_digests"] = {**baseline.get("import_digests", {}), **digests}
         PARITY.mkdir(exist_ok=True)
         BASELINE.write_text(json.dumps(baseline, indent=1))
@@ -312,7 +326,7 @@ def main() -> int:
             if smoke.returncode or "0 different" not in line or "reopen: True" not in out:
                 failures.append(f"real-app run failed: {line}")
 
-    counts = {s: sum(1 for r in results if r["status"] == s) for s in ("match", "gap-reject", "DIFF", "CRASH")}
+    counts = {s: sum(1 for r in results if r["status"] == s) for s in ("match", "error-vs-refusal", "gap-reject", "DIFF", "CRASH")}
     if partial:
         # read-only: no PARITY_LEDGER.md, no baseline.json
         print(f"replayed {len(results)} Power BI answers: {counts}; locked {len(locked)}")
