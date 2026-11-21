@@ -21,8 +21,10 @@ counted on its own, not failing, never locked; any other DIFF, or a listed row w
 from __future__ import annotations
 
 import argparse
+import gzip
 import hashlib
 import json
+import os
 import random
 import re
 import subprocess
@@ -42,6 +44,7 @@ from tools.table_oracle_diff import local_value  # noqa: E402
 
 PARITY = ROOT / "tools" / "parity"
 BASELINE = PARITY / "baseline.json"
+BASELINE_GZ = PARITY / "baseline.json.gz"
 LEDGER = ROOT / "PARITY_LEDGER.md"
 DAX_BATTERIES = ["dax_battery", "dax_battery_review", "dax_battery_blank_logic", "dax_battery_filter_tables", "dax_battery_typed", "dax_battery_math", "dax_battery_tables", "dax_battery_tables2", "dax_battery_stats",
                 "dax_battery_misc", "dax_battery_adversarial", "dax_battery_finance", "dax_battery_bonds", "dax_battery_filter_shapes", "dax_battery_filter_shapes2",
@@ -63,6 +66,37 @@ TABLES = {
     "DSI": {"path": Path.home() / "Downloads/DSI.xlsx", "header_row": 6, "sheet_name": None,
             "report": ROOT / "tools/table_oracle_report.json"},
 }
+
+
+def load_baseline() -> dict:
+    """The lock list: the gzip when it exists, the plain json as a fallback, an empty lock list when neither does.
+
+    Both module names are read here, so tests can point them at a tmp folder."""
+    if BASELINE_GZ.exists():
+        with gzip.open(BASELINE_GZ, "rt", encoding="utf-8") as handle:
+            return json.load(handle)
+    if BASELINE.exists():
+        return json.loads(BASELINE.read_text())
+    return {"locked": [], "import_digests": {}}
+
+
+def save_baseline(baseline: dict) -> None:
+    """Write BASELINE_GZ atomically and byte-stable: fixed mtime, sorted keys, sorted locked ids.
+
+    The bytes never depend on the clock or on the temporary file's random name, so saving the same lock list twice
+    produces the same file.  BASELINE itself is never written any more."""
+    payload = {**baseline, "locked": sorted(baseline.get("locked", []))}
+    blob = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    folder = BASELINE_GZ.parent
+    folder.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(dir=folder, prefix=".baseline.json.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as zipped:
+            zipped.write(blob)
+        os.replace(temp_name, BASELINE_GZ)
+    except BaseException:
+        Path(temp_name).unlink(missing_ok=True)
+        raise
 
 
 def freeze() -> None:
@@ -299,7 +333,7 @@ def main() -> int:
         return 2
     if args.freeze:
         freeze()
-    baseline = json.loads(BASELINE.read_text()) if BASELINE.exists() else {"locked": [], "import_digests": {}}
+    baseline = load_baseline()
     try:
         first = next(PARITY.glob("dax_battery*.json"))
         baseline["powerbi_version"] = json.loads(first.read_text())["powerbi_version"]
@@ -346,7 +380,7 @@ def main() -> int:
         baseline["locked"] = sorted(locked | {r["id"] for r in results if r["status"] in ("match", "error-vs-refusal")})
         baseline["import_digests"] = {**baseline.get("import_digests", {}), **digests}
         PARITY.mkdir(exist_ok=True)
-        BASELINE.write_text(json.dumps(baseline, indent=1))
+        save_baseline(baseline)
         locked = set(baseline["locked"])
         print(f"locked {len(locked)} items")
     elif args.accept:
