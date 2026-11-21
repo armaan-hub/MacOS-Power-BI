@@ -87,13 +87,13 @@ def freeze() -> None:
 
 
 def status(powerbi: str, ours: str) -> str:
-    """match, error-vs-refusal (Power BI errors and the app refuses: the same outcome by a different path, shown on its own),
-    gap-reject (Power BI answers, the app refuses), DIFF, or CRASH."""
+    """match, gap-reject (Power BI answers, the app refuses), DIFF, or CRASH.
+
+    A Power BI error answered by an app refusal compares equal here; classify() counts that case on its own as
+    error-vs-refusal, so callers of status() see exactly what they always saw."""
     if ours.startswith("LOCAL-CRASH"):
         return "CRASH"
-    if powerbi.startswith("ERR") and ours.startswith("LOCAL-REJECT"):
-        return "error-vs-refusal"
-    if dax.same(powerbi, ours):
+    if dax.same(powerbi, ours) or (powerbi.startswith("ERR") and ours.startswith("LOCAL-REJECT")):
         return "match"
     return "gap-reject" if ours.startswith("LOCAL-REJECT") and not powerbi.startswith("ERR") else "DIFF"
 
@@ -105,9 +105,12 @@ def load_known_diffs() -> dict[str, dict]:
 
 
 def classify(row_id: str, powerbi: str, ours: str, known: dict[str, dict]) -> str:
-    """status(), except that a DIFF listed in known_diffs whose app answer is still the recorded one is known-diff (it does not fail the
+    """status(), except that a Power BI error answered by an app refusal is counted on its own as error-vs-refusal, and a DIFF listed in
+    known_diffs whose app answer is still the recorded one is known-diff (it does not fail the
     gate); a listed row whose answer moved to another wrong value stays DIFF, and one that now matches is reported by the caller."""
     result = status(powerbi, ours)
+    if result == "match" and powerbi.startswith("ERR") and ours.startswith("LOCAL-REJECT"):
+        return "error-vs-refusal"
     if result == "DIFF" and row_id in known and known[row_id]["app"] == ours:
         return "known-diff"
     return result
@@ -147,7 +150,7 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
         known = load_known_diffs()
         for item in _pick(name, battery["items"], None if name in full else sample, seed):
             table = item.get("facts")
-            ours = dax.local(item["expr"], tables[table] if table is not None else None)
+            ours = dax.local(item["expr"]) if table is None else dax.local(item["expr"], tables[table])
             # an item on its own Facts table is locked under an id that names the table, so one expression can sit on several tables
             row_id = f"{name}:{table}|{item['expr']}" if table is not None else f"{name}:{item['expr']}"
             rows.append({"group": name, "expr": item["expr"], "powerbi": item["powerbi"], "ours": ours,

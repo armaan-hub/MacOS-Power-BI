@@ -92,7 +92,9 @@ class KnownDiffTests(unittest.TestCase):
 
 class StatusTests(unittest.TestCase):
     def test_power_bi_error_and_app_refusal_is_its_own_status(self) -> None:
-        self.assertEqual(parity_check.status('ERR:Exception calling "Read"', "LOCAL-REJECT:Cannot convert"), "error-vs-refusal")
+        powerbi, ours = 'ERR:Exception calling "Read"', "LOCAL-REJECT:Cannot convert"
+        self.assertEqual(parity_check.status(powerbi, ours), "match")
+        self.assertEqual(parity_check.classify("g:a", powerbi, ours, {}), "error-vs-refusal")
 
     def test_other_statuses_are_unchanged(self) -> None:
         self.assertEqual(parity_check.status("1", "1"), "match")
