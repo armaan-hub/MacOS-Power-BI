@@ -25,6 +25,15 @@ def test_perf_check_fast_formula(monkeypatch) -> None:
         assert row["peak_mb"] > 0
         assert row["value"] != ""
 
+        # A subsequent run with higher memory allocation reports higher peak,
+        # and a third run back at 0 does not inherit the previous run's peak.
+        monkeypatch.setenv(perf_check.ALLOC_ENV, "50")
+        large_rows = perf_check.main(["--sizes", "200", "--only", "SUM"])
+        monkeypatch.setenv(perf_check.ALLOC_ENV, "0")
+        small_rows = perf_check.main(["--sizes", "200", "--only", "SUM"])
+        assert large_rows[0]["peak_mb"] >= row["peak_mb"] + 40
+        assert small_rows[0]["peak_mb"] < large_rows[0]["peak_mb"] - 30
+
         saved = json.loads(Path(out_json).read_text(encoding="utf-8"))
         assert len(saved) == 1
         assert saved[0]["name"] == "SUM"
@@ -42,7 +51,7 @@ def test_perf_check_timeout_path(monkeypatch) -> None:
     assert isinstance(row["seconds"], float)
     assert row["seconds"] >= 0.4
     assert row["value"] == ""
-    assert isinstance(row["peak_mb"], float)
+    assert row["peak_mb"] == ""
 
 
 def test_perf_check_skipped_over_max_rows() -> None:
@@ -50,6 +59,7 @@ def test_perf_check_skipped_over_max_rows() -> None:
     assert len(rows) == 1
     row = rows[0]
     assert row["size"] == 5000
+    assert row["name"] == "-"
     assert row["status"] == "skipped (over --max-rows)"
     assert row["seconds"] == ""
     assert row["value"] == ""
