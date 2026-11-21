@@ -1,5 +1,7 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Current plan:** docs/plans/2026-11-21-team-plan.md (approved 2026-11-21; section 11 = docs/plans/2026-11-21-scale-plan-v2.md); evidence: docs/plans/2026-11-21-fable-report.md.
+
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
 **Active agent:** Opus planner, Sonnet coder until Sat 2026-11-21 12:59 pm, then Haiku (function tasks) / Sonnet (engine core) per the approved plan `/Users/armaan/pbi_scratch/fable/TEAM_PLAN.md` (DAX hunt closed after Task 246; next: docs task 9.1+9.6, then Phase 0 and Stage A of SCALE_PLAN v2). Task 246 merged as 60e11eb: Power BI errors now raised for type tests over SUMMARIZECOLUMNS text Variant columns and FORMAT of added text columns; CONCATENATEX over unordered VALUES in added columns and 80 measured wrong group shapes refused; gate 41,377 passed, real app 575/575, replay 540,401 (0 DIFF, 0 CRASH); review 1,140 fresh rows branch 50 wrong vs main 193, 0 regressions; finding: the 80 refusal rules key on column names (renamed shapes still 50 wrong), for Phase 3; measures.py 26,768 lines.
@@ -17,7 +19,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
    - First: the 5 "other" functions (`EXTERNALMEASURE`, `NATURALJOINUSAGE`, `SAMPLEAXISWITHLOCALMINMAX`, `SAMPLECARTESIANPOINTSBYCOVER`, `SELECTEDMEASUREFORMATSTRING`) and the missing `INFO.*` functions.
    - Then the 6 week time-intelligence functions, which need calendar model objects.
    - Then the 14 visual-calculation functions, which need visual calculations.
-2. Power Query (M): the local M engine knows about 76 standard-library names. Power Query has several hundred.
+2. Power Query (M): the local M engine has 651 global names, 502 of Power BI's 932 (source: docs/plans/2026-11-21-fable-report.md).
    - Take the exact list from Power BI's own `#shared` in the guest, never from memory.
    - Each function follows the parity rule: Power BI answers saved, gate passed, locked.
 3. Order (user, 2026-11-08, second instruction): strictly sequential, no alternating. First finish every missing DAX function, then run a full test pass over ALL DAX functions (every function compared with Power BI, gate passed, locked). Only after that DAX close-out passes, start Power Query M code and its functions.

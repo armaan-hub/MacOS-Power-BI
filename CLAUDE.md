@@ -1,5 +1,8 @@
 # Analytics Studio project rules
 
+**Current plan:** docs/plans/2026-11-21-team-plan.md (approved 2026-11-21; section 11 = docs/plans/2026-11-21-scale-plan-v2.md); evidence: docs/plans/2026-11-21-fable-report.md.
+Coder routing from Sat 2026-11-21 13:00 +04: Haiku codes function-level tasks and does read-only testing; Sonnet codes engine-core tasks (speed, structure) and a second Sonnet session reviews them (TEAM_PLAN section 10).
+
 ## Two-agent workflow (set by the user 2026-10-26)
 Antigravity writes the new feature code (until its quota returns on Nov 2, Haiku 5.5 does, as a subagent; see `AGENTS.md`). Claude plans, tests and fixes errors in Antigravity's code. Claude does NOT write
 new feature code until the user explicitly says so (and then only for that task). Full rules: `AGENTS.md`. Message board:

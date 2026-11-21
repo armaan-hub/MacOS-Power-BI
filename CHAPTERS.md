@@ -12,6 +12,18 @@ How chapters work: `docs/plans/2026-11-17-chapters.md`. A closed chapter gets no
 | 5 | Report view ribbon tabs | Partly built | | |
 | 6 | Speed | Not started | | |
 
+## Chapter 1b: DAX hunt, Tasks 184 to 246, closed 2026-11-21
+
+The Chapter 1 section below says a closed chapter gets no new features and that Chapter 3 is current. That is still true for Chapter 1's saved answers: they keep running in the gate and are never edited. But Tasks 184 to 246 (the DAX hunt) changed the Chapter 1 DAX engine after 2026-11-17: they fixed wrong answers and added modelled cases against Power BI answer checks. So Chapter 1 was closed as a baseline, and the hunt that followed is recorded here as Chapter 1b. It ended with Task 246 (merged 60e11eb). The table row "1b DAX gaps" above is the same open work, now handled by the phases below.
+
+New phases from `docs/plans/2026-11-21-team-plan.md` (approved 2026-11-21):
+- **Phase 0:** freeze the hunt data into battery files and lock it.
+- **Phase 1:** the DAX exit test (one realistic model, about 400 formulas, 0 wrong, 0 crash, at least 97% answered).
+- **Stages A to F (speed and scale):** `docs/plans/2026-11-21-scale-plan-v2.md`. Stage A may run beside Phase 0 and Phase 1.
+- **Phase 4:** Power Query M functions, running beside Stage D.
+- **Phase 5:** report view, after Stage C4.
+Chapter 3 (Power Query editor screens) is paused behind these phases, not dropped.
+
 ## Chapter 1: DAX engine baseline (closed 2026-11-17)
 
 **Works (locked):** every saved Power BI DAX answer that our app matches.
