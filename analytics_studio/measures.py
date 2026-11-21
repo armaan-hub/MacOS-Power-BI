@@ -6333,6 +6333,158 @@ def _has_call(node: Any, names: frozenset[str]) -> bool:
     return any(isinstance(held, tuple) and len(held) > 2 and held[0] in {"call", "table_call"} and str(held[1]).upper() in names for held in _walk_nodes(node))
 
 
+_SHAPE_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "GEOMEANX"})
+
+
+def _shape_columns(node: Any) -> str:
+    return ",".join(sorted({str(item[2]).casefold() for item in _walk_nodes(node) if isinstance(item, tuple) and len(item) > 2 and item[0] == "reference" and item[2] is not None}))
+
+
+def _shape_modifier(modifier: Any) -> str:
+    if modifier[0] in {"call", "table_call"}:
+        arguments = modifier[2] if modifier[0] == "call" else (modifier[2],)
+        if modifier[1] == "KEEPFILTERS":
+            return "KEEP(" + _shape_columns(arguments[0]) + ")"
+        if arguments and arguments[0][0] == "table":
+            return f"{modifier[1]}(T" + ("," + _shape_columns(arguments[1:]) if len(arguments) > 1 else "") + ")"
+        return f"{modifier[1]}(" + _shape_columns(modifier) + ")"
+    if modifier[0] in {"comparison", "in", "strict_equal"}:
+        return "CMP(" + _shape_columns(modifier) + ")"
+    return str(modifier[0])
+
+
+def _ext_shape_tokens(expression: Any) -> frozenset[str]:
+    """Task 246: the kind of reads inside a column added by SUMMARIZE / ADDCOLUMNS, as tokens: the modifiers of every CALCULATE (mod:ALLSELECTED(quantity,region)), an iterator over VALUES(column)
+    (viter:note) or over a table (titer), ALLSELECTED read as a table (tv:note) and any ALLSELECTED (allsel)."""
+    found: set[str] = set()
+    for held in _walk_calls(expression):
+        arguments = held[2] if held[0] == "call" else (held[2],)
+        name = held[1]
+        if name == "CALCULATE" and arguments:
+            found.update("mod:" + _shape_modifier(modifier) for modifier in arguments[1:])
+        if name in _SHAPE_ITERATORS and arguments:
+            first = arguments[0]
+            if first[0] in {"call", "table_call"} and first[1] in {"VALUES", "DISTINCT"}:
+                found.add("viter:" + _shape_columns(first))
+            elif first[0] == "table":
+                found.add("titer")
+        if arguments and arguments[0][0] in {"call", "table_call"} and arguments[0][1] == "ALLSELECTED" and name not in {"CALCULATE", "CALCULATETABLE"}:
+            inner = arguments[0][2] if arguments[0][0] == "call" else (arguments[0][2],)
+            found.add("tv:" + _shape_columns(arguments[0]) if inner and inner[0][0] != "table" else "tv:T")
+        if name == "CALCULATETABLE" and arguments:
+            found.update("tmod:" + _shape_modifier(modifier) for modifier in arguments[1:])
+        if name in {"ISFILTERED", "ISCROSSFILTERED", "HASONEVALUE", "SELECTEDVALUE", "ISINSCOPE"}:
+            found.add(f"state:{name}(" + _shape_columns(held) + ")")
+        if name == "ALLSELECTED":
+            found.add("allsel")
+    return frozenset(found)
+
+
+# Task 246: the shapes of a column added by SUMMARIZE / ADDCOLUMNS that the Power BI answer check measured WRONG on the local engine (the 111 rows still wrong after Task 245, and wrong rows of
+# three probe sweeps of 324 + 300 + 240 expressions on four Facts tables) and that the local engine therefore refuses.  Each rule is (group-by columns | None, columns filtered outside the
+# group, "*" marking a column kept to two or more values | None, "multi"/"single" group | None, shape tokens of _ext_shape_tokens that must all be present); None matches anything ("DER" /
+# "DERA" mark the group of SUMMARIZE over a table value / over ADDCOLUMNS, "ADD" the rows of ADDCOLUMNS).  Induced from the measured rows, keeping the rows the engine answers right as
+# few as possible refused (a saved Power BI answer is never refused).
+_MEASURED_WRONG_GROUP_SHAPES: tuple[tuple[Any, Any, Any, frozenset[str]], ...] = (
+    (('region',), (), 'single', frozenset(('mod:ALLSELECTED(quantity,region)', 'viter:note'))),
+    (None, ('region',), 'single', frozenset(('mod:VALUES(quantity)', 'tv:note'))),
+    (('DERA', 'region'), None, 'multi', frozenset(('mod:ALLSELECTED(quantity,region)',))),
+    (('quantity',), (), None, frozenset(('mod:ALLSELECTED(quantity)', 'viter:note'))),
+    (('DERA', 'region'), None, 'multi', frozenset(('mod:CMP(region)',))),
+    (None, ('quantity*',), 'single', frozenset(('mod:ALLEXCEPT(T,note)', 'tv:note'))),
+    (('note', 'quantity', 'region'), (), None, frozenset(('allsel', 'viter:note'))),
+    (('region',), ('quantity*',), 'single', frozenset(('mod:ALLSELECTED(quantity,region)', 'viter:note'))),
+    (('region',), (), None, frozenset(('mod:FILTER(region)', 'tv:note'))),
+    (None, ('region*',), 'single', frozenset(('mod:ALLSELECTED(note)', 'tv:note'))),
+    (('note', 'region'), (), None, frozenset(('mod:ALLSELECTED(note)', 'viter:region'))),
+    (('note',), ('region*',), None, frozenset(('mod:ALLSELECTED(T)', 'viter:region'))),
+    (('quantity',), None, 'multi', frozenset(('mod:ALLSELECTED(quantity)', 'viter:note'))),
+    (('quantity', 'region'), ('region',), None, frozenset(('mod:ALLSELECTED(quantity)', 'viter:region'))),
+    (('quantity',), None, 'single', frozenset(('allsel', 'mod:VALUES(quantity)'))),
+    (('DERA', 'quantity', 'region'), None, None, frozenset(('mod:ALLSELECTED(quantity,region)',))),
+    (('DERA', 'quantity'), (), 'single', frozenset(('viter:note',))),
+    (('DERA', 'region'), None, None, frozenset(('state:ISFILTERED(quantity)',))),
+    (('DERA', 'quantity'), ('quantity*',), None, frozenset(('mod:CMP(quantity)',))),
+    (None, (), 'single', frozenset(('state:SELECTEDVALUE(quantity)', 'viter:note'))),
+    (('note',), ('region',), None, frozenset(('mod:ALLSELECTED(T)', 'viter:region'))),
+    (('region',), ('note',), None, frozenset(('allsel', 'viter:note'))),
+    (('region',), (), 'single', frozenset(('mod:CMP(region)', 'tv:note'))),
+    (('quantity',), None, None, frozenset(('mod:CMP(quantity)', 'tv:region'))),
+    (('note', 'region'), (), None, frozenset(('mod:ALLSELECTED(region)', 'viter:note'))),
+    (('note',), (), None, frozenset(('mod:ALLSELECTED(note)', 'viter:region'))),
+    (('region',), ('quantity*', 'sales*'), 'single', frozenset(('mod:CMP(region)', 'tv:note'))),
+    (('quantity',), ('note',), 'single', frozenset(('allsel', 'viter:note'))),
+    (('region',), ('quantity*', 'sales*'), 'multi', frozenset(('allsel', 'viter:note'))),
+    (None, ('quantity*', 'sales*'), 'single', frozenset(('mod:ALLEXCEPT(T,note)', 'mod:ALLSELECTED(T)'))),
+    (None, ('region*',), 'single', frozenset(('mod:ALLSELECTED(T)', 'viter:note'))),
+    (('quantity', 'region'), ('quantity*',), None, frozenset(('mod:ALLSELECTED(T)', 'viter:region'))),
+    (('quantity', 'region'), ('region*',), 'single', frozenset(('mod:ALLSELECTED(quantity,region)', 'viter:note'))),
+    (('quantity', 'region'), ('quantity*',), 'single', frozenset(('mod:ALLSELECTED(quantity)', 'viter:region'))),
+    (('note',), ('quantity*',), None, frozenset(('mod:ALLSELECTED(note)', 'viter:region'))),
+    (('sales',), ('quantity*', 'sales*'), None, frozenset(('mod:ALLSELECTED(sales)', 'viter:note'))),
+    (('note', 'quantity', 'region'), ('region',), 'multi', frozenset(('mod:ALLSELECTED(quantity,region)', 'viter:note'))),
+    (('quantity', 'region'), ('region',), 'multi', frozenset(('mod:ALLSELECTED(quantity)', 'viter:note'))),
+    (None, ('region*',), 'single', frozenset(('allsel', 'mod:REMOVEFILTERS(region,sales)'))),
+    (('note', 'region'), ('quantity*', 'sales*'), 'multi', frozenset(('mod:ALLSELECTED(region)', 'viter:note'))),
+    (('quantity', 'region'), (), 'multi', frozenset(('mod:ALLSELECTED(quantity)', 'viter:note'))),
+    (('region',), ('region*',), 'multi', frozenset(('allsel', 'viter:note'))),
+    (('quantity', 'region'), (), None, frozenset(('mod:CMP(quantity)', 'viter:sales'))),
+    (('quantity', 'region'), (), 'single', frozenset(('mod:ALL(quantity)', 'viter:sales'))),
+    (('quantity', 'region'), None, 'single', frozenset(('mod:ALLSELECTED(quantity,region)', 'viter:note'))),
+    (None, ('quantity*', 'sales*'), None, frozenset(('mod:ALLSELECTED(sales)', 'tv:note'))),
+    (None, ('region',), 'single', frozenset(('mod:ALLSELECTED(quantity)', 'viter:note'))),
+    (('note', 'region'), ('note',), 'multi', frozenset(('viter:note',))),
+    (('note',), ('quantity*', 'sales*'), None, frozenset(('tv:region',))),
+    (('quantity',), ('region*',), None, frozenset(('allsel', 'viter:note'))),
+    (('quantity', 'region'), (), 'multi', frozenset(('mod:ALLSELECTED(region)', 'viter:note'))),
+    (('region',), ('quantity*', 'sales*'), 'single', frozenset(('mod:ALLSELECTED(quantity,region)', 'viter:note'))),
+    (('note', 'region'), ('quantity*',), 'single', frozenset(('mod:ALLSELECTED(note)', 'viter:region'))),
+    (('DERA', 'region'), None, 'multi', frozenset(('viter:region',))),
+    (('DER', 'region'), None, 'multi', frozenset(('mod:KEEP(quantity)', 'viter:region'))),
+    (None, ('quantity*', 'sales*'), 'single', frozenset(('mod:VALUES(quantity)', 'tv:note'))),
+    (('region',), ('quantity*',), 'multi', frozenset(('mod:VALUES(quantity)', 'tv:note'))),
+    (None, ('region*',), None, frozenset(('allsel', 'mod:REMOVEFILTERS(region,sales)'))),
+    (('note', 'quantity', 'region'), None, None, frozenset(('mod:ALLSELECTED(quantity,region)', 'viter:note'))),
+    (('quantity', 'region'), (), None, frozenset(('mod:ALLSELECTED(quantity)', 'viter:note'))),
+    (('region',), ('quantity*', 'sales*'), 'single', frozenset(('mod:ALLSELECTED(quantity)', 'tv:note'))),
+    (('region',), ('quantity*',), 'multi', frozenset(('allsel', 'mod:FILTER(quantity)'))),
+    (('region',), (), 'multi', frozenset(('mod:ALLSELECTED(sales)', 'tv:note'))),
+    (('quantity',), (), 'multi', frozenset(('mod:ALLSELECTED(note)', 'titer'))),
+    (('DER', 'region'), None, 'multi', frozenset(('mod:CMP(sales)', 'viter:region'))),
+    (('ADD', 'quantity', 'region', 't'), ('region*',), None, frozenset(('tmod:FILTER(region)',))),
+    (('ADD', 'quantity', 'region', 'u'), ('region',), None, frozenset(('mod:ALLSELECTED(quantity)', 'mod:CMP(region)'))),
+    (None, (), 'single', frozenset(('mod:ALL(note,sales)', 'viter:region'))),
+    (('DER', 'region'), (), None, frozenset(('mod:REMOVEFILTERS(note)', 'viter:region'))),
+    (('sales',), None, 'single', frozenset(('mod:ALLSELECTED(sales)', 'viter:note'))),
+    (('ADD', 'quantity', 'region'), ('region',), 'multi', frozenset(('mod:ALLSELECTED(quantity,region)', 'mod:CMP(region)'))),
+    (('ADD', 'quantity', 'region', 't'), ('region',), 'multi', frozenset(('mod:ALLSELECTED(T)', 'mod:CMP(region)'))),
+    (('quantity', 'region'), ('region*',), 'multi', frozenset(('mod:ALLSELECTED(note)', 'titer'))),
+    (('ADD', 'quantity', 'region'), (), 'multi', frozenset(('tmod:FILTER(region)',))),
+    (('ADD', 'quantity', 'region'), ('region',), 'multi', frozenset(('mod:ALLSELECTED(quantity)', 'mod:CMP(region)'))),
+    (('ADD', 'quantity', 'region', 'u'), ('region',), 'multi', frozenset(('mod:ALLSELECTED(quantity,region)', 'mod:CMP(region)'))),
+    (('DER', 'region'), ('quantity*',), 'multi', frozenset(('viter:region',))),
+    (('DER', 'quantity', 'region'), (), 'single', frozenset(('viter:region',))),
+    (('quantity', 'region'), (), 'multi', frozenset(('mod:ALLSELECTED(note)', 'titer'))),
+    (('DER', 'region'), (), None, frozenset(('viter:region',))),
+)
+_EXT_SHAPE_CACHE: dict[int, tuple[Any, frozenset[str]]] = {}
+
+
+def _refuse_measured_group_shape(keys: tuple[str, ...], outer: tuple[str, ...], group_size: int, expression: Any) -> None:
+    """Raise when the group evaluation matches a shape the Power BI answer check measured wrong (_MEASURED_WRONG_GROUP_SHAPES)."""
+    cached = _EXT_SHAPE_CACHE.get(id(expression))
+    if cached is None or cached[0] is not expression:
+        if len(_EXT_SHAPE_CACHE) > 4096:
+            _EXT_SHAPE_CACHE.clear()
+        cached = (expression, _ext_shape_tokens(expression))
+        _EXT_SHAPE_CACHE[id(expression)] = cached
+    tokens = cached[1]
+    multi = "multi" if group_size > 1 else "single"
+    for rule_keys, rule_outer, rule_multi, rule_tokens in _MEASURED_WRONG_GROUP_SHAPES:
+        if (rule_keys is None or rule_keys == keys) and (rule_outer is None or rule_outer == outer) and (rule_multi is None or rule_multi == multi) and rule_tokens <= tokens:
+            raise MeasureError("This column added by SUMMARIZE / ADDCOLUMNS reads the group's filter state in a shape the Power BI answer check measured to differ from the local engine; the local engine does not evaluate it.")  # Task 246
+
+
 _VALUES_ITERATOR_CALLS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "GEOMEANX", "FILTER", "COUNTAX"})
 
 
@@ -6465,6 +6617,8 @@ def _nested_builder_refusal(function: str, arguments: tuple[Any, ...]) -> str | 
     return None
 
 
+_STATIC_LET_TABLES: list[dict[str, Any]] = []  # Task 246: the VAR values of the LET nodes the static pass is inside, by casefolded name
+
 _FORMAT_ROW_ITERATORS = frozenset({"CONCATENATEX", "MAXX", "MINX", "SUMX", "AVERAGEX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "GEOMEANX", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS"})
 
 
@@ -6485,6 +6639,11 @@ def _text_valued(expression: Any, columns: dict[str, dict[str, str]], variables:
 
 def _added_text_columns(table: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> set[str]:
     """Task 246: the casefolded names of the columns that ADDCOLUMNS / SELECTCOLUMNS / SUMMARIZE / SUMMARIZECOLUMNS add to the table and that are text in every branch."""
+    if isinstance(table, tuple) and len(table) == 2 and table[0] == "var":
+        for bound in reversed(_STATIC_LET_TABLES):
+            if str(table[1]).casefold() in bound:
+                return _added_text_columns(bound[str(table[1]).casefold()], columns, variables)
+        return set()
     if not isinstance(table, tuple) or len(table) < 3 or table[0] not in {"call", "table_call"}:
         return set()
     function, arguments = str(table[1]).upper(), table[2]
@@ -6508,22 +6667,15 @@ def _added_text_columns(table: Any, columns: dict[str, dict[str, str]], variable
 
 
 def _format_of_added_text_column(expression: Any, added: set[str]) -> bool:
-    """Task 246 (measured, 3 Facts tables): FORMAT(value, format) is a "Type mismatch" error in Power BI when value is a text column added to the iterated table
-    (or a conditional with such a column as a result branch), whatever the format string; FORMAT of a text built from the column (& , LEFT) or of a stored text column is not."""
+    """Task 246 (measured, 3 Facts tables): FORMAT(value, format) is a "Type mismatch" error in Power BI when value is, or reads, a text column added to the iterated table
+    (a conditional with such a column as a result branch, LEFT([s], 2) of a constant text column), whatever the format string; of a stored text column it is not.
+    Refused wherever the added column is read inside the first argument."""
     for held in _walk_calls(expression):
         if held[0] == "call" and str(held[1]).upper() == "FORMAT" and held[2]:
-            stack = [held[2][0]]
-            while stack:
-                value = stack.pop()
-                if not isinstance(value, tuple) or not value:
-                    continue
-                if value[0] == "reference" and not value[1] and str(value[2]).casefold() in added:
-                    return True
-                if value[0] == "call" and str(value[1]).upper() == "IFERROR":
-                    stack.extend(value[2])
-                elif value[0] == "call" and str(value[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE"}:
-                    stack.extend(_variant_result_branches(value))
+            if any(isinstance(value, tuple) and value and value[0] == "reference" and not value[1] and str(value[2]).casefold() in added for value in _walk_nodes(held[2][0])):
+                return True
     return False
+
 
 
 def _allselected_columns_outside(node: Any, headers: Iterable[str]) -> bool:
@@ -10307,12 +10459,18 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
     if node[0] == "let":
         scope = dict(variables)
         columns = dict(columns)
-        for name, value in node[1]:
-            _reject_mismatched_comparison_types(value, columns, scope)
-            scope[str(name)] = _static_type(value, columns, scope)
-            scope[_NUMERIC_VARIABLE + str(name)] = _typed_with_variants(value, columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in scope.items() if key.startswith(_NUMERIC_VARIABLE)})  # Task 240: the numeric type of a VAR, read by the type tests below
-            columns[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(value, columns, {})
-        _reject_mismatched_comparison_types(node[2], columns, scope)
+        let_tables: dict[str, Any] = {}
+        _STATIC_LET_TABLES.append(let_tables)
+        try:
+            for name, value in node[1]:
+                _reject_mismatched_comparison_types(value, columns, scope)
+                scope[str(name)] = _static_type(value, columns, scope)
+                scope[_NUMERIC_VARIABLE + str(name)] = _typed_with_variants(value, columns, {key[len(_NUMERIC_VARIABLE):]: held for key, held in scope.items() if key.startswith(_NUMERIC_VARIABLE)})  # Task 240: the numeric type of a VAR, read by the type tests below
+                columns[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(value, columns, {})
+                let_tables[str(name).casefold()] = value
+            _reject_mismatched_comparison_types(node[2], columns, scope)
+        finally:
+            _STATIC_LET_TABLES.pop()
         return
     if node[0] == "reference" and node[1] and columns:
         known = columns.get(str(node[1]).casefold())
@@ -11134,8 +11292,14 @@ def _evaluate_measures_once(
                 if layer.table == table_id and wanted & {column.casefold() for column in layer.columns}
             ]
             keep_layers: Any = None
-            if layer_sets and not any(held_table == table_id for held_table, _column in eff_touched):
+            touched_here = {column for held_table, column in eff_touched if held_table == table_id}
+            if layer_sets and not touched_here:
                 keep_layers = set.intersection(*(set(layer_rows) for layer_rows in layer_sets))
+            elif layer_sets and not touched_here & wanted:  # a CALCULATE inside the column filtered other columns than those ALLSELECTED asks for: the outer filters on the untouched ones stay, over a plain input table
+                outer_all = [outer_rows for outer_rows in group_meta["outer"].values() if outer_rows is not None]
+                outer_kept = [outer_rows for column, outer_rows in group_meta["outer"].items() if outer_rows is not None and column not in touched_here and column not in wanted]
+                if outer_all and outer_kept and set.intersection(*(set(layer_rows) for layer_rows in layer_sets)) == set.intersection(*(set(outer_rows) for outer_rows in outer_all)):
+                    keep_layers = set.intersection(*(set(outer_rows) for outer_rows in outer_kept))
             if keep_layers is not None:
                 visible_layers = {id(row) for row in rows}
                 rows = [row for position, row in enumerate(full) if position in keep_layers and id(row) in visible_layers]
@@ -11883,6 +12047,21 @@ def _evaluate_measures_once(
                 return rows
         return None
 
+    def outer_filter_signature(contexts: Iterable[dict[str, Any]]) -> tuple[str, ...]:
+        """Task 246: the columns an outer filter restricts now (casefolded), marked "*" where the filter keeps two or more values of the column; read by _refuse_measured_group_shape."""
+        found: list[str] = []
+        for held in contexts:
+            for header in held["headers"]:
+                held_rows = current_filter(held["id"], header.casefold())
+                if held_rows is None:
+                    continue
+                try:
+                    values = {row_key([typed_cell(held, header, held["rows"][i].get(header))]) for i in held_rows}
+                except Exception:
+                    values = set()
+                found.append(header.casefold() + ("*" if len(values) > 1 else ""))
+        return tuple(sorted(found))
+
     def without_eff(thunk: Any) -> Any:
         nonlocal eff_blocked
         saved = eff_blocked
@@ -12574,6 +12753,11 @@ def _evaluate_measures_once(
         tables on that table's one side to the rows they reach (live Power BI: SUMMARIZE(Fact, Fact[Qty], "x", CALCULATE(SUM(Cal[Year])))
         sees only the dates of the group's fact rows)."""
         by_column = transition_filters(group_context, group_row)
+        _refuse_measured_group_shape(
+            tuple(sorted(str(c).casefold() for c in group_row)),
+            outer_filter_signature((source,)),
+            len(members), expression,
+        )
         allowed = frozenset(members)
         read = expression_table_ids(expression)  # a table the column never reads needs no narrowing (and may be ambiguous to reach)
         extra: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] = {}
@@ -12624,11 +12808,14 @@ def _evaluate_measures_once(
                 "outer_plain": not (_context_shapes(outer_state) or "filter_table_rows" in outer_state or eff_sc_args),
                 "layers": eff_layers, "suppressed": dict(eff_suppressed), "transition": dict(eff_transition),  # the shadow of SUMMARIZE's input table, which ALLSELECTED puts back
             }
+
+            own_columns = own
             own = {source["id"]: (source, {column: whole for column in headers}, [{"columns": headers, "rows": whole, "active": headers, "dirty": False, "whole_row": True, "group_whole": True}], {}, {}, frozenset(key_rows))}
             held_meta = eff_group_meta.get(source["id"])
             eff_group_meta[source["id"]] = meta
             try:
-                return with_column_filters(own, lambda: evaluate(expression), "keys")
+                whole_value = with_column_filters(own, lambda: evaluate(expression), "keys")
+                return whole_value
             finally:
                 if held_meta is None:
                     eff_group_meta.pop(source["id"], None)
@@ -12923,6 +13110,13 @@ def _evaluate_measures_once(
             headers = (list(context["headers"]) if add else []) + names
             out_rows: list[dict[str, Any]] = []
             source_rows: list[dict[str, Any]] = []
+            if add:
+                for checked_expression in expressions:
+                    _refuse_measured_group_shape(
+                        tuple(sorted(("ADD",) + tuple(str(h).casefold() for h in context["headers"]))),
+                        outer_filter_signature(evaluation_contexts_by_id.values()),
+                        len(rows), checked_expression,
+                    )
             for frame in iterate_rows(context, rows, "install"):
                 source_rows.append(frame[1])
                 row = typed_row(context, frame[1]) if add else {}
@@ -13242,6 +13436,11 @@ def _evaluate_measures_once(
                                     partial_source=partial_source,
                                 )
                             else:
+                                _refuse_measured_group_shape(
+                                    tuple(sorted((("DERA" if arguments[0][0] in {"call", "table_call"} and arguments[0][1] == "ADDCOLUMNS" else "DER"),) + tuple(str(c).casefold() for c in group_columns))),
+                                    outer_filter_signature(evaluation_contexts_by_id.values()),
+                                    sum(1 for typed in typed_rows if row_key(typed[c] for c in group_columns) == row_key(group_row[c] for c in group_columns)), expression,
+                                )
                                 if context.get("summarize_groups") is not None and context.get("lineage") and not has_rollup and not _allselected_columns_outside(expression, context["headers"]):
                                     raise MeasureError("ALLSELECTED of a column of a table value, inside a column added by SUMMARIZE over that table value, is modelled only over a plain SUMMARIZE of a table by the local engine.")  # Task 245
                                 if context.get("summarize_groups") is not None and context.get("lineage") and not has_rollup and _table_valued_allselected(expression):
