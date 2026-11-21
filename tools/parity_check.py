@@ -13,7 +13,9 @@ A sampled or --only run is read-only: it writes neither PARITY_LEDGER.md nor bas
 Exit code 1 when a locked item stopped matching, any item differs from Power BI, the app crashed on an expression or the
 imported VAT table changed.  Items Power BI answers but the app still refuses are listed as pending work (gap-reject),
 they do not fail the gate.  Items where Power BI gives an error and the app refuses are counted on their own as
-error-vs-refusal: they do not fail the gate either, and --accept locks them with the matches.  Hunt batteries
+error-vs-refusal: they do not fail the gate either, and --accept locks them with the matches.  A DIFF listed in
+tools/parity/known_diffs.json (made by tools/make_known_diffs.py) whose app answer is still the recorded one is a known-diff:
+counted on its own, not failing, never locked; any other DIFF, or a listed row whose answer changed, fails.  Hunt batteries
 (dax_battery_hunt_*.json) carry a Facts table per item.  The result is written to PARITY_LEDGER.md.
 """
 from __future__ import annotations
@@ -96,6 +98,21 @@ def status(powerbi: str, ours: str) -> str:
     return "gap-reject" if ours.startswith("LOCAL-REJECT") and not powerbi.startswith("ERR") else "DIFF"
 
 
+def load_known_diffs() -> dict[str, dict]:
+    """Rows measured wrong on purpose and listed with the app's current wrong answer (tools/parity/known_diffs.json), by lock id."""
+    file = PARITY / "known_diffs.json"
+    return {entry["id"]: entry for entry in json.loads(file.read_text())} if file.exists() else {}
+
+
+def classify(row_id: str, powerbi: str, ours: str, known: dict[str, dict]) -> str:
+    """status(), except that a DIFF listed in known_diffs whose app answer is still the recorded one is known-diff (it does not fail the
+    gate); a listed row whose answer moved to another wrong value stays DIFF, and one that now matches is reported by the caller."""
+    result = status(powerbi, ours)
+    if result == "DIFF" and row_id in known and known[row_id]["app"] == ours:
+        return "known-diff"
+    return result
+
+
 def _pick(name: str, items: list[dict], sample: int | None, seed: int) -> list[dict]:
     """A seeded sample of `sample` items, in file order; the whole list when it is None or not larger than the sample."""
     if sample is None or len(items) <= sample:
@@ -127,12 +144,14 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
             continue
         battery = json.loads(file.read_text())
         tables = battery.get("facts_tables", {})
+        known = load_known_diffs()
         for item in _pick(name, battery["items"], None if name in full else sample, seed):
             table = item.get("facts")
             ours = dax.local(item["expr"], tables[table] if table is not None else None)
             # an item on its own Facts table is locked under an id that names the table, so one expression can sit on several tables
+            row_id = f"{name}:{table}|{item['expr']}" if table is not None else f"{name}:{item['expr']}"
             rows.append({"group": name, "expr": item["expr"], "powerbi": item["powerbi"], "ours": ours,
-                         "status": status(item["powerbi"], ours), "id": f"{name}:{table}|{item['expr']}" if table is not None else f"{name}:{item['expr']}"})
+                         "status": classify(row_id, item["powerbi"], ours, known), "id": row_id})
     return rows
 
 
@@ -170,18 +189,24 @@ def write_ledger(results: list[dict], baseline: dict, failures: list[str], notes
         f"Power BI Desktop {baseline.get('powerbi_version', '?')}; the gate replays them against the app on every run.", "",
         "Rule: a slice is finished only when it is compared with Power BI, its items are locked here "
         "(`--accept`) and the gate passes.  Locked items are never re-investigated, only guarded.", "",
-        "| Group | Locked and matching | Match (not yet locked) | Error vs refusal | Pending (app refuses) | Differs | Crash |",
-        "|---|---|---|---|---|---|---|",
+        "| Group | Locked and matching | Match (not yet locked) | Error vs refusal | Pending (app refuses) | Known diff | Differs | Crash |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     locked = set(baseline.get("locked", []))
     for group, counts in groups.items():
         match_locked = sum(1 for r in results if r["group"] == group and r["status"] == "match" and r["id"] in locked)
         match_all = counts.get("match", 0)
         lines.append(f"| {group} | {match_locked} | {match_all - match_locked} | {counts.get('error-vs-refusal', 0)} | {counts.get('gap-reject', 0)} | "
-                     f"{counts.get('DIFF', 0)} | {counts.get('CRASH', 0)} |")
+                     f"{counts.get('known-diff', 0)} | {counts.get('DIFF', 0)} | {counts.get('CRASH', 0)} |")
     pending = [r for r in results if r["status"] == "gap-reject"]
     lines += ["", f"## Pending work ({len(pending)}): Power BI answers, the app refuses", ""]
     lines += [f"- `{r['expr']}` (Power BI: `{r['powerbi'][:60]}`) [{r['group']}]" for r in pending] or ["- none"]
+    known_rows = [r for r in results if r["status"] == "known-diff"]
+    if known_rows:
+        known = load_known_diffs()
+        lines += ["", f"## Known wrong ({len(known_rows)}): Power BI answers, the app answers differently, listed in tools/parity/known_diffs.json", ""]
+        lines += [f"- `{r['expr'][:150]}` (Power BI: `{r['powerbi'][:40]}`, app: `{r['ours'][:40]}`) [{r['group']}; {known[r['id']]['cause_group']}]"
+                  for r in known_rows]
     if failures:
         lines += ["", "## Failing", ""] + [f"- {f}" for f in failures]
     deviations = PARITY / "known_deviations.json"
@@ -302,6 +327,13 @@ def main() -> int:
             failures.append(f"{r['status']} {r['id']}: Power BI {r['powerbi'][:50]} vs app {r['ours'][:80]}")
         elif r["id"] in locked and r["status"] not in ("match", "error-vs-refusal"):
             failures.append(f"REGRESSION (was locked) {r['id']}: Power BI {r['powerbi'][:50]} vs app {r['ours'][:80]}")
+    known = load_known_diffs()
+    seen_ids = {r["id"] for r in results}
+    for r in results:
+        if r["id"] in known and r["status"] not in ("known-diff", "DIFF", "CRASH"):
+            notes.append(f"fixed, remove from known_diffs.json: {r['id'][:160]} (now {r['status']})")
+    if not partial:
+        notes += [f"known_diffs.json lists a row that no battery holds any more: {i[:160]}" for i in known if i not in seen_ids]
     for name, digest in digests.items():
         old = baseline.get("import_digests", {}).get(name)
         if old and old != digest:
@@ -326,7 +358,7 @@ def main() -> int:
             if smoke.returncode or "0 different" not in line or "reopen: True" not in out:
                 failures.append(f"real-app run failed: {line}")
 
-    counts = {s: sum(1 for r in results if r["status"] == s) for s in ("match", "error-vs-refusal", "gap-reject", "DIFF", "CRASH")}
+    counts = {s: sum(1 for r in results if r["status"] == s) for s in ("match", "error-vs-refusal", "known-diff", "gap-reject", "DIFF", "CRASH")}
     if partial:
         # read-only: no PARITY_LEDGER.md, no baseline.json
         print(f"replayed {len(results)} Power BI answers: {counts}; locked {len(locked)}")

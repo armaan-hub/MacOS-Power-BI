@@ -52,6 +52,44 @@ class FactsPerItemTests(unittest.TestCase):
         self.assertEqual(rows[0]["status"], "DIFF")
 
 
+class KnownDiffTests(unittest.TestCase):
+    TINY = {"t": [["1", "1", "East", ""]]}
+
+    def _replay(self, power_bi: str, known: list[dict]) -> dict:
+        battery = _battery([{"expr": "SUM(Facts[Sales])", "powerbi": power_bi, "facts": "t"}], self.TINY)
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "dax_battery_hunt_tiny.json").write_text(json.dumps(battery))
+            (Path(folder) / "known_diffs.json").write_text(json.dumps(known))
+            with mock.patch.object(parity_check, "PARITY", Path(folder)), \
+                    mock.patch.object(parity_check, "DAX_BATTERIES", ["dax_battery_hunt_tiny"]):
+                return parity_check.replay_dax()[0]
+
+    ID = "dax_battery_hunt_tiny:t|SUM(Facts[Sales])"
+
+    def test_listed_wrong_row_with_the_recorded_answer_is_known_diff(self) -> None:
+        row = self._replay("99", [{"id": self.ID, "powerbi": "99", "app": "1", "cause_group": "x"}])
+        self.assertEqual(row["status"], "known-diff")
+
+    def test_unlisted_wrong_row_is_a_difference(self) -> None:
+        self.assertEqual(self._replay("99", [])["status"], "DIFF")
+
+    def test_listed_row_whose_answer_moved_to_another_wrong_value_fails(self) -> None:
+        row = self._replay("99", [{"id": self.ID, "powerbi": "99", "app": "7", "cause_group": "x"}])
+        self.assertEqual(row["status"], "DIFF")
+
+    def test_listed_row_that_now_matches_is_a_match_and_is_reported(self) -> None:
+        row = self._replay("1", [{"id": self.ID, "powerbi": "99", "app": "7", "cause_group": "x"}])
+        self.assertEqual(row["status"], "match")
+
+    def test_variable_declared_in_an_untaken_branch_does_not_crash(self) -> None:
+        expression = (
+            'CALCULATE(ISNONTEXT(IF(HASONEVALUE(Facts[Region]),VAR _t=SUMMARIZE(FILTER(Facts,Facts[Quantity]>1),Facts[Note],"s",'
+            'IF(ISBLANK(MAX(Facts[Sales])),"blank",MAX(Facts[Sales]))) RETURN SUMX(_t,VALUE([s])),'
+            'SUMX(GROUPBY(Facts,Facts[Note],"s",SUMX(CURRENTGROUP(),Facts[Quantity])),VALUE([s])))),REMOVEFILTERS(Facts[Region]))'
+        )
+        self.assertEqual(parity_check.dax.local(expression), "True")  # Power BI: True
+
+
 class StatusTests(unittest.TestCase):
     def test_power_bi_error_and_app_refusal_is_its_own_status(self) -> None:
         self.assertEqual(parity_check.status('ERR:Exception calling "Read"', "LOCAL-REJECT:Cannot convert"), "error-vs-refusal")

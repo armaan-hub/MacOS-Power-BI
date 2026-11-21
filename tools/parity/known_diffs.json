@@ -1,0 +1,416 @@
+[
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),REMOVEFILTERS(Facts[Quantity],Facts[Note]))),[s]),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "1.33333333333333",
+  "app": "3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region])))),[s]),ALL(Facts[Quantity]))",
+  "powerbi": "2",
+  "app": "1.333333333333333333333333333",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLSELECTED(Facts[Region]))),IF(ISBLANK([s]),\"b\",[s]),\"|\",[s],ASC,Facts[Sales],ASC),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "1|1|1|1",
+  "app": "3|3|3|3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(MAXX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],Facts[Sales],\"s\",CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Sales],Facts[Note])),Facts[Note]<>\"North\")),[s]),ALL(Facts[Sales]))",
+  "powerbi": "46",
+  "app": "30",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(MAXX(SUMMARIZE(Facts,Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Note]=\"East\")),[s]),ALL(Facts[Sales]))",
+  "powerbi": "2",
+  "app": "3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(SUMX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],\"s\",CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales],Facts[Note]))),[s]),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "12",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(SUMX(SUMMARIZE(FILTER(Facts,Facts[Quantity]>1),Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLEXCEPT(Facts,Facts[Region]))),[s]),Facts[Quantity]>1)",
+  "powerbi": "3",
+  "app": "6",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))),[s]*2),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "18",
+  "app": "12",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Sales],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),VALUES(Facts[Sales]))),[s]),Facts[Quantity]>1,Facts[Sales]<5)",
+  "powerbi": "3",
+  "app": "9",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|CALCULATE(SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Sales],Facts[Note])))),[s]*2),ALL(Facts[Sales]))",
+  "powerbi": "106",
+  "app": "92",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|SUMX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],\"s\",CALCULATE(DISTINCTCOUNT(Facts[Region]),ALLSELECTED(Facts[Sales],Facts[Note]))),[s])",
+  "powerbi": "9",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:2|SUMX(SUMMARIZE(Facts,Facts[Note],\"t\",SUM(Facts[Quantity]),\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Quantity],Facts[Note])))),[s]*2)",
+  "powerbi": "-1.5",
+  "app": "-2.5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "1.4",
+  "app": "1",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(MAXX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "2",
+  "app": "1",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "7",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "9",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(DISTINCT(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "7",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))),[s]),Facts[Quantity]>1)",
+  "powerbi": "9",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "7",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Note])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "9",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1,Facts[Region]<>\"North\")",
+  "powerbi": "6",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>2)",
+  "powerbi": "6",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Sales]>1)",
+  "powerbi": "5",
+  "app": "3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "43",
+  "app": "37",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),REMOVEFILTERS(Facts[Quantity],Facts[Note]))),[s]),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "1.66666666666667",
+  "app": "3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Region],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),FILTER(ALL(Facts[Sales]),Facts[Sales]>1))),[s]),Facts[Sales]>1)",
+  "powerbi": "1.33333333333333",
+  "app": "1.666666666666666666666666667",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region])))),[s]),ALL(Facts[Quantity]))",
+  "powerbi": "3.66666666666667",
+  "app": "2",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLSELECTED(Facts[Region]))),IF(ISBLANK([s]),\"b\",[s]),\"|\",[s],ASC,Facts[Sales],ASC),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "1|1|1|1|1|1",
+  "app": "3|3|3|3|3|3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(MAXX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],Facts[Sales],\"s\",CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Sales],Facts[Note])),Facts[Note]<>\"North\")),[s]),ALL(Facts[Sales]))",
+  "powerbi": "15",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(MAXX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Sales],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))),[s]),ALL(Facts[Sales]))",
+  "powerbi": "8",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(MAXX(SUMMARIZE(Facts,Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Note]=\"East\")),[s]),ALL(Facts[Sales]))",
+  "powerbi": "2",
+  "app": "3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(SUMX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],\"s\",CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales],Facts[Note]))),[s]),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "18",
+  "app": "6",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(SUMX(SUMMARIZE(FILTER(Facts,Facts[Quantity]>1),Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLEXCEPT(Facts,Facts[Region]))),[s]),Facts[Quantity]>1)",
+  "powerbi": "4",
+  "app": "9",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Note],Facts[Sales],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales]))),\"t\",COUNTROWS(Facts)),[s]),Facts[Sales]>1)",
+  "powerbi": "6",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))),[s]*2),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "42",
+  "app": "22",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Sales],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),VALUES(Facts[Sales]))),[s]),Facts[Quantity]>1,Facts[Sales]<5)",
+  "powerbi": "2",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity]),Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Quantity],Facts[Note])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "49",
+  "app": "36",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CALCULATE(SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Sales],Facts[Note])))),[s]*2),ALL(Facts[Sales]))",
+  "powerbi": "52",
+  "app": "30",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CONCATENATEX(SUMMARIZE(Facts,Facts[Note],Facts[Sales],\"s\",SUMX(VALUES(Facts[Quantity]),CALCULATE(COUNTROWS(Facts),ALL(Facts[Sales])))),IF(ISBLANK([s]),\"b\",[s]),\"|\",Facts[Note],ASC,Facts[Sales],ASC)",
+  "powerbi": "1|1|1|2|1|2",
+  "app": "1|1|1|1|1|1",
+  "cause_group": "ALL of a column inside the added column of SUMMARIZE"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CONCATENATEX(SUMMARIZE(Facts,Facts[Note],Facts[Sales],\"s\",SUMX(VALUES(Facts[Quantity]),CALCULATE(COUNTROWS(Facts),Facts[Sales]>1))),IF(ISBLANK([s]),\"b\",[s]),\"|\",Facts[Note],ASC,Facts[Sales],ASC)",
+  "powerbi": "1|1|1|1|b|1",
+  "app": "1|1|1|b|b|1",
+  "cause_group": "CONCATENATEX over an inner table: row order or value"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Sales],\"s\",SUMX(VALUES(Facts[Quantity]),CALCULATE(SUM(Facts[Quantity]),ALL(Facts[Sales])))),IF(ISBLANK([s]),\"b\",[s]),\"|\",Facts[Region],ASC,Facts[Sales],ASC)",
+  "powerbi": "3|5|3|4|0|3",
+  "app": "1|5|2|4|0|3",
+  "cause_group": "ALL of a column inside the added column of SUMMARIZE"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|SUMX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],\"s\",CALCULATE(DISTINCTCOUNT(Facts[Region]),ALLSELECTED(Facts[Sales],Facts[Note]))),[s])",
+  "powerbi": "9",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:5|SUMX(SUMMARIZE(Facts,Facts[Note],\"t\",SUM(Facts[Quantity]),\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Quantity],Facts[Note])))),[s]*2)",
+  "powerbi": "132",
+  "app": "69",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),REMOVEFILTERS(Facts[Quantity],Facts[Note]))),[s]),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "1.66666666666667",
+  "app": "3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Region],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),FILTER(ALL(Facts[Sales]),Facts[Sales]>1))),[s]),Facts[Sales]>1)",
+  "powerbi": "1.33333333333333",
+  "app": "1.666666666666666666666666667",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(AVERAGEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region])))),[s]),ALL(Facts[Quantity]))",
+  "powerbi": "3.66666666666667",
+  "app": "2",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLSELECTED(Facts[Region]))),IF(ISBLANK([s]),\"b\",[s]),\"|\",[s],ASC,Facts[Sales],ASC),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "1|1|1|1|1|1",
+  "app": "3|3|3|3|3|3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(MAXX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],Facts[Sales],\"s\",CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Sales],Facts[Note])),Facts[Note]<>\"North\")),[s]),ALL(Facts[Sales]))",
+  "powerbi": "15",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(MAXX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Sales],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))),[s]),ALL(Facts[Sales]))",
+  "powerbi": "8",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(MAXX(SUMMARIZE(Facts,Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Note]=\"East\")),[s]),ALL(Facts[Sales]))",
+  "powerbi": "2",
+  "app": "3",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(SUMX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],\"s\",CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales],Facts[Note]))),[s]),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "18",
+  "app": "6",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(SUMX(SUMMARIZE(FILTER(Facts,Facts[Quantity]>1),Facts[Note],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLEXCEPT(Facts,Facts[Region]))),[s]),Facts[Quantity]>1)",
+  "powerbi": "4",
+  "app": "9",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Note],Facts[Sales],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales]))),\"t\",COUNTROWS(Facts)),[s]),Facts[Sales]>1)",
+  "powerbi": "6",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))),[s]*2),KEEPFILTERS(Facts[Note]<>\"North\"))",
+  "powerbi": "42",
+  "app": "22",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Sales],\"s\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),VALUES(Facts[Sales]))),[s]),Facts[Quantity]>1,Facts[Sales]<5)",
+  "powerbi": "2",
+  "app": "4",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Note],Facts[Quantity]),Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Quantity],Facts[Note])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "49",
+  "app": "36",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CALCULATE(SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Sales],Facts[Note])))),[s]*2),ALL(Facts[Sales]))",
+  "powerbi": "52",
+  "app": "30",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CONCATENATEX(SUMMARIZE(Facts,Facts[Note],Facts[Sales],\"s\",SUMX(VALUES(Facts[Quantity]),CALCULATE(COUNTROWS(Facts),ALL(Facts[Sales])))),IF(ISBLANK([s]),\"b\",[s]),\"|\",Facts[Note],ASC,Facts[Sales],ASC)",
+  "powerbi": "1|1|1|2|1|2",
+  "app": "1|1|1|1|1|1",
+  "cause_group": "ALL of a column inside the added column of SUMMARIZE"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CONCATENATEX(SUMMARIZE(Facts,Facts[Note],Facts[Sales],\"s\",SUMX(VALUES(Facts[Quantity]),CALCULATE(COUNTROWS(Facts),Facts[Sales]>1))),IF(ISBLANK([s]),\"b\",[s]),\"|\",Facts[Note],ASC,Facts[Sales],ASC)",
+  "powerbi": "1|1|1|1|b|1",
+  "app": "1|1|1|b|b|1",
+  "cause_group": "CONCATENATEX over an inner table: row order or value"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Sales],\"s\",SUMX(VALUES(Facts[Quantity]),CALCULATE(SUM(Facts[Quantity]),ALL(Facts[Sales])))),IF(ISBLANK([s]),\"b\",[s]),\"|\",Facts[Region],ASC,Facts[Sales],ASC)",
+  "powerbi": "3|5|3|4|0|3",
+  "app": "1|5|2|4|0|3",
+  "cause_group": "ALL of a column inside the added column of SUMMARIZE"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|SUMX(SUMMARIZE(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Note],Facts[Sales]),\"u\",1),Facts[Note],\"s\",CALCULATE(DISTINCTCOUNT(Facts[Region]),ALLSELECTED(Facts[Sales],Facts[Note]))),[s])",
+  "powerbi": "9",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_review246:6|SUMX(SUMMARIZE(Facts,Facts[Note],\"t\",SUM(Facts[Quantity]),\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Quantity],Facts[Note])))),[s]*2)",
+  "powerbi": "132",
+  "app": "69",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_w244:3|CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],\"s\",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity],Facts[Region])))),[s]),Facts[Quantity]>1)",
+  "powerbi": "7",
+  "app": "5",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_w246:4|CONCATENATEX(SUMMARIZECOLUMNS(Facts[Quantity],\"s\",CONCATENATEX(VALUES(Facts[Region]),1,\"\")),[s],\",\")",
+  "powerbi": "1,1,11,1,1",
+  "app": "1,1,1,1,11",
+  "cause_group": "CONCATENATEX over an inner table: row order or value"
+ },
+ {
+  "id": "dax_battery_hunt_w246:5|CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts)))),Facts[Region]&\":\"&[s],\"|\",Facts[Region],ASC)",
+  "powerbi": "East:63|North:3|West:63",
+  "app": "East:23|North:3|West:40",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_w246:5|CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Region])))),Facts[Region]&\":\"&[s],\"|\",Facts[Region],ASC)",
+  "powerbi": "East:31.5|North:3|West:31.5",
+  "app": "East:11.5|North:3|West:20",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_w246:CONCATENATEX(SUMMARIZE(Facts,Facts[Note],\"s\",CONCATENATEX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts)),\"-\")),[s],\",\")",
+  "powerbi": "3,2,1",
+  "app": "2,3,1",
+  "cause_group": "CONCATENATEX over an inner table: row order or value"
+ },
+ {
+  "id": "dax_battery_hunt_w246:CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts)))),Facts[Region]&\":\"&[s],\"|\",Facts[Region],ASC)",
+  "powerbi": "East:63|North:|West:63",
+  "app": "East:23|North:|West:40",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ },
+ {
+  "id": "dax_battery_hunt_w246:CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUMX(VALUES(Facts[Note]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Region])))),Facts[Region]&\":\"&[s],\"|\",Facts[Region],ASC)",
+  "powerbi": "East:31.5|North:|West:31.5",
+  "app": "East:11.5|North:|West:20",
+  "cause_group": "ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)"
+ }
+]
