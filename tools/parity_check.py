@@ -209,6 +209,7 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
         return rows
 
     # Full replay: distribute chunks across a process pool
+    from concurrent.futures import ProcessPoolExecutor
     from multiprocessing import get_context
     tasks = []
     CHUNK_SIZE = 2500
@@ -227,12 +228,17 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
                 chunk = items[i:i + CHUNK_SIZE]
                 tasks.append((name, chunk, tables, True, known))
 
-    workers = int(os.environ.get("PARITY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
+    if os.environ.get("PYTEST_XDIST_WORKER"):
+        workers = int(os.environ.get("PARITY_WORKERS", 2))
+    else:
+        workers = int(os.environ.get("PARITY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
     try:
         ctx = get_context("fork")
-        with ctx.Pool(processes=workers) as pool:
-            results = pool.map(_replay_chunk, tasks)
-    except Exception:
+        with ProcessPoolExecutor(max_workers=workers, mp_context=ctx) as executor:
+            results = list(executor.map(_replay_chunk, tasks))
+    except Exception as err:
+        sys.stderr.write(f"tools/parity_check.py: replay_dax process pool failed ({err}); falling back to serial execution\n")
+        sys.stderr.flush()
         results = [_replay_chunk(t) for t in tasks]
 
     return [r for sub in results for r in sub]

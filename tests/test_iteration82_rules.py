@@ -34,6 +34,7 @@ def _replay(name: str) -> tuple[list[tuple[str, str, str, str]], int]:
 import pytest
 
 UM_ITEMS = json.loads((HERE / "fixtures_iter82_um.json").read_text())["items"]
+assert len(UM_ITEMS) > 600, f"UM_ITEMS fixture is too small: {len(UM_ITEMS)}"
 UM_CHUNKS = [UM_ITEMS[i:i + 150] for i in range(0, len(UM_ITEMS), 150)]
 
 
@@ -48,6 +49,9 @@ def test_unknown_member_saved_power_bi_answers(chunk: list[dict]) -> None:
 
 
 class UnknownMemberTests(unittest.TestCase):
+    def test_fixture_not_empty(self) -> None:
+        self.assertGreater(len(UM_ITEMS), 600)
+
     def check(self, cases: dict[str, str]) -> None:
         for expression, expected in cases.items():
             with self.subTest(expression=expression):
@@ -97,6 +101,7 @@ class UnknownMemberTests(unittest.TestCase):
 
 
 R10_ITEMS = json.loads((HERE / "fixtures_iter82_r10.json").read_text())["items"]
+assert len(R10_ITEMS) > 400, f"R10_ITEMS fixture is too small: {len(R10_ITEMS)}"
 R10_CHUNK_SIZE = 100
 R10_CHUNKS = [R10_ITEMS[i:i + R10_CHUNK_SIZE] for i in range(0, len(R10_ITEMS), R10_CHUNK_SIZE)]
 
@@ -112,6 +117,9 @@ def test_date_key_wipe_saved_power_bi_answers(chunk: list[dict]) -> None:
 
 
 class DateKeyWipeTests(unittest.TestCase):
+    def test_fixture_not_empty(self) -> None:
+        self.assertGreater(len(R10_ITEMS), 400)
+
     def test_replacing_a_date_key_wipes_the_other_filters_of_its_table(self) -> None:
         for expression, expected in {
             "CALCULATE(CALCULATE(COUNTROWS(CB_Cal),CB_Cal[Date]<=DATE(2023,6,30)),CB_Cal[Year]=2024)": "181",

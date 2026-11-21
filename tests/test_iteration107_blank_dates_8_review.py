@@ -36,9 +36,5 @@ def test_fresh_probes_on_another_table_match_or_are_refused(ds_name: str, rows: 
         dax.ROWS, dax.LOCAL_ROWS = saved
 
 
-class FreshProbesTest(unittest.TestCase):
-    pass
-
-
 if __name__ == "__main__":
     unittest.main()
