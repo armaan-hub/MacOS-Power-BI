@@ -9,7 +9,6 @@ a listed one whose answer changed, and a crash do.
 
 from __future__ import annotations
 
-import json
 import unittest
 
 from tools import parity_check
@@ -18,7 +17,7 @@ from tools import parity_check
 class ParityLedgerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.baseline = json.loads(parity_check.BASELINE.read_text())
+        cls.baseline = parity_check.load_baseline()
         dax_rows = parity_check.replay_dax()
         table_rows, cls.digests, _notes = parity_check.replay_tables()
         cls.results = dax_rows + table_rows

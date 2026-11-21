@@ -26,6 +26,7 @@ def gate(tmp_path, monkeypatch):
         (parity / f"{name}.json").write_text(json.dumps({"powerbi_version": "test", "frozen": "2026-11-17", "items": items}))
     monkeypatch.setattr(parity_check, "PARITY", parity)
     monkeypatch.setattr(parity_check, "BASELINE", parity / "baseline.json")
+    monkeypatch.setattr(parity_check, "BASELINE_GZ", parity / "baseline.json.gz")
     monkeypatch.setattr(parity_check, "LEDGER", tmp_path / "PARITY_LEDGER.md")
     monkeypatch.setattr(parity_check, "DAX_BATTERIES", list(NAMES))
     monkeypatch.setattr(parity_check, "TABLES", {})
@@ -70,6 +71,7 @@ def test_only_replays_named_file_in_full(gate):
 def test_sample_with_accept_is_refused_and_writes_nothing(gate, monkeypatch):
     assert _run(monkeypatch, "--sample", "3", "--accept") == 2
     assert not parity_check.BASELINE.exists()
+    assert not parity_check.BASELINE_GZ.exists()
     assert not parity_check.LEDGER.exists()
 
 
@@ -91,6 +93,7 @@ def test_sampled_run_does_not_create_or_modify_ledger_or_baseline(gate, monkeypa
     assert _run(monkeypatch, "--sample", "3") == 0
     assert parity_check.LEDGER.read_text() == before
     assert not parity_check.BASELINE.exists()
+    assert not parity_check.BASELINE_GZ.exists()
     out = capsys.readouterr().out.strip().splitlines()
     assert out[-1] == "PARITY GATE (SAMPLE) PASSED"
     assert "sampled 6 of 20 saved answers" in out
