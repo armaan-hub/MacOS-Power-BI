@@ -121,12 +121,19 @@ def power_bi(expressions: list[str], port_: str, chunk: int = 250) -> list[str]:
     raise RuntimeError(f"Power BI returned {len(answers)} answers for {len(expressions)} expressions after 3 tries")
 
 
-def local(expression: str) -> str:
+def local_rows(rows: list) -> list[dict]:
+    """Rows of a Facts table given as lists of text cells (empty text = blank) in the form the evaluator loads them."""
+    return [{h: (v if v != "" else None) for h, v in zip(HEADERS, row)} for row in rows]
+
+
+def local(expression: str, rows: list | None = None) -> str:
+    """The local evaluator's answer for `expression`; `rows` (text cells, as in ROWS) replaces the default Facts table."""
+    facts_rows = LOCAL_ROWS if rows is None else local_rows(rows)
     try:
         value = evaluate_measures(
-            [{"name": "Probe__", "expression": expression}], LOCAL_ROWS, HEADERS, "Facts", measure_names=["Probe__"],
+            [{"name": "Probe__", "expression": expression}], facts_rows, HEADERS, "Facts", measure_names=["Probe__"],
             table_context=[{
-                "id": "facts", "name": "Facts", "headers": HEADERS, "rows": LOCAL_ROWS,
+                "id": "facts", "name": "Facts", "headers": HEADERS, "rows": facts_rows,
                 "column_types": {"Sales": "decimal_number", "Quantity": "whole_number", "Region": "text", "Note": "text"},
             }],
             active_table_id="facts",

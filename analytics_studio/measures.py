@@ -23610,7 +23610,7 @@ def _evaluate_measures_once(
                         except MeasureError as part_error:
                             if any(marker in str(part_error) for marker in _UNTAKEN_BRANCH_ERRORS):
                                 raise
-                        except (DecimalException, OverflowError):
+                        except (DecimalException, OverflowError, KeyError):  # KeyError: a variable the branch itself declares, out of its scope
                             pass
             except (DecimalException, OverflowError):
                 pass
