@@ -31,7 +31,27 @@ def _replay(name: str) -> tuple[list[tuple[str, str, str, str]], int]:
     return failures, len(items)
 
 
+import pytest
+
+UM_ITEMS = json.loads((HERE / "fixtures_iter82_um.json").read_text())["items"]
+assert len(UM_ITEMS) > 600, f"UM_ITEMS fixture is too small: {len(UM_ITEMS)}"
+UM_CHUNKS = [UM_ITEMS[i:i + 150] for i in range(0, len(UM_ITEMS), 150)]
+
+
+@pytest.mark.parametrize("chunk", UM_CHUNKS)
+def test_unknown_member_saved_power_bi_answers(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = _answer(item["model"], item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["model"], item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} of {len(chunk)} differ from Power BI"
+
+
 class UnknownMemberTests(unittest.TestCase):
+    def test_fixture_not_empty(self) -> None:
+        self.assertGreater(len(UM_ITEMS), 600)
+
     def check(self, cases: dict[str, str]) -> None:
         for expression, expected in cases.items():
             with self.subTest(expression=expression):
@@ -79,13 +99,27 @@ class UnknownMemberTests(unittest.TestCase):
             "CALCULATE(SUM(ZO_Fact[Amt]),ALL(ZO_Dim))": "375",
         })
 
-    def test_saved_power_bi_answers(self) -> None:
-        failures, total = _replay("um")
-        self.assertEqual([], failures[:6], f"{len(failures)} of {total} differ from Power BI")
-        self.assertGreater(total, 600)
+
+R10_ITEMS = json.loads((HERE / "fixtures_iter82_r10.json").read_text())["items"]
+assert len(R10_ITEMS) > 400, f"R10_ITEMS fixture is too small: {len(R10_ITEMS)}"
+R10_CHUNK_SIZE = 100
+R10_CHUNKS = [R10_ITEMS[i:i + R10_CHUNK_SIZE] for i in range(0, len(R10_ITEMS), R10_CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", R10_CHUNKS)
+def test_date_key_wipe_saved_power_bi_answers(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = _answer(item["model"], item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["model"], item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} of {len(chunk)} differ from Power BI"
 
 
 class DateKeyWipeTests(unittest.TestCase):
+    def test_fixture_not_empty(self) -> None:
+        self.assertGreater(len(R10_ITEMS), 400)
+
     def test_replacing_a_date_key_wipes_the_other_filters_of_its_table(self) -> None:
         for expression, expected in {
             "CALCULATE(CALCULATE(COUNTROWS(CB_Cal),CB_Cal[Date]<=DATE(2023,6,30)),CB_Cal[Year]=2024)": "181",
@@ -106,11 +140,6 @@ class DateKeyWipeTests(unittest.TestCase):
         ):
             with self.subTest(expression=expression):
                 self.assertIn(cb_ours(expression), {"BLANK", "365"})
-
-    def test_saved_power_bi_answers(self) -> None:
-        failures, total = _replay("r10")
-        self.assertEqual([], failures[:6], f"{len(failures)} of {total} differ from Power BI")
-        self.assertGreater(total, 400)
 
 
 class ManyToManyAndOneToOneTests(unittest.TestCase):

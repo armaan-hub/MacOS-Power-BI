@@ -11,21 +11,29 @@ from pathlib import Path
 from tools import dax_oracle_diff as dax
 from tools.parity_check import status
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
+FIXTURE = json.loads((ROOT / "tests" / "fixtures_never10_review_alt.json").read_text())
+CHUNK_SIZE = 10000
+CHUNKS = []
+for ds_name, ds in sorted(FIXTURE["datasets"].items()):
+    ds_items = ds["items"]
+    rows = ds["rows"]
+    for i in range(0, len(ds_items), CHUNK_SIZE):
+        CHUNKS.append((ds_name, rows, ds_items[i:i + CHUNK_SIZE]))
 
 
-class FreshProbesTest(unittest.TestCase):
-    def test_fresh_probes_on_another_table_match_or_are_refused(self) -> None:
-        fixture = json.loads((ROOT / "tests" / "fixtures_never10_review_alt.json").read_text())
-        saved = (dax.ROWS, dax.LOCAL_ROWS)
-        try:
-            for dataset in fixture["datasets"].values():
-                dax.ROWS = [tuple(row) for row in dataset["rows"]]
-                dax.LOCAL_ROWS = [{h: (v if v != "" else None) for h, v in zip(dax.HEADERS, row)} for row in dax.ROWS]
-                wrong = [(item["expr"], item["powerbi"][:60]) for item in dataset["items"] if status(item["powerbi"], dax.local(item["expr"])) not in {"match", "gap-reject"}]
-                self.assertEqual([], wrong[:10])
-        finally:
-            dax.ROWS, dax.LOCAL_ROWS = saved
+@pytest.mark.parametrize("ds_name,rows,items", CHUNKS)
+def test_fresh_probes_on_another_table_match_or_are_refused(ds_name: str, rows: list, items: list[dict]) -> None:
+    saved = (dax.ROWS, dax.LOCAL_ROWS)
+    try:
+        dax.ROWS = [tuple(r) for r in rows]
+        dax.LOCAL_ROWS = [{h: (v if v != "" else None) for h, v in zip(dax.HEADERS, r)} for r in dax.ROWS]
+        wrong = [(item["expr"], item["powerbi"][:60]) for item in items if status(item["powerbi"], dax.local(item["expr"])) not in {"match", "gap-reject"}]
+        assert wrong == [], f"{len(wrong)} of {len(items)} failed in dataset {ds_name}"
+    finally:
+        dax.ROWS, dax.LOCAL_ROWS = saved
 
 
 if __name__ == "__main__":

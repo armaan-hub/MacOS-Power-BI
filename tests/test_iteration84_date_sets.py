@@ -42,6 +42,76 @@ KNOWN_REFUSALS = (
 )
 
 
+import pytest
+
+FRESH = json.loads((Path(__file__).parent / "fixtures_iter84_date_sets_fresh.json").read_text())["items"]
+
+C08_ITEMS = [it for it in ITEMS if it[3] == "C08"]
+C08_CHUNK_SIZE = 150
+C08_CHUNKS = [C08_ITEMS[i:i + C08_CHUNK_SIZE] for i in range(0, len(C08_ITEMS), C08_CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", C08_CHUNKS)
+def test_c08_first_last_nonblank(chunk: list) -> None:
+    bad = []
+    for model, expression, powerbi, tag in chunk:
+        answer = ours_for(model, expression)
+        state = status(powerbi, answer)
+        if state != "match":
+            bad.append((tag, model, expression, powerbi, answer, state))
+    wrong = [b for b in bad if b[5] != "gap-reject" or not any(text in b[4] for text in KNOWN_REFUSALS)]
+    shown = "\n".join(f"{m} {e}\n   power bi: {p}\n   ours: {a[:100]} [{s}]" for _t, m, e, p, a, s in wrong[:5])
+    assert wrong == [], f"C08: {len(wrong)} of {len(chunk)} differ from Power BI ({dict(Counter(b[5] for b in wrong))})\n{shown}"
+    assert len(bad) <= 0, f"C08: more refusals than the 0 known ones"
+
+
+FRESH_CHUNKS = [FRESH[i:i + 300] for i in range(0, len(FRESH), 300)]
+
+
+@pytest.mark.parametrize("chunk", FRESH_CHUNKS)
+def test_fresh_live_probes_every_probe_matches_or_is_refused(chunk: list) -> None:
+    wrong = []
+    for model, expression, powerbi, _tag in chunk:
+        answer = ours_for(model, expression)
+        if status(powerbi, answer) not in {"match", "gap-reject"}:
+            wrong.append((model, expression, powerbi, answer[:80]))
+    assert wrong == [], f"{len(wrong)} of {len(chunk)} differ from Power BI"
+
+
+C01_ITEMS = [it for it in ITEMS if it[3] == "C01"]
+C01_CHUNKS = [C01_ITEMS[i:i + 300] for i in range(0, len(C01_ITEMS), 300)]
+
+
+@pytest.mark.parametrize("chunk", C01_CHUNKS)
+def test_c01_first_last_start_end(chunk: list) -> None:
+    bad = []
+    for model, expression, powerbi, tag in chunk:
+        answer = ours_for(model, expression)
+        state = status(powerbi, answer)
+        if state != "match":
+            bad.append((tag, model, expression, powerbi, answer, state))
+    wrong = [b for b in bad if b[5] != "gap-reject" or not any(text in b[4] for text in KNOWN_REFUSALS)]
+    shown = "\n".join(f"{m} {e}\n   power bi: {p}\n   ours: {a[:100]} [{s}]" for _t, m, e, p, a, s in wrong[:5])
+    assert wrong == [], f"C01: {len(wrong)} of {len(chunk)} differ from Power BI ({dict(Counter(b[5] for b in wrong))})\n{shown}"
+
+
+C05_ITEMS = [it for it in ITEMS if it[3] == "C05"]
+C05_CHUNKS = [C05_ITEMS[i:i + 300] for i in range(0, len(C05_ITEMS), 300)]
+
+
+@pytest.mark.parametrize("chunk", C05_CHUNKS)
+def test_c05_next_previous(chunk: list) -> None:
+    bad = []
+    for model, expression, powerbi, tag in chunk:
+        answer = ours_for(model, expression)
+        state = status(powerbi, answer)
+        if state != "match":
+            bad.append((tag, model, expression, powerbi, answer, state))
+    wrong = [b for b in bad if b[5] != "gap-reject" or not any(text in b[4] for text in KNOWN_REFUSALS)]
+    shown = "\n".join(f"{m} {e}\n   power bi: {p}\n   ours: {a[:100]} [{s}]" for _t, m, e, p, a, s in wrong[:5])
+    assert wrong == [], f"C05: {len(wrong)} of {len(chunk)} differ from Power BI ({dict(Counter(b[5] for b in wrong))})\n{shown}"
+
+
 class SavedPowerBiAnswers(unittest.TestCase):
     def check(self, cluster: str, allowed_refusals: int) -> None:
         bad = failures(cluster)
@@ -51,38 +121,24 @@ class SavedPowerBiAnswers(unittest.TestCase):
         self.assertEqual([], wrong, f"{cluster}: {len(wrong)} of {total} differ from Power BI ({dict(Counter(b[5] for b in wrong))})\n{shown}")
         self.assertLessEqual(len(bad), allowed_refusals, f"{cluster}: more refusals than the {allowed_refusals} known ones")
 
-    def test_c01_first_last_start_end(self) -> None:
+    def test_c01_overall_refusals_bounded(self) -> None:
         self.check("C01", 2)
 
     def test_c04_opening_closing_balances(self) -> None:
         self.check("C04", 0)
 
-    def test_c05_next_previous(self) -> None:
+    def test_c05_overall_refusals_bounded(self) -> None:
         self.check("C05", 54)
 
     def test_c07_fact_date_columns(self) -> None:
         self.check("C07", 3)
 
-    def test_c08_first_last_nonblank(self) -> None:
-        self.check("C08", 0)
-
     def test_c11_date_overflow_saturates(self) -> None:
         self.check("C11", 0)
 
 
-FRESH = json.loads((Path(__file__).parent / "fixtures_iter84_date_sets_fresh.json").read_text())["items"]
-
-
 class FreshLiveProbes(unittest.TestCase):
     """Probes written after the engine (random nesting, VAR-held sets, scalar use, iterators): never a wrong number."""
-
-    def test_every_probe_matches_or_is_refused(self) -> None:
-        wrong = []
-        for model, expression, powerbi, _tag in FRESH:
-            answer = ours_for(model, expression)
-            if status(powerbi, answer) not in {"match", "gap-reject"}:
-                wrong.append((model, expression, powerbi, answer[:80]))
-        self.assertEqual([], wrong[:5], f"{len(wrong)} of {len(FRESH)} differ from Power BI")
 
     def test_known_shapes(self) -> None:
         for model, expression, expected in (

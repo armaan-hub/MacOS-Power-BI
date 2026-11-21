@@ -18,6 +18,23 @@ from tools.parity_check import status
 FIXTURE = json.loads((Path(__file__).parent / "fixtures_critic3_cb.json").read_text())
 
 
+import pytest
+
+CRITIC3_CB_ITEMS = FIXTURE["items"]
+CRITIC3_CB_CHUNK_SIZE = 100
+CRITIC3_CB_CHUNKS = [CRITIC3_CB_ITEMS[i:i + CRITIC3_CB_CHUNK_SIZE] for i in range(0, len(CRITIC3_CB_ITEMS), CRITIC3_CB_CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", CRITIC3_CB_CHUNKS)
+def test_saved_critic_answers(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = ours(item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} of {len(chunk)} differ from Power BI"
+
+
 class AllSelectedInsideFactIterationTests(unittest.TestCase):
     """A fact-row transition also filters Dim and Cal; ALLSELECTED(table) must not keep those transition filters."""
 
@@ -33,14 +50,6 @@ class AllSelectedInsideFactIterationTests(unittest.TestCase):
             "AVERAGEX(CB_Fact,CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact))))": "13",
             'CALCULATE(SUMX(ADDCOLUMNS(CB_Fact,"x",CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact)))),[x]),CB_Dim[Cat]="A")': "64",
         })
-
-    def test_saved_critic_answers(self) -> None:
-        failures = []
-        for item in FIXTURE["items"]:
-            answer = ours(item["expr"])
-            if status(item["powerbi"], answer) != "match":
-                failures.append((item["expr"], item["powerbi"], answer))
-        self.assertEqual([], failures[:6], f"{len(failures)} of {len(FIXTURE['items'])} differ from Power BI")
 
 
 class DerivedFactTablesReachTheOneSideTests(unittest.TestCase):
@@ -68,19 +77,23 @@ MODEL_FIXTURE = json.loads((Path(__file__).parent / "fixtures_critic3_models.jso
 # partner in W) is kept by Power BI (RE-D: a 1:1 table has its own blank member), and the engine does not model that yet.
 KNOWN_ONE_TO_ONE_GAPS = {("ZM", "COUNTX(ZM_F,CALCULATE(COUNTROWS(VALUES(ZM_F2))))")}
 
+CRITIC3_MODELS_ITEMS = [it for it in MODEL_FIXTURE["items"] if (it["model"], it["expr"]) not in KNOWN_ONE_TO_ONE_GAPS]
+CRITIC3_MODELS_CHUNK_SIZE = 100
+CRITIC3_MODELS_CHUNKS = [CRITIC3_MODELS_ITEMS[i:i + CRITIC3_MODELS_CHUNK_SIZE] for i in range(0, len(CRITIC3_MODELS_ITEMS), CRITIC3_MODELS_CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", CRITIC3_MODELS_CHUNKS)
+def test_critic_three_models_saved_power_bi_answers(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = ours_for(item["model"], item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["model"], item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} of {len(chunk)} differ from Power BI"
+
 
 class CriticThreeModelsTests(unittest.TestCase):
     """The Critic's other models (bidirectional star, orphan keys, snowflake with two facts, one-to-one): saved Power BI answers."""
-
-    def test_saved_power_bi_answers(self) -> None:
-        failures = []
-        for item in MODEL_FIXTURE["items"]:
-            if (item["model"], item["expr"]) in KNOWN_ONE_TO_ONE_GAPS:
-                continue
-            answer = ours_for(item["model"], item["expr"])
-            if status(item["powerbi"], answer) != "match":
-                failures.append((item["model"], item["expr"], item["powerbi"], answer))
-        self.assertEqual([], failures[:6], f"{len(failures)} of {len(MODEL_FIXTURE['items'])} differ from Power BI")
 
     def test_fixtures_are_not_vacuous(self) -> None:
         self.assertGreater(len(MODEL_FIXTURE["items"]), 300)

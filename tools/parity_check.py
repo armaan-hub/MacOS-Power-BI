@@ -172,25 +172,76 @@ def saved_total() -> int:
     return total
 
 
-def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None = None) -> list[dict]:
+def _replay_chunk(task: tuple) -> list[dict]:
+    name, items, tables, exists, known = task
+    if not exists:
+        return [{"group": name, "expr": "", "powerbi": "", "ours": "", "status": "NOT-FROZEN", "id": name}]
     rows = []
+    for item in items:
+        table = item.get("facts")
+        ours = dax.local(item["expr"]) if table is None else dax.local(item["expr"], tables[table])
+        row_id = f"{name}:{table}|{item['expr']}" if table is not None else f"{name}:{item['expr']}"
+        rows.append({"group": name, "expr": item["expr"], "powerbi": item["powerbi"], "ours": ours,
+                     "status": classify(row_id, item["powerbi"], ours, known), "id": row_id})
+    return rows
+
+
+def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None = None) -> list[dict]:
     full = set(only or [])
+    known = load_known_diffs()
+
+    # When running a sampled or narrow filter, sequential execution is instantaneous.
+    if sample is not None or (only and len(only) <= 3):
+        rows = []
+        for name in DAX_BATTERIES:
+            file = PARITY / f"{name}.json"
+            if not file.exists():
+                rows.append({"group": name, "expr": "", "powerbi": "", "ours": "", "status": "NOT-FROZEN", "id": name})
+                continue
+            battery = json.loads(file.read_text())
+            tables = battery.get("facts_tables", {})
+            for item in _pick(name, battery["items"], None if name in full else sample, seed):
+                table = item.get("facts")
+                ours = dax.local(item["expr"]) if table is None else dax.local(item["expr"], tables[table])
+                row_id = f"{name}:{table}|{item['expr']}" if table is not None else f"{name}:{item['expr']}"
+                rows.append({"group": name, "expr": item["expr"], "powerbi": item["powerbi"], "ours": ours,
+                             "status": classify(row_id, item["powerbi"], ours, known), "id": row_id})
+        return rows
+
+    # Full replay: distribute chunks across a process pool
+    from concurrent.futures import ProcessPoolExecutor
+    from multiprocessing import get_context
+    tasks = []
+    CHUNK_SIZE = 2500
     for name in DAX_BATTERIES:
         file = PARITY / f"{name}.json"
         if not file.exists():
-            rows.append({"group": name, "expr": "", "powerbi": "", "ours": "", "status": "NOT-FROZEN", "id": name})
+            tasks.append((name, None, None, False, known))
             continue
         battery = json.loads(file.read_text())
+        items = _pick(name, battery["items"], None if name in full else sample, seed)
         tables = battery.get("facts_tables", {})
-        known = load_known_diffs()
-        for item in _pick(name, battery["items"], None if name in full else sample, seed):
-            table = item.get("facts")
-            ours = dax.local(item["expr"]) if table is None else dax.local(item["expr"], tables[table])
-            # an item on its own Facts table is locked under an id that names the table, so one expression can sit on several tables
-            row_id = f"{name}:{table}|{item['expr']}" if table is not None else f"{name}:{item['expr']}"
-            rows.append({"group": name, "expr": item["expr"], "powerbi": item["powerbi"], "ours": ours,
-                         "status": classify(row_id, item["powerbi"], ours, known), "id": row_id})
-    return rows
+        if len(items) <= CHUNK_SIZE:
+            tasks.append((name, items, tables, True, known))
+        else:
+            for i in range(0, len(items), CHUNK_SIZE):
+                chunk = items[i:i + CHUNK_SIZE]
+                tasks.append((name, chunk, tables, True, known))
+
+    if os.environ.get("PYTEST_XDIST_WORKER"):
+        workers = int(os.environ.get("PARITY_REPLAY_WORKERS", 8))
+    else:
+        workers = int(os.environ.get("PARITY_REPLAY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
+    try:
+        ctx = get_context("fork")
+        with ProcessPoolExecutor(max_workers=workers, mp_context=ctx) as executor:
+            results = list(executor.map(_replay_chunk, tasks))
+    except Exception as err:
+        sys.stderr.write(f"tools/parity_check.py: replay_dax process pool failed ({err}); falling back to serial execution\n")
+        sys.stderr.flush()
+        results = [_replay_chunk(t) for t in tasks]
+
+    return [r for sub in results for r in sub]
 
 
 def import_digest(rows: list[dict], headers: list[str]) -> str:
@@ -266,8 +317,8 @@ def _start_pytest(env: dict) -> subprocess.Popen:
     import os
     command = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rfE"]
     if importlib.util.find_spec("xdist"):
-        workers = int(os.environ.get("PARITY_WORKERS", max(1, min(12, (os.cpu_count() or 2) - 4))))
-        command += ["-n", str(workers)]
+        workers = int(os.environ.get("PARITY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
+        command += ["-n", str(workers), "--dist", "worksteal"]
     log = tempfile.TemporaryFile(mode="w+")  # a file, not a pipe: a full pipe would stall the suite while the answers replay
     process = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT, text=True)
     process.log = log

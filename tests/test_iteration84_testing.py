@@ -22,6 +22,22 @@ def load(name: str, key: str = "items", wanted: tuple[str, ...] | None = None) -
     return [r for r in items if wanted is None or r[4] in wanted]
 
 
+import pytest
+
+TESTING84_FRESH = load("fixtures_testing84_fresh.json")
+TESTING84_CHUNKS = [TESTING84_FRESH[i:i + 300] for i in range(0, len(TESTING84_FRESH), 300)]
+
+
+@pytest.mark.parametrize("chunk", TESTING84_CHUNKS)
+def test_fresh_probes_have_no_wrong_answer(chunk: list[list]) -> None:
+    bad = []
+    for model, expr, powerbi, _old, _status in chunk:
+        ours = ours_for(model, expr)
+        if status(powerbi, ours) not in ("match", "gap-reject"):
+            bad.append((model, expr, powerbi[:80], ours[:80]))
+    assert bad == []
+
+
 class TestingAgentDiffs(unittest.TestCase):
     def check(self, items: list[list]) -> None:
         bad = []
@@ -38,9 +54,6 @@ class TestingAgentDiffs(unittest.TestCase):
 
     def test_the_minimal_reproducers_are_match_or_refused(self) -> None:
         self.check(load("fixtures_testing84.json", "reproducers"))
-
-    def test_fresh_probes_have_no_wrong_answer(self) -> None:
-        self.check(load("fixtures_testing84_fresh.json"))
 
 
 if __name__ == "__main__":

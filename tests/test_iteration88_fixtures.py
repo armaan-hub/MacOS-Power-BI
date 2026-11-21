@@ -67,6 +67,23 @@ def fresh_states() -> list[tuple[str, str, str, str, str, str]]:
     return _STATES
 
 
+import pytest
+
+CHUNK_SIZE = 1000
+FRESH_CHUNKS = [FRESH[i:i + CHUNK_SIZE] for i in range(0, len(FRESH), CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", FRESH_CHUNKS)
+def test_fresh_probes_match_or_are_refused(chunk: list[list]) -> None:
+    wrong = []
+    for model, expr, powerbi, _old, _state in chunk:
+        ours = _ours(model, expr)
+        state = status(powerbi, ours)
+        if state not in {"match", "gap-reject"}:
+            wrong.append((state, model, expr[:160], powerbi[:40], ours[:60]))
+    assert wrong == [], f"{len(wrong)} of {len(chunk)} fresh probes answered wrongly ({dict(Counter(w[0] for w in wrong))})"
+
+
 class Iteration88Answers(unittest.TestCase):
     def test_saved_power_bi_answers_now_match(self) -> None:
         wrong = []
@@ -75,11 +92,6 @@ class Iteration88Answers(unittest.TestCase):
             if status(row["powerbi"], ours) != "match":
                 wrong.append((row["expr"], row["powerbi"][:60], ours[:60]))
         self.assertEqual([], wrong[:5], f"{len(wrong)} of {len(SAVED)} saved answers do not match")
-
-    def test_fresh_probes_match_or_are_refused(self) -> None:
-        wrong = [(state, model, expr[:160], powerbi[:40], ours[:60]) for model, expr, powerbi, _old, ours, state in fresh_states()
-                 if state not in {"match", "gap-reject"}]
-        self.assertEqual([], wrong[:5], f"{len(wrong)} of {len(FRESH)} fresh probes answered wrongly ({dict(Counter(w[0] for w in wrong))})")
 
     def test_most_fresh_probes_are_answered(self) -> None:
         answered = sum(1 for *_rest, state in fresh_states() if state == "match")

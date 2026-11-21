@@ -40,17 +40,30 @@ def wrong_answers(rows: list[dict]) -> list[tuple[str, str, str, str, str]]:
     return out
 
 
+import pytest
+
+CHUNK_SIZE = 100
+FRESH_CHUNKS = [FRESH[i:i + CHUNK_SIZE] for i in range(0, len(FRESH), CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", FRESH_CHUNKS)
+def test_fresh_probes_match_or_are_refused(chunk: list[dict]) -> None:
+    wrong = wrong_answers(chunk)
+    shown = "\n".join(f"{m} {e}\n   power bi: {p}\n   ours: {a} [{s}]" for m, e, p, a, s in wrong[:5])
+    assert wrong == [], f"{len(wrong)} of {len(chunk)} fresh probes answered wrongly\n{shown}"
+
+
+ROWS_CHUNKS = [ROWS[i:i + 150] for i in range(0, len(ROWS), 150)]
+
+
+@pytest.mark.parametrize("chunk", ROWS_CHUNKS)
+def test_critic_rows_match_or_are_refused(chunk: list[dict]) -> None:
+    wrong = wrong_answers(chunk)
+    shown = "\n".join(f"{m} {e}\n   power bi: {p}\n   ours: {a} [{s}]" for m, e, p, a, s in wrong[:5])
+    assert wrong == [], f"{len(wrong)} of {len(chunk)} critic rows answered wrongly ({dict(Counter(w[4] for w in wrong))})\n{shown}"
+
+
 class CriticFindings(unittest.TestCase):
-    def test_critic_rows_match_or_are_refused(self) -> None:
-        wrong = wrong_answers(ROWS)
-        shown = "\n".join(f"{m} {e}\n   power bi: {p}\n   ours: {a} [{s}]" for m, e, p, a, s in wrong[:5])
-        self.assertEqual([], wrong, f"{len(wrong)} of {len(ROWS)} critic rows answered wrongly ({dict(Counter(w[4] for w in wrong))})\n{shown}")
-
-    def test_fresh_probes_match_or_are_refused(self) -> None:
-        wrong = wrong_answers(FRESH)
-        shown = "\n".join(f"{m} {e}\n   power bi: {p}\n   ours: {a} [{s}]" for m, e, p, a, s in wrong[:5])
-        self.assertEqual([], wrong, f"{len(wrong)} of {len(FRESH)} fresh probes answered wrongly\n{shown}")
-
     def test_clock_functions_follow_the_system_date(self) -> None:
         """The clock-dependent rows skipped above: TODAY() is today's serial number and moves with plain date arithmetic."""
         today = date.today()

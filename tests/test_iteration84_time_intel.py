@@ -47,6 +47,69 @@ def failures_in(cluster: str, expect: str) -> list[tuple[str, str, str, str]]:
     return bad
 
 
+import pytest
+
+GATE_ITEMS = [it for it in ITEMS if it["cluster"] == "GATE"]
+CHUNK_SIZE = 100
+GATE_CHUNKS = [GATE_ITEMS[i:i + CHUNK_SIZE] for i in range(0, len(GATE_ITEMS), CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", GATE_CHUNKS)
+def test_gate_time_intelligence_inside_iterators(chunk: list[dict]) -> None:
+    bad_match = []
+    bad_gap = []
+    for item in chunk:
+        got = answer(item)
+        verdict = status(item["powerbi"], got)
+        if item["expect"] == "match" and verdict != "match":
+            bad_match.append((item["model"], item["expr"], item["powerbi"], got))
+        if item["expect"] == "gap" and verdict not in {"match", "gap-reject"}:
+            bad_gap.append((item["model"], item["expr"], item["powerbi"], got))
+    total_match = sum(1 for item in chunk if item["expect"] == "match")
+    assert bad_match == [], f"GATE: {len(bad_match)} of {total_match} differ from Power BI"
+    assert bad_gap == [], f"GATE: a refused shape now answers differently from Power BI"
+
+
+DIP_ITEMS = [it for it in ITEMS if it["cluster"] == "DIP"]
+DIP_CHUNKS = [DIP_ITEMS[i:i + 300] for i in range(0, len(DIP_ITEMS), 300)]
+
+
+@pytest.mark.parametrize("chunk", DIP_CHUNKS)
+def test_datesinperiod_scalar_start(chunk: list[dict]) -> None:
+    bad_match = []
+    bad_gap = []
+    for item in chunk:
+        got = answer(item)
+        verdict = status(item["powerbi"], got)
+        if item["expect"] == "match" and verdict != "match":
+            bad_match.append((item["model"], item["expr"], item["powerbi"], got))
+        if item["expect"] == "gap" and verdict not in {"match", "gap-reject"}:
+            bad_gap.append((item["model"], item["expr"], item["powerbi"], got))
+    total_match = sum(1 for item in chunk if item["expect"] == "match")
+    assert bad_match == [], f"DIP: {len(bad_match)} of {total_match} differ from Power BI"
+    assert bad_gap == [], f"DIP: a refused shape now answers differently from Power BI"
+
+
+ZS_ITEMS = [it for it in ITEMS if it["cluster"] == "ZS"]
+ZS_CHUNKS = [ZS_ITEMS[i:i + 200] for i in range(0, len(ZS_ITEMS), 200)]
+
+
+@pytest.mark.parametrize("chunk", ZS_CHUNKS)
+def test_zs_shortest_path(chunk: list[dict]) -> None:
+    bad_match = []
+    bad_gap = []
+    for item in chunk:
+        got = answer(item)
+        verdict = status(item["powerbi"], got)
+        if item["expect"] == "match" and verdict != "match":
+            bad_match.append((item["model"], item["expr"], item["powerbi"], got))
+        if item["expect"] == "gap" and verdict not in {"match", "gap-reject"}:
+            bad_gap.append((item["model"], item["expr"], item["powerbi"], got))
+    total_match = sum(1 for item in chunk if item["expect"] == "match")
+    assert bad_match == [], f"ZS: {len(bad_match)} of {total_match} differ from Power BI"
+    assert bad_gap == [], f"ZS: a refused shape now answers differently from Power BI"
+
+
 class Iteration84Tests(unittest.TestCase):
     def check(self, cluster: str) -> None:
         bad = failures_in(cluster, "match")
@@ -74,12 +137,6 @@ class Iteration84Tests(unittest.TestCase):
     def test_argument_timing_and_date_key_wipe(self) -> None:
         self.check("B23")
 
-    def test_gate_time_intelligence_inside_iterators(self) -> None:
-        self.check("GATE")
-
-    def test_datesinperiod_scalar_start(self) -> None:
-        self.check("DIP")
-
     def test_total_td_argument_forms(self) -> None:
         self.check("TYTD")
 
@@ -91,9 +148,6 @@ class Iteration84Tests(unittest.TestCase):
 
     def test_datesbetween_and_fact_date_columns(self) -> None:
         self.check("G4")
-
-    def test_zs_shortest_path(self) -> None:
-        self.check("ZS")
 
     def test_other_shapes_never_answer_differently(self) -> None:
         self.check("OTHER")
