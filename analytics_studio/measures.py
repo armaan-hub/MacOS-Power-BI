@@ -11121,19 +11121,22 @@ def _evaluate_measures_once(
                 raise MeasureError("ALLSELECTED of a table that a TREATAS argument reaches through a bidirectional relationship is not supported in the local engine.")
             if marked_roots:
                 rows = [row for row in full if id(row) in direct_ids]
-        if table_id in eff_group_meta and not eff_rank_table and not any(held_table == table_id for held_table, _column in eff_touched):
+        if table_id in eff_group_meta and not eff_rank_table:
             # Task 246 (measured): inside a column added by SUMMARIZE, ALLSELECTED(X) sees the rows SUMMARIZE iterates (its input table, in the filters outside it), also those the
             # outer filters on columns other than X select (CALCULATE(SUMX(SUMMARIZE(Facts, Facts[Region], "s", COUNTROWS(ALLSELECTED(Facts[Note]))), [s]), Facts[Quantity] > 1))
+            group_meta = eff_group_meta[table_id]
             layer_sets = [
                 frozenset(
                     index for index, base_row in enumerate(source_context["rows"])
                     if row_key(typed_cell(source_context, column, base_row.get(column)) for column in layer.columns) in layer.tuples
                 )
-                for layer in eff_group_meta[table_id]["layers"]
+                for layer in group_meta["layers"]
                 if layer.table == table_id and wanted & {column.casefold() for column in layer.columns}
             ]
-            if layer_sets:
+            keep_layers: Any = None
+            if layer_sets and not any(held_table == table_id for held_table, _column in eff_touched):
                 keep_layers = set.intersection(*(set(layer_rows) for layer_rows in layer_sets))
+            if keep_layers is not None:
                 visible_layers = {id(row) for row in rows}
                 rows = [row for position, row in enumerate(full) if position in keep_layers and id(row) in visible_layers]
         allowed = {id(row) for row in rows}
@@ -26140,6 +26143,21 @@ def _evaluate_measures_once(
                 topn_walk_under_filter.discard(id(walked_table))
             if context.get("order_undecided") and len(iteration_rows) > 1 and not order_spec:
                 raise MeasureError("The row order of this table for a key space between the measured sizes is not modelled in the local engine.")
+            if (
+                len(iteration_rows) > 1 and not order_spec and walked_table[0] in {"call", "table_call"} and walked_table[1] in {"VALUES", "DISTINCT"}
+                and (eff_group_meta or any(eff_group_keys.values())) and len(context.get("headers", ())) == 1 and (context.get("lineage") or {}).get(context["headers"][0])
+            ):
+                # Task 246 (measured, live Power BI): inside a column added by SUMMARIZE the values of VALUES(column) come in an order that is neither the sorted one nor the one of the
+                # first appearance in every group (Paid rows with Quantity 2, 1, 0 give "2,1,0" where the East rows 2, 1, 5 give "1,2,5"): it is answered only where the two orders agree
+                walk_header = context["headers"][0]
+                walk_base, walk_column = context["lineage"][walk_header]
+                first_seen_at: dict[Any, int] = {}
+                for position, base in enumerate(walk_base["rows"]):
+                    held_value = base.get(walk_column)
+                    first_seen_at.setdefault(cell_key(ascii_fold(held_value) if isinstance(held_value, str) else held_value), position)
+                seen_order = [first_seen_at.get(cell_key(ascii_fold(row[walk_header]) if isinstance(row[walk_header], str) else row[walk_header]), -1) for row in iteration_rows]
+                if seen_order != sorted(seen_order):
+                    raise MeasureError("CONCATENATEX of VALUES(column) without an order inside a column added by a table function walks the values in an order the local engine does not model.")
             entries = []
             if len(iteration_rows) > 1 and walked_table[:2] != ("call", "TABLEOF") and _contains_function_call(walked_table, "TABLEOF"):
                 if walked_table[0] in {"call", "table_call"} and walked_table[1] in {"UNION", "DISTINCT"}:
