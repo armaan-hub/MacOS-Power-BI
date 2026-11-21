@@ -6465,6 +6465,67 @@ def _nested_builder_refusal(function: str, arguments: tuple[Any, ...]) -> str | 
     return None
 
 
+_FORMAT_ROW_ITERATORS = frozenset({"CONCATENATEX", "MAXX", "MINX", "SUMX", "AVERAGEX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "GEOMEANX", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS"})
+
+
+def _text_valued(expression: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> bool:
+    """Task 246: the expression is text whatever the data (a CONCATENATEX is text; a conditional only when every result branch is)."""
+    if not isinstance(expression, tuple) or not expression:
+        return False
+    if expression[0] == "call" and str(expression[1]).upper() == "IFERROR" and len(expression[2]) == 2:
+        return all(_text_valued(branch, columns, variables) for branch in expression[2])
+    if expression[0] == "call" and str(expression[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "CALCULATE"}:
+        branches = _variant_result_branches(expression)
+        if branches and not (len(branches) == 1 and branches[0] is expression):
+            return all(_text_valued(branch, columns, variables) for branch in branches)
+    if expression[0] == "call" and str(expression[1]).upper() == "CONCATENATEX":
+        return True
+    return _static_type(expression, columns, variables) == "text"
+
+
+def _added_text_columns(table: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> set[str]:
+    """Task 246: the casefolded names of the columns that ADDCOLUMNS / SELECTCOLUMNS / SUMMARIZE / SUMMARIZECOLUMNS add to the table and that are text in every branch."""
+    if not isinstance(table, tuple) or len(table) < 3 or table[0] not in {"call", "table_call"}:
+        return set()
+    function, arguments = str(table[1]).upper(), table[2]
+    if table[0] == "table_call" or not isinstance(arguments, (tuple, list)) or not arguments:
+        return set()
+    held: set[str] = set()
+    if function in {"ADDCOLUMNS", "SUMMARIZE", "SELECTCOLUMNS", "SUMMARIZECOLUMNS"}:
+        if function in {"ADDCOLUMNS", "SUMMARIZE"}:
+            held |= _added_text_columns(arguments[0], columns, variables)
+        scope = {**columns, "": _static_table_columns(arguments[0], columns, variables)} if function != "SUMMARIZECOLUMNS" else columns
+        first_name = 1 if function in {"ADDCOLUMNS", "SELECTCOLUMNS"} else next((i for i, item in enumerate(arguments) if item[0] == "string"), len(arguments))
+        for position in range(first_name, len(arguments) - 1, 2):
+            if arguments[position][0] == "string" and _text_valued(arguments[position + 1], scope, variables):
+                held.add(str(arguments[position][1]).casefold())
+        return held
+    if function in {"FILTER", "CALCULATETABLE", "KEEPFILTERS"}:
+        return _added_text_columns(arguments[0], columns, variables)
+    if function == "TOPN" and len(arguments) >= 2:
+        return _added_text_columns(arguments[1], columns, variables)
+    return set()
+
+
+def _format_of_added_text_column(expression: Any, added: set[str]) -> bool:
+    """Task 246 (measured, 3 Facts tables): FORMAT(value, format) is a "Type mismatch" error in Power BI when value is a text column added to the iterated table
+    (or a conditional with such a column as a result branch), whatever the format string; FORMAT of a text built from the column (& , LEFT) or of a stored text column is not."""
+    for held in _walk_calls(expression):
+        if held[0] == "call" and str(held[1]).upper() == "FORMAT" and held[2]:
+            stack = [held[2][0]]
+            while stack:
+                value = stack.pop()
+                if not isinstance(value, tuple) or not value:
+                    continue
+                if value[0] == "reference" and not value[1] and str(value[2]).casefold() in added:
+                    return True
+                if value[0] == "call" and str(value[1]).upper() == "IFERROR":
+                    stack.extend(value[2])
+                elif value[0] == "call" and str(value[1]).upper() in {"IF", "IF.EAGER", "SWITCH", "COALESCE"}:
+                    stack.extend(_variant_result_branches(value))
+    return False
+
+
 def _allselected_columns_outside(node: Any, headers: Iterable[str]) -> bool:
     """Task 245: every ALLSELECTED in this expression names only columns that are not among the headers (no ALLSELECTED at all counts too)."""
     held = {str(header).casefold() for header in headers}
@@ -9165,6 +9226,22 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
             else:
                 i += 1
         return result
+    if fn == "SUMMARIZECOLUMNS" and args:
+        # Task 246 (measured): SUMX / AVERAGEX / PRODUCTX of a column added by SUMMARIZECOLUMNS that is text in every branch is an error at compile time,
+        # also in an IF / SWITCH branch that is not taken (as it is for ADDCOLUMNS / SUMMARIZE / SELECTCOLUMNS above)
+        result = {}
+        position = 0
+        while position < len(args):
+            arg = args[position]
+            if arg[0] == "string" and position + 1 < len(args):
+                result[str(arg[1]).casefold()] = _static_numeric_type(args[position + 1], columns, variables) or ""
+                position += 2
+                continue
+            if arg[0] == "reference" and len(arg) > 2 and arg[2] is not None:
+                col_name = str(arg[2]).casefold()
+                result[col_name] = columns.get(str(arg[1] or "").casefold(), {}).get(col_name) or ""
+            position += 1
+        return result
     if fn in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"} and args and all(isinstance(arg, tuple) and arg and arg[0] == "reference" and len(arg) > 2 and arg[2] is not None for arg in args):
         typed: dict[str, str] = {}  # Task 160: ALL(col1, col2, ..) is one column for each argument, not the whole table
         for arg in args:
@@ -10313,6 +10390,10 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                     f"DAX comparison operations do not support comparing values of type {_type_display(subject)} with values of type {_type_display(value_type)}. "
                     "Consider using the VALUE or FORMAT function to convert one of the values."
                 )  # live Power BI (Task 13 review): SWITCH(TRUE(), "x", ...) also over an empty table, and IFERROR does not catch it
+    if node[0] == "call" and node[1] in _FORMAT_ROW_ITERATORS and len(node[2]) >= 2:
+        added_text = _added_text_columns(node[2][0], columns, variables)
+        if added_text and any(_format_of_added_text_column(expression, added_text) for expression in node[2][1:]):
+            raise MeasureError("FORMAT of a text column added to the iterated table is a type mismatch error in Power BI; the local engine does not evaluate it.")  # Task 246
     if node[0] == "in" and columns:
         _reject_mismatched_row_values(node[2], [node[1]], columns, variables)  # Task 160: v IN table compares v with the one column, as CONTAINSROW does
     if node[0] == "comparison" and node[1] == "=" and columns is not None:
