@@ -18,17 +18,24 @@ from tools.parity_check import status
 FIXTURE = json.loads((Path(__file__).parent / "fixtures_relatedtable.json").read_text())
 
 
-class SavedPowerBiAnswersTests(unittest.TestCase):
-    def test_every_matching_item_still_matches(self) -> None:
-        failures = []
-        for item in FIXTURE["items"]:
-            if item["status"] != "match":
-                continue
-            answer = ours_for(item["model"], item["expr"])
-            if status(item["powerbi"], answer) != "match":
-                failures.append((item["expr"], item["powerbi"], answer))
-        self.assertEqual([], failures[:6], f"{len(failures)} saved Power BI answers regressed")
+import pytest
 
+MATCHING_ITEMS = [item for item in FIXTURE["items"] if item["status"] == "match"]
+MATCHING_CHUNK_SIZE = 50
+MATCHING_CHUNKS = [MATCHING_ITEMS[i:i + MATCHING_CHUNK_SIZE] for i in range(0, len(MATCHING_ITEMS), MATCHING_CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", MATCHING_CHUNKS)
+def test_every_matching_item_still_matches(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = ours_for(item["model"], item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} saved Power BI answers regressed"
+
+
+class SavedPowerBiAnswersTests(unittest.TestCase):
     def test_pending_items_do_not_crash_or_reject_the_function(self) -> None:
         for item in [i for i in FIXTURE["items"] if i["status"] == "pending"][::6]:
             answer = ours_for(item["model"], item["expr"])

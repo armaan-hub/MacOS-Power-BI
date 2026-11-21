@@ -211,7 +211,7 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
     # Full replay: distribute chunks across a process pool
     from multiprocessing import get_context
     tasks = []
-    CHUNK_SIZE = 5000
+    CHUNK_SIZE = 2500
     for name in DAX_BATTERIES:
         file = PARITY / f"{name}.json"
         if not file.exists():
@@ -311,8 +311,8 @@ def _start_pytest(env: dict) -> subprocess.Popen:
     import os
     command = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rfE"]
     if importlib.util.find_spec("xdist"):
-        workers = int(os.environ.get("PARITY_WORKERS", max(1, min(12, (os.cpu_count() or 2) - 4))))
-        command += ["-n", str(workers)]
+        workers = int(os.environ.get("PARITY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
+        command += ["-n", str(workers), "--dist", "worksteal"]
     log = tempfile.TemporaryFile(mode="w+")  # a file, not a pipe: a full pipe would stall the suite while the answers replay
     process = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT, text=True)
     process.log = log

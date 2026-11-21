@@ -94,15 +94,23 @@ def ours(expression: str) -> str:
     return "BLANK" if value is None else str(value)
 
 
-class AllSelectedCriticTwoTests(unittest.TestCase):
-    def test_saved_power_bi_answers(self) -> None:
-        failures = []
-        for item in FIXTURE["items"]:
-            answer = ours(item["expr"])
-            if status(item["powerbi"], answer) != "match":
-                failures.append((item["expr"], item["powerbi"], answer))
-        self.assertEqual([], failures[:5], f"{len(failures)} of {len(FIXTURE['items'])} differ from Power BI")
+import pytest
 
+ALLSELECTED_ITEMS = FIXTURE["items"]
+ALLSELECTED_CHUNKS = [ALLSELECTED_ITEMS[i:i + 200] for i in range(0, len(ALLSELECTED_ITEMS), 200)]
+
+
+@pytest.mark.parametrize("chunk", ALLSELECTED_CHUNKS)
+def test_saved_power_bi_answers(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = ours(item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} of {len(chunk)} differ from Power BI"
+
+
+class AllSelectedCriticTwoTests(unittest.TestCase):
     def test_named_repros(self) -> None:
         cases = {
             # R1: the outer filter a SUMMARIZECOLUMNS group row replaced stays visible to ALLSELECTED

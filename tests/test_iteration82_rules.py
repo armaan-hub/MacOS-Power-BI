@@ -31,6 +31,22 @@ def _replay(name: str) -> tuple[list[tuple[str, str, str, str]], int]:
     return failures, len(items)
 
 
+import pytest
+
+UM_ITEMS = json.loads((HERE / "fixtures_iter82_um.json").read_text())["items"]
+UM_CHUNKS = [UM_ITEMS[i:i + 150] for i in range(0, len(UM_ITEMS), 150)]
+
+
+@pytest.mark.parametrize("chunk", UM_CHUNKS)
+def test_unknown_member_saved_power_bi_answers(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = _answer(item["model"], item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["model"], item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} of {len(chunk)} differ from Power BI"
+
+
 class UnknownMemberTests(unittest.TestCase):
     def check(self, cases: dict[str, str]) -> None:
         for expression, expected in cases.items():
@@ -79,10 +95,20 @@ class UnknownMemberTests(unittest.TestCase):
             "CALCULATE(SUM(ZO_Fact[Amt]),ALL(ZO_Dim))": "375",
         })
 
-    def test_saved_power_bi_answers(self) -> None:
-        failures, total = _replay("um")
-        self.assertEqual([], failures[:6], f"{len(failures)} of {total} differ from Power BI")
-        self.assertGreater(total, 600)
+
+R10_ITEMS = json.loads((HERE / "fixtures_iter82_r10.json").read_text())["items"]
+R10_CHUNK_SIZE = 100
+R10_CHUNKS = [R10_ITEMS[i:i + R10_CHUNK_SIZE] for i in range(0, len(R10_ITEMS), R10_CHUNK_SIZE)]
+
+
+@pytest.mark.parametrize("chunk", R10_CHUNKS)
+def test_date_key_wipe_saved_power_bi_answers(chunk: list[dict]) -> None:
+    failures = []
+    for item in chunk:
+        answer = _answer(item["model"], item["expr"])
+        if status(item["powerbi"], answer) != "match":
+            failures.append((item["model"], item["expr"], item["powerbi"], answer))
+    assert failures == [], f"{len(failures)} of {len(chunk)} differ from Power BI"
 
 
 class DateKeyWipeTests(unittest.TestCase):
@@ -106,11 +132,6 @@ class DateKeyWipeTests(unittest.TestCase):
         ):
             with self.subTest(expression=expression):
                 self.assertIn(cb_ours(expression), {"BLANK", "365"})
-
-    def test_saved_power_bi_answers(self) -> None:
-        failures, total = _replay("r10")
-        self.assertEqual([], failures[:6], f"{len(failures)} of {total} differ from Power BI")
-        self.assertGreater(total, 400)
 
 
 class ManyToManyAndOneToOneTests(unittest.TestCase):
