@@ -11121,6 +11121,21 @@ def _evaluate_measures_once(
                 raise MeasureError("ALLSELECTED of a table that a TREATAS argument reaches through a bidirectional relationship is not supported in the local engine.")
             if marked_roots:
                 rows = [row for row in full if id(row) in direct_ids]
+        if table_id in eff_group_meta and not eff_rank_table and not any(held_table == table_id for held_table, _column in eff_touched):
+            # Task 246 (measured): inside a column added by SUMMARIZE, ALLSELECTED(X) sees the rows SUMMARIZE iterates (its input table, in the filters outside it), also those the
+            # outer filters on columns other than X select (CALCULATE(SUMX(SUMMARIZE(Facts, Facts[Region], "s", COUNTROWS(ALLSELECTED(Facts[Note]))), [s]), Facts[Quantity] > 1))
+            layer_sets = [
+                frozenset(
+                    index for index, base_row in enumerate(source_context["rows"])
+                    if row_key(typed_cell(source_context, column, base_row.get(column)) for column in layer.columns) in layer.tuples
+                )
+                for layer in eff_group_meta[table_id]["layers"]
+                if layer.table == table_id and wanted & {column.casefold() for column in layer.columns}
+            ]
+            if layer_sets:
+                keep_layers = set.intersection(*(set(layer_rows) for layer_rows in layer_sets))
+                visible_layers = {id(row) for row in rows}
+                rows = [row for position, row in enumerate(full) if position in keep_layers and id(row) in visible_layers]
         allowed = {id(row) for row in rows}
         result = [row for row in full if id(row) in allowed] if len(allowed) != len(full) or any(id(r) not in allowed for r in full) else list(full)
         child_relevant = False  # a many-side row or a many-side iterator over a child table of this table is in force
