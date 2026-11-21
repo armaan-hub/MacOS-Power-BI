@@ -1,6 +1,6 @@
 """Every answer saved from Power BI Desktop is replayed against the local engine on each test run.
 
-``tools/parity_check.py`` owns the replay and the baseline of locked items (``tools/parity/baseline.json``).  A locked
+``tools/parity_check.py`` owns the replay and the baseline of locked items (``tools/parity/baseline.json.gz``).  A locked
 item that stops matching, any difference from Power BI, or an engine crash fails the suite; items Power BI answers but
 the engine still refuses are the work list in ``PARITY_LEDGER.md`` and do not fail it.  A difference listed in
 ``tools/parity/known_diffs.json`` with the app's recorded answer is a known-diff and does not fail it either; an unlisted difference,
@@ -37,6 +37,7 @@ class ParityLedgerTests(unittest.TestCase):
 
     def test_locked_items_still_match(self) -> None:
         locked = set(self.baseline["locked"])
+        self.assertGreater(len(locked), 0)
         regressions = [f"{r['id']} ({r['status']})" for r in self.results if r["id"] in locked and r["status"] not in {"match", "error-vs-refusal"}]
         self.assertEqual(regressions, [])
 

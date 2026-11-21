@@ -7,7 +7,7 @@
     PYTHONPATH=. python tools/parity_check.py --sample 20 [--seed 1]   # quick task gate: 20 answers per battery file, read-only
     PYTHONPATH=. python tools/parity_check.py --only NAME [--sample N] # full replay of the named battery files, others sampled, read-only
 
-A sampled or --only run is read-only: it writes neither PARITY_LEDGER.md nor baseline.json, and it cannot be combined with
+A sampled or --only run is read-only: it writes neither PARITY_LEDGER.md nor baseline.json.gz, and it cannot be combined with
 --accept or --freeze.  Its last line is PARITY GATE (SAMPLE) PASSED or FAILED.
 
 Exit code 1 when a locked item stopped matching, any item differs from Power BI, the app crashed on an expression or the
@@ -76,6 +76,7 @@ def load_baseline() -> dict:
         with gzip.open(BASELINE_GZ, "rt", encoding="utf-8") as handle:
             return json.load(handle)
     if BASELINE.exists():
+        print(f"note: {BASELINE_GZ} is missing, falling back to {BASELINE}", file=sys.stderr)
         return json.loads(BASELINE.read_text())
     return {"locked": [], "import_digests": {}}
 
@@ -397,7 +398,7 @@ def main() -> int:
 
     counts = {s: sum(1 for r in results if r["status"] == s) for s in ("match", "error-vs-refusal", "known-diff", "gap-reject", "DIFF", "CRASH")}
     if partial:
-        # read-only: no PARITY_LEDGER.md, no baseline.json
+        # read-only: no PARITY_LEDGER.md, no baseline.json.gz
         print(f"replayed {len(results)} Power BI answers: {counts}; locked {len(locked)}")
         for n in notes:
             print("note:", n)
