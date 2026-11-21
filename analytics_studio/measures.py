@@ -20056,11 +20056,7 @@ def _evaluate_measures_once(
                 wanted = row.get(header)
                 if not iterated_table.get("derived"):
                     wanted = typed_cell(base_context, base_column, wanted)
-                allowed = frozenset(
-                    index for index, base_row in enumerate(base_context["rows"])
-                    if cell_key(typed_cell(base_context, base_column, base_row.get(base_column)))
-                    == cell_key(wanted)
-                )
+                allowed = one_side_value_index(base_context, base_column).get(cell_key(wanted), frozenset())
                 filters.setdefault(base_context["id"], (base_context, {}))[1][base_column] = BlankSet(allowed, wanted is None)
             for base_id, (base_context, base_filters) in list(filters.items()):  # every column of a loaded table: the row reaches its one side too
                 if base_id in contexts_by_id and len(base_filters) == len(base_context["headers"]) and (not iterated_table.get("derived") or iterated_table.get("row_identity")):
@@ -20070,24 +20066,59 @@ def _evaluate_measures_once(
         table_id = iterated_table["id"]
         # each column filters to the rows that hold this row's value in it; together they select the row itself,
         # and clearing some columns (ALLEXCEPT, ALL(column)) leaves the others still filtered by value
-        per_column: dict[str, list[int]] = {header: [] for header in iterated_table["headers"]}
         base_table = contexts_by_id.get(table_id)
         # a derived copy of a loaded table (ALLSELECTED(T), a subset): its positions are not the table's, so the filter
         # must be found among the loaded rows
         source_rows = base_table["rows"] if base_table is not None and iterated_table["rows"] is not base_table["rows"] else iterated_table["rows"]
-        for row_index, iterate_row in enumerate(source_rows):
-            for header in iterated_table["headers"]:
-                left, right = iterate_row.get(header), row.get(header)
-                _reject_power_query_error(left, header, row_index + 1)
-                _reject_power_query_error(right, header, None)
-                if cell_key(left) == cell_key(right):
-                    per_column[header].append(row_index)
+        idx = row_value_index(source_rows)
+        headers = iterated_table["headers"]
+        if idx is not None:
+            try:
+                per_column: dict[str, list[int]] = {}
+                for header in headers:
+                    val = row.get(header)
+                    _reject_power_query_error(val, header, None)
+                    col_idx = idx.get(header)
+                    if col_idx is None:
+                        col_idx = {}
+                        for r_i, r in enumerate(source_rows):
+                            col_idx.setdefault(cell_key(r.get(header)), []).append(r_i)
+                        idx[header] = col_idx
+                    per_column[header] = list(col_idx.get(cell_key(val), []))
+            except TypeError:
+                idx = None
+        if idx is None:
+            per_column = {header: [] for header in headers}
+            for row_index, iterate_row in enumerate(source_rows):
+                for header in headers:
+                    left, right = iterate_row.get(header), row.get(header)
+                    _reject_power_query_error(left, header, row_index + 1)
+                    _reject_power_query_error(right, header, None)
+                    if cell_key(left) == cell_key(right):
+                        per_column[header].append(row_index)
         transitioned = {table_id: (iterated_table, {header: BlankSet(indexes, row.get(header) is None) for header, indexes in per_column.items()})}
         if base_table is not None:
             add_one_side_transition(table_id, row, transitioned)
         return transitioned
 
     one_side_index_cache: dict[tuple[str, str], dict[Any, frozenset[int]]] = {}
+    row_value_index_cache: dict[int, tuple[list[dict[str, Any]], dict[str, dict[Any, list[int]]] | None]] = {}
+
+    def row_value_index(source_rows: list[dict[str, Any]]) -> dict[str, dict[Any, list[int]]] | None:
+        """Lazily indexed column values of a rows list (row indexes ascending), or None if it has error cells or is empty."""
+        if not source_rows:
+            return None
+        cached = row_value_index_cache.get(id(source_rows))
+        if cached is not None and cached[0] is source_rows:
+            return cached[1]
+        for r_i, r in enumerate(source_rows):
+            for h, v in r.items():
+                if is_cell_error(v):
+                    row_value_index_cache[id(source_rows)] = (source_rows, None)
+                    return None
+        index: dict[str, dict[Any, list[int]]] = {}
+        row_value_index_cache[id(source_rows)] = (source_rows, index)
+        return index
 
     def one_side_value_index(one_context: dict[str, Any], column: str) -> dict[Any, frozenset[int]]:
         """key of a value in a one-side column -> the rows holding it (built once per column)."""
