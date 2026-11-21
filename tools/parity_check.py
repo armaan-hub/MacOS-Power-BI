@@ -229,9 +229,9 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
                 tasks.append((name, chunk, tables, True, known))
 
     if os.environ.get("PYTEST_XDIST_WORKER"):
-        workers = int(os.environ.get("PARITY_WORKERS", 2))
+        workers = int(os.environ.get("PARITY_REPLAY_WORKERS", 8))
     else:
-        workers = int(os.environ.get("PARITY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
+        workers = int(os.environ.get("PARITY_REPLAY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
     try:
         ctx = get_context("fork")
         with ProcessPoolExecutor(max_workers=workers, mp_context=ctx) as executor:
