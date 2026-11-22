@@ -6,6 +6,8 @@ from collections.abc import Callable
 import re
 from typing import Any
 
+import shiboken6
+
 from PySide6.QtCore import QEvent, Qt
 from PySide6.QtGui import QColor, QFontDatabase, QKeyEvent, QPalette, QTextCursor
 from PySide6.QtWidgets import (
@@ -627,6 +629,8 @@ class MeasureDialog(QDialog):
         field_references: list[tuple[str, str]] | None = None,
         measure_references: list[str] | None = None,
         preview_callback: Callable[[str, str], str] | None = None,
+        preview_async_callback: Callable[[str, str, Callable[[str], None]], None] | None = None,
+        cancel_preview_callback: Callable[[], None] | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -666,6 +670,9 @@ class MeasureDialog(QDialog):
         }
         self._accepted_measure: dict[str, Any] | None = None
         self._preview_callback = preview_callback
+        self._preview_async_callback = preview_async_callback
+        self._closing = False
+        self._cancel_preview_callback = cancel_preview_callback
         editing = initial_measure is not None
         self.setWindowTitle(
             "Quick measure" if quick else "Edit measure" if editing else "New measure"
@@ -906,17 +913,23 @@ class MeasureDialog(QDialog):
             )
             form.addRow(self.local_scope_help)
 
+        has_preview = preview_callback is not None or preview_async_callback is not None
         preview_row = QHBoxLayout()
         self.preview_button = QPushButton("Validate / preview")
         self.preview_button.setObjectName("previewDaxMeasureButton")
-        self.preview_button.setVisible(preview_callback is not None)
-        self.preview_button.setEnabled(preview_callback is not None)
+        self.preview_button.setVisible(has_preview)
+        self.preview_button.setEnabled(has_preview)
         self.preview_button.clicked.connect(self._preview_measure)
+        self.preview_cancel_button = QPushButton("Cancel")
+        self.preview_cancel_button.setObjectName("previewDaxMeasureCancelButton")
+        self.preview_cancel_button.setVisible(False)
+        self.preview_cancel_button.clicked.connect(self._cancel_preview)
         self.preview_label = QLabel()
         self.preview_label.setObjectName("daxMeasurePreview")
         self.preview_label.setWordWrap(True)
         self.preview_label.setStyleSheet("color: #526477;")
         preview_row.addWidget(self.preview_button)
+        preview_row.addWidget(self.preview_cancel_button)
         preview_row.addWidget(self.preview_label, 1)
         content_layout.addLayout(preview_row)
 
@@ -1408,6 +1421,41 @@ class MeasureDialog(QDialog):
         self._insert_reference(self.measure_combo)
 
     def _preview_measure(self) -> None:
+        # The worker-thread path needs a running event loop, so it is used only
+        # when an async callback was given and the dialog is on screen.
+        if self._preview_async_callback is not None and self.isVisible():
+            try:
+                measure = self._current_measure()
+            except (MeasureError, TypeError, ValueError) as exc:
+                self.preview_label.setStyleSheet("color: #a4262c;")
+                self.preview_label.setText(str(exc))
+                return
+            self.preview_label.setStyleSheet("color: #526477;")
+            self.preview_label.setText("Evaluating…")
+            self.preview_button.setEnabled(False)
+            self.preview_cancel_button.setVisible(True)
+            self.preview_cancel_button.setEnabled(True)
+
+            def on_done(text: str) -> None:
+                # The dialog may have been closed or deleted while the worker ran.
+                if self._closing or not shiboken6.isValid(self):
+                    return
+                self.preview_button.setEnabled(True)
+                self.preview_cancel_button.setVisible(False)
+                if text == "Cancelled":
+                    self.preview_label.setStyleSheet("color: #526477;")
+                    self.preview_label.setText("Cancelled")
+                elif text.startswith("Current report-context result:") or text.startswith("—") or any(c.isdigit() for c in text):
+                    self.preview_label.setStyleSheet("color: #107c10;")
+                    prefix = "" if text.startswith("Current report-context result:") else "Current report-context result: "
+                    self.preview_label.setText(f"{prefix}{text}")
+                else:
+                    self.preview_label.setStyleSheet("color: #a4262c;")
+                    self.preview_label.setText(text)
+
+            self._preview_async_callback(measure["name"], measure["expression"], on_done)
+            return
+
         if self._preview_callback is None:
             return
         try:
@@ -1419,6 +1467,14 @@ class MeasureDialog(QDialog):
             return
         self.preview_label.setStyleSheet("color: #107c10;")
         self.preview_label.setText(f"Current report-context result: {value}")
+
+    def _cancel_preview(self) -> None:
+        if self._cancel_preview_callback is not None:
+            self._cancel_preview_callback()
+        self.preview_button.setEnabled(True)
+        self.preview_cancel_button.setVisible(False)
+        self.preview_label.setStyleSheet("color: #526477;")
+        self.preview_label.setText("Cancelled")
 
     @property
     def measure(self) -> dict[str, Any] | None:
@@ -1492,3 +1548,14 @@ class MeasureDialog(QDialog):
     def reject(self) -> None:
         self._accepted_measure = None
         super().reject()
+
+    def showEvent(self, event: Any) -> None:  # noqa: N802
+        self._closing = False
+        super().showEvent(event)
+
+    def done(self, result: int) -> None:
+        """Every way of closing (accept, reject, done) stops a running preview."""
+        self._closing = True
+        if self._cancel_preview_callback is not None:
+            self._cancel_preview_callback()
+        super().done(result)

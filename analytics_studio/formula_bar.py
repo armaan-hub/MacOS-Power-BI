@@ -30,6 +30,7 @@ class FormulaBarController(QObject):
     changed = Signal()
     revisionChanged = Signal()  # the text was replaced from Python: the editor must reload it
     committed = Signal(str, str)  # kind ("measure" | "column"), name
+    previewBusyChanged = Signal(bool)
 
     def __init__(self, studio: "StudioController") -> None:
         super().__init__(studio)
@@ -46,6 +47,7 @@ class FormulaBarController(QObject):
         self._home_table_id = ""
         self._last_binding = ""
         self._focus_requested = True
+        self._preview_busy = False
         studio.stateChanged.connect(self.changed)
 
     # ------------------------------------------------------------------ properties
@@ -73,6 +75,15 @@ class FormulaBarController(QObject):
     @Property(str, notify=changed)
     def error(self) -> str:
         return self._error
+
+    @Property(bool, notify=previewBusyChanged)
+    def previewBusy(self) -> bool:  # noqa: N802
+        return self._preview_busy
+
+    def _set_preview_busy(self, busy: bool) -> None:
+        if self._preview_busy != busy:
+            self._preview_busy = busy
+            self.previewBusyChanged.emit(busy)
 
     @Property(str, notify=changed)
     def name(self) -> str:
@@ -249,6 +260,13 @@ class FormulaBarController(QObject):
         return self.beginEditMeasure(measure_name, focus=False)
 
     @Slot(str, result=bool)
+    def previewMeasureInteractive(self, measure_name: str) -> bool:  # noqa: N802
+        """Interactive entry from QML. Like previewMeasure it shows the formula
+        only and runs no evaluation; the busy flag follows the controller's
+        newest worker-thread preview request."""
+        return self.previewMeasure(measure_name)
+
+    @Slot(str, result=bool)
     def previewColumn(self, column_name: str) -> bool:  # noqa: N802
         return self.beginEditColumn(column_name, focus=False)
 
@@ -353,12 +371,16 @@ class FormulaBarController(QObject):
     @Slot()
     def cancel(self) -> None:
         """Drop the draft without asking (callers that already know it is clean or are throwing it away)."""
+        self._studio.cancelPreview()
+        self._set_preview_busy(False)
         if self._active:
             self._close()
 
     @Slot()
     def requestCancel(self) -> None:  # noqa: N802
         """Escape and the X button typed by the user: a clean bar closes, a dirty draft asks Save / Discard / Cancel first."""
+        self._studio.cancelPreview()
+        self._set_preview_busy(False)
         if not self._active:
             return
         if self.dirty:

@@ -775,7 +775,7 @@ ApplicationWindow {
             return
         const measure = mainWindow.measureNameForBinding(mainWindow.selectedFieldBinding)
         if (measure !== "") {
-            bar.previewMeasure(measure)
+            bar.previewMeasureInteractive(measure)
             return
         }
         if (mainWindow.selectedFieldBinding !== "" && bar.isCalculatedColumn(mainWindow.selectedFieldBinding)) {
