@@ -2994,3 +2994,13 @@ Next: Task 246. Candidates: Power BI errors where the engine answers (ISLOGICAL/
 Roles: Sonnet coded (commit 985f979) and reviewed, Opus planned and merged.
 
 **Gate:** PARITY GATE PASSED. Real app 575 of 575 measures equal to Power BI, 0 different; replay 540,401 saved Power BI answers: 537,896 match, 2,505 refused, 0 DIFF, 0 CRASH, locked 537,342. pytest 41,261 passed (26 xfailed). No saved Power BI answer was edited. Merge commit 2f62083.
+
+## 2026-11-22 — Phase 1.1 and 1.2 (DAX exit test: XT_ model, 493-formula list, both-error scoring)
+
+Phase 1.1 (merged d69679f): tools/exit_model.py builds the XT_ model (seed 20261122, 12,000 sales rows, one inactive ShipDate relationship) on the guest and locally; tools/exit_check.py runs a formula list on Power BI and locally and compares them.
+
+Phase 1.2 (merged 7b8fa01): tools/exit_formulas.py writes tools/parity/exit_formulas.json, 493 formulas in 19 groups. The compare step gained a both_error bucket: a local rejection with a Power BI error counts as right; a local rejection against a Power BI value stays refused. Local run: 487 of 493 answered, 0 crash. Six refusals (XT-CA-009, XT-TI-057, XT-BV-023, XT-TX-029, XT-EC-027, XT-FN-027) wait for Power BI's answer in Phase 1.3.
+
+Gate: PARITY GATE PASSED. pytest 41,843 passed (26 xfailed), real app 575 of 575, replay 831,135 saved Power BI answers with 0 DIFF and 0 CRASH, locked 795,446. DSI.xlsx is missing, so its answers are not replayed.
+
+Open: plain AVERAGE of a Currency column is not rounded to 4 decimals (measures.py:26740); IFERROR(1/0,-1) gives -1 locally, bare 1/0 gives Infinity (Power BI unchecked); XOR unsupported. Next: Phase 1.3, run the 493 formulas on Power BI once.
