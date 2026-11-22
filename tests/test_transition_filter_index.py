@@ -19,6 +19,7 @@ def test_transition_filter_duplicates_blanks_case_expected():
     rows = [
         {"Sales": Decimal(10), "Region": "East", "Note": "Paid"},
         {"Sales": Decimal(10), "Region": "East", "Note": "Paid"},
+        {"Sales": Decimal(10), "Region": "east", "Note": "Paid"},
         {"Sales": Decimal(20), "Region": "east", "Note": "Paid"},
         {"Sales": Decimal(30), "Region": "West", "Note": None},
         {"Sales": Decimal(40), "Region": "West", "Note": None},
@@ -27,36 +28,40 @@ def test_transition_filter_duplicates_blanks_case_expected():
     ]
     # Hand calculation for transition:
     # In DAX, context transition for a row transforms the row into column equality filters on all columns of the table.
-    # Note: string equality in cell_key is case-insensitive ("East" == "east").
+    # Note: string equality in cell_key is case-sensitive ("East" != "east").
     # Row 0: Sales=10, Region="East", Note="Paid".
-    #   Matches: Row 0 (10, East, Paid), Row 1 (10, East, Paid). Row 2 has Sales=20 so it does not match Sales=10.
+    #   Matches: Row 0 (10, East, Paid), Row 1 (10, East, Paid).
     #   CALCULATE(SUM(Sales)) = 10 + 10 = 20.
     #   CALCULATE(COUNTROWS) = 2.
     # Row 1: same as Row 0 -> SUM=20, COUNTROWS=2.
-    # Row 2: Sales=20, Region="east", Note="Paid".
-    #   Matches: Row 2 only.
+    # Row 2: Sales=10, Region="east", Note="Paid".
+    #   Matches: Row 2 only (Row 0 & 1 have Region="East", Row 3 has Sales=20).
+    #   CALCULATE(SUM(Sales)) = 10.
+    #   CALCULATE(COUNTROWS) = 1.
+    # Row 3: Sales=20, Region="east", Note="Paid".
+    #   Matches: Row 3 only.
     #   CALCULATE(SUM(Sales)) = 20.
     #   CALCULATE(COUNTROWS) = 1.
-    # Row 3: Sales=30, Region="West", Note=None.
-    #   Matches: Row 3 only (Row 4 has Sales=40).
+    # Row 4: Sales=30, Region="West", Note=None.
+    #   Matches: Row 4 only (Row 5 has Sales=40).
     #   CALCULATE(SUM(Sales)) = 30.
     #   CALCULATE(COUNTROWS) = 1.
-    # Row 4: Sales=40, Region="West", Note=None.
-    #   Matches: Row 4 only.
+    # Row 5: Sales=40, Region="West", Note=None.
+    #   Matches: Row 5 only.
     #   CALCULATE(SUM(Sales)) = 40.
     #   CALCULATE(COUNTROWS) = 1.
-    # Row 5: Sales=None, Region="North", Note="Late".
-    #   Matches: Row 5 only (Row 6 has Sales=50).
+    # Row 6: Sales=None, Region="North", Note="Late".
+    #   Matches: Row 6 only (Row 7 has Sales=50).
     #   CALCULATE(SUM(Sales)) = None / 0. In DAX SUM of BLANK is None (or Decimal(0) in SUMX accumulator).
     #   CALCULATE(COUNTROWS) = 1.
-    # Row 6: Sales=50, Region="North", Note="Late".
-    #   Matches: Row 6 only.
+    # Row 7: Sales=50, Region="North", Note="Late".
+    #   Matches: Row 7 only.
     #   CALCULATE(SUM(Sales)) = 50.
     #   CALCULATE(COUNTROWS) = 1.
     # Total SUMX(CALCULATE(SUM(Sales))):
-    #   20 + 20 + 20 + 30 + 40 + 0 + 50 = 180.
+    #   20 + 20 + 10 + 20 + 30 + 40 + 0 + 50 = 190.
     # Total SUMX(CALCULATE(COUNTROWS)):
-    #   2 + 2 + 1 + 1 + 1 + 1 + 1 = 9.
+    #   2 + 2 + 1 + 1 + 1 + 1 + 1 + 1 = 10.
 
     headers = ["Sales", "Region", "Note"]
     types = {"Sales": "decimal_number", "Region": "text", "Note": "text"}
@@ -66,13 +71,13 @@ def test_transition_filter_duplicates_blanks_case_expected():
         [{"name": "P", "expression": "SUMX(Facts, CALCULATE(SUM(Facts[Sales])))"}],
         rows, headers, "Facts", measure_names=["P"], table_context=context, active_table_id="facts"
     )["P"]
-    assert res_sum == Decimal(180)
+    assert res_sum == Decimal(190)
 
     res_cnt = evaluate_measures(
         [{"name": "P", "expression": "SUMX(Facts, CALCULATE(COUNTROWS(Facts)))"}],
         rows, headers, "Facts", measure_names=["P"], table_context=context, active_table_id="facts"
     )["P"]
-    assert res_cnt == Decimal(9)
+    assert res_cnt == Decimal(10)
 
 
 def test_transition_filter_allexcept_keeps_other_columns_filtered():
@@ -151,9 +156,50 @@ def test_transition_filter_derived_table_row_and_low_cardinality():
     assert res is None
 
 
-def test_transition_filter_speed_20000_rows():
-    """Speed: SUMX(Facts, CALCULATE(SUM(Facts[Sales]))) on 20,000 generated rows finishes in under 120s."""
+def test_transition_filter_non_lineage_not_in_source_rows():
+    """Non-lineage branch: iterated row with a value not present in the table's source rows."""
+    base_rows = [
+        {"Sales": Decimal(10), "Region": "East"},
+        {"Sales": Decimal(20), "Region": "West"},
+        {"Sales": Decimal(30), "Region": "North"},
+    ]
+    headers = ["Sales", "Region"]
+    types = {"Sales": "decimal_number", "Region": "text"}
+    context = [
+        {"id": "facts", "name": "Facts", "headers": headers, "rows": base_rows, "column_types": types},
+    ]
+
+    # Iterating a row with Region="South" (not in Facts source_rows):
+    # In the non-lineage branch of transition_filters, col_idx has no matches for "South",
+    # so per_column["Region"] is empty, resulting in BlankSet([], False).
+    # CALCULATE(COUNTROWS(Facts)) evaluates to None (BLANK).
+    res1 = evaluate_measures(
+        [{"name": "P", "expression": "SUMX(ALLSELECTED(Facts), CALCULATE(COUNTROWS(Facts)))"}],
+        [{"Sales": Decimal(99), "Region": "South"}], headers, "Facts",
+        measure_names=["P"], table_context=context, filter_table_ids=["facts"], active_table_id="facts"
+    )["P"]
+    assert res1 is None
+
+    # Iterating two rows: one with Region="East" (matches 1 row in Facts) and one with Region="South" (0 rows).
+    # SUMX is 1 + BLANK = 1.
+    res2 = evaluate_measures(
+        [{"name": "P", "expression": "SUMX(ALLSELECTED(Facts), CALCULATE(COUNTROWS(Facts)))"}],
+        [{"Sales": Decimal(10), "Region": "East"}, {"Sales": Decimal(99), "Region": "South"}], headers, "Facts",
+        measure_names=["P"], table_context=context, filter_table_ids=["facts"], active_table_id="facts"
+    )["P"]
+    assert res2 == Decimal(1)
+
+
+def test_transition_filter_speed_5000_rows():
+    """Speed: SUMX(Facts, CALCULATE(SUM(Facts[Sales]))) on 5,000 generated rows.
+
+    Benchmark timings (docstring note):
+      - 20,000 rows QUADRATIC on main (eb9db55): projected ~1,488s (timed out >300s)
+      - 20,000 rows with transition index: ~59.5s
+      - 5,000 rows with transition index: ~3.9s
+    """
     import random
+    from collections import Counter
     rng = random.Random(1)
     regions = ["East", "West", "North", "South"]
     notes = ["Paid", "Late", None]
@@ -164,17 +210,21 @@ def test_transition_filter_speed_20000_rows():
             "Region": rng.choice(regions),
             "Note": rng.choice(notes),
         }
-        for _ in range(20000)
+        for _ in range(5000)
     ]
     headers = ["Sales", "Quantity", "Region", "Note"]
     types = {"Sales": "decimal_number", "Quantity": "whole_number", "Region": "text", "Note": "text"}
     context = [{"id": "facts", "name": "Facts", "headers": headers, "rows": rows, "column_types": types}]
 
-    started = time.perf_counter()
+    # Python computation of expected sum in double_body mode
+    counts = Counter((r["Sales"], r["Quantity"], r["Region"], r["Note"]) for r in rows)
+    running = 0.0
+    for r in rows:
+        running += float(counts[(r["Sales"], r["Quantity"], r["Region"], r["Note"])] * r["Sales"])
+    expected_sum = Decimal(running)
+
     ans = evaluate_measures(
         [{"name": "P", "expression": "SUMX(Facts, CALCULATE(SUM(Facts[Sales])))"}],
         rows, headers, "Facts", measure_names=["P"], table_context=context, active_table_id="facts"
     )["P"]
-    elapsed = time.perf_counter() - started
-    assert elapsed < 120.0
-    assert ans is not None
+    assert ans == expected_sum

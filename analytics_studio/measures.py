@@ -20056,7 +20056,13 @@ def _evaluate_measures_once(
                 wanted = row.get(header)
                 if not iterated_table.get("derived"):
                     wanted = typed_cell(base_context, base_column, wanted)
-                allowed = one_side_value_index(base_context, base_column).get(cell_key(wanted), frozenset())
+                try:
+                    allowed = one_side_value_index(base_context, base_column).get(cell_key(wanted), frozenset())
+                except TypeError:
+                    allowed = frozenset(
+                        index for index, base_row in enumerate(base_context["rows"])
+                        if cell_key(typed_cell(base_context, base_column, base_row.get(base_column))) == cell_key(wanted)
+                    )
                 filters.setdefault(base_context["id"], (base_context, {}))[1][base_column] = BlankSet(allowed, wanted is None)
             for base_id, (base_context, base_filters) in list(filters.items()):  # every column of a loaded table: the row reaches its one side too
                 if base_id in contexts_by_id and len(base_filters) == len(base_context["headers"]) and (not iterated_table.get("derived") or iterated_table.get("row_identity")):
@@ -20112,7 +20118,7 @@ def _evaluate_measures_once(
         if cached is not None and cached[0] is source_rows:
             return cached[1]
         for r_i, r in enumerate(source_rows):
-            for h, v in r.items():
+            for v in r.values():
                 if is_cell_error(v):
                     row_value_index_cache[id(source_rows)] = (source_rows, None)
                     return None
