@@ -78,7 +78,7 @@ TABLE_SPECS: dict[str, list[tuple[str, str]]] = {
         ("RegionKey", "int64"),
         ("Quantity", "int64"),
         ("UnitPrice", "decimal"),
-        ("Discount", "decimal"),
+        ("Discount", "double"),
         ("SalesAmount", "decimal"),
         ("Channel", "string"),
     ],
@@ -90,30 +90,33 @@ TABLE_SPECS: dict[str, list[tuple[str, str]]] = {
 }
 
 # Type mappings
-# TMSL dataType: int64, string, decimal (fixed decimal currency), dateTime, boolean
+# TMSL dataType: int64, string, decimal (fixed decimal currency), double, dateTime, boolean
 _TMSL_DATA_TYPES = {
     "int64": "int64",
     "string": "string",
     "decimal": "decimal",
+    "double": "double",
     "date": "dateTime",
     "boolean": "boolean",
 }
 
-# DAX DATATABLE types: INTEGER, STRING, CURRENCY, DATETIME, BOOLEAN
+# DAX DATATABLE types: INTEGER, STRING, CURRENCY, DOUBLE, DATETIME, BOOLEAN
 _DAX_DATATABLE_TYPES = {
     "int64": "INTEGER",
     "string": "STRING",
     "decimal": "CURRENCY",
+    "double": "DOUBLE",
     "date": "DATETIME",
     "boolean": "BOOLEAN",
 }
 
 # Local evaluator column_types mapping:
-# whole_number, text, decimal_number, date, boolean
+# whole_number, text, currency (fixed decimal), decimal_number (double), date, boolean
 _LOCAL_COLUMN_TYPES = {
     "int64": "whole_number",
     "string": "text",
-    "decimal": "decimal_number",
+    "decimal": "currency",
+    "double": "decimal_number",
     "date": "date",
     "boolean": "boolean",
 }
@@ -229,8 +232,8 @@ def generate_data(seed: int = MODEL_SEED) -> dict[str, list[dict[str, Any]]]:
         qty = rng.randint(1, 20)
         unit_price = round(Decimal(str(rng.uniform(5.0, 500.0))), 2)
         disc_float = round(rng.uniform(0.0, 0.3), 2)
-        discount = Decimal(str(disc_float))
-        raw_amt = Decimal(qty) * unit_price * (Decimal("1") - discount)
+        discount = disc_float
+        raw_amt = Decimal(qty) * unit_price * (Decimal("1") - Decimal(str(discount)))
         sales_amount = round(raw_amt, 2)
         channel = rng.choice(channels)
 
@@ -373,8 +376,8 @@ def compute_expected_aggregates(data: dict[str, list[dict[str, Any]]]) -> dict[s
         for col_name, kind in columns:
             blanks = sum(1 for r in rows if r[col_name] is None)
             table_aggs["COUNTBLANK"][col_name] = blanks
-            if kind in ("int64", "decimal"):
-                total = sum((r[col_name] for r in rows if r[col_name] is not None), Decimal("0") if kind == "decimal" else 0)
+            if kind in ("int64", "decimal", "double"):
+                total = sum((r[col_name] for r in rows if r[col_name] is not None), Decimal("0") if kind == "decimal" else 0.0 if kind == "double" else 0)
                 table_aggs["SUM"][col_name] = total
         aggregates[table_name] = table_aggs
     return aggregates
@@ -484,7 +487,7 @@ def verify_guest(data: dict[str, list[dict[str, Any]]], port_: str) -> dict[str,
         for col_name, kind in spec:
             queries.append(f"COUNTBLANK({tbl_name}[{col_name}])")
             keys.append((tbl_name, "COUNTBLANK", col_name))
-            if kind in ("int64", "decimal"):
+            if kind in ("int64", "decimal", "double"):
                 queries.append(f"SUM({tbl_name}[{col_name}])")
                 keys.append((tbl_name, "SUM", col_name))
 
@@ -633,7 +636,7 @@ def verify_local(data: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
                 all_match = False
             results.append({"table": tbl_name, "metric": "COUNTBLANK", "column": col, "expected": expected, "actual": ans, "match": is_same})
 
-            if kind in ("int64", "decimal"):
+            if kind in ("int64", "decimal", "double"):
                 try:
                     val = evaluate_measures(
                         [{"name": "m", "expression": f"SUM({tbl_name}[{col}])", "home_table_id": t_id}],

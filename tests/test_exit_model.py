@@ -98,6 +98,21 @@ class TestExitModel(unittest.TestCase):
         ship_rel = [r for r in rels if r["id"] == "rel_sales_date_ship"][0]
         self.assertFalse(ship_rel["is_active"])
 
+    def test_column_type_mappings(self) -> None:
+        """Fixed decimal columns map to 'currency' and Discount maps to 'decimal_number'."""
+        data = exit_model.generate_data(exit_model.MODEL_SEED)
+        tables, _ = exit_model.local_context(data)
+        table_map = {t["name"]: t["column_types"] for t in tables}
+
+        # Fixed decimal columns map to currency
+        self.assertEqual(table_map["XT_Product"]["ListPrice"], "currency")
+        self.assertEqual(table_map["XT_Sales"]["UnitPrice"], "currency")
+        self.assertEqual(table_map["XT_Sales"]["SalesAmount"], "currency")
+        self.assertEqual(table_map["XT_Budget"]["BudgetAmount"], "currency")
+
+        # Discount is double -> decimal_number
+        self.assertEqual(table_map["XT_Sales"]["Discount"], "decimal_number")
+
     def test_local_aggregate_checks_equal_python(self) -> None:
         """Local evaluator produces aggregate values matching expected Python metrics."""
         data = exit_model.generate_data(exit_model.MODEL_SEED)
