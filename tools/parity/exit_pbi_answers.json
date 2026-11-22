@@ -1,0 +1,2467 @@
+[
+  {
+    "id": "XT-AG-001",
+    "expr": "SUM(XT_Sales[SalesAmount])",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-AG-002",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-AG-003",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AG-004",
+    "expr": "SUM(XT_Sales[Quantity])",
+    "powerbi": "125770"
+  },
+  {
+    "id": "XT-AG-005",
+    "expr": "CALCULATE(SUM(XT_Sales[Quantity]), XT_Region[Region] = \"North\")",
+    "powerbi": "25849"
+  },
+  {
+    "id": "XT-AG-006",
+    "expr": "AVERAGE(XT_Sales[UnitPrice])",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "XT-AG-007",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AG-008",
+    "expr": "COUNTROWS(XT_Sales)",
+    "powerbi": "12000"
+  },
+  {
+    "id": "XT-AG-009",
+    "expr": "CALCULATE(COUNTROWS(XT_Sales), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "2923"
+  },
+  {
+    "id": "XT-AG-010",
+    "expr": "CALCULATE(COUNTROWS(XT_Sales), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AG-011",
+    "expr": "COUNT(XT_Sales[CustomerKey])",
+    "powerbi": "11875"
+  },
+  {
+    "id": "XT-AG-012",
+    "expr": "DISTINCTCOUNT(XT_Sales[CustomerKey])",
+    "powerbi": "801"
+  },
+  {
+    "id": "XT-AG-013",
+    "expr": "CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "740"
+  },
+  {
+    "id": "XT-AG-014",
+    "expr": "CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AG-015",
+    "expr": "DISTINCTCOUNT(XT_Sales[ProductKey])",
+    "powerbi": "61"
+  },
+  {
+    "id": "XT-AG-016",
+    "expr": "CALCULATE(DISTINCTCOUNT(XT_Sales[ProductKey]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AG-017",
+    "expr": "CALCULATE(MIN(XT_Sales[OrderDate]), XT_Region[Region] = \"North\")",
+    "powerbi": "01/01/2023 00:00:00"
+  },
+  {
+    "id": "XT-AG-018",
+    "expr": "MAX(XT_Sales[ShipDate])",
+    "powerbi": "01/09/2026 00:00:00"
+  },
+  {
+    "id": "XT-AG-019",
+    "expr": "SUMX(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice])",
+    "powerbi": "32093304.46"
+  },
+  {
+    "id": "XT-AG-020",
+    "expr": "CALCULATE(SUMX(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AG-021",
+    "expr": "CALCULATE(SUMX(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice] * (1 - XT_Sales[Discount])), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "6581943.3866"
+  },
+  {
+    "id": "XT-AG-022",
+    "expr": "CALCULATE(AVERAGEX(XT_Sales, XT_Sales[SalesAmount] / XT_Sales[Quantity]), XT_Region[Region] = \"North\")",
+    "powerbi": "217.913"
+  },
+  {
+    "id": "XT-AG-023",
+    "expr": "MAXX(XT_Sales, XT_Sales[SalesAmount])",
+    "powerbi": "9806.94"
+  },
+  {
+    "id": "XT-AG-024",
+    "expr": "CALCULATE(MAXX(XT_Sales, XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AG-025",
+    "expr": "CALCULATE(MINX(XT_Sales, XT_Sales[Discount]), XT_Date[Year] = 2024)",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-AG-026",
+    "expr": "COUNTA(XT_Sales[ShipDate])",
+    "powerbi": "11393"
+  },
+  {
+    "id": "XT-AG-027",
+    "expr": "CALCULATE(COUNTBLANK(XT_Sales[ShipDate]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "103"
+  },
+  {
+    "id": "XT-AG-028",
+    "expr": "DISTINCTCOUNTNOBLANK(XT_Sales[CustomerKey])",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-AG-029",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[Discount]), XT_Date[Year] = 2024)",
+    "powerbi": "0.149936419125126"
+  },
+  {
+    "id": "XT-AG-030",
+    "expr": "GEOMEANX(XT_Sales, XT_Sales[UnitPrice])",
+    "powerbi": "196.7847"
+  },
+  {
+    "id": "XT-AG-031",
+    "expr": "COUNTX(XT_Sales, XT_Sales[ShipDate])",
+    "powerbi": "11393"
+  },
+  {
+    "id": "XT-AG-032",
+    "expr": "PRODUCTX(VALUES(XT_Region[RegionKey]), XT_Region[RegionKey])",
+    "powerbi": "120"
+  },
+  {
+    "id": "XT-CA-001",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\")",
+    "powerbi": "4371879.01"
+  },
+  {
+    "id": "XT-CA-002",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4371879.01"
+  },
+  {
+    "id": "XT-CA-003",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\"), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-CA-004",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Region[Region] = \"North\", XT_Product[Category] = \"Cat_3\"), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "180531.01"
+  },
+  {
+    "id": "XT-CA-005",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] IN {\"Cat_1\", \"Cat_2\"})",
+    "powerbi": "8896446.35"
+  },
+  {
+    "id": "XT-CA-006",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] IN {\"Cat_1\", \"Cat_2\"}), XT_Region[Region] = \"North\")",
+    "powerbi": "1752757.93"
+  },
+  {
+    "id": "XT-CA-007",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\" || XT_Product[Category] = \"Cat_2\"), XT_Date[Year] = 2024)",
+    "powerbi": "2784191.07"
+  },
+  {
+    "id": "XT-CA-008",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[Quantity] > 10), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "3373652.35"
+  },
+  {
+    "id": "XT-CA-009",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(XT_Sales, XT_Sales[Quantity] > 10 && XT_Sales[Discount] > 0.1)), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "2069213.94"
+  },
+  {
+    "id": "XT-CA-010",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Sales[Channel]), XT_Sales[Channel] <> \"Store\")), XT_Region[Region] = \"North\")",
+    "powerbi": "3729311.4"
+  },
+  {
+    "id": "XT-CA-011",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)",
+    "powerbi": "1693253.26"
+  },
+  {
+    "id": "XT-CA-012",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Date)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-CA-013",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Date, XT_Date[Year])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1446703.42"
+  },
+  {
+    "id": "XT-CA-014",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category])), XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-CA-015",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category])), XT_Product[Category] = \"Cat_2\", XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "4524567.34"
+  },
+  {
+    "id": "XT-CA-016",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS(XT_Region)), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-CA-017",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS(XT_Product[Category])), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-CA-018",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLSELECTED(XT_Product)), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4524567.34"
+  },
+  {
+    "id": "XT-CA-019",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLSELECTED(XT_Date[Year])), XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-CA-020",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), KEEPFILTERS(XT_Product[Category] = \"Cat_1\")), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-CA-021",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), KEEPFILTERS(XT_Product[Category] IN {\"Cat_2\", \"Cat_3\"})), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4524567.34"
+  },
+  {
+    "id": "XT-CA-022",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024), XT_Date[Year] = 2023)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-CA-023",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024), XT_Date[MonthNumber] = 3)",
+    "powerbi": "788840.36"
+  },
+  {
+    "id": "XT-CA-024",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), VALUES(XT_Product[Category])), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4524567.34"
+  },
+  {
+    "id": "XT-CA-025",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] <> \"Cat_1\"), XT_Date[Year] = 2024)",
+    "powerbi": "7578322.43"
+  },
+  {
+    "id": "XT-CA-026",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[Channel] = \"Online\", XT_Sales[Discount] >= 0.2), XT_Date[Year] = 2024)",
+    "powerbi": "867077.72"
+  },
+  {
+    "id": "XT-CA-027",
+    "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), XT_Sales[Channel] = \"Online\"), XT_Region[Region] = \"North\")",
+    "powerbi": "785"
+  },
+  {
+    "id": "XT-CA-028",
+    "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), XT_Sales[Channel] = \"Online\"), XT_Date[Year] = 2024)",
+    "powerbi": "632"
+  },
+  {
+    "id": "XT-CA-029",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer[Segment])), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-CA-030",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Sales[Channel])), XT_Sales[Channel] = \"Online\")",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-CA-031",
+    "expr": "COUNTROWS(CALCULATETABLE(XT_Sales, XT_Sales[Channel] = \"Partner\", XT_Date[Year] = 2025))",
+    "powerbi": "1330"
+  },
+  {
+    "id": "XT-CA-032",
+    "expr": "SUMX(CALCULATETABLE(XT_Sales, XT_Product[Category] = \"Cat_4\"), XT_Sales[SalesAmount])",
+    "powerbi": "4590602.92"
+  },
+  {
+    "id": "XT-CA-033",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Product[Product]), CONTAINSSTRING(XT_Product[Product], \"_1\")))",
+    "powerbi": "4954957.61"
+  },
+  {
+    "id": "XT-TI-001",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-TI-002",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2250020.89"
+  },
+  {
+    "id": "XT-TI-003",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "323427.85"
+  },
+  {
+    "id": "XT-TI-004",
+    "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-TI-005",
+    "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)",
+    "powerbi": "1693253.26"
+  },
+  {
+    "id": "XT-TI-006",
+    "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date], \"6/30\"), XT_Date[Year] = 2024)",
+    "powerbi": "4477949.97"
+  },
+  {
+    "id": "XT-TI-007",
+    "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date], \"6/30\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "6956324"
+  },
+  {
+    "id": "XT-TI-008",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date], \"6/30\")), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "6956324"
+  },
+  {
+    "id": "XT-TI-009",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESQTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "2187839.22"
+  },
+  {
+    "id": "XT-TI-010",
+    "expr": "CALCULATE(TOTALQTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2250020.89"
+  },
+  {
+    "id": "XT-TI-011",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESMTD(XT_Date[Date])), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "385469.09"
+  },
+  {
+    "id": "XT-TI-012",
+    "expr": "CALCULATE(TOTALMTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "874742.31"
+  },
+  {
+    "id": "XT-TI-013",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "9291673.53"
+  },
+  {
+    "id": "XT-TI-014",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "775328.26"
+  },
+  {
+    "id": "XT-TI-015",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TI-016",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "775328.26"
+  },
+  {
+    "id": "XT-TI-017",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "742329.03"
+  },
+  {
+    "id": "XT-TI-018",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, MONTH)), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TI-019",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, QUARTER)), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "2250020.89"
+  },
+  {
+    "id": "XT-TI-020",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, DAY)), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "5108.58"
+  },
+  {
+    "id": "XT-TI-021",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], 1, YEAR)), XT_Date[Year] = 2023)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-TI-022",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PARALLELPERIOD(XT_Date[Date], -1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "9291673.53"
+  },
+  {
+    "id": "XT-TI-023",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PARALLELPERIOD(XT_Date[Date], -12, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "775328.26"
+  },
+  {
+    "id": "XT-TI-024",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PARALLELPERIOD(XT_Date[Date], -3, MONTH)), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "2250020.89"
+  },
+  {
+    "id": "XT-TI-025",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TI-026",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), NEXTMONTH(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "678000.58"
+  },
+  {
+    "id": "XT-TI-027",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSQUARTER(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "2250020.89"
+  },
+  {
+    "id": "XT-TI-028",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSYEAR(XT_Date[Date])), XT_Date[Year] = 2023)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TI-029",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), NEXTYEAR(XT_Date[Date])), XT_Date[Year] = 2023)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-TI-030",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSDAY(XT_Date[Date])), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "5108.58"
+  },
+  {
+    "id": "XT-TI-031",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), NEXTDAY(XT_Date[Date])), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "28118.93"
+  },
+  {
+    "id": "XT-TI-032",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), DATESBETWEEN(XT_Date[Date], DATE(2024, 1, 1), DATE(2024, 6, 30)))",
+    "powerbi": "4437860.11"
+  },
+  {
+    "id": "XT-TI-033",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESBETWEEN(XT_Date[Date], BLANK(), MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "11541694.42"
+  },
+  {
+    "id": "XT-TI-034",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2250020.89"
+  },
+  {
+    "id": "XT-TI-035",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -12, MONTH)), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "874742.31"
+  },
+  {
+    "id": "XT-TI-036",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -30, DAY)), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "804898.34"
+  },
+  {
+    "id": "XT-TI-037",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MIN(XT_Date[Date]), 1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "8872531.23"
+  },
+  {
+    "id": "XT-TI-038",
+    "expr": "CALCULATE(DIVIDE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH)), 3), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "291580.77"
+  },
+  {
+    "id": "XT-TI-039",
+    "expr": "CALCULATE(AVERAGEX(DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "24725.5043"
+  },
+  {
+    "id": "XT-TI-040",
+    "expr": "CALCULATE(CALCULATE(AVERAGEX(VALUES(XT_Date[YearMonth]), CALCULATE(SUM(XT_Sales[SalesAmount]))), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "750006.9633"
+  },
+  {
+    "id": "XT-TI-041",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[Date]), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "11138323.15"
+  },
+  {
+    "id": "XT-TI-042",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[Date]), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "11541694.42"
+  },
+  {
+    "id": "XT-TI-043",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[Date]), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1883995.65"
+  },
+  {
+    "id": "XT-TI-044",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date), XT_Date[Year] = MAX(XT_Date[Year]) && XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2250020.89"
+  },
+  {
+    "id": "XT-TI-045",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date), XT_Date[Year] = MAX(XT_Date[Year]) && XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "1846649.62"
+  },
+  {
+    "id": "XT-TI-046",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[YearMonth]), XT_Date[YearMonth] <= MAX(XT_Date[YearMonth]))), XT_Date[YearMonth] = 202403)",
+    "powerbi": "11541694.42"
+  },
+  {
+    "id": "XT-TI-047",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN DIVIDE(cur - prev, prev), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "0.0626559492089377"
+  },
+  {
+    "id": "XT-TI-048",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN DIVIDE(cur - prev, prev), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TI-049",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN DIVIDE(cur - prev, prev), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "-0.020803745666797"
+  },
+  {
+    "id": "XT-TI-050",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN cur - prev, XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)",
+    "powerbi": "874742.31"
+  },
+  {
+    "id": "XT-TI-051",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2024)",
+    "powerbi": "-0.0404516418690832"
+  },
+  {
+    "id": "XT-TI-052",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2023)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TI-053",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "0.0174275860910835"
+  },
+  {
+    "id": "XT-TI-054",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "0.0038073690912628"
+  },
+  {
+    "id": "XT-TI-055",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN cur - py, XT_Date[Year] = 2024)",
+    "powerbi": "-375863.45"
+  },
+  {
+    "id": "XT-TI-056",
+    "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN IF(ISBLANK(py), BLANK(), DIVIDE(cur - py, py)), XT_Date[Year] = 2023)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TI-057",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(DATESYTD(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2353667.37"
+  },
+  {
+    "id": "XT-TI-058",
+    "expr": "CALCULATE(CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), DATEADD(XT_Date[Date], -1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2353667.37"
+  },
+  {
+    "id": "XT-TI-059",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ENDOFMONTH(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "18908.44"
+  },
+  {
+    "id": "XT-TI-060",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "8006.44"
+  },
+  {
+    "id": "XT-TI-061",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FIRSTDATE(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "28546.43"
+  },
+  {
+    "id": "XT-TI-062",
+    "expr": "CALCULATE(COUNTROWS(DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "91"
+  },
+  {
+    "id": "XT-TI-063",
+    "expr": "CALCULATE(DATEDIFF(MIN(XT_Date[Date]), MAX(XT_Date[Date]), DAY), XT_Date[Year] = 2024)",
+    "powerbi": "365"
+  },
+  {
+    "id": "XT-TI-064",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, MONTH)), XT_Date[Date] = DATE(2024, 3, 31))",
+    "powerbi": "22484.28"
+  },
+  {
+    "id": "XT-TI-065",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Date] = DATE(2024, 2, 29))",
+    "powerbi": "29695.47"
+  },
+  {
+    "id": "XT-PT-001",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "0.165927060689504"
+  },
+  {
+    "id": "XT-PT-002",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Product[Category] = \"Cat_2\", XT_Date[Year] = 2024)",
+    "powerbi": "0.16226270041858"
+  },
+  {
+    "id": "XT-PT-003",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-PT-004",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Region))), XT_Region[Region] = \"North\")",
+    "powerbi": "0.205660855859497"
+  },
+  {
+    "id": "XT-PT-005",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Region))), XT_Region[Region] = \"North\", XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "0.185194463256679"
+  },
+  {
+    "id": "XT-PT-006",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS())), XT_Date[Year] = 2024)",
+    "powerbi": "0.326964778966082"
+  },
+  {
+    "id": "XT-PT-007",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS())), XT_Region[Region] = \"North\", XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "0.0471108343982542"
+  },
+  {
+    "id": "XT-PT-008",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer[Segment]))), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "0.241376118790334"
+  },
+  {
+    "id": "XT-PT-009",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Sales[Channel]))), XT_Sales[Channel] = \"Online\", XT_Region[Region] = \"North\")",
+    "powerbi": "0.325580811470014"
+  },
+  {
+    "id": "XT-PT-010",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category]))), XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "0.0667987826142268"
+  },
+  {
+    "id": "XT-PT-011",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category]))), XT_Product[Category] = \"Cat_2\", XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-PT-012",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS(XT_Date[MonthNumber]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "0.0884765773296957"
+  },
+  {
+    "id": "XT-PT-013",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALLSELECTED(XT_Product))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-PT-014",
+    "expr": "IF(ISFILTERED(XT_Product[Category]), DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Category]))), 1)",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-PT-015",
+    "expr": "CALCULATE(IF(ISFILTERED(XT_Product[Category]), DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Category]))), 1), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "0.165927060689504"
+  },
+  {
+    "id": "XT-PT-016",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) / CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "0.165927060689504"
+  },
+  {
+    "id": "XT-PT-017",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) / CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-PT-018",
+    "expr": "CALCULATE(DIVIDE(COUNTROWS(XT_Sales), CALCULATE(COUNTROWS(XT_Sales), ALL(XT_Region))), XT_Region[Region] = \"North\")",
+    "powerbi": "0.202416666666667"
+  },
+  {
+    "id": "XT-PT-019",
+    "expr": "CALCULATE(DIVIDE(DISTINCTCOUNT(XT_Sales[CustomerKey]), CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), ALL(XT_Product))), XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "0.616729088639201"
+  },
+  {
+    "id": "XT-RK-001",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Product] = \"Product_7\")",
+    "powerbi": "53"
+  },
+  {
+    "id": "XT-RK-002",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "62"
+  },
+  {
+    "id": "XT-RK-003",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[Quantity])), , ASC, Dense), XT_Product[Product] = \"Product_7\")",
+    "powerbi": "6"
+  },
+  {
+    "id": "XT-RK-004",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4"
+  },
+  {
+    "id": "XT-RK-005",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\", XT_Date[Year] = 2024)",
+    "powerbi": "4"
+  },
+  {
+    "id": "XT-RK-006",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])), , ASC), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4"
+  },
+  {
+    "id": "XT-RK-007",
+    "expr": "CALCULATE(RANKX(ALL(XT_Region[Region]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")",
+    "powerbi": "2"
+  },
+  {
+    "id": "XT-RK-008",
+    "expr": "CALCULATE(RANKX(ALL(XT_Region[Region]), CALCULATE(COUNTROWS(XT_Sales)), , DESC, Dense), XT_Region[Region] = \"North\")",
+    "powerbi": "2"
+  },
+  {
+    "id": "XT-RK-009",
+    "expr": "CALCULATE(RANKX(ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Customer] = \"Customer_10\")",
+    "powerbi": "117"
+  },
+  {
+    "id": "XT-RK-010",
+    "expr": "CALCULATE(RANKX(ALL(XT_Customer[Customer]), CALCULATE(COUNTROWS(XT_Sales)), , DESC, Dense), XT_Customer[Customer] = \"Customer_10\")",
+    "powerbi": "13"
+  },
+  {
+    "id": "XT-RK-011",
+    "expr": "CALCULATE(RANKX(ALL(XT_Customer[Customer]), CALCULATE(COUNTROWS(XT_Sales)), , DESC, Skip), XT_Customer[Customer] = \"Customer_10\")",
+    "powerbi": "187"
+  },
+  {
+    "id": "XT-RK-012",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Subcategory]), CALCULATE(SUM(XT_Sales[Quantity]))), XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "2"
+  },
+  {
+    "id": "XT-RK-013",
+    "expr": "CALCULATE(RANKX(ALL(XT_Date[YearMonth]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[YearMonth] = 202403)",
+    "powerbi": "9"
+  },
+  {
+    "id": "XT-RK-014",
+    "expr": "CALCULATE(RANKX(ALL(XT_Date[MonthNumber]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2"
+  },
+  {
+    "id": "XT-RK-015",
+    "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4"
+  },
+  {
+    "id": "XT-RK-016",
+    "expr": "CALCULATE(RANKX(ALLSELECTED(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-RK-017",
+    "expr": "SUMX(TOPN(5, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "2610808.83"
+  },
+  {
+    "id": "XT-RK-018",
+    "expr": "CALCULATE(SUMX(TOPN(5, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "2454038.18"
+  },
+  {
+    "id": "XT-RK-019",
+    "expr": "CALCULATE(SUMX(TOPN(10, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)",
+    "powerbi": "1845020"
+  },
+  {
+    "id": "XT-RK-020",
+    "expr": "SUMX(TOPN(5, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])), ASC), CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "1709605.22"
+  },
+  {
+    "id": "XT-RK-021",
+    "expr": "DIVIDE(SUMX(TOPN(10, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)))",
+    "powerbi": "0.186367857311608"
+  },
+  {
+    "id": "XT-RK-022",
+    "expr": "CALCULATE(DIVIDE(SUMX(TOPN(10, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Region[Region] = \"North\")",
+    "powerbi": "0.218510991177333"
+  },
+  {
+    "id": "XT-RK-023",
+    "expr": "DIVIDE(SUMX(TOPN(10, ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer)))",
+    "powerbi": "0.0341537902252825"
+  },
+  {
+    "id": "XT-RK-024",
+    "expr": "COUNTROWS(TOPN(3, ALL(XT_Region[Region]), CALCULATE(SUM(XT_Sales[SalesAmount]))))",
+    "powerbi": "3"
+  },
+  {
+    "id": "XT-RK-025",
+    "expr": "CONCATENATEX(TOPN(3, ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category], \", \", CALCULATE(SUM(XT_Sales[SalesAmount])), DESC)",
+    "powerbi": "Cat_5, Cat_4, Cat_6"
+  },
+  {
+    "id": "XT-RK-026",
+    "expr": "CALCULATE(CONCATENATEX(TOPN(3, ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category], \", \", CALCULATE(SUM(XT_Sales[SalesAmount])), DESC), XT_Region[Region] = \"North\")",
+    "powerbi": "Cat_4, Cat_6, Cat_1"
+  },
+  {
+    "id": "XT-RK-027",
+    "expr": "MAXX(TOPN(1, ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Customer])",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-RK-028",
+    "expr": "CALCULATE(MAXX(TOPN(1, ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Customer]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-RK-029",
+    "expr": "COUNTROWS(TOPN(1, ALL(XT_Customer[Customer]), CALCULATE(COUNTROWS(XT_Sales))))",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-RK-030",
+    "expr": "CALCULATE(COUNTROWS(TOPN(5, VALUES(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])))), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-AB-001",
+    "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_7\")",
+    "powerbi": "B"
+  },
+  {
+    "id": "XT-AB-002",
+    "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_30\")",
+    "powerbi": "A"
+  },
+  {
+    "id": "XT-AB-003",
+    "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_59\")",
+    "powerbi": "A"
+  },
+  {
+    "id": "XT-AB-004",
+    "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_7\", XT_Date[Year] = 2024)",
+    "powerbi": "A"
+  },
+  {
+    "id": "XT-AB-005",
+    "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Subcategory]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Subcategory])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "A"
+  },
+  {
+    "id": "XT-AB-006",
+    "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Region[Region]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Region[Region])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Region[Region] = \"North\")",
+    "powerbi": "A"
+  },
+  {
+    "id": "XT-AB-008",
+    "expr": "CALCULATE(SUMX(ALL(XT_Product[Product]), VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) RETURN IF(DIVIDE(cum, tot) <= 0.8, 1, 0)), XT_Date[Year] = 2024)",
+    "powerbi": "45"
+  },
+  {
+    "id": "XT-AB-009",
+    "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer[Customer])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Customer[Customer] = \"Customer_10\")",
+    "powerbi": "A"
+  },
+  {
+    "id": "XT-NR-001",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)",
+    "powerbi": "254"
+  },
+  {
+    "id": "XT-NR-002",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "25"
+  },
+  {
+    "id": "XT-NR-003",
+    "expr": "VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx))",
+    "powerbi": "734"
+  },
+  {
+    "id": "XT-NR-004",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)",
+    "powerbi": "253"
+  },
+  {
+    "id": "XT-NR-005",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "9"
+  },
+  {
+    "id": "XT-NR-006",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Region[Region] = \"North\")",
+    "powerbi": "157"
+  },
+  {
+    "id": "XT-NR-007",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN DISTINCTCOUNT(XT_Sales[CustomerKey]) - CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)",
+    "powerbi": "543"
+  },
+  {
+    "id": "XT-NR-008",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)",
+    "powerbi": "2828712.91"
+  },
+  {
+    "id": "XT-NR-009",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "21353.52"
+  },
+  {
+    "id": "XT-NR-010",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f >= mn && f <= mx)), XT_Date[Year] = 2024)",
+    "powerbi": "3"
+  },
+  {
+    "id": "XT-NR-011",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f >= mn && f <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-NR-012",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f >= mn && f <= mx)), XT_Date[Year] = 2024, XT_Region[Region] = \"North\")",
+    "powerbi": "162"
+  },
+  {
+    "id": "XT-NR-013",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f < mn)), XT_Date[Year] = 2024)",
+    "powerbi": "793"
+  },
+  {
+    "id": "XT-NR-014",
+    "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f < mn)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "288"
+  },
+  {
+    "id": "XT-NR-015",
+    "expr": "COUNTROWS(FILTER(XT_Customer, ISBLANK(XT_Customer[FirstOrderDate])))",
+    "powerbi": "66"
+  },
+  {
+    "id": "XT-NR-016",
+    "expr": "COUNTROWS(FILTER(XT_Customer, XT_Customer[FirstOrderDate] >= DATE(2025, 1, 1)))",
+    "powerbi": "255"
+  },
+  {
+    "id": "XT-BV-001",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])), XT_Date[Year] = 2024)",
+    "powerbi": "2185192.17"
+  },
+  {
+    "id": "XT-BV-002",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "172266.45"
+  },
+  {
+    "id": "XT-BV-003",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "523820.03"
+  },
+  {
+    "id": "XT-BV-004",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Date[Year] = 2024)",
+    "powerbi": "2185192.17"
+  },
+  {
+    "id": "XT-BV-005",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "37936.51"
+  },
+  {
+    "id": "XT-BV-006",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1170835.33"
+  },
+  {
+    "id": "XT-BV-007",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Date[Year] = 2023)",
+    "powerbi": "2191860.15"
+  },
+  {
+    "id": "XT-BV-008",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-BV-009",
+    "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN a - b, XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "76302.41"
+  },
+  {
+    "id": "XT-BV-010",
+    "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN a - b, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "3353732.01"
+  },
+  {
+    "id": "XT-BV-011",
+    "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a - b, b), XT_Date[Year] = 2024)",
+    "powerbi": "3.08010343547954"
+  },
+  {
+    "id": "XT-BV-012",
+    "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a - b, b), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "2.01131864791991"
+  },
+  {
+    "id": "XT-BV-013",
+    "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a - b, b), XT_Date[Year] = 2026)",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-BV-014",
+    "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a, b), XT_Date[Year] = 2024)",
+    "powerbi": "4.08010343547954"
+  },
+  {
+    "id": "XT-BV-015",
+    "expr": "VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a, b)",
+    "powerbi": "4.24720942239508"
+  },
+  {
+    "id": "XT-BV-016",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(CALCULATETABLE(VALUES(XT_Date[YearMonth]), DATESYTD(XT_Date[Date])), XT_Budget[YearMonth])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "612154.07"
+  },
+  {
+    "id": "XT-BV-017",
+    "expr": "CALCULATE(VAR a = CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(CALCULATETABLE(VALUES(XT_Date[YearMonth]), DATESYTD(XT_Date[Date])), XT_Budget[YearMonth])) RETURN DIVIDE(a, b), XT_Date[Year] = 2024)",
+    "powerbi": "4.08010343547954"
+  },
+  {
+    "id": "XT-BV-018",
+    "expr": "CALCULATE(SUMX(VALUES(XT_Date[YearMonth]), VAR ym = XT_Date[YearMonth] RETURN CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[YearMonth] = ym)), XT_Date[Year] = 2024)",
+    "powerbi": "2185192.17"
+  },
+  {
+    "id": "XT-BV-019",
+    "expr": "CALCULATE(SUMX(VALUES(XT_Date[YearMonth]), VAR ym = XT_Date[YearMonth] RETURN CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[YearMonth] = ym)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "172266.45"
+  },
+  {
+    "id": "XT-BV-020",
+    "expr": "CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Date[Year] = 2024)",
+    "powerbi": "6420312.4"
+  },
+  {
+    "id": "XT-BV-021",
+    "expr": "LOOKUPVALUE(XT_Budget[BudgetAmount], XT_Budget[YearMonth], 202403, XT_Budget[Category], \"Cat_1\")",
+    "powerbi": "11093.38"
+  },
+  {
+    "id": "XT-BV-022",
+    "expr": "CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[Category] = \"Cat_1\", XT_Budget[YearMonth] >= 202401, XT_Budget[YearMonth] <= 202406)",
+    "powerbi": "159000.81"
+  },
+  {
+    "id": "XT-BV-023",
+    "expr": "SUMX(VALUES(XT_Product[Category]), VAR c = XT_Product[Category] RETURN CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[Category] = c, TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])))",
+    "powerbi": "6420312.4"
+  },
+  {
+    "id": "XT-SA-001",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "37"
+  },
+  {
+    "id": "XT-SA-002",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "90"
+  },
+  {
+    "id": "XT-SA-003",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "111"
+  },
+  {
+    "id": "XT-SA-004",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024)",
+    "powerbi": "37"
+  },
+  {
+    "id": "XT-SA-005",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "90"
+  },
+  {
+    "id": "XT-SA-006",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "16"
+  },
+  {
+    "id": "XT-SA-007",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], SUM(XT_Sales[Quantity]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "90"
+  },
+  {
+    "id": "XT-SA-008",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), FIRSTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "143"
+  },
+  {
+    "id": "XT-SA-009",
+    "expr": "CALCULATE(CLOSINGBALANCEMONTH(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "90"
+  },
+  {
+    "id": "XT-SA-010",
+    "expr": "CALCULATE(CLOSINGBALANCEMONTH(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "111"
+  },
+  {
+    "id": "XT-SA-011",
+    "expr": "CALCULATE(CLOSINGBALANCEQUARTER(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "111"
+  },
+  {
+    "id": "XT-SA-012",
+    "expr": "CALCULATE(CLOSINGBALANCEYEAR(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024)",
+    "powerbi": "37"
+  },
+  {
+    "id": "XT-SA-013",
+    "expr": "CALCULATE(OPENINGBALANCEMONTH(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "114"
+  },
+  {
+    "id": "XT-SA-014",
+    "expr": "CALCULATE(OPENINGBALANCEQUARTER(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")",
+    "powerbi": "90"
+  },
+  {
+    "id": "XT-SA-015",
+    "expr": "CALCULATE(OPENINGBALANCEYEAR(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024)",
+    "powerbi": "91"
+  },
+  {
+    "id": "XT-SA-016",
+    "expr": "CALCULATE(LASTNONBLANKVALUE(XT_Date[Date], SUM(XT_Sales[Quantity])), XT_Date[Year] = 2024)",
+    "powerbi": "37"
+  },
+  {
+    "id": "XT-SA-017",
+    "expr": "CALCULATE(LASTNONBLANKVALUE(XT_Date[Date], SUM(XT_Sales[Quantity])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "90"
+  },
+  {
+    "id": "XT-SA-018",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), DATESBETWEEN(XT_Date[Date], BLANK(), MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "52712"
+  },
+  {
+    "id": "XT-SA-019",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), DATESBETWEEN(XT_Date[Date], BLANK(), MAX(XT_Date[Date]))), XT_Date[Date] = DATE(2024, 3, 15))",
+    "powerbi": "50834"
+  },
+  {
+    "id": "XT-SA-020",
+    "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-SA-021",
+    "expr": "CALCULATE(AVERAGEX(VALUES(XT_Date[Date]), CALCULATE(SUM(XT_Sales[Quantity]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "118.967741935484"
+  },
+  {
+    "id": "XT-IR-001",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]))",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-IR-002",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "8508953.02"
+  },
+  {
+    "id": "XT-IR-003",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "772983.16"
+  },
+  {
+    "id": "XT-IR-004",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2023)",
+    "powerbi": "8663150.96"
+  },
+  {
+    "id": "XT-IR-005",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Product[Category] = \"Cat_2\", XT_Date[Year] = 2024)",
+    "powerbi": "1365357.4"
+  },
+  {
+    "id": "XT-IR-006",
+    "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "3751"
+  },
+  {
+    "id": "XT-IR-007",
+    "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "340"
+  },
+  {
+    "id": "XT-IR-008",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])) - SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "-15857.2"
+  },
+  {
+    "id": "XT-IR-009",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2148668.39"
+  },
+  {
+    "id": "XT-IR-010",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "746418.59"
+  },
+  {
+    "id": "XT-IR-011",
+    "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "796"
+  },
+  {
+    "id": "XT-IR-012",
+    "expr": "SUM(XT_Sales[SalesAmount]) - CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]))",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-IR-013",
+    "expr": "CALCULATE(COUNTROWS(XT_Sales), ISBLANK(XT_Sales[ShipDate]))",
+    "powerbi": "607"
+  },
+  {
+    "id": "XT-IR-014",
+    "expr": "AVERAGEX(XT_Sales, IF(ISBLANK(XT_Sales[ShipDate]), BLANK(), DATEDIFF(XT_Sales[OrderDate], XT_Sales[ShipDate], DAY)))",
+    "powerbi": "5.03423154568595"
+  },
+  {
+    "id": "XT-IR-015",
+    "expr": "CALCULATE(AVERAGEX(XT_Sales, IF(ISBLANK(XT_Sales[ShipDate]), BLANK(), DATEDIFF(XT_Sales[OrderDate], XT_Sales[ShipDate], DAY))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "5.0185873605948"
+  },
+  {
+    "id": "XT-IR-016",
+    "expr": "AVERAGEX(XT_Sales, DATEDIFF(XT_Sales[OrderDate], XT_Sales[ShipDate], DAY))",
+    "powerbi": "5.03423154568595"
+  },
+  {
+    "id": "XT-IR-017",
+    "expr": "CALCULATE(CALCULATE(SUMX(XT_Sales, RELATED(XT_Date[MonthNumber])), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "24351"
+  },
+  {
+    "id": "XT-IR-018",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), CROSSFILTER(XT_Sales[OrderDate], XT_Date[Date], NONE), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)",
+    "powerbi": "8508953.02"
+  },
+  {
+    "id": "XT-MM-001",
+    "expr": "COUNTROWS(XT_CustomerRegion)",
+    "powerbi": "1597"
+  },
+  {
+    "id": "XT-MM-002",
+    "expr": "CALCULATE(COUNTROWS(XT_CustomerRegion), XT_Region[Region] = \"North\")",
+    "powerbi": "324"
+  },
+  {
+    "id": "XT-MM-003",
+    "expr": "CALCULATE(COUNTROWS(XT_CustomerRegion), XT_Region[Region] = \"North\", XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "75"
+  },
+  {
+    "id": "XT-MM-004",
+    "expr": "DISTINCTCOUNT(XT_CustomerRegion[CustomerKey])",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-MM-005",
+    "expr": "CALCULATE(DISTINCTCOUNT(XT_CustomerRegion[CustomerKey]), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "200"
+  },
+  {
+    "id": "XT-MM-006",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), CROSSFILTER(XT_CustomerRegion[CustomerKey], XT_Customer[CustomerKey], BOTH)), XT_Region[Region] = \"North\")",
+    "powerbi": "5608044.81"
+  },
+  {
+    "id": "XT-MM-007",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), CROSSFILTER(XT_CustomerRegion[CustomerKey], XT_Customer[CustomerKey], BOTH)), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)",
+    "powerbi": "1693253.26"
+  },
+  {
+    "id": "XT-MM-008",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey])), XT_Region[Region] = \"North\")",
+    "powerbi": "2331965.38"
+  },
+  {
+    "id": "XT-MM-009",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey]))",
+    "powerbi": "26990081"
+  },
+  {
+    "id": "XT-MM-010",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey])), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)",
+    "powerbi": "704989.23"
+  },
+  {
+    "id": "XT-MM-011",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey]), REMOVEFILTERS(XT_Region)), XT_Region[Region] = \"North\")",
+    "powerbi": "10985175.04"
+  },
+  {
+    "id": "XT-MM-012",
+    "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey]), REMOVEFILTERS(XT_Region)), XT_Region[Region] = \"North\")",
+    "powerbi": "324"
+  },
+  {
+    "id": "XT-MM-013",
+    "expr": "AVERAGEX(VALUES(XT_Region[Region]), CALCULATE(COUNTROWS(XT_CustomerRegion)))",
+    "powerbi": "319.4"
+  },
+  {
+    "id": "XT-MM-014",
+    "expr": "COUNTROWS(FILTER(VALUES(XT_Customer[CustomerKey]), CALCULATE(COUNTROWS(XT_CustomerRegion)) > 1))",
+    "powerbi": "537"
+  },
+  {
+    "id": "XT-MM-015",
+    "expr": "CALCULATE(COUNTROWS(FILTER(VALUES(XT_Customer[CustomerKey]), CALCULATE(COUNTROWS(XT_CustomerRegion)) > 1)), XT_Region[Region] = \"North\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-MM-016",
+    "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(COUNTROWS(XT_CustomerRegion))), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "390"
+  },
+  {
+    "id": "XT-MM-017",
+    "expr": "COUNTROWS(FILTER(XT_Customer, CALCULATE(COUNTROWS(XT_CustomerRegion), XT_Region[Region] = \"North\") > 0))",
+    "powerbi": "324"
+  },
+  {
+    "id": "XT-MM-018",
+    "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Customer[CustomerKey]), CROSSFILTER(XT_CustomerRegion[CustomerKey], XT_Customer[CustomerKey], BOTH)), XT_Region[Region] = \"North\")",
+    "powerbi": "324"
+  },
+  {
+    "id": "XT-MM-019",
+    "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), CROSSFILTER(XT_Sales[RegionKey], XT_Region[RegionKey], NONE)), XT_Region[Region] = \"North\")",
+    "powerbi": "12000"
+  },
+  {
+    "id": "XT-CT-001",
+    "expr": "SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "26990081"
+  },
+  {
+    "id": "XT-CT-002",
+    "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)",
+    "powerbi": "8819744.02"
+  },
+  {
+    "id": "XT-CT-003",
+    "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "6581943.29"
+  },
+  {
+    "id": "XT-CT-004",
+    "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")",
+    "powerbi": "5555076.86"
+  },
+  {
+    "id": "XT-CT-005",
+    "expr": "CALCULATE(SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-CT-006",
+    "expr": "CALCULATE(SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")",
+    "powerbi": "5608044.81"
+  },
+  {
+    "id": "XT-CT-007",
+    "expr": "MAXX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "4637617.53"
+  },
+  {
+    "id": "XT-CT-008",
+    "expr": "CALCULATE(MAXX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")",
+    "powerbi": "1030535.42"
+  },
+  {
+    "id": "XT-CT-009",
+    "expr": "AVERAGEX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "33737.6013"
+  },
+  {
+    "id": "XT-CT-010",
+    "expr": "CALCULATE(AVERAGEX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "32909.7165"
+  },
+  {
+    "id": "XT-CT-011",
+    "expr": "SUMX(XT_Sales, RELATED(XT_Product[ListPrice]) * XT_Sales[Quantity])",
+    "powerbi": "32613720.92"
+  },
+  {
+    "id": "XT-CT-012",
+    "expr": "CALCULATE(SUMX(XT_Sales, RELATED(XT_Product[ListPrice]) * XT_Sales[Quantity]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "3975158.34"
+  },
+  {
+    "id": "XT-CT-013",
+    "expr": "CALCULATE(SUMX(XT_Sales, RELATED(XT_Product[ListPrice]) * XT_Sales[Quantity]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-CT-014",
+    "expr": "CALCULATE(SUMX(XT_Sales, IF(RELATED(XT_Product[Category]) = \"Cat_1\", XT_Sales[SalesAmount], 0)), XT_Date[Year] = 2024)",
+    "powerbi": "1337487.65"
+  },
+  {
+    "id": "XT-CT-015",
+    "expr": "SUMX(XT_Customer, COUNTROWS(RELATEDTABLE(XT_Sales)))",
+    "powerbi": "11875"
+  },
+  {
+    "id": "XT-CT-016",
+    "expr": "CALCULATE(SUMX(XT_Customer, COUNTROWS(RELATEDTABLE(XT_Sales))), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "2923"
+  },
+  {
+    "id": "XT-CT-017",
+    "expr": "COUNTROWS(FILTER(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])) > 5000))",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-CT-018",
+    "expr": "CALCULATE(COUNTROWS(FILTER(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])) > 5000)), XT_Date[Year] = 2024)",
+    "powerbi": "647"
+  },
+  {
+    "id": "XT-CT-019",
+    "expr": "CALCULATE(COUNTROWS(FILTER(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])) > 5000)), XT_Region[Region] = \"North\")",
+    "powerbi": "465"
+  },
+  {
+    "id": "XT-CT-020",
+    "expr": "SUMX(XT_Product, CALCULATE(SUM(XT_Sales[Quantity])) * XT_Product[ListPrice])",
+    "powerbi": "32613720.92"
+  },
+  {
+    "id": "XT-CT-021",
+    "expr": "CALCULATE(SUMX(XT_Product, CALCULATE(SUM(XT_Sales[Quantity])) * XT_Product[ListPrice]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "3975158.34"
+  },
+  {
+    "id": "XT-CT-022",
+    "expr": "CALCULATE(AVERAGEX(VALUES(XT_Date[Date]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "25446.4632"
+  },
+  {
+    "id": "XT-CT-023",
+    "expr": "CALCULATE(SUMX(VALUES(XT_Region[Region]), SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))), XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-CT-024",
+    "expr": "CALCULATE(SUMX(XT_Product, COUNTROWS(RELATEDTABLE(XT_Sales))), XT_Date[Year] = 2024)",
+    "powerbi": "3883"
+  },
+  {
+    "id": "XT-CT-025",
+    "expr": "CALCULATE(SUMX(FILTER(XT_Customer, CALCULATE(COUNTROWS(XT_Sales)) > 10), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)",
+    "powerbi": "204717.11"
+  },
+  {
+    "id": "XT-CT-026",
+    "expr": "COUNTROWS(FILTER(XT_Sales, RELATED(XT_Region[Country]) = \"Canada\"))",
+    "powerbi": "4763"
+  },
+  {
+    "id": "XT-CT-027",
+    "expr": "SUMX(XT_Product, SUMX(RELATEDTABLE(XT_Sales), XT_Sales[Quantity]))",
+    "powerbi": "124364"
+  },
+  {
+    "id": "XT-TX-001",
+    "expr": "CALCULATE(FORMAT(SUM(XT_Sales[SalesAmount]), \"#,0.00\"), XT_Date[Year] = 2024)",
+    "powerbi": "8,915,810.08"
+  },
+  {
+    "id": "XT-TX-002",
+    "expr": "CALCULATE(FORMAT(SUM(XT_Sales[SalesAmount]), \"#,0.00\"), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": ""
+  },
+  {
+    "id": "XT-TX-003",
+    "expr": "CALCULATE(FORMAT(SUM(XT_Sales[SalesAmount]), \"Currency\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "$4,524,567.34"
+  },
+  {
+    "id": "XT-TX-004",
+    "expr": "CALCULATE(FORMAT(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), \"0.0%\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "16.6%"
+  },
+  {
+    "id": "XT-TX-005",
+    "expr": "CALCULATE(FORMAT(MIN(XT_Date[Date]), \"yyyy-MM-dd\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "2024-03-01"
+  },
+  {
+    "id": "XT-TX-006",
+    "expr": "CALCULATE(FORMAT(MIN(XT_Date[Date]), \"MMM yyyy\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "Mar 2024"
+  },
+  {
+    "id": "XT-TX-007",
+    "expr": "CONCATENATEX(VALUES(XT_Product[Category]), XT_Product[Category], \", \", XT_Product[Category], ASC)",
+    "powerbi": ", Cat_1, Cat_2, Cat_3, Cat_4, Cat_5, Cat_6"
+  },
+  {
+    "id": "XT-TX-008",
+    "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Product[Category]), XT_Product[Category], \", \", XT_Product[Category], ASC), XT_Product[Subcategory] = \"Subcat_4\")",
+    "powerbi": "Cat_1, Cat_4"
+  },
+  {
+    "id": "XT-TX-009",
+    "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Region[Region]), XT_Region[Region], \" | \", XT_Region[Region]), XT_Region[Region] = \"North\")",
+    "powerbi": "North"
+  },
+  {
+    "id": "XT-TX-010",
+    "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Sales[Channel]), XT_Sales[Channel], \", \", XT_Sales[Channel]), XT_Date[Year] = 2024)",
+    "powerbi": "Online, Partner, Store"
+  },
+  {
+    "id": "XT-TX-011",
+    "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Sales[Channel]), XT_Sales[Channel], \", \", XT_Sales[Channel]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TX-012",
+    "expr": "CALCULATE(CONCATENATEX(FILTER(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])) > 1000000), XT_Product[Category], \", \", XT_Product[Category]), XT_Date[Year] = 2024)",
+    "powerbi": "Cat_1, Cat_2, Cat_3, Cat_4, Cat_5, Cat_6"
+  },
+  {
+    "id": "XT-TX-013",
+    "expr": "SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\")",
+    "powerbi": "High"
+  },
+  {
+    "id": "XT-TX-014",
+    "expr": "CALCULATE(SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "High"
+  },
+  {
+    "id": "XT-TX-015",
+    "expr": "CALCULATE(SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\"), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "Low"
+  },
+  {
+    "id": "XT-TX-016",
+    "expr": "CALCULATE(SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "Medium"
+  },
+  {
+    "id": "XT-TX-017",
+    "expr": "CALCULATE(SWITCH(SELECTEDVALUE(XT_Product[Category]), \"Cat_1\", \"One\", \"Cat_2\", \"Two\", \"Other\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "Two"
+  },
+  {
+    "id": "XT-TX-018",
+    "expr": "CALCULATE(SELECTEDVALUE(XT_Product[Category], \"Multiple\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "Cat_2"
+  },
+  {
+    "id": "XT-TX-019",
+    "expr": "CALCULATE(SELECTEDVALUE(XT_Date[Year]), XT_Date[Year] = 2024)",
+    "powerbi": "2024"
+  },
+  {
+    "id": "XT-TX-020",
+    "expr": "SELECTEDVALUE(XT_Region[Region], \"All Regions\")",
+    "powerbi": "All Regions"
+  },
+  {
+    "id": "XT-TX-021",
+    "expr": "CALCULATE(SELECTEDVALUE(XT_Region[Region], \"All Regions\"), XT_Region[Region] = \"North\")",
+    "powerbi": "North"
+  },
+  {
+    "id": "XT-TX-022",
+    "expr": "SELECTEDVALUE(XT_Customer[Segment])",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-TX-023",
+    "expr": "CALCULATE(LEFT(SELECTEDVALUE(XT_Product[Category], \"n/a\"), 3), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "Cat"
+  },
+  {
+    "id": "XT-TX-024",
+    "expr": "CALCULATE(UPPER(SELECTEDVALUE(XT_Region[Region], \"ALL\")), XT_Region[Region] = \"North\")",
+    "powerbi": "NORTH"
+  },
+  {
+    "id": "XT-TX-025",
+    "expr": "CALCULATE(SUBSTITUTE(SELECTEDVALUE(XT_Product[Category], \"x\"), \"_\", \" \"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "Cat 2"
+  },
+  {
+    "id": "XT-TX-026",
+    "expr": "\"Sales \" & SELECTEDVALUE(XT_Date[Year], \"All Years\") & \" - \" & SELECTEDVALUE(XT_Region[Region], \"All Regions\")",
+    "powerbi": "Sales All Years - All Regions"
+  },
+  {
+    "id": "XT-TX-027",
+    "expr": "CALCULATE(\"Sales \" & SELECTEDVALUE(XT_Date[Year], \"All Years\") & \" - \" & SELECTEDVALUE(XT_Region[Region], \"All Regions\"), XT_Date[Year] = 2024, XT_Region[Region] = \"North\")",
+    "powerbi": "Sales 2024 - North"
+  },
+  {
+    "id": "XT-TX-028",
+    "expr": "LEN(CONCATENATEX(VALUES(XT_Product[Category]), XT_Product[Category], \",\"))",
+    "powerbi": "36"
+  },
+  {
+    "id": "XT-TX-029",
+    "expr": "CALCULATE(IF(HASONEVALUE(XT_Product[Category]), VALUES(XT_Product[Category]), \"Many\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "Cat_2"
+  },
+  {
+    "id": "XT-TX-030",
+    "expr": "CALCULATE(SELECTEDVALUE(XT_Product[Category], \"Multiple\"), XT_Product[Category] IN {\"Cat_1\", \"Cat_2\"})",
+    "powerbi": "Multiple"
+  },
+  {
+    "id": "XT-LG-001",
+    "expr": "CALCULATE(IF(SUM(XT_Sales[SalesAmount]) > 1000000, \"Above\", \"Below\"), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "Below"
+  },
+  {
+    "id": "XT-LG-002",
+    "expr": "CALCULATE(IF(ISBLANK(SUM(XT_Sales[SalesAmount])), 0, SUM(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-LG-003",
+    "expr": "CALCULATE(IF(ISBLANK(SUM(XT_Sales[SalesAmount])), 0, SUM(XT_Sales[SalesAmount])), XT_Date[Year] = 2026)",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-LG-004",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) + 0, XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-LG-005",
+    "expr": "CALCULATE(COALESCE(SUM(XT_Sales[SalesAmount]), 0), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-LG-006",
+    "expr": "CALCULATE(COALESCE(SUM(XT_Sales[SalesAmount]), 0), XT_Date[Year] = 2026)",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-LG-007",
+    "expr": "CALCULATE(COALESCE(SUM(XT_Sales[SalesAmount]), -1), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "-1"
+  },
+  {
+    "id": "XT-LG-008",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales), 0), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-LG-009",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales), 0), XT_Region[Region] = \"North\")",
+    "powerbi": "2308.7875"
+  },
+  {
+    "id": "XT-LG-010",
+    "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales)), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-LG-011",
+    "expr": "DIVIDE(SUM(XT_Sales[Quantity]), 0, -1)",
+    "powerbi": "-1"
+  },
+  {
+    "id": "XT-LG-012",
+    "expr": "CALCULATE(IF(SUM(XT_Sales[SalesAmount]) > 0, SUM(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-LG-013",
+    "expr": "CALCULATE(IF(COUNTROWS(XT_Sales) = 0, \"No data\", \"Has data\"), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "No data"
+  },
+  {
+    "id": "XT-LG-014",
+    "expr": "CALCULATE(IF(COUNTROWS(XT_Sales) = 0, \"No data\", \"Has data\"), XT_Date[Year] = 2026)",
+    "powerbi": "No data"
+  },
+  {
+    "id": "XT-LG-015",
+    "expr": "CALCULATE(IF(SUM(XT_Sales[SalesAmount]) = BLANK(), \"blank\", \"value\"), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "blank"
+  },
+  {
+    "id": "XT-LG-016",
+    "expr": "CALCULATE(IF(AND(SUM(XT_Sales[SalesAmount]) > 100000, COUNTROWS(XT_Sales) > 100), 1, 0), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-LG-017",
+    "expr": "CALCULATE(IF(AND(SUM(XT_Sales[SalesAmount]) > 100000, COUNTROWS(XT_Sales) > 100), 1, 0), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-LG-018",
+    "expr": "CALCULATE(IF(OR(SUM(XT_Sales[SalesAmount]) > 10000000, COUNTROWS(XT_Sales) > 100), 1, 0), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-LG-019",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) > 0, XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-LG-020",
+    "expr": "CALCULATE(ISBLANK(SUM(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "True"
+  },
+  {
+    "id": "XT-LG-021",
+    "expr": "ISBLANK(SUM(XT_Sales[SalesAmount]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-LG-022",
+    "expr": "CALCULATE(ISEMPTY(XT_Sales), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "True"
+  },
+  {
+    "id": "XT-LG-023",
+    "expr": "CALCULATE(NOT(ISEMPTY(CALCULATETABLE(XT_Sales, XT_Sales[Channel] = \"Online\"))), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-LG-024",
+    "expr": "CALCULATE(NOT(ISEMPTY(CALCULATETABLE(XT_Sales, XT_Sales[Channel] = \"Online\"))), XT_Date[Year] = 2026)",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-LG-025",
+    "expr": "IFERROR(1 / 0, -1)",
+    "powerbi": "-1"
+  },
+  {
+    "id": "XT-LG-026",
+    "expr": "IFERROR(VALUE(\"abc\"), 0)",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-LG-027",
+    "expr": "ROUND(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales)), 2)",
+    "powerbi": "2272.37"
+  },
+  {
+    "id": "XT-LG-028",
+    "expr": "IF(HASONEVALUE(XT_Product[Category]), SUM(XT_Sales[SalesAmount]), BLANK())",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-LG-029",
+    "expr": "IF(SELECTEDVALUE(XT_Product[Category]) IN {\"Cat_1\", \"Cat_2\"}, \"early\", \"late\")",
+    "powerbi": "late"
+  },
+  {
+    "id": "XT-LG-030",
+    "expr": "ISCROSSFILTERED(XT_Sales)",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-LG-031",
+    "expr": "HASONEFILTER(XT_Product[Category])",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-ST-001",
+    "expr": "MEDIAN(XT_Sales[SalesAmount])",
+    "powerbi": "1736.495"
+  },
+  {
+    "id": "XT-ST-002",
+    "expr": "CALCULATE(MEDIAN(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1706.25"
+  },
+  {
+    "id": "XT-ST-003",
+    "expr": "CALCULATE(MEDIAN(XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-ST-004",
+    "expr": "CALCULATE(MEDIANX(XT_Sales, XT_Sales[SalesAmount] / XT_Sales[Quantity]), XT_Date[Year] = 2024)",
+    "powerbi": "215.9741"
+  },
+  {
+    "id": "XT-ST-005",
+    "expr": "PERCENTILE.INC(XT_Sales[SalesAmount], 0.9)",
+    "powerbi": "5178.244"
+  },
+  {
+    "id": "XT-ST-006",
+    "expr": "CALCULATE(PERCENTILE.INC(XT_Sales[SalesAmount], 0.9), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "5198.115"
+  },
+  {
+    "id": "XT-ST-007",
+    "expr": "CALCULATE(PERCENTILE.EXC(XT_Sales[SalesAmount], 0.25), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "663.7075"
+  },
+  {
+    "id": "XT-ST-008",
+    "expr": "CALCULATE(PERCENTILEX.INC(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice], 0.5), XT_Date[Year] = 2024)",
+    "powerbi": "2014.01"
+  },
+  {
+    "id": "XT-ST-009",
+    "expr": "STDEV.P(XT_Sales[SalesAmount])",
+    "powerbi": "1932.4624"
+  },
+  {
+    "id": "XT-ST-010",
+    "expr": "CALCULATE(STDEV.P(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1950.9494"
+  },
+  {
+    "id": "XT-ST-011",
+    "expr": "CALCULATE(STDEV.S(XT_Sales[SalesAmount]), XT_Region[Region] = \"North\")",
+    "powerbi": "1935.6518"
+  },
+  {
+    "id": "XT-ST-012",
+    "expr": "STDEVX.P(XT_Sales, XT_Sales[SalesAmount])",
+    "powerbi": "1932.4624"
+  },
+  {
+    "id": "XT-ST-013",
+    "expr": "STDEVX.S(XT_Sales, XT_Sales[SalesAmount])",
+    "powerbi": "1932.543"
+  },
+  {
+    "id": "XT-ST-014",
+    "expr": "CALCULATE(VAR.P(XT_Sales[SalesAmount]), XT_Date[Year] = 2024)",
+    "powerbi": "3876142.78777092"
+  },
+  {
+    "id": "XT-ST-015",
+    "expr": "CALCULATE(VAR.P(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "3806203.49870388"
+  },
+  {
+    "id": "XT-ST-016",
+    "expr": "CALCULATE(VAR.S(XT_Sales[Quantity]), XT_Region[Region] = \"North\")",
+    "powerbi": "33.9474424563705"
+  },
+  {
+    "id": "XT-ST-017",
+    "expr": "VARX.P(XT_Sales, XT_Sales[SalesAmount])",
+    "powerbi": "3734411.04529099"
+  },
+  {
+    "id": "XT-ST-018",
+    "expr": "VARX.S(XT_Sales, XT_Sales[SalesAmount])",
+    "powerbi": "3734722.272147"
+  },
+  {
+    "id": "XT-ST-019",
+    "expr": "DIVIDE(STDEV.P(XT_Sales[SalesAmount]), AVERAGE(XT_Sales[SalesAmount]))",
+    "powerbi": "0.8504180397573"
+  },
+  {
+    "id": "XT-ST-020",
+    "expr": "CALCULATE(DIVIDE(STDEV.P(XT_Sales[SalesAmount]), AVERAGE(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-ST-021",
+    "expr": "MEDIANX(VALUES(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "452458.15"
+  },
+  {
+    "id": "XT-ST-022",
+    "expr": "CALCULATE(MEDIANX(VALUES(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")",
+    "powerbi": "89900.96"
+  },
+  {
+    "id": "XT-ST-023",
+    "expr": "CALCULATE(PERCENTILEX.INC(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])), 0.8), XT_Date[Year] = 2024)",
+    "powerbi": "168577.97"
+  },
+  {
+    "id": "XT-ST-024",
+    "expr": "AVERAGE(XT_Sales[SalesAmount]) - MEDIAN(XT_Sales[SalesAmount])",
+    "powerbi": "535.8726"
+  },
+  {
+    "id": "XT-EC-001",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[ProductKey] = 999)",
+    "powerbi": "272804.55"
+  },
+  {
+    "id": "XT-EC-002",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[ProductKey] = 999), XT_Region[Region] = \"North\")",
+    "powerbi": "53557.04"
+  },
+  {
+    "id": "XT-EC-003",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = BLANK())",
+    "powerbi": "272804.55"
+  },
+  {
+    "id": "XT-EC-004",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), ISBLANK(XT_Product[Category]))",
+    "powerbi": "272804.55"
+  },
+  {
+    "id": "XT-EC-005",
+    "expr": "SUM(XT_Sales[SalesAmount]) - SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-EC-006",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) - SUMX(DISTINCT(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)",
+    "powerbi": "105994.77"
+  },
+  {
+    "id": "XT-EC-007",
+    "expr": "SUM(XT_Sales[SalesAmount]) - SUMX(ALLNOBLANKROW(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))",
+    "powerbi": "272804.55"
+  },
+  {
+    "id": "XT-EC-008",
+    "expr": "COUNTROWS(VALUES(XT_Product[Category]))",
+    "powerbi": "7"
+  },
+  {
+    "id": "XT-EC-009",
+    "expr": "COUNTROWS(DISTINCT(XT_Product[Category]))",
+    "powerbi": "6"
+  },
+  {
+    "id": "XT-EC-010",
+    "expr": "COUNTROWS(ALL(XT_Product[Category]))",
+    "powerbi": "7"
+  },
+  {
+    "id": "XT-EC-011",
+    "expr": "COUNTROWS(ALLNOBLANKROW(XT_Product[Category]))",
+    "powerbi": "6"
+  },
+  {
+    "id": "XT-EC-012",
+    "expr": "COUNTROWS(VALUES(XT_Product[Color]))",
+    "powerbi": "6"
+  },
+  {
+    "id": "XT-EC-013",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Color] = BLANK())",
+    "powerbi": "6787312.86"
+  },
+  {
+    "id": "XT-EC-014",
+    "expr": "CALCULATE(COUNTROWS(XT_Sales), ISBLANK(XT_Sales[CustomerKey]))",
+    "powerbi": "125"
+  },
+  {
+    "id": "XT-EC-015",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Customer[Customer] = BLANK())",
+    "powerbi": "278330.32"
+  },
+  {
+    "id": "XT-EC-016",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Date] = DATE(2024, 2, 29))",
+    "powerbi": "22484.28"
+  },
+  {
+    "id": "XT-EC-017",
+    "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[IsWeekend] = TRUE()), XT_Region[Region] = \"North\")",
+    "powerbi": "1684635.72"
+  },
+  {
+    "id": "XT-EC-018",
+    "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Month] = \"Feb\", XT_Date[Year] = 2024)",
+    "powerbi": "742329.03"
+  },
+  {
+    "id": "XT-EC-019",
+    "expr": "1 / 0",
+    "powerbi": "Infinity"
+  },
+  {
+    "id": "XT-EC-020",
+    "expr": "0 / 0",
+    "powerbi": "NaN"
+  },
+  {
+    "id": "XT-EC-021",
+    "expr": "BLANK() + 1",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-EC-022",
+    "expr": "BLANK() = 0",
+    "powerbi": "True"
+  },
+  {
+    "id": "XT-EC-023",
+    "expr": "BLANK() & \"x\"",
+    "powerbi": "x"
+  },
+  {
+    "id": "XT-EC-024",
+    "expr": "ROUND(2.5, 0)",
+    "powerbi": "3"
+  },
+  {
+    "id": "XT-EC-025",
+    "expr": "ROUND(-2.5, 0)",
+    "powerbi": "-3"
+  },
+  {
+    "id": "XT-EC-026",
+    "expr": "MOD(-7, 3)",
+    "powerbi": "2"
+  },
+  {
+    "id": "XT-EC-027",
+    "expr": "SQRT(-1)",
+    "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+    "id": "XT-SH-001",
+    "expr": "COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date])))))",
+    "powerbi": "801"
+  },
+  {
+    "id": "XT-SH-002",
+    "expr": "CALCULATE(COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024)",
+    "powerbi": "3"
+  },
+  {
+    "id": "XT-SH-003",
+    "expr": "CALCULATE(COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "1"
+  },
+  {
+    "id": "XT-SH-004",
+    "expr": "CALCULATE(COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "740"
+  },
+  {
+    "id": "XT-SH-005",
+    "expr": "COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date])))))",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-SH-006",
+    "expr": "CALCULATE(COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024)",
+    "powerbi": "793"
+  },
+  {
+    "id": "XT-SH-007",
+    "expr": "CALCULATE(COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "288"
+  },
+  {
+    "id": "XT-SH-008",
+    "expr": "CALCULATE(COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "XT-SH-009",
+    "expr": "COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region])))",
+    "powerbi": "10"
+  },
+  {
+    "id": "XT-SH-010",
+    "expr": "CALCULATE(COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region]))), XT_Date[Year] = 2024)",
+    "powerbi": "10"
+  },
+  {
+    "id": "XT-SH-011",
+    "expr": "CALCULATE(COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "10"
+  },
+  {
+    "id": "XT-SH-012",
+    "expr": "CALCULATE(COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region]))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "10"
+  },
+  {
+    "id": "XT-SH-013",
+    "expr": "SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s])",
+    "powerbi": "27268411.32"
+  },
+  {
+    "id": "XT-SH-014",
+    "expr": "CALCULATE(SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s]), XT_Date[Year] = 2024)",
+    "powerbi": "8915810.08"
+  },
+  {
+    "id": "XT-SH-015",
+    "expr": "CALCULATE(SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "788840.36"
+  },
+  {
+    "id": "XT-SH-016",
+    "expr": "CALCULATE(SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4524567.34"
+  },
+  {
+    "id": "XT-SH-017",
+    "expr": "MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s])",
+    "powerbi": "4637617.53"
+  },
+  {
+    "id": "XT-SH-018",
+    "expr": "CALCULATE(MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s]), XT_Date[Year] = 2024)",
+    "powerbi": "1629167.57"
+  },
+  {
+    "id": "XT-SH-019",
+    "expr": "CALCULATE(MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "176445.18"
+  },
+  {
+    "id": "XT-SH-020",
+    "expr": "CALCULATE(MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "4524567.34"
+  },
+  {
+    "id": "XT-SH-021",
+    "expr": "COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year]))",
+    "powerbi": "2386"
+  },
+  {
+    "id": "XT-SH-022",
+    "expr": "CALCULATE(COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year])), XT_Date[Year] = 2024)",
+    "powerbi": "796"
+  },
+  {
+    "id": "XT-SH-023",
+    "expr": "CALCULATE(COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "289"
+  },
+  {
+    "id": "XT-SH-024",
+    "expr": "CALCULATE(COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year])), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "1352"
+  },
+  {
+    "id": "XT-SH-025",
+    "expr": "COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category])))",
+    "powerbi": "35"
+  },
+  {
+    "id": "XT-SH-026",
+    "expr": "CALCULATE(COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category]))), XT_Date[Year] = 2024)",
+    "powerbi": "35"
+  },
+  {
+    "id": "XT-SH-027",
+    "expr": "CALCULATE(COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "35"
+  },
+  {
+    "id": "XT-SH-028",
+    "expr": "CALCULATE(COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category]))), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "5"
+  },
+  {
+    "id": "XT-SH-029",
+    "expr": "SUMX(GENERATESERIES(1, 10), [Value])",
+    "powerbi": "55"
+  },
+  {
+    "id": "XT-SH-030",
+    "expr": "CALCULATE(SUMX(GENERATESERIES(1, 10), [Value]), XT_Date[Year] = 2024)",
+    "powerbi": "55"
+  },
+  {
+    "id": "XT-SH-031",
+    "expr": "CALCULATE(SUMX(GENERATESERIES(1, 10), [Value]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "55"
+  },
+  {
+    "id": "XT-SH-032",
+    "expr": "CALCULATE(SUMX(GENERATESERIES(1, 10), [Value]), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "55"
+  },
+  {
+    "id": "XT-SH-033",
+    "expr": "COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey]))",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-SH-034",
+    "expr": "CALCULATE(COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey])), XT_Date[Year] = 2024)",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-SH-035",
+    "expr": "CALCULATE(COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-SH-036",
+    "expr": "CALCULATE(COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey])), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "800"
+  },
+  {
+    "id": "XT-SH-037",
+    "expr": "CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\")",
+    "powerbi": "True"
+  },
+  {
+    "id": "XT-SH-038",
+    "expr": "CALCULATE(CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\"), XT_Date[Year] = 2024)",
+    "powerbi": "True"
+  },
+  {
+    "id": "XT-SH-039",
+    "expr": "CALCULATE(CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)",
+    "powerbi": "True"
+  },
+  {
+    "id": "XT-SH-040",
+    "expr": "CALCULATE(CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\"), XT_Product[Category] = \"Cat_2\")",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-SH-041",
+    "expr": "SUMX(XT_Product, COUNTROWS(FILTER(XT_Product, XT_Product[ListPrice] > EARLIER(XT_Product[ListPrice]))))",
+    "powerbi": "1770"
+  },
+  {
+    "id": "XT-FN-001",
+    "expr": "YEAR(MAX(XT_Date[Date]))",
+    "powerbi": "2025"
+  },
+  {
+    "id": "XT-FN-002",
+    "expr": "EOMONTH(MAX(XT_Date[Date]), 0)",
+    "powerbi": "12/31/2025 00:00:00"
+  },
+  {
+    "id": "XT-FN-003",
+    "expr": "EDATE(MAX(XT_Date[Date]), -1)",
+    "powerbi": "11/30/2025 00:00:00"
+  },
+  {
+    "id": "XT-FN-004",
+    "expr": "WEEKDAY(MAX(XT_Date[Date]), 2)",
+    "powerbi": "3"
+  },
+  {
+    "id": "XT-FN-005",
+    "expr": "WEEKNUM(MAX(XT_Date[Date]))",
+    "powerbi": "53"
+  },
+  {
+    "id": "XT-FN-006",
+    "expr": "FORMAT(MAX(XT_Date[Date]), \"dddd\")",
+    "powerbi": "Wednesday"
+  },
+  {
+    "id": "XT-FN-007",
+    "expr": "INT(-2.5)",
+    "powerbi": "-3"
+  },
+  {
+    "id": "XT-FN-008",
+    "expr": "TRUNC(-2.57, 1)",
+    "powerbi": "-2.5"
+  },
+  {
+    "id": "XT-FN-009",
+    "expr": "FLOOR(7.3, 2)",
+    "powerbi": "6"
+  },
+  {
+    "id": "XT-FN-010",
+    "expr": "CEILING(7.1, 2)",
+    "powerbi": "8"
+  },
+  {
+    "id": "XT-FN-011",
+    "expr": "ROUNDUP(-2.1, 0)",
+    "powerbi": "-3"
+  },
+  {
+    "id": "XT-FN-012",
+    "expr": "MROUND(7, 5)",
+    "powerbi": "5"
+  },
+  {
+    "id": "XT-FN-013",
+    "expr": "ABS(-3)",
+    "powerbi": "3"
+  },
+  {
+    "id": "XT-FN-014",
+    "expr": "POWER(2, 0.5)",
+    "powerbi": "1.4142135623731"
+  },
+  {
+    "id": "XT-FN-015",
+    "expr": "LN(10)",
+    "powerbi": "2.30258509299405"
+  },
+  {
+    "id": "XT-FN-016",
+    "expr": "SIGN(-4)",
+    "powerbi": "-1"
+  },
+  {
+    "id": "XT-FN-017",
+    "expr": "MID(\"abcdef\", 2, 3)",
+    "powerbi": "bcd"
+  },
+  {
+    "id": "XT-FN-018",
+    "expr": "RIGHT(\"abc\", 5)",
+    "powerbi": "abc"
+  },
+  {
+    "id": "XT-FN-019",
+    "expr": "LOWER(\"AbC\")",
+    "powerbi": "abc"
+  },
+  {
+    "id": "XT-FN-020",
+    "expr": "TRIM(\"  a  b \")",
+    "powerbi": "a b"
+  },
+  {
+    "id": "XT-FN-021",
+    "expr": "SEARCH(\"x\", \"abc\", 1, 0)",
+    "powerbi": "0"
+  },
+  {
+    "id": "XT-FN-022",
+    "expr": "FIND(\"b\", \"abc\")",
+    "powerbi": "2"
+  },
+  {
+    "id": "XT-FN-023",
+    "expr": "REPLACE(\"abcdef\", 2, 2, \"ZZ\")",
+    "powerbi": "aZZdef"
+  },
+  {
+    "id": "XT-FN-024",
+    "expr": "FIXED(1234.567, 1)",
+    "powerbi": "1,234.6"
+  },
+  {
+    "id": "XT-FN-025",
+    "expr": "CONVERT(2.5, INTEGER)",
+    "powerbi": "3"
+  },
+  {
+    "id": "XT-FN-026",
+    "expr": "ISTEXT(SELECTEDVALUE(XT_Region[Region]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "XT-FN-027",
+    "expr": "XOR(TRUE(), FALSE())",
+    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The syntax for 'XOR' is incorrect. (EVALUATE ROW(\"v\", XOR(TRUE(), FALSE()))).\""
+  },
+  {
+    "id": "XT-WN-001",
+    "expr": "CALCULATE(CALCULATE(SUMX(OFFSET(-1, ALLSELECTED(XT_Date[YearMonth]), ORDERBY(XT_Date[YearMonth])), CALCULATE(SUM(XT_Sales[SalesAmount])))), XT_Date[Year] = 2024)",
+    "powerbi": "8191497.05"
+  },
+  {
+    "id": "XT-WN-002",
+    "expr": "CALCULATE(SUMX(INDEX(2, ALLSELECTED(XT_Date[YearMonth]), ORDERBY(XT_Date[YearMonth])), CALCULATE(SUM(XT_Sales[SalesAmount]))))",
+    "powerbi": "874742.31"
+  }
+]

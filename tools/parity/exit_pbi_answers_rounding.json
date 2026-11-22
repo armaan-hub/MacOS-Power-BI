@@ -1,0 +1,402 @@
+[
+  {
+    "id": "RP-001",
+    "expr": "STDEV.S(XT_Sales[UnitPrice])",
+    "powerbi": "142.4438"
+  },
+  {
+    "id": "RP-002",
+    "expr": "STDEV.P(XT_Sales[UnitPrice])",
+    "powerbi": "142.4378"
+  },
+  {
+    "id": "RP-003",
+    "expr": "VAR.P(XT_Sales[UnitPrice])",
+    "powerbi": "20288.5390049885"
+  },
+  {
+    "id": "RP-004",
+    "expr": "GEOMEAN(XT_Sales[UnitPrice])",
+    "powerbi": "196.7847"
+  },
+  {
+    "id": "RP-005",
+    "expr": "PERCENTILE.INC(XT_Sales[UnitPrice], 0.37)",
+    "powerbi": "193.6189"
+  },
+  {
+    "id": "RP-006",
+    "expr": "PERCENTILE.EXC(XT_Sales[SalesAmount], 0.333)",
+    "powerbi": "985.8896"
+  },
+  {
+    "id": "RP-007",
+    "expr": "AVERAGE(XT_Product[ListPrice])",
+    "powerbi": "259.8227"
+  },
+  {
+    "id": "RP-008",
+    "expr": "AVERAGE(XT_Budget[BudgetAmount])",
+    "powerbi": "29723.6685"
+  },
+  {
+    "id": "RP-009",
+    "expr": "STDEV.S(XT_Budget[BudgetAmount])",
+    "powerbi": "11279.5755"
+  },
+  {
+    "id": "RP-010",
+    "expr": "PRODUCT(XT_Product[ListPrice])",
+    "powerbi": "2.40434578779953E+139"
+  },
+  {
+    "id": "RP-011",
+    "expr": "AVERAGE(XT_Sales[Discount])",
+    "powerbi": "0.150602499999996"
+  },
+  {
+    "id": "RP-012",
+    "expr": "STDEV.S(XT_Sales[Discount])",
+    "powerbi": "0.0864020684756515"
+  },
+  {
+    "id": "RP-013",
+    "expr": "VAR.P(XT_Sales[Discount])",
+    "powerbi": "0.00746469532708477"
+  },
+  {
+    "id": "RP-014",
+    "expr": "GEOMEAN(XT_Sales[Discount])",
+    "powerbi": "0"
+  },
+  {
+    "id": "RP-015",
+    "expr": "MEDIAN(XT_Sales[Discount])",
+    "powerbi": "0.15"
+  },
+  {
+    "id": "RP-016",
+    "expr": "AVERAGE(XT_Sales[Quantity])",
+    "powerbi": "10.4808333333333"
+  },
+  {
+    "id": "RP-017",
+    "expr": "STDEV.S(XT_Sales[Quantity])",
+    "powerbi": "5.76442263829764"
+  },
+  {
+    "id": "RP-018",
+    "expr": "STDEV.P(XT_Sales[Quantity])",
+    "powerbi": "5.764182449017"
+  },
+  {
+    "id": "RP-019",
+    "expr": "STDEVX.S(XT_Sales, XT_Sales[UnitPrice])",
+    "powerbi": "142.4438"
+  },
+  {
+    "id": "RP-020",
+    "expr": "STDEVX.P(XT_Sales, XT_Sales[UnitPrice])",
+    "powerbi": "142.4378"
+  },
+  {
+    "id": "RP-021",
+    "expr": "VARX.S(XT_Sales, XT_Sales[UnitPrice])",
+    "powerbi": "20290.2298574766"
+  },
+  {
+    "id": "RP-022",
+    "expr": "VARX.P(XT_Sales, XT_Sales[UnitPrice])",
+    "powerbi": "20288.5390049885"
+  },
+  {
+    "id": "RP-023",
+    "expr": "AVERAGEX(XT_Sales, XT_Sales[UnitPrice])",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "RP-024",
+    "expr": "STDEVX.S(XT_Sales, XT_Sales[Discount])",
+    "powerbi": "0.0864020684756515"
+  },
+  {
+    "id": "RP-025",
+    "expr": "GEOMEANX(XT_Sales, XT_Sales[Discount])",
+    "powerbi": "0"
+  },
+  {
+    "id": "RP-026",
+    "expr": "AVERAGEX(XT_Sales, XT_Sales[Discount])",
+    "powerbi": "0.150602499999996"
+  },
+  {
+    "id": "RP-027",
+    "expr": "VARX.P(XT_Sales, XT_Sales[Quantity])",
+    "powerbi": "33.2257993055556"
+  },
+  {
+    "id": "RP-028",
+    "expr": "STDEVX.P(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice])",
+    "powerbi": "2247.9256"
+  },
+  {
+    "id": "RP-029",
+    "expr": "GEOMEANX(XT_Sales, XT_Sales[SalesAmount] / XT_Sales[Quantity])",
+    "powerbi": "166.278"
+  },
+  {
+    "id": "RP-030",
+    "expr": "STDEVX.S(XT_Sales, XT_Sales[SalesAmount] * XT_Sales[Discount])",
+    "powerbi": "343.4203"
+  },
+  {
+    "id": "RP-031",
+    "expr": "AVERAGEX(XT_Sales, XT_Sales[SalesAmount] * XT_Sales[Discount])",
+    "powerbi": "321.8466"
+  },
+  {
+    "id": "RP-032",
+    "expr": "AVERAGEX(XT_Sales, RELATED(XT_Product[ListPrice]))",
+    "powerbi": "261.0152"
+  },
+  {
+    "id": "RP-033",
+    "expr": "STDEVX.P(XT_Sales, RELATED(XT_Product[ListPrice]))",
+    "powerbi": "140.9158"
+  },
+  {
+    "id": "RP-034",
+    "expr": "GEOMEANX(XT_Sales, RELATED(XT_Product[ListPrice]))",
+    "powerbi": "211.1422"
+  },
+  {
+    "id": "RP-035",
+    "expr": "AVERAGEX(XT_Product, XT_Product[ListPrice])",
+    "powerbi": "259.8227"
+  },
+  {
+    "id": "RP-036",
+    "expr": "SUMX(VALUES(XT_Product[Category]), AVERAGE(XT_Sales[SalesAmount]))",
+    "powerbi": "15906.5732"
+  },
+  {
+    "id": "RP-037",
+    "expr": "SUMX(VALUES(XT_Region[Region]), STDEV.S(XT_Sales[UnitPrice]))",
+    "powerbi": "712.219"
+  },
+  {
+    "id": "RP-038",
+    "expr": "AVERAGEX(VALUES(XT_Product[Category]), AVERAGE(XT_Sales[UnitPrice]))",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "RP-039",
+    "expr": "MAXX(VALUES(XT_Region[Region]), STDEV.P(XT_Sales[SalesAmount]))",
+    "powerbi": "1932.4624"
+  },
+  {
+    "id": "RP-040",
+    "expr": "AVERAGEX(VALUES(XT_Customer[Segment]), CALCULATE(AVERAGE(XT_Sales[SalesAmount])))",
+    "powerbi": "2263.5519"
+  },
+  {
+    "id": "RP-041",
+    "expr": "AVERAGEX(VALUES(XT_Date[Year]), CALCULATE(STDEV.P(XT_Sales[UnitPrice])))",
+    "powerbi": "142.4311"
+  },
+  {
+    "id": "RP-042",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[SalesAmount]), XT_Region[Region] = \"East\")",
+    "powerbi": "2277.6192"
+  },
+  {
+    "id": "RP-043",
+    "expr": "CALCULATE(STDEV.S(XT_Sales[UnitPrice]), XT_Product[Category] = \"Cat_3\", XT_Date[Year] = 2025)",
+    "powerbi": "136.6068"
+  },
+  {
+    "id": "RP-044",
+    "expr": "CALCULATE(STDEV.P(XT_Sales[SalesAmount]), XT_Region[Region] = \"East\", XT_Date[Year] = 2025)",
+    "powerbi": "1878.1713"
+  },
+  {
+    "id": "RP-045",
+    "expr": "CALCULATE(GEOMEAN(XT_Sales[UnitPrice]), XT_Region[Region] = \"East\")",
+    "powerbi": "192.6016"
+  },
+  {
+    "id": "RP-046",
+    "expr": "CALCULATE(PERCENTILE.INC(XT_Sales[SalesAmount], 0.123), XT_Date[Year] = 2025)",
+    "powerbi": "323.7258"
+  },
+  {
+    "id": "RP-047",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[Discount]), XT_Region[Region] = \"East\")",
+    "powerbi": "0.150263377926422"
+  },
+  {
+    "id": "RP-048",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[Quantity]), XT_Date[Year] = 2025, XT_Product[Category] = \"Cat_3\")",
+    "powerbi": "10.0334855403349"
+  },
+  {
+    "id": "RP-049",
+    "expr": "CALCULATE(STDEVX.S(XT_Sales, XT_Sales[UnitPrice]), XT_Customer[Segment] = \"Corporate\")",
+    "powerbi": "142.4032"
+  },
+  {
+    "id": "RP-050",
+    "expr": "AVERAGE(XT_Sales[SalesAmount]) / AVERAGE(XT_Sales[UnitPrice])",
+    "powerbi": "8.89144372200108"
+  },
+  {
+    "id": "RP-051",
+    "expr": "AVERAGE(XT_Sales[SalesAmount]) - AVERAGE(XT_Sales[UnitPrice])",
+    "powerbi": "2016.7997"
+  },
+  {
+    "id": "RP-052",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) * 2",
+    "powerbi": "511.1358"
+  },
+  {
+    "id": "RP-053",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) * 3.7",
+    "powerbi": "945.6012"
+  },
+  {
+    "id": "RP-054",
+    "expr": "ROUND(AVERAGE(XT_Sales[SalesAmount]), 2)",
+    "powerbi": "2272.37"
+  },
+  {
+    "id": "RP-055",
+    "expr": "ROUND(STDEV.S(XT_Sales[UnitPrice]), 6)",
+    "powerbi": "142.4438"
+  },
+  {
+    "id": "RP-056",
+    "expr": "STDEV.S(XT_Sales[SalesAmount]) / AVERAGE(XT_Sales[SalesAmount])",
+    "powerbi": "0.850453509370579"
+  },
+  {
+    "id": "RP-057",
+    "expr": "AVERAGE(XT_Sales[SalesAmount]) / COUNTROWS(XT_Sales)",
+    "powerbi": "0.1894"
+  },
+  {
+    "id": "RP-058",
+    "expr": "DIVIDE(AVERAGE(XT_Sales[UnitPrice]), AVERAGE(XT_Sales[Discount]))",
+    "powerbi": "1696.9698"
+  },
+  {
+    "id": "RP-059",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) + STDEV.P(XT_Sales[UnitPrice]) / 3",
+    "powerbi": "303.0472"
+  },
+  {
+    "id": "RP-060",
+    "expr": "AVERAGE(XT_Sales[SalesAmount]) / 7",
+    "powerbi": "324.6239"
+  },
+  {
+    "id": "RP-061",
+    "expr": "1 / AVERAGE(XT_Sales[UnitPrice])",
+    "powerbi": "0.00391285447037754"
+  },
+  {
+    "id": "RP-062",
+    "expr": "SQRT(VAR.P(XT_Sales[UnitPrice])) - STDEV.P(XT_Sales[UnitPrice])",
+    "powerbi": "4.26015659229506E-05"
+  },
+  {
+    "id": "RP-063",
+    "expr": "VAR a = AVERAGE(XT_Sales[UnitPrice]) RETURN a * 3",
+    "powerbi": "766.7037"
+  },
+  {
+    "id": "RP-064",
+    "expr": "VAR s = STDEV.S(XT_Sales[SalesAmount]) RETURN s / 7",
+    "powerbi": "276.0776"
+  },
+  {
+    "id": "RP-065",
+    "expr": "CALCULATE(STDEV.S(XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-066",
+    "expr": "CALCULATE(STDEV.P(XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-067",
+    "expr": "CALCULATE(VAR.S(XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-068",
+    "expr": "CALCULATE(GEOMEAN(XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-069",
+    "expr": "CALCULATE(STDEVX.P(XT_Sales, XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-070",
+    "expr": "CALCULATE(GEOMEANX(XT_Sales, XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-071",
+    "expr": "CALCULATE(AVERAGEX(XT_Sales, XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-072",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[Discount]), XT_Product[Product] = \"No Such Product\")",
+    "powerbi": "BLANK"
+  },
+  {
+    "id": "RP-073",
+    "expr": "ISBLANK(CALCULATE(AVERAGE(XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\"))",
+    "powerbi": "True"
+  },
+  {
+    "id": "RP-074",
+    "expr": "COALESCE(CALCULATE(AVERAGE(XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\"), 0) + 1",
+    "powerbi": "1"
+  },
+  {
+    "id": "RP-075",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[SalesAmount]), XT_Sales[SalesKey] = 17)",
+    "powerbi": "1514.05"
+  },
+  {
+    "id": "RP-076",
+    "expr": "CALCULATE(STDEV.P(XT_Sales[UnitPrice]), XT_Sales[SalesKey] = 17)",
+    "powerbi": "0"
+  },
+  {
+    "id": "RP-077",
+    "expr": "CALCULATE(STDEV.S(XT_Sales[UnitPrice]), XT_Sales[SalesKey] = 17)",
+    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"A division by zero has been encountered.\""
+  },
+  {
+    "id": "RP-078",
+    "expr": "CALCULATE(GEOMEAN(XT_Sales[UnitPrice]), XT_Sales[SalesKey] = 17)",
+    "powerbi": "140.19"
+  },
+  {
+    "id": "RP-079",
+    "expr": "CALCULATE(STDEVX.S(XT_Sales, XT_Sales[SalesAmount]), XT_Sales[SalesKey] = 17)",
+    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"A division by zero has been encountered.\""
+  },
+  {
+    "id": "RP-080",
+    "expr": "CALCULATE(AVERAGE(XT_Sales[SalesAmount]), XT_Sales[SalesKey] IN {17, 18})",
+    "powerbi": "2127.235"
+  }
+]

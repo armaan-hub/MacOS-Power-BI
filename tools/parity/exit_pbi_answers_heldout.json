@@ -1,0 +1,452 @@
+[
+  {
+    "id": "HP-001",
+    "expr": "ISCURRENCY(AVERAGE(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-002",
+    "expr": "ISCURRENCY(STDEV.P(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-003",
+    "expr": "ISCURRENCY(MEDIAN(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-004",
+    "expr": "ISCURRENCY(VAR.P(XT_Sales[SalesAmount]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-005",
+    "expr": "ISDECIMAL(AVERAGE(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-006",
+    "expr": "ISDECIMAL(STDEV.P(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-007",
+    "expr": "ISDECIMAL(MEDIAN(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-008",
+    "expr": "ISDECIMAL(VAR.P(XT_Sales[SalesAmount]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-009",
+    "expr": "ISDOUBLE(AVERAGE(XT_Sales[SalesAmount]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-010",
+    "expr": "ISDOUBLE(STDEV.P(XT_Sales[SalesAmount]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-011",
+    "expr": "ISDOUBLE(MEDIAN(XT_Sales[SalesAmount]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-012",
+    "expr": "ISDOUBLE(VAR.P(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-013",
+    "expr": "ISNUMBER(MEDIAN(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-014",
+    "expr": "ISNUMBER(VAR.P(XT_Sales[SalesAmount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-015",
+    "expr": "ISCURRENCY(GEOMEAN(XT_Product[ListPrice]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-016",
+    "expr": "ISCURRENCY(PERCENTILE.EXC(XT_Product[ListPrice], 0.4))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-017",
+    "expr": "ISDOUBLE(AVERAGE(XT_Sales[Discount]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-018",
+    "expr": "ISDOUBLE(AVERAGE(XT_Sales[Quantity]))",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-019",
+    "expr": "ISCURRENCY(AVERAGE(XT_Sales[Quantity]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-020",
+    "expr": "ISCURRENCY(PRODUCT(XT_Product[ListPrice]))",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-021",
+    "expr": "IF(COUNTROWS(FILTER(XT_Region, XT_Region[Region] = \"West\")) = 1, AVERAGE(XT_Sales[SalesAmount]), 0.5)",
+    "powerbi": "2272.3676"
+  },
+  {
+    "id": "HP-022",
+    "expr": "IF(1 = 1, AVERAGE(XT_Sales[SalesAmount]), 1)",
+    "powerbi": "2272.3676"
+  },
+  {
+    "id": "HP-023",
+    "expr": "IF(1 = 1, STDEV.S(XT_Sales[SalesAmount]), 0.5)",
+    "powerbi": "1932.543"
+  },
+  {
+    "id": "HP-024",
+    "expr": "IF(1 = 2, 1, GEOMEAN(XT_Sales[SalesAmount]))",
+    "powerbi": "1376.3054"
+  },
+  {
+    "id": "HP-025",
+    "expr": "IF(1 = 1, AVERAGE(XT_Sales[UnitPrice]), AVERAGE(XT_Sales[Discount]))",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "HP-026",
+    "expr": "IF(1 = 1, MEDIAN(XT_Sales[UnitPrice]), 0.5)",
+    "powerbi": "258.15"
+  },
+  {
+    "id": "HP-027",
+    "expr": "IF(COUNTROWS(XT_Sales) > 5, PERCENTILE.INC(XT_Sales[SalesAmount], 0.77), 1.5)",
+    "powerbi": "3582.9543"
+  },
+  {
+    "id": "HP-028",
+    "expr": "SWITCH(TRUE(), COUNTROWS(XT_Sales) > 1, AVERAGE(XT_Product[ListPrice]), 0.25)",
+    "powerbi": "259.8227"
+  },
+  {
+    "id": "HP-029",
+    "expr": "SWITCH(2, 1, AVERAGE(XT_Sales[SalesAmount]), 2, STDEV.P(XT_Sales[SalesAmount]), 0)",
+    "powerbi": "1932.4624"
+  },
+  {
+    "id": "HP-030",
+    "expr": "COALESCE(CALCULATE(AVERAGE(XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\"), 0.5)",
+    "powerbi": "0.5"
+  },
+  {
+    "id": "HP-031",
+    "expr": "COALESCE(CALCULATE(STDEV.P(XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\"), AVERAGE(XT_Sales[UnitPrice]))",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "HP-032",
+    "expr": "COALESCE(AVERAGE(XT_Sales[SalesAmount]), 1.5)",
+    "powerbi": "2272.3676"
+  },
+  {
+    "id": "HP-033",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) > 255.56795",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-034",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) = 255.5679",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-035",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) = 255.56793166666667",
+    "powerbi": "False"
+  },
+  {
+    "id": "HP-036",
+    "expr": "STDEV.S(XT_Sales[SalesAmount]) > 1932.5429",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-037",
+    "expr": "STDEV.P(XT_Sales[SalesAmount]) = 1932.4624",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-038",
+    "expr": "GEOMEAN(XT_Sales[UnitPrice]) < 196.78473",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-039",
+    "expr": "PERCENTILE.INC(XT_Sales[SalesAmount], 0.9) = 5178.244",
+    "powerbi": "True"
+  },
+  {
+    "id": "HP-040",
+    "expr": "FORMAT(AVERAGE(XT_Sales[UnitPrice]), \"0.00000\")",
+    "powerbi": "255.56790"
+  },
+  {
+    "id": "HP-041",
+    "expr": "FORMAT(STDEV.S(XT_Sales[SalesAmount]), \"0.000000\")",
+    "powerbi": "1932.543000"
+  },
+  {
+    "id": "HP-042",
+    "expr": "FORMAT(GEOMEAN(XT_Sales[UnitPrice]), \"#,0.00000\")",
+    "powerbi": "196.78470"
+  },
+  {
+    "id": "HP-043",
+    "expr": "FORMAT(AVERAGE(XT_Sales[Discount]), \"0.000000\")",
+    "powerbi": "0.150602"
+  },
+  {
+    "id": "HP-044",
+    "expr": "CONVERT(AVERAGE(XT_Sales[UnitPrice]), DOUBLE)",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "HP-045",
+    "expr": "CONVERT(AVERAGE(XT_Sales[UnitPrice]), INTEGER)",
+    "powerbi": "256"
+  },
+  {
+    "id": "HP-046",
+    "expr": "CONVERT(STDEV.P(XT_Sales[SalesAmount]), STRING)",
+    "powerbi": "1932.4624"
+  },
+  {
+    "id": "HP-047",
+    "expr": "CONVERT(AVERAGE(XT_Sales[Quantity]), CURRENCY)",
+    "powerbi": "10.4808"
+  },
+  {
+    "id": "HP-048",
+    "expr": "INT(AVERAGE(XT_Sales[UnitPrice]))",
+    "powerbi": "255"
+  },
+  {
+    "id": "HP-049",
+    "expr": "ROUND(STDEV.S(XT_Sales[SalesAmount]), 5)",
+    "powerbi": "1932.543"
+  },
+  {
+    "id": "HP-050",
+    "expr": "CEILING(AVERAGE(XT_Sales[UnitPrice]), 0.01)",
+    "powerbi": "255.57"
+  },
+  {
+    "id": "HP-051",
+    "expr": "TRUNC(GEOMEAN(XT_Sales[SalesAmount]), 3)",
+    "powerbi": "1376.305"
+  },
+  {
+    "id": "HP-052",
+    "expr": "FLOOR(AVERAGE(XT_Sales[SalesAmount]), 0.5)",
+    "powerbi": "2272"
+  },
+  {
+    "id": "HP-053",
+    "expr": "MROUND(STDEV.P(XT_Sales[UnitPrice]), 0.25)",
+    "powerbi": "142.5"
+  },
+  {
+    "id": "HP-054",
+    "expr": "MAX(AVERAGE(XT_Sales[UnitPrice]), STDEV.S(XT_Sales[UnitPrice]))",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "HP-055",
+    "expr": "MIN(AVERAGE(XT_Sales[SalesAmount]), PERCENTILE.INC(XT_Sales[SalesAmount], 0.5))",
+    "powerbi": "1736.495"
+  },
+  {
+    "id": "HP-056",
+    "expr": "MIN(GEOMEAN(XT_Product[ListPrice]), AVERAGE(XT_Product[ListPrice]))",
+    "powerbi": "210.3859"
+  },
+  {
+    "id": "HP-057",
+    "expr": "SUMX(VALUES(XT_Region[Region]), CALCULATE(PERCENTILE.INC(XT_Sales[SalesAmount], 0.25)))",
+    "powerbi": "3442.5875"
+  },
+  {
+    "id": "HP-058",
+    "expr": "AVERAGEX(VALUES(XT_Product[Category]), CALCULATE(GEOMEAN(XT_Sales[UnitPrice])))",
+    "powerbi": "193.8191"
+  },
+  {
+    "id": "HP-059",
+    "expr": "MAXX(VALUES(XT_Customer[Segment]), CALCULATE(STDEV.S(XT_Sales[SalesAmount])))",
+    "powerbi": "1952.2709"
+  },
+  {
+    "id": "HP-060",
+    "expr": "MINX(VALUES(XT_Date[Year]), CALCULATE(AVERAGE(XT_Sales[UnitPrice])))",
+    "powerbi": "253.3653"
+  },
+  {
+    "id": "HP-061",
+    "expr": "SUMX(VALUES(XT_Product[Category]), CALCULATE(STDEV.P(XT_Sales[UnitPrice])) * 2)",
+    "powerbi": "2005.4998"
+  },
+  {
+    "id": "HP-062",
+    "expr": "SUMX(VALUES(XT_Region[Region]), CALCULATE(AVERAGE(XT_Sales[SalesAmount])) / 3)",
+    "powerbi": "3786.6472"
+  },
+  {
+    "id": "HP-063",
+    "expr": "AVERAGEX(VALUES(XT_Region[Region]), CALCULATE(PERCENTILE.EXC(XT_Sales[UnitPrice], 0.6)))",
+    "powerbi": "305.7468"
+  },
+  {
+    "id": "HP-064",
+    "expr": "SUMX(VALUES(XT_Date[Year]), AVERAGE(XT_Sales[Discount]))",
+    "powerbi": "0.602409999999986"
+  },
+  {
+    "id": "HP-065",
+    "expr": "STDEVX.P(VALUES(XT_Region[Region]), CALCULATE(AVERAGE(XT_Sales[SalesAmount])))",
+    "powerbi": "31.0817"
+  },
+  {
+    "id": "HP-066",
+    "expr": "GEOMEANX(VALUES(XT_Product[Category]), CALCULATE(AVERAGE(XT_Sales[UnitPrice])))",
+    "powerbi": "253.0737"
+  },
+  {
+    "id": "HP-067",
+    "expr": "AVERAGEX(XT_Product, CALCULATE(AVERAGE(XT_Sales[UnitPrice])))",
+    "powerbi": "255.7751"
+  },
+  {
+    "id": "HP-068",
+    "expr": "SUMX(XT_Region, CALCULATE(GEOMEAN(XT_Sales[SalesAmount])))",
+    "powerbi": "6881.7339"
+  },
+  {
+    "id": "HP-069",
+    "expr": "VAR a = AVERAGE(XT_Sales[SalesAmount]) RETURN a + a",
+    "powerbi": "4544.7352"
+  },
+  {
+    "id": "HP-070",
+    "expr": "VAR a = STDEV.P(XT_Sales[UnitPrice]) RETURN a * a",
+    "powerbi": "20288.52686884"
+  },
+  {
+    "id": "HP-071",
+    "expr": "VAR g = GEOMEAN(XT_Sales[UnitPrice]) VAR p = PERCENTILE.INC(XT_Sales[UnitPrice], 0.5) RETURN g - p",
+    "powerbi": "-61.3653"
+  },
+  {
+    "id": "HP-072",
+    "expr": "VAR a = AVERAGE(XT_Sales[UnitPrice]) RETURN IF(a > 255, a, 0.5)",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "HP-073",
+    "expr": "VAR a = AVERAGE(XT_Sales[Discount]) RETURN a + a",
+    "powerbi": "0.301204999999993"
+  },
+  {
+    "id": "HP-074",
+    "expr": "GEOMEAN(XT_Budget[BudgetAmount])",
+    "powerbi": "27357.3202"
+  },
+  {
+    "id": "HP-075",
+    "expr": "PERCENTILE.INC(XT_Budget[BudgetAmount], 0.63)",
+    "powerbi": "34342.719"
+  },
+  {
+    "id": "HP-076",
+    "expr": "STDEV.S(XT_Sales[Discount]) + AVERAGE(XT_Sales[Discount])",
+    "powerbi": "0.237004568475648"
+  },
+  {
+    "id": "HP-077",
+    "expr": "PERCENTILE.INC(XT_Sales[Discount], 0.37)",
+    "powerbi": "0.11"
+  },
+  {
+    "id": "HP-078",
+    "expr": "PERCENTILE.EXC(XT_Sales[Quantity], 0.37)",
+    "powerbi": "8"
+  },
+  {
+    "id": "HP-079",
+    "expr": "STDEV.S(XT_Sales[Quantity]) * 1.5",
+    "powerbi": "8.64663395744645"
+  },
+  {
+    "id": "HP-080",
+    "expr": "AVERAGE(XT_Sales[Quantity]) / 7",
+    "powerbi": "1.4972619047619"
+  },
+  {
+    "id": "HP-081",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) + AVERAGE(XT_Sales[Discount])",
+    "powerbi": "255.7185025"
+  },
+  {
+    "id": "HP-082",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) * AVERAGE(XT_Sales[UnitPrice])",
+    "powerbi": "65314.95151041"
+  },
+  {
+    "id": "HP-083",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) ^ 2",
+    "powerbi": "65314.95151041"
+  },
+  {
+    "id": "HP-084",
+    "expr": "-AVERAGE(XT_Sales[UnitPrice])",
+    "powerbi": "-255.5679"
+  },
+  {
+    "id": "HP-085",
+    "expr": "ABS(STDEV.S(XT_Sales[UnitPrice]) - AVERAGE(XT_Sales[UnitPrice]))",
+    "powerbi": "113.1241"
+  },
+  {
+    "id": "HP-086",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) * AVERAGE(XT_Sales[Discount])",
+    "powerbi": "38.4892"
+  },
+  {
+    "id": "HP-087",
+    "expr": "STDEV.P(XT_Sales[SalesAmount]) + 0.00005",
+    "powerbi": "1932.46245"
+  },
+  {
+    "id": "HP-088",
+    "expr": "AVERAGE(XT_Sales[UnitPrice]) / 3 * 3",
+    "powerbi": "255.5679"
+  },
+  {
+    "id": "HP-089",
+    "expr": "(AVERAGE(XT_Sales[SalesAmount]) - AVERAGE(XT_Sales[UnitPrice])) / 3",
+    "powerbi": "672.2666"
+  },
+  {
+    "id": "HP-090",
+    "expr": "AVERAGE(XT_Sales[SalesAmount]) + COUNTROWS(XT_Sales)",
+    "powerbi": "14272.3676"
+  }
+]
