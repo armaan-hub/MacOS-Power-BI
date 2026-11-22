@@ -32,21 +32,22 @@ def _ensure_blocking() -> None:
 
 def run_power_bi(items: list[dict[str, str]], port_: str, chunk: int = 200) -> list[dict[str, Any]]:
     """Evaluate DAX expressions on guest Power BI in a single session with model installed and dropped."""
-    data = exit_model.generate_data()
-    exit_model.install_guest_model(port_, data)
-    try:
-        exprs = [it["expr"] for it in items]
-        answers = dax.power_bi(exprs, port_, chunk=chunk)
-        results = []
-        for it, ans in zip(items, answers):
-            results.append({
-                "id": it["id"],
-                "expr": it["expr"],
-                "powerbi": ans,
-            })
-        return results
-    finally:
-        exit_model.drop_guest_model(port_)
+    with dax.guest_lock():
+        try:
+            data = exit_model.generate_data()
+            exit_model.install_guest_model(port_, data)
+            exprs = [it["expr"] for it in items]
+            answers = dax.power_bi(exprs, port_, chunk=chunk)
+            results = []
+            for it, ans in zip(items, answers):
+                results.append({
+                    "id": it["id"],
+                    "expr": it["expr"],
+                    "powerbi": ans,
+                })
+            return results
+        finally:
+            exit_model.drop_guest_model(port_)
 
 
 def run_local(items: list[dict[str, str]], data: dict[str, Any] | None = None) -> list[dict[str, Any]]:
@@ -106,6 +107,9 @@ def compare_results(path_a: str, path_b: str) -> dict[str, Any]:
     map_a = {it["id"]: it for it in items_a}
     map_b = {it["id"]: it for it in items_b}
 
+    only_in_a = set(map_a.keys()) - set(map_b.keys())
+    only_in_b = set(map_b.keys()) - set(map_a.keys())
+
     right_count = 0
     wrong_count = 0
     refused_count = 0
@@ -147,6 +151,10 @@ def compare_results(path_a: str, path_b: str) -> dict[str, Any]:
         "crash": crash_count,
         "slowest_20": slowest_20,
         "wrong_items": wrong_items,
+        "only_in_a_count": len(only_in_a),
+        "only_in_b_count": len(only_in_b),
+        "only_in_a": sorted(only_in_a),
+        "only_in_b": sorted(only_in_b),
     }
 
 
@@ -158,6 +166,12 @@ def print_comparison_report(stats: dict[str, Any]) -> None:
     print(f"- **Wrong:** {stats['wrong']}")
     print(f"- **Refused:** {stats['refused']}")
     print(f"- **Crash:** {stats['crash']}")
+    print(f"- **Only in File A:** {stats.get('only_in_a_count', 0)}")
+    print(f"- **Only in File B:** {stats.get('only_in_b_count', 0)}")
+    if stats.get('only_in_a'):
+        print(f"  - IDs in A only: {stats['only_in_a']}")
+    if stats.get('only_in_b'):
+        print(f"  - IDs in B only: {stats['only_in_b']}")
 
     print("\n### 20 Slowest Items")
     print("| ID | Duration (ms) | DAX Expression |")

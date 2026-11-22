@@ -8,11 +8,13 @@ Read-only otherwise; never saves the Power BI project.
 from __future__ import annotations
 
 import base64
+import contextlib
 import fcntl
 import json
 from pathlib import Path
 import subprocess
 import sys
+import threading
 import time
 from decimal import Decimal, InvalidOperation
 
@@ -51,15 +53,41 @@ function Run($q){ try{ $cmd=$c.CreateCommand(); $cmd.CommandText=$q; $r=$cmd.Exe
 """
 
 
+_lock_state = threading.local()
+
+
+@contextlib.contextmanager
+def guest_lock():
+    """Acquire the shared guest.lock across the whole session re-entrantly."""
+    depth = getattr(_lock_state, "depth", 0)
+    if depth > 0:
+        _lock_state.depth = depth + 1
+        try:
+            yield _lock_state.file
+        finally:
+            _lock_state.depth -= 1
+        return
+
+    folder = Path.home() / ".rea_scratch"
+    folder.mkdir(exist_ok=True)
+    with open(folder / "guest.lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        _lock_state.depth = 1
+        _lock_state.file = lock
+        try:
+            yield lock
+        finally:
+            _lock_state.depth = 0
+            _lock_state.file = None
+
+
 def guest(script: str) -> str:
     """Run a PowerShell script in the guest via the shared Mac home folder (no argv length limit)."""
     folder = Path.home() / ".rea_scratch"
     folder.mkdir(exist_ok=True)
     name = f"run-{time.time_ns()}.ps1"  # fresh name each call: the guest's share view caches by path
     (folder / name).write_text("\ufeff" + script, encoding="utf-8")
-    # one guest call at a time across every process (the guest is slow when queries overlap)
-    with open(folder / "guest.lock", "w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
+    with guest_lock():
         out = subprocess.run(
             # no --current-user: the script then runs as SYSTEM in session 0, which has no desktop, so no window can open
             # (it still reaches the shared folder and Power BI's local port)

@@ -2,6 +2,11 @@
 
 Models an enterprise sales dataset with 7 tables, active and inactive relationships,
 many-to-many bridge, unknown members, blanks, and budget for TREATAS.
+
+Bridge note:
+Both bridge relationships (XT_CustomerRegion -> XT_Customer and XT_CustomerRegion -> XT_Region)
+are single direction (oneDirection) in Power BI Desktop. In DAX, many-to-many patterns through
+the bridge table must use CROSSFILTER(..., BOTH) or TREATAS to propagate filters across the bridge.
 """
 from __future__ import annotations
 
@@ -123,13 +128,13 @@ _LOCAL_COLUMN_TYPES = {
 
 # Relationship specs: (name, from_table, from_col, to_table, to_col, is_active, both_dir, from_card, to_card)
 RELATIONSHIP_SPECS = [
-    ("rel_sales_date_order", "XT_Sales", "OrderDate", "XT_Date", "Date", True, False, "many", "one"),
-    ("rel_sales_date_ship", "XT_Sales", "ShipDate", "XT_Date", "Date", False, False, "many", "one"),
-    ("rel_sales_product", "XT_Sales", "ProductKey", "XT_Product", "ProductKey", True, False, "many", "one"),
-    ("rel_sales_customer", "XT_Sales", "CustomerKey", "XT_Customer", "CustomerKey", True, False, "many", "one"),
-    ("rel_sales_region", "XT_Sales", "RegionKey", "XT_Region", "RegionKey", True, False, "many", "one"),
-    ("rel_custreg_customer", "XT_CustomerRegion", "CustomerKey", "XT_Customer", "CustomerKey", True, False, "many", "one"),
-    ("rel_custreg_region", "XT_CustomerRegion", "RegionKey", "XT_Region", "RegionKey", True, False, "many", "one"),
+    ("XT_rel_sales_date_order", "XT_Sales", "OrderDate", "XT_Date", "Date", True, False, "many", "one"),
+    ("XT_rel_sales_date_ship", "XT_Sales", "ShipDate", "XT_Date", "Date", False, False, "many", "one"),
+    ("XT_rel_sales_product", "XT_Sales", "ProductKey", "XT_Product", "ProductKey", True, False, "many", "one"),
+    ("XT_rel_sales_customer", "XT_Sales", "CustomerKey", "XT_Customer", "CustomerKey", True, False, "many", "one"),
+    ("XT_rel_sales_region", "XT_Sales", "RegionKey", "XT_Region", "RegionKey", True, False, "many", "one"),
+    ("XT_rel_custreg_customer", "XT_CustomerRegion", "CustomerKey", "XT_Customer", "CustomerKey", True, False, "many", "one"),
+    ("XT_rel_custreg_region", "XT_CustomerRegion", "RegionKey", "XT_Region", "RegionKey", True, False, "many", "one"),
 ]
 
 
@@ -395,18 +400,41 @@ def get_guest_port() -> str:
     return dax.port()
 
 
-def install_guest_model(port_: str, data: dict[str, list[dict[str, Any]]]) -> None:
-    """Deploy the exit model into Power BI via TMSL createOrReplace."""
+def tmsl_table_commands(data: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+    """Generate per-table TMSL createOrReplace commands for all XT_ tables."""
     model_body = tmsl_model_definition(data)
-    cmds = [
-        {"createOrReplace": {"object": {"database": "__DB__"}, "database": {"name": "__DB__", "compatibilityLevel": 1700, "model": model_body}}},
-        {"refresh": {"type": "calculate", "objects": [{"database": "__DB__"}]}},
-    ]
-    payload = base64.b64encode(json.dumps(cmds).encode()).decode()
-    script = dax.PS_HEAD.replace("__PORT__", port_) + f"""
-$cs = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("{payload}")).Replace("__DB__", $c.Database) | ConvertFrom-Json
+    cmds = []
+    for tbl in model_body["tables"]:
+        cmds.append({
+            "createOrReplace": {
+                "object": {"database": "__DB__", "table": tbl["name"]},
+                "table": tbl,
+            }
+        })
+    return cmds
+
+
+def install_guest_model(port_: str, data: dict[str, list[dict[str, Any]]]) -> None:
+    """Deploy the exit model into Power BI: per-table TMSL createOrReplace, relationships, and XT_ refresh."""
+    before_tables = list_guest_model_tables(port_)
+    print("Tables before install:", sorted(before_tables))
+
+    table_cmds = tmsl_table_commands(data)
+    refresh_cmd = {
+        "refresh": {
+            "type": "calculate",
+            "objects": [{"database": "__DB__", "table": name} for name in TABLE_SPECS.keys()],
+        }
+    }
+
+    payload_tb = base64.b64encode(json.dumps(table_cmds).encode()).decode()
+    payload_ref = base64.b64encode(json.dumps(refresh_cmd).encode()).decode()
+
+    # Step 1: Create each XT_ table individually via createOrReplace
+    tb_script = dax.PS_HEAD.replace("__PORT__", port_) + f"""
+$cmds = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("{payload_tb}")).Replace("__DB__", $c.Database) | ConvertFrom-Json
 $bad = $false
-foreach($k in $cs){{
+foreach($k in $cmds){{
     $t = ($k | ConvertTo-Json -Depth 30 -Compress)
     $cmd = $c.CreateCommand()
     $cmd.CommandText = $t
@@ -414,51 +442,163 @@ foreach($k in $cs){{
         $null = $cmd.ExecuteNonQuery()
     }} catch {{
         $bad = $true
-        Write-Output ("TMSL_ERR: " + $_.Exception.ToString())
+        Write-Output ("TABLE_ERR: " + $k.createOrReplace.object.table + " : " + $_.Exception.ToString())
     }}
 }}
-if(-not $bad){{ Write-Output "INSTALL_OK" }}
+if(-not $bad){{ Write-Output "TABLES_OK" }}
 $c.Close()
 """
-    for attempt in range(3):
-        result = dax.guest(script)
-        if "INSTALL_OK" in result:
-            return
-        time.sleep(1.0)
-    raise RuntimeError(f"Could not install exit model in Power BI after 3 tries:\n{result}")
+    result = dax.guest(tb_script)
+    if "TABLES_OK" not in result:
+        raise RuntimeError(f"Could not create XT_ tables in Power BI:\n{result}")
+
+    # Step 2: Create relationships with XT_ prefix using TOM
+    rel_script = dax.PS_HEAD.replace("__PORT__", port_) + """
+$p = Split-Path (Get-Process PBIDesktop | Select-Object -First 1).Path
+Add-Type -Path "$p\\Microsoft.AnalysisServices.Server.Tabular.dll"
+$srv = New-Object Microsoft.AnalysisServices.Tabular.Server
+$connStr = "Provider=MSOLAP;Data Source=localhost:__PORT__;Initial Catalog=" + $c.Database
+$srv.Connect($connStr)
+$db = $srv.Databases[0]
+
+$relSpecs = @(
+    @("XT_rel_sales_date_order", "XT_Sales", "OrderDate", "XT_Date", "Date", $true, $false, "many", "one"),
+    @("XT_rel_sales_date_ship", "XT_Sales", "ShipDate", "XT_Date", "Date", $false, $false, "many", "one"),
+    @("XT_rel_sales_product", "XT_Sales", "ProductKey", "XT_Product", "ProductKey", $true, $false, "many", "one"),
+    @("XT_rel_sales_customer", "XT_Sales", "CustomerKey", "XT_Customer", "CustomerKey", $true, $false, "many", "one"),
+    @("XT_rel_sales_region", "XT_Sales", "RegionKey", "XT_Region", "RegionKey", $true, $false, "many", "one"),
+    @("XT_rel_custreg_customer", "XT_CustomerRegion", "CustomerKey", "XT_Customer", "CustomerKey", $true, $false, "many", "one"),
+    @("XT_rel_custreg_region", "XT_CustomerRegion", "RegionKey", "XT_Region", "RegionKey", $true, $false, "many", "one")
+)
+
+foreach($spec in $relSpecs) {
+    $r = New-Object Microsoft.AnalysisServices.Tabular.SingleColumnRelationship
+    $r.Name = $spec[0]
+    $r.FromColumn = $db.Model.Tables[$spec[1]].Columns[$spec[2]]
+    $r.ToColumn = $db.Model.Tables[$spec[3]].Columns[$spec[4]]
+    $r.IsActive = $spec[5]
+    $r.FromCardinality = if ($spec[7] -eq "many") { [Microsoft.AnalysisServices.Tabular.RelationshipEndCardinality]::Many } else { [Microsoft.AnalysisServices.Tabular.RelationshipEndCardinality]::One }
+    $r.ToCardinality = if ($spec[8] -eq "many") { [Microsoft.AnalysisServices.Tabular.RelationshipEndCardinality]::Many } else { [Microsoft.AnalysisServices.Tabular.RelationshipEndCardinality]::One }
+    $r.CrossFilteringBehavior = if ($spec[6]) { [Microsoft.AnalysisServices.Tabular.CrossFilteringBehavior]::BothDirections } else { [Microsoft.AnalysisServices.Tabular.CrossFilteringBehavior]::OneDirection }
+    $db.Model.Relationships.Add($r)
+}
+$null = $db.Model.SaveChanges()
+Write-Output "RELS_OK"
+$c.Close()
+""".replace("__PORT__", port_)
+    result_rel = dax.guest(rel_script)
+    if "RELS_OK" not in result_rel:
+        raise RuntimeError(f"Could not create XT_ relationships in Power BI:\n{result_rel}")
+
+    # Step 3: Refresh calculate on XT_ tables only
+    ref_script = dax.PS_HEAD.replace("__PORT__", port_) + f"""
+$ref = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("{payload_ref}")).Replace("__DB__", $c.Database)
+$cmd = $c.CreateCommand()
+$cmd.CommandText = $ref
+try {{
+    $null = $cmd.ExecuteNonQuery()
+    Write-Output "REFRESH_OK"
+}} catch {{
+    Write-Output ("REFRESH_ERR: " + $_.Exception.ToString())
+}}
+$c.Close()
+"""
+    result_ref = dax.guest(ref_script)
+    if "REFRESH_OK" not in result_ref:
+        raise RuntimeError(f"Could not refresh XT_ tables in Power BI:\n{result_ref}")
 
 
 def drop_guest_model(port_: str) -> None:
-    """Remove the exit model from Power BI, leaving only a 1-row Empty stand-in."""
-    empty_body = {
-        "culture": "en-US",
-        "defaultPowerBIDataSourceVersion": "powerBI_V3",
-        "tables": [
-            {
-                "name": "Empty",
-                "columns": [{"name": "x", "dataType": "int64", "type": "calculatedTableColumn", "sourceColumn": "[x]"}],
-                "partitions": [{"name": "p", "source": {"type": "calculated", "expression": 'ROW("x",1)'}}],
-            }
-        ],
-        "relationships": [],
+    """Remove all XT_ relationships and XT_ tables from Power BI; never touches non-XT_ objects."""
+    drop_script = dax.PS_HEAD.replace("__PORT__", port_) + """
+$p = Split-Path (Get-Process PBIDesktop | Select-Object -First 1).Path
+Add-Type -Path "$p\\Microsoft.AnalysisServices.Server.Tabular.dll"
+$srv = New-Object Microsoft.AnalysisServices.Tabular.Server
+$connStr = "Provider=MSOLAP;Data Source=localhost:__PORT__;Initial Catalog=" + $c.Database
+$srv.Connect($connStr)
+$db = $srv.Databases[0]
+
+$toRemove = @()
+foreach($r in $db.Model.Relationships) {
+    if ($r.Name -like "XT_*") {
+        $toRemove += $r
     }
-    cmds = [
-        {"createOrReplace": {"object": {"database": "__DB__"}, "database": {"name": "__DB__", "compatibilityLevel": 1700, "model": empty_body}}},
-        {"refresh": {"type": "calculate", "objects": [{"database": "__DB__"}]}},
-    ]
-    payload = base64.b64encode(json.dumps(cmds).encode()).decode()
-    script = dax.PS_HEAD.replace("__PORT__", port_) + f"""
-$cs = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("{payload}")).Replace("__DB__", $c.Database) | ConvertFrom-Json
-foreach($k in $cs){{
-    $t = ($k | ConvertTo-Json -Depth 30 -Compress)
-    $cmd = $c.CreateCommand()
-    $cmd.CommandText = $t
-    try {{ $null = $cmd.ExecuteNonQuery() }} catch {{}}
-}}
+}
+foreach($r in $toRemove) {
+    try {
+        $db.Model.Relationships.Remove($r)
+    } catch {
+        Write-Output ("FAIL_DEL_REL: " + $r.Name + " " + $_.Exception.ToString())
+    }
+}
+try {
+    $null = $db.Model.SaveChanges()
+    Write-Output "RELS_DROPPED_OK"
+} catch {
+    Write-Output ("FAIL_SAVE_RELS: " + $_.Exception.ToString())
+}
+
+# Delete each XT_ table via TMSL delete
+$cmdT = $c.CreateCommand()
+$cmdT.CommandText = "SELECT [Name] FROM `$SYSTEM.TMSCHEMA_TABLES"
+$rT = $cmdT.ExecuteReader()
+$xtTables = @()
+while($rT.Read()){
+    $n = $rT["Name"].ToString()
+    if ($n.StartsWith("XT_")) {
+        $xtTables += $n
+    }
+}
+$rT.Close()
+
+foreach($t in $xtTables) {
+    $del = ('{"delete":{"object":{"database":"' + $c.Database + '","table":"' + $t + '"}}}')
+    $cmdDel = $c.CreateCommand()
+    $cmdDel.CommandText = $del
+    try {
+        $null = $cmdDel.ExecuteNonQuery()
+        Write-Output ("DEL_TABLE_OK: " + $t)
+    } catch {
+        Write-Output ("FAIL_DEL_TABLE: " + $t + " " + $_.Exception.ToString())
+    }
+}
+
+# List model tables and relationships via DMV and fail loudly if any XT_ object remains
+$cmdCheckT = $c.CreateCommand()
+$cmdCheckT.CommandText = "SELECT [Name] FROM `$SYSTEM.TMSCHEMA_TABLES"
+$rCheckT = $cmdCheckT.ExecuteReader()
+$remTables = @()
+while($rCheckT.Read()){
+    $n = $rCheckT["Name"].ToString()
+    if ($n.StartsWith("XT_")) { $remTables += $n }
+}
+$rCheckT.Close()
+
+$cmdCheckR = $c.CreateCommand()
+$cmdCheckR.CommandText = "SELECT [Name] FROM `$SYSTEM.TMSCHEMA_RELATIONSHIPS"
+$rCheckR = $cmdCheckR.ExecuteReader()
+$remRels = @()
+while($rCheckR.Read()){
+    $n = $rCheckR["Name"].ToString()
+    if ($n.StartsWith("XT_")) { $remRels += $n }
+}
+$rCheckR.Close()
+
+if ($remTables.Count -gt 0 -or $remRels.Count -gt 0) {
+    Write-Output ("REMAINING_OBJECTS_ERROR: Tables=" + ($remTables -join ",") + " Rels=" + ($remRels -join ","))
+} else {
+    Write-Output "ALL_XT_CLEAN"
+}
+
 $c.Close()
-Write-Output "DROPPED"
-"""
-    dax.guest(script)
+""".replace("__PORT__", port_)
+    out = dax.guest(drop_script)
+    if "ALL_XT_CLEAN" not in out:
+        raise RuntimeError(f"Drop failed or XT_ objects remained in Power BI model:\n{out}")
+    if "FAIL_DEL" in out or "FAIL_SAVE" in out:
+        raise RuntimeError(f"Encountered delete failures while dropping XT_ objects:\n{out}")
+    after_tables = list_guest_model_tables(port_)
+    print("Tables after drop:", sorted(after_tables))
 
 
 def list_guest_model_tables(port_: str) -> list[str]:
@@ -699,19 +839,20 @@ def main() -> None:
     if "--verify-guest" in sys.argv:
         print("Running --verify-guest...")
         port_ = get_guest_port()
-        try:
-            install_guest_model(port_, data)
-            res = verify_guest(data, port_)
-            print_verification_table("Guest Verification Table", res)
-            if not res["all_match"]:
-                sys.exit(1)
-        finally:
-            drop_guest_model(port_)
-            remaining = [t for t in list_guest_model_tables(port_) if t.startswith("XT_")]
-            if remaining:
-                print(f"WARNING: Remaining XT_ tables in guest: {remaining}")
-            else:
-                print("Guest clean: no XT_ tables remaining.")
+        with dax.guest_lock():
+            try:
+                install_guest_model(port_, data)
+                res = verify_guest(data, port_)
+                print_verification_table("Guest Verification Table", res)
+                if not res["all_match"]:
+                    sys.exit(1)
+            finally:
+                drop_guest_model(port_)
+                remaining = [t for t in list_guest_model_tables(port_) if t.startswith("XT_")]
+                if remaining:
+                    print(f"WARNING: Remaining XT_ tables in guest: {remaining}")
+                else:
+                    print("Guest clean: no XT_ tables remaining.")
 
 
 if __name__ == "__main__":

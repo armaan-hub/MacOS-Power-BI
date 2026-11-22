@@ -83,8 +83,8 @@ class TestExitModel(unittest.TestCase):
         table_ids = {t["id"] for t in tables}
 
         expected_ids = {
-            "rel_sales_date_order", "rel_sales_date_ship", "rel_sales_product",
-            "rel_sales_customer", "rel_sales_region", "rel_custreg_customer", "rel_custreg_region",
+            "XT_rel_sales_date_order", "XT_rel_sales_date_ship", "XT_rel_sales_product",
+            "XT_rel_sales_customer", "XT_rel_sales_region", "XT_rel_custreg_customer", "XT_rel_custreg_region",
         }
         self.assertEqual({r["id"] for r in rels}, expected_ids)
 
@@ -95,7 +95,7 @@ class TestExitModel(unittest.TestCase):
             self.assertIsInstance(r["is_active"], bool)
 
         # Check ship date is inactive
-        ship_rel = [r for r in rels if r["id"] == "rel_sales_date_ship"][0]
+        ship_rel = [r for r in rels if r["id"] == "XT_rel_sales_date_ship"][0]
         self.assertFalse(ship_rel["is_active"])
 
     def test_column_type_mappings(self) -> None:
@@ -147,6 +147,71 @@ class TestExitModel(unittest.TestCase):
             self.assertEqual(stats["refused"], 1)  # item4
             self.assertEqual(len(stats["slowest_20"]), 4)
             self.assertEqual(stats["slowest_20"][0]["id"], "item2")
+            self.assertEqual(stats["only_in_a_count"], 0)
+            self.assertEqual(stats["only_in_b_count"], 0)
+
+    def test_compare_counts_disjoint_ids(self) -> None:
+        """exit_check.compare_results counts and lists ids present in only one file."""
+        file_a_items = [
+            {"id": "item1", "expr": "1+1", "powerbi": "2"},
+            {"id": "item_only_a", "expr": "5+5", "powerbi": "10"},
+        ]
+        file_b_items = [
+            {"id": "item1", "expr": "1+1", "local": "2", "time_ms": 1.0},
+            {"id": "item_only_b", "expr": "6+6", "local": "12", "time_ms": 1.0},
+        ]
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_a = str(Path(tmp_dir) / "pbi.json")
+            path_b = str(Path(tmp_dir) / "local.json")
+            Path(path_a).write_text(json.dumps(file_a_items), encoding="utf-8")
+            Path(path_b).write_text(json.dumps(file_b_items), encoding="utf-8")
+
+            stats = exit_check.compare_results(path_a, path_b)
+            self.assertEqual(stats["right"], 1)
+            self.assertEqual(stats["only_in_a_count"], 1)
+            self.assertEqual(stats["only_in_b_count"], 1)
+            self.assertEqual(stats["only_in_a"], ["item_only_a"])
+            self.assertEqual(stats["only_in_b"], ["item_only_b"])
+
+    def test_tmsl_shape_no_database_replace_and_xt_prefix(self) -> None:
+        """TMSL commands never replace the database and all created/deleted objects start with XT_."""
+        data = exit_model.generate_data(exit_model.MODEL_SEED)
+        cmds = exit_model.tmsl_table_commands(data)
+        self.assertGreater(len(cmds), 0)
+        for cmd in cmds:
+            self.assertIn("createOrReplace", cmd)
+            cor = cmd["createOrReplace"]
+            obj = cor["object"]
+            # Must NOT be a bare database replace
+            self.assertIn("table", obj)
+            tbl_name = obj["table"]
+            self.assertTrue(tbl_name.startswith("XT_"), f"Table {tbl_name} must start with XT_")
+            self.assertEqual(cor["table"]["name"], tbl_name)
+
+        # Check relationship specs all start with XT_
+        for spec in exit_model.RELATIONSHIP_SPECS:
+            rel_name = spec[0]
+            self.assertTrue(rel_name.startswith("XT_"), f"Relationship {rel_name} must start with XT_")
+
+    def test_mocked_install_failure_calls_drop(self) -> None:
+        """A failure during install inside run_power_bi still invokes drop_guest_model."""
+        from unittest.mock import patch
+
+        dropped = False
+
+        def mock_drop(port: str) -> None:
+            nonlocal dropped
+            dropped = True
+
+        def mock_install(port: str, data: dict) -> None:
+            raise RuntimeError("Simulated install failure midway")
+
+        with patch("tools.exit_model.install_guest_model", side_effect=mock_install), \
+             patch("tools.exit_model.drop_guest_model", side_effect=mock_drop):
+            with self.assertRaises(RuntimeError):
+                exit_check.run_power_bi([{"id": "1", "expr": "1"}], "12345")
+
+        self.assertTrue(dropped, "drop_guest_model was not called after install failure")
 
 
 if __name__ == "__main__":
