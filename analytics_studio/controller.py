@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
+import threading
 from typing import Any
 from uuid import uuid4
 
@@ -99,7 +100,10 @@ from analytics_studio import dax_dates
 from analytics_studio.measures import (
     MAX_MEASURES,
     MeasureError,
+    MeasureEvaluationCancelled,
     VisualAxisContext,
+    acquire_engine_lock,
+    release_engine_lock,
     evaluate_calculated_table,
     evaluate_calculated_columns,
     evaluate_measures,
@@ -109,6 +113,10 @@ from analytics_studio.measures import (
     rename_table_references,
     tokenize,
     validate_calculated_columns,
+)
+from analytics_studio.measure_tasks import (
+    MeasureEvaluationTask,
+    create_measure_thread_pool,
 )
 from analytics_studio.query_engine import QueryError, append_candidates, merge_candidates
 from analytics_studio.recent_sources import RecentSourcesStore
@@ -1912,6 +1920,7 @@ class StudioController(QObject):
     statusChanged = Signal(str)
     fieldQueryChanged = Signal(str)
     activeSourceReady = Signal()
+    reportBusyChanged = Signal(bool)
 
     def __init__(self, parent: QObject | None = None, settings: QSettings | None = None) -> None:
         super().__init__(parent)
@@ -1990,6 +1999,11 @@ class StudioController(QObject):
         self._model_relationships: list[str] = []
         self._recent_source_store = RecentSourcesStore(settings)
         self._table_model = CsvTableModel(self)
+        self._report_pool = create_measure_thread_pool()
+        self._report_request_id: int = 0
+        self._report_cancel_event: threading.Event | None = None
+        self._report_busy: bool = False
+        self._report_tasks: dict[int, Any] = {}
         self._refresh_model_view()
         self._refresh_report()
 
@@ -2010,6 +2024,10 @@ class StudioController(QObject):
     @Property(bool, notify=stateChanged)
     def dirty(self) -> bool:
         return self._dirty
+
+    @Property(bool, notify=reportBusyChanged)
+    def reportBusy(self) -> bool:  # noqa: N802
+        return self._report_busy
 
     @Property(str, notify=stateChanged)
     def currentView(self) -> str:  # noqa: N802
@@ -6235,16 +6253,29 @@ class StudioController(QObject):
         self._dirty = True
         self.stateChanged.emit()
 
-    @Slot(str)
-    def setRegionFilter(self, region: str) -> None:  # noqa: N802
+    def _refresh(self, async_refresh: bool = False) -> None:
+        if async_refresh:
+            self._refresh_report_async()
+        else:
+            self._refresh_report()
+
+    def _set_region(self, region: str, async_refresh: bool = False) -> None:
         next_region = None if region in ("", "All regions") else region
         if next_region is not None and next_region not in self.regions:
             return
         if self._current_region == next_region:
             return
         self._current_region = next_region
-        self._refresh_report()
+        self._refresh(async_refresh)
         self.stateChanged.emit()
+
+    @Slot(str)
+    def setRegionFilter(self, region: str) -> None:  # noqa: N802
+        self._set_region(region)
+
+    @Slot(str)
+    def setRegionFilterInteractive(self, region: str) -> None:  # noqa: N802
+        self._set_region(region, True)
 
     def _add_report_filter(
         self,
@@ -6262,6 +6293,7 @@ class StudioController(QObject):
         relative_time_rule: dict[str, Any] | None = None,
         top_n_rule: dict[str, Any] | None = None,
         report_scope: bool = False,
+        async_refresh: bool = False,
     ) -> bool:
         table = next(
             (item for item in self._table_catalog
@@ -6509,7 +6541,7 @@ class StudioController(QObject):
             self._set_status(f"Could not add filter: {exc}")
             return False
         self._dirty = True
-        self._refresh_report()
+        self._refresh(async_refresh)
         self.stateChanged.emit()
         summary = _report_filter_summary(clauses, logic)
         scope = (
@@ -6522,217 +6554,31 @@ class StudioController(QObject):
         )
         return True
 
-    @Slot(str, str, str, result=bool)
-    def addPageFilter(self, table_id: str, column: str, value: str) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id, column=column, operator="equals", value=value
-        )
-
-    @Slot(str, str, str, str, str, str, str, result=bool)
-    def addPageFilterRule(
-        self,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-        )
-
-    @Slot(str, str, str, str, str, str, str, result=bool)
-    def addReportFilterRule(
-        self,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-            report_scope=True,
-        )
-
-    @Slot(str, str, str, str, result=bool)
-    def addPageMultiValueFilter(  # noqa: N802
-        self, table_id: str, column: str, operator: str, values_json: str
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            multi_values=values,
-        )
-
-    @Slot(str, str, str, str, result=bool)
-    def addReportMultiValueFilter(  # noqa: N802
-        self, table_id: str, column: str, operator: str, values_json: str
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            multi_values=values,
-            report_scope=True,
-        )
-
-    @Slot(str, str, str, int, str, bool, result=bool)
-    def addPageRelativeDateFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-        )
-
-    @Slot(str, str, str, int, str, bool, result=bool)
-    def addReportRelativeDateFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-            report_scope=True,
-        )
-
-    @Slot(str, str, str, int, str, result=bool)
-    def addPageRelativeTimeFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-        )
-
-    @Slot(str, str, str, int, str, result=bool)
-    def addReportRelativeTimeFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-            report_scope=True,
-        )
-
-    @Slot(int, result=bool)
-    def removeReportFilter(self, index: int) -> bool:  # noqa: N802
-        filters = self._project.get("report", {}).get("filters", [])
+    def _remove_filter(self, scope: str, index: int, async_refresh: bool = False) -> bool:
+        """Remove one filter; scope is "report", "page" or "visual"."""
+        if scope == "report":
+            filters = self._project.get("report", {}).get("filters", [])
+        else:
+            page = self._active_page()
+            if page is None or (scope == "visual" and not self._selected_visual):
+                return False
+            filters = page.get("visual_filters" if scope == "visual" else "filters", [])
         if index < 0 or index >= len(filters):
+            return False
+        if scope == "visual" and filters[index].get("visual_name") != self._selected_visual:
             return False
         removed = filters.pop(index)
         self._dirty = True
-        self._refresh_report()
+        self._refresh(async_refresh)
         self.stateChanged.emit()
-        self._set_status(f"Removed report filter for {removed['column']}")
+        if scope == "visual":
+            self._set_status(f"Removed filter from {self._selected_visual} · {removed['column']}")
+        else:
+            self._set_status(f"Removed {scope} filter for {removed['column']}")
         return True
 
-    @Slot(int, result=bool)
-    def removePageFilter(self, index: int) -> bool:  # noqa: N802
-
-
-        page = self._active_page()
-        if page is None:
-            return False
-        filters = page.get("filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report()
-        self.stateChanged.emit()
-        self._set_status(f"Removed page filter for {removed['column']}")
-        return True
-
-    @Slot(str, str, str, str, result=bool)
-    def addVisualFilter(
-        self, visual_name: str, table_id: str, column: str, value: str
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator="equals",
-            value=value,
-            visual_name=visual_name,
-        )
-
-    @Slot(str, str, str, str, str, str, str, str, result=bool)
-    def addVisualFilterRule(
+    def _add_filter_rule(
         self,
-        visual_name: str,
         table_id: str,
         column: str,
         operator: str,
@@ -6740,7 +6586,9 @@ class StudioController(QObject):
         second_operator: str,
         second_value: str,
         logic: str,
-    ) -> bool:  # noqa: N802
+        async_refresh: bool = False,
+        **scope: Any,
+    ) -> bool:
         return self._add_report_filter(
             table_id=table_id,
             column=column,
@@ -6749,17 +6597,18 @@ class StudioController(QObject):
             second_operator=second_operator,
             second_value=second_value,
             logic=logic,
-            visual_name=visual_name,
+            async_refresh=async_refresh,
+            **scope,
         )
 
-    @Slot(str, str, str, str, str, result=bool)
-    def addVisualMultiValueFilter(  # noqa: N802
+    def _add_multi_value(
         self,
-        visual_name: str,
         table_id: str,
         column: str,
         operator: str,
         values_json: str,
+        async_refresh: bool = False,
+        **scope: Any,
     ) -> bool:
         try:
             values = json.loads(values_json)
@@ -6771,56 +6620,58 @@ class StudioController(QObject):
             column=column,
             operator=operator,
             value="",
-            visual_name=visual_name,
             multi_values=values,
+            async_refresh=async_refresh,
+            **scope,
         )
 
-    @Slot(str, str, str, str, int, str, bool, result=bool)
-    def addVisualRelativeDateFilter(  # noqa: N802
+    def _add_relative_date(
         self,
-        visual_name: str,
         table_id: str,
         column: str,
         direction: str,
         count: int,
         unit: str,
         include_today: bool,
+        async_refresh: bool = False,
+        **scope: Any,
     ) -> bool:
         return self._add_report_filter(
             table_id=table_id,
             column=column,
             operator=_REPORT_FILTER_RELATIVE_DATE,
             value="",
-            visual_name=visual_name,
             relative_date_rule={
                 "direction": direction,
                 "count": count,
                 "unit": unit,
                 "include_today": include_today,
             },
+            async_refresh=async_refresh,
+            **scope,
         )
 
-    @Slot(str, str, str, str, int, str, result=bool)
-    def addVisualRelativeTimeFilter(  # noqa: N802
+    def _add_relative_time(
         self,
-        visual_name: str,
         table_id: str,
         column: str,
         direction: str,
         count: int,
         unit: str,
+        async_refresh: bool = False,
+        **scope: Any,
     ) -> bool:
         return self._add_report_filter(
             table_id=table_id,
             column=column,
             operator=_REPORT_FILTER_RELATIVE_TIME,
             value="",
-            visual_name=visual_name,
             relative_time_rule={"direction": direction, "count": count, "unit": unit},
+            async_refresh=async_refresh,
+            **scope,
         )
 
-    @Slot(str, str, str, str, int, str, result=bool)
-    def addVisualTopNFilter(  # noqa: N802
+    def _add_top_n(
         self,
         visual_name: str,
         table_id: str,
@@ -6828,6 +6679,7 @@ class StudioController(QObject):
         direction: str,
         count: int,
         order_by_column: str,
+        async_refresh: bool = False,
     ) -> bool:
         return self._add_report_filter(
             table_id=table_id,
@@ -6840,26 +6692,144 @@ class StudioController(QObject):
                 "count": count,
                 "order_by_column": order_by_column,
             },
+            async_refresh=async_refresh,
         )
+
+    @Slot(str, str, str, result=bool)
+    def addPageFilter(self, table_id: str, column: str, value: str) -> bool:  # noqa: N802
+        return self._add_report_filter(table_id=table_id, column=column, operator="equals", value=value)
+
+    @Slot(str, str, str, str, str, str, str, result=bool)
+    def addPageFilterRule(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic)
+
+    @Slot(str, str, str, str, str, str, str, result=bool)
+    def addPageFilterRuleInteractive(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, True)
+
+    @Slot(str, str, str, str, str, str, str, result=bool)
+    def addReportFilterRule(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, report_scope=True)
+
+    @Slot(str, str, str, str, str, str, str, result=bool)
+    def addReportFilterRuleInteractive(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, True, report_scope=True)
+
+    @Slot(str, str, str, str, result=bool)
+    def addPageMultiValueFilter(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json)
+
+    @Slot(str, str, str, str, result=bool)
+    def addPageMultiValueFilterInteractive(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, True)
+
+    @Slot(str, str, str, str, result=bool)
+    def addReportMultiValueFilter(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, report_scope=True)
+
+    @Slot(str, str, str, str, result=bool)
+    def addReportMultiValueFilterInteractive(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, True, report_scope=True)
+
+    @Slot(str, str, str, int, str, bool, result=bool)
+    def addPageRelativeDateFilter(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today)
+
+    @Slot(str, str, str, int, str, bool, result=bool)
+    def addPageRelativeDateFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, True)
+
+    @Slot(str, str, str, int, str, bool, result=bool)
+    def addReportRelativeDateFilter(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, report_scope=True)
+
+    @Slot(str, str, str, int, str, bool, result=bool)
+    def addReportRelativeDateFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, True, report_scope=True)
+
+    @Slot(str, str, str, int, str, result=bool)
+    def addPageRelativeTimeFilter(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit)
+
+    @Slot(str, str, str, int, str, result=bool)
+    def addPageRelativeTimeFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, True)
+
+    @Slot(str, str, str, int, str, result=bool)
+    def addReportRelativeTimeFilter(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, report_scope=True)
+
+    @Slot(str, str, str, int, str, result=bool)
+    def addReportRelativeTimeFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, True, report_scope=True)
+
+    @Slot(int, result=bool)
+    def removeReportFilter(self, index: int) -> bool:  # noqa: N802
+        return self._remove_filter("report", index)
+
+    @Slot(int, result=bool)
+    def removeReportFilterInteractive(self, index: int) -> bool:  # noqa: N802
+        return self._remove_filter("report", index, True)
+
+    @Slot(int, result=bool)
+    def removePageFilter(self, index: int) -> bool:  # noqa: N802
+        return self._remove_filter("page", index)
+
+    @Slot(int, result=bool)
+    def removePageFilterInteractive(self, index: int) -> bool:  # noqa: N802
+        return self._remove_filter("page", index, True)
+
+    @Slot(str, str, str, str, result=bool)
+    def addVisualFilter(self, visual_name: str, table_id: str, column: str, value: str) -> bool:  # noqa: N802
+        return self._add_report_filter(table_id=table_id, column=column, operator="equals", value=value, visual_name=visual_name)
+
+    @Slot(str, str, str, str, str, str, str, str, result=bool)
+    def addVisualFilterRule(self, visual_name: str, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, visual_name=visual_name)
+
+    @Slot(str, str, str, str, str, str, str, str, result=bool)
+    def addVisualFilterRuleInteractive(self, visual_name: str, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, True, visual_name=visual_name)
+
+    @Slot(str, str, str, str, str, result=bool)
+    def addVisualMultiValueFilter(self, visual_name: str, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, visual_name=visual_name)
+
+    @Slot(str, str, str, str, str, result=bool)
+    def addVisualMultiValueFilterInteractive(self, visual_name: str, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, True, visual_name=visual_name)
+
+    @Slot(str, str, str, str, int, str, bool, result=bool)
+    def addVisualRelativeDateFilter(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, visual_name=visual_name)
+
+    @Slot(str, str, str, str, int, str, bool, result=bool)
+    def addVisualRelativeDateFilterInteractive(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, True, visual_name=visual_name)
+
+    @Slot(str, str, str, str, int, str, result=bool)
+    def addVisualRelativeTimeFilter(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, visual_name=visual_name)
+
+    @Slot(str, str, str, str, int, str, result=bool)
+    def addVisualRelativeTimeFilterInteractive(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, True, visual_name=visual_name)
+
+    @Slot(str, str, str, str, int, str, result=bool)
+    def addVisualTopNFilter(self, visual_name: str, table_id: str, column: str, direction: str, count: int, order_by_column: str) -> bool:  # noqa: N802
+        return self._add_top_n(visual_name, table_id, column, direction, count, order_by_column)
+
+    @Slot(str, str, str, str, int, str, result=bool)
+    def addVisualTopNFilterInteractive(self, visual_name: str, table_id: str, column: str, direction: str, count: int, order_by_column: str) -> bool:  # noqa: N802
+        return self._add_top_n(visual_name, table_id, column, direction, count, order_by_column, True)
 
     @Slot(int, result=bool)
     def removeVisualFilter(self, index: int) -> bool:  # noqa: N802
+        return self._remove_filter("visual", index)
 
-
-        page = self._active_page()
-        if page is None or not self._selected_visual:
-            return False
-        filters = page.get("visual_filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        if filters[index].get("visual_name") != self._selected_visual:
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report()
-        self.stateChanged.emit()
-        self._set_status(f"Removed filter from {self._selected_visual} · {removed['column']}")
-        return True
+    @Slot(int, result=bool)
+    def removeVisualFilterInteractive(self, index: int) -> bool:  # noqa: N802
+        return self._remove_filter("visual", index, True)
 
     @Slot(str)
     def setFieldQuery(self, query: str) -> None:  # noqa: N802
@@ -8538,6 +8508,7 @@ class StudioController(QObject):
     @Slot(result=bool)
     def calculated_table_dialog(self) -> bool:
         """Create a saved DISTINCT calculated table from one loaded model column."""
+        self._cancel_and_wait_worker()
         tables = [
             dict(table) for table in self._table_catalog
             if table.get("loaded") and table.get("loadEnabled")
@@ -9081,6 +9052,7 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate, evaluate, then transactionally add a local DAX measure."""
+        self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
             return False
@@ -9140,6 +9112,7 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate and transactionally replace one saved local DAX measure."""
+        self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before editing a measure.")
             return False
@@ -9226,6 +9199,7 @@ class StudioController(QObject):
 
     def remove_measure(self, name: str) -> bool:
         """Remove one measure only when the remaining model still evaluates."""
+        self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before removing a measure.")
             return False
@@ -9835,6 +9809,7 @@ class StudioController(QObject):
             effective_types.update(column_types)
         definitions = table.get("calculated_columns", [])
         if definitions:
+            self._cancel_and_wait_worker()
             headers, rows, type_map = evaluate_calculated_columns(
                 definitions,
                 candidate.rows,
@@ -13739,6 +13714,7 @@ class StudioController(QObject):
             page["visual_filters"] = []
         if report_filters or page_filters or visual_filters:
             self._dirty = True
+        # Stays synchronous: a one-shot reset whose callers read the refreshed results at once.
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status("Report, current-page, and visual selections cleared")
@@ -14220,7 +14196,33 @@ class StudioController(QObject):
             ]
         return source_rows
 
+    def _cancel_and_wait_worker(self) -> None:
+        """Cancel any running report worker task and wait for it to finish."""
+        self._report_request_id += 1
+        if self._report_cancel_event is not None:
+            self._report_cancel_event.set()
+        if hasattr(self, "_report_pool") and self._report_pool is not None:
+            if not self._report_pool.waitForDone(2000):
+                self._set_status("Waiting for background report evaluation to cancel...")
+                if self._report_cancel_event is not None:
+                    self._report_cancel_event.set()
+                self._report_pool.waitForDone(5000)
+        self._set_report_busy(False)
+
+    def _set_report_busy(self, busy: bool) -> None:
+        if self._report_busy != busy:
+            self._report_busy = busy
+            self.reportBusyChanged.emit(busy)
+
+    @Slot()
+    def cancelReportEvaluation(self) -> None:  # noqa: N802
+        """Cooperatively cancel active report worker evaluation, leaving prior values shown."""
+        if self._report_cancel_event is not None:
+            self._report_cancel_event.set()
+        self._set_report_busy(False)
+
     def _refresh_report(self) -> None:
+        self._cancel_and_wait_worker()
         self._report_filter_context_cache.clear()
         now = datetime.now(timezone.utc)
         self._relative_filter_anchor_date = now.date()
@@ -14321,87 +14323,381 @@ class StudioController(QObject):
         measures = self._project.get("model", {}).get("measures", [])
         relationships = self._project.get("model", {}).get("relationships", [])
 
-        def evaluate_one_measure(
-            name: str,
-            measure_rows: list[dict[str, Any]],
-            table_context: list[dict[str, Any]],
-            filter_ids: set[str],
-        ) -> Decimal | None:
-            return evaluate_measures(
-                measures,
-                measure_rows,
-                self._headers,
-                self._active_model_table_name(),
-                measure_names=[name],
-                table_context=table_context,
-                relationships=relationships,
-                filter_table_ids=filter_ids,
-                active_table_id=active_table_id or None,
-            )[name]
+        # Bounded acquire of engine lock for synchronous evaluation
+        lock_acquired = acquire_engine_lock(timeout=2.0)
+        if not lock_acquired:
+            self._set_status("Waiting for engine lock...")
+            self._cancel_and_wait_worker()
+            lock_acquired = acquire_engine_lock(timeout=5.0)
+            if not lock_acquired:
+                self._set_status("Could not acquire engine lock; aborting synchronous evaluation.")
+                return
 
-        for measure in measures:
-            name = str(measure["name"])
-            try:
-                value = evaluate_one_measure(
-                    name, rows, measure_table_context, filter_table_ids
-                )
-            except MeasureError as exc:
-                self._measure_errors[name] = str(exc)
-            else:
-                formatted = (
-                    _format_report_number(value) if value is not None else "—"
-                )
-                self._measure_values[name] = formatted
-                self._kpis[name] = formatted
+        try:
+            def evaluate_one_measure(
+                name: str,
+                measure_rows: list[dict[str, Any]],
+                table_context: list[dict[str, Any]],
+                filter_ids: set[str],
+            ) -> Decimal | None:
+                return evaluate_measures(
+                    measures,
+                    measure_rows,
+                    self._headers,
+                    self._active_model_table_name(),
+                    measure_names=[name],
+                    table_context=table_context,
+                    relationships=relationships,
+                    filter_table_ids=filter_ids,
+                    active_table_id=active_table_id or None,
+                )[name]
 
-        filter_errors = [self._filter_context_error] if self._filter_context_error else []
+            for measure in measures:
+                name = str(measure["name"])
+                try:
+                    value = evaluate_one_measure(
+                        name, rows, measure_table_context, filter_table_ids
+                    )
+                except MeasureError as exc:
+                    self._measure_errors[name] = str(exc)
+                else:
+                    formatted = (
+                        _format_report_number(value) if value is not None else "—"
+                    )
+                    self._measure_values[name] = formatted
+                    self._kpis[name] = formatted
 
+            filter_errors = [self._filter_context_error] if self._filter_context_error else []
+
+
+            page = self._active_page()
+            visuals_with_filters = {
+                str(item.get("visual_name", ""))
+                for item in (page.get("visual_filters", []) if page else [])
+            }
+            measure_names = {str(measure["name"]) for measure in measures}
+            for visual_name in self.activePageVisuals:
+                visual_rows = rows
+                visual_context = measure_table_context
+                visual_filter_ids = filter_table_ids
+                if visual_name in visuals_with_filters or self._cross_filters:
+                    (
+                        visual_rows_by_table,
+                        visual_context,
+                        visual_filter_ids,
+                    ) = self._report_filter_context(visual_name)
+                    visual_rows = visual_rows_by_table.get(active_table_id, list(self._rows))
+                    if self._filter_context_error:
+                        filter_errors.append(self._filter_context_error)
+
+                if visual_name == "Monthly revenue":
+                    self._monthly_visual_series[visual_name] = chart_series(visual_rows)[0]
+                elif visual_name == "Region revenue":
+                    visual_rows = self._apply_visual_top_n_rows(
+                        visual_name, visual_rows, active_table_id
+                    )
+                    self._region_visual_series[visual_name] = chart_series(visual_rows)[1]
+                elif visual_name.endswith(" KPI"):
+                    kpi_name = visual_name[:-4]
+                    if kpi_name in measure_names:
+                        try:
+                            visual_value = evaluate_one_measure(
+                                kpi_name, visual_rows, visual_context, visual_filter_ids
+                            )
+                        except MeasureError:
+                            self._visual_kpis[visual_name] = "—"
+                        else:
+                            self._visual_kpis[visual_name] = (
+                                _format_report_number(visual_value)
+                                if visual_value is not None else "—"
+                            )
+                    else:
+                        self._visual_kpis[visual_name] = standard_kpis(visual_rows).get(kpi_name, "—")
+
+            self._filter_context_error = "; ".join(dict.fromkeys(filter_errors))
+        finally:
+            release_engine_lock()
+
+    def _refresh_report_async(self) -> None:
+        """Asynchronously evaluate report measures and visual data off the window thread."""
+        self._report_filter_context_cache.clear()
+        now = datetime.now(timezone.utc)
+        self._relative_filter_anchor_date = now.date()
+        self._relative_filter_anchor_time = now
+        self._schedule_relative_filter_refresh(now)
+        defaults = {name: "—" for name in ("Revenue", "Cost", "Margin", "Units", "Orders")}
+        self._report_theme = self._project.get("report", {}).get("theme", "Default")
+        self._themes = REPORT_THEMES
+        self._region_column = _report_field(self._headers, "region") if self.sourceLoaded else None
+        if not self.sourceLoaded:
+            self._cancel_and_wait_worker()
+            self._kpis = defaults
+            self._measure_values = {}
+            self._measure_errors = {}
+            self._visual_kpis = {}
+            self._monthly_visual_series = {}
+            self._region_visual_series = {}
+            self._monthly_series = []
+            self._region_series = []
+            self._filter_context_error = ""
+            self._monthly_chart_message = "No date and numeric sales field found in this source."
+            self._region_chart_message = "No region and numeric sales field found in this source."
+            self.stateChanged.emit()
+            return
+
+        if self._current_region is not None and self._current_region not in self.regions:
+            self._current_region = None
+        filtered_rows_by_table, measure_table_context, filter_table_ids = (
+            self._report_filter_context()
+        )
+        active_table_id = self._active_model_table_id()
+        rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
+        revenue_column = _report_field(self._headers, "revenue")
+        cost_column = _report_field(self._headers, "cost")
+        margin_column = _report_field(self._headers, "margin")
+        units_column = _report_field(self._headers, "units")
+        date_column = _report_field(self._headers, "date")
+        region_column = self._region_column
+
+        def standard_kpis(source_rows: list[dict[str, Any]]) -> dict[str, str]:
+            def total(column: str | None) -> Decimal | None:
+                if column is None:
+                    return None
+                values = [_report_number(row.get(column, "")) for row in source_rows]
+                numbers = [value for value in values if value is not None]
+                return sum(numbers, Decimal(0)) if numbers else None
+
+            revenue_total = total(revenue_column)
+            cost_total = total(cost_column)
+            margin_total = total(margin_column)
+            if margin_total is None and revenue_total is not None and cost_total is not None:
+                margin_total = revenue_total - cost_total
+            units_total = total(units_column)
+            return {
+                "Revenue": _format_report_number(revenue_total) if revenue_total is not None else "—",
+                "Cost": _format_report_number(cost_total) if cost_total is not None else "—",
+                "Margin": _format_report_number(margin_total) if margin_total is not None else "—",
+                "Units": _format_report_number(units_total) if units_total is not None else "—",
+                "Orders": f"{len(source_rows):,}",
+            }
+
+        def chart_series(
+            source_rows: list[dict[str, Any]],
+        ) -> tuple[list[dict[str, str | float]], list[dict[str, str | float]]]:
+            monthly: defaultdict[str, Decimal] = defaultdict(Decimal)
+            regions: defaultdict[str, Decimal] = defaultdict(Decimal)
+            if revenue_column:
+                for row in source_rows:
+                    amount = _report_number(row.get(revenue_column, ""))
+                    if amount is None:
+                        continue
+                    month = _report_month(row.get(date_column, "")) if date_column else None
+                    if month:
+                        monthly[month] += amount
+                    if region_column:
+                        region = str(row.get(region_column, "") or "Unknown").strip() or "Unknown"
+                        regions[region] += amount
+            return (
+                [{"label": key, "value": float(value)} for key, value in sorted(monthly.items())],
+                [{"label": key, "value": float(value)} for key, value in sorted(regions.items())],
+            )
+
+        immediate_kpis = standard_kpis(rows)
+        immediate_monthly, immediate_region = chart_series(rows)
+        monthly_chart_message = (
+            "No sales or revenue column found in this source."
+            if revenue_column is None else
+            "No date column found in this source."
+            if date_column is None else
+            "No usable dates and numeric sales values found in this source."
+        )
+        region_chart_message = (
+            "No sales or revenue column found in this source."
+            if revenue_column is None else
+            "No region or geographic column found in this source."
+            if region_column is None else
+            "No numeric sales values found for the region chart."
+        )
+
+        measures_snapshot = deepcopy(self._project.get("model", {}).get("measures", []))
+        relationships_snapshot = deepcopy(self._project.get("model", {}).get("relationships", []))
+        headers_snapshot = list(self._headers)
+        active_table_name_snapshot = str(self._active_model_table_name())
+        rows_snapshot = [dict(r) for r in rows]
+        measure_table_context_snapshot = [
+            {**ctx, "rows": [dict(r) for r in ctx.get("rows", [])]}
+            for ctx in measure_table_context
+        ] if measure_table_context else []
+        filter_table_ids_snapshot = set(filter_table_ids)
 
         page = self._active_page()
         visuals_with_filters = {
             str(item.get("visual_name", ""))
             for item in (page.get("visual_filters", []) if page else [])
         }
-        measure_names = {str(measure["name"]) for measure in measures}
-        for visual_name in self.activePageVisuals:
-            visual_rows = rows
-            visual_context = measure_table_context
-            visual_filter_ids = filter_table_ids
+        active_visuals_snapshot = list(self.activePageVisuals)
+
+        visual_specs: dict[str, Any] = {}
+        filter_errors = [self._filter_context_error] if self._filter_context_error else []
+        for visual_name in active_visuals_snapshot:
+            v_rows = rows_snapshot
+            v_context = measure_table_context_snapshot
+            v_filter_ids = filter_table_ids_snapshot
             if visual_name in visuals_with_filters or self._cross_filters:
                 (
                     visual_rows_by_table,
-                    visual_context,
-                    visual_filter_ids,
+                    v_context_raw,
+                    v_filter_ids,
                 ) = self._report_filter_context(visual_name)
-                visual_rows = visual_rows_by_table.get(active_table_id, list(self._rows))
+                v_rows = [dict(r) for r in visual_rows_by_table.get(active_table_id, list(self._rows))]
+                v_context = [
+                    {**ctx, "rows": [dict(r) for r in ctx.get("rows", [])]}
+                    for ctx in v_context_raw
+                ] if v_context_raw else []
                 if self._filter_context_error:
                     filter_errors.append(self._filter_context_error)
+            if visual_name == "Region revenue":
+                v_rows = self._apply_visual_top_n_rows(visual_name, v_rows, active_table_id)
+            visual_specs[visual_name] = {
+                "rows": v_rows,
+                "context": v_context,
+                "filter_ids": v_filter_ids,
+            }
 
-            if visual_name == "Monthly revenue":
-                self._monthly_visual_series[visual_name] = chart_series(visual_rows)[0]
-            elif visual_name == "Region revenue":
-                visual_rows = self._apply_visual_top_n_rows(
-                    visual_name, visual_rows, active_table_id
-                )
-                self._region_visual_series[visual_name] = chart_series(visual_rows)[1]
-            elif visual_name.endswith(" KPI"):
-                kpi_name = visual_name[:-4]
-                if kpi_name in measure_names:
-                    try:
-                        visual_value = evaluate_one_measure(
-                            kpi_name, visual_rows, visual_context, visual_filter_ids
-                        )
-                    except MeasureError:
-                        self._visual_kpis[visual_name] = "—"
-                    else:
-                        self._visual_kpis[visual_name] = (
-                            _format_report_number(visual_value)
-                            if visual_value is not None else "—"
-                        )
+        filter_error_str = "; ".join(dict.fromkeys(filter_errors))
+
+        # Cancel previous task and create new cancel event
+        if self._report_cancel_event is not None:
+            self._report_cancel_event.set()
+        self._report_request_id += 1
+        req_id = self._report_request_id
+        cancel_event = threading.Event()
+        self._report_cancel_event = cancel_event
+        self._set_report_busy(True)
+
+        def eval_fn(is_cancelled: Callable[[], bool]) -> dict[str, Any]:
+            def evaluate_one_measure(
+                name: str,
+                measure_rows: list[dict[str, Any]],
+                table_context: list[dict[str, Any]],
+                filter_ids: set[str],
+            ) -> Decimal | None:
+                return evaluate_measures(
+                    measures_snapshot,
+                    measure_rows,
+                    headers_snapshot,
+                    active_table_name_snapshot,
+                    measure_names=[name],
+                    table_context=table_context,
+                    relationships=relationships_snapshot,
+                    filter_table_ids=filter_ids,
+                    active_table_id=active_table_id or None,
+                    cancel_check=is_cancelled,
+                )[name]
+
+            measure_vals: dict[str, str] = {}
+            measure_errs: dict[str, str] = {}
+            kpis_res = dict(immediate_kpis)
+            for measure in measures_snapshot:
+                if is_cancelled():
+                    raise MeasureEvaluationCancelled("Evaluation cancelled.")
+                name = str(measure["name"])
+                try:
+                    val = evaluate_one_measure(name, rows_snapshot, measure_table_context_snapshot, filter_table_ids_snapshot)
+                except MeasureEvaluationCancelled:
+                    raise
+                except MeasureError as exc:
+                    measure_errs[name] = str(exc)
                 else:
-                    self._visual_kpis[visual_name] = standard_kpis(visual_rows).get(kpi_name, "—")
+                    fmt = _format_report_number(val) if val is not None else "—"
+                    measure_vals[name] = fmt
+                    kpis_res[name] = fmt
 
-        self._filter_context_error = "; ".join(dict.fromkeys(filter_errors))
+            visual_kpis_res: dict[str, str] = {}
+            monthly_v_res: dict[str, Any] = {}
+            region_v_res: dict[str, Any] = {}
+            measure_names_set = {str(m["name"]) for m in measures_snapshot}
+
+            for v_name in active_visuals_snapshot:
+                if is_cancelled():
+                    raise MeasureEvaluationCancelled("Evaluation cancelled.")
+                spec = visual_specs.get(v_name)
+                if not spec:
+                    continue
+                v_rows = spec["rows"]
+                v_ctx = spec["context"]
+                v_fids = spec["filter_ids"]
+
+                if v_name == "Monthly revenue":
+                    monthly_v_res[v_name] = chart_series(v_rows)[0]
+                elif v_name == "Region revenue":
+                    region_v_res[v_name] = chart_series(v_rows)[1]
+                elif v_name.endswith(" KPI"):
+                    kpi_n = v_name[:-4]
+                    if kpi_n in measure_names_set:
+                        try:
+                            v_val = evaluate_one_measure(kpi_n, v_rows, v_ctx, v_fids)
+                        except MeasureEvaluationCancelled:
+                            raise
+                        except MeasureError:
+                            visual_kpis_res[v_name] = "—"
+                        else:
+                            visual_kpis_res[v_name] = _format_report_number(v_val) if v_val is not None else "—"
+                    else:
+                        visual_kpis_res[v_name] = standard_kpis(v_rows).get(kpi_n, "—")
+
+            return {
+                "kpis": kpis_res,
+                "measure_values": measure_vals,
+                "measure_errors": measure_errs,
+                "visual_kpis": visual_kpis_res,
+                "monthly_visual_series": monthly_v_res,
+                "region_visual_series": region_v_res,
+                "monthly_series": immediate_monthly,
+                "region_series": immediate_region,
+                "monthly_chart_message": monthly_chart_message,
+                "region_chart_message": region_chart_message,
+                "filter_context_error": filter_error_str,
+            }
+
+        task = MeasureEvaluationTask(req_id, eval_fn, cancel_event)
+        self._report_tasks[req_id] = task
+        task.signals.completed.connect(self._on_report_task_completed)
+        task.signals.cancelled.connect(self._on_report_task_cancelled)
+        task.signals.failed.connect(self._on_report_task_failed)
+        self._report_pool.start(task)
+
+    @Slot(int, object)
+    def _on_report_task_completed(self, request_id: int, result: dict[str, Any]) -> None:
+        self._report_tasks.pop(request_id, None)
+        if request_id != self._report_request_id:
+            return
+        self._set_report_busy(False)
+        self._kpis = result["kpis"]
+        self._measure_values = result["measure_values"]
+        self._measure_errors = result["measure_errors"]
+        self._visual_kpis = result["visual_kpis"]
+        self._monthly_visual_series = result["monthly_visual_series"]
+        self._region_visual_series = result["region_visual_series"]
+        self._monthly_series = result["monthly_series"]
+        self._region_series = result["region_series"]
+        self._monthly_chart_message = result["monthly_chart_message"]
+        self._region_chart_message = result["region_chart_message"]
+        self._filter_context_error = result["filter_context_error"]
+        self.stateChanged.emit()
+
+    @Slot(int)
+    def _on_report_task_cancelled(self, request_id: int) -> None:
+        self._report_tasks.pop(request_id, None)
+        if request_id == self._report_request_id:
+            self._set_report_busy(False)
+
+    @Slot(int, str)
+    def _on_report_task_failed(self, request_id: int, message: str) -> None:
+        self._report_tasks.pop(request_id, None)
+        if request_id == self._report_request_id:
+            self._set_report_busy(False)
+            self._set_status(f"Report evaluation error: {message}")
 
     def _measure_value_for_visual_group(
         self,
@@ -15152,7 +15448,7 @@ class StudioController(QObject):
         if not selected_list:
             del self._cross_filters[visual_title]
 
-        self._refresh_report()
+        self._refresh_report_async()
         self.stateChanged.emit()
 
     @Slot()

@@ -233,7 +233,7 @@ def replay_dax(sample: int | None = None, seed: int = 0, only: list[str] | None 
     else:
         workers = int(os.environ.get("PARITY_REPLAY_WORKERS", max(1, min(16, (os.cpu_count() or 2) - 2))))
     try:
-        ctx = get_context("fork")
+        ctx = get_context("spawn")
         with ProcessPoolExecutor(max_workers=workers, mp_context=ctx) as executor:
             results = list(executor.map(_replay_chunk, tasks))
     except Exception as err:
