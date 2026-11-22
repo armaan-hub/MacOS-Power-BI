@@ -103,7 +103,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_datestats30_extra | 3087 | 0 | 0 | 70 | 0 | 0 | 0 |
 | dax_battery_typeerr31_extra | 2762 | 0 | 84 | 3 | 0 | 0 | 0 |
 | dax_battery_roworder32_extra | 809 | 0 | 0 | 58 | 0 | 0 | 0 |
-| dax_battery_mixed33_extra | 1388 | 0 | 0 | 12 | 0 | 0 | 0 |
+| dax_battery_mixed33_extra | 1388 | 5 | 0 | 7 | 0 | 0 | 0 |
 | dax_battery_counttext34_extra | 1496 | 0 | 33 | 41 | 0 | 0 | 0 |
 | dax_battery_xnpvblank35_extra | 1272 | 0 | 58 | 66 | 0 | 0 | 0 |
 | dax_battery_biground36_extra | 1820 | 0 | 5 | 0 | 0 | 0 | 0 |
@@ -165,7 +165,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_hunt_w246 | 2999 | 0 | 746 | 661 | 6 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-## Pending work (35600): Power BI answers, the app refuses
+## Pending work (35595): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -2615,16 +2615,11 @@ North`) [dax_battery_logic4_extra]
 	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
 - `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) VAR u=t RETURN u,3)` (Power BI: `{
 	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
-- `GEOMEANX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(Facts[Sales]))` (Power BI: `8.0671`) [dax_battery_mixed33_extra]
-- `GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(Facts[Sales])))` (Power BI: `8.0671`) [dax_battery_mixed33_extra]
 - `GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(1,CURRENCY(Facts[Sales]),2.5))` (Power BI: `8.06714323012272`) [dax_battery_mixed33_extra]
 - `GEOMEANX(Facts,IF.EAGER(Facts[Quantity]>2,CURRENCY(1.23456),2.5))` (Power BI: `1.75684376083931`) [dax_battery_mixed33_extra]
 - `GEOMEANX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(1.5),DATE(2020,1,1)))` (Power BI: `7897.68290154425`) [dax_battery_mixed33_extra]
 - `PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,CURRENCY(0.33333)),0.25)` (Power BI: `0.25`) [dax_battery_mixed33_extra]
-- `STDEVX.P(ADDCOLUMNS(Facts,"z",1),COALESCE(CURRENCY(Facts[Sales]),Facts[Quantity]))` (Power BI: `7.3565`) [dax_battery_mixed33_extra]
 - `STDEVX.P(Facts,IF(FALSE(),CURRENCY(Facts[Sales]),Facts[Sales]))` (Power BI: `8.0037491215055`) [dax_battery_mixed33_extra]
-- `STDEVX.S(ADDCOLUMNS(Facts,"z",1),IF.EAGER(0,CURRENCY(Facts[Sales]),Facts[Quantity]))` (Power BI: `1.8708`) [dax_battery_mixed33_extra]
-- `STDEVX.S(ADDCOLUMNS(Facts,"z",1),IF.EAGER(Facts[Quantity]>2,CURRENCY(0),Facts[Quantity]))` (Power BI: `0.8367`) [dax_battery_mixed33_extra]
 - `VARX.P(Facts,SWITCH(Facts[Quantity],1,CURRENCY(Facts[Sales]),1))` (Power BI: `0.868055555555555`) [dax_battery_mixed33_extra]
 - `VARX.S(Facts,IF(ISBLANK(Facts[Note]),2.5,CURRENCY(0)))` (Power BI: `1.66666666666667`) [dax_battery_mixed33_extra]
 - `DATEVALUE("1,99")+TIMEVALUE("12, 05")` (Power BI: `01/01/1999 00:00:00`) [dax_battery_counttext34_extra]

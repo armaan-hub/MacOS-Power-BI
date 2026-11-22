@@ -9700,6 +9700,8 @@ def _static_numeric_type(
         return "currency"
     if fn in _CURRENCY_AMOUNT_POSITIONS and _currency_amount_call(fn, len(args), lambda pos: _static_numeric_type(args[pos], columns, variables)):
         return "currency"  # Task 148 family A (measured): a Currency amount argument makes the result a Currency
+    if fn in {"AVERAGE", "MEDIAN", "STDEV.S", "STDEV.P", "GEOMEAN", "PERCENTILE.INC", "PERCENTILE.EXC"} and args and _static_numeric_type(args[0], columns, variables) == "currency":
+        return "currency"  # RP-004/006/046/053/057/058/059/060/064 measured: these statistics over a Currency column are a Currency (four decimals); VAR and PRODUCT are not. HP-003/007/011 measured: MEDIAN of a Currency column is a Currency too
     if fn in _STATIC_ALWAYS_DOUBLE:
         return "double"
     if fn in _STATIC_ALWAYS_INT64:
@@ -22894,6 +22896,8 @@ def _evaluate_measures_once(
         return _static_numeric_type(node, cols, scope)
 
     def currency_typed(node: tuple[Any, ...], row_context: Any = None) -> bool:
+        if isinstance(node, tuple) and node[:2] == ("call", "RELATED") and len(node[2]) == 1 and isinstance(node[2][0], tuple) and node[2][0][:1] == ("reference",):
+            node = node[2][0]  # RP-032/033/034 measured: RELATED(Table[Currency column]) is a Currency, so the iterator rounding applies
         if row_context is not None and isinstance(row_context, tuple) and row_context and isinstance(row_context[0], dict):
             cols = {**static_scope()[0], "": row_columns(row_context)}
             scope: dict[str, str | None] = {}
@@ -24488,7 +24492,9 @@ def _evaluate_measures_once(
                 percentile = (
                     dax_typed.to_number(evaluate(arguments[2], row_context)) if function.startswith("PERCENTILEX") else None
                 )
-                currency_body = function in {"STDEVX.S", "VARX.S"} and _static_numeric_type(arguments[1]) == "currency"
+                # RP-079 measured: STDEVX.S over a Currency body is typed with the table columns (the model-less check never saw a column reference); VARX.S is unchanged
+                currency_body = (function == "STDEVX.S" and currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1))) or (
+                    function == "VARX.S" and _static_numeric_type(arguments[1]) == "currency")
                 if currency_body and len(values) == 1:
                     raise MeasureRuntimeError("A division by zero has been encountered.")  # Task 19 Part A: one Currency row has no sample spread
                 blank_rule = function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"} and blank_results > 0 and not double_dates
@@ -24510,8 +24516,8 @@ def _evaluate_measures_once(
                     # live Power BI (Task 40 review): the product of a date body is neither the exact product nor the row-order double product; the digits past the 14th
                     # follow no rule the local engine reproduces, and arithmetic or IF around the product can hide it from a text conversion, so it is refused outright
                     raise MeasureError("PRODUCTX over a date body whose product depends on the multiplication order is not modelled by the local engine.")
-                if _static_numeric_type(arguments[1]) == "currency" and function in {"STDEVX.S", "STDEVX.P"} and isinstance(answer, Decimal) and answer.is_finite():
-                    answer = answer.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Task 19 Part A: a Currency result has four decimals
+                if currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)) and function in {"STDEVX.S", "STDEVX.P", "GEOMEANX"} and isinstance(answer, Decimal) and answer.is_finite():
+                    answer = answer.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Task 19 Part A: a Currency result has four decimals; XT-ST-012/013 and XT-AG-030 measured with a Currency column body (the column reference was not typed here, so the rule never fired)
                 elif (function[:4] in {"VARX", "STDE"} or function in {"GEOMEANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}) and isinstance(answer, Decimal) and answer.is_finite() and iteration_rows and _builds_currency(arguments[1]) and (lambda shown: shown != shown.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP))(Decimal(f"{float(answer):.14g}")):
                     # live Power BI (Task 43 review): when the body can build a Currency value, a statistic with more than four decimals is sometimes rounded to four
                     # (GEOMEANX over CURRENCY, STDEVX over a COALESCE or IF.EAGER holding one) and sometimes not (IF.EAGER(1,CURRENCY(x),2.5)); no structural rule separates them
@@ -26714,7 +26720,13 @@ def _evaluate_measures_once(
             percentile = None
             if function in dax_math.STAT_PERCENTILE_COLUMN:
                 percentile = dax_typed.to_number(evaluate(arguments[1], row_context))
-            return dax_math.statistic(function, values, percentile)
+            stat_is_currency = str(stat_context.get("column_types", {}).get(stat_column, "")).casefold() in {"currency", "fixed_decimal", "decimal"}
+            if function == "STDEV.S" and stat_is_currency and len(values) == 1:
+                raise MeasureRuntimeError("A division by zero has been encountered.")  # RP-077 measured: one Currency row has no sample spread (Power BI error, not NaN)
+            stat_answer = dax_math.statistic(function, values, percentile)
+            if function in {"STDEV.S", "STDEV.P", "GEOMEAN", "PERCENTILE.INC", "PERCENTILE.EXC"} and isinstance(stat_answer, Decimal) and stat_answer.is_finite() and stat_is_currency:
+                stat_answer = stat_answer.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # XT-ST-009/011 measured: STDEV over a Currency column is a Currency, four decimals; RP-004/006/046 measured for GEOMEAN and PERCENTILE
+            return stat_answer
         if function == "COUNT":
             context, actual = resolve_table(reference[1], reference[2])
             visible_rows = rows_by_table_id[context["id"]]
@@ -26737,7 +26749,12 @@ def _evaluate_measures_once(
             if abs(product) > _DOUBLE_MAX:
                 raise MeasureRuntimeError("The result is outside the supported numeric range.")
             return _checked_double(product)
-        if function == "AVERAGE": return sum(values, Decimal(0)) / Decimal(len(values))
+        if function == "AVERAGE":
+            column_average = sum(values, Decimal(0)) / Decimal(len(values))
+            avg_context, avg_column = resolve_table(reference[1], reference[2])
+            if str(avg_context.get("column_types", {}).get(avg_column, "")).casefold() in {"currency", "fixed_decimal", "decimal"}:
+                column_average = column_average.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # XT-AG-006 and XT-ST-024 measured: AVERAGE over a Currency column is a Currency, four decimals
+            return column_average
         if function == "MIN": return min(values)
         return max(values)
 
