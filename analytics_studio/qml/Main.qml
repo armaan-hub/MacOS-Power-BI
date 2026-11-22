@@ -2272,6 +2272,39 @@ ApplicationWindow {
                                                         onCanceled: parent.parent.resizing = false
                                                     }
                                                 }
+
+                                                Rectangle {
+                                                    id: visualBusyOverlay
+                                                    objectName: "visualBusyOverlay_" + String(modelData.id)
+                                                    anchors.fill: parent
+                                                    visible: mainWindow.studioController.reportBusy && (modelData.type !== "button" && modelData.type !== "text_box" && modelData.type !== "image" && String(modelData.type).indexOf("shape") !== 0)
+                                                    color: "#80FFFFFF"
+                                                    radius: 4
+                                                    z: 999
+
+                                                    ColumnLayout {
+                                                        anchors.centerIn: parent
+                                                        spacing: 6
+
+                                                        BusyIndicator {
+                                                            Layout.alignment: Qt.AlignHCenter
+                                                            running: visualBusyOverlay.visible
+                                                        }
+
+                                                        Text {
+                                                            Layout.alignment: Qt.AlignHCenter
+                                                            text: "Cancel"
+                                                            font.pixelSize: 11
+                                                            color: "#0078D4"
+
+                                                            MouseArea {
+                                                                anchors.fill: parent
+                                                                cursorShape: Qt.PointingHandCursor
+                                                                onClicked: mainWindow.studioController.cancelReportEvaluation()
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
