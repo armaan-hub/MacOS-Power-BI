@@ -2282,6 +2282,14 @@ ApplicationWindow {
                                                     radius: 4
                                                     z: 999
 
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        hoverEnabled: true
+                                                        preventStealing: true
+                                                        onPressed: function(mouse) { mouse.accepted = true; }
+                                                        onClicked: function(mouse) { mouse.accepted = true; }
+                                                    }
+
                                                     ColumnLayout {
                                                         anchors.centerIn: parent
                                                         spacing: 6
@@ -2291,17 +2299,10 @@ ApplicationWindow {
                                                             running: visualBusyOverlay.visible
                                                         }
 
-                                                        Text {
+                                                        Button {
                                                             Layout.alignment: Qt.AlignHCenter
                                                             text: "Cancel"
-                                                            font.pixelSize: 11
-                                                            color: "#0078D4"
-
-                                                            MouseArea {
-                                                                anchors.fill: parent
-                                                                cursorShape: Qt.PointingHandCursor
-                                                                onClicked: mainWindow.studioController.cancelReportEvaluation()
-                                                            }
+                                                            onClicked: mainWindow.studioController.cancelReportEvaluation()
                                                         }
                                                     }
                                                 }

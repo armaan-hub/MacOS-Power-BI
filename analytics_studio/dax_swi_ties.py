@@ -91,6 +91,8 @@ def run_with_tie_orders(run: Callable[[], T], same: Callable[[T, T], bool]) -> T
         try:
             result = run()
         except Exception as error:
+            if type(error).__name__ == "MeasureEvaluationCancelled":
+                raise
             if driver.refusal is not None:
                 raise TieRefused(driver.refusal) from error
             raise

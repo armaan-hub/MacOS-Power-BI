@@ -8455,28 +8455,35 @@ def normalize_calculated_table_expression(
 _ENGINE_LOCK = threading.RLock()
 
 
+def acquire_engine_lock(timeout: float = -1) -> bool:
+    return _ENGINE_LOCK.acquire(timeout=timeout)
+
+
+def release_engine_lock() -> None:
+    _ENGINE_LOCK.release()
+
+
 def evaluate_calculated_table(
     expression: Any,
     source_candidate: Any,
     source_table: Any,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     """Materialize DISTINCT over one loaded column, preserving first-seen order."""
-    with _ENGINE_LOCK:
-        definition = normalize_calculated_table_expression(
-            expression, source_table, source_candidate.headers
-        )
-        column = definition["column"]
-        seen: set[tuple[Any, ...]] = set()
-        rows: list[dict[str, Any]] = []
-        for source_row in source_candidate.rows:
-            value = source_row.get(column)
-            _reject_power_query_error(value, column, len(rows) + 1)
-            key = cell_key(value)
-            if key in seen:
-                continue
-            seen.add(key)
-            rows.append({column: value})
-        return [column], rows
+    definition = normalize_calculated_table_expression(
+        expression, source_table, source_candidate.headers
+    )
+    column = definition["column"]
+    seen: set[tuple[Any, ...]] = set()
+    rows: list[dict[str, Any]] = []
+    for source_row in source_candidate.rows:
+        value = source_row.get(column)
+        _reject_power_query_error(value, column, len(rows) + 1)
+        key = cell_key(value)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append({column: value})
+    return [column], rows
 
 
 def normalize_calculated_column(name: Any, expression: Any) -> dict[str, str]:
@@ -8553,16 +8560,6 @@ def evaluate_calculated_columns(
     table_name: str = "",
 ) -> tuple[list[str], list[dict[str, Any]], dict[str, str]]:
     """Materialize a table's numeric/boolean row expressions in definition order."""
-    with _ENGINE_LOCK:
-        return _evaluate_calculated_columns_impl(definitions, rows, headers, table_name)
-
-
-def _evaluate_calculated_columns_impl(
-    definitions: Iterable[dict[str, str]],
-    rows: list[dict[str, Any]],
-    headers: list[str],
-    table_name: str = "",
-) -> tuple[list[str], list[dict[str, Any]], dict[str, str]]:
     columns = validate_calculated_columns(list(definitions))
     output_headers = list(headers)
     output_rows = [dict(row) for row in rows]
@@ -10618,8 +10615,8 @@ def evaluate_measures(
     Task 59: when SUBSTITUTEWITHINDEX meets tied order values, the whole evaluation is re-run under every tie order
     (analytics_studio/dax_swi_ties.py) and answered only when all of them agree; otherwise the refusal is raised.
     """
-    _EXT_SHAPE_CACHE.clear()
     with _ENGINE_LOCK:
+        _EXT_SHAPE_CACHE.clear()
         measures = list(measures)  # inputs are read once per tie-order run
         relationships = list(relationships)
         filter_table_ids = list(filter_table_ids)

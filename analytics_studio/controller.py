@@ -102,6 +102,8 @@ from analytics_studio.measures import (
     MeasureError,
     MeasureEvaluationCancelled,
     VisualAxisContext,
+    acquire_engine_lock,
+    release_engine_lock,
     evaluate_calculated_table,
     evaluate_calculated_columns,
     evaluate_measures,
@@ -14243,10 +14245,15 @@ class StudioController(QObject):
 
     def _cancel_and_wait_worker(self) -> None:
         """Cancel any running report worker task and wait for it to finish."""
+        self._report_request_id += 1
         if self._report_cancel_event is not None:
             self._report_cancel_event.set()
         if hasattr(self, "_report_pool") and self._report_pool is not None:
-            self._report_pool.waitForDone(2000)
+            if not self._report_pool.waitForDone(2000):
+                self._set_status("Waiting for background report evaluation to cancel...")
+                if self._report_cancel_event is not None:
+                    self._report_cancel_event.set()
+                self._report_pool.waitForDone(5000)
         self._set_report_busy(False)
 
     def _set_report_busy(self, busy: bool) -> None:
@@ -14363,87 +14370,100 @@ class StudioController(QObject):
         measures = self._project.get("model", {}).get("measures", [])
         relationships = self._project.get("model", {}).get("relationships", [])
 
-        def evaluate_one_measure(
-            name: str,
-            measure_rows: list[dict[str, Any]],
-            table_context: list[dict[str, Any]],
-            filter_ids: set[str],
-        ) -> Decimal | None:
-            return evaluate_measures(
-                measures,
-                measure_rows,
-                self._headers,
-                self._active_model_table_name(),
-                measure_names=[name],
-                table_context=table_context,
-                relationships=relationships,
-                filter_table_ids=filter_ids,
-                active_table_id=active_table_id or None,
-            )[name]
+        # Bounded acquire of engine lock for synchronous evaluation
+        lock_acquired = acquire_engine_lock(timeout=2.0)
+        if not lock_acquired:
+            self._set_status("Waiting for engine lock...")
+            self._cancel_and_wait_worker()
+            lock_acquired = acquire_engine_lock(timeout=5.0)
+            if not lock_acquired:
+                self._set_status("Could not acquire engine lock; aborting synchronous evaluation.")
+                return
 
-        for measure in measures:
-            name = str(measure["name"])
-            try:
-                value = evaluate_one_measure(
-                    name, rows, measure_table_context, filter_table_ids
-                )
-            except MeasureError as exc:
-                self._measure_errors[name] = str(exc)
-            else:
-                formatted = (
-                    _format_report_number(value) if value is not None else "—"
-                )
-                self._measure_values[name] = formatted
-                self._kpis[name] = formatted
+        try:
+            def evaluate_one_measure(
+                name: str,
+                measure_rows: list[dict[str, Any]],
+                table_context: list[dict[str, Any]],
+                filter_ids: set[str],
+            ) -> Decimal | None:
+                return evaluate_measures(
+                    measures,
+                    measure_rows,
+                    self._headers,
+                    self._active_model_table_name(),
+                    measure_names=[name],
+                    table_context=table_context,
+                    relationships=relationships,
+                    filter_table_ids=filter_ids,
+                    active_table_id=active_table_id or None,
+                )[name]
 
-        filter_errors = [self._filter_context_error] if self._filter_context_error else []
-
-
-        page = self._active_page()
-        visuals_with_filters = {
-            str(item.get("visual_name", ""))
-            for item in (page.get("visual_filters", []) if page else [])
-        }
-        measure_names = {str(measure["name"]) for measure in measures}
-        for visual_name in self.activePageVisuals:
-            visual_rows = rows
-            visual_context = measure_table_context
-            visual_filter_ids = filter_table_ids
-            if visual_name in visuals_with_filters or self._cross_filters:
-                (
-                    visual_rows_by_table,
-                    visual_context,
-                    visual_filter_ids,
-                ) = self._report_filter_context(visual_name)
-                visual_rows = visual_rows_by_table.get(active_table_id, list(self._rows))
-                if self._filter_context_error:
-                    filter_errors.append(self._filter_context_error)
-
-            if visual_name == "Monthly revenue":
-                self._monthly_visual_series[visual_name] = chart_series(visual_rows)[0]
-            elif visual_name == "Region revenue":
-                visual_rows = self._apply_visual_top_n_rows(
-                    visual_name, visual_rows, active_table_id
-                )
-                self._region_visual_series[visual_name] = chart_series(visual_rows)[1]
-            elif visual_name.endswith(" KPI"):
-                kpi_name = visual_name[:-4]
-                if kpi_name in measure_names:
-                    try:
-                        visual_value = evaluate_one_measure(
-                            kpi_name, visual_rows, visual_context, visual_filter_ids
-                        )
-                    except MeasureError:
-                        self._visual_kpis[visual_name] = "—"
-                    else:
-                        self._visual_kpis[visual_name] = (
-                            _format_report_number(visual_value)
-                            if visual_value is not None else "—"
-                        )
+            for measure in measures:
+                name = str(measure["name"])
+                try:
+                    value = evaluate_one_measure(
+                        name, rows, measure_table_context, filter_table_ids
+                    )
+                except MeasureError as exc:
+                    self._measure_errors[name] = str(exc)
                 else:
-                    self._visual_kpis[visual_name] = standard_kpis(visual_rows).get(kpi_name, "—")
+                    formatted = (
+                        _format_report_number(value) if value is not None else "—"
+                    )
+                    self._measure_values[name] = formatted
+                    self._kpis[name] = formatted
 
-        self._filter_context_error = "; ".join(dict.fromkeys(filter_errors))
+            filter_errors = [self._filter_context_error] if self._filter_context_error else []
+
+
+            page = self._active_page()
+            visuals_with_filters = {
+                str(item.get("visual_name", ""))
+                for item in (page.get("visual_filters", []) if page else [])
+            }
+            measure_names = {str(measure["name"]) for measure in measures}
+            for visual_name in self.activePageVisuals:
+                visual_rows = rows
+                visual_context = measure_table_context
+                visual_filter_ids = filter_table_ids
+                if visual_name in visuals_with_filters or self._cross_filters:
+                    (
+                        visual_rows_by_table,
+                        visual_context,
+                        visual_filter_ids,
+                    ) = self._report_filter_context(visual_name)
+                    visual_rows = visual_rows_by_table.get(active_table_id, list(self._rows))
+                    if self._filter_context_error:
+                        filter_errors.append(self._filter_context_error)
+
+                if visual_name == "Monthly revenue":
+                    self._monthly_visual_series[visual_name] = chart_series(visual_rows)[0]
+                elif visual_name == "Region revenue":
+                    visual_rows = self._apply_visual_top_n_rows(
+                        visual_name, visual_rows, active_table_id
+                    )
+                    self._region_visual_series[visual_name] = chart_series(visual_rows)[1]
+                elif visual_name.endswith(" KPI"):
+                    kpi_name = visual_name[:-4]
+                    if kpi_name in measure_names:
+                        try:
+                            visual_value = evaluate_one_measure(
+                                kpi_name, visual_rows, visual_context, visual_filter_ids
+                            )
+                        except MeasureError:
+                            self._visual_kpis[visual_name] = "—"
+                        else:
+                            self._visual_kpis[visual_name] = (
+                                _format_report_number(visual_value)
+                                if visual_value is not None else "—"
+                            )
+                    else:
+                        self._visual_kpis[visual_name] = standard_kpis(visual_rows).get(kpi_name, "—")
+
+            self._filter_context_error = "; ".join(dict.fromkeys(filter_errors))
+        finally:
+            release_engine_lock()
 
     def _refresh_report_async(self) -> None:
         """Asynchronously evaluate report measures and visual data off the window thread."""

@@ -4,12 +4,10 @@ from __future__ import annotations
 
 import threading
 from typing import Any, Callable
-from decimal import Decimal
 
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
 
 from analytics_studio.measures import (
-    MeasureError,
     MeasureEvaluationCancelled,
     evaluate_measures,
 )
