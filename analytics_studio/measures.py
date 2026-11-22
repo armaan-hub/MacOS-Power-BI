@@ -2432,7 +2432,25 @@ def _mixes_table_and_scalar_branches(function: str, arguments: tuple[Any, ...] |
         isinstance(b, tuple) and b and (b[0] == "table_call" or (b[0] == "call" and (b[1] == "CALCULATETABLE" or b[1] in _TABLE_FUNCTION_ARITY)))
         for b in branches
     ]
+    # XT-TX-029: IF(HASONEVALUE(c), VALUES(c), "Many") in a scalar position: VALUES(c) of the same column is one row there, so it is a scalar
+    if function in {"IF", "IF.EAGER"} and len(arguments) == 3 and _is_values_of_hasonevalue_column(arguments[0], arguments[1]):
+        return False
     return any(tables) and not all(tables)
+
+
+def _is_values_of_hasonevalue_column(condition: Any, branch: Any) -> bool:
+    """True when the condition is HASONEVALUE(column) and the branch is VALUES(the same column)."""
+    if not (isinstance(condition, tuple) and len(condition) == 3 and condition[0] == "call" and condition[1] == "HASONEVALUE"):
+        return False
+    if not (isinstance(branch, tuple) and len(branch) == 3 and branch[0] == "table_call" and branch[1] == "VALUES"):
+        return False  # VALUES(column) parses as ("table_call", "VALUES", column reference)
+    if len(condition[2]) != 1:
+        return False
+    tested, shown = condition[2][0], branch[2]
+    return (
+        isinstance(tested, tuple) and isinstance(shown, tuple) and tested[0] == "reference" and shown[0] == "reference"
+        and str(tested[1]).casefold() == str(shown[1]).casefold() and str(tested[2]).casefold() == str(shown[2]).casefold()
+    )
 
 
 def _is_multi_column_table_node(node: Any) -> bool:
@@ -8102,7 +8120,12 @@ class _Parser:
                         "and YEAR, QUARTER, MONTH, or DAY interval."
                     )
             elif function == "SAMEPERIODLASTYEAR":
-                if len(arguments) != 1 or arguments[0][0] != "reference":
+                # XT-TI-057: SAMEPERIODLASTYEAR(DATESYTD(d)) shifts the date set DATESYTD returns (checked in time_filter_dates)
+                shifted_set = (
+                    len(arguments) == 1 and arguments[0][0] == "call" and arguments[0][1] == "DATESYTD"
+                    and arguments[0][2] and arguments[0][2][0][0] == "reference"
+                )
+                if len(arguments) != 1 or (arguments[0][0] != "reference" and not shifted_set):
                     raise MeasureError(
                         "SAMEPERIODLASTYEAR needs one marked date-column reference."
                     )
@@ -20499,6 +20522,8 @@ def _evaluate_measures_once(
                         except MeasureError:
                             col_cat = "unknown"
                     if col_cat == "text":
+                        if side[0] == "var" and row_stack and value is None:
+                            return node  # XT-BV-023: a VAR read from the iterator row is row-dependent; it is evaluated per row, not here (no row here: BLANK)
                         if not isinstance(value, str):
                             if side_cat != "text" and side_cat != "variant":
                                 raise MeasureError("Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer.")
@@ -23277,6 +23302,20 @@ def _evaluate_measures_once(
         """The days a date-set function selects in the current context: (date table, date column, days)."""
         date_filter_function = date_filter[1]
         date_filter_arguments = date_filter[2]
+        if date_filter_function == "SAMEPERIODLASTYEAR" and date_filter_arguments[0][0] == "call":
+            # XT-TI-057: the dates DATESYTD(d) selects now, shifted back one year over the whole column (live Power BI)
+            set_table, set_rows = date_set_table(date_filter_arguments[0])
+            set_column = set_table["headers"][0]
+            set_base = set_table["lineage"][set_column][0]
+            universe = [
+                parsed for index, row in enumerate(set_base["rows"], 1)
+                if (parsed := _parse_measure_date(row.get(set_column), set_column, index)) is not None
+            ]
+            selected = [
+                parsed for index, row in enumerate(set_rows, 1)
+                if (parsed := _parse_measure_date(row.get(set_column), set_column, index)) is not None
+            ]
+            return set_base, set_column, _sameperiodlastyear_dates(selected, universe)
         date_reference = date_filter_arguments[0]
         date_table, actual_date_column = resolve_table(
             date_reference[1], date_reference[2]
