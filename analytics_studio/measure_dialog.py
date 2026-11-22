@@ -6,6 +6,8 @@ from collections.abc import Callable
 import re
 from typing import Any
 
+import shiboken6
+
 from PySide6.QtCore import QEvent, Qt
 from PySide6.QtGui import QColor, QFontDatabase, QKeyEvent, QPalette, QTextCursor
 from PySide6.QtWidgets import (
@@ -669,6 +671,7 @@ class MeasureDialog(QDialog):
         self._accepted_measure: dict[str, Any] | None = None
         self._preview_callback = preview_callback
         self._preview_async_callback = preview_async_callback
+        self._closing = False
         self._cancel_preview_callback = cancel_preview_callback
         editing = initial_measure is not None
         self.setWindowTitle(
@@ -1418,8 +1421,9 @@ class MeasureDialog(QDialog):
         self._insert_reference(self.measure_combo)
 
     def _preview_measure(self) -> None:
-        is_patched_exec = type(MeasureDialog.exec).__name__ == "function"
-        if self._preview_async_callback is not None and not is_patched_exec:
+        # The worker-thread path needs a running event loop, so it is used only
+        # when an async callback was given and the dialog is on screen.
+        if self._preview_async_callback is not None and self.isVisible():
             try:
                 measure = self._current_measure()
             except (MeasureError, TypeError, ValueError) as exc:
@@ -1433,6 +1437,9 @@ class MeasureDialog(QDialog):
             self.preview_cancel_button.setEnabled(True)
 
             def on_done(text: str) -> None:
+                # The dialog may have been closed or deleted while the worker ran.
+                if self._closing or not shiboken6.isValid(self):
+                    return
                 self.preview_button.setEnabled(True)
                 self.preview_cancel_button.setVisible(False)
                 if text == "Cancelled":
@@ -1539,7 +1546,16 @@ class MeasureDialog(QDialog):
         super().accept()
 
     def reject(self) -> None:
-        if self._cancel_preview_callback is not None:
-            self._cancel_preview_callback()
         self._accepted_measure = None
         super().reject()
+
+    def showEvent(self, event: Any) -> None:  # noqa: N802
+        self._closing = False
+        super().showEvent(event)
+
+    def done(self, result: int) -> None:
+        """Every way of closing (accept, reject, done) stops a running preview."""
+        self._closing = True
+        if self._cancel_preview_callback is not None:
+            self._cancel_preview_callback()
+        super().done(result)

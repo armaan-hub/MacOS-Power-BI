@@ -261,32 +261,10 @@ class FormulaBarController(QObject):
 
     @Slot(str, result=bool)
     def previewMeasureInteractive(self, measure_name: str) -> bool:  # noqa: N802
-        """Interactive preview for QML: evaluates asynchronously with busy state."""
-        self._set_preview_busy(True)
-        res = self.beginEditMeasure(measure_name, focus=False)
-        if not res:
-            self._set_preview_busy(False)
-            return False
-
-        def on_done(text: str) -> None:
-            self._set_preview_busy(False)
-
-        measure = next((
-            item for item in self._studio._project.get("model", {}).get("measures", [])
-            if str(item.get("name", "")).casefold() == str(measure_name).casefold()
-        ), None)
-        if measure is not None:
-            home_id = str(measure.get("home_table_id") or self._studio._active_model_table_id())
-            self._studio._preview_measure_expression_async(
-                str(measure["name"]),
-                str(measure["expression"]),
-                on_done,
-                editing_name=str(measure["name"]),
-                home_table_id=home_id,
-            )
-        else:
-            self._set_preview_busy(False)
-        return True
+        """Interactive entry from QML. Like previewMeasure it shows the formula
+        only and runs no evaluation; the busy flag follows the controller's
+        newest worker-thread preview request."""
+        return self.previewMeasure(measure_name)
 
     @Slot(str, result=bool)
     def previewColumn(self, column_name: str) -> bool:  # noqa: N802

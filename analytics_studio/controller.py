@@ -2006,6 +2006,8 @@ class StudioController(QObject):
         self._report_tasks: dict[int, Any] = {}
         self._preview_pool = create_measure_thread_pool()
         self._preview_request_id: int = 0
+        self._preview_busy_request_id: int | None = None
+        self._preview_job: tuple[Any, ...] | None = None
         self._preview_cancel_event: threading.Event | None = None
         self._preview_tasks: dict[int, Any] = {}
         self._refresh_model_view()
@@ -8986,15 +8988,19 @@ class StudioController(QObject):
                 ))
         return references
 
-    def _preview_measure_expression(
+    def _build_preview_inputs(
         self,
         name: str,
         expression: str,
         *,
         editing_name: str | None = None,
         home_table_id: str | None = None,
-    ) -> str:
-        """Validate and evaluate a draft measure without changing project state."""
+    ) -> dict[str, Any]:
+        """Validate a draft measure and gather what its evaluation needs.
+
+        Shared by the synchronous and the worker-thread preview. Project state
+        stays exactly as it was found.
+        """
         measure = normalize_measure(
             name, expression, home_table_id=home_table_id
         )
@@ -9034,22 +9040,51 @@ class StudioController(QObject):
         try:
             filtered_rows, table_context, filter_table_ids = self._report_filter_context()
             active_table_id = self._active_model_table_id()
-            values = evaluate_measures(
-                candidate_measures,
-                filtered_rows.get(active_table_id, list(self._rows)),
-                self._headers,
-                self._active_model_table_name(),
-                measure_names=evaluate_names,
-                table_context=table_context,
-                relationships=self._project.get("model", {}).get("relationships", []),
-                filter_table_ids=filter_table_ids,
-                active_table_id=active_table_id or None,
-            )
+            rows = filtered_rows.get(active_table_id, list(self._rows))
+            headers = self._headers
+            active_table_name = self._active_model_table_name()
+            relationships = self._project.get("model", {}).get("relationships", [])
         finally:
             self._report_filter_context_cache = previous_filter_context_cache
             self._region_column = previous_region_column
             self._filter_context_error = previous_filter_context_error
-        value = values.get(measure["name"])
+        return {
+            "measure": measure,
+            "candidate_measures": candidate_measures,
+            "evaluate_names": evaluate_names,
+            "rows": rows,
+            "headers": headers,
+            "active_table_name": active_table_name,
+            "table_context": table_context,
+            "relationships": relationships,
+            "filter_table_ids": filter_table_ids,
+            "active_table_id": active_table_id or None,
+        }
+
+    def _preview_measure_expression(
+        self,
+        name: str,
+        expression: str,
+        *,
+        editing_name: str | None = None,
+        home_table_id: str | None = None,
+    ) -> str:
+        """Validate and evaluate a draft measure without changing project state."""
+        inputs = self._build_preview_inputs(
+            name, expression, editing_name=editing_name, home_table_id=home_table_id
+        )
+        values = evaluate_measures(
+            inputs["candidate_measures"],
+            inputs["rows"],
+            inputs["headers"],
+            inputs["active_table_name"],
+            measure_names=inputs["evaluate_names"],
+            table_context=inputs["table_context"],
+            relationships=inputs["relationships"],
+            filter_table_ids=inputs["filter_table_ids"],
+            active_table_id=inputs["active_table_id"],
+        )
+        value = values.get(inputs["measure"]["name"])
         if value is None:
             return "—"
         return _format_report_number(value)
@@ -9063,62 +9098,32 @@ class StudioController(QObject):
         editing_name: str | None = None,
         home_table_id: str | None = None,
     ) -> None:
-        """Evaluate a draft measure expression asynchronously off the window thread."""
-        try:
-            measure = normalize_measure(
-                name, expression, home_table_id=home_table_id
-            )
-            current = list(self._project.get("model", {}).get("measures", []))
-            if editing_name is None:
-                if any(
-                    str(item.get("name", "")).casefold() == measure["name"].casefold()
-                    for item in current
-                ):
-                    raise MeasureError(f"A measure named {measure['name']!r} already exists.")
-                candidate_measures = [*current, measure]
-                evaluate_names = [measure["name"]]
-            else:
-                existing_index = next((
-                    index for index, item in enumerate(current)
-                    if str(item.get("name", "")).casefold() == editing_name.casefold()
-                ), None)
-                if existing_index is None:
-                    raise MeasureError(f"Measure {editing_name!r} no longer exists.")
-                if any(
-                    index != existing_index
-                    and str(item.get("name", "")).casefold() == measure["name"].casefold()
-                    for index, item in enumerate(current)
-                ):
-                    raise MeasureError(f"A measure named {measure['name']!r} already exists.")
-                candidate_measures = list(current)
-                candidate_measures[existing_index] = measure
-                evaluate_names = None
+        """Evaluate a draft measure expression asynchronously off the window thread.
 
-            previous_region_column = self._region_column
-            previous_filter_context_error = self._filter_context_error
-            previous_filter_context_cache = self._report_filter_context_cache
-            self._report_filter_context_cache = dict(previous_filter_context_cache)
-            try:
-                filtered_rows, table_context, filter_table_ids = self._report_filter_context()
-                active_table_id = self._active_model_table_id()
-                active_rows = filtered_rows.get(active_table_id, list(self._rows))
-                rows_snapshot = [dict(r) for r in active_rows]
-                headers_snapshot = list(self._headers)
-                active_table_name_snapshot = str(self._active_model_table_name())
-                relationships_snapshot = deepcopy(self._project.get("model", {}).get("relationships", []))
-                candidate_measures_snapshot = deepcopy(candidate_measures)
-                table_context_snapshot = [
-                    {**ctx, "rows": [dict(r) for r in ctx.get("rows", [])]}
-                    for ctx in table_context
-                ] if table_context else []
-                filter_table_ids_snapshot = set(filter_table_ids)
-            finally:
-                self._report_filter_context_cache = previous_filter_context_cache
-                self._region_column = previous_region_column
-                self._filter_context_error = previous_filter_context_error
+        If another engine call cancels the running preview, it is started again
+        once that call has returned. A user cancel drops it.
+        """
+        try:
+            inputs = self._build_preview_inputs(
+                name, expression, editing_name=editing_name, home_table_id=home_table_id
+            )
+            # The worker must not see state the window thread goes on to change.
+            rows_snapshot = [dict(r) for r in inputs["rows"]]
+            headers_snapshot = list(inputs["headers"])
+            relationships_snapshot = deepcopy(inputs["relationships"])
+            candidate_measures_snapshot = deepcopy(inputs["candidate_measures"])
+            table_context_snapshot = [
+                {**ctx, "rows": [dict(r) for r in ctx.get("rows", [])]}
+                for ctx in inputs["table_context"]
+            ] if inputs["table_context"] else []
+            filter_table_ids_snapshot = set(inputs["filter_table_ids"])
         except Exception as exc:
             on_done(str(exc))
             return
+        evaluate_names = inputs["evaluate_names"]
+        active_table_name_snapshot = str(inputs["active_table_name"])
+        active_table_id = inputs["active_table_id"]
+        target_name = inputs["measure"]["name"]
 
         if self._preview_cancel_event is not None:
             self._preview_cancel_event.set()
@@ -9126,8 +9131,8 @@ class StudioController(QObject):
         req_id = self._preview_request_id
         cancel_event = threading.Event()
         self._preview_cancel_event = cancel_event
-
-        target_name = measure["name"]
+        self._preview_job = (name, expression, on_done, editing_name, home_table_id)
+        self._set_preview_busy_for(req_id)
 
         def eval_fn(is_cancelled: Callable[[], bool]) -> str:
             values = evaluate_measures(
@@ -9139,7 +9144,7 @@ class StudioController(QObject):
                 table_context=table_context_snapshot,
                 relationships=relationships_snapshot,
                 filter_table_ids=filter_table_ids_snapshot,
-                active_table_id=active_table_id or None,
+                active_table_id=active_table_id,
                 cancel_check=is_cancelled,
             )
             val = values.get(target_name)
@@ -9150,25 +9155,35 @@ class StudioController(QObject):
         task = MeasureEvaluationTask(req_id, eval_fn, cancel_event)
         self._preview_tasks[req_id] = task
 
-        def on_completed(r_id: int, result: Any) -> None:
+        def finish(r_id: int, text: str) -> None:
             self._preview_tasks.pop(r_id, None)
-            if r_id == self._preview_request_id:
-                on_done(str(result))
+            if r_id != self._preview_request_id:
+                return
+            self._preview_job = None
+            self._set_preview_busy_for(None)
+            on_done(text)
 
-        def on_cancelled(r_id: int) -> None:
-            self._preview_tasks.pop(r_id, None)
-            if r_id == self._preview_request_id:
-                on_done("Cancelled")
-
-        def on_failed(r_id: int, message: str) -> None:
-            self._preview_tasks.pop(r_id, None)
-            if r_id == self._preview_request_id:
-                on_done(str(message))
-
-        task.signals.completed.connect(on_completed)
-        task.signals.cancelled.connect(on_cancelled)
-        task.signals.failed.connect(on_failed)
+        task.signals.completed.connect(lambda r_id, result: finish(r_id, str(result)))
+        task.signals.cancelled.connect(lambda r_id: finish(r_id, "Cancelled"))
+        task.signals.failed.connect(lambda r_id, message: finish(r_id, str(message)))
         self._preview_pool.start(task)
+
+    def _set_preview_busy_for(self, req_id: int | None) -> None:
+        """Formula bar busy flag follows the newest preview request only."""
+        self._preview_busy_request_id = req_id
+        bar = getattr(self, "_formula_bar", None)
+        if bar is not None:
+            bar._set_preview_busy(req_id is not None)
+
+    def _restart_interrupted_preview(self, job: tuple[Any, ...]) -> None:
+        if self._preview_job is not job:
+            return
+        self._preview_job = None
+        name, expression, on_done, editing_name, home_table_id = job
+        self._preview_measure_expression_async(
+            name, expression, on_done,
+            editing_name=editing_name, home_table_id=home_table_id,
+        )
 
     def create_measure(
         self,
@@ -14340,7 +14355,13 @@ class StudioController(QObject):
         self._cancel_and_wait_preview()
 
     def _cancel_and_wait_preview(self) -> None:
-        """Cancel any running preview worker task and wait for it to finish."""
+        """Cancel any running preview worker task and wait for it to finish.
+
+        A result already queued for the window thread is dropped. The preview is
+        started again after the calling engine operation returns.
+        """
+        job = self._preview_job
+        self._preview_request_id += 1
         if self._preview_cancel_event is not None:
             self._preview_cancel_event.set()
         if hasattr(self, "_preview_pool") and self._preview_pool is not None:
@@ -14348,16 +14369,19 @@ class StudioController(QObject):
                 if self._preview_cancel_event is not None:
                     self._preview_cancel_event.set()
                 self._preview_pool.waitForDone(5000)
-        if hasattr(self, "_formula_bar") and self._formula_bar is not None:
-            self._formula_bar._set_preview_busy(False)
+        self._set_preview_busy_for(None)
+        if job is not None:
+            self._preview_job = job
+            QTimer.singleShot(0, lambda: self._restart_interrupted_preview(job))
 
     @Slot()
     def cancelPreview(self) -> None:  # noqa: N802
-        """Cancel any running preview worker task cooperatively."""
+        """Cancel any running preview worker task cooperatively (user cancel)."""
+        self._preview_request_id += 1
+        self._preview_job = None
         if self._preview_cancel_event is not None:
             self._preview_cancel_event.set()
-        if hasattr(self, "_formula_bar") and self._formula_bar is not None:
-            self._formula_bar._set_preview_busy(False)
+        self._set_preview_busy_for(None)
 
     def _set_report_busy(self, busy: bool) -> None:
         if self._report_busy != busy:
