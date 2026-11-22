@@ -20,6 +20,7 @@ class FactsPerItemTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             (Path(folder) / "dax_battery_hunt_tiny.json").write_text(json.dumps(battery))
             with mock.patch.object(parity_check, "PARITY", Path(folder)), \
+                    mock.patch.object(parity_check, "EXIT_ANSWER_FILES", []), \
                     mock.patch.object(parity_check, "DAX_BATTERIES", ["dax_battery_hunt_tiny"]):
                 return parity_check.replay_dax()
 

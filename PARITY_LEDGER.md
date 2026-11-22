@@ -103,7 +103,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_datestats30_extra | 3087 | 0 | 0 | 70 | 0 | 0 | 0 |
 | dax_battery_typeerr31_extra | 2762 | 0 | 84 | 3 | 0 | 0 | 0 |
 | dax_battery_roworder32_extra | 809 | 0 | 0 | 58 | 0 | 0 | 0 |
-| dax_battery_mixed33_extra | 1388 | 5 | 0 | 7 | 0 | 0 | 0 |
+| dax_battery_mixed33_extra | 1393 | 0 | 0 | 7 | 0 | 0 | 0 |
 | dax_battery_counttext34_extra | 1496 | 0 | 33 | 41 | 0 | 0 | 0 |
 | dax_battery_xnpvblank35_extra | 1272 | 0 | 58 | 66 | 0 | 0 | 0 |
 | dax_battery_biground36_extra | 1820 | 0 | 5 | 0 | 0 | 0 | 0 |
@@ -149,7 +149,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_hunt_review240 | 211 | 0 | 112 | 1 | 0 | 0 | 0 |
 | dax_battery_hunt_review241 | 317 | 0 | 52 | 89 | 0 | 0 | 0 |
 | dax_battery_hunt_review241b | 265 | 0 | 85 | 91 | 0 | 0 | 0 |
-| dax_battery_hunt_review242 | 196 | 20 | 28 | 52 | 0 | 0 | 0 |
+| dax_battery_hunt_review242 | 216 | 0 | 28 | 52 | 0 | 0 | 0 |
 | dax_battery_hunt_review243b | 202 | 0 | 15 | 93 | 0 | 0 | 0 |
 | dax_battery_hunt_review244 | 249 | 0 | 0 | 51 | 0 | 0 | 0 |
 | dax_battery_hunt_review245 | 259 | 0 | 20 | 36 | 0 | 0 | 0 |
@@ -158,14 +158,15 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_hunt_w239 | 4444 | 0 | 1165 | 64 | 0 | 0 | 0 |
 | dax_battery_hunt_w240 | 18531 | 0 | 8118 | 2074 | 0 | 0 | 0 |
 | dax_battery_hunt_w241 | 18048 | 0 | 3031 | 839 | 0 | 0 | 0 |
-| dax_battery_hunt_w242 | 5572 | 48 | 266 | 2157 | 0 | 0 | 0 |
+| dax_battery_hunt_w242 | 5620 | 0 | 266 | 2157 | 0 | 0 | 0 |
 | dax_battery_hunt_w243 | 26222 | 0 | 3047 | 5206 | 0 | 0 | 0 |
 | dax_battery_hunt_w244 | 147102 | 0 | 11274 | 21278 | 1 | 0 | 0 |
 | dax_battery_hunt_w245 | 1873 | 0 | 6 | 239 | 0 | 0 | 0 |
 | dax_battery_hunt_w246 | 2999 | 0 | 746 | 661 | 6 | 0 | 0 |
+| exit_model | 657 | 0 | 4 | 1 | 1 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-## Pending work (35527): Power BI answers, the app refuses
+## Pending work (35528): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -36361,8 +36362,9 @@ North`) [dax_battery_logic4_extra]
 - `SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region],"s",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts)))),[s])` (Power BI: `6`) [dax_battery_hunt_w246]
 - `SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region],"s",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALL(Facts[Sales],Facts[Note])))),[s]*2)` (Power BI: `12`) [dax_battery_hunt_w246]
 - `SUMX(SUMMARIZE(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region],"s",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),REMOVEFILTERS(Facts[Note])))),[s]*2)` (Power BI: `12`) [dax_battery_hunt_w246]
+- `SUMX(VALUES(XT_Product[Category]), CALCULATE(STDEV.P(XT_Sales[UnitPrice])) * 2)` (Power BI: `2005.4998`) [exit_model]
 
-## Known wrong (69): Power BI answers, the app answers differently, listed in tools/parity/known_diffs.json
+## Known wrong (70): Power BI answers, the app answers differently, listed in tools/parity/known_diffs.json
 
 - `CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],"s",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Q` (Power BI: `6`, app: `4`) [dax_battery_hunt_review246; ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)]
 - `CALCULATE(SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],Facts[Note],"s",SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Q` (Power BI: `5`, app: `3`) [dax_battery_hunt_review246; ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)]
@@ -36433,6 +36435,7 @@ North`) [dax_battery_logic4_extra]
 - `CONCATENATEX(SUMMARIZE(Facts,Facts[Region],"s",SUMX(VALUES(Facts[Note]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts)))),Facts[Region]&":"&[s],"|",Fa` (Power BI: `East:63|North:|West:63`, app: `East:23|North:|West:40`) [dax_battery_hunt_w246; ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)]
 - `CONCATENATEX(SUMMARIZE(Facts,Facts[Region],"s",SUMX(VALUES(Facts[Note]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts[Region])))),Facts[Region]&":"&[s` (Power BI: `East:31.5|North:3|West:31.5`, app: `East:11.5|North:3|West:20`) [dax_battery_hunt_w246; ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)]
 - `CONCATENATEX(SUMMARIZE(Facts,Facts[Region],"s",SUMX(VALUES(Facts[Note]),CALCULATE(SUM(Facts[Sales]),ALLSELECTED(Facts)))),Facts[Region]&":"&[s],"|",Fa` (Power BI: `East:63|North:3|West:63`, app: `East:23|North:3|West:40`) [dax_battery_hunt_w246; ALLSELECTED inside the added column of SUMMARIZE (outer filters and the group column)]
+- `FORMAT(AVERAGE(XT_Sales[Discount]), "0.000000")` (Power BI: `0.150602`, app: `0.150603`) [exit_model; exit model: FORMAT(AVERAGE(Discount), "0.000000") differs in the sixth decimal (cause not yet analysed)]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 

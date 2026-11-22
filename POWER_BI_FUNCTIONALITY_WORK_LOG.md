@@ -3022,3 +3022,13 @@ The four formulas the engine refused but Power BI answers now match the saved an
 Gate: PARITY GATE PASSED. pytest 41,892 passed (26 xfailed), real app 575 of 575, replay 831,135 saved Power BI answers with 0 DIFF and 0 CRASH (68 more answers match than before), locked 795,446.
 
 Open: the 5 refused probes, HP-043, HP-061, even-count Currency MEDIAN. Next: lock the exit list with --accept and run all 493 on Power BI once more as the final exit test.
+
+## 2026-11-23 — Phase 1 exit test passed and locked
+
+Final exit test: all 493 formulas ran on Power BI again (answers identical to the saved set) and against the local engine: 491 right, 2 both-error, 0 wrong, 0 refused, 0 crash, so 100 percent answered. The exit goals (0 wrong, 0 crash, at least 97 percent answered) are met.
+
+Locking: the parity gate now replays the saved XT_ answers as its own group, exit_model: 663 items (the 493 formulas, 80 rounding probes, 90 held-out probes) over the deterministic XT_ model, one context per worker process. Sonnet checked that answers do not depend on order (forward, reversed, fresh context per item all identical) and that a wrong saved answer gives DIFF and a crash gives CRASH. HP-043 is a registered known difference (in EXIT_KNOWN_DIFFS in tools/parity_check.py, since saved answers are never edited); HP-061 stays a refusal. Four older tests that stub the replay now switch the exit group off in their setup. Locked: 796,180 items.
+
+Gate: PARITY GATE PASSED. pytest 41,895 passed (26 xfailed; one visual-lifecycle test failed only beside others and passed alone), real app 575 of 575, replay 831,798 saved Power BI answers with 0 DIFF and 0 CRASH. The full gate now takes about 18 minutes.
+
+Open: 5 refused fresh probes (SAMEPERIODLASTYEAR over DATESMTD/DATESQTD, SUMX over VALUES with SAMEPERIODLASTYEAR(DATESYTD) inside, IF returning DISTINCT, IF testing one column and returning another), HP-043, HP-061, even-count Currency MEDIAN, install_guest_model not safe to re-run after a crash, case-sensitive filter at exit_model.py:523, guest_lock re-entrancy test. Next: Phase 2.
