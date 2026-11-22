@@ -1,6 +1,6 @@
 # Parity ledger: Analytics Studio vs Power BI Desktop
 
-Generated 2026-11-22 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
+Generated 2026-11-23 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
 
 Rule: a slice is finished only when it is compared with Power BI, its items are locked here (`--accept`) and the gate passes.  Locked items are never re-investigated, only guarded.
 
@@ -149,7 +149,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_hunt_review240 | 211 | 0 | 112 | 1 | 0 | 0 | 0 |
 | dax_battery_hunt_review241 | 317 | 0 | 52 | 89 | 0 | 0 | 0 |
 | dax_battery_hunt_review241b | 265 | 0 | 85 | 91 | 0 | 0 | 0 |
-| dax_battery_hunt_review242 | 196 | 0 | 28 | 72 | 0 | 0 | 0 |
+| dax_battery_hunt_review242 | 196 | 20 | 28 | 52 | 0 | 0 | 0 |
 | dax_battery_hunt_review243b | 202 | 0 | 15 | 93 | 0 | 0 | 0 |
 | dax_battery_hunt_review244 | 249 | 0 | 0 | 51 | 0 | 0 | 0 |
 | dax_battery_hunt_review245 | 259 | 0 | 20 | 36 | 0 | 0 | 0 |
@@ -158,14 +158,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_hunt_w239 | 4444 | 0 | 1165 | 64 | 0 | 0 | 0 |
 | dax_battery_hunt_w240 | 18531 | 0 | 8118 | 2074 | 0 | 0 | 0 |
 | dax_battery_hunt_w241 | 18048 | 0 | 3031 | 839 | 0 | 0 | 0 |
-| dax_battery_hunt_w242 | 5572 | 0 | 266 | 2205 | 0 | 0 | 0 |
+| dax_battery_hunt_w242 | 5572 | 48 | 266 | 2157 | 0 | 0 | 0 |
 | dax_battery_hunt_w243 | 26222 | 0 | 3047 | 5206 | 0 | 0 | 0 |
 | dax_battery_hunt_w244 | 147102 | 0 | 11274 | 21278 | 1 | 0 | 0 |
 | dax_battery_hunt_w245 | 1873 | 0 | 6 | 239 | 0 | 0 | 0 |
 | dax_battery_hunt_w246 | 2999 | 0 | 746 | 661 | 6 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-## Pending work (35595): Power BI answers, the app refuses
+## Pending work (35527): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -3517,57 +3517,37 @@ North`) [dax_battery_logic4_extra]
 - `ISCURRENCY(CONCATENATEX(Facts,-(ROUNDUP(IF(SUM(Facts[Quantity])>3,2.5,MAX(Facts[Sales])),1)),","))` (Power BI: `False`) [dax_battery_hunt_review241b]
 - `ISCURRENCY(CALCULATE(SIGN(COALESCE(IF(SUM(Facts[Quantity])>9,BLANK(),DATE(2021,3,4)),SUM(Facts[Quantity]),"")),Facts[Region]="West"))` (Power BI: `False`) [dax_battery_hunt_review241b]
 - `CALCULATE(ISDOUBLE(ABS(INT(IF(MAX(Facts[Sales])>5,2.5,"abc")))),ALL(Facts[Region]))` (Power BI: `False`) [dax_battery_hunt_review241b]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),MAX(Facts[Quantity]))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDECIMAL(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),DIVIDE(1,2))),ALL(Facts))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISINTEGER(SELECTEDVALUE(Facts[Note],COUNTROWS(Facts))+1),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_review242]
 - `ISINT64(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),-IF(MAX(Facts[Quantity])>9,TRUE(),1.5)))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISINTEGER(COALESCE(SELECTEDVALUE(Facts[Region],IF(COUNTROWS(Facts)>5,"abc",7)),IF(MAX(Facts[Quantity])>9,TRUE(),1.5))),Facts[Region]="North")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISINTEGER(SELECTEDVALUE(Facts[Note],SELECTEDVALUE(Facts[Sales],IF(MIN(Facts[Sales])<0,DATE(2021,3,4),5)))),Facts[Region]="North")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISINT64(SELECTEDVALUE(Facts[Sales],SELECTEDVALUE(Facts[Note],INT(COALESCE(BLANK(),3,AVERAGE(Facts[Quantity]))))))` (Power BI: `True`) [dax_battery_hunt_review242]
-- `ISNUMERIC(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),0))` (Power BI: `True`) [dax_battery_hunt_review242]
-- `ISDATETIME(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISDECIMAL(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(COALESCE(BLANK(),BLANK(),SUM(Facts[Quantity]))))))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDOUBLE(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),MAX(SWITCH(TRUE(),MAX(Facts[Sales])>50,1,MAX(Facts[Quantity])>3,2.5,3),1))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISINT64(SELECTEDVALUE(Facts[Sales],MAX(COALESCE(MAX(Facts[Note]),0),1))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_review242]
 - `ISDATETIME(SELECTEDVALUE(Facts[Region],SELECTEDVALUE(Facts[Quantity],COALESCE(MAX(Facts[Note]),0))))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDECIMAL(SELECTEDVALUE(Facts[Note],CEILING(SUM(Facts[Quantity]),1))&""),Facts[Region]="North")` (Power BI: `False`) [dax_battery_hunt_review242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),CEILING(IF(SUM(Facts[Quantity])>9,SUM(Facts[Sales]),MIN(Facts[Quantity])),1))),REMOVEFILTERS(Facts[Region]))` (Power BI: `True`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDECIMAL(SELECTEDVALUE(Facts[Sales],SWITCH(COUNTROWS(Facts),6,AVERAGE(Facts[Quantity]),7,"x",0))),Facts[Region]="Z")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISINTEGER(ROUND(SELECTEDVALUE(Facts[Region],MAX(Facts[Sales])),0)),REMOVEFILTERS(Facts[Region]))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISNUMERIC(IF(HASONEVALUE(Facts[Quantity]),VALUES(Facts[Quantity]),COUNTROWS(Facts)))` (Power BI: `True`) [dax_battery_hunt_review242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),1+1)),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISCURRENCY(COALESCE(SELECTEDVALUE(Facts[Note],CURRENCY(4)),BLANK())),Facts[Region]="North")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISDECIMAL(-SELECTEDVALUE(Facts[Note],CEILING(IF(MAX(Facts[Quantity])>9,TRUE(),1.5),1)))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Quantity]),VALUES(Facts[Quantity]),SIGN(SUM(Facts[Sales])))),REMOVEFILTERS(Facts[Region]))` (Power BI: `True`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDATETIME(INT(SELECTEDVALUE(Facts[Sales],IF(MAX(Facts[Quantity])>9,TRUE(),1.5)))),Facts[Quantity]>2)` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDOUBLE(COALESCE(SELECTEDVALUE(Facts[Quantity],MAX(Facts[Sales])),INT(IF(MAX(Facts[Quantity])>9,TRUE(),1.5)))),REMOVEFILTERS(Facts[Region]))` (Power BI: `True`) [dax_battery_hunt_review242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))),Facts[Region]="Z")` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISBOOLEAN(IF(HASONEVALUE(Facts[Quantity]),VALUES(Facts[Quantity]),-3))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISINT64(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),BLANK()))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `CALCULATE(ISSTRING(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),CURRENCY(4))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISDATETIME(SELECTEDVALUE(Facts[Note],SELECTEDVALUE(Facts[Note],"abc")))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISINT64(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),COALESCE(BLANK(),3,AVERAGE(Facts[Quantity])))),ALL(Facts))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISINT64(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Quantity])>9,TRUE(),1.5))),Facts[Region]="North")` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),INT(IF(MIN(Facts[Sales])<0,DATE(2021,3,4),5))))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISBOOLEAN(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISDECIMAL(SELECTEDVALUE(Facts[Sales],SWITCH(COUNTROWS(Facts),6,AVERAGE(Facts[Quantity]),7,"x",0)))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISDATETIME(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),2.5))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISSTRING(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),IF(MAX(Facts[Quantity])>9,TRUE(),1.5)))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `CALCULATE(ISBOOLEAN(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),MROUND(IF(SUM(Facts[Quantity])>9,SUM(Facts[Sales]),MIN(Facts[Quantity])),3))),Facts[Region]="Z")` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISNONTEXT(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),COALESCE(BLANK(),3,AVERAGE(Facts[Quantity]))))` (Power BI: `True`) [dax_battery_hunt_review242]
 - `ISDOUBLE(IF(HASONEVALUE(Facts[Quantity]),VALUES(Facts[Quantity]),IF(MAX(Facts[Quantity])>9,TRUE(),1.5)))` (Power BI: `True`) [dax_battery_hunt_review242]
 - `ISCURRENCY(ABS(SELECTEDVALUE(Facts[Note],SWITCH(TRUE(),MAX(Facts[Sales])>50,1,MAX(Facts[Quantity])>3,2.5,3))))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISDECIMAL(IF(HASONEVALUE(Facts[Region]),MAX(Facts[Region]),-IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISCURRENCY(SELECTEDVALUE(Facts[Sales],FLOOR(SWITCH(COUNTROWS(Facts),6,AVERAGE(Facts[Quantity]),7,"x",0),1))),REMOVEFILTERS(Facts[Region]))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `ISLOGICAL(IF(HASONEVALUE(Facts[Sales]),VALUES(Facts[Sales]),(1)*2))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `CALCULATE(ISNUMERIC(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),2.5)),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_review242]
-- `ISNONTEXT(IF(HASONEVALUE(Facts[Quantity]),VALUES(Facts[Quantity]),FLOOR(MAX(Facts[Sales]),1)))` (Power BI: `True`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDECIMAL(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),BLANK())),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_review242]
 - `CALCULATE(ISDOUBLE(-SELECTEDVALUE(Facts[Region],COUNTROWS(Facts))),Facts[Quantity]>2)` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISDECIMAL(IF(HASONEVALUE(Facts[Region]),MAX(Facts[Region]),COUNTROWS(Facts)/2))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISDECIMAL(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),SIGN(MAX(Facts[Sales]))))` (Power BI: `False`) [dax_battery_hunt_review242]
 - `ISINT64(IF(HASONEVALUE(Facts[Region]),MAX(Facts[Region]),COUNTROWS(Facts)/2))` (Power BI: `False`) [dax_battery_hunt_review242]
-- `CALCULATE(ISNUMERIC(IF(HASONEVALUE(Facts[Note]),VALUES(Facts[Note]),MROUND(2.5,3))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_review242]
 - `VAR _v=SELECTEDVALUE(Facts[Region],MAX(Facts[Quantity])) RETURN ISDATETIME(_v)` (Power BI: `False`) [dax_battery_hunt_review242]
 - `VAR _v=SELECTEDVALUE(Facts[Sales],ROUND(SWITCH(COUNTROWS(Facts),6,AVERAGE(Facts[Quantity]),7,"x",0),0)) RETURN ISDECIMAL(_v)` (Power BI: `False`) [dax_battery_hunt_review242]
 - `VAR _v=SELECTEDVALUE(Facts[Note],COALESCE(BLANK(),BLANK(),SUM(Facts[Quantity]))) RETURN ISINTEGER(_v)` (Power BI: `True`) [dax_battery_hunt_review242]
@@ -6956,35 +6936,11 @@ North`) [dax_battery_logic4_extra]
 - `ISDOUBLE(IFERROR(1/0,IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISDOUBLE(COALESCE(MAX(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISDOUBLE(FIRSTNONBLANKVALUE(Facts[Quantity],IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1)),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5)),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISNUMBER(DIVIDE(1,2,"a"))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a"))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a")),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity]))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity])))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISNUMBER(IFERROR(1/0,ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISNUMBER(IFERROR(1/0,IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1)),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5)),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISTEXT(DIVIDE(1,2,"a"))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a"))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a")),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity]))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity])))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISTEXT(IFERROR(1/0,ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISTEXT(IFERROR(1/0,IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISCURRENCY(LOOKUPVALUE(Facts[Sales],Facts[Region],"Z",1))` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISCURRENCY(LOOKUPVALUE(Facts[Region],Facts[Quantity],3,1))` (Power BI: `False`) [dax_battery_hunt_w242]
@@ -7211,35 +7167,11 @@ North`) [dax_battery_logic4_extra]
 - `ISDOUBLE(IFERROR(1/0,IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISDOUBLE(COALESCE(MAX(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISDOUBLE(FIRSTNONBLANKVALUE(Facts[Quantity],IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1)),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5)),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISNUMBER(DIVIDE(1,2,"a"))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a"))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a")),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity]))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity])))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISNUMBER(IFERROR(1/0,ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISNUMBER(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))),Facts[Region]="East")` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISNUMBER(IFERROR(1/0,IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1)),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),1.5)),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISTEXT(DIVIDE(1,2,"a"))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a"))` (Power BI: `True`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),"a")),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity]))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),INT(AVERAGE(Facts[Quantity])))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISTEXT(IFERROR(1/0,ABS(INT(IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_w242]
-- `CALCULATE(ISTEXT(IF(HASONEVALUE(Facts[Region]),VALUES(Facts[Region]),IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts)))),Facts[Region]="East")` (Power BI: `True`) [dax_battery_hunt_w242]
 - `ISTEXT(IFERROR(1/0,IF(MAX(Facts[Sales])>15,AVERAGE(Facts[Quantity]),COUNTROWS(Facts))))` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISCURRENCY(LOOKUPVALUE(Facts[Sales],Facts[Region],"Z",1))` (Power BI: `False`) [dax_battery_hunt_w242]
 - `ISCURRENCY(LOOKUPVALUE(Facts[Region],Facts[Quantity],3,1))` (Power BI: `False`) [dax_battery_hunt_w242]

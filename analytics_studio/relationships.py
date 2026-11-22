@@ -464,10 +464,11 @@ def _apply_expanded_table_filters(
             common = sorted((set(root_paths) & set(target_paths)) - {root_id, target_id})
             if not common or any(root_id in (tables_by_id[common_id].get("expanded_filter_cleared") or ()) for common_id in common):
                 continue  # (a link table cleared after the filter no longer carries it from one fact table to the other)
-            # Task 88: with one common one-side table the blank member is a value of that table (a row with no match in it is
-            # the blank member, live Power BI: CALCULATE(COUNTROWS(F), F2) keeps the F rows of U's blank member, selected by F2's orphans);
-            # with two or more common tables a key with no match is still refused
-            blank_allowed = len(common) == 1
+            # Task 88 / XT-CA-009: with one or two common one-side tables a key with no match is the blank member of that table (a row
+            # with no match in it is the blank member, live Power BI: CALCULATE(COUNTROWS(F), F2) keeps the F rows of U's blank member,
+            # selected by F2's orphans; XT_Customer and XT_Region through the XT_CustomerRegion bridge, XT-CA-009); the blank member is a
+            # plain member of each table, so None matches None. With three or more common tables it is still refused: unverified.
+            blank_allowed = len(common) <= 2
             root_tuples = root_tuples_by_common.get(tuple(common))
             if root_tuples is None:
                 root_tuples = root_tuples_by_common[tuple(common)] = set()

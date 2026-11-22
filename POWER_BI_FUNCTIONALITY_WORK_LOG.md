@@ -3004,3 +3004,21 @@ Phase 1.2 (merged 7b8fa01): tools/exit_formulas.py writes tools/parity/exit_form
 Gate: PARITY GATE PASSED. pytest 41,843 passed (26 xfailed), real app 575 of 575, replay 831,135 saved Power BI answers with 0 DIFF and 0 CRASH, locked 795,446. DSI.xlsx is missing, so its answers are not replayed.
 
 Open: plain AVERAGE of a Currency column is not rounded to 4 decimals (measures.py:26740); IFERROR(1/0,-1) gives -1 locally, bare 1/0 gives Infinity (Power BI unchecked); XOR unsupported. Next: Phase 1.3, run the 493 formulas on Power BI once.
+
+## 2026-11-22 — Phase 1.3 to 1.5 (first Power BI run of the exit list; Currency rounding of statistics)
+
+Phase 1.3 and 1.4: the 493 exit formulas ran on Power BI in one pass (about one minute) and were scored against the local engine: 478 right, 2 both-error, 9 wrong, 4 refused, 0 crash (489 of 493 answered). Power BI errors on SQRT(-1) and on XOR, so those two are right when the engine also rejects them.
+
+Phase 1.5, round 1 to 3 (merged 1054e1a): all 9 wrong were one cause. Power BI returns AVERAGE, STDEV.S/P, STDEVX, GEOMEAN(X), PERCENTILE.INC/EXC and MEDIAN of a Currency column as a Currency with four decimals, and arithmetic on it follows the Currency rules (Currency with a number rounds to four decimals; Currency divided by Currency stays a double). VAR, VARX and PRODUCT are not rounded. A first fix covered only plain column forms; 80 fresh probes then found 17 more differences (GEOMEAN, PERCENTILE, RELATED bodies, arithmetic, one-row sample spread), fixed by typing these calls as Currency in _static_numeric_type. 90 held-out probes then matched 88 of 90 after MEDIAN was typed too. Saved Power BI answers: tools/parity/exit_pbi_answers.json, exit_pbi_answers_rounding.json, exit_pbi_answers_heldout.json.
+
+Gate: PARITY GATE PASSED. pytest 41,882 passed (26 xfailed), real app 575 of 575, replay 831,135 saved Power BI answers with 0 DIFF and 0 CRASH, locked 795,446.
+
+Open: HP-043 (FORMAT of a Double average at a rounding boundary: Power BI sums doubles in floating point), HP-061 (statistic beside arithmetic inside an iterator, still refused), even-count column MEDIAN of a Currency with 5 or more decimals. Next: the four remaining refusals (XT-CA-009, XT-TI-057, XT-BV-023, XT-TX-029).
+
+## 2026-11-23 — Phase 1.5 four refusals
+
+The four formulas the engine refused but Power BI answers now match the saved answers: XT-CA-009 (a Sales row with a blank CustomerKey points at the blank member of both Customer and Region through the bridge; analytics_studio/relationships.py allows the blank member with one or two common one-side tables and still refuses three or more, which is unverified), XT-TI-057 (SAMEPERIODLASTYEAR over DATESYTD of a date column), XT-BV-023 (a VAR compared with text inside an iterator was evaluated once with an empty row and became blank; it is now evaluated per row) and XT-TX-029 (IF(HASONEVALUE(c), VALUES(c), ...) on the same column returns the single value). Sonnet reviewed with 60 fresh probes run on Power BI: 51 right, 4 both-error, 0 wrong, 0 crash, 5 refused (SAMEPERIODLASTYEAR over DATESMTD and DATESQTD, SUMX over VALUES with SAMEPERIODLASTYEAR(DATESYTD) inside, IF returning DISTINCT, IF testing one column and returning another). The 493 exit formulas now give 491 right, 2 both-error, 0 wrong, 0 refused, 0 crash.
+
+Gate: PARITY GATE PASSED. pytest 41,892 passed (26 xfailed), real app 575 of 575, replay 831,135 saved Power BI answers with 0 DIFF and 0 CRASH (68 more answers match than before), locked 795,446.
+
+Open: the 5 refused probes, HP-043, HP-061, even-count Currency MEDIAN. Next: lock the exit list with --accept and run all 493 on Power BI once more as the final exit test.
