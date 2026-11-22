@@ -144,7 +144,8 @@ class TestExitModel(unittest.TestCase):
             self.assertEqual(stats["right"], 1)  # item1
             self.assertEqual(stats["wrong"], 1)  # item2
             self.assertEqual(stats["crash"], 1)  # item3
-            self.assertEqual(stats["refused"], 1)  # item4
+            self.assertEqual(stats["refused"], 0)  # item4 is LOCAL-REJECT vs Power BI ERR: -> both_error
+            self.assertEqual(stats["both_error"], 1)  # item4
             self.assertEqual(len(stats["slowest_20"]), 4)
             self.assertEqual(stats["slowest_20"][0]["id"], "item2")
             self.assertEqual(stats["only_in_a_count"], 0)

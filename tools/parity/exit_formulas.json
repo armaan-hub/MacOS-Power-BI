@@ -1,0 +1,2467 @@
+[
+ {
+  "id": "XT-AG-001",
+  "group": "AG",
+  "expr": "SUM(XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-AG-002",
+  "group": "AG",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-AG-003",
+  "group": "AG",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AG-004",
+  "group": "AG",
+  "expr": "SUM(XT_Sales[Quantity])"
+ },
+ {
+  "id": "XT-AG-005",
+  "group": "AG",
+  "expr": "CALCULATE(SUM(XT_Sales[Quantity]), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-AG-006",
+  "group": "AG",
+  "expr": "AVERAGE(XT_Sales[UnitPrice])"
+ },
+ {
+  "id": "XT-AG-007",
+  "group": "AG",
+  "expr": "CALCULATE(AVERAGE(XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AG-008",
+  "group": "AG",
+  "expr": "COUNTROWS(XT_Sales)"
+ },
+ {
+  "id": "XT-AG-009",
+  "group": "AG",
+  "expr": "CALCULATE(COUNTROWS(XT_Sales), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-AG-010",
+  "group": "AG",
+  "expr": "CALCULATE(COUNTROWS(XT_Sales), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AG-011",
+  "group": "AG",
+  "expr": "COUNT(XT_Sales[CustomerKey])"
+ },
+ {
+  "id": "XT-AG-012",
+  "group": "AG",
+  "expr": "DISTINCTCOUNT(XT_Sales[CustomerKey])"
+ },
+ {
+  "id": "XT-AG-013",
+  "group": "AG",
+  "expr": "CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-AG-014",
+  "group": "AG",
+  "expr": "CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AG-015",
+  "group": "AG",
+  "expr": "DISTINCTCOUNT(XT_Sales[ProductKey])"
+ },
+ {
+  "id": "XT-AG-016",
+  "group": "AG",
+  "expr": "CALCULATE(DISTINCTCOUNT(XT_Sales[ProductKey]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AG-017",
+  "group": "AG",
+  "expr": "CALCULATE(MIN(XT_Sales[OrderDate]), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-AG-018",
+  "group": "AG",
+  "expr": "MAX(XT_Sales[ShipDate])"
+ },
+ {
+  "id": "XT-AG-019",
+  "group": "AG",
+  "expr": "SUMX(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice])"
+ },
+ {
+  "id": "XT-AG-020",
+  "group": "AG",
+  "expr": "CALCULATE(SUMX(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AG-021",
+  "group": "AG",
+  "expr": "CALCULATE(SUMX(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice] * (1 - XT_Sales[Discount])), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-AG-022",
+  "group": "AG",
+  "expr": "CALCULATE(AVERAGEX(XT_Sales, XT_Sales[SalesAmount] / XT_Sales[Quantity]), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-AG-023",
+  "group": "AG",
+  "expr": "MAXX(XT_Sales, XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-AG-024",
+  "group": "AG",
+  "expr": "CALCULATE(MAXX(XT_Sales, XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AG-025",
+  "group": "AG",
+  "expr": "CALCULATE(MINX(XT_Sales, XT_Sales[Discount]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-AG-026",
+  "group": "AG",
+  "expr": "COUNTA(XT_Sales[ShipDate])"
+ },
+ {
+  "id": "XT-AG-027",
+  "group": "AG",
+  "expr": "CALCULATE(COUNTBLANK(XT_Sales[ShipDate]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-AG-028",
+  "group": "AG",
+  "expr": "DISTINCTCOUNTNOBLANK(XT_Sales[CustomerKey])"
+ },
+ {
+  "id": "XT-AG-029",
+  "group": "AG",
+  "expr": "CALCULATE(AVERAGE(XT_Sales[Discount]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-AG-030",
+  "group": "AG",
+  "expr": "GEOMEANX(XT_Sales, XT_Sales[UnitPrice])"
+ },
+ {
+  "id": "XT-AG-031",
+  "group": "AG",
+  "expr": "COUNTX(XT_Sales, XT_Sales[ShipDate])"
+ },
+ {
+  "id": "XT-AG-032",
+  "group": "AG",
+  "expr": "PRODUCTX(VALUES(XT_Region[RegionKey]), XT_Region[RegionKey])"
+ },
+ {
+  "id": "XT-CA-001",
+  "group": "CA",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\")"
+ },
+ {
+  "id": "XT-CA-002",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-003",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\"), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-CA-004",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Region[Region] = \"North\", XT_Product[Category] = \"Cat_3\"), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-CA-005",
+  "group": "CA",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] IN {\"Cat_1\", \"Cat_2\"})"
+ },
+ {
+  "id": "XT-CA-006",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] IN {\"Cat_1\", \"Cat_2\"}), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CA-007",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_1\" || XT_Product[Category] = \"Cat_2\"), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CA-008",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[Quantity] > 10), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-009",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(XT_Sales, XT_Sales[Quantity] > 10 && XT_Sales[Discount] > 0.1)), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-010",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Sales[Channel]), XT_Sales[Channel] <> \"Store\")), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CA-011",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CA-012",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Date)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-CA-013",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Date, XT_Date[Year])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-014",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category])), XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-CA-015",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category])), XT_Product[Category] = \"Cat_2\", XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-CA-016",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS(XT_Region)), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CA-017",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS(XT_Product[Category])), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-018",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLSELECTED(XT_Product)), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-019",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALLSELECTED(XT_Date[Year])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CA-020",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), KEEPFILTERS(XT_Product[Category] = \"Cat_1\")), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-021",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), KEEPFILTERS(XT_Product[Category] IN {\"Cat_2\", \"Cat_3\"})), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-022",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-CA-023",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024), XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-CA-024",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), VALUES(XT_Product[Category])), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CA-025",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] <> \"Cat_1\"), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CA-026",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[Channel] = \"Online\", XT_Sales[Discount] >= 0.2), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CA-027",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), XT_Sales[Channel] = \"Online\"), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CA-028",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), XT_Sales[Channel] = \"Online\"), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CA-029",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer[Segment])), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-CA-030",
+  "group": "CA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Sales[Channel])), XT_Sales[Channel] = \"Online\")"
+ },
+ {
+  "id": "XT-CA-031",
+  "group": "CA",
+  "expr": "COUNTROWS(CALCULATETABLE(XT_Sales, XT_Sales[Channel] = \"Partner\", XT_Date[Year] = 2025))"
+ },
+ {
+  "id": "XT-CA-032",
+  "group": "CA",
+  "expr": "SUMX(CALCULATETABLE(XT_Sales, XT_Product[Category] = \"Cat_4\"), XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-CA-033",
+  "group": "CA",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Product[Product]), CONTAINSSTRING(XT_Product[Product], \"_1\")))"
+ },
+ {
+  "id": "XT-TI-001",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-002",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-003",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TI-004",
+  "group": "TI",
+  "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-005",
+  "group": "TI",
+  "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-006",
+  "group": "TI",
+  "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date], \"6/30\"), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-007",
+  "group": "TI",
+  "expr": "CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date], \"6/30\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-008",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date], \"6/30\")), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-009",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESQTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-TI-010",
+  "group": "TI",
+  "expr": "CALCULATE(TOTALQTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-011",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESMTD(XT_Date[Date])), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-TI-012",
+  "group": "TI",
+  "expr": "CALCULATE(TOTALMTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-013",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-014",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-015",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-016",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-017",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-018",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, MONTH)), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-019",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, QUARTER)), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-TI-020",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, DAY)), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-TI-021",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], 1, YEAR)), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-TI-022",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PARALLELPERIOD(XT_Date[Date], -1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-023",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PARALLELPERIOD(XT_Date[Date], -12, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-024",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PARALLELPERIOD(XT_Date[Date], -3, MONTH)), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-TI-025",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-026",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), NEXTMONTH(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-027",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSQUARTER(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-TI-028",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSYEAR(XT_Date[Date])), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-TI-029",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), NEXTYEAR(XT_Date[Date])), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-TI-030",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSDAY(XT_Date[Date])), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-TI-031",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), NEXTDAY(XT_Date[Date])), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-TI-032",
+  "group": "TI",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), DATESBETWEEN(XT_Date[Date], DATE(2024, 1, 1), DATE(2024, 6, 30)))"
+ },
+ {
+  "id": "XT-TI-033",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESBETWEEN(XT_Date[Date], BLANK(), MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-034",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-035",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -12, MONTH)), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-036",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -30, DAY)), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-TI-037",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MIN(XT_Date[Date]), 1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-038",
+  "group": "TI",
+  "expr": "CALCULATE(DIVIDE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH)), 3), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-039",
+  "group": "TI",
+  "expr": "CALCULATE(AVERAGEX(DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-040",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(AVERAGEX(VALUES(XT_Date[YearMonth]), CALCULATE(SUM(XT_Sales[SalesAmount]))), DATESINPERIOD(XT_Date[Date], MAX(XT_Date[Date]), -3, MONTH)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-041",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[Date]), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-TI-042",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[Date]), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-043",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[Date]), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TI-044",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date), XT_Date[Year] = MAX(XT_Date[Year]) && XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-045",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date), XT_Date[Year] = MAX(XT_Date[Year]) && XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-TI-046",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Date[YearMonth]), XT_Date[YearMonth] <= MAX(XT_Date[YearMonth]))), XT_Date[YearMonth] = 202403)"
+ },
+ {
+  "id": "XT-TI-047",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN DIVIDE(cur - prev, prev), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-048",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN DIVIDE(cur - prev, prev), XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-049",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN DIVIDE(cur - prev, prev), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TI-050",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR prev = CALCULATE(SUM(XT_Sales[SalesAmount]), PREVIOUSMONTH(XT_Date[Date])) RETURN cur - prev, XT_Date[Year] = 2023, XT_Date[MonthNumber] = 1)"
+ },
+ {
+  "id": "XT-TI-051",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-052",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-TI-053",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-054",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN DIVIDE(cur - py, py), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TI-055",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN cur - py, XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-056",
+  "group": "TI",
+  "expr": "CALCULATE(VAR cur = SUM(XT_Sales[SalesAmount]) VAR py = CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])) RETURN IF(ISBLANK(py), BLANK(), DIVIDE(cur - py, py)), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-TI-057",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(DATESYTD(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-058",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(TOTALYTD(SUM(XT_Sales[SalesAmount]), XT_Date[Date]), DATEADD(XT_Date[Date], -1, YEAR)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-059",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), ENDOFMONTH(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-060",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-061",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), FIRSTDATE(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-062",
+  "group": "TI",
+  "expr": "CALCULATE(COUNTROWS(DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TI-063",
+  "group": "TI",
+  "expr": "CALCULATE(DATEDIFF(MIN(XT_Date[Date]), MAX(XT_Date[Date]), DAY), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TI-064",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), DATEADD(XT_Date[Date], -1, MONTH)), XT_Date[Date] = DATE(2024, 3, 31))"
+ },
+ {
+  "id": "XT-TI-065",
+  "group": "TI",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Date] = DATE(2024, 2, 29))"
+ },
+ {
+  "id": "XT-PT-001",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-PT-002",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Product[Category] = \"Cat_2\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-PT-003",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-PT-004",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Region))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-PT-005",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Region))), XT_Region[Region] = \"North\", XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-PT-006",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS())), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-PT-007",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS())), XT_Region[Region] = \"North\", XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-PT-008",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer[Segment]))), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-PT-009",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Sales[Channel]))), XT_Sales[Channel] = \"Online\", XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-PT-010",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category]))), XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-PT-011",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALLEXCEPT(XT_Product, XT_Product[Category]))), XT_Product[Category] = \"Cat_2\", XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-PT-012",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), REMOVEFILTERS(XT_Date[MonthNumber]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-PT-013",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALLSELECTED(XT_Product))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-PT-014",
+  "group": "PT",
+  "expr": "IF(ISFILTERED(XT_Product[Category]), DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Category]))), 1)"
+ },
+ {
+  "id": "XT-PT-015",
+  "group": "PT",
+  "expr": "CALCULATE(IF(ISFILTERED(XT_Product[Category]), DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Category]))), 1), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-PT-016",
+  "group": "PT",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) / CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-PT-017",
+  "group": "PT",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) / CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-PT-018",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(COUNTROWS(XT_Sales), CALCULATE(COUNTROWS(XT_Sales), ALL(XT_Region))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-PT-019",
+  "group": "PT",
+  "expr": "CALCULATE(DIVIDE(DISTINCTCOUNT(XT_Sales[CustomerKey]), CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), ALL(XT_Product))), XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-RK-001",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Product] = \"Product_7\")"
+ },
+ {
+  "id": "XT-RK-002",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-RK-003",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[Quantity])), , ASC, Dense), XT_Product[Product] = \"Product_7\")"
+ },
+ {
+  "id": "XT-RK-004",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-RK-005",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-RK-006",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])), , ASC), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-RK-007",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Region[Region]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-RK-008",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Region[Region]), CALCULATE(COUNTROWS(XT_Sales)), , DESC, Dense), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-RK-009",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Customer] = \"Customer_10\")"
+ },
+ {
+  "id": "XT-RK-010",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Customer[Customer]), CALCULATE(COUNTROWS(XT_Sales)), , DESC, Dense), XT_Customer[Customer] = \"Customer_10\")"
+ },
+ {
+  "id": "XT-RK-011",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Customer[Customer]), CALCULATE(COUNTROWS(XT_Sales)), , DESC, Skip), XT_Customer[Customer] = \"Customer_10\")"
+ },
+ {
+  "id": "XT-RK-012",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Subcategory]), CALCULATE(SUM(XT_Sales[Quantity]))), XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-RK-013",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Date[YearMonth]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[YearMonth] = 202403)"
+ },
+ {
+  "id": "XT-RK-014",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Date[MonthNumber]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-RK-015",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-RK-016",
+  "group": "RK",
+  "expr": "CALCULATE(RANKX(ALLSELECTED(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-RK-017",
+  "group": "RK",
+  "expr": "SUMX(TOPN(5, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-RK-018",
+  "group": "RK",
+  "expr": "CALCULATE(SUMX(TOPN(5, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-RK-019",
+  "group": "RK",
+  "expr": "CALCULATE(SUMX(TOPN(10, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-RK-020",
+  "group": "RK",
+  "expr": "SUMX(TOPN(5, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])), ASC), CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-RK-021",
+  "group": "RK",
+  "expr": "DIVIDE(SUMX(TOPN(10, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product)))"
+ },
+ {
+  "id": "XT-RK-022",
+  "group": "RK",
+  "expr": "CALCULATE(DIVIDE(SUMX(TOPN(10, ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-RK-023",
+  "group": "RK",
+  "expr": "DIVIDE(SUMX(TOPN(10, ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]))), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer)))"
+ },
+ {
+  "id": "XT-RK-024",
+  "group": "RK",
+  "expr": "COUNTROWS(TOPN(3, ALL(XT_Region[Region]), CALCULATE(SUM(XT_Sales[SalesAmount]))))"
+ },
+ {
+  "id": "XT-RK-025",
+  "group": "RK",
+  "expr": "CONCATENATEX(TOPN(3, ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category], \", \", CALCULATE(SUM(XT_Sales[SalesAmount])), DESC)"
+ },
+ {
+  "id": "XT-RK-026",
+  "group": "RK",
+  "expr": "CALCULATE(CONCATENATEX(TOPN(3, ALL(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Product[Category], \", \", CALCULATE(SUM(XT_Sales[SalesAmount])), DESC), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-RK-027",
+  "group": "RK",
+  "expr": "MAXX(TOPN(1, ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Customer])"
+ },
+ {
+  "id": "XT-RK-028",
+  "group": "RK",
+  "expr": "CALCULATE(MAXX(TOPN(1, ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Customer]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-RK-029",
+  "group": "RK",
+  "expr": "COUNTROWS(TOPN(1, ALL(XT_Customer[Customer]), CALCULATE(COUNTROWS(XT_Sales))))"
+ },
+ {
+  "id": "XT-RK-030",
+  "group": "RK",
+  "expr": "CALCULATE(COUNTROWS(TOPN(5, VALUES(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])))), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-AB-001",
+  "group": "AB",
+  "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_7\")"
+ },
+ {
+  "id": "XT-AB-002",
+  "group": "AB",
+  "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_30\")"
+ },
+ {
+  "id": "XT-AB-003",
+  "group": "AB",
+  "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_59\")"
+ },
+ {
+  "id": "XT-AB-004",
+  "group": "AB",
+  "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Product] = \"Product_7\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-AB-005",
+  "group": "AB",
+  "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Subcategory]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Subcategory])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-AB-006",
+  "group": "AB",
+  "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Region[Region]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Region[Region])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-AB-008",
+  "group": "AB",
+  "expr": "CALCULATE(SUMX(ALL(XT_Product[Product]), VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product[Product])) RETURN IF(DIVIDE(cum, tot) <= 0.8, 1, 0)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-AB-009",
+  "group": "AB",
+  "expr": "CALCULATE(VAR cs = CALCULATE(SUM(XT_Sales[SalesAmount])) VAR cum = SUMX(FILTER(ALL(XT_Customer[Customer]), CALCULATE(SUM(XT_Sales[SalesAmount])) >= cs), CALCULATE(SUM(XT_Sales[SalesAmount]))) VAR tot = CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Customer[Customer])) VAR pct = DIVIDE(cum, tot) RETURN IF(ISBLANK(cs), BLANK(), IF(pct <= 0.8, \"A\", IF(pct <= 0.95, \"B\", \"C\"))), XT_Customer[Customer] = \"Customer_10\")"
+ },
+ {
+  "id": "XT-NR-001",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-NR-002",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-NR-003",
+  "group": "NR",
+  "expr": "VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx))"
+ },
+ {
+  "id": "XT-NR-004",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-NR-005",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-NR-006",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-NR-007",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN DISTINCTCOUNT(XT_Sales[CustomerKey]) - CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-NR-008",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-NR-009",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN CALCULATE(SUM(XT_Sales[SalesAmount]), FILTER(ALL(XT_Customer), XT_Customer[FirstOrderDate] >= mn && XT_Customer[FirstOrderDate] <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-NR-010",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f >= mn && f <= mx)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-NR-011",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f >= mn && f <= mx)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-NR-012",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f >= mn && f <= mx)), XT_Date[Year] = 2024, XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-NR-013",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f < mn)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-NR-014",
+  "group": "NR",
+  "expr": "CALCULATE(VAR mn = MIN(XT_Date[Date]) VAR mx = MAX(XT_Date[Date]) RETURN COUNTROWS(FILTER(VALUES(XT_Sales[CustomerKey]), VAR f = CALCULATE(MIN(XT_Sales[OrderDate]), REMOVEFILTERS(XT_Date)) RETURN f < mn)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-NR-015",
+  "group": "NR",
+  "expr": "COUNTROWS(FILTER(XT_Customer, ISBLANK(XT_Customer[FirstOrderDate])))"
+ },
+ {
+  "id": "XT-NR-016",
+  "group": "NR",
+  "expr": "COUNTROWS(FILTER(XT_Customer, XT_Customer[FirstOrderDate] >= DATE(2025, 1, 1)))"
+ },
+ {
+  "id": "XT-BV-001",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-BV-002",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-BV-003",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-BV-004",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-BV-005",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-BV-006",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-BV-007",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-BV-008",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-BV-009",
+  "group": "BV",
+  "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN a - b, XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-BV-010",
+  "group": "BV",
+  "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN a - b, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-BV-011",
+  "group": "BV",
+  "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a - b, b), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-BV-012",
+  "group": "BV",
+  "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a - b, b), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-BV-013",
+  "group": "BV",
+  "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a - b, b), XT_Date[Year] = 2026)"
+ },
+ {
+  "id": "XT-BV-014",
+  "group": "BV",
+  "expr": "CALCULATE(VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a, b), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-BV-015",
+  "group": "BV",
+  "expr": "VAR a = SUM(XT_Sales[SalesAmount]) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth]), TREATAS(VALUES(XT_Product[Category]), XT_Budget[Category])) RETURN DIVIDE(a, b)"
+ },
+ {
+  "id": "XT-BV-016",
+  "group": "BV",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(CALCULATETABLE(VALUES(XT_Date[YearMonth]), DATESYTD(XT_Date[Date])), XT_Budget[YearMonth])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-BV-017",
+  "group": "BV",
+  "expr": "CALCULATE(VAR a = CALCULATE(SUM(XT_Sales[SalesAmount]), DATESYTD(XT_Date[Date])) VAR b = CALCULATE(SUM(XT_Budget[BudgetAmount]), TREATAS(CALCULATETABLE(VALUES(XT_Date[YearMonth]), DATESYTD(XT_Date[Date])), XT_Budget[YearMonth])) RETURN DIVIDE(a, b), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-BV-018",
+  "group": "BV",
+  "expr": "CALCULATE(SUMX(VALUES(XT_Date[YearMonth]), VAR ym = XT_Date[YearMonth] RETURN CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[YearMonth] = ym)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-BV-019",
+  "group": "BV",
+  "expr": "CALCULATE(SUMX(VALUES(XT_Date[YearMonth]), VAR ym = XT_Date[YearMonth] RETURN CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[YearMonth] = ym)), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-BV-020",
+  "group": "BV",
+  "expr": "CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-BV-021",
+  "group": "BV",
+  "expr": "LOOKUPVALUE(XT_Budget[BudgetAmount], XT_Budget[YearMonth], 202403, XT_Budget[Category], \"Cat_1\")"
+ },
+ {
+  "id": "XT-BV-022",
+  "group": "BV",
+  "expr": "CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[Category] = \"Cat_1\", XT_Budget[YearMonth] >= 202401, XT_Budget[YearMonth] <= 202406)"
+ },
+ {
+  "id": "XT-BV-023",
+  "group": "BV",
+  "expr": "SUMX(VALUES(XT_Product[Category]), VAR c = XT_Product[Category] RETURN CALCULATE(SUM(XT_Budget[BudgetAmount]), XT_Budget[Category] = c, TREATAS(VALUES(XT_Date[YearMonth]), XT_Budget[YearMonth])))"
+ },
+ {
+  "id": "XT-SA-001",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SA-002",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-003",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTDATE(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-SA-004",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SA-005",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-006",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3, XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SA-007",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), LASTNONBLANK(XT_Date[Date], SUM(XT_Sales[Quantity]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-008",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), FIRSTNONBLANK(XT_Date[Date], CALCULATE(COUNTROWS(XT_Sales)))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-009",
+  "group": "SA",
+  "expr": "CALCULATE(CLOSINGBALANCEMONTH(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-010",
+  "group": "SA",
+  "expr": "CALCULATE(CLOSINGBALANCEMONTH(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-SA-011",
+  "group": "SA",
+  "expr": "CALCULATE(CLOSINGBALANCEQUARTER(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-SA-012",
+  "group": "SA",
+  "expr": "CALCULATE(CLOSINGBALANCEYEAR(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SA-013",
+  "group": "SA",
+  "expr": "CALCULATE(OPENINGBALANCEMONTH(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-014",
+  "group": "SA",
+  "expr": "CALCULATE(OPENINGBALANCEQUARTER(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024, XT_Date[Quarter] = \"Q2\")"
+ },
+ {
+  "id": "XT-SA-015",
+  "group": "SA",
+  "expr": "CALCULATE(OPENINGBALANCEYEAR(SUM(XT_Sales[Quantity]), XT_Date[Date]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SA-016",
+  "group": "SA",
+  "expr": "CALCULATE(LASTNONBLANKVALUE(XT_Date[Date], SUM(XT_Sales[Quantity])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SA-017",
+  "group": "SA",
+  "expr": "CALCULATE(LASTNONBLANKVALUE(XT_Date[Date], SUM(XT_Sales[Quantity])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-018",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), DATESBETWEEN(XT_Date[Date], BLANK(), MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-019",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[Quantity]), DATESBETWEEN(XT_Date[Date], BLANK(), MAX(XT_Date[Date]))), XT_Date[Date] = DATE(2024, 3, 15))"
+ },
+ {
+  "id": "XT-SA-020",
+  "group": "SA",
+  "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] <= MAX(XT_Date[Date]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SA-021",
+  "group": "SA",
+  "expr": "CALCULATE(AVERAGEX(VALUES(XT_Date[Date]), CALCULATE(SUM(XT_Sales[Quantity]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-IR-001",
+  "group": "IR",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]))"
+ },
+ {
+  "id": "XT-IR-002",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-IR-003",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-IR-004",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2023)"
+ },
+ {
+  "id": "XT-IR-005",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Product[Category] = \"Cat_2\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-IR-006",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-IR-007",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-IR-008",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])) - SUM(XT_Sales[SalesAmount]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-IR-009",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]), DATESYTD(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-IR-010",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]), SAMEPERIODLASTYEAR(XT_Date[Date])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-IR-011",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-IR-012",
+  "group": "IR",
+  "expr": "SUM(XT_Sales[SalesAmount]) - CALCULATE(SUM(XT_Sales[SalesAmount]), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date]))"
+ },
+ {
+  "id": "XT-IR-013",
+  "group": "IR",
+  "expr": "CALCULATE(COUNTROWS(XT_Sales), ISBLANK(XT_Sales[ShipDate]))"
+ },
+ {
+  "id": "XT-IR-014",
+  "group": "IR",
+  "expr": "AVERAGEX(XT_Sales, IF(ISBLANK(XT_Sales[ShipDate]), BLANK(), DATEDIFF(XT_Sales[OrderDate], XT_Sales[ShipDate], DAY)))"
+ },
+ {
+  "id": "XT-IR-015",
+  "group": "IR",
+  "expr": "CALCULATE(AVERAGEX(XT_Sales, IF(ISBLANK(XT_Sales[ShipDate]), BLANK(), DATEDIFF(XT_Sales[OrderDate], XT_Sales[ShipDate], DAY))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-IR-016",
+  "group": "IR",
+  "expr": "AVERAGEX(XT_Sales, DATEDIFF(XT_Sales[OrderDate], XT_Sales[ShipDate], DAY))"
+ },
+ {
+  "id": "XT-IR-017",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUMX(XT_Sales, RELATED(XT_Date[MonthNumber])), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-IR-018",
+  "group": "IR",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), CROSSFILTER(XT_Sales[OrderDate], XT_Date[Date], NONE), USERELATIONSHIP(XT_Sales[ShipDate], XT_Date[Date])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-MM-001",
+  "group": "MM",
+  "expr": "COUNTROWS(XT_CustomerRegion)"
+ },
+ {
+  "id": "XT-MM-002",
+  "group": "MM",
+  "expr": "CALCULATE(COUNTROWS(XT_CustomerRegion), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-MM-003",
+  "group": "MM",
+  "expr": "CALCULATE(COUNTROWS(XT_CustomerRegion), XT_Region[Region] = \"North\", XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-MM-004",
+  "group": "MM",
+  "expr": "DISTINCTCOUNT(XT_CustomerRegion[CustomerKey])"
+ },
+ {
+  "id": "XT-MM-005",
+  "group": "MM",
+  "expr": "CALCULATE(DISTINCTCOUNT(XT_CustomerRegion[CustomerKey]), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-MM-006",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), CROSSFILTER(XT_CustomerRegion[CustomerKey], XT_Customer[CustomerKey], BOTH)), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-MM-007",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), CROSSFILTER(XT_CustomerRegion[CustomerKey], XT_Customer[CustomerKey], BOTH)), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-MM-008",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey])), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-MM-009",
+  "group": "MM",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey]))"
+ },
+ {
+  "id": "XT-MM-010",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey])), XT_Region[Region] = \"North\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-MM-011",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey]), REMOVEFILTERS(XT_Region)), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-MM-012",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Sales[CustomerKey]), TREATAS(VALUES(XT_CustomerRegion[CustomerKey]), XT_Sales[CustomerKey]), REMOVEFILTERS(XT_Region)), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-MM-013",
+  "group": "MM",
+  "expr": "AVERAGEX(VALUES(XT_Region[Region]), CALCULATE(COUNTROWS(XT_CustomerRegion)))"
+ },
+ {
+  "id": "XT-MM-014",
+  "group": "MM",
+  "expr": "COUNTROWS(FILTER(VALUES(XT_Customer[CustomerKey]), CALCULATE(COUNTROWS(XT_CustomerRegion)) > 1))"
+ },
+ {
+  "id": "XT-MM-015",
+  "group": "MM",
+  "expr": "CALCULATE(COUNTROWS(FILTER(VALUES(XT_Customer[CustomerKey]), CALCULATE(COUNTROWS(XT_CustomerRegion)) > 1)), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-MM-016",
+  "group": "MM",
+  "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(COUNTROWS(XT_CustomerRegion))), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-MM-017",
+  "group": "MM",
+  "expr": "COUNTROWS(FILTER(XT_Customer, CALCULATE(COUNTROWS(XT_CustomerRegion), XT_Region[Region] = \"North\") > 0))"
+ },
+ {
+  "id": "XT-MM-018",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(XT_Customer[CustomerKey]), CROSSFILTER(XT_CustomerRegion[CustomerKey], XT_Customer[CustomerKey], BOTH)), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-MM-019",
+  "group": "MM",
+  "expr": "CALCULATE(CALCULATE(COUNTROWS(XT_Sales), CROSSFILTER(XT_Sales[RegionKey], XT_Region[RegionKey], NONE)), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CT-001",
+  "group": "CT",
+  "expr": "SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-CT-002",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CT-003",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-CT-004",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CT-005",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CT-006",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CT-007",
+  "group": "CT",
+  "expr": "MAXX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-CT-008",
+  "group": "CT",
+  "expr": "CALCULATE(MAXX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CT-009",
+  "group": "CT",
+  "expr": "AVERAGEX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-CT-010",
+  "group": "CT",
+  "expr": "CALCULATE(AVERAGEX(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-CT-011",
+  "group": "CT",
+  "expr": "SUMX(XT_Sales, RELATED(XT_Product[ListPrice]) * XT_Sales[Quantity])"
+ },
+ {
+  "id": "XT-CT-012",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Sales, RELATED(XT_Product[ListPrice]) * XT_Sales[Quantity]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CT-013",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Sales, RELATED(XT_Product[ListPrice]) * XT_Sales[Quantity]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-CT-014",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Sales, IF(RELATED(XT_Product[Category]) = \"Cat_1\", XT_Sales[SalesAmount], 0)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CT-015",
+  "group": "CT",
+  "expr": "SUMX(XT_Customer, COUNTROWS(RELATEDTABLE(XT_Sales)))"
+ },
+ {
+  "id": "XT-CT-016",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Customer, COUNTROWS(RELATEDTABLE(XT_Sales))), XT_Customer[Segment] = \"Corporate\")"
+ },
+ {
+  "id": "XT-CT-017",
+  "group": "CT",
+  "expr": "COUNTROWS(FILTER(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])) > 5000))"
+ },
+ {
+  "id": "XT-CT-018",
+  "group": "CT",
+  "expr": "CALCULATE(COUNTROWS(FILTER(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])) > 5000)), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CT-019",
+  "group": "CT",
+  "expr": "CALCULATE(COUNTROWS(FILTER(XT_Customer, CALCULATE(SUM(XT_Sales[SalesAmount])) > 5000)), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-CT-020",
+  "group": "CT",
+  "expr": "SUMX(XT_Product, CALCULATE(SUM(XT_Sales[Quantity])) * XT_Product[ListPrice])"
+ },
+ {
+  "id": "XT-CT-021",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Product, CALCULATE(SUM(XT_Sales[Quantity])) * XT_Product[ListPrice]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-CT-022",
+  "group": "CT",
+  "expr": "CALCULATE(AVERAGEX(VALUES(XT_Date[Date]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-CT-023",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(VALUES(XT_Region[Region]), SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CT-024",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(XT_Product, COUNTROWS(RELATEDTABLE(XT_Sales))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CT-025",
+  "group": "CT",
+  "expr": "CALCULATE(SUMX(FILTER(XT_Customer, CALCULATE(COUNTROWS(XT_Sales)) > 10), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-CT-026",
+  "group": "CT",
+  "expr": "COUNTROWS(FILTER(XT_Sales, RELATED(XT_Region[Country]) = \"Canada\"))"
+ },
+ {
+  "id": "XT-CT-027",
+  "group": "CT",
+  "expr": "SUMX(XT_Product, SUMX(RELATEDTABLE(XT_Sales), XT_Sales[Quantity]))"
+ },
+ {
+  "id": "XT-TX-001",
+  "group": "TX",
+  "expr": "CALCULATE(FORMAT(SUM(XT_Sales[SalesAmount]), \"#,0.00\"), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TX-002",
+  "group": "TX",
+  "expr": "CALCULATE(FORMAT(SUM(XT_Sales[SalesAmount]), \"#,0.00\"), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-TX-003",
+  "group": "TX",
+  "expr": "CALCULATE(FORMAT(SUM(XT_Sales[SalesAmount]), \"Currency\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-004",
+  "group": "TX",
+  "expr": "CALCULATE(FORMAT(DIVIDE(SUM(XT_Sales[SalesAmount]), CALCULATE(SUM(XT_Sales[SalesAmount]), ALL(XT_Product))), \"0.0%\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-005",
+  "group": "TX",
+  "expr": "CALCULATE(FORMAT(MIN(XT_Date[Date]), \"yyyy-MM-dd\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TX-006",
+  "group": "TX",
+  "expr": "CALCULATE(FORMAT(MIN(XT_Date[Date]), \"MMM yyyy\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TX-007",
+  "group": "TX",
+  "expr": "CONCATENATEX(VALUES(XT_Product[Category]), XT_Product[Category], \", \", XT_Product[Category], ASC)"
+ },
+ {
+  "id": "XT-TX-008",
+  "group": "TX",
+  "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Product[Category]), XT_Product[Category], \", \", XT_Product[Category], ASC), XT_Product[Subcategory] = \"Subcat_4\")"
+ },
+ {
+  "id": "XT-TX-009",
+  "group": "TX",
+  "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Region[Region]), XT_Region[Region], \" | \", XT_Region[Region]), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-TX-010",
+  "group": "TX",
+  "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Sales[Channel]), XT_Sales[Channel], \", \", XT_Sales[Channel]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TX-011",
+  "group": "TX",
+  "expr": "CALCULATE(CONCATENATEX(VALUES(XT_Sales[Channel]), XT_Sales[Channel], \", \", XT_Sales[Channel]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-TX-012",
+  "group": "TX",
+  "expr": "CALCULATE(CONCATENATEX(FILTER(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])) > 1000000), XT_Product[Category], \", \", XT_Product[Category]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TX-013",
+  "group": "TX",
+  "expr": "SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\")"
+ },
+ {
+  "id": "XT-TX-014",
+  "group": "TX",
+  "expr": "CALCULATE(SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-015",
+  "group": "TX",
+  "expr": "CALCULATE(SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\"), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-TX-016",
+  "group": "TX",
+  "expr": "CALCULATE(SWITCH(TRUE(), SUM(XT_Sales[SalesAmount]) > 1000000, \"High\", SUM(XT_Sales[SalesAmount]) > 500000, \"Medium\", \"Low\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-TX-017",
+  "group": "TX",
+  "expr": "CALCULATE(SWITCH(SELECTEDVALUE(XT_Product[Category]), \"Cat_1\", \"One\", \"Cat_2\", \"Two\", \"Other\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-018",
+  "group": "TX",
+  "expr": "CALCULATE(SELECTEDVALUE(XT_Product[Category], \"Multiple\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-019",
+  "group": "TX",
+  "expr": "CALCULATE(SELECTEDVALUE(XT_Date[Year]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-TX-020",
+  "group": "TX",
+  "expr": "SELECTEDVALUE(XT_Region[Region], \"All Regions\")"
+ },
+ {
+  "id": "XT-TX-021",
+  "group": "TX",
+  "expr": "CALCULATE(SELECTEDVALUE(XT_Region[Region], \"All Regions\"), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-TX-022",
+  "group": "TX",
+  "expr": "SELECTEDVALUE(XT_Customer[Segment])"
+ },
+ {
+  "id": "XT-TX-023",
+  "group": "TX",
+  "expr": "CALCULATE(LEFT(SELECTEDVALUE(XT_Product[Category], \"n/a\"), 3), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-024",
+  "group": "TX",
+  "expr": "CALCULATE(UPPER(SELECTEDVALUE(XT_Region[Region], \"ALL\")), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-TX-025",
+  "group": "TX",
+  "expr": "CALCULATE(SUBSTITUTE(SELECTEDVALUE(XT_Product[Category], \"x\"), \"_\", \" \"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-026",
+  "group": "TX",
+  "expr": "\"Sales \" & SELECTEDVALUE(XT_Date[Year], \"All Years\") & \" - \" & SELECTEDVALUE(XT_Region[Region], \"All Regions\")"
+ },
+ {
+  "id": "XT-TX-027",
+  "group": "TX",
+  "expr": "CALCULATE(\"Sales \" & SELECTEDVALUE(XT_Date[Year], \"All Years\") & \" - \" & SELECTEDVALUE(XT_Region[Region], \"All Regions\"), XT_Date[Year] = 2024, XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-TX-028",
+  "group": "TX",
+  "expr": "LEN(CONCATENATEX(VALUES(XT_Product[Category]), XT_Product[Category], \",\"))"
+ },
+ {
+  "id": "XT-TX-029",
+  "group": "TX",
+  "expr": "CALCULATE(IF(HASONEVALUE(XT_Product[Category]), VALUES(XT_Product[Category]), \"Many\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-TX-030",
+  "group": "TX",
+  "expr": "CALCULATE(SELECTEDVALUE(XT_Product[Category], \"Multiple\"), XT_Product[Category] IN {\"Cat_1\", \"Cat_2\"})"
+ },
+ {
+  "id": "XT-LG-001",
+  "group": "LG",
+  "expr": "CALCULATE(IF(SUM(XT_Sales[SalesAmount]) > 1000000, \"Above\", \"Below\"), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-002",
+  "group": "LG",
+  "expr": "CALCULATE(IF(ISBLANK(SUM(XT_Sales[SalesAmount])), 0, SUM(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-003",
+  "group": "LG",
+  "expr": "CALCULATE(IF(ISBLANK(SUM(XT_Sales[SalesAmount])), 0, SUM(XT_Sales[SalesAmount])), XT_Date[Year] = 2026)"
+ },
+ {
+  "id": "XT-LG-004",
+  "group": "LG",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) + 0, XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-005",
+  "group": "LG",
+  "expr": "CALCULATE(COALESCE(SUM(XT_Sales[SalesAmount]), 0), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-006",
+  "group": "LG",
+  "expr": "CALCULATE(COALESCE(SUM(XT_Sales[SalesAmount]), 0), XT_Date[Year] = 2026)"
+ },
+ {
+  "id": "XT-LG-007",
+  "group": "LG",
+  "expr": "CALCULATE(COALESCE(SUM(XT_Sales[SalesAmount]), -1), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-008",
+  "group": "LG",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales), 0), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-009",
+  "group": "LG",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales), 0), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-LG-010",
+  "group": "LG",
+  "expr": "CALCULATE(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales)), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-011",
+  "group": "LG",
+  "expr": "DIVIDE(SUM(XT_Sales[Quantity]), 0, -1)"
+ },
+ {
+  "id": "XT-LG-012",
+  "group": "LG",
+  "expr": "CALCULATE(IF(SUM(XT_Sales[SalesAmount]) > 0, SUM(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-013",
+  "group": "LG",
+  "expr": "CALCULATE(IF(COUNTROWS(XT_Sales) = 0, \"No data\", \"Has data\"), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-014",
+  "group": "LG",
+  "expr": "CALCULATE(IF(COUNTROWS(XT_Sales) = 0, \"No data\", \"Has data\"), XT_Date[Year] = 2026)"
+ },
+ {
+  "id": "XT-LG-015",
+  "group": "LG",
+  "expr": "CALCULATE(IF(SUM(XT_Sales[SalesAmount]) = BLANK(), \"blank\", \"value\"), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-016",
+  "group": "LG",
+  "expr": "CALCULATE(IF(AND(SUM(XT_Sales[SalesAmount]) > 100000, COUNTROWS(XT_Sales) > 100), 1, 0), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-LG-017",
+  "group": "LG",
+  "expr": "CALCULATE(IF(AND(SUM(XT_Sales[SalesAmount]) > 100000, COUNTROWS(XT_Sales) > 100), 1, 0), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-018",
+  "group": "LG",
+  "expr": "CALCULATE(IF(OR(SUM(XT_Sales[SalesAmount]) > 10000000, COUNTROWS(XT_Sales) > 100), 1, 0), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-LG-019",
+  "group": "LG",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) > 0, XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-020",
+  "group": "LG",
+  "expr": "CALCULATE(ISBLANK(SUM(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-021",
+  "group": "LG",
+  "expr": "ISBLANK(SUM(XT_Sales[SalesAmount]))"
+ },
+ {
+  "id": "XT-LG-022",
+  "group": "LG",
+  "expr": "CALCULATE(ISEMPTY(XT_Sales), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-023",
+  "group": "LG",
+  "expr": "CALCULATE(NOT(ISEMPTY(CALCULATETABLE(XT_Sales, XT_Sales[Channel] = \"Online\"))), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-LG-024",
+  "group": "LG",
+  "expr": "CALCULATE(NOT(ISEMPTY(CALCULATETABLE(XT_Sales, XT_Sales[Channel] = \"Online\"))), XT_Date[Year] = 2026)"
+ },
+ {
+  "id": "XT-LG-025",
+  "group": "LG",
+  "expr": "IFERROR(1 / 0, -1)"
+ },
+ {
+  "id": "XT-LG-026",
+  "group": "LG",
+  "expr": "IFERROR(VALUE(\"abc\"), 0)"
+ },
+ {
+  "id": "XT-LG-027",
+  "group": "LG",
+  "expr": "ROUND(DIVIDE(SUM(XT_Sales[SalesAmount]), COUNTROWS(XT_Sales)), 2)"
+ },
+ {
+  "id": "XT-LG-028",
+  "group": "LG",
+  "expr": "IF(HASONEVALUE(XT_Product[Category]), SUM(XT_Sales[SalesAmount]), BLANK())"
+ },
+ {
+  "id": "XT-LG-029",
+  "group": "LG",
+  "expr": "IF(SELECTEDVALUE(XT_Product[Category]) IN {\"Cat_1\", \"Cat_2\"}, \"early\", \"late\")"
+ },
+ {
+  "id": "XT-LG-030",
+  "group": "LG",
+  "expr": "ISCROSSFILTERED(XT_Sales)"
+ },
+ {
+  "id": "XT-LG-031",
+  "group": "LG",
+  "expr": "HASONEFILTER(XT_Product[Category])"
+ },
+ {
+  "id": "XT-ST-001",
+  "group": "ST",
+  "expr": "MEDIAN(XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-ST-002",
+  "group": "ST",
+  "expr": "CALCULATE(MEDIAN(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-ST-003",
+  "group": "ST",
+  "expr": "CALCULATE(MEDIAN(XT_Sales[SalesAmount]), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-ST-004",
+  "group": "ST",
+  "expr": "CALCULATE(MEDIANX(XT_Sales, XT_Sales[SalesAmount] / XT_Sales[Quantity]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-ST-005",
+  "group": "ST",
+  "expr": "PERCENTILE.INC(XT_Sales[SalesAmount], 0.9)"
+ },
+ {
+  "id": "XT-ST-006",
+  "group": "ST",
+  "expr": "CALCULATE(PERCENTILE.INC(XT_Sales[SalesAmount], 0.9), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-ST-007",
+  "group": "ST",
+  "expr": "CALCULATE(PERCENTILE.EXC(XT_Sales[SalesAmount], 0.25), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-ST-008",
+  "group": "ST",
+  "expr": "CALCULATE(PERCENTILEX.INC(XT_Sales, XT_Sales[Quantity] * XT_Sales[UnitPrice], 0.5), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-ST-009",
+  "group": "ST",
+  "expr": "STDEV.P(XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-ST-010",
+  "group": "ST",
+  "expr": "CALCULATE(STDEV.P(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-ST-011",
+  "group": "ST",
+  "expr": "CALCULATE(STDEV.S(XT_Sales[SalesAmount]), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-ST-012",
+  "group": "ST",
+  "expr": "STDEVX.P(XT_Sales, XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-ST-013",
+  "group": "ST",
+  "expr": "STDEVX.S(XT_Sales, XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-ST-014",
+  "group": "ST",
+  "expr": "CALCULATE(VAR.P(XT_Sales[SalesAmount]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-ST-015",
+  "group": "ST",
+  "expr": "CALCULATE(VAR.P(XT_Sales[SalesAmount]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-ST-016",
+  "group": "ST",
+  "expr": "CALCULATE(VAR.S(XT_Sales[Quantity]), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-ST-017",
+  "group": "ST",
+  "expr": "VARX.P(XT_Sales, XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-ST-018",
+  "group": "ST",
+  "expr": "VARX.S(XT_Sales, XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-ST-019",
+  "group": "ST",
+  "expr": "DIVIDE(STDEV.P(XT_Sales[SalesAmount]), AVERAGE(XT_Sales[SalesAmount]))"
+ },
+ {
+  "id": "XT-ST-020",
+  "group": "ST",
+  "expr": "CALCULATE(DIVIDE(STDEV.P(XT_Sales[SalesAmount]), AVERAGE(XT_Sales[SalesAmount])), XT_Product[Product] = \"No Such Product\")"
+ },
+ {
+  "id": "XT-ST-021",
+  "group": "ST",
+  "expr": "MEDIANX(VALUES(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-ST-022",
+  "group": "ST",
+  "expr": "CALCULATE(MEDIANX(VALUES(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-ST-023",
+  "group": "ST",
+  "expr": "CALCULATE(PERCENTILEX.INC(ALL(XT_Product[Product]), CALCULATE(SUM(XT_Sales[SalesAmount])), 0.8), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-ST-024",
+  "group": "ST",
+  "expr": "AVERAGE(XT_Sales[SalesAmount]) - MEDIAN(XT_Sales[SalesAmount])"
+ },
+ {
+  "id": "XT-EC-001",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[ProductKey] = 999)"
+ },
+ {
+  "id": "XT-EC-002",
+  "group": "EC",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Sales[ProductKey] = 999), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-EC-003",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Category] = BLANK())"
+ },
+ {
+  "id": "XT-EC-004",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), ISBLANK(XT_Product[Category]))"
+ },
+ {
+  "id": "XT-EC-005",
+  "group": "EC",
+  "expr": "SUM(XT_Sales[SalesAmount]) - SUMX(VALUES(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-EC-006",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]) - SUMX(DISTINCT(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount]))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-EC-007",
+  "group": "EC",
+  "expr": "SUM(XT_Sales[SalesAmount]) - SUMX(ALLNOBLANKROW(XT_Product[Category]), CALCULATE(SUM(XT_Sales[SalesAmount])))"
+ },
+ {
+  "id": "XT-EC-008",
+  "group": "EC",
+  "expr": "COUNTROWS(VALUES(XT_Product[Category]))"
+ },
+ {
+  "id": "XT-EC-009",
+  "group": "EC",
+  "expr": "COUNTROWS(DISTINCT(XT_Product[Category]))"
+ },
+ {
+  "id": "XT-EC-010",
+  "group": "EC",
+  "expr": "COUNTROWS(ALL(XT_Product[Category]))"
+ },
+ {
+  "id": "XT-EC-011",
+  "group": "EC",
+  "expr": "COUNTROWS(ALLNOBLANKROW(XT_Product[Category]))"
+ },
+ {
+  "id": "XT-EC-012",
+  "group": "EC",
+  "expr": "COUNTROWS(VALUES(XT_Product[Color]))"
+ },
+ {
+  "id": "XT-EC-013",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Product[Color] = BLANK())"
+ },
+ {
+  "id": "XT-EC-014",
+  "group": "EC",
+  "expr": "CALCULATE(COUNTROWS(XT_Sales), ISBLANK(XT_Sales[CustomerKey]))"
+ },
+ {
+  "id": "XT-EC-015",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Customer[Customer] = BLANK())"
+ },
+ {
+  "id": "XT-EC-016",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Date] = DATE(2024, 2, 29))"
+ },
+ {
+  "id": "XT-EC-017",
+  "group": "EC",
+  "expr": "CALCULATE(CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[IsWeekend] = TRUE()), XT_Region[Region] = \"North\")"
+ },
+ {
+  "id": "XT-EC-018",
+  "group": "EC",
+  "expr": "CALCULATE(SUM(XT_Sales[SalesAmount]), XT_Date[Month] = \"Feb\", XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-EC-019",
+  "group": "EC",
+  "expr": "1 / 0"
+ },
+ {
+  "id": "XT-EC-020",
+  "group": "EC",
+  "expr": "0 / 0"
+ },
+ {
+  "id": "XT-EC-021",
+  "group": "EC",
+  "expr": "BLANK() + 1"
+ },
+ {
+  "id": "XT-EC-022",
+  "group": "EC",
+  "expr": "BLANK() = 0"
+ },
+ {
+  "id": "XT-EC-023",
+  "group": "EC",
+  "expr": "BLANK() & \"x\""
+ },
+ {
+  "id": "XT-EC-024",
+  "group": "EC",
+  "expr": "ROUND(2.5, 0)"
+ },
+ {
+  "id": "XT-EC-025",
+  "group": "EC",
+  "expr": "ROUND(-2.5, 0)"
+ },
+ {
+  "id": "XT-EC-026",
+  "group": "EC",
+  "expr": "MOD(-7, 3)"
+ },
+ {
+  "id": "XT-EC-027",
+  "group": "EC",
+  "expr": "SQRT(-1)"
+ },
+ {
+  "id": "XT-SH-001",
+  "group": "SH",
+  "expr": "COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date])))))"
+ },
+ {
+  "id": "XT-SH-002",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-003",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-004",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(EXCEPT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-005",
+  "group": "SH",
+  "expr": "COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date])))))"
+ },
+ {
+  "id": "XT-SH-006",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-007",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-008",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(INTERSECT(VALUES(XT_Sales[CustomerKey]), CALCULATETABLE(VALUES(XT_Sales[CustomerKey]), FILTER(ALL(XT_Date), XT_Date[Date] < MIN(XT_Date[Date]))))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-009",
+  "group": "SH",
+  "expr": "COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region])))"
+ },
+ {
+  "id": "XT-SH-010",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region]))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-011",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-012",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(UNION(VALUES(XT_Region[Region]), VALUES(XT_Region[Region]))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-013",
+  "group": "SH",
+  "expr": "SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s])"
+ },
+ {
+  "id": "XT-SH-014",
+  "group": "SH",
+  "expr": "CALCULATE(SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-015",
+  "group": "SH",
+  "expr": "CALCULATE(SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-016",
+  "group": "SH",
+  "expr": "CALCULATE(SUMX(ADDCOLUMNS(VALUES(XT_Product[Category]), \"s\", CALCULATE(SUM(XT_Sales[SalesAmount]))), [s]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-017",
+  "group": "SH",
+  "expr": "MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s])"
+ },
+ {
+  "id": "XT-SH-018",
+  "group": "SH",
+  "expr": "CALCULATE(MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-019",
+  "group": "SH",
+  "expr": "CALCULATE(MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-020",
+  "group": "SH",
+  "expr": "CALCULATE(MAXX(SUMMARIZE(XT_Sales, XT_Product[Category], \"s\", SUM(XT_Sales[SalesAmount])), [s]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-021",
+  "group": "SH",
+  "expr": "COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year]))"
+ },
+ {
+  "id": "XT-SH-022",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-023",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-024",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(SUMMARIZE(XT_Sales, XT_Sales[CustomerKey], XT_Date[Year])), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-025",
+  "group": "SH",
+  "expr": "COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category])))"
+ },
+ {
+  "id": "XT-SH-026",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category]))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-027",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category]))), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-028",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(CROSSJOIN(VALUES(XT_Region[Region]), VALUES(XT_Product[Category]))), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-029",
+  "group": "SH",
+  "expr": "SUMX(GENERATESERIES(1, 10), [Value])"
+ },
+ {
+  "id": "XT-SH-030",
+  "group": "SH",
+  "expr": "CALCULATE(SUMX(GENERATESERIES(1, 10), [Value]), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-031",
+  "group": "SH",
+  "expr": "CALCULATE(SUMX(GENERATESERIES(1, 10), [Value]), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-032",
+  "group": "SH",
+  "expr": "CALCULATE(SUMX(GENERATESERIES(1, 10), [Value]), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-033",
+  "group": "SH",
+  "expr": "COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey]))"
+ },
+ {
+  "id": "XT-SH-034",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey])), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-035",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey])), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-036",
+  "group": "SH",
+  "expr": "CALCULATE(COUNTROWS(SELECTCOLUMNS(XT_Customer, \"k\", XT_Customer[CustomerKey])), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-037",
+  "group": "SH",
+  "expr": "CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\")"
+ },
+ {
+  "id": "XT-SH-038",
+  "group": "SH",
+  "expr": "CALCULATE(CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\"), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-SH-039",
+  "group": "SH",
+  "expr": "CALCULATE(CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\"), XT_Date[Year] = 2024, XT_Date[MonthNumber] = 3)"
+ },
+ {
+  "id": "XT-SH-040",
+  "group": "SH",
+  "expr": "CALCULATE(CONTAINS(VALUES(XT_Product[Category]), XT_Product[Category], \"Cat_1\"), XT_Product[Category] = \"Cat_2\")"
+ },
+ {
+  "id": "XT-SH-041",
+  "group": "SH",
+  "expr": "SUMX(XT_Product, COUNTROWS(FILTER(XT_Product, XT_Product[ListPrice] > EARLIER(XT_Product[ListPrice]))))"
+ },
+ {
+  "id": "XT-FN-001",
+  "group": "FN",
+  "expr": "YEAR(MAX(XT_Date[Date]))"
+ },
+ {
+  "id": "XT-FN-002",
+  "group": "FN",
+  "expr": "EOMONTH(MAX(XT_Date[Date]), 0)"
+ },
+ {
+  "id": "XT-FN-003",
+  "group": "FN",
+  "expr": "EDATE(MAX(XT_Date[Date]), -1)"
+ },
+ {
+  "id": "XT-FN-004",
+  "group": "FN",
+  "expr": "WEEKDAY(MAX(XT_Date[Date]), 2)"
+ },
+ {
+  "id": "XT-FN-005",
+  "group": "FN",
+  "expr": "WEEKNUM(MAX(XT_Date[Date]))"
+ },
+ {
+  "id": "XT-FN-006",
+  "group": "FN",
+  "expr": "FORMAT(MAX(XT_Date[Date]), \"dddd\")"
+ },
+ {
+  "id": "XT-FN-007",
+  "group": "FN",
+  "expr": "INT(-2.5)"
+ },
+ {
+  "id": "XT-FN-008",
+  "group": "FN",
+  "expr": "TRUNC(-2.57, 1)"
+ },
+ {
+  "id": "XT-FN-009",
+  "group": "FN",
+  "expr": "FLOOR(7.3, 2)"
+ },
+ {
+  "id": "XT-FN-010",
+  "group": "FN",
+  "expr": "CEILING(7.1, 2)"
+ },
+ {
+  "id": "XT-FN-011",
+  "group": "FN",
+  "expr": "ROUNDUP(-2.1, 0)"
+ },
+ {
+  "id": "XT-FN-012",
+  "group": "FN",
+  "expr": "MROUND(7, 5)"
+ },
+ {
+  "id": "XT-FN-013",
+  "group": "FN",
+  "expr": "ABS(-3)"
+ },
+ {
+  "id": "XT-FN-014",
+  "group": "FN",
+  "expr": "POWER(2, 0.5)"
+ },
+ {
+  "id": "XT-FN-015",
+  "group": "FN",
+  "expr": "LN(10)"
+ },
+ {
+  "id": "XT-FN-016",
+  "group": "FN",
+  "expr": "SIGN(-4)"
+ },
+ {
+  "id": "XT-FN-017",
+  "group": "FN",
+  "expr": "MID(\"abcdef\", 2, 3)"
+ },
+ {
+  "id": "XT-FN-018",
+  "group": "FN",
+  "expr": "RIGHT(\"abc\", 5)"
+ },
+ {
+  "id": "XT-FN-019",
+  "group": "FN",
+  "expr": "LOWER(\"AbC\")"
+ },
+ {
+  "id": "XT-FN-020",
+  "group": "FN",
+  "expr": "TRIM(\"  a  b \")"
+ },
+ {
+  "id": "XT-FN-021",
+  "group": "FN",
+  "expr": "SEARCH(\"x\", \"abc\", 1, 0)"
+ },
+ {
+  "id": "XT-FN-022",
+  "group": "FN",
+  "expr": "FIND(\"b\", \"abc\")"
+ },
+ {
+  "id": "XT-FN-023",
+  "group": "FN",
+  "expr": "REPLACE(\"abcdef\", 2, 2, \"ZZ\")"
+ },
+ {
+  "id": "XT-FN-024",
+  "group": "FN",
+  "expr": "FIXED(1234.567, 1)"
+ },
+ {
+  "id": "XT-FN-025",
+  "group": "FN",
+  "expr": "CONVERT(2.5, INTEGER)"
+ },
+ {
+  "id": "XT-FN-026",
+  "group": "FN",
+  "expr": "ISTEXT(SELECTEDVALUE(XT_Region[Region]))"
+ },
+ {
+  "id": "XT-FN-027",
+  "group": "FN",
+  "expr": "XOR(TRUE(), FALSE())"
+ },
+ {
+  "id": "XT-WN-001",
+  "group": "WN",
+  "expr": "CALCULATE(CALCULATE(SUMX(OFFSET(-1, ALLSELECTED(XT_Date[YearMonth]), ORDERBY(XT_Date[YearMonth])), CALCULATE(SUM(XT_Sales[SalesAmount])))), XT_Date[Year] = 2024)"
+ },
+ {
+  "id": "XT-WN-002",
+  "group": "WN",
+  "expr": "CALCULATE(SUMX(INDEX(2, ALLSELECTED(XT_Date[YearMonth]), ORDERBY(XT_Date[YearMonth])), CALCULATE(SUM(XT_Sales[SalesAmount]))))"
+ }
+]

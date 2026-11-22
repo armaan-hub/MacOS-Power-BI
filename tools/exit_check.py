@@ -113,6 +113,7 @@ def compare_results(path_a: str, path_b: str) -> dict[str, Any]:
     right_count = 0
     wrong_count = 0
     refused_count = 0
+    both_error_count = 0
     crash_count = 0
 
     wrong_items = []
@@ -132,8 +133,10 @@ def compare_results(path_a: str, path_b: str) -> dict[str, Any]:
             crash_count += 1
             wrong_items.append({"id": item_id, "expr": expr, "pbi": pbi_ans, "local": loc_ans, "category": "crash"})
         elif loc_ans.startswith("LOCAL-REJECT:"):
-            refused_count += 1
-            if not pbi_ans.startswith("ERR:"):
+            if pbi_ans.startswith("ERR:"):
+                both_error_count += 1
+            else:
+                refused_count += 1
                 wrong_items.append({"id": item_id, "expr": expr, "pbi": pbi_ans, "local": loc_ans, "category": "refused"})
         elif dax.same(pbi_ans, loc_ans):
             right_count += 1
@@ -148,6 +151,7 @@ def compare_results(path_a: str, path_b: str) -> dict[str, Any]:
         "right": right_count,
         "wrong": wrong_count,
         "refused": refused_count,
+        "both_error": both_error_count,
         "crash": crash_count,
         "slowest_20": slowest_20,
         "wrong_items": wrong_items,
@@ -165,6 +169,7 @@ def print_comparison_report(stats: dict[str, Any]) -> None:
     print(f"- **Right:** {stats['right']}")
     print(f"- **Wrong:** {stats['wrong']}")
     print(f"- **Refused:** {stats['refused']}")
+    print(f"- **Both error (right):** {stats.get('both_error', 0)}")
     print(f"- **Crash:** {stats['crash']}")
     print(f"- **Only in File A:** {stats.get('only_in_a_count', 0)}")
     print(f"- **Only in File B:** {stats.get('only_in_b_count', 0)}")
