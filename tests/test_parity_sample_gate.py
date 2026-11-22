@@ -30,6 +30,7 @@ def gate(tmp_path, monkeypatch):
     monkeypatch.setattr(parity_check, "LEDGER", tmp_path / "PARITY_LEDGER.md")
     monkeypatch.setattr(parity_check, "DAX_BATTERIES", list(NAMES))
     monkeypatch.setattr(parity_check, "TABLES", {})
+    monkeypatch.setattr(parity_check, "EXIT_ANSWER_FILES", [])
     monkeypatch.setattr(parity_check.dax, "local", lambda expr: "1")
     monkeypatch.setattr(parity_check, "replay_tables", lambda: ([], {}, []))
     return tmp_path

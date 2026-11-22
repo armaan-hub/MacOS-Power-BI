@@ -50,11 +50,16 @@ def run_power_bi(items: list[dict[str, str]], port_: str, chunk: int = 200) -> l
             exit_model.drop_guest_model(port_)
 
 
-def run_local(items: list[dict[str, str]], data: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-    """Evaluate DAX expressions using local evaluator with exit_model.local_context()."""
-    if data is None:
-        data = exit_model.generate_data()
-    tables, rels = exit_model.local_context(data)
+def run_local(items: list[dict[str, str]], data: dict[str, Any] | None = None,
+              context: tuple[list[dict[str, Any]], list[dict[str, Any]]] | None = None) -> list[dict[str, Any]]:
+    """Evaluate DAX expressions using local evaluator with exit_model.local_context().
+
+    context: a (tables, relationships) pair already built by exit_model.local_context(), so a caller can build it once."""
+    if context is None:
+        if data is None:
+            data = exit_model.generate_data()
+        context = exit_model.local_context(data)
+    tables, rels = context
     home_table = "xt_sales"
     table_map = {t["id"]: t for t in tables}
     t_home = table_map[home_table]
