@@ -13685,9 +13685,10 @@ def _evaluate_measures_once(
                     lineage.update(base_lineage(context))
                     new_output = []
                     for right in rows:
-                        if cancel_check is not None and cancel_check():
-                            raise MeasureEvaluationCancelled("Evaluation cancelled.")
-                        new_output.extend({**left, **right} for left in output)
+                        for left in output:
+                            if cancel_check is not None and (len(new_output) & 0x3FF == 0) and cancel_check():
+                                raise MeasureEvaluationCancelled("Evaluation cancelled.")
+                            new_output.append({**left, **right})
                     output = new_output
                 if len({h.casefold() for h in merged_headers}) != len(merged_headers):
                     raise MeasureError("CROSSJOIN does not allow two columns with the same name.")

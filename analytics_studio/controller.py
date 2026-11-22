@@ -6253,27 +6253,29 @@ class StudioController(QObject):
         self._dirty = True
         self.stateChanged.emit()
 
-    @Slot(str)
-    def setRegionFilter(self, region: str) -> None:  # noqa: N802
+    def _refresh(self, async_refresh: bool = False) -> None:
+        if async_refresh:
+            self._refresh_report_async()
+        else:
+            self._refresh_report()
+
+    def _set_region(self, region: str, async_refresh: bool = False) -> None:
         next_region = None if region in ("", "All regions") else region
         if next_region is not None and next_region not in self.regions:
             return
         if self._current_region == next_region:
             return
         self._current_region = next_region
-        self._refresh_report()
+        self._refresh(async_refresh)
         self.stateChanged.emit()
 
     @Slot(str)
+    def setRegionFilter(self, region: str) -> None:  # noqa: N802
+        self._set_region(region)
+
+    @Slot(str)
     def setRegionFilterInteractive(self, region: str) -> None:  # noqa: N802
-        next_region = None if region in ("", "All regions") else region
-        if next_region is not None and next_region not in self.regions:
-            return
-        if self._current_region == next_region:
-            return
-        self._current_region = next_region
-        self._refresh_report_async()
-        self.stateChanged.emit()
+        self._set_region(region, True)
 
     def _add_report_filter(
         self,
@@ -6539,10 +6541,7 @@ class StudioController(QObject):
             self._set_status(f"Could not add filter: {exc}")
             return False
         self._dirty = True
-        if async_refresh:
-            self._refresh_report_async()
-        else:
-            self._refresh_report()
+        self._refresh(async_refresh)
         self.stateChanged.emit()
         summary = _report_filter_summary(clauses, logic)
         scope = (
@@ -6555,674 +6554,282 @@ class StudioController(QObject):
         )
         return True
 
+    def _remove_filter(self, scope: str, index: int, async_refresh: bool = False) -> bool:
+        """Remove one filter; scope is "report", "page" or "visual"."""
+        if scope == "report":
+            filters = self._project.get("report", {}).get("filters", [])
+        else:
+            page = self._active_page()
+            if page is None or (scope == "visual" and not self._selected_visual):
+                return False
+            filters = page.get("visual_filters" if scope == "visual" else "filters", [])
+        if index < 0 or index >= len(filters):
+            return False
+        if scope == "visual" and filters[index].get("visual_name") != self._selected_visual:
+            return False
+        removed = filters.pop(index)
+        self._dirty = True
+        self._refresh(async_refresh)
+        self.stateChanged.emit()
+        if scope == "visual":
+            self._set_status(f"Removed filter from {self._selected_visual} · {removed['column']}")
+        else:
+            self._set_status(f"Removed {scope} filter for {removed['column']}")
+        return True
+
+    def _add_filter_rule(
+        self,
+        table_id: str,
+        column: str,
+        operator: str,
+        value: str,
+        second_operator: str,
+        second_value: str,
+        logic: str,
+        async_refresh: bool = False,
+        **scope: Any,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value=value,
+            second_operator=second_operator,
+            second_value=second_value,
+            logic=logic,
+            async_refresh=async_refresh,
+            **scope,
+        )
+
+    def _add_multi_value(
+        self,
+        table_id: str,
+        column: str,
+        operator: str,
+        values_json: str,
+        async_refresh: bool = False,
+        **scope: Any,
+    ) -> bool:
+        try:
+            values = json.loads(values_json)
+        except (json.JSONDecodeError, TypeError):
+            self._set_status("The selected filter values are invalid.")
+            return False
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value="",
+            multi_values=values,
+            async_refresh=async_refresh,
+            **scope,
+        )
+
+    def _add_relative_date(
+        self,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+        include_today: bool,
+        async_refresh: bool = False,
+        **scope: Any,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_DATE,
+            value="",
+            relative_date_rule={
+                "direction": direction,
+                "count": count,
+                "unit": unit,
+                "include_today": include_today,
+            },
+            async_refresh=async_refresh,
+            **scope,
+        )
+
+    def _add_relative_time(
+        self,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+        async_refresh: bool = False,
+        **scope: Any,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_TIME,
+            value="",
+            relative_time_rule={"direction": direction, "count": count, "unit": unit},
+            async_refresh=async_refresh,
+            **scope,
+        )
+
+    def _add_top_n(
+        self,
+        visual_name: str,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        order_by_column: str,
+        async_refresh: bool = False,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_TOP_N,
+            value="",
+            visual_name=visual_name,
+            top_n_rule={
+                "direction": direction,
+                "count": count,
+                "order_by_column": order_by_column,
+            },
+            async_refresh=async_refresh,
+        )
+
     @Slot(str, str, str, result=bool)
     def addPageFilter(self, table_id: str, column: str, value: str) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id, column=column, operator="equals", value=value
-        )
+        return self._add_report_filter(table_id=table_id, column=column, operator="equals", value=value)
 
     @Slot(str, str, str, str, str, str, str, result=bool)
-    def addPageFilterRule(
-        self,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-        )
+    def addPageFilterRule(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic)
 
     @Slot(str, str, str, str, str, str, str, result=bool)
-    def addPageFilterRuleInteractive(
-        self,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-            async_refresh=True,
-        )
+    def addPageFilterRuleInteractive(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, True)
 
     @Slot(str, str, str, str, str, str, str, result=bool)
-    def addReportFilterRule(
-        self,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-            report_scope=True,
-        )
+    def addReportFilterRule(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, report_scope=True)
 
     @Slot(str, str, str, str, str, str, str, result=bool)
-    def addReportFilterRuleInteractive(
-        self,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-            report_scope=True,
-            async_refresh=True,
-        )
+    def addReportFilterRuleInteractive(self, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, True, report_scope=True)
 
     @Slot(str, str, str, str, result=bool)
-    def addPageMultiValueFilter(  # noqa: N802
-        self, table_id: str, column: str, operator: str, values_json: str
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            multi_values=values,
-        )
+    def addPageMultiValueFilter(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json)
 
     @Slot(str, str, str, str, result=bool)
-    def addPageMultiValueFilterInteractive(  # noqa: N802
-        self, table_id: str, column: str, operator: str, values_json: str
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            multi_values=values,
-            async_refresh=True,
-        )
+    def addPageMultiValueFilterInteractive(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, True)
 
     @Slot(str, str, str, str, result=bool)
-    def addReportMultiValueFilter(  # noqa: N802
-        self, table_id: str, column: str, operator: str, values_json: str
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            multi_values=values,
-            report_scope=True,
-        )
+    def addReportMultiValueFilter(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, report_scope=True)
 
     @Slot(str, str, str, str, result=bool)
-    def addReportMultiValueFilterInteractive(  # noqa: N802
-        self, table_id: str, column: str, operator: str, values_json: str
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            multi_values=values,
-            report_scope=True,
-            async_refresh=True,
-        )
+    def addReportMultiValueFilterInteractive(self, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, True, report_scope=True)
 
     @Slot(str, str, str, int, str, bool, result=bool)
-    def addPageRelativeDateFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-        )
+    def addPageRelativeDateFilter(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today)
 
     @Slot(str, str, str, int, str, bool, result=bool)
-    def addPageRelativeDateFilterInteractive(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-            async_refresh=True,
-        )
+    def addPageRelativeDateFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, True)
 
     @Slot(str, str, str, int, str, bool, result=bool)
-    def addReportRelativeDateFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-            report_scope=True,
-        )
+    def addReportRelativeDateFilter(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, report_scope=True)
 
     @Slot(str, str, str, int, str, bool, result=bool)
-    def addReportRelativeDateFilterInteractive(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-            report_scope=True,
-            async_refresh=True,
-        )
+    def addReportRelativeDateFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, True, report_scope=True)
 
     @Slot(str, str, str, int, str, result=bool)
-    def addPageRelativeTimeFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-        )
+    def addPageRelativeTimeFilter(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit)
 
     @Slot(str, str, str, int, str, result=bool)
-    def addPageRelativeTimeFilterInteractive(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-            async_refresh=True,
-        )
+    def addPageRelativeTimeFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, True)
 
     @Slot(str, str, str, int, str, result=bool)
-    def addReportRelativeTimeFilter(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-            report_scope=True,
-        )
+    def addReportRelativeTimeFilter(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, report_scope=True)
 
     @Slot(str, str, str, int, str, result=bool)
-    def addReportRelativeTimeFilterInteractive(  # noqa: N802
-        self,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-            report_scope=True,
-            async_refresh=True,
-        )
+    def addReportRelativeTimeFilterInteractive(self, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, True, report_scope=True)
 
     @Slot(int, result=bool)
     def removeReportFilter(self, index: int) -> bool:  # noqa: N802
-        filters = self._project.get("report", {}).get("filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report()
-        self.stateChanged.emit()
-        self._set_status(f"Removed report filter for {removed['column']}")
-        return True
+        return self._remove_filter("report", index)
 
     @Slot(int, result=bool)
     def removeReportFilterInteractive(self, index: int) -> bool:  # noqa: N802
-        filters = self._project.get("report", {}).get("filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report_async()
-        self.stateChanged.emit()
-        self._set_status(f"Removed report filter for {removed['column']}")
-        return True
+        return self._remove_filter("report", index, True)
 
     @Slot(int, result=bool)
     def removePageFilter(self, index: int) -> bool:  # noqa: N802
-
-
-        page = self._active_page()
-        if page is None:
-            return False
-        filters = page.get("filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report()
-        self.stateChanged.emit()
-        self._set_status(f"Removed page filter for {removed['column']}")
-        return True
+        return self._remove_filter("page", index)
 
     @Slot(int, result=bool)
     def removePageFilterInteractive(self, index: int) -> bool:  # noqa: N802
-        page = self._active_page()
-        if page is None:
-            return False
-        filters = page.get("filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report_async()
-        self.stateChanged.emit()
-        self._set_status(f"Removed page filter for {removed['column']}")
-        return True
+        return self._remove_filter("page", index, True)
 
     @Slot(str, str, str, str, result=bool)
-    def addVisualFilter(
-        self, visual_name: str, table_id: str, column: str, value: str
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator="equals",
-            value=value,
-            visual_name=visual_name,
-        )
+    def addVisualFilter(self, visual_name: str, table_id: str, column: str, value: str) -> bool:  # noqa: N802
+        return self._add_report_filter(table_id=table_id, column=column, operator="equals", value=value, visual_name=visual_name)
 
     @Slot(str, str, str, str, str, str, str, str, result=bool)
-    def addVisualFilterRule(
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-            visual_name=visual_name,
-        )
+    def addVisualFilterRule(self, visual_name: str, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, visual_name=visual_name)
 
     @Slot(str, str, str, str, str, str, str, str, result=bool)
-    def addVisualFilterRuleInteractive(
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        operator: str,
-        value: str,
-        second_operator: str,
-        second_value: str,
-        logic: str,
-    ) -> bool:  # noqa: N802
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value=value,
-            second_operator=second_operator,
-            second_value=second_value,
-            logic=logic,
-            visual_name=visual_name,
-            async_refresh=True,
-        )
+    def addVisualFilterRuleInteractive(self, visual_name: str, table_id: str, column: str, operator: str, value: str, second_operator: str, second_value: str, logic: str) -> bool:  # noqa: N802
+        return self._add_filter_rule(table_id, column, operator, value, second_operator, second_value, logic, True, visual_name=visual_name)
 
     @Slot(str, str, str, str, str, result=bool)
-    def addVisualMultiValueFilter(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        operator: str,
-        values_json: str,
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            visual_name=visual_name,
-            multi_values=values,
-        )
+    def addVisualMultiValueFilter(self, visual_name: str, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, visual_name=visual_name)
 
     @Slot(str, str, str, str, str, result=bool)
-    def addVisualMultiValueFilterInteractive(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        operator: str,
-        values_json: str,
-    ) -> bool:
-        try:
-            values = json.loads(values_json)
-        except (json.JSONDecodeError, TypeError):
-            self._set_status("The selected filter values are invalid.")
-            return False
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=operator,
-            value="",
-            visual_name=visual_name,
-            multi_values=values,
-            async_refresh=True,
-        )
+    def addVisualMultiValueFilterInteractive(self, visual_name: str, table_id: str, column: str, operator: str, values_json: str) -> bool:  # noqa: N802
+        return self._add_multi_value(table_id, column, operator, values_json, True, visual_name=visual_name)
 
     @Slot(str, str, str, str, int, str, bool, result=bool)
-    def addVisualRelativeDateFilter(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            visual_name=visual_name,
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-        )
+    def addVisualRelativeDateFilter(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, visual_name=visual_name)
 
     @Slot(str, str, str, str, int, str, bool, result=bool)
-    def addVisualRelativeDateFilterInteractive(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-        include_today: bool,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_DATE,
-            value="",
-            visual_name=visual_name,
-            relative_date_rule={
-                "direction": direction,
-                "count": count,
-                "unit": unit,
-                "include_today": include_today,
-            },
-            async_refresh=True,
-        )
+    def addVisualRelativeDateFilterInteractive(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str, include_today: bool) -> bool:  # noqa: N802
+        return self._add_relative_date(table_id, column, direction, count, unit, include_today, True, visual_name=visual_name)
 
     @Slot(str, str, str, str, int, str, result=bool)
-    def addVisualRelativeTimeFilter(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            visual_name=visual_name,
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-        )
+    def addVisualRelativeTimeFilter(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, visual_name=visual_name)
 
     @Slot(str, str, str, str, int, str, result=bool)
-    def addVisualRelativeTimeFilterInteractive(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        unit: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_RELATIVE_TIME,
-            value="",
-            visual_name=visual_name,
-            relative_time_rule={"direction": direction, "count": count, "unit": unit},
-            async_refresh=True,
-        )
+    def addVisualRelativeTimeFilterInteractive(self, visual_name: str, table_id: str, column: str, direction: str, count: int, unit: str) -> bool:  # noqa: N802
+        return self._add_relative_time(table_id, column, direction, count, unit, True, visual_name=visual_name)
 
     @Slot(str, str, str, str, int, str, result=bool)
-    def addVisualTopNFilter(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        order_by_column: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_TOP_N,
-            value="",
-            visual_name=visual_name,
-            top_n_rule={
-                "direction": direction,
-                "count": count,
-                "order_by_column": order_by_column,
-            },
-        )
+    def addVisualTopNFilter(self, visual_name: str, table_id: str, column: str, direction: str, count: int, order_by_column: str) -> bool:  # noqa: N802
+        return self._add_top_n(visual_name, table_id, column, direction, count, order_by_column)
 
     @Slot(str, str, str, str, int, str, result=bool)
-    def addVisualTopNFilterInteractive(  # noqa: N802
-        self,
-        visual_name: str,
-        table_id: str,
-        column: str,
-        direction: str,
-        count: int,
-        order_by_column: str,
-    ) -> bool:
-        return self._add_report_filter(
-            table_id=table_id,
-            column=column,
-            operator=_REPORT_FILTER_TOP_N,
-            value="",
-            visual_name=visual_name,
-            top_n_rule={
-                "direction": direction,
-                "count": count,
-                "order_by_column": order_by_column,
-            },
-            async_refresh=True,
-        )
+    def addVisualTopNFilterInteractive(self, visual_name: str, table_id: str, column: str, direction: str, count: int, order_by_column: str) -> bool:  # noqa: N802
+        return self._add_top_n(visual_name, table_id, column, direction, count, order_by_column, True)
 
     @Slot(int, result=bool)
     def removeVisualFilter(self, index: int) -> bool:  # noqa: N802
-
-
-        page = self._active_page()
-        if page is None or not self._selected_visual:
-            return False
-        filters = page.get("visual_filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        if filters[index].get("visual_name") != self._selected_visual:
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report()
-        self.stateChanged.emit()
-        self._set_status(f"Removed filter from {self._selected_visual} · {removed['column']}")
-        return True
+        return self._remove_filter("visual", index)
 
     @Slot(int, result=bool)
     def removeVisualFilterInteractive(self, index: int) -> bool:  # noqa: N802
-        page = self._active_page()
-        if page is None or not self._selected_visual:
-            return False
-        filters = page.get("visual_filters", [])
-        if index < 0 or index >= len(filters):
-            return False
-        if filters[index].get("visual_name") != self._selected_visual:
-            return False
-        removed = filters.pop(index)
-        self._dirty = True
-        self._refresh_report_async()
-        self.stateChanged.emit()
-        self._set_status(f"Removed filter from {self._selected_visual} · {removed['column']}")
-        return True
+        return self._remove_filter("visual", index, True)
 
     @Slot(str)
     def setFieldQuery(self, query: str) -> None:  # noqa: N802
@@ -14107,6 +13714,7 @@ class StudioController(QObject):
             page["visual_filters"] = []
         if report_filters or page_filters or visual_filters:
             self._dirty = True
+        # Stays synchronous: a one-shot reset whose callers read the refreshed results at once.
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status("Report, current-page, and visual selections cleared")
