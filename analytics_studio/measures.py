@@ -66,6 +66,20 @@ def _frozen(indexes: Iterable[int]) -> frozenset[int]:
     return indexes if isinstance(indexes, frozenset) else frozenset(indexes)
 
 
+def rows_matching(rows: list[dict[str, Any]], column_rows: dict[str, Any]) -> list[dict[str, Any]]:
+    """Rows that satisfy every column filter in column_rows, intersecting smallest first."""
+    if not column_rows:
+        return list(rows)
+    sets = sorted((_frozen(s) for s in column_rows.values()), key=len)
+    common = sets[0]
+    for s in sets[1:]:
+        common = common & s
+        if not common:
+            return []
+    n = len(rows)
+    return [rows[i] for i in sorted(common) if 0 <= i < n]
+
+
 class BlankSet(frozenset):
     """Allowed row indexes of one column that also select the virtual blank member (a row of BLANKs) when blank is true."""
 
@@ -11549,23 +11563,13 @@ def _evaluate_measures_once(
             other["filter_column_rows"] = other_rows
             other["filter_context_complete"] = True
             if other_rows:
-                other["filter_rows"] = [
-                    row for row_index, row in enumerate(other["rows"])
-                    if all(row_index in indexes for indexes in other_rows.values())
-                ]
+                other["filter_rows"] = rows_matching(other["rows"], other_rows)
                 updated_filter_roots.add(other_id)
             else:
                 other.pop("filter_rows", None)
                 updated_filter_roots.discard(other_id)
         if remaining_column_rows:
-            updated["filter_rows"] = [
-                row
-                for row_index, row in enumerate(updated["rows"])
-                if all(
-                    row_index in indexes
-                    for indexes in remaining_column_rows.values()
-                )
-            ]
+            updated["filter_rows"] = rows_matching(updated["rows"], remaining_column_rows)
             updated_filter_roots.add(table_id)
         else:
             updated.pop("filter_rows", None)
@@ -20050,10 +20054,7 @@ def _evaluate_measures_once(
             target_context["filter_column_extra"] = extra
             target_context["filter_column_rows"] = updated_column_rows
             target_context["filter_context_complete"] = True
-            target_context["filter_rows"] = [
-                row for row_index, row in enumerate(target_context["rows"])
-                if all(row_index in indexes for indexes in updated_column_rows.values())
-            ]
+            target_context["filter_rows"] = rows_matching(target_context["rows"], updated_column_rows)
             updated_filter_roots.add(table_id)
             forget_expanded_filter_cleared(updated_by_id, table_id)
         try:
@@ -20118,21 +20119,28 @@ def _evaluate_measures_once(
         # a derived copy of a loaded table (ALLSELECTED(T), a subset): its positions are not the table's, so the filter
         # must be found among the loaded rows
         source_rows = base_table["rows"] if base_table is not None and iterated_table["rows"] is not base_table["rows"] else iterated_table["rows"]
+        source_id = id(source_rows)
         idx = row_value_index(source_rows)
         headers = iterated_table["headers"]
         if idx is not None:
             try:
-                per_column: dict[str, list[int]] = {}
+                per_column_sets: dict[str, BlankSet] = {}
                 for header in headers:
                     val = row.get(header)
                     _reject_power_query_error(val, header, None)
-                    col_idx = idx.get(header)
-                    if col_idx is None:
-                        col_idx = {}
-                        for r_i, r in enumerate(source_rows):
-                            col_idx.setdefault(cell_key(r.get(header)), []).append(r_i)
-                        idx[header] = col_idx
-                    per_column[header] = list(col_idx.get(cell_key(val), []))
+                    k = cell_key(val)
+                    cached_bs = blank_set_cache.get((source_id, header, k))
+                    if cached_bs is None:
+                        col_idx = idx.get(header)
+                        if col_idx is None:
+                            col_idx = {}
+                            for r_i, r in enumerate(source_rows):
+                                col_idx.setdefault(cell_key(r.get(header)), []).append(r_i)
+                            idx[header] = col_idx
+                        cached_bs = BlankSet(col_idx.get(k, []), val is None)
+                        blank_set_cache[(source_id, header, k)] = cached_bs
+                    per_column_sets[header] = cached_bs
+                transitioned = {table_id: (iterated_table, per_column_sets)}
             except TypeError:
                 idx = None
         if idx is None:
@@ -20144,13 +20152,14 @@ def _evaluate_measures_once(
                     _reject_power_query_error(right, header, None)
                     if cell_key(left) == cell_key(right):
                         per_column[header].append(row_index)
-        transitioned = {table_id: (iterated_table, {header: BlankSet(indexes, row.get(header) is None) for header, indexes in per_column.items()})}
+            transitioned = {table_id: (iterated_table, {header: BlankSet(indexes, row.get(header) is None) for header, indexes in per_column.items()})}
         if base_table is not None:
             add_one_side_transition(table_id, row, transitioned)
         return transitioned
 
     one_side_index_cache: dict[tuple[str, str], dict[Any, frozenset[int]]] = {}
     row_value_index_cache: dict[int, tuple[list[dict[str, Any]], dict[str, dict[Any, list[int]]] | None]] = {}
+    blank_set_cache: dict[tuple[int, str, Any], BlankSet] = {}
 
     def row_value_index(source_rows: list[dict[str, Any]]) -> dict[str, dict[Any, list[int]]] | None:
         """Lazily indexed column values of a rows list (row indexes ascending), or None if it has error cells or is empty."""
