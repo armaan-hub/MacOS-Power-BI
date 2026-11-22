@@ -195,6 +195,13 @@ Rectangle {
                     }
                     onClicked: root.commitFormula()
                 }
+                BusyIndicator {
+                    objectName: "formulaBarPreviewSpinner"
+                    width: 20; height: 20
+                    anchors.verticalCenter: parent.verticalCenter
+                    running: root.bar !== null && root.bar.previewBusy
+                    visible: running
+                }
             }
 
             Flickable {

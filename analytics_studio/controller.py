@@ -2004,6 +2004,10 @@ class StudioController(QObject):
         self._report_cancel_event: threading.Event | None = None
         self._report_busy: bool = False
         self._report_tasks: dict[int, Any] = {}
+        self._preview_pool = create_measure_thread_pool()
+        self._preview_request_id: int = 0
+        self._preview_cancel_event: threading.Event | None = None
+        self._preview_tasks: dict[int, Any] = {}
         self._refresh_model_view()
         self._refresh_report()
 
@@ -8651,6 +8655,11 @@ class StudioController(QObject):
                 name, expression, editing_name=measure_name,
                 home_table_id=home_table_id,
             ),
+            preview_async_callback=lambda name, expression, on_done: self._preview_measure_expression_async(
+                name, expression, on_done, editing_name=measure_name,
+                home_table_id=home_table_id,
+            ),
+            cancel_preview_callback=self.cancelPreview,
             home_table_id=home_table_id,
             home_table_name=(
                 str(home_table.get("name", "")) if home_table else ""
@@ -8931,6 +8940,10 @@ class StudioController(QObject):
             "preview_callback": lambda name, expression: self._preview_measure_expression(
                 name, expression, home_table_id=home_table_id
             ),
+            "preview_async_callback": lambda name, expression, on_done: self._preview_measure_expression_async(
+                name, expression, on_done, home_table_id=home_table_id
+            ),
+            "cancel_preview_callback": self.cancelPreview,
         }
         if quick:
             dialog_kwargs["quick_table_name"] = quick_table_name
@@ -9040,6 +9053,122 @@ class StudioController(QObject):
         if value is None:
             return "—"
         return _format_report_number(value)
+
+    def _preview_measure_expression_async(
+        self,
+        name: str,
+        expression: str,
+        on_done: Callable[[str], None],
+        *,
+        editing_name: str | None = None,
+        home_table_id: str | None = None,
+    ) -> None:
+        """Evaluate a draft measure expression asynchronously off the window thread."""
+        try:
+            measure = normalize_measure(
+                name, expression, home_table_id=home_table_id
+            )
+            current = list(self._project.get("model", {}).get("measures", []))
+            if editing_name is None:
+                if any(
+                    str(item.get("name", "")).casefold() == measure["name"].casefold()
+                    for item in current
+                ):
+                    raise MeasureError(f"A measure named {measure['name']!r} already exists.")
+                candidate_measures = [*current, measure]
+                evaluate_names = [measure["name"]]
+            else:
+                existing_index = next((
+                    index for index, item in enumerate(current)
+                    if str(item.get("name", "")).casefold() == editing_name.casefold()
+                ), None)
+                if existing_index is None:
+                    raise MeasureError(f"Measure {editing_name!r} no longer exists.")
+                if any(
+                    index != existing_index
+                    and str(item.get("name", "")).casefold() == measure["name"].casefold()
+                    for index, item in enumerate(current)
+                ):
+                    raise MeasureError(f"A measure named {measure['name']!r} already exists.")
+                candidate_measures = list(current)
+                candidate_measures[existing_index] = measure
+                evaluate_names = None
+
+            previous_region_column = self._region_column
+            previous_filter_context_error = self._filter_context_error
+            previous_filter_context_cache = self._report_filter_context_cache
+            self._report_filter_context_cache = dict(previous_filter_context_cache)
+            try:
+                filtered_rows, table_context, filter_table_ids = self._report_filter_context()
+                active_table_id = self._active_model_table_id()
+                active_rows = filtered_rows.get(active_table_id, list(self._rows))
+                rows_snapshot = [dict(r) for r in active_rows]
+                headers_snapshot = list(self._headers)
+                active_table_name_snapshot = str(self._active_model_table_name())
+                relationships_snapshot = deepcopy(self._project.get("model", {}).get("relationships", []))
+                candidate_measures_snapshot = deepcopy(candidate_measures)
+                table_context_snapshot = [
+                    {**ctx, "rows": [dict(r) for r in ctx.get("rows", [])]}
+                    for ctx in table_context
+                ] if table_context else []
+                filter_table_ids_snapshot = set(filter_table_ids)
+            finally:
+                self._report_filter_context_cache = previous_filter_context_cache
+                self._region_column = previous_region_column
+                self._filter_context_error = previous_filter_context_error
+        except Exception as exc:
+            on_done(str(exc))
+            return
+
+        if self._preview_cancel_event is not None:
+            self._preview_cancel_event.set()
+        self._preview_request_id += 1
+        req_id = self._preview_request_id
+        cancel_event = threading.Event()
+        self._preview_cancel_event = cancel_event
+
+        target_name = measure["name"]
+
+        def eval_fn(is_cancelled: Callable[[], bool]) -> str:
+            values = evaluate_measures(
+                candidate_measures_snapshot,
+                rows_snapshot,
+                headers_snapshot,
+                active_table_name_snapshot,
+                measure_names=evaluate_names,
+                table_context=table_context_snapshot,
+                relationships=relationships_snapshot,
+                filter_table_ids=filter_table_ids_snapshot,
+                active_table_id=active_table_id or None,
+                cancel_check=is_cancelled,
+            )
+            val = values.get(target_name)
+            if val is None:
+                return "—"
+            return _format_report_number(val)
+
+        task = MeasureEvaluationTask(req_id, eval_fn, cancel_event)
+        self._preview_tasks[req_id] = task
+
+        def on_completed(r_id: int, result: Any) -> None:
+            self._preview_tasks.pop(r_id, None)
+            if r_id == self._preview_request_id:
+                on_done(str(result))
+
+        def on_cancelled(r_id: int) -> None:
+            self._preview_tasks.pop(r_id, None)
+            if r_id == self._preview_request_id:
+                on_done("Cancelled")
+
+        def on_failed(r_id: int, message: str) -> None:
+            self._preview_tasks.pop(r_id, None)
+            if r_id == self._preview_request_id:
+                on_done(str(message))
+
+        task.signals.completed.connect(on_completed)
+        task.signals.cancelled.connect(on_cancelled)
+        task.signals.failed.connect(on_failed)
+        self._preview_pool.start(task)
 
     def create_measure(
         self,
@@ -14197,7 +14326,7 @@ class StudioController(QObject):
         return source_rows
 
     def _cancel_and_wait_worker(self) -> None:
-        """Cancel any running report worker task and wait for it to finish."""
+        """Cancel any running report or preview worker task and wait for it to finish."""
         self._report_request_id += 1
         if self._report_cancel_event is not None:
             self._report_cancel_event.set()
@@ -14208,6 +14337,27 @@ class StudioController(QObject):
                     self._report_cancel_event.set()
                 self._report_pool.waitForDone(5000)
         self._set_report_busy(False)
+        self._cancel_and_wait_preview()
+
+    def _cancel_and_wait_preview(self) -> None:
+        """Cancel any running preview worker task and wait for it to finish."""
+        if self._preview_cancel_event is not None:
+            self._preview_cancel_event.set()
+        if hasattr(self, "_preview_pool") and self._preview_pool is not None:
+            if not self._preview_pool.waitForDone(2000):
+                if self._preview_cancel_event is not None:
+                    self._preview_cancel_event.set()
+                self._preview_pool.waitForDone(5000)
+        if hasattr(self, "_formula_bar") and self._formula_bar is not None:
+            self._formula_bar._set_preview_busy(False)
+
+    @Slot()
+    def cancelPreview(self) -> None:  # noqa: N802
+        """Cancel any running preview worker task cooperatively."""
+        if self._preview_cancel_event is not None:
+            self._preview_cancel_event.set()
+        if hasattr(self, "_formula_bar") and self._formula_bar is not None:
+            self._formula_bar._set_preview_busy(False)
 
     def _set_report_busy(self, busy: bool) -> None:
         if self._report_busy != busy:
