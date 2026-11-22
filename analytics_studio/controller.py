@@ -6264,6 +6264,17 @@ class StudioController(QObject):
         self._refresh_report()
         self.stateChanged.emit()
 
+    @Slot(str)
+    def setRegionFilterInteractive(self, region: str) -> None:  # noqa: N802
+        next_region = None if region in ("", "All regions") else region
+        if next_region is not None and next_region not in self.regions:
+            return
+        if self._current_region == next_region:
+            return
+        self._current_region = next_region
+        self._refresh_report_async()
+        self.stateChanged.emit()
+
     def _add_report_filter(
         self,
         *,
@@ -6280,6 +6291,7 @@ class StudioController(QObject):
         relative_time_rule: dict[str, Any] | None = None,
         top_n_rule: dict[str, Any] | None = None,
         report_scope: bool = False,
+        async_refresh: bool = False,
     ) -> bool:
         table = next(
             (item for item in self._table_catalog
@@ -6527,7 +6539,10 @@ class StudioController(QObject):
             self._set_status(f"Could not add filter: {exc}")
             return False
         self._dirty = True
-        self._refresh_report()
+        if async_refresh:
+            self._refresh_report_async()
+        else:
+            self._refresh_report()
         self.stateChanged.emit()
         summary = _report_filter_summary(clauses, logic)
         scope = (
@@ -6568,6 +6583,28 @@ class StudioController(QObject):
         )
 
     @Slot(str, str, str, str, str, str, str, result=bool)
+    def addPageFilterRuleInteractive(
+        self,
+        table_id: str,
+        column: str,
+        operator: str,
+        value: str,
+        second_operator: str,
+        second_value: str,
+        logic: str,
+    ) -> bool:  # noqa: N802
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value=value,
+            second_operator=second_operator,
+            second_value=second_value,
+            logic=logic,
+            async_refresh=True,
+        )
+
+    @Slot(str, str, str, str, str, str, str, result=bool)
     def addReportFilterRule(
         self,
         table_id: str,
@@ -6589,6 +6626,29 @@ class StudioController(QObject):
             report_scope=True,
         )
 
+    @Slot(str, str, str, str, str, str, str, result=bool)
+    def addReportFilterRuleInteractive(
+        self,
+        table_id: str,
+        column: str,
+        operator: str,
+        value: str,
+        second_operator: str,
+        second_value: str,
+        logic: str,
+    ) -> bool:  # noqa: N802
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value=value,
+            second_operator=second_operator,
+            second_value=second_value,
+            logic=logic,
+            report_scope=True,
+            async_refresh=True,
+        )
+
     @Slot(str, str, str, str, result=bool)
     def addPageMultiValueFilter(  # noqa: N802
         self, table_id: str, column: str, operator: str, values_json: str
@@ -6607,6 +6667,24 @@ class StudioController(QObject):
         )
 
     @Slot(str, str, str, str, result=bool)
+    def addPageMultiValueFilterInteractive(  # noqa: N802
+        self, table_id: str, column: str, operator: str, values_json: str
+    ) -> bool:
+        try:
+            values = json.loads(values_json)
+        except (json.JSONDecodeError, TypeError):
+            self._set_status("The selected filter values are invalid.")
+            return False
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value="",
+            multi_values=values,
+            async_refresh=True,
+        )
+
+    @Slot(str, str, str, str, result=bool)
     def addReportMultiValueFilter(  # noqa: N802
         self, table_id: str, column: str, operator: str, values_json: str
     ) -> bool:
@@ -6622,6 +6700,25 @@ class StudioController(QObject):
             value="",
             multi_values=values,
             report_scope=True,
+        )
+
+    @Slot(str, str, str, str, result=bool)
+    def addReportMultiValueFilterInteractive(  # noqa: N802
+        self, table_id: str, column: str, operator: str, values_json: str
+    ) -> bool:
+        try:
+            values = json.loads(values_json)
+        except (json.JSONDecodeError, TypeError):
+            self._set_status("The selected filter values are invalid.")
+            return False
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value="",
+            multi_values=values,
+            report_scope=True,
+            async_refresh=True,
         )
 
     @Slot(str, str, str, int, str, bool, result=bool)
@@ -6648,6 +6745,30 @@ class StudioController(QObject):
         )
 
     @Slot(str, str, str, int, str, bool, result=bool)
+    def addPageRelativeDateFilterInteractive(  # noqa: N802
+        self,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+        include_today: bool,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_DATE,
+            value="",
+            relative_date_rule={
+                "direction": direction,
+                "count": count,
+                "unit": unit,
+                "include_today": include_today,
+            },
+            async_refresh=True,
+        )
+
+    @Slot(str, str, str, int, str, bool, result=bool)
     def addReportRelativeDateFilter(  # noqa: N802
         self,
         table_id: str,
@@ -6671,6 +6792,31 @@ class StudioController(QObject):
             report_scope=True,
         )
 
+    @Slot(str, str, str, int, str, bool, result=bool)
+    def addReportRelativeDateFilterInteractive(  # noqa: N802
+        self,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+        include_today: bool,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_DATE,
+            value="",
+            relative_date_rule={
+                "direction": direction,
+                "count": count,
+                "unit": unit,
+                "include_today": include_today,
+            },
+            report_scope=True,
+            async_refresh=True,
+        )
+
     @Slot(str, str, str, int, str, result=bool)
     def addPageRelativeTimeFilter(  # noqa: N802
         self,
@@ -6686,6 +6832,24 @@ class StudioController(QObject):
             operator=_REPORT_FILTER_RELATIVE_TIME,
             value="",
             relative_time_rule={"direction": direction, "count": count, "unit": unit},
+        )
+
+    @Slot(str, str, str, int, str, result=bool)
+    def addPageRelativeTimeFilterInteractive(  # noqa: N802
+        self,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_TIME,
+            value="",
+            relative_time_rule={"direction": direction, "count": count, "unit": unit},
+            async_refresh=True,
         )
 
     @Slot(str, str, str, int, str, result=bool)
@@ -6706,6 +6870,25 @@ class StudioController(QObject):
             report_scope=True,
         )
 
+    @Slot(str, str, str, int, str, result=bool)
+    def addReportRelativeTimeFilterInteractive(  # noqa: N802
+        self,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_TIME,
+            value="",
+            relative_time_rule={"direction": direction, "count": count, "unit": unit},
+            report_scope=True,
+            async_refresh=True,
+        )
+
     @Slot(int, result=bool)
     def removeReportFilter(self, index: int) -> bool:  # noqa: N802
         filters = self._project.get("report", {}).get("filters", [])
@@ -6714,6 +6897,18 @@ class StudioController(QObject):
         removed = filters.pop(index)
         self._dirty = True
         self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Removed report filter for {removed['column']}")
+        return True
+
+    @Slot(int, result=bool)
+    def removeReportFilterInteractive(self, index: int) -> bool:  # noqa: N802
+        filters = self._project.get("report", {}).get("filters", [])
+        if index < 0 or index >= len(filters):
+            return False
+        removed = filters.pop(index)
+        self._dirty = True
+        self._refresh_report_async()
         self.stateChanged.emit()
         self._set_status(f"Removed report filter for {removed['column']}")
         return True
@@ -6731,6 +6926,21 @@ class StudioController(QObject):
         removed = filters.pop(index)
         self._dirty = True
         self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Removed page filter for {removed['column']}")
+        return True
+
+    @Slot(int, result=bool)
+    def removePageFilterInteractive(self, index: int) -> bool:  # noqa: N802
+        page = self._active_page()
+        if page is None:
+            return False
+        filters = page.get("filters", [])
+        if index < 0 or index >= len(filters):
+            return False
+        removed = filters.pop(index)
+        self._dirty = True
+        self._refresh_report_async()
         self.stateChanged.emit()
         self._set_status(f"Removed page filter for {removed['column']}")
         return True
@@ -6770,6 +6980,30 @@ class StudioController(QObject):
             visual_name=visual_name,
         )
 
+    @Slot(str, str, str, str, str, str, str, str, result=bool)
+    def addVisualFilterRuleInteractive(
+        self,
+        visual_name: str,
+        table_id: str,
+        column: str,
+        operator: str,
+        value: str,
+        second_operator: str,
+        second_value: str,
+        logic: str,
+    ) -> bool:  # noqa: N802
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value=value,
+            second_operator=second_operator,
+            second_value=second_value,
+            logic=logic,
+            visual_name=visual_name,
+            async_refresh=True,
+        )
+
     @Slot(str, str, str, str, str, result=bool)
     def addVisualMultiValueFilter(  # noqa: N802
         self,
@@ -6791,6 +7025,30 @@ class StudioController(QObject):
             value="",
             visual_name=visual_name,
             multi_values=values,
+        )
+
+    @Slot(str, str, str, str, str, result=bool)
+    def addVisualMultiValueFilterInteractive(  # noqa: N802
+        self,
+        visual_name: str,
+        table_id: str,
+        column: str,
+        operator: str,
+        values_json: str,
+    ) -> bool:
+        try:
+            values = json.loads(values_json)
+        except (json.JSONDecodeError, TypeError):
+            self._set_status("The selected filter values are invalid.")
+            return False
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=operator,
+            value="",
+            visual_name=visual_name,
+            multi_values=values,
+            async_refresh=True,
         )
 
     @Slot(str, str, str, str, int, str, bool, result=bool)
@@ -6818,6 +7076,32 @@ class StudioController(QObject):
             },
         )
 
+    @Slot(str, str, str, str, int, str, bool, result=bool)
+    def addVisualRelativeDateFilterInteractive(  # noqa: N802
+        self,
+        visual_name: str,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+        include_today: bool,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_DATE,
+            value="",
+            visual_name=visual_name,
+            relative_date_rule={
+                "direction": direction,
+                "count": count,
+                "unit": unit,
+                "include_today": include_today,
+            },
+            async_refresh=True,
+        )
+
     @Slot(str, str, str, str, int, str, result=bool)
     def addVisualRelativeTimeFilter(  # noqa: N802
         self,
@@ -6835,6 +7119,26 @@ class StudioController(QObject):
             value="",
             visual_name=visual_name,
             relative_time_rule={"direction": direction, "count": count, "unit": unit},
+        )
+
+    @Slot(str, str, str, str, int, str, result=bool)
+    def addVisualRelativeTimeFilterInteractive(  # noqa: N802
+        self,
+        visual_name: str,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        unit: str,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_RELATIVE_TIME,
+            value="",
+            visual_name=visual_name,
+            relative_time_rule={"direction": direction, "count": count, "unit": unit},
+            async_refresh=True,
         )
 
     @Slot(str, str, str, str, int, str, result=bool)
@@ -6860,6 +7164,30 @@ class StudioController(QObject):
             },
         )
 
+    @Slot(str, str, str, str, int, str, result=bool)
+    def addVisualTopNFilterInteractive(  # noqa: N802
+        self,
+        visual_name: str,
+        table_id: str,
+        column: str,
+        direction: str,
+        count: int,
+        order_by_column: str,
+    ) -> bool:
+        return self._add_report_filter(
+            table_id=table_id,
+            column=column,
+            operator=_REPORT_FILTER_TOP_N,
+            value="",
+            visual_name=visual_name,
+            top_n_rule={
+                "direction": direction,
+                "count": count,
+                "order_by_column": order_by_column,
+            },
+            async_refresh=True,
+        )
+
     @Slot(int, result=bool)
     def removeVisualFilter(self, index: int) -> bool:  # noqa: N802
 
@@ -6875,6 +7203,23 @@ class StudioController(QObject):
         removed = filters.pop(index)
         self._dirty = True
         self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Removed filter from {self._selected_visual} · {removed['column']}")
+        return True
+
+    @Slot(int, result=bool)
+    def removeVisualFilterInteractive(self, index: int) -> bool:  # noqa: N802
+        page = self._active_page()
+        if page is None or not self._selected_visual:
+            return False
+        filters = page.get("visual_filters", [])
+        if index < 0 or index >= len(filters):
+            return False
+        if filters[index].get("visual_name") != self._selected_visual:
+            return False
+        removed = filters.pop(index)
+        self._dirty = True
+        self._refresh_report_async()
         self.stateChanged.emit()
         self._set_status(f"Removed filter from {self._selected_visual} · {removed['column']}")
         return True

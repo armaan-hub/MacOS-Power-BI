@@ -2890,7 +2890,7 @@ ApplicationWindow {
                                                 model: mainWindow.studioController.regions
                                                 currentIndex: Math.max(0, mainWindow.studioController.regions.indexOf(mainWindow.studioController.currentRegion))
                                                 enabled: mainWindow.studioController.sourceLoaded && mainWindow.studioController.regions.length > 1
-                                                onActivated: function(index) { mainWindow.studioController.setRegionFilter(String(mainWindow.studioController.regions[index])) }
+                                                onActivated: function(index) { mainWindow.studioController.setRegionFilterInteractive(String(mainWindow.studioController.regions[index])) }
                                                 background: Rectangle {
                                                     radius: 3
                                                     color: "#ffffff"
@@ -3046,11 +3046,11 @@ ApplicationWindow {
                                                                                     : "Remove visual filter")
                                                                 onClicked: {
                                                                     if (filterScopeCombo.currentIndex === 0)
-                                                                        mainWindow.studioController.removeReportFilter(Number(modelData.index))
+                                                                        mainWindow.studioController.removeReportFilterInteractive(Number(modelData.index))
                                                                     else if (filterScopeCombo.currentIndex === 1)
-                                                                        mainWindow.studioController.removePageFilter(Number(modelData.index))
+                                                                        mainWindow.studioController.removePageFilterInteractive(Number(modelData.index))
                                                                     else
-                                                                        mainWindow.studioController.removeVisualFilter(Number(modelData.index))
+                                                                        mainWindow.studioController.removeVisualFilterInteractive(Number(modelData.index))
                                                                 }
                                                                 contentItem: Text { text: "×"; color: "#657784"; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                                 background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
@@ -3626,17 +3626,17 @@ ApplicationWindow {
                                                         const unit = String(relativeDateUnitCombo.currentValue)
                                                         const includeToday = relativeDateIncludeToday.checked
                                                         if (filterScopeCombo.currentIndex === 0) {
-                                                            mainWindow.studioController.addReportRelativeDateFilter(
+                                                            mainWindow.studioController.addReportRelativeDateFilterInteractive(
                                                                 String(field.tableId), String(field.column), direction,
                                                                 count, unit, includeToday
                                                             )
                                                         } else if (filterScopeCombo.currentIndex === 1) {
-                                                            mainWindow.studioController.addPageRelativeDateFilter(
+                                                            mainWindow.studioController.addPageRelativeDateFilterInteractive(
                                                                 String(field.tableId), String(field.column), direction,
                                                                 count, unit, includeToday
                                                             )
                                                         } else {
-                                                            mainWindow.studioController.addVisualRelativeDateFilter(
+                                                            mainWindow.studioController.addVisualRelativeDateFilterInteractive(
                                                                 String(mainWindow.studioController.selectedVisual),
                                                                 String(field.tableId), String(field.column), direction,
                                                                 count, unit, includeToday
@@ -3649,17 +3649,17 @@ ApplicationWindow {
                                                         const count = direction === "this" ? 1 : Number(relativeDateCount.value)
                                                         const unit = String(relativeDateUnitCombo.currentValue)
                                                         if (filterScopeCombo.currentIndex === 0) {
-                                                            mainWindow.studioController.addReportRelativeTimeFilter(
+                                                            mainWindow.studioController.addReportRelativeTimeFilterInteractive(
                                                                 String(field.tableId), String(field.column), direction,
                                                                 count, unit
                                                             )
                                                         } else if (filterScopeCombo.currentIndex === 1) {
-                                                            mainWindow.studioController.addPageRelativeTimeFilter(
+                                                            mainWindow.studioController.addPageRelativeTimeFilterInteractive(
                                                                 String(field.tableId), String(field.column), direction,
                                                                 count, unit
                                                             )
                                                         } else {
-                                                            mainWindow.studioController.addVisualRelativeTimeFilter(
+                                                            mainWindow.studioController.addVisualRelativeTimeFilterInteractive(
                                                                 String(mainWindow.studioController.selectedVisual),
                                                                 String(field.tableId), String(field.column), direction,
                                                                 count, unit
@@ -3668,7 +3668,7 @@ ApplicationWindow {
                                                         return
                                                     }
                                                     if (operator === "top_n") {
-                                                        mainWindow.studioController.addVisualTopNFilter(
+                                                        mainWindow.studioController.addVisualTopNFilterInteractive(
                                                             String(mainWindow.studioController.selectedVisual),
                                                             String(field.tableId), String(field.column),
                                                             String(topNDirectionCombo.currentValue), Number(topNCount.value),
@@ -3680,15 +3680,15 @@ ApplicationWindow {
                                                         const valuesJson = JSON.stringify(mainWindow.selectedReportFilterValues)
                                                         let added = false
                                                         if (filterScopeCombo.currentIndex === 0) {
-                                                            added = mainWindow.studioController.addReportMultiValueFilter(
+                                                            added = mainWindow.studioController.addReportMultiValueFilterInteractive(
                                                                 String(field.tableId), String(field.column), operator, valuesJson
                                                             )
                                                         } else if (filterScopeCombo.currentIndex === 1) {
-                                                            added = mainWindow.studioController.addPageMultiValueFilter(
+                                                            added = mainWindow.studioController.addPageMultiValueFilterInteractive(
                                                                 String(field.tableId), String(field.column), operator, valuesJson
                                                             )
                                                         } else {
-                                                            added = mainWindow.studioController.addVisualMultiValueFilter(
+                                                            added = mainWindow.studioController.addVisualMultiValueFilterInteractive(
                                                                 String(mainWindow.studioController.selectedVisual),
                                                                 String(field.tableId), String(field.column), operator, valuesJson
                                                             )
@@ -3710,17 +3710,17 @@ ApplicationWindow {
                                                                         : String(secondFilterValue.text)
                                                     const logic = String(filterLogicCombo.currentText).toLowerCase()
                                                     if (filterScopeCombo.currentIndex === 0) {
-                                                        mainWindow.studioController.addReportFilterRule(
+                                                        mainWindow.studioController.addReportFilterRuleInteractive(
                                                             String(field.tableId), String(field.column), operator, value,
                                                             secondOperator, secondValue, logic
                                                         )
                                                     } else if (filterScopeCombo.currentIndex === 1) {
-                                                        mainWindow.studioController.addPageFilterRule(
+                                                        mainWindow.studioController.addPageFilterRuleInteractive(
                                                             String(field.tableId), String(field.column), operator, value,
                                                             secondOperator, secondValue, logic
                                                         )
                                                     } else {
-                                                        mainWindow.studioController.addVisualFilterRule(
+                                                        mainWindow.studioController.addVisualFilterRuleInteractive(
                                                             String(mainWindow.studioController.selectedVisual),
                                                             String(field.tableId), String(field.column), operator, value,
                                                             secondOperator, secondValue, logic

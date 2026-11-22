@@ -340,6 +340,156 @@ class TestAsyncReport(unittest.TestCase):
         self.assertIn(True, busy_states)
         self.assertEqual(busy_states[-1], False)
 
+    def test_interactive_filter_slots_async(self) -> None:
+        large_rows = [
+            {"Region": "North" if i % 2 == 0 else "South", "Amount": "10", "Units": "1", "Date": "2026-01-15", "Cat": "A"}
+            for i in range(4000)
+        ]
+        candidate = ImportCandidate(
+            "inline",
+            list(self.headers),
+            [dict(r) for r in large_rows],
+            {},
+            [],
+            source_id="src_1",
+        )
+        self.controller._rows = [dict(r) for r in large_rows]
+        self.controller._loaded_candidates["src_1"] = candidate
+        self.controller._project["model"]["measures"] = [
+            {"name": "SlowCount", "expression": "SUMX(Sales, CALCULATE(COUNTROWS(Sales)))"}
+        ]
+        self.controller._refresh_report()
+
+        # 1. Test setRegionFilterInteractive
+        sync_controller = StudioController()
+        sync_controller._source_id = "src_1"
+        sync_controller._active_source_id = "src_1"
+        sync_controller._headers = list(self.headers)
+        sync_controller._rows = [dict(r) for r in large_rows]
+        sync_controller._loaded_candidates["src_1"] = ImportCandidate(
+            "inline", list(self.headers), [dict(r) for r in large_rows], {}, [], source_id="src_1"
+        )
+        sync_controller._table_catalog = list(self.controller._table_catalog)
+        sync_controller._project = {
+            "model": {
+                "tables": list(self.controller._project["model"]["tables"]),
+                "measures": [{"name": "SlowCount", "expression": "SUMX(Sales, CALCULATE(COUNTROWS(Sales)))"}],
+                "relationships": [],
+            },
+            "report": {"pages": [{"id": "page_1", "name": "Page 1", "filters": [], "visual_filters": []}]},
+        }
+        sync_controller._refresh_report()
+        sync_controller.setRegionFilter("North")
+        expected_kpis = dict(sync_controller._kpis)
+        expected_measures = dict(sync_controller._measure_values)
+
+        t0 = time.perf_counter()
+        self.controller.setRegionFilterInteractive("North")
+        t_call = time.perf_counter() - t0
+        self.assertLess(t_call, 0.5, f"setRegionFilterInteractive blocked for {t_call:.3f}s")
+        self.assertTrue(self.controller.reportBusy)
+
+        deadline = time.perf_counter() + 10.0
+        while self.controller.reportBusy and time.perf_counter() < deadline:
+            self.app.processEvents()
+            time.sleep(0.01)
+
+        self.assertFalse(self.controller.reportBusy)
+        self.assertEqual(self.controller._kpis, expected_kpis)
+        self.assertEqual(self.controller._measure_values, expected_measures)
+
+        # 2. Test addReportFilterRuleInteractive
+        sync_controller.addReportFilterRule("src_1", "Region", "equals", "North", "", "", "and")
+        expected_kpis = dict(sync_controller._kpis)
+        expected_measures = dict(sync_controller._measure_values)
+
+        t0 = time.perf_counter()
+        ret = self.controller.addReportFilterRuleInteractive("src_1", "Region", "equals", "North", "", "", "and")
+        t_call = time.perf_counter() - t0
+        self.assertTrue(ret)
+        self.assertLess(t_call, 0.5, f"addReportFilterRuleInteractive blocked for {t_call:.3f}s")
+        self.assertTrue(self.controller.reportBusy)
+
+        deadline = time.perf_counter() + 10.0
+        while self.controller.reportBusy and time.perf_counter() < deadline:
+            self.app.processEvents()
+            time.sleep(0.01)
+
+        self.assertFalse(self.controller.reportBusy)
+        self.assertEqual(self.controller._kpis, expected_kpis)
+        self.assertEqual(self.controller._measure_values, expected_measures)
+
+        # 3. Test addPageFilterRuleInteractive
+        sync_controller.addPageFilterRule("src_1", "Region", "equals", "North", "", "", "and")
+        expected_kpis = dict(sync_controller._kpis)
+        expected_measures = dict(sync_controller._measure_values)
+
+        t0 = time.perf_counter()
+        ret = self.controller.addPageFilterRuleInteractive("src_1", "Region", "equals", "North", "", "", "and")
+        t_call = time.perf_counter() - t0
+        self.assertTrue(ret)
+        self.assertLess(t_call, 0.5, f"addPageFilterRuleInteractive blocked for {t_call:.3f}s")
+        self.assertTrue(self.controller.reportBusy)
+
+        deadline = time.perf_counter() + 10.0
+        while self.controller.reportBusy and time.perf_counter() < deadline:
+            self.app.processEvents()
+            time.sleep(0.01)
+
+        self.assertFalse(self.controller.reportBusy)
+        self.assertEqual(self.controller._kpis, expected_kpis)
+        self.assertEqual(self.controller._measure_values, expected_measures)
+
+        # 4. Test addVisualFilterRuleInteractive
+        page = self.controller._active_page()
+        page["visuals"] = [{"id": "v1", "title": "Region revenue", "type": "bar", "table_id": "src_1", "fields": {}}]
+        sync_page = sync_controller._active_page()
+        if sync_page is None:
+            sync_page = sync_controller._project["report"]["pages"][0]
+            sync_controller._active_page_id = sync_page.get("id")
+        sync_page["visuals"] = [{"id": "v1", "title": "Region revenue", "type": "bar", "table_id": "src_1", "fields": {}}]
+
+        sync_controller.addVisualFilterRule("Region revenue", "src_1", "Region", "equals", "North", "", "", "and")
+        expected_kpis = dict(sync_controller._kpis)
+        expected_measures = dict(sync_controller._measure_values)
+
+        t0 = time.perf_counter()
+        ret = self.controller.addVisualFilterRuleInteractive("Region revenue", "src_1", "Region", "equals", "North", "", "", "and")
+        t_call = time.perf_counter() - t0
+        self.assertTrue(ret)
+        self.assertLess(t_call, 0.5, f"addVisualFilterRuleInteractive blocked for {t_call:.3f}s")
+        self.assertTrue(self.controller.reportBusy)
+
+        deadline = time.perf_counter() + 10.0
+        while self.controller.reportBusy and time.perf_counter() < deadline:
+            self.app.processEvents()
+            time.sleep(0.01)
+
+        self.assertFalse(self.controller.reportBusy)
+        self.assertEqual(self.controller._kpis, expected_kpis)
+        self.assertEqual(self.controller._measure_values, expected_measures)
+
+        # 5. Test removeReportFilterInteractive
+        sync_controller.removeReportFilter(0)
+        expected_kpis = dict(sync_controller._kpis)
+        expected_measures = dict(sync_controller._measure_values)
+
+        t0 = time.perf_counter()
+        ret = self.controller.removeReportFilterInteractive(0)
+        t_call = time.perf_counter() - t0
+        self.assertTrue(ret)
+        self.assertLess(t_call, 0.5, f"removeReportFilterInteractive blocked for {t_call:.3f}s")
+        self.assertTrue(self.controller.reportBusy)
+
+        deadline = time.perf_counter() + 10.0
+        while self.controller.reportBusy and time.perf_counter() < deadline:
+            self.app.processEvents()
+            time.sleep(0.01)
+
+        self.assertFalse(self.controller.reportBusy)
+        self.assertEqual(self.controller._kpis, expected_kpis)
+        self.assertEqual(self.controller._measure_values, expected_measures)
+
 
 if __name__ == "__main__":
     unittest.main()

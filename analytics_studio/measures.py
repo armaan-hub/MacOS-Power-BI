@@ -8453,14 +8453,17 @@ def normalize_calculated_table_expression(
 
 
 _ENGINE_LOCK = threading.RLock()
+acquire_engine_lock, release_engine_lock = _ENGINE_LOCK.acquire, _ENGINE_LOCK.release
 
 
-def acquire_engine_lock(timeout: float = -1) -> bool:
-    return _ENGINE_LOCK.acquire(timeout=timeout)
-
-
-def release_engine_lock() -> None:
-    _ENGINE_LOCK.release()
+@contextlib.contextmanager
+def _engine_entry_lock(timeout: float = 60.0):
+    if not _ENGINE_LOCK.acquire(timeout=timeout):
+        raise MeasureError("Engine busy: lock acquisition timed out.")
+    try:
+        yield
+    finally:
+        _ENGINE_LOCK.release()
 
 
 def evaluate_calculated_table(
@@ -8469,21 +8472,22 @@ def evaluate_calculated_table(
     source_table: Any,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     """Materialize DISTINCT over one loaded column, preserving first-seen order."""
-    definition = normalize_calculated_table_expression(
-        expression, source_table, source_candidate.headers
-    )
-    column = definition["column"]
-    seen: set[tuple[Any, ...]] = set()
-    rows: list[dict[str, Any]] = []
-    for source_row in source_candidate.rows:
-        value = source_row.get(column)
-        _reject_power_query_error(value, column, len(rows) + 1)
-        key = cell_key(value)
-        if key in seen:
-            continue
-        seen.add(key)
-        rows.append({column: value})
-    return [column], rows
+    with _engine_entry_lock():
+        definition = normalize_calculated_table_expression(
+            expression, source_table, source_candidate.headers
+        )
+        column = definition["column"]
+        seen: set[tuple[Any, ...]] = set()
+        rows: list[dict[str, Any]] = []
+        for source_row in source_candidate.rows:
+            value = source_row.get(column)
+            _reject_power_query_error(value, column, len(rows) + 1)
+            key = cell_key(value)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append({column: value})
+        return [column], rows
 
 
 def normalize_calculated_column(name: Any, expression: Any) -> dict[str, str]:
@@ -8560,193 +8564,194 @@ def evaluate_calculated_columns(
     table_name: str = "",
 ) -> tuple[list[str], list[dict[str, Any]], dict[str, str]]:
     """Materialize a table's numeric/boolean row expressions in definition order."""
-    columns = validate_calculated_columns(list(definitions))
-    output_headers = list(headers)
-    output_rows = [dict(row) for row in rows]
-    output_types: dict[str, str] = {}
+    with _engine_entry_lock():
+        columns = validate_calculated_columns(list(definitions))
+        output_headers = list(headers)
+        output_rows = [dict(row) for row in rows]
+        output_types: dict[str, str] = {}
 
-    for definition in columns:
-        name = definition["name"]
-        header_by_key = {header.casefold(): header for header in output_headers}
-        if name.casefold() in header_by_key:
-            raise MeasureError(f"A column named {name!r} already exists in table {table_name!r}.")
-        expression = parse_expression(definition["expression"])
-        result_values: list[Decimal | bool | None] = []
+        for definition in columns:
+            name = definition["name"]
+            header_by_key = {header.casefold(): header for header in output_headers}
+            if name.casefold() in header_by_key:
+                raise MeasureError(f"A column named {name!r} already exists in table {table_name!r}.")
+            expression = parse_expression(definition["expression"])
+            result_values: list[Decimal | bool | None] = []
 
-    
-        def evaluate(
-            node: tuple[Any, ...], row: dict[str, Any], row_index: int
-        ) -> Decimal | bool | None:
-            kind = node[0]
-            if kind == "number":
-                return node[1]
-            if kind == "boolean":
-                return node[1]
-            if kind == "table":
-                raise MeasureError(
-                    "Table names are not supported in calculated-column expressions."
-                )
-            if kind == "reference":
-                _, table, column = node
-                if table and table.casefold() != table_name.casefold():
+        
+            def evaluate(
+                node: tuple[Any, ...], row: dict[str, Any], row_index: int
+            ) -> Decimal | bool | None:
+                kind = node[0]
+                if kind == "number":
+                    return node[1]
+                if kind == "boolean":
+                    return node[1]
+                if kind == "table":
                     raise MeasureError(
-                        "A calculated column can reference columns from its own table only."
+                        "Table names are not supported in calculated-column expressions."
                     )
-                actual = header_by_key.get(column.casefold())
-                if actual is None:
-                    raise MeasureError(
-                        f"Column {column!r} does not exist in table {table_name!r}."
-                    )
-                raw = row.get(actual)
-                _reject_power_query_error(raw, actual, row_index)
-                value = "" if raw is None else cell_to_text(raw).strip()
-                if not value:
-                    return None
-                if value.casefold() in {"true", "false"}:
-                    return value.casefold() == "true"
-                try:
-                    number = Decimal(value.replace(",", ""))
-                except (DecimalException, ValueError) as exc:
-                    raise MeasureError(
-                        f"Column {actual!r} contains a non-numeric value at row {row_index}."
-                    ) from exc
-                if not number.is_finite():
-                    raise MeasureError(f"Column {actual!r} contains a non-finite number.")
-                return number
-            if kind == "blank":
-                return None
-            if kind == "unary":
-                operand = evaluate(node[2], row, row_index)
-                if operand is None:
-                    return None
-                value = as_number(operand)
-                return value if node[1] == "+" else -value
-            if kind == "binary":
-                left = evaluate(node[2], row, row_index)
-                right = evaluate(node[3], row, row_index)
-                if node[1] == "/" and left is not None and (right is None or as_number(right) == 0):
-                    raise _DivisionError(f"Calculated column {name!r} divides by zero at row {row_index}.")
-                return _unsigned_zero(_binary_value(
-                    node[1],
-                    None if left is None else as_number(left),
-                    None if right is None else as_number(right),
-                ))
-            if kind == "logical":
-                left = as_boolean(_consume_infinity(lambda: evaluate(node[2], row, row_index)))
-                if node[1] == "&&":
-                    return left and as_boolean(_consume_infinity(lambda: evaluate(node[3], row, row_index)))
-                return left or as_boolean(_consume_infinity(lambda: evaluate(node[3], row, row_index)))
-            if kind == "comparison":
-                left = _consume_infinity(lambda: evaluate(node[2], row, row_index))
-                right = _consume_infinity(lambda: evaluate(node[3], row, row_index))
-                if isinstance(left, bool) and isinstance(right, bool):
-                    if node[1] == "=":
-                        return left == right
-                    if node[1] == "<>":
-                        return left != right
-                    raise MeasureError("True/False values support only equality comparisons.")
-                left_number, right_number = as_number(left), as_number(right)
-                return {
-                    "=": left_number == right_number,
-                    "<>": left_number != right_number,
-                    "<": left_number < right_number,
-                    "<=": left_number <= right_number,
-                    ">": left_number > right_number,
-                    ">=": left_number >= right_number,
-                }[node[1]]
-            _, function, arguments = node
-            if function == "IF":
-                if as_boolean(_consume_infinity(lambda: evaluate(arguments[0], row, row_index))):
-                    return evaluate(arguments[1], row, row_index)
-                return evaluate(arguments[2], row, row_index) if len(arguments) == 3 else None
-            if function == "ISBLANK":
-                def _task64_fails(part: Any) -> bool:
+                if kind == "reference":
+                    _, table, column = node
+                    if table and table.casefold() != table_name.casefold():
+                        raise MeasureError(
+                            "A calculated column can reference columns from its own table only."
+                        )
+                    actual = header_by_key.get(column.casefold())
+                    if actual is None:
+                        raise MeasureError(
+                            f"Column {column!r} does not exist in table {table_name!r}."
+                        )
+                    raw = row.get(actual)
+                    _reject_power_query_error(raw, actual, row_index)
+                    value = "" if raw is None else cell_to_text(raw).strip()
+                    if not value:
+                        return None
+                    if value.casefold() in {"true", "false"}:
+                        return value.casefold() == "true"
                     try:
-                        evaluate(part, row, row_index)
-                    except Exception:
-                        return True
-                    return False
+                        number = Decimal(value.replace(",", ""))
+                    except (DecimalException, ValueError) as exc:
+                        raise MeasureError(
+                            f"Column {actual!r} contains a non-numeric value at row {row_index}."
+                        ) from exc
+                    if not number.is_finite():
+                        raise MeasureError(f"Column {actual!r} contains a non-finite number.")
+                    return number
+                if kind == "blank":
+                    return None
+                if kind == "unary":
+                    operand = evaluate(node[2], row, row_index)
+                    if operand is None:
+                        return None
+                    value = as_number(operand)
+                    return value if node[1] == "+" else -value
+                if kind == "binary":
+                    left = evaluate(node[2], row, row_index)
+                    right = evaluate(node[3], row, row_index)
+                    if node[1] == "/" and left is not None and (right is None or as_number(right) == 0):
+                        raise _DivisionError(f"Calculated column {name!r} divides by zero at row {row_index}.")
+                    return _unsigned_zero(_binary_value(
+                        node[1],
+                        None if left is None else as_number(left),
+                        None if right is None else as_number(right),
+                    ))
+                if kind == "logical":
+                    left = as_boolean(_consume_infinity(lambda: evaluate(node[2], row, row_index)))
+                    if node[1] == "&&":
+                        return left and as_boolean(_consume_infinity(lambda: evaluate(node[3], row, row_index)))
+                    return left or as_boolean(_consume_infinity(lambda: evaluate(node[3], row, row_index)))
+                if kind == "comparison":
+                    left = _consume_infinity(lambda: evaluate(node[2], row, row_index))
+                    right = _consume_infinity(lambda: evaluate(node[3], row, row_index))
+                    if isinstance(left, bool) and isinstance(right, bool):
+                        if node[1] == "=":
+                            return left == right
+                        if node[1] == "<>":
+                            return left != right
+                        raise MeasureError("True/False values support only equality comparisons.")
+                    left_number, right_number = as_number(left), as_number(right)
+                    return {
+                        "=": left_number == right_number,
+                        "<>": left_number != right_number,
+                        "<": left_number < right_number,
+                        "<=": left_number <= right_number,
+                        ">": left_number > right_number,
+                        ">=": left_number >= right_number,
+                    }[node[1]]
+                _, function, arguments = node
+                if function == "IF":
+                    if as_boolean(_consume_infinity(lambda: evaluate(arguments[0], row, row_index))):
+                        return evaluate(arguments[1], row, row_index)
+                    return evaluate(arguments[2], row, row_index) if len(arguments) == 3 else None
+                if function == "ISBLANK":
+                    def _task64_fails(part: Any) -> bool:
+                        try:
+                            evaluate(part, row, row_index)
+                        except Exception:
+                            return True
+                        return False
 
-                if _task64_isblank_refused(arguments[0], _task64_fails):  # Task 64 Part B: a failing call compared with text raises under ISBLANK
-                    raise dax_typed.refusal("ISBLANK of a comparison of a failing call with text is not modelled by the local engine.")
-                return _isblank_consume(lambda: evaluate(arguments[0], row, row_index), arguments[0])
-            if function == "IFERROR":
-                try:
-                    return evaluate(arguments[0], row, row_index)
-                except (MeasureRuntimeError, DecimalException, OverflowError):
-                    return evaluate(arguments[1], row, row_index)
-            if function == "SWITCH":
-                subject = _consume_infinity(lambda: evaluate(arguments[0], row, row_index))
-                remaining = list(arguments[1:])
-                fallback = remaining.pop() if len(remaining) % 2 else None
-                for candidate, result in zip(remaining[::2], remaining[1::2]):
-                    if dax_typed.values_match(
-                        subject, _consume_infinity(lambda: evaluate(candidate, row, row_index))
-                    ):
-                        return evaluate(result, row, row_index)
-                return None if fallback is None else evaluate(fallback, row, row_index)
-            if function in {"AND", "OR"}:
-                left = as_boolean(_consume_infinity(lambda: evaluate(arguments[0], row, row_index)))
-                if function == "AND":
-                    return left and as_boolean(_consume_infinity(lambda: evaluate(arguments[1], row, row_index)))
-                return left or as_boolean(_consume_infinity(lambda: evaluate(arguments[1], row, row_index)))
-            if function == "NOT":
-                return not as_boolean(_consume_infinity(lambda: evaluate(arguments[0], row, row_index)))
-            if function == "ABS":
-                return abs(as_number(evaluate(arguments[0], row, row_index)))
-            if function in _SCALAR_MATH_ARITY:
-                return _scalar_math(function, [
-                    None if value is None else as_number(value)
-                    for value in (evaluate(argument, row, row_index) for argument in arguments)
-                ])
-            if function == "ROUND":
-                value = as_number(evaluate(arguments[0], row, row_index))
-                precision = as_number(evaluate(arguments[1], row, row_index))
-                if precision != precision.to_integral_value() or abs(precision) > 28:
-                    raise MeasureError("ROUND digits must be a whole number from -28 to 28.")
-                quantum = Decimal(1).scaleb(-int(precision))
-                return value.quantize(quantum, rounding=ROUND_HALF_UP)
-            raise MeasureError(
-                f"{function} is not supported in calculated-column expressions."
-            )
-
-        def as_number(value: Decimal | bool | None) -> Decimal:
-            if value is None:
-                return Decimal(0)
-            if not isinstance(value, Decimal):
-                raise MeasureError("This calculated-column expression needs a numeric value.")
-            return value
-
-        def as_boolean(value: Decimal | bool | None) -> bool:
-            if value is None:
-                return False
-            if isinstance(value, bool):
-                return value
-            if isinstance(value, Decimal):
-                return value != 0
-            raise MeasureError("This calculated-column expression needs a logical value.")
-
-        for row_index, row in enumerate(output_rows, 1):
-            try:
-                result_values.append(evaluate(expression, row, row_index))
-            except (DecimalException, OverflowError) as exc:
+                    if _task64_isblank_refused(arguments[0], _task64_fails):  # Task 64 Part B: a failing call compared with text raises under ISBLANK
+                        raise dax_typed.refusal("ISBLANK of a comparison of a failing call with text is not modelled by the local engine.")
+                    return _isblank_consume(lambda: evaluate(arguments[0], row, row_index), arguments[0])
+                if function == "IFERROR":
+                    try:
+                        return evaluate(arguments[0], row, row_index)
+                    except (MeasureRuntimeError, DecimalException, OverflowError):
+                        return evaluate(arguments[1], row, row_index)
+                if function == "SWITCH":
+                    subject = _consume_infinity(lambda: evaluate(arguments[0], row, row_index))
+                    remaining = list(arguments[1:])
+                    fallback = remaining.pop() if len(remaining) % 2 else None
+                    for candidate, result in zip(remaining[::2], remaining[1::2]):
+                        if dax_typed.values_match(
+                            subject, _consume_infinity(lambda: evaluate(candidate, row, row_index))
+                        ):
+                            return evaluate(result, row, row_index)
+                    return None if fallback is None else evaluate(fallback, row, row_index)
+                if function in {"AND", "OR"}:
+                    left = as_boolean(_consume_infinity(lambda: evaluate(arguments[0], row, row_index)))
+                    if function == "AND":
+                        return left and as_boolean(_consume_infinity(lambda: evaluate(arguments[1], row, row_index)))
+                    return left or as_boolean(_consume_infinity(lambda: evaluate(arguments[1], row, row_index)))
+                if function == "NOT":
+                    return not as_boolean(_consume_infinity(lambda: evaluate(arguments[0], row, row_index)))
+                if function == "ABS":
+                    return abs(as_number(evaluate(arguments[0], row, row_index)))
+                if function in _SCALAR_MATH_ARITY:
+                    return _scalar_math(function, [
+                        None if value is None else as_number(value)
+                        for value in (evaluate(argument, row, row_index) for argument in arguments)
+                    ])
+                if function == "ROUND":
+                    value = as_number(evaluate(arguments[0], row, row_index))
+                    precision = as_number(evaluate(arguments[1], row, row_index))
+                    if precision != precision.to_integral_value() or abs(precision) > 28:
+                        raise MeasureError("ROUND digits must be a whole number from -28 to 28.")
+                    quantum = Decimal(1).scaleb(-int(precision))
+                    return value.quantize(quantum, rounding=ROUND_HALF_UP)
                 raise MeasureError(
-                    f"Calculated column {name!r} is outside the supported numeric range at row {row_index}."
-                ) from exc
+                    f"{function} is not supported in calculated-column expressions."
+                )
 
-        value_kinds = {"boolean" if isinstance(value, bool) else "numeric"
-                       for value in result_values if value is not None}
-        if len(value_kinds) > 1:
-            raise MeasureError(
-                f"Calculated column {name!r} returns mixed numeric and True/False values."
-            )
-        column_type = "boolean" if value_kinds == {"boolean"} else "decimal_number"
-        for row, value in zip(output_rows, result_values):
-            row[name] = value
-        output_headers.append(name)
-        output_types[name] = column_type
+            def as_number(value: Decimal | bool | None) -> Decimal:
+                if value is None:
+                    return Decimal(0)
+                if not isinstance(value, Decimal):
+                    raise MeasureError("This calculated-column expression needs a numeric value.")
+                return value
 
-    return output_headers, output_rows, output_types
+            def as_boolean(value: Decimal | bool | None) -> bool:
+                if value is None:
+                    return False
+                if isinstance(value, bool):
+                    return value
+                if isinstance(value, Decimal):
+                    return value != 0
+                raise MeasureError("This calculated-column expression needs a logical value.")
+
+            for row_index, row in enumerate(output_rows, 1):
+                try:
+                    result_values.append(evaluate(expression, row, row_index))
+                except (DecimalException, OverflowError) as exc:
+                    raise MeasureError(
+                        f"Calculated column {name!r} is outside the supported numeric range at row {row_index}."
+                    ) from exc
+
+            value_kinds = {"boolean" if isinstance(value, bool) else "numeric"
+                           for value in result_values if value is not None}
+            if len(value_kinds) > 1:
+                raise MeasureError(
+                    f"Calculated column {name!r} returns mixed numeric and True/False values."
+                )
+            column_type = "boolean" if value_kinds == {"boolean"} else "decimal_number"
+            for row, value in zip(output_rows, result_values):
+                row[name] = value
+            output_headers.append(name)
+            output_types[name] = column_type
+
+        return output_headers, output_rows, output_types
 
 
 def normalize_measure(
@@ -10615,7 +10620,7 @@ def evaluate_measures(
     Task 59: when SUBSTITUTEWITHINDEX meets tied order values, the whole evaluation is re-run under every tie order
     (analytics_studio/dax_swi_ties.py) and answered only when all of them agree; otherwise the refusal is raised.
     """
-    with _ENGINE_LOCK:
+    with _engine_entry_lock():
         _EXT_SHAPE_CACHE.clear()
         measures = list(measures)  # inputs are read once per tie-order run
         relationships = list(relationships)
@@ -13680,10 +13685,9 @@ def _evaluate_measures_once(
                     lineage.update(base_lineage(context))
                     new_output = []
                     for right in rows:
-                        for left in output:
-                            if cancel_check is not None and (len(new_output) & 0x3FF == 0) and cancel_check():
-                                raise MeasureEvaluationCancelled("Evaluation cancelled.")
-                            new_output.append({**left, **right})
+                        if cancel_check is not None and cancel_check():
+                            raise MeasureEvaluationCancelled("Evaluation cancelled.")
+                        new_output.extend({**left, **right} for left in output)
                     output = new_output
                 if len({h.casefold() for h in merged_headers}) != len(merged_headers):
                     raise MeasureError("CROSSJOIN does not allow two columns with the same name.")
