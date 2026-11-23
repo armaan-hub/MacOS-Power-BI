@@ -3,7 +3,9 @@
 import datetime
 import decimal
 import fcntl
+import math
 import os
+from collections.abc import Sequence as _AbcSequence
 from typing import Any, Iterable, List, Optional, Sequence, Tuple
 
 import duckdb
@@ -34,6 +36,10 @@ _MAX_BIGINT = 9223372036854775807
 _FIXED_EXP = decimal.Decimal("0.0001")
 _MAX_FIXED = decimal.Decimal("999999999999999.9999")
 _MIN_FIXED = -_MAX_FIXED
+_FIXED_LIMIT_INT = 10**15
+# Wide local context so quantize never overflows the default 28-digit context.
+_FIXED_CTX = decimal.Context(prec=60)
+_BATCH_NAME = "__store_batch__"
 
 
 def _quote_identifier(ident: str) -> str:
@@ -82,10 +88,30 @@ def _coerce_value(val: Any, type_name: str, table_name: str, col_name: str, row_
                 f"Invalid value for column '{col_name}' of type 'decimal' in table '{table_name}' "
                 f"at row {row_idx}: expected float, int, or Decimal, got bool."
             )
-        if isinstance(val, (int, float)):
-            return float(val)
+        if isinstance(val, float):
+            return val
+        if isinstance(val, int):
+            try:
+                return float(val)
+            except OverflowError:
+                raise StoreError(
+                    f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                    f"is too large for a decimal (DOUBLE) column: int with {val.bit_length()} bits."
+                ) from None
         if isinstance(val, decimal.Decimal):
-            return float(val)
+            try:
+                f_val = float(val)
+            except (ValueError, OverflowError) as exc:
+                raise StoreError(
+                    f"Invalid value for column '{col_name}' of type 'decimal' in table '{table_name}' "
+                    f"at row {row_idx}: cannot convert {val!r} to a float ({exc})."
+                ) from None
+            if val.is_finite() and not math.isfinite(f_val):
+                raise StoreError(
+                    f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                    f"is too large for a decimal (DOUBLE) column: {val!r}."
+                )
+            return f_val
         raise StoreError(
             f"Invalid value for column '{col_name}' of type 'decimal' in table '{table_name}' "
             f"at row {row_idx}: expected float, int, or Decimal, got {type(val).__name__} ({val!r})."
@@ -97,13 +123,27 @@ def _coerce_value(val: Any, type_name: str, table_name: str, col_name: str, row_
                 f"Invalid value for column '{col_name}' of type 'fixed' in table '{table_name}' "
                 f"at row {row_idx}: expected Decimal or int, got {type(val).__name__} ({val!r})."
             )
-        d_val = decimal.Decimal(val) if isinstance(val, int) else val
-        if d_val.is_nan() or d_val.is_infinite():
-            raise StoreError(
-                f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
-                f"cannot be NaN or Infinity in 'fixed' type: {val!r}."
-            )
-        rounded = d_val.quantize(_FIXED_EXP, rounding=decimal.ROUND_HALF_UP)
+        if isinstance(val, int):
+            if not (-_FIXED_LIMIT_INT < val < _FIXED_LIMIT_INT):
+                raise StoreError(
+                    f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                    f"exceeds DECIMAL(19,4) range: int with {val.bit_length()} bits."
+                )
+            d_val = decimal.Decimal(val)
+        else:
+            d_val = val
+            if d_val.is_nan() or d_val.is_infinite():
+                raise StoreError(
+                    f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                    f"cannot be NaN or Infinity in 'fixed' type: {val!r}."
+                )
+            # Check magnitude before quantize so huge values give StoreError, not InvalidOperation.
+            if d_val.adjusted() > 15:
+                raise StoreError(
+                    f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                    f"exceeds DECIMAL(19,4) range: {val!r}."
+                )
+        rounded = d_val.quantize(_FIXED_EXP, rounding=decimal.ROUND_HALF_UP, context=_FIXED_CTX)
         if not (_MIN_FIXED <= rounded <= _MAX_FIXED):
             raise StoreError(
                 f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
@@ -271,6 +311,8 @@ class DuckStore:
     def create_table(self, name: str, columns: Sequence[Tuple[str, str]]) -> None:
         conn = self._check_open()
         _validate_identifier(name, kind="Table name")
+        if name.startswith("__"):
+            raise StoreError(f"Table name '{name}' is reserved: names starting with '__' are internal.")
 
         if isinstance(columns, str) or not hasattr(columns, "__iter__"):
             raise StoreError("Columns must be a sequence of (name, type) pairs, not string.")
@@ -302,9 +344,9 @@ class DuckStore:
                 raise StoreError(f"Duplicate column name: '{col_name}'")
             seen_ci.add(col_ci)
 
-            if type_name not in _TYPE_MAP:
+            if not isinstance(type_name, str) or type_name not in _TYPE_MAP:
                 raise StoreError(
-                    f"Unknown column type '{type_name}'. Must be one of {COLUMN_TYPES}."
+                    f"Unknown column type {type_name!r}. Must be one of {COLUMN_TYPES}."
                 )
 
             sql_type = _TYPE_MAP[type_name]
@@ -377,6 +419,14 @@ class DuckStore:
             raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
 
     def append_rows(self, name: str, rows: Iterable[Sequence[Any]]) -> int:
+        """Append rows in one transaction; return the number of rows added.
+
+        Values are strict: whole takes int only, fixed takes Decimal or int, datetime
+        takes naive datetime only. numpy integers and floats, pandas Timestamps and
+        timezone-aware datetimes are rejected on purpose; the importer (B2/B3) must
+        convert them to plain Python int, float, Decimal and naive datetime first.
+        Any failure, including KeyboardInterrupt, rolls the whole append back.
+        """
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
 
@@ -416,13 +466,14 @@ class DuckStore:
 
         try:
             for row in rows:
-                if isinstance(row, (str, bytes)) or not hasattr(row, "__len__"):
+                if isinstance(row, (str, bytes, bytearray)) or not isinstance(row, _AbcSequence):
                     raise StoreError(
-                        f"Row at index {overall_row_idx} must be a sequence of values, got {type(row).__name__}."
+                        f"Row {overall_row_idx} for table '{resolved_name}' must be a tuple or list of values, "
+                        f"got {type(row).__name__}."
                     )
                 if len(row) != expected_cols:
                     raise StoreError(
-                        f"Row at index {overall_row_idx} has {len(row)} values, but table '{resolved_name}' expects {expected_cols}."
+                        f"Row {overall_row_idx} has {len(row)} values, but table '{resolved_name}' expects {expected_cols}."
                     )
                 coerced_row = []
                 for idx, (c_name, t_name) in enumerate(col_info):
@@ -449,14 +500,17 @@ class DuckStore:
                 current_batch = []
 
             conn.execute("COMMIT")
-        except Exception as exc:
+        except BaseException as exc:
+            # BaseException on purpose: an interrupt must not leave the transaction open.
             try:
                 conn.execute("ROLLBACK")
             except Exception:
                 pass
-            if isinstance(exc, StoreError):
+            if isinstance(exc, StoreError) or not isinstance(exc, Exception):
                 raise
-            raise StoreError(f"Failed to append rows to '{resolved_name}': {exc}") from exc
+            raise StoreError(
+                f"Failed to append rows to '{resolved_name}' at row {overall_row_idx}: {exc}"
+            ) from exc
 
         return total_appended
 
@@ -480,13 +534,13 @@ class DuckStore:
 
         try:
             batch_table = pa.Table.from_pydict(cols_dict, schema=pa_schema)
-            conn.register("batch_tbl", batch_table)
-            conn.execute(f"INSERT INTO {quoted_tbl} SELECT * FROM batch_tbl")
+            conn.register(_BATCH_NAME, batch_table)
+            conn.execute(f"INSERT INTO {quoted_tbl} SELECT * FROM {_BATCH_NAME}")
         except Exception as exc:
             raise StoreError(f"Failed to insert batch: {exc}") from exc
         finally:
             try:
-                conn.unregister("batch_tbl")
+                conn.unregister(_BATCH_NAME)
             except Exception:
                 pass
 
@@ -504,9 +558,6 @@ class DuckStore:
             raise StoreError(f"Offset must be a non-negative integer, got {offset!r}.")
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
             raise StoreError(f"Limit must be a non-negative integer, got {limit!r}.")
-
-        if limit == 0:
-            return []
 
         all_cols = self.columns(resolved_name)
         col_lookup: dict[str, str] = {}
@@ -531,7 +582,7 @@ class DuckStore:
                     raise StoreError(f"Column '{c}' does not exist in table '{resolved_name}'.")
                 selected_cols.append(col_lookup[c_ci])
 
-        if not selected_cols:
+        if limit == 0 or not selected_cols:
             return []
 
         selected_sql = ", ".join(_quote_identifier(c) for c in selected_cols)
@@ -550,6 +601,9 @@ class DuckStore:
 
         Note: When running 'SELECT *', the returned tuples will also include the hidden
         '__rn' column as the last element.
+
+        Only SQL generated by the engine may be passed in; user-typed SQL must never reach it,
+        because files inside the store's own folder stay readable through DuckDB's external-access rule.
         """
         conn = self._check_open()
         if not isinstance(sql, str) or not sql.strip():

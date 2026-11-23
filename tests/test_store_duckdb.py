@@ -468,3 +468,232 @@ def test_speed_300k_rows(tmp_path):
         assert added == n_rows
         assert elapsed < 3.0, f"Append took {elapsed:.3f} s, which exceeds 3 s limit"
         assert store.row_count("bench") == n_rows
+
+
+# ---------------------------------------------------------------------------
+# Review fix 2 (N1-N4, D8a, D8b, weak tests)
+# ---------------------------------------------------------------------------
+
+
+def _msg_has(exc_info, *parts):
+    msg = str(exc_info.value)
+    for part in parts:
+        assert part in msg, f"{part!r} missing from message: {msg}"
+
+
+def test_rounding_is_half_up_not_half_even(tmp_path):
+    D = decimal.Decimal
+    with DuckStore(str(tmp_path / "rnd.npa.data")) as store:
+        store.create_table("t", [("f", "fixed")])
+        store.append_rows(
+            "t",
+            [
+                (D("1.23455"),),   # half-even would give 1.2346 too; next two differ
+                (D("1.23445"),),   # half-up 1.2345, half-even 1.2344
+                (D("2.00005"),),   # half-up 2.0001, half-even 2.0000
+                (D("-1.23455"),),
+                (D("-2.00005"),),  # half-up (away from zero) -2.0001
+                (D("0.00005"),),   # half-up 0.0001, half-even 0.0000
+            ],
+        )
+        assert store.read_page("t", 0, 10) == [
+            (D("1.2346"),),
+            (D("1.2345"),),
+            (D("2.0001"),),
+            (D("-1.2346"),),
+            (D("-2.0001"),),
+            (D("0.0001"),),
+        ]
+
+
+def test_memory_limit_and_temp_directory_applied(tmp_path):
+    folder = tmp_path / "cfg"
+    with DuckStore(str(folder / "m.npa.data"), memory_limit="500MB") as store:
+        mem, temp = store.execute(
+            "SELECT current_setting('memory_limit'), current_setting('temp_directory')"
+        )[0]
+        # 500 MB = 476.8 MiB in DuckDB's own formatting.
+        assert mem.startswith("476.8"), mem
+        assert os.path.realpath(temp) == os.path.realpath(str(folder))
+    with DuckStore(str(folder / "m2.npa.data"), memory_limit="1GB") as store:
+        mem = store.execute("SELECT current_setting('memory_limit')")[0][0]
+        assert mem.startswith("953."), mem
+
+
+def test_error_messages_name_table_column_and_row(tmp_path):
+    D = decimal.Decimal
+    with DuckStore(str(tmp_path / "msg.npa.data")) as store:
+        store.create_table(
+            "tbl_x",
+            [("w", "whole"), ("fx", "fixed"), ("d", "decimal"), ("tx", "text"), ("b", "boolean"), ("dt", "datetime")],
+        )
+        good = (1, D("1"), 1.0, "a", True, datetime.datetime(2020, 1, 1))
+
+        def with_bad(col, val):
+            row = list(good)
+            row[col] = val
+            return [good, good, good, tuple(row)]  # bad row index is 3
+
+        cases = [
+            (0, 2**63, "w"),                       # whole out of range
+            (0, 1.5, "w"),                         # wrong type
+            (1, D("1234567890123456.1"), "fx"),    # fixed out of range
+            (1, 1.5, "fx"),                        # wrong type
+            (1, D("1E+30"), "fx"),                 # N3
+            (1, D("1E+400"), "fx"),                # N3
+            (1, 10**40, "fx"),                     # N3
+            (1, D("1" * 31), "fx"),                # N3
+            (2, 10**400, "d"),                     # N3
+            (2, D("1E+400"), "d"),                 # N3
+            (3, 5, "tx"),
+            (4, 1, "b"),
+            (5, datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc), "dt"),
+        ]
+        for col, val, col_name in cases:
+            with pytest.raises(StoreError) as exc_info:
+                store.append_rows("tbl_x", with_bad(col, val))
+            _msg_has(exc_info, "tbl_x", f"'{col_name}'", "row 3")
+            assert store.row_count("tbl_x") == 0
+
+
+def test_bool_rejected_separately_with_type_message(tmp_path):
+    with DuckStore(str(tmp_path / "bool.npa.data")) as store:
+        store.create_table("w", [("a", "whole")])
+        store.create_table("b", [("a", "boolean")])
+        with pytest.raises(StoreError) as exc_info:
+            store.append_rows("w", [(True,)])
+        _msg_has(exc_info, "expected int", "got bool")
+        with pytest.raises(StoreError) as exc_info:
+            store.append_rows("b", [(1,)])
+        _msg_has(exc_info, "expected bool", "got int")
+        assert store.row_count("w") == 0 and store.row_count("b") == 0
+
+
+def test_n1_interrupt_mid_append_rolls_back(tmp_path):
+    with DuckStore(str(tmp_path / "n1.npa.data")) as store:
+        store.create_table("t", [("a", "whole")])
+        store.append_rows("t", [(1,), (2,)])
+
+        def gen(exc):
+            for i in range(60_000):  # more than one 50,000 batch is flushed
+                yield (i,)
+            raise exc
+
+        with pytest.raises(KeyboardInterrupt):
+            store.append_rows("t", gen(KeyboardInterrupt()))
+        # original exception type must pass through unchanged, store still usable
+        assert store.row_count("t") == 2
+        assert store.append_rows("t", [(3,), (4,)]) == 2
+        assert store.execute("SELECT __rn FROM t ORDER BY __rn") == [(0,), (1,), (2,), (3,)]
+
+        class Odd(BaseException):
+            pass
+
+        with pytest.raises(Odd):
+            store.append_rows("t", gen(Odd()))
+        assert store.row_count("t") == 4
+        assert store.append_rows("t", [(5,)]) == 1
+        assert store.execute("SELECT __rn FROM t ORDER BY __rn") == [(i,) for i in range(5)]
+
+
+def test_n2_user_table_named_batch_tbl_and_reserved_names(tmp_path):
+    with DuckStore(str(tmp_path / "n2.npa.data")) as store:
+        store.create_table("batch_tbl", [("a", "whole")])
+        assert store.append_rows("batch_tbl", [(1,), (2,)]) == 2
+        assert store.read_page("batch_tbl", 0, 10) == [(1,), (2,)]
+        for bad in ["__store_batch__", "__x", "__"]:
+            with pytest.raises(StoreError):
+                store.create_table(bad, [("a", "whole")])
+        assert store.table_names() == ["batch_tbl"]
+
+
+def test_n3_huge_values_raise_store_error(tmp_path):
+    D = decimal.Decimal
+    with DuckStore(str(tmp_path / "n3.npa.data")) as store:
+        store.create_table("t", [("f", "fixed"), ("d", "decimal")])
+        for bad in [D("1E+30"), D("1" * 31), 10**40, D("1E+400"), 10**400, D("999999999999999.99995")]:
+            with pytest.raises(StoreError):
+                store.append_rows("t", [(bad, 1.0)])
+        for bad in [10**400, D("1E+400"), -(10**400)]:
+            with pytest.raises(StoreError):
+                store.append_rows("t", [(D("1"), bad)])
+        assert store.row_count("t") == 0
+        # float inf and nan, stay allowed in a decimal column
+        store.append_rows("t", [(D("1"), float("inf")), (D("1"), float("nan")), (D("1"), -float("inf"))])
+        rows = store.read_page("t", 0, 10)
+        assert rows[0][1] == float("inf") and rows[2][1] == float("-inf")
+        assert rows[1][1] != rows[1][1]
+        # edge values that fit
+        store.append_rows("t", [(D("999999999999999.9999"), 1e300), (10**15 - 1, 1.0)])
+        assert store.read_page("t", 3, 10)[0][0] == D("999999999999999.9999")
+
+
+def test_n4_row_shapes_and_generator_cause(tmp_path):
+    with DuckStore(str(tmp_path / "n4.npa.data")) as store:
+        store.create_table("tshape", [("a", "whole"), ("b", "text")])
+        bad_rows = [{"a": 1, "b": "x"}, {1, "x"}, "ab", 5, (1,), (1, "x", 3), None, b"ab"]
+        for bad in bad_rows:
+            with pytest.raises(StoreError) as exc_info:
+                store.append_rows("tshape", [(0, "ok"), (1, "ok"), bad])
+            _msg_has(exc_info, "tshape", "Row 2")
+        assert store.row_count("tshape") == 0
+
+        original = RuntimeError("stream failure")
+
+        def faulty():
+            yield (1, "a")
+            raise original
+
+        with pytest.raises(StoreError) as exc_info:
+            store.append_rows("tshape", faulty())
+        assert exc_info.value.__cause__ is original
+        _msg_has(exc_info, "tshape")
+        assert store.row_count("tshape") == 0
+
+
+def test_d8a_bad_column_specs_raise_store_error(tmp_path):
+    with DuckStore(str(tmp_path / "d8a.npa.data")) as store:
+        bad_specs = [
+            [("a", ["whole"])],      # unhashable type name
+            [("a", 5)],              # non-str type name
+            [("a", None)],
+            [(5, "whole")],          # non-str column name
+            [None],                  # non-tuple spec
+            ["ab"],
+            [5],
+            [("a",)],
+            [("a", "whole", "x")],
+            [("a", {"whole"})],
+        ]
+        for spec in bad_specs:
+            with pytest.raises(StoreError):
+                store.create_table("zz", spec)
+        assert not store.has_table("zz")
+
+
+def test_d8b_limit_zero_still_validates_columns(tmp_path):
+    with DuckStore(str(tmp_path / "d8b.npa.data")) as store:
+        store.create_table("t", [("a", "whole")])
+        store.append_rows("t", [(1,)])
+        with pytest.raises(StoreError):
+            store.read_page("t", 0, 0, columns=["nope"])
+        with pytest.raises(StoreError):
+            store.read_page("t", 0, 0, columns="a")
+        assert store.read_page("t", 0, 0, columns=["A"]) == []
+
+
+def test_read_page_follows_rn_after_failed_batch_and_three_calls(tmp_path):
+    with DuckStore(str(tmp_path / "ord3.npa.data")) as store:
+        store.create_table("t", [("a", "whole")])
+        data = [(i,) for i in range(30)]
+        store.append_rows("t", data[:10])
+        with pytest.raises(StoreError):
+            store.append_rows("t", [(100,), ("bad",)])
+        store.append_rows("t", data[10:25])
+        store.append_rows("t", data[25:])
+        assert store.execute("SELECT __rn FROM t") != []
+        assert sorted(r[0] for r in store.execute("SELECT __rn FROM t")) == list(range(30))
+        pages = []
+        for off in range(0, 30, 7):
+            pages.extend(store.read_page("t", off, 7))
+        assert pages == data
