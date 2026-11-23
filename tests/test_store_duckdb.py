@@ -733,16 +733,16 @@ def test_b2a_create_table_from_arrow_success(tmp_path):
         assert [r[0] for r in rn_vals] == [0, 1, 2]
 
 
-def test_b2a_create_table_from_arrow_type_must_be_text(tmp_path):
+def test_b2a_create_table_from_arrow_type_must_be_known(tmp_path):
     import pyarrow as pa
     with DuckStore(str(tmp_path / "b2a_bad_type.duckdb")) as store:
         batch = pa.record_batch([
             pa.array(["val"], pa.string()),
         ], names=["col0"])
-        with pytest.raises(StoreError, match="requires 'text' columns"):
+        with pytest.raises(StoreError, match="Unknown column type"):
             store.create_table_from_arrow(
                 "tbl",
-                [("col0", "whole")],
+                [("col0", "nonexistent_type")],
                 [batch],
             )
         assert not store.has_table("tbl")
@@ -882,4 +882,222 @@ def test_b2a_create_table_from_arrow_rollback_on_error(tmp_path):
         # Table should be cleanly rolled back and not exist
         assert not store.has_table("t_fail")
         assert "t_fail" not in store.table_names()
+
+
+
+def test_b2b_create_table_from_arrow_all_types_round_trip(tmp_path):
+    import datetime
+    from decimal import Decimal
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2b_all_types.duckdb")) as store:
+        cols = [
+            ("c_bool", "boolean"),
+            ("c_whole", "whole"),
+            ("c_dec", "decimal"),
+            ("c_fix", "fixed"),
+            ("c_dt", "datetime"),
+            ("c_txt", "text"),
+        ]
+        dt_val = datetime.datetime(2023, 11, 14, 22, 13, 20)
+        batch = pa.record_batch([
+            pa.array([True, False, None], type=pa.bool_()),
+            pa.array([42, -999, None], type=pa.int64()),
+            pa.array([3.1415, -0.001, None], type=pa.float64()),
+            pa.array([Decimal("12.3456"), Decimal("-99.0000"), None], type=pa.decimal128(19, 4)),
+            pa.array([dt_val, datetime.datetime(2024, 1, 1, 0, 0, 0), None], type=pa.timestamp("us")),
+            pa.array(["hello", "", None], type=pa.string()),
+        ], names=[c[0] for c in cols])
+
+        inserted = store.create_table_from_arrow("all_types", cols, [batch])
+        assert inserted == 3
+        assert store.row_count("all_types") == 3
+
+        page = store.read_page("all_types", 0, 10)
+        assert len(page) == 3
+        # Row 0
+        r0 = page[0]
+        assert r0[0] is True
+        assert r0[1] == 42
+        assert abs(r0[2] - 3.1415) < 1e-9
+        assert r0[3] == Decimal("12.3456")
+        assert r0[4] == dt_val
+        assert r0[5] == "hello"
+
+        # Row 1
+        r1 = page[1]
+        assert r1[0] is False
+        assert r1[1] == -999
+        assert abs(r1[2] - (-0.001)) < 1e-9
+        assert r1[3] == Decimal("-99.0000")
+        assert r1[4] == datetime.datetime(2024, 1, 1, 0, 0, 0)
+        assert r1[5] == ""
+
+        # Row 2 (all nulls)
+        r2 = page[2]
+        assert r2 == (None, None, None, None, None, None)
+
+
+def test_b2b_create_table_from_arrow_wrong_arrow_type_refused(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2b_wrong_type.duckdb")) as store:
+        # Expected whole (int64), provided int32
+        batch = pa.record_batch([
+            pa.array([1, 2], type=pa.int32()),
+        ], names=["w"])
+        with pytest.raises(StoreError, match="expected int64"):
+            store.create_table_from_arrow("tbl_wrong", [("w", "whole")], [batch])
+        assert not store.has_table("tbl_wrong")
+
+
+def test_b2b_create_table_from_arrow_wrong_field_name_order(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2b_wrong_order.duckdb")) as store:
+        cols = [("a", "text"), ("b", "whole")]
+        # Reversed column order in batch
+        batch = pa.record_batch([
+            pa.array([1, 2], type=pa.int64()),
+            pa.array(["x", "y"], type=pa.string()),
+        ], names=["b", "a"])
+        with pytest.raises(StoreError, match="do not match"):
+            store.create_table_from_arrow("tbl_order", cols, [batch])
+        assert not store.has_table("tbl_order")
+
+
+def test_b2b_create_table_from_arrow_extra_column_refused(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2b_extra_col.duckdb")) as store:
+        cols = [("a", "text")]
+        batch = pa.record_batch([
+            pa.array(["x"], type=pa.string()),
+            pa.array([1], type=pa.int64()),
+        ], names=["a", "b"])
+        with pytest.raises(StoreError, match="do not match"):
+            store.create_table_from_arrow("tbl_extra", cols, [batch])
+        assert not store.has_table("tbl_extra")
+
+
+def test_create_table_from_arrow_strict_types_coverage(tmp_path):
+    import pyarrow as pa
+    from decimal import Decimal
+    with DuckStore(str(tmp_path / "strict_types.duckdb")) as store:
+        # Check text accepts ONLY pa.string(), not large_string
+        b_large_str = pa.RecordBatch.from_arrays([pa.array(["abc"], type=pa.large_string())], names=["col"])
+        with pytest.raises(StoreError, match="non-string type|expected string"):
+            store.create_table_from_arrow("t_ls", [("col", "text")], [b_large_str])
+        assert not store.has_table("t_ls")
+
+        # Check all wrong fixed decimals
+        for wrong_dec in [
+            pa.decimal128(18, 4),
+            pa.decimal128(20, 4),
+            pa.decimal128(19, 5),
+            pa.decimal128(19, 3),
+            pa.decimal128(38, 4),
+            pa.decimal256(19, 4),
+        ]:
+            b_dec = pa.RecordBatch.from_arrays([pa.array([Decimal("1.0")], type=wrong_dec)], names=["f"])
+            with pytest.raises(StoreError, match="expected decimal128\\(19, 4\\)"):
+                store.create_table_from_arrow("t_dec", [("f", "fixed")], [b_dec])
+            assert not store.has_table("t_dec")
+
+        # Check all wrong datetimes
+        for wrong_dt in [
+            pa.timestamp("ms"),
+            pa.timestamp("s"),
+            pa.timestamp("ns"),
+            pa.date32(),
+        ]:
+            b_dt = pa.RecordBatch.from_arrays([pa.array([1], type=wrong_dt)], names=["d"])
+            with pytest.raises(StoreError, match="expected timestamp\\[us\\]"):
+                store.create_table_from_arrow("t_dt", [("d", "datetime")], [b_dt])
+            assert not store.has_table("t_dt")
+
+        # Check wrong boolean (e.g. int8)
+        b_bool = pa.RecordBatch.from_arrays([pa.array([1], type=pa.int8())], names=["b"])
+        with pytest.raises(StoreError, match="expected bool"):
+            store.create_table_from_arrow("t_b", [("b", "boolean")], [b_bool])
+        assert not store.has_table("t_b")
+
+        # Check wrong decimal (float32)
+        b_float = pa.RecordBatch.from_arrays([pa.array([1.5], type=pa.float32())], names=["d"])
+        with pytest.raises(StoreError, match="expected double"):
+            store.create_table_from_arrow("t_f", [("d", "decimal")], [b_float])
+        assert not store.has_table("t_f")
+
+        # Check non-RecordBatch input in batches
+        with pytest.raises(StoreError, match="Expected pa.RecordBatch, got Table"):
+            tbl = pa.Table.from_arrays([pa.array([1], type=pa.int64())], names=["a"])
+            store.create_table_from_arrow("t_tbl", [("a", "whole")], [tbl])
+        assert not store.has_table("t_tbl")
+
+
+def test_create_table_from_arrow_keyboard_interrupt_rollback(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "ki_rollback.duckdb")) as store:
+        b1 = pa.RecordBatch.from_arrays([pa.array([1, 2], type=pa.int64())], names=["a"])
+        def gen():
+            yield b1
+            raise KeyboardInterrupt()
+
+        with pytest.raises(KeyboardInterrupt):
+            store.create_table_from_arrow("t_ki", [("a", "whole")], gen())
+        assert not store.has_table("t_ki")
+
+        # Store remains completely usable and __rn is contiguous from 0
+        b2 = pa.RecordBatch.from_arrays([pa.array([10, 20], type=pa.int64())], names=["a"])
+        store.create_table_from_arrow("t_after", [("a", "whole")], [b2])
+        rows = store.execute("SELECT __rn, a FROM t_after ORDER BY __rn")
+        assert rows == [(0, 10), (1, 20)]
+
+
+def test_thread_safety_concurrent_access_fails_loudly(tmp_path):
+    import threading
+    with DuckStore(str(tmp_path / "thread_safety.duckdb")) as store:
+        started = threading.Event()
+        release_thread = threading.Event()
+        second_error = []
+
+        def slow_append():
+            # Use append_rows with a generator that pauses
+            def gen():
+                started.set()
+                release_thread.wait(timeout=5.0)
+                yield (1,)
+            store.create_table("t", [("a", "whole")])
+            store.append_rows("t", gen())
+
+        th = threading.Thread(target=slow_append)
+        th.start()
+        started.wait(timeout=5.0)
+
+        # While thread 1 is holding the store in append_rows, thread 2 attempts access
+        try:
+            store.table_names()
+        except StoreError as exc:
+            second_error.append(str(exc))
+        finally:
+            release_thread.set()
+            th.join()
+
+        assert len(second_error) == 1
+        assert "The store is busy with another operation." in second_error[0]
+        # First operation finished cleanly
+        assert store.row_count("t") == 1
+        assert store.read_page("t", 0, 5) == [(1,)]
+
+
+def test_read_page_random_offsets_equivalence(tmp_path):
+    """Equivalence test for read_page using __rn range vs list slice."""
+    import random
+    with DuckStore(str(tmp_path / "read_page_equiv.duckdb")) as store:
+        store.create_table("t", [("i", "whole"), ("v", "text")])
+        data = [(i, f"val_{i}") for i in range(1000)]
+        store.append_rows("t", data)
+
+        for _ in range(50):
+            off = random.randint(0, 1200)
+            lim = random.randint(0, 200)
+            page = store.read_page("t", off, lim)
+            expected = data[off : off + lim]
+            assert page == expected
 
