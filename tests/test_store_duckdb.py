@@ -697,3 +697,189 @@ def test_read_page_follows_rn_after_failed_batch_and_three_calls(tmp_path):
         for off in range(0, 30, 7):
             pages.extend(store.read_page("t", off, 7))
         assert pages == data
+
+
+def test_b2a_create_table_from_arrow_success(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_store.duckdb")) as store:
+        batch1 = pa.record_batch([
+            pa.array(["r0c0", "r1c0"], pa.string()),
+            pa.array(["r0c1", "r1c1"], pa.string()),
+        ], names=["col0", "col1"])
+        batch2 = pa.record_batch([
+            pa.array(["r2c0"], pa.string()),
+            pa.array(["r2c1"], pa.string()),
+        ], names=["col0", "col1"])
+
+        rows_added = store.create_table_from_arrow(
+            "tbl",
+            [("col0", "text"), ("col1", "text")],
+            [batch1, batch2],
+        )
+        assert rows_added == 3
+        assert store.row_count("tbl") == 3
+        assert store.columns("tbl") == [("col0", "text"), ("col1", "text")]
+
+        # Read page
+        page = store.read_page("tbl", 0, 10)
+        assert page == [
+            ("r0c0", "r0c1"),
+            ("r1c0", "r1c1"),
+            ("r2c0", "r2c1"),
+        ]
+
+        # Verify __rn
+        rn_vals = store.execute('SELECT "__rn" FROM "tbl" ORDER BY "__rn"')
+        assert [r[0] for r in rn_vals] == [0, 1, 2]
+
+
+def test_b2a_create_table_from_arrow_type_must_be_text(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_bad_type.duckdb")) as store:
+        batch = pa.record_batch([
+            pa.array(["val"], pa.string()),
+        ], names=["col0"])
+        with pytest.raises(StoreError, match="requires 'text' columns"):
+            store.create_table_from_arrow(
+                "tbl",
+                [("col0", "whole")],
+                [batch],
+            )
+        assert not store.has_table("tbl")
+
+
+def test_b2a_create_table_from_arrow_reserved_name(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_res_tbl.duckdb")) as store:
+        batch = pa.record_batch([pa.array(["val"], pa.string())], names=["col0"])
+        with pytest.raises(StoreError, match="reserved"):
+            store.create_table_from_arrow(
+                "__internal",
+                [("col0", "text")],
+                [batch],
+            )
+
+
+def test_b2a_create_table_from_arrow_duplicate_columns(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_dup_cols.duckdb")) as store:
+        batch = pa.record_batch([
+            pa.array(["v1"], pa.string()),
+            pa.array(["v2"], pa.string()),
+        ], names=["Col", "col"])
+        with pytest.raises(StoreError, match="Duplicate column name"):
+            store.create_table_from_arrow(
+                "tbl",
+                [("Col", "text"), ("col", "text")],
+                [batch],
+            )
+
+
+def test_b2a_create_table_from_arrow_non_string_batch(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_non_string.duckdb")) as store:
+        batch = pa.record_batch([
+            pa.array([123], pa.int64()),
+        ], names=["col0"])
+        with pytest.raises(StoreError, match="non-string type"):
+            store.create_table_from_arrow(
+                "tbl",
+                [("col0", "text")],
+                [batch],
+            )
+
+
+def test_b2a_create_table_from_arrow_batch_names_mismatch(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_mismatch.duckdb")) as store:
+        batch = pa.record_batch([
+            pa.array(["v"], pa.string()),
+        ], names=["other_name"])
+        with pytest.raises(StoreError, match="do not match"):
+            store.create_table_from_arrow(
+                "tbl",
+                [("col0", "text")],
+                [batch],
+            )
+
+
+def test_b2a_create_table_from_arrow_cancel_checked_between_batches(tmp_path):
+    import threading
+    import pyarrow as pa
+    from analytics_studio.file_import import ImportCancelledError
+
+    ev = threading.Event()
+    batch = pa.record_batch([pa.array(["v"], pa.string())], names=["c0"])
+
+    def dummy_batches():
+        yield batch
+        ev.set()  # Cancel triggered after first batch
+        yield batch
+
+    with DuckStore(str(tmp_path / "b2a_cancel.duckdb")) as store:
+        with pytest.raises(ImportCancelledError):
+            store.create_table_from_arrow(
+                "tbl",
+                [("c0", "text")],
+                dummy_batches(),
+                cancel_event=ev,
+            )
+        assert not store.has_table("tbl")
+
+
+def test_b2a_create_table_from_arrow_max_rows_boundary(tmp_path):
+    import pyarrow as pa
+    from analytics_studio.file_import import FileImportError
+
+    with DuckStore(str(tmp_path / "b2a_max_rows.duckdb")) as store:
+        batch1 = pa.record_batch([pa.array(["a", "b"], pa.string())], names=["c0"])
+        batch2 = pa.record_batch([pa.array(["c"], pa.string())], names=["c0"])
+
+        # Exactly max_rows rows (3) -> OK
+        store.create_table_from_arrow("t_exact", [("c0", "text")], [batch1, batch2], max_rows=3)
+        assert store.row_count("t_exact") == 3
+
+        # max_rows=2 with 3 rows -> raises and rolls back
+        with pytest.raises(FileImportError, match="import limit"):
+            store.create_table_from_arrow("t_over", [("c0", "text")], [batch1, batch2], max_rows=2)
+        assert not store.has_table("t_over")
+
+
+def test_b2a_create_table_from_arrow_progress_called(tmp_path):
+    import pyarrow as pa
+
+    calls = []
+    with DuckStore(str(tmp_path / "b2a_prog.duckdb")) as store:
+        batch = pa.record_batch([pa.array(["a"], pa.string())], names=["c0"])
+        store.create_table_from_arrow(
+            "tbl",
+            [("c0", "text")],
+            [batch],
+            progress=calls.append,
+        )
+        assert len(calls) == 1
+        assert "Imported 1 CSV rows" in calls[0]
+
+
+def test_b2a_create_table_from_arrow_rollback_on_error(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_rollback.duckdb")) as store:
+        batch1 = pa.record_batch([
+            pa.array(["a", "b"], pa.string()),
+        ], names=["c1"])
+        # batch2 schema mismatch
+        batch2 = pa.record_batch([
+            pa.array(["c"], pa.string()),
+        ], names=["mismatched"])
+
+        with pytest.raises(StoreError, match="do not match"):
+            store.create_table_from_arrow(
+                "t_fail",
+                [("c1", "text")],
+                [batch1, batch2],
+            )
+
+        # Table should be cleanly rolled back and not exist
+        assert not store.has_table("t_fail")
+        assert "t_fail" not in store.table_names()
+
