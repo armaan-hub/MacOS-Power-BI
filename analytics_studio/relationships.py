@@ -94,12 +94,8 @@ def propagate_relationship_filters(
         if "filter_rows" in table and not isinstance(table["filter_rows"], list):
             raise RelationshipError(f"Loaded table {table.get('name', table_id)!r} has an invalid filter context.")
         tables_by_id[table_id] = table
-        rows_by_id[table_id] = list(table["rows"])
-
-    for table_id in filter_table_ids:
-        table = tables_by_id.get(table_id)
-        if table is not None and "filter_rows" in table:
-            rows_by_id[table_id] = list(table["filter_rows"])
+        # a filtered table starts from its filter rows: copying all of its rows first would cost the table's size on every call
+        rows_by_id[table_id] = list(table["filter_rows"] if table_id in filter_table_ids and "filter_rows" in table else table["rows"])
 
     edges_by_source: dict[str, list[tuple[str, str, str, str, str, str]]] = defaultdict(list)
 
