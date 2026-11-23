@@ -3069,3 +3069,13 @@ New: analytics_studio/store/parquet_source.py, parquet_import.py, type_detect.py
 
 Antigravity built it (headless `agy -p`); the OpenCode API key expired, so the Parquet reader and type detection were built in scratch folders by OpenCode and a Haiku builder and then copied in. Two Sonnet reviews (first FAIL, second PASS); gate 42,469 passed, 575 of 575 on the real app, replay 0 different, 0 crashes.
 
+
+## Stage B4a: grid model for store tables, large-file import preview, project format 85 (2026-11-23)
+
+Merged e30c026 (branch p21-store-grid). New: analytics_studio/store/candidate.py (StoreCandidate, LargeTableError), analytics_studio/store/table_model.py (StoreTableModel: sort, filter, values filter and search on DuckDB, one 500-row page at a time), project FORMAT_VERSION 85 with an optional `source["store"]` record, large mode (default off) in the import preview, ImportLimitError and parse_head in file_import.py. DuckStore gained create_view_ids, drop_view, register_arrow_ids, checkpoint (refused inside a transaction) and table_version.
+
+Built by Antigravity (headless `agy -p`); the StoreTableModel failed Sonnet review twice and a Sonnet fixer made the third version, which passed. Gate: 42,796 passed (known flake test_static_visual_lifecycle passed alone), 575/575 real app, replay DIFF 0 CRASH 0.
+
+Reviewer-measured at 10M rows x 5 text columns: sort amount 0.82 s, filter 0.08 to 0.1 s, columnFilterValues('id') 0.29 s (was 71 s and 8.5 GB), searches 0.02 to 0.06 s; the model adds about 60 MB and DuckDB sort buffers peak at 2.58 GB. Reviewer fuzz (800 sequences per shape, fresh seeds) and the 656, 1,072 and 1,410-compare grids: 0 differences.
+
+Open items: greater_than and less_than_or_equal on a DOUBLE column with +-inf differ from the old model (Parquet only); three untested edges (19 to 30 digit canonical decimal, key re-encode check, _set_page return value); the Python fallback path freezes the UI thread (about 2.5 s per 1M rows, record a worker-thread task); read_page and the Python path assume contiguous __rn. Known differences from the old model are in the table_model.py docstring. Next: B4b.
