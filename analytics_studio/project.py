@@ -252,16 +252,30 @@ def new_project(name: str = "Untitled Project") -> dict[str, Any]:
     }
 
 
+STORE_MAX_INTEGER = 2**63 - 1
+_ASCII_UPPER_TO_LOWER = {code: code + 32 for code in range(ord("A"), ord("Z") + 1)}
+
+
 def _is_whole_number(value: Any, minimum: int) -> bool:
-    return isinstance(value, int) and not isinstance(value, bool) and value >= minimum
+    return (
+        isinstance(value, int)
+        and not isinstance(value, bool)
+        and minimum <= value <= STORE_MAX_INTEGER
+    )
 
 
 def _is_sha256_hex(value: Any) -> bool:
+    # Lowercase only: the store writes hexdigest() and compares by string equality.
     return (
         isinstance(value, str)
         and len(value) == 64
-        and all(char in "0123456789abcdefABCDEF" for char in value)
+        and all(char in "0123456789abcdef" for char in value)
     )
+
+
+def _ascii_fold(name: str) -> str:
+    # Matches the store's ASCII-only case rule. str.lower() would also fold non-ASCII letters.
+    return name.translate(_ASCII_UPPER_TO_LOWER)
 
 
 def _validate_store_source(source: dict[str, Any]) -> None:
@@ -295,8 +309,8 @@ def _validate_store_source(source: dict[str, Any]) -> None:
         raise fail(f"need a headers list of at most {STORE_MAX_HEADERS} names.")
     if any(not isinstance(header, str) or not header.strip() for header in headers):
         raise fail("need every header to be a non-empty text name.")
-    if len(set(headers)) != len(headers):
-        raise fail("need unique header names.")
+    if len({_ascii_fold(header) for header in headers}) != len(headers):
+        raise fail("need unique header names; names that differ only by ASCII letter case are the same name.")
 
     physical_types = store["physical_types"]
     if not isinstance(physical_types, list) or len(physical_types) != len(headers):

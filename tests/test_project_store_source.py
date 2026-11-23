@@ -55,6 +55,10 @@ def _v84_document() -> dict[str, Any]:
     return document
 
 
+def _validated_store_source() -> dict[str, Any]:
+    return validate_project(_document(_store()))["data_sources"][0]
+
+
 class StoreSourceValidationTests(unittest.TestCase):
     def test_format_version_is_85(self) -> None:
         self.assertEqual(FORMAT_VERSION, 85)
@@ -270,6 +274,82 @@ class StoreSourceValidationTests(unittest.TestCase):
             validate_project(document)
 
 
+    def test_integer_fields_accept_2_63_minus_1_and_refuse_2_63(self) -> None:
+        limit = 2**63 - 1
+        for field in ("row_count", "generation", "size", "mtime_ns"):
+            with self.subTest(field=field, value="limit"):
+                store = _store()
+                if field in ("size", "mtime_ns"):
+                    store["fingerprint"][field] = limit
+                else:
+                    store[field] = limit
+                validate_project(_document(store))
+            with self.subTest(field=field, value="over"):
+                store = _store()
+                if field in ("size", "mtime_ns"):
+                    store["fingerprint"][field] = limit + 1
+                else:
+                    store[field] = limit + 1
+                with self.assertRaises(ProjectFileError):
+                    validate_project(_document(store))
+
+    def test_bool_refused_for_every_integer_field(self) -> None:
+        for field in ("row_count", "generation"):
+            with self.subTest(field=field):
+                store = _store()
+                store[field] = True
+                with self.assertRaises(ProjectFileError):
+                    validate_project(_document(store))
+        for field in ("size", "mtime_ns"):
+            with self.subTest(field=field):
+                store = _store()
+                store["fingerprint"][field] = True
+                with self.assertRaises(ProjectFileError):
+                    validate_project(_document(store))
+
+    def test_uppercase_sha256_is_refused(self) -> None:
+        store = _store()
+        store["fingerprint"]["head_tail_sha256"] = "A" * 64
+        with self.assertRaises(ProjectFileError):
+            validate_project(_document(store))
+
+    def test_lowercase_sha256_is_accepted(self) -> None:
+        store = _store()
+        store["fingerprint"]["head_tail_sha256"] = "0123456789abcdef" * 4
+        validate_project(_document(store))
+
+    def test_headers_differing_only_by_ascii_case_are_refused(self) -> None:
+        store = _store()
+        store["headers"] = ["A", "a"]
+        store["physical_types"] = ["text", "text"]
+        with self.assertRaises(ProjectFileError) as caught:
+            validate_project(_document(store))
+        self.assertIn("ASCII letter case", str(caught.exception))
+
+    def test_non_ascii_case_variants_are_distinct_headers(self) -> None:
+        store = _store()
+        store["headers"] = ["\u00c9", "\u00e9"]
+        store["physical_types"] = ["text", "text"]
+        store.pop("column_types")
+        store.pop("source_arrow_types", None)
+        validate_project(_document(store))
+
+    def test_513_headers_are_refused(self) -> None:
+        store = _store()
+        store["headers"] = [f"c{i}" for i in range(513)]
+        store["physical_types"] = ["text"] * 513
+        store.pop("column_types")
+        store.pop("source_arrow_types", None)
+        with self.assertRaises(ProjectFileError):
+            validate_project(_document(store))
+
+    def test_physical_types_match_store_column_types(self) -> None:
+        from analytics_studio.project import STORE_PHYSICAL_TYPES
+        from analytics_studio.store.base import COLUMN_TYPES
+
+        self.assertEqual(tuple(STORE_PHYSICAL_TYPES), tuple(COLUMN_TYPES))
+
+
 class StoreMigrationTests(unittest.TestCase):
     def test_v84_project_migrates_to_v85_unchanged(self) -> None:
         document = _v84_document()
@@ -300,6 +380,26 @@ class StoreMigrationTests(unittest.TestCase):
 
 
 class StoreRoundTripTests(unittest.TestCase):
+    def test_store_block_survives_the_save_merge(self) -> None:
+        # Reproduces controller.py:14096-14102 (_document_for_save): the saved source is
+        # {**source, **source_record}, and source_record has no "store" key.
+        source = _validated_store_source()
+        source_record = {
+            "id": "src-1",
+            "name": "Sales",
+            "kind": "csv",
+            "path": "/data/sales.csv",
+            "parser_options": {"delimiter": ","},
+            "transform_steps": [],
+        }
+        document = _document(_store())
+        document["data_sources"][0] = {**source, **source_record}
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["data_sources"][0]["store"], _store())
+        self.assertNotIn("rows", migrated["data_sources"][0])
+
     def test_round_trip_through_json_keeps_store(self) -> None:
         first = validate_project(_document(_store()))
         text = json.dumps(first, sort_keys=True)
