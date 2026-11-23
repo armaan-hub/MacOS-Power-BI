@@ -30,6 +30,7 @@ from __future__ import annotations
 import codecs
 import csv
 from dataclasses import dataclass
+import io
 import os
 from pathlib import Path
 import shutil
@@ -369,6 +370,23 @@ def _fast_quote_check(
     return inside == 0
 
 
+def _scan_quote_structure(
+    path: Path,
+    delimiter: str,
+    cancel_event: Optional[threading.Event] = None,
+    chunk_size: int = _8MB,
+) -> tuple[list[str], bool]:
+    """Quote check: (notices, line_structure_is_exact).
+
+    The second value is True when the vectorised check proved the file clean. Then
+    a record ends exactly at a line end that has an even number of quote bytes
+    before it, so record starts can be found without parsing.
+    """
+    if _fast_quote_check(path, delimiter, cancel_event=cancel_event, chunk_size=chunk_size):
+        return [], True
+    return _exact_quote_scan(path, delimiter, cancel_event=cancel_event, chunk_size=chunk_size), False
+
+
 def _detect_malformed_quotes_and_space_before_quote(
     path: Path,
     delimiter: str,
@@ -380,9 +398,7 @@ def _detect_malformed_quotes_and_space_before_quote(
     A vectorised check proves most files clean. Anything it cannot prove goes to
     the exact scan, so the result is always the exact scan's result.
     """
-    if _fast_quote_check(path, delimiter, cancel_event=cancel_event, chunk_size=chunk_size):
-        return []
-    return _exact_quote_scan(path, delimiter, cancel_event=cancel_event, chunk_size=chunk_size)
+    return _scan_quote_structure(path, delimiter, cancel_event, chunk_size)[0]
 
 
 def _transcode_to_utf8(
@@ -488,6 +504,116 @@ def _python_kept_width(
     return widest
 
 
+def _wide_candidate_offsets(
+    path: Path,
+    delimiter: str,
+    n: int,
+    has_quotes: bool,
+    cancel_event: Optional[threading.Event],
+    chunk_size: int,
+) -> list[int]:
+    """Byte offsets of records that may start with n empty cells followed by more cells.
+
+    Such a record begins with n delimiters, each cell before them being empty or an
+    empty quoted pair, so its first min(n, 16) bytes are all delimiter or quote bytes.
+    Only the records that pass this test are looked at by Python. Needs a file whose
+    line structure is exact: a line start counts as a record start when the number of
+    quote bytes before it is even.
+    """
+    delim = ord(delimiter.encode("utf-8"))
+    k = min(n, 16)
+    wanted = pa.array([delim, 34], pa.uint8())
+    ends = pa.array([10, 13], pa.uint8())
+    offsets: list[int] = []
+    inside = 0
+    carry = b""
+    try:
+        with _open_after_bom(path) as f:
+            base = f.tell()
+            at_eof = False
+            while not at_eof:
+                _raise_if_cancelled(cancel_event)
+                chunk = f.read(chunk_size)
+                if chunk:
+                    data = carry + chunk
+                elif carry:
+                    data = carry + b"\n"  # the last line has no line end
+                    at_eof = True
+                else:
+                    break
+                size = len(data)
+                arr = pa.Array.from_buffers(pa.uint8(), size, [None, pa.py_buffer(data)])
+                line_ends = pc.indices_nonzero(pc.is_in(arr, value_set=ends))
+                if len(line_ends) == 0:
+                    carry = data
+                    continue
+                starts = pa.concat_arrays(
+                    [pa.array([0], pa.uint64()), pc.add(line_ends[:-1], pa.scalar(1, pa.uint64()))]
+                )
+                lengths = pc.subtract(line_ends, starts)
+                idx = pc.filter(starts, pc.greater_equal(lengths, k))
+                for j in range(k):
+                    if len(idx) == 0:
+                        break
+                    idx = pc.filter(idx, pc.is_in(pc.take(arr, pc.add(idx, pa.scalar(j, pa.uint64()))), value_set=wanted))
+                complete = line_ends[len(line_ends) - 1].as_py() + 1
+                if has_quotes:
+                    pos = 0
+                    quote_count = inside
+                    for s in idx.to_pylist():
+                        quote_count += data.count(b'"', pos, s)
+                        pos = s
+                        if quote_count % 2 == 0:
+                            offsets.append(base + s)
+                    inside = (inside + data.count(b'"', 0, complete)) % 2
+                else:
+                    offsets.extend(base + s for s in idx.to_pylist())
+                base += complete
+                carry = data[complete:]
+    except OSError as exc:
+        raise _read_error(path.name, exc) from exc
+    return offsets
+
+
+def _widest_record_at(
+    path: Path,
+    delimiter: str,
+    offsets: list[int],
+    cancel_event: Optional[threading.Event],
+) -> int:
+    """Width of the widest kept record among the records that start at the given offsets.
+
+    Each record is parsed with Python's csv module with the old importer's settings
+    (strict) and judged by the old rule: all-empty records are skipped.
+    """
+    widest = 0
+    with _fi._CSV_FIELD_LIMIT_LOCK:
+        old_limit = csv.field_size_limit()
+        csv.field_size_limit(_fi.MAX_SOURCE_BYTES)
+        try:
+            with open(path, "rb") as raw:
+                for count, offset in enumerate(offsets):
+                    if count % 1000 == 0:
+                        _raise_if_cancelled(cancel_event)
+                    raw.seek(offset)
+                    text = io.TextIOWrapper(raw, encoding="utf-8", newline="")
+                    try:
+                        record = next(csv.reader(text, delimiter=delimiter, strict=True), [])
+                    finally:
+                        text.detach()
+                    if _is_empty_record(record):
+                        continue
+                    _check_column_limit(len(record))
+                    widest = max(widest, len(record))
+        except csv.Error as exc:
+            raise FileImportError(f"Could not parse {path.name} as CSV: {exc}") from exc
+        except (OSError, UnicodeDecodeError) as exc:
+            raise FileImportError(f"Could not read {path.name}: {exc}.") from exc
+        finally:
+            csv.field_size_limit(old_limit)
+    return widest
+
+
 def _measure_width(
     conn: Any,
     escaped_path: str,
@@ -496,15 +622,25 @@ def _measure_width(
     path: Path,
     delimiter: str,
     cancel_event: Optional[threading.Event],
+    *,
+    structure_exact: bool = False,
+    has_quotes: bool = True,
+    scan_chunk_size: int = _1MB,
 ) -> int:
     """Widest kept record (a record is kept unless every cell is empty).
 
     Reads with a small schema first. A schema of n columns shows a record's first
-    n cells; if ANY record has a cell in column n (it fills the last schema
-    column, whatever the other cells hold) the schema may have cut the record, so
-    the whole pre-pass repeats with the next, bigger schema. That test does not use
-    the all-empty filter: a record such as ",,,,,,,,,,,,,,,,,x" looks empty
-    through a 17 column schema but is wider than it.
+    n cells. If a KEPT record (one with a non-empty visible cell) fills the last
+    schema column it may be wider, so the pre-pass repeats with the next, bigger
+    schema.
+
+    A record that fills the last schema column while all its visible cells are empty
+    (",,,,,,,,,,,,,,,,,x" through a 17 column schema) cannot be judged by DuckDB: it
+    is wider than the schema if a later cell holds data. That test does not use the
+    all-empty filter. Such records are found from the raw bytes (only records that
+    begin with n empty cells) and judged exactly by Python's csv module, which costs
+    almost nothing unless the file really has them. A file whose line structure is not
+    proven exact is judged by a full Python pass instead.
     """
     last = len(tiers) - 1
     for index, n in enumerate(tiers):
@@ -517,15 +653,21 @@ def _measure_width(
             f"FROM {_read_csv_sql(escaped_path, escaped_delim, n)}"
         )
         width, any_full, kept_full = conn.execute(query).fetchone()
-        if not any_full:
-            return width or 0
-        if index == last:
-            if kept_full:
+        if kept_full:
+            if index == last:
                 _check_column_limit(n)  # a kept record reaches the limit + 1 column
                 raise ValueError("The last width tier must be larger than the column limit.")
-            # Only all-empty records reach the last column. They are skipped, unless a
-            # cell past the schema holds data: ask Python's csv module (exact, slow).
-            return _python_kept_width(path, delimiter, cancel_event)
+            continue
+        width = width or 0
+        if not any_full:
+            return width
+        # Only all-empty-looking records reach the last schema column: judge them exactly.
+        if structure_exact:
+            offsets = _wide_candidate_offsets(
+                path, delimiter, n, has_quotes, cancel_event, scan_chunk_size
+            )
+            return max(width, _widest_record_at(path, delimiter, offsets, cancel_event))
+        return max(width, _python_kept_width(path, delimiter, cancel_event))
     return 0
 
 
@@ -686,11 +828,11 @@ def import_csv_to_store(
 
         # Detect malformed quotes and space-before-quote (nothing to look at without a quote)
         if quotes > 0:
-            notices = _detect_malformed_quotes_and_space_before_quote(
+            notices, structure_exact = _scan_quote_structure(
                 parse_path, delimiter, cancel_event=cancel_event, chunk_size=scan_chunk_size
             )
         else:
-            notices = []
+            notices, structure_exact = [], True
 
         # Create dedicated in-memory DuckDB connection for parsing
         cpu_count = os.cpu_count() or 4
@@ -740,6 +882,9 @@ def import_csv_to_store(
                 max_w = _measure_width(
                     src_conn, escaped_path, escaped_delim, width_tiers,
                     parse_path, delimiter, cancel_event,
+                    structure_exact=structure_exact,
+                    has_quotes=quotes > 0,
+                    scan_chunk_size=scan_chunk_size,
                 )
                 if has_header:
                     first_kept = _read_first_kept_record(

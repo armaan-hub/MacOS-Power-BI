@@ -1333,3 +1333,157 @@ def test_blocker2_real_8mib_boundary_sentinel_bytes_are_refused(tmp_path, store2
         old, new = _both(tmp_path, store2, data)
         assert old[0] == "ok"
         assert new[0] == "refuse" and "sentinel" in new[1]
+
+
+# ---------------------------------------------------------------------------
+# B2a-fix3: wide all-empty records must not cost a Python pass over the file
+# ---------------------------------------------------------------------------
+
+def _wide_shapes():
+    q4 = b'""""'
+    return {
+        "empty_600_commas": (b"," * 599, 2),
+        "empty_600_quoted_pairs": (b",".join([b'""'] * 600), 2),
+        "empty_mixed_pairs": (b",".join([b'""', b"", b'""', b""] * 150), 2),
+        "x_after_600": (b"," * 600 + b"x", None),            # 601 cells: over the column limit
+        "x_after_20": (b"," * 20 + b"x", 21),
+        "x_after_20_quoted_pairs": (b'"",' * 20 + b"x", 21),
+        "600_escaped_quote_cells": (b",".join([q4] * 600), None),  # not empty, over the limit
+        "20_escaped_quote_cells": (b",".join([q4] * 20), 20),
+        "quoted_comma_after_20": (b"," * 20 + b'"a,b",x', 22),
+        "quoted_newline_after_20": (b"," * 20 + b'"a\nb"', 21),
+    }
+
+
+@pytest.mark.parametrize("eol", [b"\n", b"\r\n"])
+@pytest.mark.parametrize("has_header", [True, False])
+@pytest.mark.parametrize("shape", list(_wide_shapes()))
+def test_fix3_wide_record_shapes_match_old(tmp_path, store2, shape, has_header, eol):
+    record, expected_width = _wide_shapes()[shape]
+    data = eol.join([b"a,b", b"1,2", record, b"3,4"]) + eol
+    old, new = _both(tmp_path, store2, data, has_header, width_tiers=(4, ci._NC))
+    _check_equal(old, new)
+    assert (old[0] == "ok") == (new[0] == "ok")
+    if expected_width is None:
+        assert old[0] == "refuse" and "512-column" in new[1]
+    else:
+        assert len(new[1]) == expected_width == len(old[1])
+
+
+def test_fix3_candidate_line_inside_quoted_field_is_not_a_record(tmp_path, store2):
+    inner = b"," * 40 + b"x"
+    for eol in (b"\n", b"\r\n"):
+        data = eol.join([b"a,b", b'1,"first', inner, b'last"', b"3,4"]) + eol
+        old, new = _both(tmp_path, store2, data, width_tiers=(4, ci._NC))
+        assert old[0] == "ok"
+        _check_equal(old, new)
+        assert new[1] == ["a", "b"] and len(new[2]) == 2
+        # a real wide record next to it is still found
+        data = eol.join([b"a,b", b'1,"first', inner, b'last"', b"," * 30 + b"x"]) + eol
+        old, new = _both(tmp_path, store2, data, width_tiers=(4, ci._NC))
+        _check_equal(old, new)
+        assert len(new[1]) == 31
+
+
+@pytest.mark.parametrize("chunk", [1, 2, 3, 5, 7, 64, 1 << 20])
+def test_fix3_candidate_offsets_do_not_depend_on_chunk_size(tmp_path, chunk):
+    record_a = b"," * 30 + b"x"
+    record_b = b'"",' * 12 + b'"a,b"'
+    data = b'a,b\n1,"p\n' + b"," * 40 + b'q"\n' + b"1,2,3,4,5,6,7,8,9,10\n" + record_a + b"\n3,4\r\n" + record_b + b"\r\n,,\n" + record_a
+    path = tmp_path / "off.csv"
+    path.write_bytes(data)
+    offsets = ci._wide_candidate_offsets(path, ",", 8, True, None, chunk)
+    expected = [m for m in (data.index(record_a), data.index(record_b), data.rindex(record_a))]
+    assert offsets == expected
+    # without quote bytes every physical line start is judged on its own
+    path.write_bytes(b"a,b\n1,2\n" + record_a + b"\n,,,,,,,,,,\n1,2,3,4,5,6,7,8,9,10\n" + b"," * 9 + b"y\n")
+    plain = path.read_bytes()
+    assert ci._wide_candidate_offsets(path, ",", 8, False, None, chunk) == [
+        plain.index(record_a), plain.index(b"," * 10 + b"\n"), plain.index(b"," * 9 + b"y")
+    ]
+
+
+@pytest.mark.parametrize("chunk", [1, 5, 64])
+def test_fix3_tier_fuzz_with_small_scan_chunks(tmp_path, store2, chunk):
+    rng = random.Random(500 + chunk)
+    for _ in range(25):
+        data = _sparse_file(rng)
+        old, new = _both(
+            tmp_path, store2, data, rng.random() < 0.6, width_tiers=(3, 25, ci._NC), scan_chunk_size=chunk
+        )
+        _check_equal(old, new)
+
+
+def test_fix3_wide_empty_record_does_not_trigger_full_python_pass(tmp_path, store2, monkeypatch):
+    calls = {"full": 0, "offsets": []}
+    real_full = ci._python_kept_width
+    real_at = ci._widest_record_at
+
+    def spy_full(*a, **k):
+        calls["full"] += 1
+        return real_full(*a, **k)
+
+    def spy_at(path, delimiter, offsets, cancel_event):
+        calls["offsets"].append(list(offsets))
+        return real_at(path, delimiter, offsets, cancel_event)
+
+    monkeypatch.setattr(ci, "_python_kept_width", spy_full)
+    monkeypatch.setattr(ci, "_widest_record_at", spy_at)
+    body = b"a,b\n" + b"1,2\n" * 20_000
+    data = body + b"," * 600 + b"\n" + b"3,4\n" * 100
+    old, new = _both(tmp_path, store2, data, width_tiers=(17, 65, ci._NC))
+    _check_equal(old, new)
+    assert new[1] == ["a", "b"]
+    assert calls["full"] == 0
+    assert calls["offsets"] == [[len(body)]]  # exactly the one wide record is looked at
+
+
+def test_fix3_file_without_ambiguous_records_looks_at_no_record(tmp_path, store2, monkeypatch):
+    seen = []
+    monkeypatch.setattr(ci, "_widest_record_at", lambda *a, **k: seen.append(a) or 0)
+    monkeypatch.setattr(ci, "_python_kept_width", lambda *a, **k: seen.append(a) or 0)
+    old, new = _both(tmp_path, store2, b"a,b\n1,2\n3,4\n")
+    _check_equal(old, new)
+    assert seen == []
+
+
+def test_fix3_unproven_line_structure_still_uses_full_pass_and_matches_old(tmp_path, store2, monkeypatch):
+    # a quote inside an unquoted field defeats the structure proof: the full pass decides
+    full = []
+    real_full = ci._python_kept_width
+    monkeypatch.setattr(ci, "_python_kept_width", lambda *a, **k: full.append(1) or real_full(*a, **k))
+    data = b'a,b\n5" pipe,2\n' + b"," * 600 + b"\n3,4\n"
+    old, new = _both(tmp_path, store2, data, width_tiers=(4, ci._NC))
+    _check_equal(old, new)
+    assert new[1] == ["a", "b"] and new[3] == []
+    assert full == [1]
+    data = b'a,b\n5" pipe,2\n' + b"," * 20 + b"x\n"
+    old, new = _both(tmp_path, store2, data, width_tiers=(4, ci._NC))
+    _check_equal(old, new)
+    assert len(new[1]) == 21
+
+
+def test_fix3_wide_record_after_a_bom_is_found_at_the_right_offset(tmp_path, store2):
+    for enc in ("utf-8-sig", "utf-8"):
+        path = tmp_path / f"bom_{enc}.csv"
+        path.write_bytes(b"\xef\xbb\xbfa,b\n1,2\n" + b"," * 25 + b"x\n3,4\n")
+        opts = _opts(encoding=enc)
+        old = _old_result(path, opts)
+        new = _new_result(store2, path, opts, width_tiers=(4, ci._NC))
+        assert old[0] == "ok" and len(old[1]) == 26
+        _check_equal(old, new)
+    # a wide record on the very first line, right after the BOM
+    path = tmp_path / "bom_first.csv"
+    path.write_bytes(b"\xef\xbb\xbf" + b"," * 25 + b"x\n1,2\n")
+    for has_header in (True, False):
+        opts = _opts(has_header=has_header)
+        _check_equal(_old_result(path, opts), _new_result(store2, path, opts, width_tiers=(4, ci._NC)))
+
+
+def test_fix3_cancel_checked_in_candidate_scan(tmp_path):
+    path = tmp_path / "cand.csv"
+    path.write_bytes(b"a,b\n" + b"1,2\n" * 50)
+    ev = threading.Event()
+    ev.set()
+    with pytest.raises(fi.ImportCancelledError):
+        ci._wide_candidate_offsets(path, ",", 4, False, ev, 64)
