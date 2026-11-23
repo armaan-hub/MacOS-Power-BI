@@ -697,3 +697,87 @@ def test_read_page_follows_rn_after_failed_batch_and_three_calls(tmp_path):
         for off in range(0, 30, 7):
             pages.extend(store.read_page("t", off, 7))
         assert pages == data
+
+
+def test_b2a_create_table_from_arrow_and_add_column(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_store.duckdb")) as store:
+        # 1. create_table_from_arrow
+        batch1 = pa.record_batch([
+            pa.array(["r0c0", "r1c0"], pa.string()),
+            pa.array(["r0c1", "r1c1"], pa.string()),
+        ], names=["col0", "col1"])
+        batch2 = pa.record_batch([
+            pa.array(["r2c0"], pa.string()),
+            pa.array(["r2c1"], pa.string()),
+        ], names=["col0", "col1"])
+
+        rows_added = store.create_table_from_arrow(
+            "tbl",
+            [("col0", "text"), ("col1", "text")],
+            [batch1, batch2],
+        )
+        assert rows_added == 3
+        assert store.row_count("tbl") == 3
+        assert store.columns("tbl") == [("col0", "text"), ("col1", "text")]
+
+        # Read page
+        page = store.read_page("tbl", 0, 10)
+        assert page == [
+            ("r0c0", "r0c1"),
+            ("r1c0", "r1c1"),
+            ("r2c0", "r2c1"),
+        ]
+
+        # Verify __rn
+        rn_vals = store.execute('SELECT "__rn" FROM "tbl" ORDER BY "__rn"')
+        assert [r[0] for r in rn_vals] == [0, 1, 2]
+
+        # 2. add_column
+        store.add_column("tbl", "col2", "text")
+        assert store.columns("tbl") == [("col0", "text"), ("col1", "text"), ("col2", "text")]
+        # Stored rows have empty string default for text
+        page_after_add = store.read_page("tbl", 0, 10)
+        assert page_after_add == [
+            ("r0c0", "r0c1", ""),
+            ("r1c0", "r1c1", ""),
+            ("r2c0", "r2c1", ""),
+        ]
+
+        # Duplicate column
+        with pytest.raises(StoreError, match="already exists"):
+            store.add_column("tbl", "col0", "text")
+        with pytest.raises(StoreError, match="already exists"):
+            store.add_column("tbl", "COL1", "text")
+
+        # Reserved __rn
+        with pytest.raises(StoreError, match="reserved"):
+            store.add_column("tbl", "__rn", "text")
+
+        # Unknown type
+        with pytest.raises(StoreError, match="Unknown column type"):
+            store.add_column("tbl", "col_bad", "nonexistent_type")
+
+
+def test_b2a_create_table_from_arrow_rollback_on_error(tmp_path):
+    import pyarrow as pa
+    with DuckStore(str(tmp_path / "b2a_rollback.duckdb")) as store:
+        batch1 = pa.record_batch([
+            pa.array(["a", "b"], pa.string()),
+        ], names=["c1"])
+        # batch2 schema mismatch
+        batch2 = pa.record_batch([
+            pa.array(["c"], pa.string()),
+        ], names=["mismatched"])
+
+        with pytest.raises(StoreError, match="do not match"):
+            store.create_table_from_arrow(
+                "t_fail",
+                [("c1", "text")],
+                [batch1, batch2],
+            )
+
+        # Table should be cleanly rolled back and not exist
+        assert not store.has_table("t_fail")
+        assert "t_fail" not in store.table_names()
+

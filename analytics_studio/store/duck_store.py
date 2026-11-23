@@ -629,3 +629,165 @@ class DuckStore:
             return conn.execute(sql, params).fetchall()
         except Exception as exc:
             raise StoreError(f"Query execution failed: {exc}") from exc
+
+    def create_table_from_arrow(
+        self,
+        name: str,
+        columns: Sequence[Tuple[str, str]],
+        batches: Iterable[pa.RecordBatch],
+        *,
+        cancel_event: Optional[Any] = None,
+        progress: Optional[Any] = None,
+        max_rows: Optional[int] = None,
+    ) -> int:
+        """Create a table with text columns and stream Arrow record batches in one transaction.
+
+        The store has one connection and is not thread-safe: an import running on a
+        worker thread owns the store until it returns.
+        Any exception, row limit overflow, or cancel_event trigger rolls back the
+        transaction cleanly so that no partial table is left in the store.
+        Returns the total number of rows inserted.
+        """
+        conn = self._check_open()
+        _validate_identifier(name, kind="Table name")
+        if name.startswith("__"):
+            raise StoreError(f"Table name '{name}' is reserved: names starting with '__' are internal.")
+
+        if isinstance(columns, str) or not hasattr(columns, "__iter__"):
+            raise StoreError("Columns must be a sequence of (name, type) pairs, not string.")
+
+        cols_list = list(columns)
+        if len(cols_list) == 0:
+            raise StoreError(f"Cannot create table '{name}' with zero columns.")
+
+        # Check existing tables case-insensitively
+        all_tables = self._get_raw_tables(conn)
+        target_lower = _ascii_lower(name)
+        for t in all_tables:
+            if _ascii_lower(t) == target_lower:
+                raise StoreError(f"Table '{name}' already exists (matches '{t}').")
+
+        seen_ci: set[str] = set()
+        col_names: list[str] = []
+        col_defs: list[str] = []
+
+        for col in cols_list:
+            if not isinstance(col, (tuple, list)) or len(col) != 2:
+                raise StoreError(f"Invalid column specification: {col!r}")
+            col_name, type_name = col
+            _validate_identifier(col_name, kind="Column name")
+
+            col_ci = _ascii_lower(col_name)
+            if col_ci == "__rn":
+                raise StoreError("Column name '__rn' is reserved for hidden row index.")
+            if col_ci in seen_ci:
+                raise StoreError(f"Duplicate column name: '{col_name}'")
+            seen_ci.add(col_ci)
+
+            if type_name != "text":
+                raise StoreError(f"create_table_from_arrow requires 'text' columns, got {type_name!r}.")
+
+            sql_type = _TYPE_MAP[type_name]
+            col_names.append(col_name)
+            col_defs.append(f"{_quote_identifier(col_name)} {sql_type}")
+
+        col_defs.append('"__rn" BIGINT')
+        quoted_name = _quote_identifier(name)
+        create_sql = f"CREATE TABLE {quoted_name} ({', '.join(col_defs)})"
+
+        table_created = False
+        try:
+            conn.execute("BEGIN TRANSACTION")
+            conn.execute(create_sql)
+            table_created = True
+
+            total_rows = 0
+            for batch in batches:
+                if cancel_event is not None and cancel_event.is_set():
+                    from analytics_studio.file_import import ImportCancelledError
+                    raise ImportCancelledError("Import canceled.")
+
+                if not isinstance(batch, pa.RecordBatch):
+                    raise StoreError(f"Expected pa.RecordBatch, got {type(batch).__name__}.")
+
+                if batch.schema.names != col_names:
+                    raise StoreError(
+                        f"Batch column names {batch.schema.names} do not match table columns {col_names}."
+                    )
+                for field in batch.schema:
+                    if not (pa.types.is_string(field.type) or pa.types.is_large_string(field.type)):
+                        raise StoreError(
+                            f"Batch column '{field.name}' has non-string type {field.type}."
+                        )
+
+                batch_len = batch.num_rows
+                if max_rows is not None and total_rows + batch_len > max_rows:
+                    from analytics_studio.file_import import FileImportError
+                    raise FileImportError(f"The file exceeds the {max_rows:,}-row import limit.")
+
+                rn_array = pa.array(range(total_rows, total_rows + batch_len), type=pa.int64())
+                table_batch = pa.Table.from_batches([batch]).append_column("__rn", rn_array)
+                conn.register(_BATCH_NAME, table_batch)
+                try:
+                    conn.execute(f"INSERT INTO {quoted_name} SELECT * FROM {_BATCH_NAME}")
+                finally:
+                    conn.unregister(_BATCH_NAME)
+
+                total_rows += batch_len
+                if progress is not None:
+                    progress(f"Imported {total_rows:,} CSV rows...")
+
+            conn.execute("COMMIT")
+            return total_rows
+        except BaseException as exc:
+            try:
+                conn.execute("ROLLBACK")
+            except Exception:
+                pass
+            if table_created:
+                try:
+                    conn.execute(f"DROP TABLE IF EXISTS {quoted_name}")
+                except Exception:
+                    pass
+            if cancel_event is not None and cancel_event.is_set():
+                from analytics_studio.file_import import ImportCancelledError
+                raise ImportCancelledError("Import canceled.") from exc
+            if isinstance(exc, (StoreError, KeyboardInterrupt)):
+                raise
+            # ImportCancelledError and FileImportError should propagate directly
+            from analytics_studio.file_import import FileImportError, ImportCancelledError
+            if isinstance(exc, (FileImportError, ImportCancelledError)):
+                raise
+            raise StoreError(f"Failed to create table '{name}' from Arrow batches: {exc}") from exc
+
+    def add_column(self, name: str, column_name: str, type_name: str) -> None:
+        """Add a new column to an existing table.
+
+        Follows standard identifier validation, case policies, and type rules.
+        """
+        conn = self._check_open()
+        resolved_name = self._resolve_table_name(name, conn)
+        _validate_identifier(column_name, kind="Column name")
+
+        col_ci = _ascii_lower(column_name)
+        if col_ci == "__rn":
+            raise StoreError("Column name '__rn' is reserved for hidden row index.")
+
+        existing = self.columns(resolved_name)
+        for existing_col, _ in existing:
+            if _ascii_lower(existing_col) == col_ci:
+                raise StoreError(f"Column '{column_name}' already exists in table '{resolved_name}'.")
+
+        if not isinstance(type_name, str) or type_name not in _TYPE_MAP:
+            raise StoreError(f"Unknown column type '{type_name}'. Must be one of {COLUMN_TYPES}.")
+
+        sql_type = _TYPE_MAP[type_name]
+        quoted_tbl = _quote_identifier(resolved_name)
+        quoted_col = _quote_identifier(column_name)
+        default_clause = "DEFAULT ''" if type_name == "text" else "DEFAULT NULL"
+        alter_sql = f"ALTER TABLE {quoted_tbl} ADD COLUMN {quoted_col} {sql_type} {default_clause}"
+        try:
+            conn.execute(alter_sql)
+        except Exception as exc:
+            raise StoreError(f"Failed to add column '{column_name}' to table '{resolved_name}': {exc}") from exc
+
