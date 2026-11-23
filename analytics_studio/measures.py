@@ -20775,7 +20775,7 @@ def _evaluate_measures_once(
                 row_stack.pop()
 
     boolean_filter_index: dict[tuple[int, int, tuple[str, ...]], tuple[list[dict[str, Any]], dict[tuple[Any, ...], dict[str, Any]], dict[tuple[Any, ...], list[int]]]] = {}
-    boolean_filter_allowed: dict[tuple[Any, ...], BlankSet] = {}
+    boolean_filter_allowed: dict[tuple[Any, ...], frozenset[int]] = {}
 
     def general_boolean_filter_sets(node: tuple[Any, ...]) -> dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]:
         """A Boolean CALCULATE filter is FILTER(ALL(referenced columns), expression): test it on every row of the table."""
@@ -20824,12 +20824,13 @@ def _evaluate_measures_once(
                 blank_passes = conjuncts_pass(node, (group_context, {name: None for name in names}, len(group_rows) + 1))
             except MeasureError:
                 blank_passes = False
-        allowed_slot = (slot, frozenset(passing), blank_passes)
-        allowed = boolean_filter_allowed.get(allowed_slot)
-        if allowed is None:  # the same tests on the same rows give the same set: one shared object, as the per-row transition sets are
-            allowed = boolean_filter_allowed[allowed_slot] = BlankSet(
-                (position for key in passing for position in row_positions.get(key, ())), blank_passes,
+        allowed_slot = (slot, frozenset(passing))
+        passing_positions = boolean_filter_allowed.get(allowed_slot)
+        if passing_positions is None:  # the same tests on the same rows pick the same row positions: shared (never handed out as a filter)
+            passing_positions = boolean_filter_allowed[allowed_slot] = frozenset(
+                position for key in passing for position in row_positions.get(key, ())
             )
+        allowed = BlankSet(passing_positions, blank_passes)  # a filter object of its own: filters are told apart by identity (ALLSELECTED)
         shapes = [{"columns": tuple(names), "rows": allowed, "active": tuple(names), "dirty": False}] if len(names) > 1 else []
         return {table_id: (context, {name: allowed for name in names}, shapes)}
 
