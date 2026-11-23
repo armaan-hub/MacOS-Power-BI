@@ -7,6 +7,7 @@ after the user confirms it.
 
 from __future__ import annotations
 
+import codecs
 import csv
 from dataclasses import dataclass, replace
 from datetime import date, datetime, time as datetime_time, timedelta
@@ -19,6 +20,7 @@ import posixpath
 from pathlib import Path
 import re
 import sqlite3
+import sys
 import threading
 import time
 from typing import Any, Callable, Mapping
@@ -43,6 +45,7 @@ PARQUET_BATCH_SIZE = 1024
 MAX_DATA_ROWS = 100_000
 MAX_COLUMNS = 512
 MAX_CELLS = 500_000
+HEAD_PREFIX_BYTES = 8 * 1024 * 1024
 AUTO_HEADER_PREFIX_ROWS = 64
 
 EXCEL_MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
@@ -54,6 +57,18 @@ _EXCEL_XSTRING_ESCAPE = re.compile(r"_x([0-9A-Fa-f]{4})_")
 
 class FileImportError(ValueError):
     """An unsupported, malformed, or over-limit source file."""
+
+
+class ImportLimitError(FileImportError):
+    """A file over a limit of the normal importer; a large-data path may accept it.
+
+    ``limit_kind`` is one of "bytes", "rows", "cells", "row_groups",
+    "uncompressed", or "text".
+    """
+
+    def __init__(self, message: str, *, limit_kind: str) -> None:
+        super().__init__(message)
+        self.limit_kind = limit_kind
 
 
 class ImportCancelledError(FileImportError):
@@ -293,9 +308,10 @@ def list_sqlite_tables(
     source_path = Path(path).expanduser().resolve()
     database_size = _sqlite_source_size(source_path)
     if database_size > MAX_SOURCE_BYTES:
-        raise FileImportError(
+        raise ImportLimitError(
             f"{source_path.name} and its write-ahead log exceed the "
-            f"{MAX_SOURCE_BYTES // (1024 * 1024)} MiB SQLite import limit."
+            f"{MAX_SOURCE_BYTES // (1024 * 1024)} MiB SQLite import limit.",
+            limit_kind="bytes",
         )
     connection = _open_sqlite_readonly(source_path, cancel_event)
     try:
@@ -351,8 +367,9 @@ def parse_file(
     normalized = normalize_options(kind, options)
     size = _source_size(source_path)
     if size > MAX_SOURCE_BYTES:
-        raise FileImportError(
-            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit."
+        raise ImportLimitError(
+            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit.",
+            limit_kind="bytes",
         )
 
     control.report(f"Reading {source_path.name}…")
@@ -484,7 +501,6 @@ def _parse_parquet(
 ) -> ImportCandidate:
     """Read a bounded, flat Parquet table into the string-based table model."""
     try:
-        import pyarrow as pa
         import pyarrow.parquet as pq
     except (ImportError, OSError) as exc:
         raise FileImportError(
@@ -507,8 +523,9 @@ def _parse_parquet(
             raise FileImportError(f"{path.name} has invalid Parquet row metadata.")
         _check_row_limit(declared_rows)
         if metadata.num_row_groups > MAX_DATA_ROWS:
-            raise FileImportError(
-                f"{path.name} contains more than {MAX_DATA_ROWS:,} Parquet row groups."
+            raise ImportLimitError(
+                f"{path.name} contains more than {MAX_DATA_ROWS:,} Parquet row groups.",
+                limit_kind="row_groups",
             )
 
         schema = parquet_file.schema_arrow
@@ -528,42 +545,20 @@ def _parse_parquet(
                 raise FileImportError(f"{path.name} has invalid Parquet row-group metadata.")
             uncompressed_bytes += group_bytes
             if uncompressed_bytes > MAX_PARQUET_UNCOMPRESSED_BYTES:
-                raise FileImportError(
+                raise ImportLimitError(
                     f"{path.name} expands beyond the "
-                    f"{MAX_PARQUET_UNCOMPRESSED_BYTES // (1024 * 1024)} MiB Parquet data limit."
+                    f"{MAX_PARQUET_UNCOMPRESSED_BYTES // (1024 * 1024)} MiB Parquet data limit.",
+                    limit_kind="uncompressed",
                 )
 
-        supported_type = (
-            pa.types.is_null,
-            pa.types.is_boolean,
-            pa.types.is_integer,
-            pa.types.is_floating,
-            pa.types.is_decimal,
-            pa.types.is_string,
-            pa.types.is_large_string,
-            pa.types.is_date,
-            pa.types.is_time,
-            pa.types.is_timestamp,
-        )
-        field_types = []
-        for column_index, field in enumerate(schema):
-            if control is not None:
-                control.check_cancelled()
-            data_type = field.type
-            if pa.types.is_dictionary(data_type):
-                data_type = data_type.value_type
-            if not any(is_type(data_type) for is_type in supported_type):
-                raise FileImportError(
-                    f"Parquet column {headers[column_index]!r} has unsupported type "
-                    f"{field.type}. Supported columns must contain scalar values; "
-                    "nested and binary types are not supported."
-                )
-            field_types.append(data_type)
+        field_types = _parquet_field_types(schema, headers, control)
 
         rows: list[dict[str, Any]] = []
         rendered_text_bytes = sum(len(header.encode("utf-8")) for header in headers)
         if rendered_text_bytes > MAX_PARQUET_TEXT_BYTES:
-            raise FileImportError("Parquet column names exceed the converted-text result limit.")
+            raise ImportLimitError(
+                "Parquet column names exceed the converted-text result limit.", limit_kind="text"
+            )
         for batch in parquet_file.iter_batches(
             batch_size=PARQUET_BATCH_SIZE,
             use_threads=False,
@@ -576,28 +571,9 @@ def _parse_parquet(
             _check_row_limit(next_count)
             _check_cell_limit(next_count, len(headers))
 
-            values_by_column: list[list[Any]] = []
-            for column_index, field in enumerate(schema):
-                array = batch.column(column_index)
-                if pa.types.is_dictionary(array.type):
-                    array = array.dictionary_decode()
-                rendered = array.to_pylist()
-
-                if pa.types.is_floating(field_types[column_index]):
-                    for value in rendered:
-                        if isinstance(value, float) and not math.isfinite(value):
-                            raise FileImportError(
-                                f"Parquet column {headers[column_index]!r} contains a non-finite number."
-                            )
-                for value in rendered:
-                    if value is not None:
-                        rendered_text_bytes += len(cell_to_text(value).encode("utf-8"))
-                        if rendered_text_bytes > MAX_PARQUET_TEXT_BYTES:
-                            raise FileImportError(
-                                f"Converted Parquet text exceeds the "
-                                f"{MAX_PARQUET_TEXT_BYTES // (1024 * 1024)} MiB result limit."
-                            )
-                values_by_column.append(rendered)
+            values_by_column, rendered_text_bytes = _parquet_batch_columns(
+                batch, schema, field_types, headers, rendered_text_bytes, MAX_PARQUET_TEXT_BYTES,
+            )
 
             for row_index in range(batch.num_rows):
                 row_number = len(rows) + 1
@@ -627,14 +603,155 @@ def _parse_parquet(
             parquet_file.close()
 
 
+def _parse_parquet_head(path: Path, options: dict[str, Any], rows_wanted: int) -> ImportCandidate:
+    """Read the first ``rows_wanted`` rows of a Parquet file, with the same types and conversion as _parse_parquet.
+
+    Only the column limit applies: no row, cell, byte or text limit.
+    """
+    try:
+        import pyarrow.parquet as pq
+    except (ImportError, OSError) as exc:
+        raise FileImportError(
+            "Parquet import requires PyArrow. Install the app's listed dependencies and try again."
+        ) from exc
+
+    parquet_file = None
+    try:
+        parquet_file = pq.ParquetFile(
+            path,
+            thrift_string_size_limit=MAX_SOURCE_BYTES,
+            thrift_container_size_limit=MAX_CELLS,
+        )
+        metadata = parquet_file.metadata
+        if metadata is None:
+            raise FileImportError(f"{path.name} has no readable Parquet metadata.")
+        declared_rows = int(metadata.num_rows)
+        if declared_rows < 0:
+            raise FileImportError(f"{path.name} has invalid Parquet row metadata.")
+
+        schema = parquet_file.schema_arrow
+        raw_headers = list(schema.names)
+        _check_column_limit(len(raw_headers))
+        if not raw_headers:
+            raise FileImportError("Parquet import requires at least one column.")
+        headers = _normalize_headers(raw_headers, len(raw_headers))
+        field_types = _parquet_field_types(schema, headers, None)
+
+        rows: list[dict[str, Any]] = []
+        rendered_text_bytes = sum(len(header.encode("utf-8")) for header in headers)
+        for batch in parquet_file.iter_batches(
+            batch_size=PARQUET_BATCH_SIZE,
+            use_threads=False,
+        ):
+            if len(rows) >= rows_wanted:
+                break
+            if batch.num_columns != len(headers):
+                raise FileImportError(f"{path.name} has inconsistent Parquet batch columns.")
+            if batch.num_rows > rows_wanted - len(rows):
+                batch = batch.slice(0, rows_wanted - len(rows))
+            values_by_column, rendered_text_bytes = _parquet_batch_columns(
+                batch, schema, field_types, headers, rendered_text_bytes, None,
+            )
+            for row_index in range(batch.num_rows):
+                rows.append({
+                    header: values_by_column[column_index][row_index]
+                    for column_index, header in enumerate(headers)
+                })
+
+        notices = [
+            "Parquet scalar values retain their source types; nested and binary values are not supported."
+        ]
+        if declared_rows > len(rows):
+            notices.append(f"Showing the first {rows_wanted:,} of a large file.")
+        return ImportCandidate("parquet", headers, rows, options, notices)
+    except FileImportError:
+        raise
+    except Exception as exc:
+        raise FileImportError(f"Could not read {path.name} as Parquet: {exc}") from exc
+    finally:
+        if parquet_file is not None:
+            parquet_file.close()
+
+
+def _parquet_field_types(schema: Any, headers: list[str], control: _ImportControl | None) -> list[Any]:
+    """Return the scalar type of each column, refusing nested and binary types."""
+    import pyarrow as pa
+
+    supported_type = (
+        pa.types.is_null,
+        pa.types.is_boolean,
+        pa.types.is_integer,
+        pa.types.is_floating,
+        pa.types.is_decimal,
+        pa.types.is_string,
+        pa.types.is_large_string,
+        pa.types.is_date,
+        pa.types.is_time,
+        pa.types.is_timestamp,
+    )
+    field_types = []
+    for column_index, field in enumerate(schema):
+        if control is not None:
+            control.check_cancelled()
+        data_type = field.type
+        if pa.types.is_dictionary(data_type):
+            data_type = data_type.value_type
+        if not any(is_type(data_type) for is_type in supported_type):
+            raise FileImportError(
+                f"Parquet column {headers[column_index]!r} has unsupported type "
+                f"{field.type}. Supported columns must contain scalar values; "
+                "nested and binary types are not supported."
+            )
+        field_types.append(data_type)
+    return field_types
+
+
+def _parquet_batch_columns(
+    batch: Any,
+    schema: Any,
+    field_types: list[Any],
+    headers: list[str],
+    rendered_text_bytes: int,
+    text_limit: int | None,
+) -> tuple[list[list[Any]], int]:
+    """Convert one record batch to per-column Python values; returns the running text byte count."""
+    import pyarrow as pa
+
+    values_by_column: list[list[Any]] = []
+    for column_index in range(len(schema)):
+        array = batch.column(column_index)
+        if pa.types.is_dictionary(array.type):
+            array = array.dictionary_decode()
+        rendered = array.to_pylist()
+
+        if pa.types.is_floating(field_types[column_index]):
+            for value in rendered:
+                if isinstance(value, float) and not math.isfinite(value):
+                    raise FileImportError(
+                        f"Parquet column {headers[column_index]!r} contains a non-finite number."
+                    )
+        for value in rendered:
+            if value is not None:
+                rendered_text_bytes += len(cell_to_text(value).encode("utf-8"))
+                if text_limit is not None and rendered_text_bytes > text_limit:
+                    raise ImportLimitError(
+                        f"Converted Parquet text exceeds the "
+                        f"{MAX_PARQUET_TEXT_BYTES // (1024 * 1024)} MiB result limit.",
+                        limit_kind="text",
+                    )
+        values_by_column.append(rendered)
+    return values_by_column, rendered_text_bytes
+
+
 def list_excel_sheets(path: str | Path) -> list[str]:
     """List readable worksheet names for the import-options dialog."""
     source_path = Path(path).expanduser()
     if kind_for_path(source_path) != "excel":
         raise FileImportError("Choose an .xls, .xlsx, or .xlsm workbook.")
     if _source_size(source_path) > MAX_SOURCE_BYTES:
-        raise FileImportError(
-            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit."
+        raise ImportLimitError(
+            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit.",
+            limit_kind="bytes",
         )
     if source_path.suffix.casefold() == ".xls":
         xlrd, book = _open_legacy_excel(source_path)
@@ -664,8 +781,9 @@ def recommend_excel_sheet(path: str | Path) -> str:
     if kind_for_path(source_path) != "excel":
         raise FileImportError("Choose an .xls, .xlsx, or .xlsm workbook.")
     if _source_size(source_path) > MAX_SOURCE_BYTES:
-        raise FileImportError(
-            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit."
+        raise ImportLimitError(
+            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit.",
+            limit_kind="bytes",
         )
     if source_path.suffix.casefold() == ".xls":
         xlrd, book = _open_legacy_excel(source_path)
@@ -713,8 +831,9 @@ def inspect_excel_options(
     if kind_for_path(source_path) != "excel":
         raise FileImportError("Choose an .xls, .xlsx, or .xlsm workbook.")
     if _source_size(source_path) > MAX_SOURCE_BYTES:
-        raise FileImportError(
-            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit."
+        raise ImportLimitError(
+            f"{source_path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit.",
+            limit_kind="bytes",
         )
 
     if source_path.suffix.casefold() == ".xls":
@@ -1228,8 +1347,9 @@ def _read_source_bytes(path: Path) -> bytes:
     except OSError as exc:
         raise FileImportError(f"Could not read {path.name}: {exc.strerror or exc}.") from exc
     if len(contents) > MAX_SOURCE_BYTES:
-        raise FileImportError(
-            f"{path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit."
+        raise ImportLimitError(
+            f"{path.name} is larger than the {MAX_SOURCE_BYTES // (1024 * 1024)} MiB import limit.",
+            limit_kind="bytes",
         )
     return contents
 
@@ -1246,8 +1366,28 @@ def _parse_csv(
         text = content.decode(options["encoding"])
     except UnicodeDecodeError as exc:
         raise FileImportError(f"Could not decode {path.name} as {options['encoding']}.") from exc
+    return _parse_csv_text(text, path, options, control)
 
+
+def _parse_csv_text(
+    text: str,
+    path: Path,
+    options: dict[str, Any],
+    control: _ImportControl | None = None,
+    *,
+    truncated: bool = False,
+    max_rows: int | None = None,
+) -> ImportCandidate:
+    """Turn decoded CSV text into a candidate.
+
+    ``max_rows`` is for the head preview only: it keeps the first ``max_rows``
+    data rows, reads the rest of ``text`` only for the column width, and skips
+    the row and cell limits. ``truncated`` means ``text`` is a prefix of a
+    larger file, so a notice is added.
+    """
+    header_count = 1 if options["has_header"] else 0
     raw_rows: list[list[str]] = []
+    record_total = 0
     # csv.field_size_limit is process-global. Guard and restore it so a valid
     # field up to the bounded file size is accepted without leaking settings.
     with _CSV_FIELD_LIMIT_LOCK:
@@ -1267,14 +1407,17 @@ def _parse_csv(
                 if _is_empty_record(record) and not is_blank_header:
                     continue
                 _check_column_limit(len(record))
-                raw_rows.append(record)
+                if max_rows is None or len(raw_rows) < max_rows + header_count:
+                    raw_rows.append(record)
+                record_total += 1
                 widest_record = max(widest_record, len(record))
-                data_count = len(raw_rows) - (1 if options["has_header"] else 0)
-                _check_row_limit(data_count)
-                _check_cell_limit(data_count, widest_record)
+                data_count = record_total - header_count
+                if max_rows is None:
+                    _check_row_limit(data_count)
+                    _check_cell_limit(data_count, widest_record)
                 if (
                     control is not None
-                    and len(raw_rows) % _PROGRESS_ROW_INTERVAL == 0
+                    and record_total % _PROGRESS_ROW_INTERVAL == 0
                 ):
                     control.report(f"Read {data_count:,} CSV rows…")
         except csv.Error as exc:
@@ -1292,10 +1435,14 @@ def _parse_csv(
         raw_headers = []
         data_records = raw_rows
 
-    width = max([len(raw_headers), *(len(record) for record in data_records)], default=0)
+    if max_rows is None:
+        width = max([len(raw_headers), *(len(record) for record in data_records)], default=0)
+    else:
+        width = widest_record
     _check_column_limit(width)
     headers = _normalize_headers(raw_headers, width)
-    _check_cell_limit(len(data_records), len(headers))
+    if max_rows is None:
+        _check_cell_limit(len(data_records), len(headers))
 
     rows = []
     for row_number, record in enumerate(data_records, 1):
@@ -1305,10 +1452,115 @@ def _parse_csv(
                 control.report(f"Preparing {row_number:,} CSV rows…")
         values = record + [""] * (width - len(record))
         rows.append(dict(zip(headers, values)))
-    return ImportCandidate("csv", headers, rows, options, [])
+    notices: list[str] = []
+    if max_rows is not None and (truncated or record_total - header_count > max_rows):
+        notices.append(f"Showing the first {max_rows:,} of a large file.")
+    if max_rows is not None and truncated:
+        notices.append("Column count taken from the first part of the file.")
+    return ImportCandidate("csv", headers, rows, options, notices)
 
 
 _CSV_FIELD_LIMIT_LOCK = threading.RLock()
+
+
+_CSV_LINE_PATTERN = re.compile(r"[^\r\n]*(?:\r\n|\r|\n)|[^\r\n]+\Z")
+
+
+def _last_complete_csv_record_end(text: str, options: dict[str, Any]) -> int:
+    """Return the offset just after the last record of ``text`` that ends outside quotes.
+
+    Records are read with the csv module. A record counts only when the line
+    that ended it has a line terminator, so a partial record at the cut is never
+    accepted. Returns 0 when no record is complete.
+    """
+    lines = _CSV_LINE_PATTERN.findall(text)
+    pulled_lines = 0
+    pulled_chars = 0
+    end = 0
+
+    def feed() -> Any:
+        nonlocal pulled_lines, pulled_chars
+        for line in lines:
+            pulled_lines += 1
+            pulled_chars += len(line)
+            yield line
+
+    with _CSV_FIELD_LIMIT_LOCK:
+        old_field_limit = csv.field_size_limit()
+        csv.field_size_limit(MAX_SOURCE_BYTES)
+        try:
+            for _record in csv.reader(feed(), delimiter=options["delimiter"], strict=True):
+                if lines[pulled_lines - 1][-1:] in {"\r", "\n"}:
+                    end = pulled_chars
+        except csv.Error:
+            # The partial record after the cut (an open quote, for example)
+            # is not complete; records before it were already accepted.
+            pass
+        finally:
+            csv.field_size_limit(old_field_limit)
+    return end
+
+
+def _parse_csv_head(path: Path, options: dict[str, Any], rows_wanted: int) -> ImportCandidate:
+    """Parse the first ``rows_wanted`` rows of a CSV file from at most HEAD_PREFIX_BYTES."""
+    try:
+        with path.open("rb") as stream:
+            chunk = stream.read(HEAD_PREFIX_BYTES + 1)
+    except OSError as exc:
+        raise FileImportError(f"Could not read {path.name}: {exc.strerror or exc}.") from exc
+    truncated = len(chunk) > HEAD_PREFIX_BYTES
+    if truncated:
+        chunk = chunk[:HEAD_PREFIX_BYTES]
+    try:
+        codec = options["encoding"]
+        if codec == "utf-16" and not chunk.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
+            # bytes.decode("utf-16") without a BOM reads native byte order, but the
+            # incremental decoder requires a BOM, so name the byte order explicitly.
+            codec = "utf-16-le" if sys.byteorder == "little" else "utf-16-be"
+        decoder = codecs.getincrementaldecoder(codec)(errors="strict")
+        text = decoder.decode(chunk, final=not truncated)
+    except UnicodeDecodeError as exc:
+        raise FileImportError(f"Could not decode {path.name} as {options['encoding']}.") from exc
+    if truncated:
+        cut = _last_complete_csv_record_end(text, options)
+        if cut == 0:
+            raise FileImportError(
+                f"{path.name} has no complete CSV record in the head preview window."
+            )
+        text = text[:cut]
+    return _parse_csv_text(
+        text, path, options, None, truncated=truncated, max_rows=rows_wanted,
+    )
+
+
+def parse_head(
+    path: str | Path,
+    options: Mapping[str, Any] | None = None,
+    rows: int = 1000,
+) -> ImportCandidate:
+    """Parse the first ``rows`` data rows of a CSV or Parquet file.
+
+    The file is not read past HEAD_PREFIX_BYTES (CSV) or past the batch that
+    holds ``rows`` rows (Parquet). Only the column limit applies; the byte,
+    row and cell limits of parse_file do not.
+    """
+    source_path = Path(path).expanduser()
+    kind = kind_for_path(source_path)
+    if kind not in {"csv", "parquet"}:
+        raise FileImportError("A head preview is only available for CSV and Parquet files.")
+    if isinstance(rows, bool) or not isinstance(rows, int) or rows < 1:
+        raise FileImportError("A head preview needs at least one row.")
+    normalized = normalize_options(kind, options)
+    _source_size(source_path)
+    if kind == "csv":
+        candidate = _parse_csv_head(source_path, normalized, rows)
+    else:
+        candidate = _parse_parquet_head(source_path, normalized, rows)
+    source_key = hashlib.sha256(
+        f"{kind}\0{source_path.resolve()}\0{json.dumps(normalized, sort_keys=True, default=str)}".encode("utf-8")
+    ).hexdigest()[:24]
+    candidate.set_source_identity(source_key)
+    return candidate
 
 
 def _parse_json(
@@ -2408,7 +2660,9 @@ def _is_empty_record(record: list[str]) -> bool:
 
 def _check_row_limit(count: int) -> None:
     if count > MAX_DATA_ROWS:
-        raise FileImportError(f"The file exceeds the {MAX_DATA_ROWS:,}-row import limit.")
+        raise ImportLimitError(
+            f"The file exceeds the {MAX_DATA_ROWS:,}-row import limit.", limit_kind="rows"
+        )
 
 
 def _check_column_limit(count: int) -> None:
@@ -2418,4 +2672,6 @@ def _check_column_limit(count: int) -> None:
 
 def _check_cell_limit(row_count: int, column_count: int) -> None:
     if row_count * column_count > MAX_CELLS:
-        raise FileImportError(f"The file exceeds the {MAX_CELLS:,}-cell import limit.")
+        raise ImportLimitError(
+            f"The file exceeds the {MAX_CELLS:,}-cell import limit.", limit_kind="cells"
+        )
