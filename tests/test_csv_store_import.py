@@ -641,7 +641,7 @@ def test_s6_unreadable_file_and_directory(tmp_path):
         # Directory
         d = tmp_path / "a_dir"
         d.mkdir()
-        with pytest.raises(fi.FileImportError, match="is not a regular file"):
+        with pytest.raises(fi.FileImportError, match="Could not read a_dir: Is a directory"):
             import_csv_to_store(store, "t2", d, fi.normalize_options("csv", {}))
 
         # Unreadable file (chmod 000)
