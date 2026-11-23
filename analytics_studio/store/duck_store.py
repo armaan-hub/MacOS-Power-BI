@@ -7,6 +7,7 @@ import functools
 import math
 import os
 import threading
+import uuid
 from collections.abc import Sequence as _AbcSequence
 from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, TypeVar, cast
 
@@ -235,6 +236,10 @@ class DuckStore:
         self._lock_fd: Optional[int] = None
         self._lock = threading.RLock()
         self._conn: Optional[duckdb.DuckDBPyConnection] = None
+        # In-memory change counters per table (lower-cased name); never persisted.
+        self._versions: dict[str, int] = {}
+        # True while append_rows or create_table_from_arrow holds an open transaction.
+        self._txn_open = False
 
         try:
             os.makedirs(os.path.dirname(self.path), exist_ok=True)
@@ -314,6 +319,23 @@ class DuckStore:
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.close()
 
+    def _bump_version(self, name: str) -> None:
+        key = _ascii_lower(name)
+        self._versions[key] = self._versions.get(key, 0) + 1
+
+    def table_version(self, name: str) -> int:
+        """Return an in-memory change token for a table.
+
+        The token goes up by one after every successful create_table, append_rows,
+        drop_table and create_table_from_arrow for that table name. It starts at 0 for
+        a name this store object has never changed, it is never saved to disk, and it
+        does not take the store lock, so it can be read while an import runs.
+        Models use it to know that cached facts about a table are out of date.
+        """
+        if not isinstance(name, str):
+            return 0
+        return self._versions.get(_ascii_lower(name), 0)
+
     def _check_open(self) -> duckdb.DuckDBPyConnection:
         if self._conn is None:
             raise StoreError("Store is closed.")
@@ -323,7 +345,7 @@ class DuckStore:
         try:
             rows = conn.execute(
                 "SELECT table_name FROM information_schema.tables "
-                "WHERE table_schema = current_schema() ORDER BY table_name"
+                "WHERE table_schema = current_schema() AND table_type = 'BASE TABLE' ORDER BY table_name"
             ).fetchall()
             return [r[0] for r in rows]
         except Exception as exc:
@@ -399,6 +421,7 @@ class DuckStore:
             conn.execute(create_sql)
         except Exception as exc:
             raise StoreError(f"Failed to create table '{name}': {exc}") from exc
+        self._bump_version(name)
 
     @_thread_locked
     def has_table(self, name: str) -> bool:
@@ -462,6 +485,7 @@ class DuckStore:
             conn.execute(f"DROP TABLE {quoted_name}")
         except Exception as exc:
             raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
+        self._bump_version(resolved_name)
 
     @_thread_locked
     def append_rows(self, name: str, rows: Iterable[Sequence[Any]]) -> int:
@@ -510,6 +534,7 @@ class DuckStore:
         except Exception as exc:
             raise StoreError(f"Failed to begin transaction: {exc}") from exc
 
+        self._txn_open = True
         try:
             for row in rows:
                 if isinstance(row, (str, bytes, bytearray)) or not isinstance(row, _AbcSequence):
@@ -546,8 +571,10 @@ class DuckStore:
                 current_batch = []
 
             conn.execute("COMMIT")
+            self._txn_open = False
         except BaseException as exc:
             # BaseException on purpose: an interrupt must not leave the transaction open.
+            self._txn_open = False
             try:
                 conn.execute("ROLLBACK")
             except Exception:
@@ -558,6 +585,7 @@ class DuckStore:
                 f"Failed to append rows to '{resolved_name}' at row {overall_row_idx}: {exc}"
             ) from exc
 
+        self._bump_version(resolved_name)
         return total_appended
 
     def _insert_batch(
@@ -679,6 +707,178 @@ class DuckStore:
             raise StoreError(f"Query execution failed: {exc}") from exc
 
     @_thread_locked
+    def checkpoint(self) -> None:
+        """Execute a checkpoint to flush the write-ahead log to disk.
+
+        Must be called before copying or moving the database file to ensure all
+        committed data is persisted in the main file rather than left in the WAL.
+        """
+        conn = self._check_open()
+        if self._txn_open:
+            raise StoreError("Cannot checkpoint while a transaction is open.")
+        try:
+            conn.execute("CHECKPOINT")
+        except Exception as exc:
+            raise StoreError(f"Checkpoint failed: {exc}") from exc
+
+    @_thread_locked
+    def create_view_ids(
+        self,
+        name: str,
+        select_sql: str,
+        params: Sequence[Any] = (),
+    ) -> None:
+        """Create a temporary table containing ordered __rn values for model views.
+
+        `name` must begin with '__stm_'.
+        `select_sql` must be a single SELECT statement returning at least `__rn`.
+        A positional column `position` is computed via `(ROW_NUMBER() OVER ()) - 1`.
+        """
+        conn = self._check_open()
+        _validate_identifier(name, kind="View name")
+        if not name.startswith("__stm_"):
+            raise StoreError(
+                f"View name '{name}' must start with reserved prefix '__stm_'."
+            )
+
+        # Refuse names that already exist as a table or temp table
+        all_raw = self._get_raw_tables(conn)
+        target_lower = _ascii_lower(name)
+        if any(_ascii_lower(t) == target_lower for t in all_raw):
+            raise StoreError(f"Table '{name}' already exists.")
+
+        try:
+            temp_tables = conn.execute(
+                "SELECT table_name FROM duckdb_tables() WHERE temporary"
+            ).fetchall()
+            temp_names = [r[0] for r in temp_tables]
+            if any(_ascii_lower(t) == target_lower for t in temp_names):
+                raise StoreError(f"Temporary table '{name}' already exists.")
+        except StoreError:
+            raise
+        except Exception as exc:
+            raise StoreError(f"Failed to check existing temp tables: {exc}") from exc
+
+        if not isinstance(select_sql, str) or not select_sql.strip():
+            raise StoreError("Query must be a non-empty string.")
+
+        try:
+            stmts = conn.extract_statements(select_sql)
+        except Exception as exc:
+            raise StoreError(f"Invalid SQL: {exc}") from exc
+
+        if len(stmts) != 1:
+            raise StoreError(
+                f"Only a single statement is allowed; found {len(stmts)} statements."
+            )
+
+        stmt = stmts[0]
+        if stmt.type != duckdb.StatementType.SELECT:
+            raise StoreError(
+                f"Only SELECT queries are allowed; received statement type {stmt.type}."
+            )
+
+        quoted_name = _quote_identifier(name)
+        create_sql = (
+            f"CREATE TEMP TABLE {quoted_name} AS "
+            f"SELECT \"__rn\", (ROW_NUMBER() OVER ()) - 1 AS position "
+            f"FROM ({select_sql})"
+        )
+        try:
+            conn.execute(create_sql, params)
+        except Exception as exc:
+            raise StoreError(f"Failed to create view ids '{name}': {exc}") from exc
+
+    @_thread_locked
+    def register_arrow_ids(
+        self,
+        name: str,
+        rns: Sequence[int],
+    ) -> None:
+        """Create a temporary view table from an explicit sequence of __rn row ids.
+
+        `name` must start with '__stm_'.
+        """
+        conn = self._check_open()
+        _validate_identifier(name, kind="View name")
+        if not name.startswith("__stm_"):
+            raise StoreError(
+                f"View name '{name}' must start with reserved prefix '__stm_'."
+            )
+
+        all_raw = self._get_raw_tables(conn)
+        target_lower = _ascii_lower(name)
+        if any(_ascii_lower(t) == target_lower for t in all_raw):
+            raise StoreError(f"Table '{name}' already exists.")
+
+        try:
+            temp_tables = conn.execute(
+                "SELECT table_name FROM duckdb_tables() WHERE temporary"
+            ).fetchall()
+            temp_names = [r[0] for r in temp_tables]
+            if any(_ascii_lower(t) == target_lower for t in temp_names):
+                raise StoreError(f"Temporary table '{name}' already exists.")
+        except StoreError:
+            raise
+        except Exception as exc:
+            raise StoreError(f"Failed to check existing temp tables: {exc}") from exc
+
+        quoted_name = _quote_identifier(name)
+        batch_name = f"__stm_batch_{uuid.uuid4().hex[:8]}__"
+        rn_array = pa.array(rns, type=pa.int64())
+        pos_array = pa.array(range(len(rns)), type=pa.int64())
+        pa_table = pa.Table.from_arrays(
+            [rn_array, pos_array], names=["__rn", "position"]
+        )
+
+        conn.register(batch_name, pa_table)
+        try:
+            conn.execute(
+                f"CREATE TEMP TABLE {quoted_name} AS SELECT * FROM {batch_name}"
+            )
+        except Exception as exc:
+            raise StoreError(f"Failed to register view ids '{name}': {exc}") from exc
+        finally:
+            try:
+                conn.unregister(batch_name)
+            except Exception:
+                pass
+
+    @_thread_locked
+    def drop_view(self, name: str) -> None:
+        """Drop a temporary view table. Refuses non-__stm_ names and non-temporary tables."""
+        conn = self._check_open()
+        _validate_identifier(name, kind="View name")
+        if not name.startswith("__stm_"):
+            raise StoreError(
+                f"View name '{name}' must start with reserved prefix '__stm_'."
+            )
+
+        # Check if the table exists as a non-temporary table
+        all_raw = self._get_raw_tables(conn)
+        target_lower = _ascii_lower(name)
+        if any(_ascii_lower(t) == target_lower for t in all_raw):
+            raise StoreError(f"Refusing to drop non-temporary table '{name}'.")
+
+        # Verify that it is indeed a temporary table (or does not exist)
+        try:
+            temp_rows = conn.execute(
+                "SELECT table_name FROM duckdb_tables() WHERE temporary AND table_name = ?",
+                [name],
+            ).fetchall()
+            if not temp_rows:
+                # Does not exist as a temporary table
+                return
+        except Exception as exc:
+            raise StoreError(f"Failed to inspect temporary tables: {exc}") from exc
+
+        quoted_name = _quote_identifier(name)
+        try:
+            conn.execute(f"DROP TABLE {quoted_name}")
+        except Exception as exc:
+            raise StoreError(f"Failed to drop view '{name}': {exc}") from exc
+
+    @_thread_locked
     def create_table_from_arrow(
         self,
         name: str,
@@ -763,6 +963,7 @@ class DuckStore:
         table_created = False
         try:
             conn.execute("BEGIN TRANSACTION")
+            self._txn_open = True
             conn.execute(create_sql)
             table_created = True
 
@@ -821,8 +1022,11 @@ class DuckStore:
                     raise StoreError("Store contains datetime values outside year 1 to 9999 or non-finite timestamps.")
 
             conn.execute("COMMIT")
+            self._txn_open = False
+            self._bump_version(name)
             return total_rows
         except BaseException as exc:
+            self._txn_open = False
             try:
                 conn.execute("ROLLBACK")
             except Exception:

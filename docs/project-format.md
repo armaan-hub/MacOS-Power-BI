@@ -2,9 +2,35 @@
 
 ## Overview
 
-The `.npa` format is a readable UTF-8 JSON document. Version 84 stores project identity, active view and page, report chart settings and report/page/visual filters, visual field bindings and aggregation choices, saved source-to-target visual interactions, optional data-label and legend visibility, visual group IDs, report theme, button action text/URLs, local image paths, model metadata including optional date-table and key-column metadata, per-column default summarization and Group by columns, optional relationship definitions, per-column data types, measure definitions and optional descriptions, display folders, and hidden flags, calculated-column definitions, linked local files, SQLite objects, SQL Server objects, OData Feed entity sets, and Web URLs/navigation settings, optional embedded tables, replayable local table transformations, typed scalar Power Query parameters and functions, optionally preserved supported M editor text, derived append/merge/calculated/calendar-table query definitions, query groups, and saved-query load/refresh settings. File and remote database rows and local image files remain external; only tables entered or loaded as built-in sample data are embedded.
+The `.npa` format is a readable UTF-8 JSON document. Version 85 stores project identity, active view and page, report chart settings and report/page/visual filters, visual field bindings and aggregation choices, saved source-to-target visual interactions, optional data-label and legend visibility, visual group IDs, report theme, button action text/URLs, local image paths, model metadata including optional date-table and key-column metadata, per-column default summarization and Group by columns, optional relationship definitions, per-column data types, measure definitions and optional descriptions, display folders, and hidden flags, calculated-column definitions, linked local files, SQLite objects, SQL Server objects, OData Feed entity sets, and Web URLs/navigation settings, optional embedded tables, replayable local table transformations, typed scalar Power Query parameters and functions, optionally preserved supported M editor text, derived append/merge/calculated/calendar-table query definitions, query groups, and saved-query load/refresh settings. File and remote database rows and local image files remain external; only tables entered or loaded as built-in sample data are embedded.
 
-The top-level `format` value is `com.analytics-studio.project`; `format_version` is `84`.
+The top-level `format` value is `com.analytics-studio.project`; `format_version` is `85`.
+
+## Large-data store settings (`store`, format version 85)
+
+An optional `store` object may appear only on a `csv` or `parquet` data source. It records a table kept in the large-data store file. No other kind may have it.
+
+- `table` (non-empty text): the store table name.
+- `row_count` (whole number, 0 to 2^63-1, not a boolean).
+- `headers` (list of up to 512 unique non-empty text names). Names that differ only by ASCII letter case count as the same name and are refused. Non-ASCII case variants are distinct.
+- `physical_types` (list, one per header): each one of `whole`, `decimal`, `fixed`, `datetime`, `text`, `boolean`.
+- `column_types` (optional object): header name to app type name.
+- `source_id` (non-empty text).
+- `data_file` (required): a bare file name. It must not contain `/`, a backslash, or `..`.
+- `fingerprint` (object with exactly `size`, `mtime_ns` and `head_tail_sha256`): `size` and `mtime_ns` are whole numbers from 0 to 2^63-1. `head_tail_sha256` is 64 lowercase hexadecimal characters.
+- `generation` (whole number, 1 to 2^63-1).
+- `duckdb_version` (non-empty text).
+- `notices` (optional list of text).
+- `source_arrow_types` (optional list of text, one per header).
+
+Other rules for a source with `store`:
+
+- `transform_steps` must be empty (`[]`) or absent.
+- `rows` must not be present.
+- `path` is required and must be non-empty.
+- Any other key inside `store` (or inside `fingerprint`) is rejected by name.
+
+A v84 project has no `store` key and migrates to v85 with only the version changed.
 
 ## Report visual field bindings
 

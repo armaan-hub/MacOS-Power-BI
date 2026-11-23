@@ -15,8 +15,20 @@ from uuid import uuid4
 
 
 FORMAT_ID = "com.analytics-studio.project"
-FORMAT_VERSION = 84
+FORMAT_VERSION = 85
 MAX_M_SCRIPT_LENGTH = 32_000
+# Large-data store settings on a csv/parquet source (format v85). Local copies:
+# importing analytics_studio.store here would create an import cycle.
+STORE_SOURCE_KINDS = {"csv", "parquet"}
+STORE_PHYSICAL_TYPES = ("whole", "decimal", "fixed", "datetime", "text", "boolean")
+STORE_MAX_HEADERS = 512
+STORE_REQUIRED_KEYS = (
+    "table", "row_count", "headers", "physical_types", "source_id",
+    "data_file", "fingerprint", "generation", "duckdb_version",
+)
+STORE_OPTIONAL_KEYS = ("column_types", "notices", "source_arrow_types")
+STORE_ALLOWED_KEYS = frozenset(STORE_REQUIRED_KEYS + STORE_OPTIONAL_KEYS)
+STORE_FINGERPRINT_KEYS = ("size", "mtime_ns", "head_tail_sha256")
 REPORT_THEMES = {
     "Default": {"primary": "#0078D4", "secondary": "#107C71"},
     "Executive": {"primary": "#00188F", "secondary": "#252423"},
@@ -240,6 +252,141 @@ def new_project(name: str = "Untitled Project") -> dict[str, Any]:
     }
 
 
+STORE_MAX_INTEGER = 2**63 - 1
+_ASCII_UPPER_TO_LOWER = {code: code + 32 for code in range(ord("A"), ord("Z") + 1)}
+
+
+def _is_whole_number(value: Any, minimum: int) -> bool:
+    return (
+        isinstance(value, int)
+        and not isinstance(value, bool)
+        and minimum <= value <= STORE_MAX_INTEGER
+    )
+
+
+def _is_sha256_hex(value: Any) -> bool:
+    # Lowercase only: the store writes hexdigest() and compares by string equality.
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(char in "0123456789abcdef" for char in value)
+    )
+
+
+def _ascii_fold(name: str) -> str:
+    # Matches the store's ASCII-only case rule. str.lower() would also fold non-ASCII letters.
+    return name.translate(_ASCII_UPPER_TO_LOWER)
+
+
+def _validate_store_source(source: dict[str, Any]) -> None:
+    """Validate the optional large-data store settings of a source (format v85)."""
+    source_id = source.get("id")
+    if source.get("kind") not in STORE_SOURCE_KINDS:
+        raise ProjectFileError(
+            f"Only CSV and Parquet data sources can use large-data store settings ({source_id!r})."
+        )
+
+    def fail(detail: str) -> ProjectFileError:
+        return ProjectFileError(f"The large-data store settings for {source_id!r} {detail}")
+
+    store = source["store"]
+    if not isinstance(store, dict):
+        raise fail("must be a JSON object.")
+    for key in store:
+        if key not in STORE_ALLOWED_KEYS:
+            raise fail(f"contain an unknown key {key!r}.")
+    for key in STORE_REQUIRED_KEYS:
+        if key not in store:
+            raise fail(f"need the {key!r} field.")
+
+    if not isinstance(store["table"], str) or not store["table"].strip():
+        raise fail("need a non-empty 'table' name.")
+    if not _is_whole_number(store["row_count"], 0):
+        raise fail("need a row_count that is a whole number of at least 0.")
+
+    headers = store["headers"]
+    if not isinstance(headers, list) or len(headers) > STORE_MAX_HEADERS:
+        raise fail(f"need a headers list of at most {STORE_MAX_HEADERS} names.")
+    if any(not isinstance(header, str) or not header.strip() for header in headers):
+        raise fail("need every header to be a non-empty text name.")
+    if len({_ascii_fold(header) for header in headers}) != len(headers):
+        raise fail("need unique header names; names that differ only by ASCII letter case are the same name.")
+
+    physical_types = store["physical_types"]
+    if not isinstance(physical_types, list) or len(physical_types) != len(headers):
+        raise fail("need a physical_types list with one entry per header.")
+    if any(item not in STORE_PHYSICAL_TYPES for item in physical_types):
+        raise fail(f"need physical_types from {', '.join(STORE_PHYSICAL_TYPES)}.")
+
+    if "column_types" in store:
+        column_types = store["column_types"]
+        if not isinstance(column_types, dict) or not all(
+            isinstance(name, str) and isinstance(app_type, str)
+            for name, app_type in column_types.items()
+        ):
+            raise fail("need column_types to map header names to type names.")
+
+    if not isinstance(store["source_id"], str) or not store["source_id"].strip():
+        raise fail("need a non-empty source_id.")
+
+    data_file = store["data_file"]
+    if (
+        not isinstance(data_file, str)
+        or not data_file.strip()
+        or "/" in data_file
+        or "\\" in data_file
+        or ".." in data_file
+        or "\x00" in data_file
+    ):
+        raise fail("need data_file to be a bare file name with no folder parts.")
+
+    fingerprint = store["fingerprint"]
+    if not isinstance(fingerprint, dict):
+        raise fail("need a fingerprint object.")
+    for key in fingerprint:
+        if key not in STORE_FINGERPRINT_KEYS:
+            raise fail(f"contain an unknown fingerprint key {key!r}.")
+    for key in STORE_FINGERPRINT_KEYS:
+        if key not in fingerprint:
+            raise fail(f"need the fingerprint {key!r} field.")
+    if not _is_whole_number(fingerprint["size"], 0) or not _is_whole_number(fingerprint["mtime_ns"], 0):
+        raise fail("need fingerprint size and mtime_ns to be whole numbers of at least 0.")
+    if not _is_sha256_hex(fingerprint["head_tail_sha256"]):
+        raise fail("need fingerprint head_tail_sha256 to be 64 hexadecimal characters.")
+
+    if not _is_whole_number(store["generation"], 1):
+        raise fail("need a generation that is a whole number of at least 1.")
+    if not isinstance(store["duckdb_version"], str) or not store["duckdb_version"].strip():
+        raise fail("need a non-empty duckdb_version.")
+
+    if "notices" in store:
+        notices = store["notices"]
+        if not isinstance(notices, list) or any(not isinstance(item, str) for item in notices):
+            raise fail("need notices to be a list of text.")
+    if "source_arrow_types" in store:
+        arrow_types = store["source_arrow_types"]
+        if (
+            not isinstance(arrow_types, list)
+            or len(arrow_types) != len(headers)
+            or any(not isinstance(item, str) for item in arrow_types)
+        ):
+            raise fail("need source_arrow_types to be a text list with one entry per header.")
+
+    # The rows live in the store file, so the saved source must not carry rows or steps.
+    if "rows" in source:
+        raise ProjectFileError(
+            f"A store-backed data source must not contain rows ({source_id!r})."
+        )
+    if "transform_steps" in source and source["transform_steps"] != []:
+        raise ProjectFileError(
+            f"A store-backed data source must not have transform steps ({source_id!r})."
+        )
+    if not isinstance(source.get("path"), str) or not source["path"].strip():
+        raise ProjectFileError(
+            f"A store-backed data source needs a non-empty 'path' field ({source_id!r})."
+        )
+
+
 def validate_project(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ProjectFileError("The project root must be a JSON object.")
@@ -423,6 +570,8 @@ def validate_project(value: Any) -> dict[str, Any]:
             value = _migrate_v82_to_v83(value)
         elif version == 83:
             value = _migrate_v83_to_v84(value)
+        elif version == 84:
+            value = _migrate_v84_to_v85(value)
         else:
             raise UnsupportedProjectVersion(f"Project format version {version} is not supported.")
         version = value.get("format_version")
@@ -642,6 +791,8 @@ def validate_project(value: Any) -> dict[str, Any]:
                 raise ProjectFileError("Each file data source needs a non-empty 'path' field.")
             if "\x00" in source["path"]:
                 raise ProjectFileError("A data source path contains an invalid character.")
+        if "store" in source:
+            _validate_store_source(source)
 
     from analytics_studio.query_engine import JOIN_KINDS
 
@@ -2182,4 +2333,14 @@ def _migrate_v83_to_v84(value: dict[str, Any]) -> dict[str, Any]:
                 ):
                     step["missing_part"] = ""
     migrated["format_version"] = 84
+    return migrated
+
+
+def _migrate_v84_to_v85(value: dict[str, Any]) -> dict[str, Any]:
+    """Format v85 adds the optional large-data store settings on csv/parquet sources.
+
+    Nothing existing changes: a v84 project has no store key, so only the version moves.
+    """
+    migrated = deepcopy(value)
+    migrated["format_version"] = 85
     return migrated
