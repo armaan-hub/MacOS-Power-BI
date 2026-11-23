@@ -26,7 +26,7 @@ def _v83_document(steps: list[dict]) -> dict:
 
 class V84MissingPartMigrationTests(unittest.TestCase):
     def test_format_version_is_84(self) -> None:
-        self.assertEqual(FORMAT_VERSION, 84)
+        self.assertEqual(FORMAT_VERSION, 85)
 
     def test_v83_split_step_loads_and_replays_blank_missing_part(self) -> None:
         document = _v83_document([{"op": "split_column", "column": "A", "delimiter": ","}])

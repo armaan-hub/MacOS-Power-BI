@@ -261,7 +261,7 @@ class ProjectMigrationTests(unittest.TestCase):
         migrated = validate_project(document)
 
         self.assertEqual(migrated["format_version"], FORMAT_VERSION)
-        self.assertEqual(FORMAT_VERSION, 84)
+        self.assertEqual(FORMAT_VERSION, 85)
         self.assertEqual(
             migrated["report"]["pages"][0]["name"],
             before["report"]["pages"][0]["name"],
