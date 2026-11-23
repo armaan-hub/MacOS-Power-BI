@@ -57,6 +57,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
+from analytics_studio.relationship_keys import RelationshipKeyMemo
 from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_failing_type_tests, dax_format, dax_iteration_order, dax_linest, dax_math, dax_model_fns, dax_order, dax_sampling_fns, dax_subnormal, dax_swi_ties, dax_time_sets, dax_typed, dax_visual_calc_fns
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
@@ -10827,6 +10828,7 @@ def _evaluate_measures_once(
 ) -> dict[str, Decimal | None]:
     """One evaluation of the measures with the tie orders chosen by the enclosing driver (see evaluate_measures)."""
     eval_step = 0
+    relationship_key_memo = RelationshipKeyMemo(_relationship_value_key)  # the row keys of one evaluation, shared by its relationship propagations
     definitions = validate_measures(list(measures))
     by_name = {item["name"].casefold(): item for item in definitions}
     parsed = {item["name"].casefold(): parse_expression(item["expression"]) for item in definitions}
@@ -11207,7 +11209,7 @@ def _evaluate_measures_once(
             if table.get("id") in filter_table_ids and table.get("filter_column_rows")
             and all(getattr(rows, "many", False) for rows in table["filter_column_rows"].values())
         }
-        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected, peer_blank=peer_blank, many_blank=many_blank, exclusion_only=exclusion_only)
+        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected, peer_blank=peer_blank, many_blank=many_blank, exclusion_only=exclusion_only, key_memo=relationship_key_memo)
 
     try:
         rows_by_table_id = propagate_relationship_filters(
@@ -19667,14 +19669,7 @@ def _evaluate_measures_once(
             }
             updated["filter_context_complete"] = True
             if remaining_column_rows:
-                updated["filter_rows"] = [
-                    row
-                    for row_index, row in enumerate(updated["rows"])
-                    if all(
-                        row_index in indexes
-                        for indexes in remaining_column_rows.values()
-                    )
-                ]
+                updated["filter_rows"] = rows_matching(updated["rows"], remaining_column_rows)
             else:
                 updated.pop("filter_rows", None)
                 updated_filter_roots.discard(updated["id"])
@@ -20779,6 +20774,9 @@ def _evaluate_measures_once(
             if pushed:
                 row_stack.pop()
 
+    boolean_filter_index: dict[tuple[int, int, tuple[str, ...]], tuple[list[dict[str, Any]], dict[tuple[Any, ...], dict[str, Any]], dict[tuple[Any, ...], list[int]]]] = {}
+    boolean_filter_allowed: dict[tuple[Any, ...], BlankSet] = {}
+
     def general_boolean_filter_sets(node: tuple[Any, ...]) -> dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]:
         """A Boolean CALCULATE filter is FILTER(ALL(referenced columns), expression): test it on every row of the table."""
         if _contains_any_function_call(node, _INFO_FUNCTIONS):
@@ -20797,12 +20795,21 @@ def _evaluate_measures_once(
         if len(columns) != 1:
             raise MeasureError("A Boolean CALCULATE filter must reference columns of exactly one table.")
         table_id, (context, names) = next(iter(columns.items()))
-        distinct: dict[tuple[Any, ...], dict[str, Any]] = {}
-        for raw in context["rows"]:
-            values = {name: typed_cell(context, name, raw.get(name)) for name in names}
-            distinct.setdefault(row_key(values[name] for name in names), values)
+        # the table's distinct value tuples over these columns and the rows holding each, built once per evaluation: the rows do not change
+        slot = (id(context["rows"]), len(context["rows"]), tuple(names))
+        indexed = boolean_filter_index.get(slot)
+        if indexed is None:
+            distinct: dict[tuple[Any, ...], dict[str, Any]] = {}
+            row_positions: dict[tuple[Any, ...], list[int]] = {}
+            for position, raw in enumerate(context["rows"]):
+                values = {name: typed_cell(context, name, raw.get(name)) for name in names}
+                key = row_key(values[name] for name in names)
+                distinct.setdefault(key, values)
+                row_positions.setdefault(key, []).append(position)
+            indexed = boolean_filter_index[slot] = (context["rows"], distinct, row_positions)
+        _, distinct, row_positions = indexed
         group_context, group_rows = derived_table(
-            list(names), list(distinct.values()), {name: (context, name) for name in names},
+            list(names), [dict(values) for values in distinct.values()], {name: (context, name) for name in names},
             {name: context.get("column_types", {}).get(name, "text") for name in names},
         )
         group_context["boolean_filter"] = True  # window functions do not read this predicate row as a row context
@@ -20817,11 +20824,12 @@ def _evaluate_measures_once(
                 blank_passes = conjuncts_pass(node, (group_context, {name: None for name in names}, len(group_rows) + 1))
             except MeasureError:
                 blank_passes = False
-        allowed = BlankSet(
-            (index for index, raw in enumerate(context["rows"])
-             if row_key(typed_cell(context, name, raw.get(name)) for name in names) in passing),
-            blank_passes,
-        )
+        allowed_slot = (slot, frozenset(passing), blank_passes)
+        allowed = boolean_filter_allowed.get(allowed_slot)
+        if allowed is None:  # the same tests on the same rows give the same set: one shared object, as the per-row transition sets are
+            allowed = boolean_filter_allowed[allowed_slot] = BlankSet(
+                (position for key in passing for position in row_positions.get(key, ())), blank_passes,
+            )
         shapes = [{"columns": tuple(names), "rows": allowed, "active": tuple(names), "dirty": False}] if len(names) > 1 else []
         return {table_id: (context, {name: allowed for name in names}, shapes)}
 
@@ -23633,7 +23641,7 @@ def _evaluate_measures_once(
             try:
                 _propagate_relationship_filters(
                     list(evaluation_contexts_by_id.values()), relationship_definitions,
-                    set(pinned) | set(evaluation_filter_ids), None, found,
+                    set(pinned) | set(evaluation_filter_ids), None, found, key_memo=relationship_key_memo,
                 )
             except RelationshipError:
                 found = {}

@@ -7,10 +7,11 @@ from collections import defaultdict, deque
 from copy import deepcopy
 from datetime import date, datetime, time
 from decimal import Decimal, DecimalException
-from typing import Any
+from typing import Any, Callable
 from uuid import uuid4
 
 from analytics_studio.power_query_values import cell_to_text, is_cell_error
+from analytics_studio.relationship_keys import RelationshipKeyMemo
 
 
 RELATIONSHIP_VERSION = 1
@@ -65,6 +66,7 @@ def propagate_relationship_filters(
     peer_blank: set[str] | None = None,
     many_blank: set[str] | None = None,
     exclusion_only: set[str] | None = None,
+    key_memo: RelationshipKeyMemo | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Propagate explicitly filtered rows across active, loaded relationships.
 
@@ -80,9 +82,12 @@ def propagate_relationship_filters(
     orphan rows but not the rows of a many-side table whose key has no match in it (SUMX(W, CALCULATE(COUNTROWS(F))) is BLANK for k5).
 
     many_blank: filtered tables whose blank member was reached from a row of a many-side table whose key has no match in them (a fact row with
-    an unknown key).  That member does not show the orphan rows of the table's one-to-one partner (SUMX(F, CALCULATE(COUNTROWS(W))) is 4, not 5)."""
+    an unknown key).  That member does not show the orphan rows of the table's one-to-one partner (SUMX(F, CALCULATE(COUNTROWS(W))) is 4, not 5).
+
+    key_memo: the key work of one evaluation, shared by its calls (see relationship_keys); without it every call computes its keys itself."""
     tables_by_id: dict[str, dict[str, Any]] = {}
     rows_by_id: dict[str, list[dict[str, Any]]] = {}
+    starts_from_all_rows: set[str] = set()  # tables whose rows began as a copy of all their rows (a filter only removes rows from it)
     for table in tables:
         table_id = table.get("id")
         if not isinstance(table_id, str) or not table_id:
@@ -95,7 +100,10 @@ def propagate_relationship_filters(
             raise RelationshipError(f"Loaded table {table.get('name', table_id)!r} has an invalid filter context.")
         tables_by_id[table_id] = table
         # a filtered table starts from its filter rows: copying all of its rows first would cost the table's size on every call
-        rows_by_id[table_id] = list(table["filter_rows"] if table_id in filter_table_ids and "filter_rows" in table else table["rows"])
+        starts_from_filter_rows = table_id in filter_table_ids and "filter_rows" in table
+        rows_by_id[table_id] = list(table["filter_rows"] if starts_from_filter_rows else table["rows"])
+        if not starts_from_filter_rows:
+            starts_from_all_rows.add(table_id)
 
     edges_by_source: dict[str, list[tuple[str, str, str, str, str, str]]] = defaultdict(list)
 
@@ -125,18 +133,29 @@ def propagate_relationship_filters(
             (target_id, source_column, target_column, source_type, target_type, source_role)
         )
 
+    def key_reader(column: str, column_type: str) -> Callable[[dict[str, Any]], Any]:
+        """The key of a row's value in a column: remembered across the calls of one evaluation when a memo is given."""
+        if key_memo is not None:
+            return key_memo.row_key_reader(column, column_type)
+        return lambda row: _relationship_value_key(row.get(column), column_type)
+
     def validate_unique_key(table_id: str, column: str) -> None:
         table = tables_by_id[table_id]
         column_type = str(table.get("column_types", {}).get(column, "text"))
+        if key_memo is not None and key_memo.unique_checked(table["rows"], column, column_type):
+            return
+        read = key_reader(column, column_type)
         seen: set[tuple[str, Any]] = set()
         for row in table["rows"]:
-            key = _relationship_value_key(row.get(column), column_type)
+            key = read(row)
             if key in seen:
                 raise RelationshipError(
                     f"{table.get('name', table_id)}[{column}] no longer has unique values "
                     "for the relationship's one side."
                 )
             seen.add(key)
+        if key_memo is not None:
+            key_memo.mark_unique(table["rows"], column, column_type)
 
     for relationship in relationships:
         if (
@@ -223,7 +242,7 @@ def propagate_relationship_filters(
         # live Power BI: with ambiguous routes every filtered table pushes ITS OWN filter along its shortest routes; what each
         # filter leaves on a table is intersected (a table narrowed by another filter's detour does not push that narrowing on)
         per_root = [
-            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected, peer_blank=peer_blank, many_blank=many_blank, exclusion_only=exclusion_only)
+            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected, peer_blank=peer_blank, many_blank=many_blank, exclusion_only=exclusion_only, key_memo=key_memo)
             for root_id in sorted(filter_roots)
         ]
         merged: dict[str, list[dict[str, Any]]] = {}
@@ -249,7 +268,12 @@ def propagate_relationship_filters(
     def all_keys(table_id: str, column: str, column_type: str) -> set[tuple[str, Any]]:
         cached = all_key_cache.get((table_id, column))
         if cached is None:
-            cached = {_relationship_value_key(row.get(column), column_type) for row in tables_by_id[table_id]["rows"]}
+            rows = tables_by_id[table_id]["rows"]
+            if key_memo is not None:
+                cached = key_memo.key_set(rows, column, column_type)
+            else:
+                read = key_reader(column, column_type)
+                cached = {read(row) for row in rows}
             all_key_cache[(table_id, column)] = cached
         return cached
 
@@ -263,24 +287,39 @@ def propagate_relationship_filters(
             if source_id not in filter_roots and narrowed_by[source_id] <= {target_id}:
                 continue  # live Power BI: no round trip - a table only filtered by its neighbour does not filter that neighbour back
             narrowed_by[target_id].add(source_id)
-            source_keys = {
-                _relationship_value_key(row.get(source_column), source_type)
-                for row in rows_by_id[source_id]
-            }
+            read_source = key_reader(source_column, source_type)
+            read_target = key_reader(target_column, target_type)
+            if key_memo is None:
+                source_keys = {read_source(row) for row in rows_by_id[source_id]}
+            elif source_id in starts_from_all_rows and len(rows_by_id[source_id]) == len(tables_by_id[source_id]["rows"]):
+                source_keys = key_memo.key_set(tables_by_id[source_id]["rows"], source_column, source_type)  # nothing was removed: all rows
+            else:
+                source_keys = key_memo.keys_of_rows(rows_by_id[source_id], tables_by_id[source_id]["rows"], source_column, source_type)
             current_target_rows = rows_by_id[target_id]
             source_unknown = unknown_state.get(source_id, True) and not (
                 (source_role == "one" and (source_id in (peer_blank or ()) or source_id in peer_kept)) or (source_role == "peer1" and source_id in (many_blank or ()))
             )
-            if source_role in {"one", "peer1"} and source_unknown:
-                known = all_keys(source_id, source_column, source_type)
+            keeps_unmatched = source_role in {"one", "peer1"} and source_unknown  # target keys the source column never holds stay (its blank member)
+            known = all_keys(source_id, source_column, source_type) if keeps_unmatched else None
+            filtered_target_rows = None
+            if key_memo is not None:
+                # pick the target rows by key instead of testing each one (the cost follows the rows kept)
+                filtered_target_rows = key_memo.rows_with_keys(
+                    current_target_rows, tables_by_id[target_id]["rows"], target_column, target_type,
+                    source_keys, known,
+                    target_id in starts_from_all_rows and len(current_target_rows) == len(tables_by_id[target_id]["rows"]),
+                )
+            if filtered_target_rows is not None:
+                pass
+            elif keeps_unmatched:
                 filtered_target_rows = [
                     row for row in current_target_rows
-                    if (key := _relationship_value_key(row.get(target_column), target_type)) in source_keys or key not in known
+                    if (key := read_target(row)) in source_keys or key not in known
                 ]
             else:
                 filtered_target_rows = [
                     row for row in current_target_rows
-                    if _relationship_value_key(row.get(target_column), target_type) in source_keys
+                    if read_target(row) in source_keys
                 ]
             changed = len(filtered_target_rows) != len(current_target_rows)
             if changed:
@@ -293,8 +332,10 @@ def propagate_relationship_filters(
                     # (live Power BI, iteration 84: CALCULATE(COUNTROWS(DISTINCT(F[Id])), U[K]="k4", W[Y]<>"y3") counts the F row of U's orphan k4)
                     known = all_keys(target_id, target_column, target_type)
                     after = any(
-                        _relationship_value_key(row.get(source_column), source_type) not in known for row in rows_by_id[source_id]
-                    )
+                        key not in known for key in source_keys
+                    ) if key_memo is not None and target_id != source_id else any(
+                        read_source(row) not in known for row in rows_by_id[source_id]
+                    )  # the keys of the source rows, as they stand: the source rows did not change in this step
                     if after:
                         peer_kept.add(target_id)  # kept only as the partner of an orphan row: no many-side orphans
                 if after != before or target_id not in unknown_state:
@@ -307,9 +348,11 @@ def propagate_relationship_filters(
             elif source_role == "many":  # the many side filters its one side: the blank member stays only while a visible row is an orphan
                 known = all_keys(target_id, target_column, target_type)
                 orphan_visible = any(
-                    _relationship_value_key(row.get(source_column), source_type) not in known
+                    key not in known for key in source_keys
+                ) if key_memo is not None and target_id != source_id else any(
+                    read_source(row) not in known
                     for row in rows_by_id[source_id]
-                )
+                )  # the keys of the source rows, as they stand: the source rows did not change in this step
                 before = unknown_state.get(target_id, True)
                 after = before and orphan_visible
                 if after != before or target_id not in unknown_state:
