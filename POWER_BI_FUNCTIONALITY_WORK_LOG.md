@@ -3052,3 +3052,14 @@ The two-column ALLSELECTED shape was compared with Power BI on the guest (Power 
 Stage B1 adds analytics_studio/store/ (DuckStore, strict typed values, one fcntl lock per store file, SELECT-only execute, external file access off) with 23 tests. Antigravity built it; two Sonnet reviews failed it (silent value conversion, a slow fallback path, open file reading, lock and name-case defects, interrupt leaving a transaction open, weak tests); the Sonnet fixer finished it and the last review passed. Gate: 41,932 tests passed, 575 of 575 on the real app, replay 0 different, 0 crashes. Nothing in the app uses the store yet. Speed: 1,000,000 rows x 5 columns append in about 1.5 s; 10,000,000 rows in about 13 s (reviewer, before the last fix); a page read at row 990,000 takes about 12 ms.
 
 Stage B2a (streaming CSV import) was planned and attacked by a Sonnet reviewer with experiments before any code: strict quote mode, mixed line endings, empty cells, row width, encodings and the transaction shape were changed in the brief. Open for B2a: the 10,000,000-row import time (about 27 to 32 s extrapolated, target 30 s) is not yet measured.
+
+## Stage B2a: streaming CSV import into the store (2026-11-23)
+
+New: analytics_studio/store/csv_import.py (import_csv_to_store) and DuckStore.create_table_from_arrow. The importer reads the file with a separate DuckDB connection, passes Arrow batches to the store in one transaction, and checks every file against the old parser: the case table (about 400 cases), three fuzzers (600 files each) and chunk-size independence all show 0 silent differences. Files the large-file path cannot read the same way as the old parser are refused with a plain message (mixed line endings, lone carriage return with quotes, a space before a quote, headers the store cannot hold, the marker bytes); two malformed-quote classes are read leniently with a notice. Speed on 10,000,000 rows x 5 text columns: 9 s without quotes, 11 s with 30 percent quoted fields, 12 s all quoted, peak memory 1.4 to 1.75 GB (targets 30 s and 2 GB).
+
+Built by Antigravity; three Sonnet reviews failed or passed it in turn (silent row loss on sparse wide records, quote state lost at chunk edges, a 513-column read schema that cost 67 percent of the time, a slow Python width fallback); the Sonnet fixer finished it. Gate: 42,097 tests passed, 575 of 575 on the real app, replay 0 different, 0 crashes.
+
+Stage B5 groundwork: the Power BI text-case probe (76 answers, two identical runs) shows letter-case variants are one value for ASCII letters only, the first spelling in row order survives, and relationships match across case. Written down in HANDOFF and in /Users/armaan/pbi_scratch/b5_probe/REPORT.md.
+
+Built in scratch and waiting to be brought into the repo (task B2b): the Parquet source reader (28 tests) and the type detection on store tables (297 tests; exact equal to the old inference by construction and by differential tests).
+
