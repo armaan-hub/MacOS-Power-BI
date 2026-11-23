@@ -1487,3 +1487,74 @@ def test_fix3_cancel_checked_in_candidate_scan(tmp_path):
     ev.set()
     with pytest.raises(fi.ImportCancelledError):
         ci._wide_candidate_offsets(path, ",", 4, False, ev, 64)
+
+
+# ---------------------------------------------------------------------------
+# B2a-fix4: lone-CR line ends and the cancel check inside the candidate judge
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("has_header", [True, False])
+@pytest.mark.parametrize(
+    "record,width",
+    [
+        (b"," * 17 + b"z", 18),        # wide record ending in z: widens
+        (b"," * 17, 2),                # all-empty wide record: no widening
+        (b"," * 30 + b"z", 31),
+        (b"," * 40, 2),
+    ],
+)
+def test_fix4_lone_cr_line_ends_with_wide_candidate(tmp_path, store2, record, width, has_header):
+    data = b"a,b\r1,2\r" + record + b"\r3,4\r"
+    assert b"\n" not in data
+    for tiers in ((4, ci._NC), (17, 65, ci._NC)):
+        old, new = _both(tmp_path, store2, data, has_header, width_tiers=tiers)
+        assert old[0] == "ok" and new[0] == "ok"
+        assert len(old[1]) == width
+        _check_equal(old, new)
+        assert len(new[1]) == width
+
+
+@pytest.mark.parametrize("chunk", [1, 3, 64, 1 << 20])
+def test_fix4_lone_cr_candidate_offsets(tmp_path, chunk):
+    record = b"," * 17 + b"z"
+    data = b"a,b\r1,2\r" + record + b"\r3,4\r"
+    path = tmp_path / "cr.csv"
+    path.write_bytes(data)
+    assert ci._wide_candidate_offsets(path, ",", 4, False, None, chunk) == [data.index(record)]
+
+
+class _CancelAfter:
+    """Event stand-in: is_set() turns True after the given number of calls."""
+
+    def __init__(self, calls_before_set):
+        self.calls = 0
+        self.limit = calls_before_set
+
+    def is_set(self):
+        self.calls += 1
+        return self.calls > self.limit
+
+
+def test_fix4_cancel_checked_while_judging_many_candidates(tmp_path, store2):
+    # 3,000 records of 20 empty cells: every one is a candidate for a first tier of 4
+    path = tmp_path / "many.csv"
+    path.write_bytes(b"a,b\n1,2\n" + (b"," * 19 + b"\n") * 3000)
+    offsets = ci._wide_candidate_offsets(path, ",", 4, False, None, 1 << 20)
+    assert len(offsets) == 3000
+    # already set: refuses before judging anything
+    ev = threading.Event()
+    ev.set()
+    with pytest.raises(fi.ImportCancelledError):
+        ci._widest_record_at(path, ",", offsets, ev)
+    # set after the first check: must be noticed at the next check, 1,000 candidates later
+    late = _CancelAfter(1)
+    with pytest.raises(fi.ImportCancelledError):
+        ci._widest_record_at(path, ",", offsets, late)
+    assert late.calls == 2
+    # never set: all 3,000 are judged, all are all-empty, so no widening
+    quiet = _CancelAfter(10**9)
+    assert ci._widest_record_at(path, ",", offsets, quiet) == 0
+    assert quiet.calls == 3
+    old, new = _both(tmp_path, store2, path.read_bytes(), width_tiers=(4, ci._NC))
+    _check_equal(old, new)
+    assert new[1] == ["a", "b"]
