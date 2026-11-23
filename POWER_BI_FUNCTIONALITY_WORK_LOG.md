@@ -3063,3 +3063,9 @@ Stage B5 groundwork: the Power BI text-case probe (76 answers, two identical run
 
 Built in scratch and waiting to be brought into the repo (task B2b): the Parquet source reader (28 tests) and the type detection on store tables (297 tests; exact equal to the old inference by construction and by differential tests).
 
+## Stage B2b: Parquet import into the store and type detection (2026-11-23)
+
+New: analytics_studio/store/parquet_source.py, parquet_import.py, type_detect.py; DuckStore.create_table_from_arrow now accepts all six column types with an exact Arrow schema; a non-blocking per-store lock makes a second thread fail with "busy" instead of corrupting a transaction; read_page reads by row-number range (last page of 20,000,000 rows in 1.6 ms). The type detection runs the old infer_column_types on the first 200 rows plus the distinct values, so it equals the old inference by construction (0 mismatches on 2,100 compared columns). The Parquet reader refuses what the one fixed decimal type cannot hold and values outside years 1 to 9999; all other types match the old parser (48 writer-matrix files).
+
+Antigravity built it (headless `agy -p`); the OpenCode API key expired, so the Parquet reader and type detection were built in scratch folders by OpenCode and a Haiku builder and then copied in. Two Sonnet reviews (first FAIL, second PASS); gate 42,469 passed, 575 of 575 on the real app, replay 0 different, 0 crashes.
+
