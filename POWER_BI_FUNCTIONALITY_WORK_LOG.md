@@ -3044,3 +3044,11 @@ Open: unfiltered tables are still copied once per call; four unconverted row sca
 Rules: work that depends only on the loaded rows (relationship keys, key sets, uniqueness checks, Boolean filter row sets) is done once per evaluation, and the heavy indexes are built only when the same table column is asked for a third time; every use of a Boolean filter still gets its own filter object, because the engine compares filters by identity (ALLSELECTED). First review failed because one filter object was shared between two predicates that selected the same rows (answers changed: 6 and 2 instead of 3 and 1); fixed and pinned by tests/test_boolean_filter_identity.py. Results: XT_ exit model 493 formulas 224 s to 36 s; 5-table model at 6,000 rows 144 s to 27 s. All answers identical to before; gate passed with 0 DIFF and 0 CRASH.
 
 Open: the two-column ALLSELECTED shape is not yet compared with Power BI (guest Power BI was not running); more memory on iterated formulas; three row scans left in measures.py.
+
+## Stage A8 follow-up and Stage B1: store module (2026-11-23)
+
+The two-column ALLSELECTED shape was compared with Power BI on the guest (Power BI was already open): 15 of 15 probe formulas equal, 0 wrong. That closes the open item of Stage A8.
+
+Stage B1 adds analytics_studio/store/ (DuckStore, strict typed values, one fcntl lock per store file, SELECT-only execute, external file access off) with 23 tests. Antigravity built it; two Sonnet reviews failed it (silent value conversion, a slow fallback path, open file reading, lock and name-case defects, interrupt leaving a transaction open, weak tests); the Sonnet fixer finished it and the last review passed. Gate: 41,932 tests passed, 575 of 575 on the real app, replay 0 different, 0 crashes. Nothing in the app uses the store yet. Speed: 1,000,000 rows x 5 columns append in about 1.5 s; 10,000,000 rows in about 13 s (reviewer, before the last fix); a page read at row 990,000 takes about 12 ms.
+
+Stage B2a (streaming CSV import) was planned and attacked by a Sonnet reviewer with experiments before any code: strict quote mode, mixed line endings, empty cells, row width, encodings and the transaction shape were changed in the brief. Open for B2a: the 10,000,000-row import time (about 27 to 32 s extrapolated, target 30 s) is not yet measured.
