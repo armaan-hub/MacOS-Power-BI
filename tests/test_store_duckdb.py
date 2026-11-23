@@ -1101,3 +1101,43 @@ def test_read_page_random_offsets_equivalence(tmp_path):
             expected = data[off : off + lim]
             assert page == expected
 
+
+def test_create_view_ids_and_drop_view(tmp_path):
+    with DuckStore(str(tmp_path / "view_test.duckdb")) as store:
+        store.create_table("t", [("val", "whole"), ("name", "text")])
+        store.append_rows(
+            "t",
+            [
+                (30, "charlie"),
+                (10, "alice"),
+                (20, "bob"),
+            ],
+        )
+        assert store.row_count("t") == 3
+
+        # Create view ordering by val asc
+        store.create_view_ids("v_test", 'SELECT "__rn" FROM "t" ORDER BY "val" ASC, "__rn" ASC')
+        res = store.execute('SELECT "__rn", position FROM "v_test" ORDER BY position ASC')
+        # Row 1 is (10, 'alice') which was row __rn 1
+        # Row 2 is (20, 'bob') which was row __rn 2
+        # Row 0 is (30, 'charlie') which was row __rn 0
+        assert res == [(1, 0), (2, 1), (0, 2)]
+
+        # Verify temporary table count
+        cnt = store.execute("SELECT count(*) FROM duckdb_tables() WHERE temporary")
+        assert cnt[0][0] == 1
+
+        # Drop view
+        store.drop_view("v_test")
+        cnt_after = store.execute("SELECT count(*) FROM duckdb_tables() WHERE temporary")
+        assert cnt_after[0][0] == 0
+
+        # Non-SELECT statement is rejected
+        with pytest.raises(StoreError, match="Only SELECT queries are allowed"):
+            store.create_view_ids("v_bad", 'DELETE FROM "t"')
+
+        # Invalid identifier is rejected
+        with pytest.raises(StoreError, match="View name"):
+            store.create_view_ids("", 'SELECT "__rn" FROM "t"')
+
+

@@ -679,6 +679,61 @@ class DuckStore:
             raise StoreError(f"Query execution failed: {exc}") from exc
 
     @_thread_locked
+    def create_view_ids(
+        self,
+        name: str,
+        select_sql: str,
+        params: Sequence[Any] = (),
+    ) -> None:
+        """Create a temporary table containing ordered __rn values for model views.
+
+        `select_sql` must be a single SELECT statement returning at least `__rn`.
+        A positional column `position` is computed via `(ROW_NUMBER() OVER ()) - 1`.
+        """
+        conn = self._check_open()
+        _validate_identifier(name, kind="View name")
+        if not isinstance(select_sql, str) or not select_sql.strip():
+            raise StoreError("Query must be a non-empty string.")
+
+        try:
+            stmts = conn.extract_statements(select_sql)
+        except Exception as exc:
+            raise StoreError(f"Invalid SQL: {exc}") from exc
+
+        if len(stmts) != 1:
+            raise StoreError(
+                f"Only a single statement is allowed; found {len(stmts)} statements."
+            )
+
+        stmt = stmts[0]
+        if stmt.type != duckdb.StatementType.SELECT:
+            raise StoreError(
+                f"Only SELECT queries are allowed; received statement type {stmt.type}."
+            )
+
+        quoted_name = _quote_identifier(name)
+        create_sql = (
+            f"CREATE TEMP TABLE {quoted_name} AS "
+            f"SELECT \"__rn\", (ROW_NUMBER() OVER ()) - 1 AS position "
+            f"FROM ({select_sql})"
+        )
+        try:
+            conn.execute(create_sql, params)
+        except Exception as exc:
+            raise StoreError(f"Failed to create view ids '{name}': {exc}") from exc
+
+    @_thread_locked
+    def drop_view(self, name: str) -> None:
+        """Drop a temporary view table if it exists."""
+        conn = self._check_open()
+        _validate_identifier(name, kind="View name")
+        quoted_name = _quote_identifier(name)
+        try:
+            conn.execute(f"DROP TABLE IF EXISTS {quoted_name}")
+        except Exception as exc:
+            raise StoreError(f"Failed to drop view '{name}': {exc}") from exc
+
+    @_thread_locked
     def create_table_from_arrow(
         self,
         name: str,
