@@ -5,16 +5,30 @@ headers, the store column types and the declared row count.  ``iter_parquet_batc
 streams the same file as Arrow record batches that are already in the exact
 Arrow types the store inserts:
 
-=====================  ====================  ===========================
+=====================  ====================  ======================================
 store type             Arrow type yielded    source Arrow types
-=====================  ====================  ===========================
+=====================  ====================  ======================================
 ``boolean``            ``bool_()``           boolean
-``whole``              ``int64()``           int8..int64, uint8..uint64
-``decimal``            ``float64()``         float16/32/64
-``fixed``              ``decimal128(19, 4)`` decimal with scale <= 4
-``datetime``           ``timestamp("us")``   date32/64, timestamp w/o tz
-``text``               ``string()``          string, large_string, dictionary
-=====================  ====================  ===========================
+``whole``              ``int64()``           int8..int64, uint8..uint64 (<= 2**63-1)
+``decimal``            ``float64()``         float16/32/64 (finite only)
+``fixed``              ``decimal128(19, 4)`` decimal (precision-scale <= 15, scale <= 4)
+``datetime``           ``timestamp("us")``   date32/64, timestamp w/o tz (yr 1..9999)
+``text``               ``string()``          string, large_string, null, dictionary
+=====================  ====================  ======================================
+
+Type mapping details and design limits:
+- ``null`` type source columns map to ``text`` (containing all nulls).
+- ``fixed`` columns require ``scale <= 4`` and ``precision - scale <= 15``. Decimals
+  with scale > 4 or integer digits > 15 are refused on purpose: the store has one
+  fixed type DECIMAL(19,4); this is a known design limit (the old in-memory importer
+  accepted wider decimals).
+- ``uint64`` values above ``2**63 - 1`` are refused.
+- Sub-microsecond ``timestamp[ns]`` values that cannot be converted without loss or
+  overflow are refused.
+- Dates and timestamps outside years 1 to 9999 are refused.
+- Row groups: files with more than 100,000 row groups are refused (inherited from
+  the old importer).
+- Time-of-day (time32/time64) and timezone-aware timestamps are refused.
 
 Limits, messages and refusals are shared with the old importer by importing
 them from ``analytics_studio.file_import`` (imported, never copied).  The
@@ -78,6 +92,18 @@ _SUPPORTED_SOURCE_TYPES = (
 
 _FIXED_SCALE_LIMIT = 4
 _FIXED_INTEGER_DIGITS = 15
+
+# Date and timestamp bounds corresponding to Python datetime range (year 1 to 9999)
+_DATE32_MIN = -719162
+_DATE32_MAX = 2932896
+_DATE64_MIN = -62135596800000
+_DATE64_MAX = 253402300799999
+_TS_BOUNDS = {
+    "s": (-62135596800, 253402300799),
+    "ms": (-62135596800000, 253402300799999),
+    "us": (-62135596800000000, 253402300799999999),
+    "ns": (-62135596800000000000, 253402300799999999000),
+}
 
 
 @dataclass
@@ -268,6 +294,42 @@ def _check_finite(array: pa.Array, header: str) -> None:
         )
 
 
+def _check_datetime_range(array: pa.Array, header: str, row_offset: int) -> None:
+    """Refuse dates and timestamps outside years 1 to 9999."""
+    src_type = array.type
+    if pa.types.is_date32(src_type):
+        min_bound, max_bound = _DATE32_MIN, _DATE32_MAX
+        int_arr = array.cast(pa.int32())
+    elif pa.types.is_date64(src_type):
+        min_bound, max_bound = _DATE64_MIN, _DATE64_MAX
+        int_arr = array.cast(pa.int64())
+    elif pa.types.is_timestamp(src_type):
+        bounds = _TS_BOUNDS.get(src_type.unit)
+        if bounds is None:
+            return
+        min_bound, max_bound = bounds
+        int_arr = array.cast(pa.int64())
+    else:
+        return
+
+    stats = pc.min_max(int_arr).as_py()
+    cur_min = stats["min"]
+    cur_max = stats["max"]
+    if cur_min is None:
+        return
+    if cur_min < min_bound or cur_max > max_bound:
+        bad = pc.fill_null(
+            pc.or_(pc.less(int_arr, min_bound), pc.greater(int_arr, max_bound)),
+            False,
+        )
+        offenders = pc.indices_nonzero(bad)
+        row_number = row_offset + int(offenders[0].as_py()) + 1
+        raise FileImportError(
+            f"Parquet column {header!r} contains a date/timestamp outside years 1 to 9999 "
+            f"at row {row_number:,}."
+        )
+
+
 def _convert_column(
     array: pa.Array,
     store_type: str,
@@ -280,6 +342,8 @@ def _convert_column(
     target = _TARGET_TYPES[store_type]
     if store_type == "whole" and pa.types.is_uint64(array.type):
         _check_uint64_range(array, header, row_offset)
+    if store_type == "datetime":
+        _check_datetime_range(array, header, row_offset)
     if array.type != target:
         if store_type == "datetime" and pa.types.is_timestamp(array.type):
             try:

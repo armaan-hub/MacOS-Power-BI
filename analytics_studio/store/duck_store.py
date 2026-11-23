@@ -3,10 +3,12 @@
 import datetime
 import decimal
 import fcntl
+import functools
 import math
 import os
+import threading
 from collections.abc import Sequence as _AbcSequence
-from typing import Any, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, TypeVar, cast
 
 import duckdb
 import pyarrow as pa
@@ -192,6 +194,26 @@ def _coerce_value(val: Any, type_name: str, table_name: str, col_name: str, row_
     raise StoreError(f"Unknown column type '{type_name}' for column '{col_name}'.")
 
 
+_F = TypeVar("_F", bound=Callable[..., Any])
+
+
+def _thread_locked(func: _F) -> _F:
+    """Decorator ensuring public DuckStore methods fail loudly under concurrency."""
+    @functools.wraps(func)
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        lock: threading.RLock = getattr(self, "_lock", None)
+        if lock is not None:
+            acquired = lock.acquire(blocking=False)
+            if not acquired:
+                raise StoreError("The store is busy with another operation.")
+            try:
+                return func(self, *args, **kwargs)
+            finally:
+                lock.release()
+        return func(self, *args, **kwargs)
+    return cast(_F, wrapper)
+
+
 class DuckStore:
     """DuckDB implementation of Store interface.
 
@@ -211,6 +233,7 @@ class DuckStore:
         self.path = real_target
         self.lock_path = real_target + ".lock"
         self._lock_fd: Optional[int] = None
+        self._lock = threading.RLock()
         self._conn: Optional[duckdb.DuckDBPyConnection] = None
 
         try:
@@ -259,6 +282,7 @@ class DuckStore:
             self.close()
             raise StoreError(f"Failed to open DuckDB store at '{self.path}': {exc}") from exc
 
+    @_thread_locked
     def close(self) -> None:
         if self._conn is not None:
             try:
@@ -317,6 +341,13 @@ class DuckStore:
                 return t
         raise StoreError(f"Table '{name}' does not exist.")
 
+    @_thread_locked
+    def resolve_table_name(self, name: str) -> str:
+        """Resolve a table name using ASCII-only case insensitivity."""
+        conn = self._check_open()
+        return self._resolve_table_name(name, conn)
+
+    @_thread_locked
     def create_table(self, name: str, columns: Sequence[Tuple[str, str]]) -> None:
         conn = self._check_open()
         _validate_identifier(name, kind="Table name")
@@ -369,6 +400,7 @@ class DuckStore:
         except Exception as exc:
             raise StoreError(f"Failed to create table '{name}': {exc}") from exc
 
+    @_thread_locked
     def has_table(self, name: str) -> bool:
         conn = self._check_open()
         if not isinstance(name, str) or not name:
@@ -377,10 +409,12 @@ class DuckStore:
         target_lower = _ascii_lower(name)
         return any(_ascii_lower(t) == target_lower for t in all_tables)
 
+    @_thread_locked
     def table_names(self) -> List[str]:
         conn = self._check_open()
         return self._get_raw_tables(conn)
 
+    @_thread_locked
     def columns(self, name: str) -> List[Tuple[str, str]]:
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
@@ -408,6 +442,7 @@ class DuckStore:
             result.append((col_name, logical_type))
         return result
 
+    @_thread_locked
     def row_count(self, name: str) -> int:
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
@@ -418,6 +453,7 @@ class DuckStore:
         except Exception as exc:
             raise StoreError(f"Failed to get row count for '{resolved_name}': {exc}") from exc
 
+    @_thread_locked
     def drop_table(self, name: str) -> None:
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
@@ -427,6 +463,7 @@ class DuckStore:
         except Exception as exc:
             raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
 
+    @_thread_locked
     def append_rows(self, name: str, rows: Iterable[Sequence[Any]]) -> int:
         """Append rows in one transaction; return the number of rows added.
 
@@ -553,6 +590,7 @@ class DuckStore:
             except Exception:
                 pass
 
+    @_thread_locked
     def read_page(
         self,
         name: str,
@@ -598,13 +636,14 @@ class DuckStore:
         quoted_tbl = _quote_identifier(resolved_name)
         sql = (
             f"SELECT {selected_sql} FROM {quoted_tbl} "
-            f"ORDER BY \"__rn\" ASC LIMIT ? OFFSET ?"
+            f"WHERE \"__rn\" >= ? AND \"__rn\" < ? ORDER BY \"__rn\" ASC"
         )
         try:
-            return conn.execute(sql, [limit, offset]).fetchall()
+            return conn.execute(sql, [offset, offset + limit]).fetchall()
         except Exception as exc:
             raise StoreError(f"Failed to read page from '{resolved_name}': {exc}") from exc
 
+    @_thread_locked
     def execute(self, sql: str, params: Sequence[Any] = ()) -> List[Tuple[Any, ...]]:
         """Run a single read query (SELECT only) and return list of tuples.
 
@@ -639,6 +678,7 @@ class DuckStore:
         except Exception as exc:
             raise StoreError(f"Query execution failed: {exc}") from exc
 
+    @_thread_locked
     def create_table_from_arrow(
         self,
         name: str,
@@ -648,8 +688,22 @@ class DuckStore:
         cancel_event: Optional[Any] = None,
         progress: Optional[Any] = None,
         max_rows: Optional[int] = None,
+        progress_label: Optional[str] = "CSV",
     ) -> int:
-        """Create a table with text columns and stream Arrow record batches in one transaction.
+        """Create a table with typed columns and stream Arrow record batches in one transaction.
+
+        Accepts all six store types with exact Arrow types:
+        - boolean: pa.bool_()
+        - whole: pa.int64()
+        - decimal: pa.float64()
+        - fixed: pa.decimal128(19, 4)
+        - datetime: pa.timestamp("us")
+        - text: pa.string() ONLY (large_string is refused)
+
+        The batch schema must match the declared column names and exact types.
+        Schema-level metadata is accepted and ignored. Field nullable flags are
+        not restricted (pyarrow writes nullable fields by default, so both nullable
+        and non-nullable fields are accepted).
 
         The store has one connection and is not thread-safe: an import running on a
         worker thread owns the store until it returns.
@@ -728,16 +782,14 @@ class DuckStore:
                 for idx_field, field in enumerate(batch.schema):
                     expected_store_type = cols_list[idx_field][1]
                     expected_arrow_type = _ARROW_TARGET_TYPES[expected_store_type]
-                    if expected_store_type == "text":
-                        if not (field.type == expected_arrow_type or pa.types.is_large_string(field.type)):
-                            raise StoreError(
-                                f"Batch column '{field.name}' has non-string type {field.type}."
-                            )
-                    else:
-                        if field.type != expected_arrow_type:
-                            raise StoreError(
-                                f"Batch column '{field.name}' has type {field.type}, expected {expected_arrow_type}."
-                            )
+                    if expected_store_type == "text" and not field.type.equals(pa.string()):
+                        raise StoreError(
+                            f"Batch column '{field.name}' has non-string type {field.type}."
+                        )
+                    if field.type != expected_arrow_type:
+                        raise StoreError(
+                            f"Batch column '{field.name}' has type {field.type}, expected {expected_arrow_type}."
+                        )
 
                 batch_len = batch.num_rows
                 if max_rows is not None and total_rows + batch_len > max_rows:
@@ -753,8 +805,20 @@ class DuckStore:
                     conn.unregister(_BATCH_NAME)
 
                 total_rows += batch_len
-                if progress is not None:
-                    progress(f"Imported {total_rows:,} CSV rows...")
+                if progress is not None and progress_label is not None:
+                    progress(f"Imported {total_rows:,} {progress_label} rows...")
+
+            # Defensive post-insert check on timestamps/dates if datetime columns exist
+            dt_cols = [c_name for c_name, t_name in cols_list if t_name == "datetime"]
+            if dt_cols:
+                conds = [
+                    f'(isinf({_quote_identifier(c)}) OR year({_quote_identifier(c)}) NOT BETWEEN 1 AND 9999)'
+                    for c in dt_cols
+                ]
+                check_sql = f"SELECT count(*) FROM {quoted_name} WHERE {' OR '.join(conds)}"
+                bad_count = conn.execute(check_sql).fetchone()
+                if bad_count and bad_count[0] > 0:
+                    raise StoreError("Store contains datetime values outside year 1 to 9999 or non-finite timestamps.")
 
             conn.execute("COMMIT")
             return total_rows

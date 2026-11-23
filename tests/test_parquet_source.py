@@ -563,3 +563,72 @@ def test_declared_row_count_must_equal_yielded_rows(tmp_path: Path):
         assert str(info.value) == (
             f"lie.parquet declares {wrong:,} rows but yielded 10."
         )
+
+
+@pytest.mark.parametrize(
+    "name,arr",
+    [
+        ("date32_past", pa.array([-719163], type=pa.date32())),
+        ("date32_future", pa.array([2932897], type=pa.date32())),
+        ("date64_past", pa.array([-62135683200000], type=pa.date64())),
+        ("date64_future", pa.array([253402300800000], type=pa.date64())),
+        ("ts_s_future", pa.array([253402300800], type=pa.timestamp("s"))),
+        ("ts_s_past", pa.array([-62135596801], type=pa.timestamp("s"))),
+        ("ts_ms_future", pa.array([253402300800000], type=pa.timestamp("ms"))),
+        ("ts_ms_past", pa.array([-65000000000000], type=pa.timestamp("ms"))),
+        ("ts_us_future", pa.array([2**62], type=pa.timestamp("us"))),
+        ("ts_us_past", pa.array([-2**63 + 1], type=pa.timestamp("us"))),
+    ],
+)
+def test_datetime_outside_year_1_to_9999_refused(tmp_path: Path, name: str, arr: pa.Array):
+    table = pa.table({"d": arr})
+    path = write_table(tmp_path, f"{name}.parquet", table)
+    plan = plan_parquet(path)
+    assert plan.column_types == ["datetime"]
+    with pytest.raises(FileImportError) as info:
+        drain(path, plan)
+    msg = str(info.value)
+    assert "outside years 1 to 9999" in msg
+    assert "row 1" in msg
+
+
+def test_datetime_outside_year_1_to_9999_row_number(tmp_path: Path):
+    table = pa.table(
+        {
+            "ts": pa.concat_arrays(
+                [
+                    pa.array(
+                        [
+                            datetime.datetime(2020, 1, 1),
+                            datetime.datetime(2020, 1, 2),
+                            None,
+                        ],
+                        type=pa.timestamp("ms"),
+                    ),
+                    pa.array([253402300800000], type=pa.timestamp("ms")),
+                ]
+            )
+        }
+    )
+    path = write_table(tmp_path, "late_ts.parquet", table)
+    plan = plan_parquet(path)
+    with pytest.raises(FileImportError) as info:
+        drain(path, plan)
+    msg = str(info.value)
+    assert "row 4" in msg
+
+
+def test_decimal_precision_scale_limits(tmp_path: Path):
+    # decimal(20,4) -> precision - scale = 16 > 15 -> refused
+    t_bad = pa.table({"d": pa.array([Decimal("1.0")], type=pa.decimal128(20, 4))})
+    p_bad = write_table(tmp_path, "dec20_4.parquet", t_bad)
+    with pytest.raises(FileImportError) as info:
+        plan_parquet(p_bad)
+    assert "does not fit the 4-decimal fixed type" in str(info.value)
+
+    # decimal(19,4) -> precision - scale = 15 <= 15 -> accepted
+    t_ok = pa.table({"d": pa.array([Decimal("1.0")], type=pa.decimal128(19, 4))})
+    p_ok = write_table(tmp_path, "dec19_4.parquet", t_ok)
+    plan = plan_parquet(p_ok)
+    assert plan.column_types == ["fixed"]
+

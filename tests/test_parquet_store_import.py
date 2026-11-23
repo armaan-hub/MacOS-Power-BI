@@ -323,3 +323,64 @@ def test_read_table_back_without_type_detect(tmp_path: Path):
         assert cols == [("id", "whole"), ("name", "text")]
         rows = store.read_page("typed_tbl", 0, 10)
         assert rows == [(1, "a"), (2, "b")]
+
+
+def test_import_parquet_bad_arguments(tmp_path: Path):
+    db_path = tmp_path / "args.duckdb"
+    valid_parquet = write_parquet(tmp_path, "sample.parquet", pa.table({"a": pa.array([1])}))
+    with DuckStore(str(db_path)) as store:
+        with pytest.raises(FileImportError, match="Path must be a string or Path object"):
+            import_parquet_to_store(store, "t", None)
+        with pytest.raises(FileImportError, match="max_rows must be an integer"):
+            import_parquet_to_store(store, "t", valid_parquet, max_rows=None)
+        with pytest.raises(FileImportError, match="max_rows must be an integer"):
+            import_parquet_to_store(store, "t", valid_parquet, max_rows=1.5)
+        with pytest.raises(FileImportError, match="max_rows must be at least 1"):
+            import_parquet_to_store(store, "t", valid_parquet, max_rows=0)
+        with pytest.raises(FileImportError, match="max_rows must be at least 1"):
+            import_parquet_to_store(store, "t", valid_parquet, max_rows=-5)
+
+
+def test_import_parquet_corrupt_body_max_rows_refused_early(tmp_path: Path):
+    """With a body-corrupted file and a small max_rows, the limit error is raised before reading body."""
+    # Write a 1000-row file
+    table = pa.table({"a": pa.array(range(1000), type=pa.int64())})
+    good_path = write_parquet(tmp_path, "good1000.parquet", table)
+    raw = bytearray(good_path.read_bytes())
+    # Corrupt a data page in the body (leaving metadata intact)
+    for i in range(100, 300):
+        raw[i] ^= 0xFF
+    corrupt_path = tmp_path / "corrupt_body.parquet"
+    corrupt_path.write_bytes(raw)
+
+    db_path = tmp_path / "corrupt.duckdb"
+    with DuckStore(str(db_path)) as store:
+        # With max_rows=10, the plan row_count (1000) > max_rows triggers the limit error first!
+        with pytest.raises(FileImportError) as info:
+            import_parquet_to_store(store, "c1", corrupt_path, max_rows=10)
+        assert "exceeds the 10-row import limit" in str(info.value)
+
+        # With large max_rows, reading the corrupted body fails with a read error
+        with pytest.raises(FileImportError) as info2:
+            import_parquet_to_store(store, "c2", corrupt_path, max_rows=5000)
+        assert "Could not read corrupt_body.parquet as Parquet" in str(info2.value)
+
+
+def test_progress_exactly_one_call_per_batch(tmp_path: Path):
+    table = pa.table({"a": pa.array(range(400), type=pa.int64())})
+    path = write_parquet(tmp_path, "four_batches.parquet", table)
+    db_path = tmp_path / "progress.duckdb"
+    messages: list[str] = []
+    with DuckStore(str(db_path)) as store:
+        import_parquet_to_store(
+            store,
+            "prog_tbl",
+            path,
+            batch_size=100,
+            progress=messages.append,
+        )
+    assert len(messages) == 4
+    for m in messages:
+        assert "Read " in m
+        assert "CSV" not in m
+

@@ -320,3 +320,20 @@ def test_non_text_column_raises(tmp_path):
             detect_column_types(store, "t")
     finally:
         store.close()
+
+
+def test_ascii_only_table_name_resolution(tmp_path):
+    store = DuckStore(str(tmp_path / "unicode_resolve.duckdb"))
+    try:
+        store.create_table("Ünï", [("col", "text")])
+        # "ünï" must NOT resolve "Ünï" (ASCII-only case folding)
+        with pytest.raises(StoreError, match="does not exist"):
+            detect_column_types(store, "ünï")
+
+        store.create_table("STRASSE", [("col", "text")])
+        # "Straße" must NOT resolve "STRASSE"
+        with pytest.raises(StoreError, match="does not exist"):
+            detect_column_types(store, "Straße")
+    finally:
+        store.close()
+

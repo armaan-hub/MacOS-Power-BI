@@ -88,6 +88,13 @@ def import_parquet_to_store(
     max_rows:
         Maximum allowed data rows (default 1,000,000).
     """
+    if path is None or isinstance(path, bool) or not isinstance(path, (str, Path)):
+        raise FileImportError("Path must be a string or Path object.")
+    if max_rows is None or isinstance(max_rows, bool) or not isinstance(max_rows, int):
+        raise FileImportError("max_rows must be an integer.")
+    if max_rows < 1:
+        raise FileImportError("max_rows must be at least 1.")
+
     source_path = Path(path)
     plan = plan_parquet(
         source_path,
@@ -117,7 +124,7 @@ def import_parquet_to_store(
             columns,
             batches,
             cancel_event=cancel_event,
-            progress=progress,
+            progress=None,
             max_rows=max_rows,
         )
     except (FileImportError, ImportCancelledError, StoreError):

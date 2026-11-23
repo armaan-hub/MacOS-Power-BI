@@ -43,12 +43,15 @@ def _quote(ident: str) -> str:
 
 
 def _resolve_table(store: Any, table: str) -> str:
+    if hasattr(store, "resolve_table_name"):
+        return store.resolve_table_name(table)
     names = store.table_names()
     if table in names:
         return table
-    lowered = table.casefold()
+    lower_target = "".join(c.lower() if "A" <= c <= "Z" else c for c in table)
     for name in names:
-        if name.casefold() == lowered:
+        lower_name = "".join(c.lower() if "A" <= c <= "Z" else c for c in name)
+        if lower_name == lower_target:
             return name
     raise StoreError(f"Table '{table}' does not exist.")
 
