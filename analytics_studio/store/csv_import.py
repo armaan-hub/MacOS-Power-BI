@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import codecs
 from dataclasses import dataclass
-import glob
 import os
 from pathlib import Path
 import shutil
@@ -47,22 +46,29 @@ class CsvImportSummary:
 
 
 def _clean_old_temp_folders() -> None:
-    """Delete leftover temporary CSV transcode folders older than 1 day."""
+    """Delete leftover temporary CSV transcode folders older than 1 day owned by current user."""
     try:
         tmp_base = tempfile.gettempdir()
         cutoff = time.time() - 86400
-        for folder in glob.glob(os.path.join(tmp_base, "analytics_studio_csv_*")):
-            try:
-                if os.path.isdir(folder) and os.path.getmtime(folder) < cutoff:
-                    shutil.rmtree(folder, ignore_errors=True)
-            except Exception:
-                pass
+        my_uid = os.getuid()
+        for name in os.listdir(tmp_base):
+            if name.startswith("analytics_studio_csv_"):
+                folder = os.path.join(tmp_base, name)
+                try:
+                    st = os.stat(folder)
+                    if os.path.isdir(folder) and st.st_uid == my_uid and st.st_mtime < cutoff:
+                        shutil.rmtree(folder, ignore_errors=True)
+                except Exception:
+                    pass
     except Exception:
         pass
 
 
 def _check_line_endings_and_sentinel(
-    path: Path, sentinel_bytes: bytes, chunk_size: int = _8MB
+    path: Path,
+    sentinel_bytes: bytes,
+    cancel_event: Optional[threading.Event] = None,
+    chunk_size: int = _8MB,
 ) -> tuple[int, int, int, int]:
     """Scan raw bytes in 8 MB chunks to count EOL markers, quotes, and check sentinel."""
     crlf = 0
@@ -71,85 +77,140 @@ def _check_line_endings_and_sentinel(
     quotes = 0
     prev_last_byte = b""
 
-    with open(path, "rb") as f:
-        while True:
-            chunk = f.read(chunk_size)
-            if not chunk:
-                break
-            if sentinel_bytes in chunk:
-                raise FileImportError(
-                    f"The file {path.name} contains internal sentinel byte sequences that cannot be preserved."
-                )
-            quotes += chunk.count(b'"')
-            cr += chunk.count(b"\r")
-            lf += chunk.count(b"\n")
-            crlf += chunk.count(b"\r\n")
-            if prev_last_byte == b"\r" and chunk.startswith(b"\n"):
-                crlf += 1
-            prev_last_byte = chunk[-1:]
+    try:
+        with open(path, "rb") as f:
+            while True:
+                if cancel_event is not None and cancel_event.is_set():
+                    raise ImportCancelledError("Import canceled.")
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                if sentinel_bytes in chunk:
+                    raise FileImportError(
+                        f"The file {path.name} contains internal sentinel byte sequences that cannot be preserved."
+                    )
+                quotes += chunk.count(b'"')
+                cr += chunk.count(b"\r")
+                lf += chunk.count(b"\n")
+                crlf += chunk.count(b"\r\n")
+                if prev_last_byte == b"\r" and chunk.startswith(b"\n"):
+                    crlf += 1
+                prev_last_byte = chunk[-1:]
+    except OSError as exc:
+        raise FileImportError(f"Could not read {path.name}: {exc.strerror or exc}.") from exc
 
     lone_cr = cr - crlf
     lone_lf = lf - crlf
     return crlf, lone_cr, lone_lf, quotes
 
 
-def _detect_malformed_quotes(
-    path: Path, delimiter: str, chunk_size: int = _1MB
+def _detect_malformed_quotes_and_space_before_quote(
+    path: Path,
+    delimiter: str,
+    cancel_event: Optional[threading.Event] = None,
+    chunk_size: int = _8MB,
 ) -> list[str]:
-    """Detect unterminated EOF quote or text immediately following a closing quote."""
-    delim_bytes = delimiter.encode("utf-8")
-    in_quotes = False
-    just_closed = False
+    """Detect space-before-quote (refusal) and malformed quotes (lenient notices)."""
+    delim_byte = ord(delimiter.encode("utf-8"))
+    quote_byte = ord('"')
+    cr_byte = ord("\r")
+    lf_byte = ord("\n")
+    space_byte = ord(" ")
+
+    # States:
+    # 0 = AT_FIELD_START
+    # 1 = IN_FIELD_LEADING_SPACES
+    # 2 = IN_UNQUOTED_FIELD
+    # 3 = IN_QUOTED_FIELD
+    # 4 = AFTER_CLOSING_QUOTE
+    state = 0
+
     has_unterminated = False
     has_text_after_quote = False
 
-    with open(path, "rb") as f:
-        while True:
-            chunk = f.read(chunk_size)
-            if not chunk:
-                break
-            i = 0
-            n = len(chunk)
-            while i < n:
-                b = chunk[i : i + 1]
-                if b == b'"':
-                    if in_quotes:
-                        if i + 1 < n:
-                            next_b = chunk[i + 1 : i + 2]
+    line_number = 1
+    prev_b = None
+
+    try:
+        with open(path, "rb") as f:
+            while True:
+                if cancel_event is not None and cancel_event.is_set():
+                    raise ImportCancelledError("Import canceled.")
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                i = 0
+                n = len(chunk)
+                while i < n:
+                    b = chunk[i]
+                    if b == lf_byte:
+                        if prev_b != cr_byte:
+                            line_number += 1
+                    elif b == cr_byte:
+                        line_number += 1
+
+                    if state == 0:  # AT_FIELD_START
+                        if b == space_byte:
+                            state = 1
+                        elif b == quote_byte:
+                            state = 3
+                        elif b == delim_byte or b in (cr_byte, lf_byte):
+                            state = 0
                         else:
-                            pos = f.tell()
-                            next_b = f.read(1)
-                            f.seek(pos)
-                        if next_b == b'"':
-                            i += 2
-                            continue
+                            state = 2
+                    elif state == 1:  # IN_FIELD_LEADING_SPACES
+                        if b == space_byte:
+                            pass
+                        elif b == quote_byte:
+                            raise FileImportError(
+                                f"Line {line_number} has a space before a quote; "
+                                f"the large-file importer cannot read it the same way as the normal importer. "
+                                f"Remove the space or the quote."
+                            )
+                        elif b == delim_byte or b in (cr_byte, lf_byte):
+                            state = 0
                         else:
-                            in_quotes = False
-                            just_closed = True
-                            i += 1
-                            continue
-                    else:
-                        in_quotes = True
-                        just_closed = False
-                        i += 1
-                        continue
-                else:
-                    if just_closed:
-                        if b in (delim_bytes, b"\r", b"\n"):
-                            just_closed = False
+                            state = 2
+                    elif state == 2:  # IN_UNQUOTED_FIELD
+                        if b == delim_byte or b in (cr_byte, lf_byte):
+                            state = 0
+                    elif state == 3:  # IN_QUOTED_FIELD
+                        if b == quote_byte:
+                            if i + 1 < n:
+                                next_b = chunk[i + 1]
+                            else:
+                                pos = f.tell()
+                                next_bytes = f.read(1)
+                                f.seek(pos)
+                                next_b = next_bytes[0] if next_bytes else None
+                            if next_b == quote_byte:
+                                i += 1  # Skip escaped quote
+                            else:
+                                state = 4
+                    elif state == 4:  # AFTER_CLOSING_QUOTE
+                        if b == delim_byte or b in (cr_byte, lf_byte):
+                            state = 0
                         else:
                             has_text_after_quote = True
-                            just_closed = False
-                    i += 1
+                            state = 2
 
-    if in_quotes:
+                    prev_b = b
+                    i += 1
+    except OSError as exc:
+        raise FileImportError(f"Could not read {path.name}: {exc.strerror or exc}.") from exc
+
+    if state == 3:
         has_unterminated = True
 
     notices: list[str] = []
     if has_unterminated:
-        notices.append(f"The file {path.name} contains an unterminated quote at end of file; parsed leniently.")
+        notices.append(
+            f"The file {path.name} contains an unterminated quote at end of file; parsed leniently."
+        )
     if has_text_after_quote:
-        notices.append(f"The file {path.name} contains unescaped text following a closing quote; parsed leniently.")
+        notices.append(
+            f"The file {path.name} contains unescaped text following a closing quote; parsed leniently."
+        )
     return notices
 
 
@@ -185,6 +246,31 @@ def _transcode_to_utf8(
                     f_out.write(text_chunk.encode("utf-8"))
     except UnicodeDecodeError as exc:
         raise FileImportError(f"Could not decode {src_path.name} as {encoding}.") from exc
+    except OSError as exc:
+        raise FileImportError(f"Could not read {src_path.name}: {exc.strerror or exc}.") from exc
+
+
+def _validate_headers_for_store(headers: list[str]) -> None:
+    """Validate headers before transaction starts per Store rules."""
+    seen_ci: set[str] = set()
+    for h in headers:
+        if (
+            h.startswith("__")
+            or any(ord(ch) < 32 or ord(ch) == 127 for ch in h)
+        ):
+            raise FileImportError(
+                f"Column name {h!r} cannot be used by the large-file store: "
+                f"names must be unique ignoring letter case, must not contain "
+                f"control characters (such as a line break) and must not start with '__'."
+            )
+        h_ci = h.lower()
+        if h_ci in seen_ci:
+            raise FileImportError(
+                f"Column name {h!r} cannot be used by the large-file store: "
+                f"names must be unique ignoring letter case, must not contain "
+                f"control characters (such as a line break) and must not start with '__'."
+            )
+        seen_ci.add(h_ci)
 
 
 def import_csv_to_store(
@@ -222,8 +308,13 @@ def import_csv_to_store(
     _clean_old_temp_folders()
 
     src_path = Path(path).resolve()
+    try:
+        src_path.stat()
+    except OSError as exc:
+        raise FileImportError(f"Could not read {src_path.name}: {exc.strerror or exc}.") from exc
+
     if not src_path.is_file():
-        raise FileImportError(f"File not found: {src_path}")
+        raise FileImportError(f"{src_path.name} is not a regular file.")
 
     delimiter = options.get("delimiter", ",")
     encoding = options.get("encoding", "utf-8-sig")
@@ -237,9 +328,14 @@ def import_csv_to_store(
         # Check if transcoding is required
         needs_transcode = False
         prepend_bom = False
+        actual_encoding = encoding
+
         if encoding in {"utf-8-sig", "utf-8"}:
-            with open(src_path, "rb") as f_peek:
-                header_bytes = f_peek.read(3)
+            try:
+                with open(src_path, "rb") as f_peek:
+                    header_bytes = f_peek.read(3)
+            except OSError as exc:
+                raise FileImportError(f"Could not read {src_path.name}: {exc.strerror or exc}.") from exc
             has_bom = header_bytes == b"\xef\xbb\xbf"
             if encoding == "utf-8" and has_bom:
                 needs_transcode = True
@@ -248,6 +344,17 @@ def import_csv_to_store(
                 needs_transcode = False
             else:
                 needs_transcode = False
+        elif encoding == "utf-16":
+            try:
+                with open(src_path, "rb") as f_peek:
+                    header_bytes = f_peek.read(2)
+            except OSError as exc:
+                raise FileImportError(f"Could not read {src_path.name}: {exc.strerror or exc}.") from exc
+            if header_bytes in (b"\xff\xfe", b"\xfe\xff"):
+                actual_encoding = "utf-16"
+            else:
+                actual_encoding = "utf-16-le"
+            needs_transcode = True
         else:
             needs_transcode = True
 
@@ -257,7 +364,7 @@ def import_csv_to_store(
             _transcode_to_utf8(
                 src_path,
                 temp_file,
-                encoding,
+                actual_encoding,
                 cancel_event=cancel_event,
                 chunk_size=chunk_size_transcode,
                 prepend_bom=prepend_bom,
@@ -266,7 +373,7 @@ def import_csv_to_store(
 
         # Check line endings and sentinel on parse_path
         crlf, lone_cr, lone_lf, quotes = _check_line_endings_and_sentinel(
-            parse_path, sentinel_bytes
+            parse_path, sentinel_bytes, cancel_event=cancel_event
         )
 
         if lone_cr > 0 and (quotes > 0 or lone_lf > 0 or crlf > 0):
@@ -274,8 +381,13 @@ def import_csv_to_store(
                 f"The file {src_path.name} contains mixed or unquoted carriage-return line endings."
             )
 
-        # Detect malformed quotes
-        notices = _detect_malformed_quotes(parse_path, delimiter)
+        # Detect malformed quotes and space-before-quote
+        if quotes > 0:
+            notices = _detect_malformed_quotes_and_space_before_quote(
+                parse_path, delimiter, cancel_event=cancel_event
+            )
+        else:
+            notices = []
 
         # Create dedicated in-memory DuckDB connection for parsing
         cpu_count = os.cpu_count() or 4
@@ -284,6 +396,7 @@ def import_csv_to_store(
         src_conn = duckdb.connect()
         src_conn.execute("SET memory_limit = '1GB'")
         src_conn.execute(f"SET threads = {threads}")
+        src_conn.execute("SET enable_progress_bar = false")
 
         stop_watcher = threading.Event()
         watcher_thread = None
@@ -306,62 +419,107 @@ def import_csv_to_store(
             if cancel_event is not None and cancel_event.is_set():
                 raise ImportCancelledError("Import canceled.")
 
-            col_defs = "{" + ",".join(f"'c{i}':'VARCHAR'" for i in range(_NC)) + "}"
             escaped_path = str(parse_path).replace("'", "''")
             escaped_delim = delimiter.replace("'", "''")
 
-            # 1. Inspect first batch to find first kept record
-            sql_head = (
-                f"SELECT * FROM read_csv('{escaped_path}', all_varchar=true, header=false, "
-                f"delim='{escaped_delim}', quote='\"', escape='\"', strict_mode=false, "
-                f"null_padding=true, auto_detect=false, parallel=false, "
-                f"nullstr='{_NULL_SENTINEL}', encoding='utf-8', max_line_size=16000000, "
-                f"columns={col_defs}) LIMIT 100"
-            )
+            # 1. Tiered Width Pre-pass
+            def _width(n: int) -> int:
+                cd = "{" + ",".join(f"'c{i}':'VARCHAR'" for i in range(n)) + "}"
+                ae = " AND ".join(f"(c{i} IS NULL OR c{i} = '')" for i in range(n))
+                wc = " ".join(f"WHEN c{i} IS NOT NULL THEN {i + 1}" for i in range(n - 1, -1, -1))
+                q = (
+                    f"SELECT max(CASE {wc} ELSE 0 END) "
+                    f"FROM read_csv('{escaped_path}', all_varchar=true, header=false, "
+                    f"delim='{escaped_delim}', quote='\"', escape='\"', strict_mode=false, "
+                    f"null_padding=true, auto_detect=false, parallel=false, "
+                    f"nullstr='{_NULL_SENTINEL}', encoding='utf-8', max_line_size=16000000, "
+                    f"columns={cd}) WHERE NOT ({ae})"
+                )
+                r = src_conn.execute(q).fetchone()
+                return r[0] if r and r[0] is not None else 0
 
-            try:
-                head_rows = src_conn.execute(sql_head).fetchall()
-            except Exception as exc:
+            def _handle_csv_error(exc: Exception) -> None:
                 if cancel_event is not None and cancel_event.is_set():
                     raise ImportCancelledError("Import canceled.") from exc
-                raise FileImportError(f"Could not parse {src_path.name} as CSV: {exc}") from exc
-
-            first_kept_rec: Optional[list[str]] = None
-            first_kept_is_blank_header = False
-
-            for r in head_rows:
-                non_nulls = [i + 1 for i, v in enumerate(r) if v is not None]
-                w = max(non_nulls, default=0)
-                rec = list(r[:w])
-                is_empty = all(v == "" for v in rec)
-                if has_header and len(rec) > 1 and is_empty:
-                    first_kept_rec = rec
-                    first_kept_is_blank_header = True
-                    break
-                elif not is_empty:
-                    first_kept_rec = rec
-                    break
-
-            # 2. Width pre-pass query over the file
-            all_empty_cond = " AND ".join(f"(c{i} IS NULL OR c{i} = '')" for i in range(_NC))
-            w_cases = " ".join(f"WHEN c{i} IS NOT NULL THEN {i + 1}" for i in range(_NC - 1, -1, -1))
-
-            sql_width = (
-                f"SELECT max(CASE {w_cases} ELSE 0 END) "
-                f"FROM read_csv('{escaped_path}', all_varchar=true, header=false, "
-                f"delim='{escaped_delim}', quote='\"', escape='\"', strict_mode=false, "
-                f"null_padding=true, auto_detect=false, parallel=false, "
-                f"nullstr='{_NULL_SENTINEL}', encoding='utf-8', max_line_size=16000000, "
-                f"columns={col_defs}) WHERE NOT ({all_empty_cond})"
-            )
+                msg = str(exc)
+                if "Invalid unicode" in msg or "not utf-8 encoded" in msg:
+                    raise FileImportError(f"Could not decode {src_path.name} as {encoding}.") from exc
+                first_line = msg.splitlines()[0] if msg else ""
+                raise FileImportError(f"Could not parse {src_path.name} as CSV: {first_line}") from exc
 
             try:
-                max_w_res = src_conn.execute(sql_width).fetchone()
-                max_w = (max_w_res[0] if max_w_res and max_w_res[0] is not None else 0)
+                max_w = _width(17)
+                if max_w >= 17:
+                    max_w = _width(_NC)
             except Exception as exc:
-                if cancel_event is not None and cancel_event.is_set():
-                    raise ImportCancelledError("Import canceled.") from exc
-                raise FileImportError(f"Could not parse {src_path.name} as CSV: {exc}") from exc
+                _handle_csv_error(exc)
+
+            # 2. Inspect first kept records using Arrow reader stream
+            def _get_head_info():
+                def _try_read_head(num_cols: int):
+                    cd = "{" + ",".join(f"'c{i}':'VARCHAR'" for i in range(num_cols)) + "}"
+                    sql_head = (
+                        f"SELECT * FROM read_csv('{escaped_path}', all_varchar=true, header=false, "
+                        f"delim='{escaped_delim}', quote='\"', escape='\"', strict_mode=false, "
+                        f"null_padding=true, auto_detect=false, parallel=false, "
+                        f"nullstr='{_NULL_SENTINEL}', encoding='utf-8', max_line_size=16000000, "
+                        f"columns={cd})"
+                    )
+                    rdr = src_conn.execute(sql_head).to_arrow_reader(1024)
+                    file_rn = 0
+                    first_rec = None
+                    first_rn = None
+                    first_is_bh = False
+                    second_rn = None
+                    needs_wider = False
+
+                    try:
+                        for batch in rdr:
+                            if cancel_event is not None and cancel_event.is_set():
+                                raise ImportCancelledError("Import canceled.")
+                            cols_data = [batch.column(c).to_pylist() for c in range(batch.num_columns)]
+                            batch_len = batch.num_rows
+                            for row_idx in range(batch_len):
+                                file_rn += 1
+                                r = [cols_data[c][row_idx] for c in range(batch.num_columns)]
+                                w = 0
+                                for col_idx in range(len(r) - 1, -1, -1):
+                                    if r[col_idx] is not None:
+                                        w = col_idx + 1
+                                        break
+                                rec = r[:w]
+                                if w == num_cols and num_cols < _NC:
+                                    needs_wider = True
+                                    break
+                                is_empty = all(v == "" for v in rec)
+
+                                if first_rec is None:
+                                    if has_header and len(rec) > 1 and is_empty:
+                                        first_rec = rec
+                                        first_rn = file_rn
+                                        first_is_bh = True
+                                    elif not is_empty:
+                                        first_rec = rec
+                                        first_rn = file_rn
+                                else:
+                                    if not is_empty:
+                                        second_rn = file_rn
+                                        break
+                            if needs_wider or (first_rec is not None and (second_rn is not None or not has_header)):
+                                break
+                    finally:
+                        rdr.close()
+                    return first_rec, first_rn, first_is_bh, second_rn, needs_wider
+
+                first_rec, first_rn, first_is_bh, second_rn, needs_wider = _try_read_head(17)
+                if needs_wider:
+                    first_rec, first_rn, first_is_bh, second_rn, _ = _try_read_head(_NC)
+                return first_rec, first_rn, first_is_bh, second_rn
+
+            try:
+                first_kept_rec, first_kept_rn, first_kept_is_blank_header, second_kept_rn = _get_head_info()
+            except Exception as exc:
+                _handle_csv_error(exc)
 
             if first_kept_is_blank_header:
                 max_w = max(max_w, len(first_kept_rec))
@@ -374,45 +532,29 @@ def import_csv_to_store(
 
             raw_headers = (first_kept_rec if first_kept_rec is not None else []) if has_header else []
             headers = _normalize_headers(raw_headers, max_w)
+            _validate_headers_for_store(headers)
             table_col_defs = [(h, "text") for h in headers]
 
-            # 3. Stream data rows using to_arrow_reader(50_000)
+            # 3. Stream data rows using exact width columns and no window functions
+            col_defs = "{" + ",".join(f"'c{i}':'VARCHAR'" for i in range(max_w)) + "}"
+            all_empty_cond = " AND ".join(f"(c{i} IS NULL OR c{i} = '')" for i in range(max_w))
             select_cols = ", ".join(f"coalesce(c{i}, '') as c{i}" for i in range(max_w))
 
             if has_header:
-                if first_kept_is_blank_header:
-                    sql_data = f"""
-                    WITH raw_rows AS (
-                      SELECT row_number() OVER () as __file_rn, *
-                      FROM read_csv('{escaped_path}', all_varchar=true, header=false,
-                                    delim='{escaped_delim}', quote='\"', escape='\"', strict_mode=false,
-                                    null_padding=true, auto_detect=false, parallel=false,
-                                    nullstr='{_NULL_SENTINEL}', encoding='utf-8', max_line_size=16000000,
-                                    columns={col_defs})
-                    )
-                    SELECT {select_cols}
-                    FROM raw_rows
-                    WHERE __file_rn > 1 AND NOT ({all_empty_cond})
-                    """
-                else:
-                    sql_data = f"""
-                    WITH raw_rows AS (
-                      SELECT *
-                      FROM read_csv('{escaped_path}', all_varchar=true, header=false,
-                                    delim='{escaped_delim}', quote='\"', escape='\"', strict_mode=false,
-                                    null_padding=true, auto_detect=false, parallel=false,
-                                    nullstr='{_NULL_SENTINEL}', encoding='utf-8', max_line_size=16000000,
-                                    columns={col_defs})
-                    ),
-                    filtered_numbered AS (
-                      SELECT row_number() OVER () as __kept_rn, *
-                      FROM raw_rows
-                      WHERE NOT ({all_empty_cond})
-                    )
-                    SELECT {select_cols}
-                    FROM filtered_numbered
-                    WHERE __kept_rn > 1
-                    """
+                min_rn = second_kept_rn if second_kept_rn is not None else (first_kept_rn + 1)
+                sql_data = f"""
+                WITH raw_rows AS (
+                    SELECT row_number() OVER () AS __file_rn, *
+                    FROM read_csv('{escaped_path}', all_varchar=true, header=false,
+                                  delim='{escaped_delim}', quote='\"', escape='\"', strict_mode=false,
+                                  null_padding=true, auto_detect=false, parallel=false,
+                                  nullstr='{_NULL_SENTINEL}', encoding='utf-8', max_line_size=16000000,
+                                  columns={col_defs})
+                )
+                SELECT {select_cols}
+                FROM raw_rows
+                WHERE __file_rn >= {min_rn} AND NOT ({all_empty_cond})
+                """
             else:
                 sql_data = f"""
                 SELECT {select_cols}
@@ -427,16 +569,13 @@ def import_csv_to_store(
             try:
                 reader = src_conn.execute(sql_data).to_arrow_reader(_BATCH_SIZE)
             except Exception as exc:
-                if cancel_event is not None and cancel_event.is_set():
-                    raise ImportCancelledError("Import canceled.") from exc
-                raise FileImportError(f"Could not parse {src_path.name} as CSV: {exc}") from exc
+                _handle_csv_error(exc)
 
             def batch_generator():
                 try:
                     for batch in reader:
                         if cancel_event is not None and cancel_event.is_set():
                             raise ImportCancelledError("Import canceled.")
-                        # Rename batch column names from c0..c(N-1) to final headers
                         renamed = pa.RecordBatch.from_arrays(batch.columns, names=headers)
                         yield renamed
                 finally:

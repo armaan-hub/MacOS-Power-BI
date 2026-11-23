@@ -760,34 +760,3 @@ class DuckStore:
                 raise
             raise StoreError(f"Failed to create table '{name}' from Arrow batches: {exc}") from exc
 
-    def add_column(self, name: str, column_name: str, type_name: str) -> None:
-        """Add a new column to an existing table.
-
-        Follows standard identifier validation, case policies, and type rules.
-        """
-        conn = self._check_open()
-        resolved_name = self._resolve_table_name(name, conn)
-        _validate_identifier(column_name, kind="Column name")
-
-        col_ci = _ascii_lower(column_name)
-        if col_ci == "__rn":
-            raise StoreError("Column name '__rn' is reserved for hidden row index.")
-
-        existing = self.columns(resolved_name)
-        for existing_col, _ in existing:
-            if _ascii_lower(existing_col) == col_ci:
-                raise StoreError(f"Column '{column_name}' already exists in table '{resolved_name}'.")
-
-        if not isinstance(type_name, str) or type_name not in _TYPE_MAP:
-            raise StoreError(f"Unknown column type '{type_name}'. Must be one of {COLUMN_TYPES}.")
-
-        sql_type = _TYPE_MAP[type_name]
-        quoted_tbl = _quote_identifier(resolved_name)
-        quoted_col = _quote_identifier(column_name)
-        default_clause = "DEFAULT ''" if type_name == "text" else "DEFAULT NULL"
-        alter_sql = f"ALTER TABLE {quoted_tbl} ADD COLUMN {quoted_col} {sql_type} {default_clause}"
-        try:
-            conn.execute(alter_sql)
-        except Exception as exc:
-            raise StoreError(f"Failed to add column '{column_name}' to table '{resolved_name}': {exc}") from exc
-
