@@ -66,9 +66,17 @@ class ImportLimitError(FileImportError):
     "uncompressed", or "text".
     """
 
-    def __init__(self, message: str, *, limit_kind: str) -> None:
+    def __init__(self, message: str, *, limit_kind: str = "") -> None:
         super().__init__(message)
         self.limit_kind = limit_kind
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        # Rebuild with the message as the only argument and restore limit_kind
+        # as state, so pickle, copy and deepcopy keep both.
+        return (type(self), (str(self),), {"limit_kind": self.limit_kind})
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({str(self)!r}, limit_kind={self.limit_kind!r})"
 
 
 class ImportCancelledError(FileImportError):
@@ -1466,17 +1474,20 @@ _CSV_FIELD_LIMIT_LOCK = threading.RLock()
 _CSV_LINE_PATTERN = re.compile(r"[^\r\n]*(?:\r\n|\r|\n)|[^\r\n]+\Z")
 
 
-def _last_complete_csv_record_end(text: str, options: dict[str, Any]) -> int:
-    """Return the offset just after the last record of ``text`` that ends outside quotes.
+def _last_complete_csv_record_end(text: str, options: dict[str, Any], path: Path) -> tuple[int, int]:
+    """Return (offset just after the last complete record, number of complete non-blank records).
 
     Records are read with the csv module. A record counts only when the line
     that ended it has a line terminator, so a partial record at the cut is never
-    accepted. Returns 0 when no record is complete.
+    accepted. A malformed record before the cut raises FileImportError with the
+    same message as the full parse; only the end-of-data error that the cut
+    itself causes (a quote still open at the end of the prefix) is dropped.
     """
     lines = _CSV_LINE_PATTERN.findall(text)
     pulled_lines = 0
     pulled_chars = 0
     end = 0
+    complete = 0
 
     def feed() -> Any:
         nonlocal pulled_lines, pulled_chars
@@ -1489,16 +1500,19 @@ def _last_complete_csv_record_end(text: str, options: dict[str, Any]) -> int:
         old_field_limit = csv.field_size_limit()
         csv.field_size_limit(MAX_SOURCE_BYTES)
         try:
-            for _record in csv.reader(feed(), delimiter=options["delimiter"], strict=True):
+            for record in csv.reader(feed(), delimiter=options["delimiter"], strict=True):
                 if lines[pulled_lines - 1][-1:] in {"\r", "\n"}:
                     end = pulled_chars
-        except csv.Error:
-            # The partial record after the cut (an open quote, for example)
-            # is not complete; records before it were already accepted.
-            pass
+                    if not _is_empty_record(record) or len(record) > 1:
+                        complete += 1
+        except csv.Error as exc:
+            # Only the end-of-data error after every line was read means the
+            # prefix ended inside the last record. Any other error is real.
+            if not (pulled_lines == len(lines) and str(exc) == "unexpected end of data"):
+                raise FileImportError(f"Could not parse {path.name} as CSV: {exc}") from exc
         finally:
             csv.field_size_limit(old_field_limit)
-    return end
+    return end, complete
 
 
 def _parse_csv_head(path: Path, options: dict[str, Any], rows_wanted: int) -> ImportCandidate:
@@ -1522,11 +1536,10 @@ def _parse_csv_head(path: Path, options: dict[str, Any], rows_wanted: int) -> Im
     except UnicodeDecodeError as exc:
         raise FileImportError(f"Could not decode {path.name} as {options['encoding']}.") from exc
     if truncated:
-        cut = _last_complete_csv_record_end(text, options)
-        if cut == 0:
-            raise FileImportError(
-                f"{path.name} has no complete CSV record in the head preview window."
-            )
+        cut, complete = _last_complete_csv_record_end(text, options, path)
+        header_count = 1 if options["has_header"] else 0
+        if complete <= header_count:
+            raise FileImportError("The first record is larger than the head preview window.")
         text = text[:cut]
     return _parse_csv_text(
         text, path, options, None, truncated=truncated, max_rows=rows_wanted,
@@ -1540,9 +1553,10 @@ def parse_head(
 ) -> ImportCandidate:
     """Parse the first ``rows`` data rows of a CSV or Parquet file.
 
-    The file is not read past HEAD_PREFIX_BYTES (CSV) or past the batch that
-    holds ``rows`` rows (Parquet). Only the column limit applies; the byte,
-    row and cell limits of parse_file do not.
+    CSV: at most HEAD_PREFIX_BYTES + 1 bytes are read, to detect truncation;
+    the decoded text is cut back to the last complete record. Parquet: batches
+    are read until ``rows`` rows are collected. Only the column limit applies;
+    the byte, row and cell limits of parse_file do not.
     """
     source_path = Path(path).expanduser()
     kind = kind_for_path(source_path)

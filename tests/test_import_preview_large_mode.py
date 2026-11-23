@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 from pathlib import Path
 
@@ -214,4 +215,46 @@ def test_large_mode_from_background_parse_for_a_big_file(qapp, tmp_path, small_l
         assert dialog.candidate is None
         assert dialog.large_request["kind"] == "csv"
     finally:
+        dialog.deleteLater()
+
+
+def test_stale_head_result_is_dropped(qapp, tmp_path, small_limit, monkeypatch) -> None:
+    from PySide6.QtCore import QThreadPool
+
+    path = _csv(tmp_path, delimiter=";")
+    real_parse_head = dialog_module.parse_head
+    first_started = threading.Event()
+    release = threading.Event()
+    calls: list[str] = []
+
+    def blocking_parse_head(path_, options=None, rows=1000):
+        calls.append((options or {}).get("delimiter", ""))
+        if len(calls) == 1:
+            first_started.set()
+            release.wait(10)
+        return real_parse_head(path_, options, rows=rows)
+
+    monkeypatch.setattr(dialog_module, "parse_head", blocking_parse_head)
+    dialog = FileImportPreviewDialog(path, replacing=False, large_mode_enabled=True)
+    try:
+        _wait(qapp, first_started.is_set)
+        # The first head request (comma delimiter) is still blocked; a second request starts.
+        dialog.delimiter_combo.setCurrentIndex(dialog.delimiter_combo.findData(";"))
+        _wait(
+            qapp,
+            lambda: dialog._preview_candidate is not None
+            and len(dialog._preview_candidate.headers) == 2
+            and dialog.import_button.isEnabled(),
+        )
+        release.set()
+        QThreadPool.globalInstance().waitForDone(10_000)
+        for _ in range(20):
+            qapp.processEvents()
+        assert len(calls) == 2
+        assert len(dialog._preview_candidate.headers) == 2, "the stale comma-delimited head overwrote the newest one"
+        assert dialog.table.model().rowCount() == 1000
+        dialog._accept_candidate("load")
+        assert dialog.large_request["options"]["delimiter"] == ";"
+    finally:
+        release.set()
         dialog.deleteLater()
