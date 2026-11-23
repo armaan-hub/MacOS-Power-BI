@@ -7,13 +7,9 @@ import os
 from typing import Any, Iterable, List, Optional, Sequence, Tuple
 
 import duckdb
+import pyarrow as pa
 
-try:
-    import pyarrow as pa
-except ImportError:
-    pa = None
-
-from .base import COLUMN_TYPES, Store, StoreError, StoreLockedError
+from .base import COLUMN_TYPES, StoreError, StoreLockedError
 
 _TYPE_MAP = {
     "whole": "BIGINT",
@@ -29,10 +25,15 @@ _REVERSE_TYPE_MAP = {
     "DOUBLE": "decimal",
     "DECIMAL(19,4)": "fixed",
     "TIMESTAMP": "datetime",
-    "TIMESTAMP WITH TIME ZONE": "datetime",
     "VARCHAR": "text",
     "BOOLEAN": "boolean",
 }
+
+_MIN_BIGINT = -9223372036854775808
+_MAX_BIGINT = 9223372036854775807
+_FIXED_EXP = decimal.Decimal("0.0001")
+_MAX_FIXED = decimal.Decimal("999999999999999.9999")
+_MIN_FIXED = -_MAX_FIXED
 
 
 def _quote_identifier(ident: str) -> str:
@@ -40,40 +41,133 @@ def _quote_identifier(ident: str) -> str:
     return '"' + ident.replace('"', '""') + '"'
 
 
-def _coerce_value(val: Any, type_name: str) -> Any:
+def _ascii_lower(s: str) -> str:
+    """Lowercase only ASCII A-Z characters, preserving unicode casing as DuckDB does."""
+    return "".join(chr(ord(c) + 32) if "A" <= c <= "Z" else c for c in s)
+
+
+def _validate_identifier(name: Any, kind: str = "Name") -> None:
+    if not isinstance(name, str):
+        raise StoreError(f"{kind} must be a string, got {type(name).__name__}.")
+    if not name:
+        raise StoreError(f"{kind} cannot be empty.")
+    for c in name:
+        code = ord(c)
+        if code < 32 or code == 127:
+            raise StoreError(
+                f"{kind} cannot contain NUL or control characters (ord {code})."
+            )
+
+
+def _coerce_value(val: Any, type_name: str, table_name: str, col_name: str, row_idx: int) -> Any:
     if val is None:
         return None
+
     if type_name == "whole":
-        return int(val)
+        if isinstance(val, bool) or not isinstance(val, int):
+            raise StoreError(
+                f"Invalid value for column '{col_name}' of type 'whole' in table '{table_name}' "
+                f"at row {row_idx}: expected int, got {type(val).__name__} ({val!r})."
+            )
+        if not (_MIN_BIGINT <= val <= _MAX_BIGINT):
+            raise StoreError(
+                f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                f"exceeds BIGINT range: {val!r}."
+            )
+        return val
+
     elif type_name == "decimal":
-        return float(val)
-    elif type_name == "fixed":
+        if isinstance(val, bool):
+            raise StoreError(
+                f"Invalid value for column '{col_name}' of type 'decimal' in table '{table_name}' "
+                f"at row {row_idx}: expected float, int, or Decimal, got bool."
+            )
+        if isinstance(val, (int, float)):
+            return float(val)
         if isinstance(val, decimal.Decimal):
-            return val
-        return decimal.Decimal(str(val))
+            return float(val)
+        raise StoreError(
+            f"Invalid value for column '{col_name}' of type 'decimal' in table '{table_name}' "
+            f"at row {row_idx}: expected float, int, or Decimal, got {type(val).__name__} ({val!r})."
+        )
+
+    elif type_name == "fixed":
+        if isinstance(val, bool) or not isinstance(val, (decimal.Decimal, int)):
+            raise StoreError(
+                f"Invalid value for column '{col_name}' of type 'fixed' in table '{table_name}' "
+                f"at row {row_idx}: expected Decimal or int, got {type(val).__name__} ({val!r})."
+            )
+        d_val = decimal.Decimal(val) if isinstance(val, int) else val
+        if d_val.is_nan() or d_val.is_infinite():
+            raise StoreError(
+                f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                f"cannot be NaN or Infinity in 'fixed' type: {val!r}."
+            )
+        rounded = d_val.quantize(_FIXED_EXP, rounding=decimal.ROUND_HALF_UP)
+        if not (_MIN_FIXED <= rounded <= _MAX_FIXED):
+            raise StoreError(
+                f"Value for column '{col_name}' in table '{table_name}' at row {row_idx} "
+                f"exceeds DECIMAL(19,4) range: {rounded!r}."
+            )
+        return rounded
+
     elif type_name == "datetime":
-        if isinstance(val, datetime.datetime):
-            return val
-        if isinstance(val, datetime.date):
-            return datetime.datetime(val.year, val.month, val.day)
-        return datetime.datetime.fromisoformat(str(val))
+        if not isinstance(val, datetime.datetime):
+            raise StoreError(
+                f"Invalid value for column '{col_name}' of type 'datetime' in table '{table_name}' "
+                f"at row {row_idx}: expected naive datetime, got {type(val).__name__} ({val!r})."
+            )
+        if val.tzinfo is not None:
+            raise StoreError(
+                f"Timezone-aware datetime rejected for column '{col_name}' in table '{table_name}' "
+                f"at row {row_idx}: {val!r}."
+            )
+        return val
+
     elif type_name == "text":
-        return str(val)
+        if isinstance(val, (bool, bytes)) or not isinstance(val, str):
+            raise StoreError(
+                f"Invalid value for column '{col_name}' of type 'text' in table '{table_name}' "
+                f"at row {row_idx}: expected str, got {type(val).__name__} ({val!r})."
+            )
+        return val
+
     elif type_name == "boolean":
-        return bool(val)
-    return val
+        if not isinstance(val, bool):
+            raise StoreError(
+                f"Invalid value for column '{col_name}' of type 'boolean' in table '{table_name}' "
+                f"at row {row_idx}: expected bool, got {type(val).__name__} ({val!r})."
+            )
+        return val
+
+    raise StoreError(f"Unknown column type '{type_name}' for column '{col_name}'.")
 
 
 class DuckStore:
-    """DuckDB implementation of Store interface."""
+    """DuckDB implementation of Store interface.
+
+    Notes on locking:
+    An exclusive advisory lock is held via fcntl.flock on '<path>.lock'.
+    A stale '.lock' file is left behind on disk on purpose; the lock is held on the
+    open file descriptor and automatically released when the file is closed or the process terminates.
+
+    threads parameter is optional; None preserves DuckDB's default thread count.
+    """
 
     def __init__(self, path: str, memory_limit: str = "2GB", threads: Optional[int] = None) -> None:
-        self.path = os.path.abspath(path)
-        self.lock_path = self.path + ".lock"
+        if not isinstance(path, str) or not path.strip():
+            raise StoreError("Store path must be a non-empty string.")
+
+        real_target = os.path.realpath(path)
+        self.path = real_target
+        self.lock_path = real_target + ".lock"
         self._lock_fd: Optional[int] = None
         self._conn: Optional[duckdb.DuckDBPyConnection] = None
 
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        try:
+            os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        except OSError as exc:
+            raise StoreError(f"Failed to create directory for store '{self.path}': {exc}") from exc
 
         self._acquire_lock()
         self._init_conn(memory_limit=memory_limit, threads=threads)
@@ -82,7 +176,7 @@ class DuckStore:
         try:
             self._lock_fd = os.open(self.lock_path, os.O_RDWR | os.O_CREAT, 0o666)
             fcntl.flock(self._lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except (BlockingIOError, OSError) as exc:
+        except BlockingIOError as exc:
             if self._lock_fd is not None:
                 try:
                     os.close(self._lock_fd)
@@ -92,9 +186,18 @@ class DuckStore:
             raise StoreLockedError(
                 f"Store at '{self.path}' is already locked by another process or instance."
             ) from exc
+        except OSError as exc:
+            if self._lock_fd is not None:
+                try:
+                    os.close(self._lock_fd)
+                except OSError:
+                    pass
+                self._lock_fd = None
+            raise StoreError(f"Failed to acquire lock file at '{self.lock_path}': {exc}") from exc
 
     def _init_conn(self, memory_limit: str = "2GB", threads: Optional[int] = None) -> None:
         config: dict[str, Any] = {
+            "enable_external_access": False,
             "memory_limit": memory_limit,
             "temp_directory": os.path.dirname(self.path),
         }
@@ -103,9 +206,9 @@ class DuckStore:
 
         try:
             self._conn = duckdb.connect(self.path, config=config)
-        except Exception:
+        except Exception as exc:
             self.close()
-            raise
+            raise StoreError(f"Failed to open DuckDB store at '{self.path}': {exc}") from exc
 
     def close(self) -> None:
         if self._conn is not None:
@@ -126,6 +229,12 @@ class DuckStore:
                 pass
             self._lock_fd = None
 
+    def __del__(self) -> None:
+        try:
+            self.close()
+        except Exception:
+            pass
+
     def __enter__(self) -> "DuckStore":
         return self
 
@@ -137,23 +246,61 @@ class DuckStore:
             raise StoreError("Store is closed.")
         return self._conn
 
+    def _get_raw_tables(self, conn: duckdb.DuckDBPyConnection) -> List[str]:
+        try:
+            rows = conn.execute(
+                "SELECT table_name FROM information_schema.tables "
+                "WHERE table_schema = current_schema() ORDER BY table_name"
+            ).fetchall()
+            return [r[0] for r in rows]
+        except Exception as exc:
+            raise StoreError(f"Failed to query table names: {exc}") from exc
+
+    def _resolve_table_name(self, name: Any, conn: duckdb.DuckDBPyConnection) -> str:
+        _validate_identifier(name, kind="Table name")
+        all_tables = self._get_raw_tables(conn)
+        for t in all_tables:
+            if t == name:
+                return t
+        lower_name = _ascii_lower(name)
+        for t in all_tables:
+            if _ascii_lower(t) == lower_name:
+                return t
+        raise StoreError(f"Table '{name}' does not exist.")
+
     def create_table(self, name: str, columns: Sequence[Tuple[str, str]]) -> None:
         conn = self._check_open()
+        _validate_identifier(name, kind="Table name")
 
-        if self.has_table(name):
-            raise StoreError(f"Table '{name}' already exists.")
+        if isinstance(columns, str) or not hasattr(columns, "__iter__"):
+            raise StoreError("Columns must be a sequence of (name, type) pairs, not string.")
 
-        seen_cols: set[str] = set()
+        cols_list = list(columns)
+        if len(cols_list) == 0:
+            raise StoreError(f"Cannot create table '{name}' with zero columns.")
+
+        # Check existing tables case-insensitively
+        all_tables = self._get_raw_tables(conn)
+        target_lower = _ascii_lower(name)
+        for t in all_tables:
+            if _ascii_lower(t) == target_lower:
+                raise StoreError(f"Table '{name}' already exists (matches '{t}').")
+
+        seen_ci: set[str] = set()
         col_defs: list[str] = []
 
-        for col_name, type_name in columns:
-            if not isinstance(col_name, str) or not col_name:
-                raise StoreError(f"Invalid column name: {col_name!r}")
-            if col_name == "__rn":
+        for col in cols_list:
+            if not isinstance(col, (tuple, list)) or len(col) != 2:
+                raise StoreError(f"Invalid column specification: {col!r}")
+            col_name, type_name = col
+            _validate_identifier(col_name, kind="Column name")
+
+            col_ci = _ascii_lower(col_name)
+            if col_ci == "__rn":
                 raise StoreError("Column name '__rn' is reserved for hidden row index.")
-            if col_name in seen_cols:
+            if col_ci in seen_ci:
                 raise StoreError(f"Duplicate column name: '{col_name}'")
-            seen_cols.add(col_name)
+            seen_ci.add(col_ci)
 
             if type_name not in _TYPE_MAP:
                 raise StoreError(
@@ -173,114 +320,118 @@ class DuckStore:
 
     def has_table(self, name: str) -> bool:
         conn = self._check_open()
-        rows = conn.execute(
-            "SELECT 1 FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = ?",
-            [name],
-        ).fetchall()
-        return len(rows) > 0
+        if not isinstance(name, str) or not name:
+            return False
+        all_tables = self._get_raw_tables(conn)
+        target_lower = _ascii_lower(name)
+        return any(_ascii_lower(t) == target_lower for t in all_tables)
 
     def table_names(self) -> List[str]:
         conn = self._check_open()
-        rows = conn.execute(
-            "SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema() ORDER BY table_name"
-        ).fetchall()
-        return [r[0] for r in rows]
+        return self._get_raw_tables(conn)
 
     def columns(self, name: str) -> List[Tuple[str, str]]:
         conn = self._check_open()
-        if not self.has_table(name):
-            raise StoreError(f"Table '{name}' does not exist.")
+        resolved_name = self._resolve_table_name(name, conn)
 
-        rows = conn.execute(
-            "SELECT column_name, data_type FROM information_schema.columns "
-            "WHERE table_schema = current_schema() AND table_name = ? "
-            "ORDER BY ordinal_position",
-            [name],
-        ).fetchall()
+        try:
+            rows = conn.execute(
+                "SELECT column_name, data_type FROM information_schema.columns "
+                "WHERE table_schema = current_schema() AND table_name = ? "
+                "ORDER BY ordinal_position",
+                [resolved_name],
+            ).fetchall()
+        except Exception as exc:
+            raise StoreError(f"Failed to query columns for '{resolved_name}': {exc}") from exc
 
         result: list[Tuple[str, str]] = []
         for col_name, data_type in rows:
-            if col_name == "__rn":
+            if _ascii_lower(col_name) == "__rn":
                 continue
             dt_upper = data_type.upper()
             logical_type = _REVERSE_TYPE_MAP.get(dt_upper)
             if logical_type is None:
-                if "DECIMAL" in dt_upper:
-                    logical_type = "fixed"
-                elif "INT" in dt_upper:
-                    logical_type = "whole"
-                elif "DOUBLE" in dt_upper or "FLOAT" in dt_upper:
-                    logical_type = "decimal"
-                elif "TIMESTAMP" in dt_upper:
-                    logical_type = "datetime"
-                elif "BOOL" in dt_upper:
-                    logical_type = "boolean"
-                else:
-                    logical_type = "text"
+                raise StoreError(
+                    f"Unknown stored column type '{data_type}' for column '{col_name}' in table '{resolved_name}'."
+                )
             result.append((col_name, logical_type))
         return result
 
     def row_count(self, name: str) -> int:
         conn = self._check_open()
-        if not self.has_table(name):
-            raise StoreError(f"Table '{name}' does not exist.")
-        quoted_name = _quote_identifier(name)
-        row = conn.execute(f"SELECT COUNT(*) FROM {quoted_name}").fetchone()
-        return row[0] if row else 0
+        resolved_name = self._resolve_table_name(name, conn)
+        quoted_name = _quote_identifier(resolved_name)
+        try:
+            row = conn.execute(f"SELECT COUNT(*) FROM {quoted_name}").fetchone()
+            return row[0] if row else 0
+        except Exception as exc:
+            raise StoreError(f"Failed to get row count for '{resolved_name}': {exc}") from exc
 
     def drop_table(self, name: str) -> None:
         conn = self._check_open()
-        if not self.has_table(name):
-            raise StoreError(f"Table '{name}' does not exist.")
-        quoted_name = _quote_identifier(name)
+        resolved_name = self._resolve_table_name(name, conn)
+        quoted_name = _quote_identifier(resolved_name)
         try:
             conn.execute(f"DROP TABLE {quoted_name}")
         except Exception as exc:
-            raise StoreError(f"Failed to drop table '{name}': {exc}") from exc
+            raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
 
     def append_rows(self, name: str, rows: Iterable[Sequence[Any]]) -> int:
         conn = self._check_open()
-        if not self.has_table(name):
-            raise StoreError(f"Table '{name}' does not exist.")
+        resolved_name = self._resolve_table_name(name, conn)
 
-        col_info = self.columns(name)
+        col_info = self.columns(resolved_name)
         expected_cols = len(col_info)
-        current_rn = self.row_count(name)
-        quoted_tbl = _quote_identifier(name)
+        current_rn = self.row_count(resolved_name)
+        quoted_tbl = _quote_identifier(resolved_name)
 
-        pa_schema = None
-        if pa is not None:
-            pa_fields = []
-            for c_name, t_name in col_info:
-                if t_name == "whole":
-                    pa_fields.append((c_name, pa.int64()))
-                elif t_name == "decimal":
-                    pa_fields.append((c_name, pa.float64()))
-                elif t_name == "fixed":
-                    pa_fields.append((c_name, pa.decimal128(19, 4)))
-                elif t_name == "datetime":
-                    pa_fields.append((c_name, pa.timestamp("us")))
-                elif t_name == "text":
-                    pa_fields.append((c_name, pa.string()))
-                elif t_name == "boolean":
-                    pa_fields.append((c_name, pa.bool_()))
-                else:
-                    pa_fields.append((c_name, pa.string()))
-            pa_fields.append(("__rn", pa.int64()))
-            pa_schema = pa.schema(pa_fields)
+        pa_fields = []
+        for c_name, t_name in col_info:
+            if t_name == "whole":
+                pa_fields.append((c_name, pa.int64()))
+            elif t_name == "decimal":
+                pa_fields.append((c_name, pa.float64()))
+            elif t_name == "fixed":
+                pa_fields.append((c_name, pa.decimal128(19, 4)))
+            elif t_name == "datetime":
+                pa_fields.append((c_name, pa.timestamp("us")))
+            elif t_name == "text":
+                pa_fields.append((c_name, pa.string()))
+            elif t_name == "boolean":
+                pa_fields.append((c_name, pa.bool_()))
+            else:
+                raise StoreError(f"Unsupported column type: {t_name}")
+        pa_fields.append(("__rn", pa.int64()))
+        pa_schema = pa.schema(pa_fields)
 
         batch_size = 50_000
         current_batch: list[Tuple[Any, ...]] = []
         total_appended = 0
+        overall_row_idx = 0
 
-        conn.execute("BEGIN TRANSACTION")
+        try:
+            conn.execute("BEGIN TRANSACTION")
+        except Exception as exc:
+            raise StoreError(f"Failed to begin transaction: {exc}") from exc
+
         try:
             for row in rows:
+                if isinstance(row, (str, bytes)) or not hasattr(row, "__len__"):
+                    raise StoreError(
+                        f"Row at index {overall_row_idx} must be a sequence of values, got {type(row).__name__}."
+                    )
                 if len(row) != expected_cols:
                     raise StoreError(
-                        f"Row has {len(row)} values, but table '{name}' expects {expected_cols}."
+                        f"Row at index {overall_row_idx} has {len(row)} values, but table '{resolved_name}' expects {expected_cols}."
                     )
-                current_batch.append(tuple(row))
+                coerced_row = []
+                for idx, (c_name, t_name) in enumerate(col_info):
+                    coerced_row.append(
+                        _coerce_value(row[idx], t_name, resolved_name, c_name, overall_row_idx)
+                    )
+                current_batch.append(tuple(coerced_row))
+                overall_row_idx += 1
+
                 if len(current_batch) >= batch_size:
                     self._insert_batch(
                         conn, quoted_tbl, current_batch, col_info, pa_schema, current_rn
@@ -298,12 +449,14 @@ class DuckStore:
                 current_batch = []
 
             conn.execute("COMMIT")
-        except Exception:
+        except Exception as exc:
             try:
                 conn.execute("ROLLBACK")
             except Exception:
                 pass
-            raise
+            if isinstance(exc, StoreError):
+                raise
+            raise StoreError(f"Failed to append rows to '{resolved_name}': {exc}") from exc
 
         return total_appended
 
@@ -320,28 +473,22 @@ class DuckStore:
         if batch_len == 0:
             return
 
-        if pa is not None and pa_schema is not None:
-            try:
-                cols_dict: dict[str, list[Any]] = {}
-                for idx, (c_name, t_name) in enumerate(col_info):
-                    cols_dict[c_name] = [
-                        _coerce_value(row[idx], t_name) for row in batch
-                    ]
-                cols_dict["__rn"] = list(range(start_rn, start_rn + batch_len))
-                batch_table = pa.Table.from_pydict(cols_dict, schema=pa_schema)
-                conn.execute(f"INSERT INTO {quoted_tbl} SELECT * FROM batch_table")
-                return
-            except Exception:
-                # If PyArrow path fails, fall back to executemany
-                pass
+        cols_dict: dict[str, list[Any]] = {}
+        for idx, (c_name, _) in enumerate(col_info):
+            cols_dict[c_name] = [row[idx] for row in batch]
+        cols_dict["__rn"] = list(range(start_rn, start_rn + batch_len))
 
-        num_cols = len(col_info) + 1  # includes __rn
-        placeholders = ", ".join(["?"] * num_cols)
-        insert_sql = f"INSERT INTO {quoted_tbl} VALUES ({placeholders})"
-        rows_with_rn = [
-            tuple(r) + (start_rn + offset,) for offset, r in enumerate(batch)
-        ]
-        conn.executemany(insert_sql, rows_with_rn)
+        try:
+            batch_table = pa.Table.from_pydict(cols_dict, schema=pa_schema)
+            conn.register("batch_tbl", batch_table)
+            conn.execute(f"INSERT INTO {quoted_tbl} SELECT * FROM batch_tbl")
+        except Exception as exc:
+            raise StoreError(f"Failed to insert batch: {exc}") from exc
+        finally:
+            try:
+                conn.unregister("batch_tbl")
+            except Exception:
+                pass
 
     def read_page(
         self,
@@ -351,29 +498,59 @@ class DuckStore:
         columns: Optional[Sequence[str]] = None,
     ) -> List[Tuple[Any, ...]]:
         conn = self._check_open()
-        if not self.has_table(name):
-            raise StoreError(f"Table '{name}' does not exist.")
+        resolved_name = self._resolve_table_name(name, conn)
+
+        if isinstance(offset, bool) or not isinstance(offset, int) or offset < 0:
+            raise StoreError(f"Offset must be a non-negative integer, got {offset!r}.")
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
+            raise StoreError(f"Limit must be a non-negative integer, got {limit!r}.")
+
+        if limit == 0:
+            return []
+
+        all_cols = self.columns(resolved_name)
+        col_lookup: dict[str, str] = {}
+        for c_name, _ in all_cols:
+            col_lookup[_ascii_lower(c_name)] = c_name
 
         if columns is None:
-            available_cols = [c[0] for c in self.columns(name)]
-            selected = ", ".join(_quote_identifier(c) for c in available_cols)
+            selected_cols = [c[0] for c in all_cols]
         else:
-            if not columns:
-                return []
-            existing = {c[0] for c in self.columns(name)}
+            if isinstance(columns, str) or not hasattr(columns, "__iter__"):
+                raise StoreError("Columns parameter must be a sequence of column names, not a string.")
+            selected_cols = []
+            seen_ci: set[str] = set()
             for c in columns:
-                if c not in existing:
-                    raise StoreError(f"Column '{c}' does not exist in table '{name}'.")
-            selected = ", ".join(_quote_identifier(c) for c in columns)
+                if not isinstance(c, str):
+                    raise StoreError(f"Column name must be a string, got {type(c).__name__}.")
+                c_ci = _ascii_lower(c)
+                if c_ci in seen_ci:
+                    raise StoreError(f"Duplicate column '{c}' in read_page request.")
+                seen_ci.add(c_ci)
+                if c_ci not in col_lookup:
+                    raise StoreError(f"Column '{c}' does not exist in table '{resolved_name}'.")
+                selected_cols.append(col_lookup[c_ci])
 
-        quoted_tbl = _quote_identifier(name)
+        if not selected_cols:
+            return []
+
+        selected_sql = ", ".join(_quote_identifier(c) for c in selected_cols)
+        quoted_tbl = _quote_identifier(resolved_name)
         sql = (
-            f"SELECT {selected} FROM {quoted_tbl} "
+            f"SELECT {selected_sql} FROM {quoted_tbl} "
             f"ORDER BY \"__rn\" ASC LIMIT ? OFFSET ?"
         )
-        return conn.execute(sql, [limit, offset]).fetchall()
+        try:
+            return conn.execute(sql, [limit, offset]).fetchall()
+        except Exception as exc:
+            raise StoreError(f"Failed to read page from '{resolved_name}': {exc}") from exc
 
     def execute(self, sql: str, params: Sequence[Any] = ()) -> List[Tuple[Any, ...]]:
+        """Run a single read query (SELECT only) and return list of tuples.
+
+        Note: When running 'SELECT *', the returned tuples will also include the hidden
+        '__rn' column as the last element.
+        """
         conn = self._check_open()
         if not isinstance(sql, str) or not sql.strip():
             raise StoreError("Query must be a non-empty string.")
