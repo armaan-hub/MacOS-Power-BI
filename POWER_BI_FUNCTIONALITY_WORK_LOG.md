@@ -3032,3 +3032,9 @@ Locking: the parity gate now replays the saved XT_ answers as its own group, exi
 Gate: PARITY GATE PASSED. pytest 41,895 passed (26 xfailed; one visual-lifecycle test failed only beside others and passed alone), real app 575 of 575, replay 831,798 saved Power BI answers with 0 DIFF and 0 CRASH. The full gate now takes about 18 minutes.
 
 Open: 5 refused fresh probes (SAMEPERIODLASTYEAR over DATESMTD/DATESQTD, SUMX over VALUES with SAMEPERIODLASTYEAR(DATESYTD) inside, IF returning DISTINCT, IF testing one column and returning another), HP-043, HP-061, even-count Currency MEDIAN, install_guest_model not safe to re-run after a crash, case-sensitive filter at exit_model.py:523, guest_lock re-entrancy test. Next: Phase 2.
+
+## Stage A7: relationship filter copy (2026-11-23)
+
+Rule: when filters are carried across relationships, a filtered table starts from its filter rows; it is not first copied in full. The old code copied all rows of every table per context transition, so SUMX(Facts, CALCULATE(SUM(Facts[Sales]))) grew with the square of the row count. Result at 100,000 rows: 28.9 s to 4.2 s (reviewer: 24.6 s to 3.5 s). Answers unchanged: engine_diff 45 of 45, two old-versus-new differentials over relationship models (78 answers x 3 seeds, 464 comparisons) with 0 different, gate passed with 0 DIFF and 0 CRASH.
+
+Open: unfiltered tables are still copied once per call; four unconverted row scans in measures.py; relationship models still slow at several thousand rows (profile next).
