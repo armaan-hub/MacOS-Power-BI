@@ -819,3 +819,517 @@ def test_speed_1m_rows(tmp_path):
         assert summary.row_count == 1_000_000
     finally:
         store.close()
+
+
+# ---------------------------------------------------------------------------
+# B2a-fix2: sparse wide records, chunk independence, fast quote check, nits, gaps
+# ---------------------------------------------------------------------------
+import itertools  # noqa: E402
+
+import analytics_studio.store.csv_import as ci  # noqa: E402
+
+_NAMES = itertools.count()
+
+
+def _opts(**kw):
+    return fi.normalize_options("csv", kw)
+
+
+def _old_result(path, opts):
+    try:
+        cand = fi._parse_csv(Path(path), opts)
+    except fi.FileImportError as exc:
+        return ("refuse", str(exc))
+    return ("ok", cand.headers, [[r[h] for h in cand.headers] for r in cand.rows])
+
+
+def _new_result(store, path, opts, **kw):
+    name = f"t{next(_NAMES)}"
+    try:
+        summary = ci.import_csv_to_store(store, name, path, opts, **kw)
+    except fi.FileImportError as exc:
+        assert not store.has_table(name)
+        return ("refuse", str(exc))
+    rows = [list(r) for r in store.read_page(name, 0, summary.row_count + 5)]
+    for row in rows:
+        assert all(isinstance(c, str) for c in row)
+    store.drop_table(name)
+    return ("ok", summary.headers, rows, summary.notices)
+
+
+def _check_equal(old, new, *, strict=True):
+    """Old and new must agree. strict: new may not refuse a file old accepts."""
+    if old[0] == "ok" and new[0] == "ok":
+        assert new[1] == old[1]
+        assert new[2] == old[2]
+    elif old[0] == "refuse":
+        # new may read the two malformed-quote classes leniently, but only with a notice
+        assert new[0] == "refuse" or new[3], f"old refused ({old[1]}) but new imported silently"
+    elif strict:
+        raise AssertionError(f"old imported but new refused: {new[1]}")
+
+
+def _both(tmp_path, store, data, has_header=True, **kw):
+    folder = tmp_path / f"d{next(_NAMES)}"
+    folder.mkdir()
+    path = folder / "data.csv"
+    path.write_bytes(data)
+    opts = _opts(has_header=has_header)
+    return _old_result(path, opts), _new_result(store, path, opts, **kw)
+
+
+@pytest.fixture
+def store2(tmp_path):
+    s = DuckStore(str(tmp_path / "fix2.duckdb"))
+    yield s
+    s.close()
+
+
+# --- Blocker 1: a record with many leading empty cells -----------------------
+
+@pytest.mark.parametrize("has_header", [True, False])
+@pytest.mark.parametrize("lead", [16, 17, 20, 500])
+def test_blocker1_leading_empty_cells_widen_table(tmp_path, store2, lead, has_header):
+    data = b"a,b\n1,2\n" + b"," * lead + b"x\n3,4\n"
+    old, new = _both(tmp_path, store2, data, has_header)
+    assert old[0] == "ok" and len(old[1]) == lead + 1
+    assert new[0] == "ok"
+    _check_equal(old, new)
+    assert len(new[2]) == len(old[2])
+
+
+@pytest.mark.parametrize("has_header", [True, False])
+def test_blocker1_sparse_only_file(tmp_path, store2, has_header):
+    old, new = _both(tmp_path, store2, b"a\n" + b"," * 40 + b"x", has_header)
+    assert old[0] == "ok" and new[0] == "ok"
+    _check_equal(old, new)
+    assert len(new[1]) == 41
+
+
+def test_blocker1_over_limit_and_skipped_wide_empty_records(tmp_path, store2):
+    # x in column 513 (512 delimiters before it): over the limit for both
+    old, new = _both(tmp_path, store2, b"a,b\n1,2\n" + b"," * 512 + b"x\n")
+    assert old[0] == "refuse" and new[0] == "refuse"
+    assert "512-column" in new[1]
+    # a wide record whose cells are all empty is skipped by both and does not widen
+    old, new = _both(tmp_path, store2, b"a,b\n,,,,\n" + b"," * 600 + b"\n1,2\n")
+    assert old[0] == "ok"
+    _check_equal(old, new)
+    assert new[1] == ["a", "b"]
+    # the same, with the widest record only reached after 600 empty delimiters
+    old, new = _both(tmp_path, store2, b"a,b\n1,2\n" + b"," * 600 + b"x\n")
+    assert old[0] == "refuse" and new[0] == "refuse"
+
+
+def test_blocker1_sparse_row_late_in_big_file(tmp_path, store2):
+    # The wide record sits at the very end, far past any head window. A small first
+    # tier stands in for "line 5,000,001 of a big file" without a 5M-row file.
+    body = b"a,b\n" + b"1,2\n" * 20_000 + b",,,,x\n"
+    old, new = _both(tmp_path, store2, body, width_tiers=(2, ci._NC))
+    assert old[0] == "ok" and len(old[1]) == 5 and len(old[2]) == 20_001
+    _check_equal(old, new)
+
+
+def _sparse_file(rng):
+    cells = ["x", "1", '""', '"q,r"', "y z"]
+    lines = []
+    for _ in range(rng.randint(0, 9)):
+        kind = rng.random()
+        if kind < 0.08:
+            lines.append("")
+        elif kind < 0.16:
+            lines.append('""')
+        else:
+            n = rng.randint(1, 24)
+            lines.append(",".join(rng.choice(cells) if rng.random() < 0.3 else "" for _ in range(n)))
+    return "\n".join(lines).encode()
+
+
+@pytest.mark.parametrize("tier", [1, 2, 3, 17])
+def test_blocker1_tier_constant_fuzz_matches_old(tmp_path, store2, tier):
+    rng = random.Random(1000 + tier)
+    seen_wide = 0
+    for _ in range(40):
+        data = _sparse_file(rng)
+        has_header = rng.random() < 0.6
+        old, new = _both(tmp_path, store2, data, has_header, width_tiers=(tier, 25, ci._NC))
+        _check_equal(old, new)
+        if old[0] == "ok" and len(old[1]) > tier:
+            seen_wide += 1
+    assert seen_wide >= 5  # the fuzz really reaches past the first tier
+
+
+def test_blocker1_default_tiers_fuzz_matches_old(tmp_path, store2):
+    rng = random.Random(7)
+    for _ in range(60):
+        old, new = _both(tmp_path, store2, _sparse_file(rng), rng.random() < 0.5)
+        _check_equal(old, new)
+
+
+def test_blocker1_last_tier_wide_empty_records(tmp_path, store2, monkeypatch):
+    # Column limit 4, tiers (2, 5): records that fill the last schema column while all
+    # their visible cells are empty cannot be judged by DuckDB; the exact fallback decides.
+    monkeypatch.setattr(fi, "MAX_COLUMNS", 4)
+    tiers = (2, 5)
+    cases = [
+        b"a,b\n1,2\n,,,,,\n3,4\n",       # all-empty wide record: skipped
+        b"a,b\n1,2\n,,,,,x\n",           # data past the last schema column: over the limit
+        b"a,b\n1,2\n,,,,x\n",            # data in the last schema column: over the limit
+        b"a,b\n1,2,3,4\n,,,,,,\n",       # widest kept record has exactly 4 cells
+        b"a,b\n,,,,,,,,\n,,,,,\n",       # only skipped wide records
+    ]
+    for data in cases:
+        for has_header in (True, False):
+            old, new = _both(tmp_path, store2, data, has_header, width_tiers=tiers)
+            _check_equal(old, new)
+            assert (old[0] == "ok") == (new[0] == "ok")
+
+
+# --- Blocker 2: chunk independence of the byte scans --------------------------
+
+_QTOK = [
+    b'"', b'""', b'"a"', b'"a ""b"" c"', b",", b",", b"\n", b"\r\n", b"\r", b" ", b"x", b"ab",
+    b'"p, ""q"""', b' "', b'" ', b'""""', b"\t", b"\xef\xbb\xbf",
+]
+
+
+def _scan_outcome(fn, path, chunk_size):
+    try:
+        return ("ok", tuple(fn(path, ",", chunk_size=chunk_size)))
+    except fi.FileImportError as exc:
+        return ("refuse", str(exc))
+
+
+def test_blocker2_quote_scan_independent_of_chunk_size(tmp_path):
+    rng = random.Random(5)
+    path = tmp_path / "q.csv"
+    sizes = (1, 2, 3, 5, 7, 11, 64)
+    same = differ = 0
+    for _ in range(1500):
+        path.write_bytes(b"".join(rng.choice(_QTOK) for _ in range(rng.randint(1, 40))))
+        for fn in (ci._exact_quote_scan, ci._detect_malformed_quotes_and_space_before_quote):
+            ref = _scan_outcome(fn, path, 1 << 20)
+            for cs in sizes:
+                if _scan_outcome(fn, path, cs) == ref:
+                    same += 1
+                else:
+                    differ += 1
+        fast_ref = ci._fast_quote_check(path, ",", chunk_size=1 << 20)
+        for cs in sizes:
+            if ci._fast_quote_check(path, ",", chunk_size=cs) == fast_ref:
+                same += 1
+            else:
+                differ += 1
+    assert differ == 0
+    assert same == 1500 * 3 * len(sizes)
+
+
+def test_fast_quote_check_is_sound_against_exact_scan(tmp_path):
+    rng = random.Random(99)
+    path = tmp_path / "f.csv"
+    clean_and_fast = fell_back = unsound = 0
+    for _ in range(3000):
+        path.write_bytes(b"".join(rng.choice(_QTOK) for _ in range(rng.randint(1, 30))))
+        exact = _scan_outcome(ci._exact_quote_scan, path, 1 << 20)
+        fast = ci._fast_quote_check(path, ",", chunk_size=rng.choice([1, 2, 3, 5, 8, 1 << 20]))
+        if fast:
+            if exact == ("ok", ()):
+                clean_and_fast += 1
+            else:
+                unsound += 1
+        else:
+            fell_back += 1
+    print(f"\nfast check: {clean_and_fast} proven clean, {fell_back} fell back, {unsound} unsound")
+    assert unsound == 0
+    assert clean_and_fast > 100 and fell_back > 100
+
+
+def test_fast_quote_check_clean_files_skip_exact_scan(tmp_path, store2, monkeypatch):
+    def boom(*a, **k):
+        raise AssertionError("exact scan must not run for a provably clean file")
+
+    monkeypatch.setattr(ci, "_exact_quote_scan", boom)
+    data = b'id,name,note\n1,"a, b","x ""y"" z"\n2,"",\n"3","l\nm",x\n'
+    old, new = _both(tmp_path, store2, data)
+    _check_equal(old, new)
+    assert new[3] == []
+
+
+def test_fast_quote_check_unprovable_but_valid_file_falls_back_without_notice(tmp_path, store2):
+    # quotes inside unquoted fields are valid text; the fast check cannot prove them
+    data = b'a,b\n5" pipe,2\nab"c"d,x"y\n'
+    path = tmp_path / "u.csv"
+    path.write_bytes(data)
+    assert ci._fast_quote_check(path, ",") is False
+    assert ci._exact_quote_scan(path, ",") == []
+    old, new = _both(tmp_path, store2, data)
+    _check_equal(old, new)
+    assert new[3] == []
+
+
+_STRADDLE = [
+    b'a,b\n"a""a ""b"" c""p, ""q""""""",2\n',         # valid escaped quotes
+    b'a,b\n"x ""y"" z",""\n1,"p, ""q"""""\n',          # valid, ends with escaped quotes
+    b'a,b\n1, "x,y"\n',                                # space before a quote: refused
+    b'a,b\n"abc"def,2\n',                              # text after closing quote: notice
+    b'a,b\n"abc,2\n3,4\n',                             # unterminated quote: notice
+    b'a,b\r\n1,2\r\n"l\nm",3\r\n',                     # CRLF with a bare LF inside quotes
+    b'a,b\r\n1,2\r\n',                                 # CR and LF split by a boundary
+    b'a,b\n1,\x01NULL\x01\n',                          # marker bytes split by a boundary
+    b'"a","b"\n"1","2"\n',
+]
+
+
+@pytest.mark.parametrize("data", _STRADDLE)
+def test_blocker2_constructs_straddling_chunk_boundary(tmp_path, store2, data):
+    results = []
+    for cs in (None, 1, 2, 3, 4, 5, 7, 11):
+        kw = {} if cs is None else {"scan_chunk_size": cs}
+        old, new = _both(tmp_path, store2, data, **kw)
+        _check_equal(old, new, strict=False)
+        results.append(new)
+    assert all(r == results[0] for r in results), "result depends on the scan chunk size"
+
+
+def test_blocker2_real_8mib_boundary_escaped_quote_pair(tmp_path, store2):
+    # the first quote of an escaped pair is the last byte of the first 8 MiB chunk
+    block = 8 * 1024 * 1024
+    for field in (b'"p ""q"" r"', b'"a""a ""b"" c""p, ""q"""""'):
+        tail = field + b",2\n"
+        for offset in (1, 2, 3, 4):  # which quote of the construct is the last byte of chunk 1
+            head = b"h1,h2\n"
+            pad = block - len(head) - 3 - (field.index(b'""') + offset)
+            data = head + b"x," + b"y" * pad + b"\n" + tail
+            old, new = _both(tmp_path, store2, data)
+            assert old[0] == "ok"
+            _check_equal(old, new)
+            assert new[3] == []
+
+
+# --- Nits ---------------------------------------------------------------------
+
+def test_nit_directory_message_like_old(tmp_path, store2):
+    d = tmp_path / "adir"
+    d.mkdir()
+    old = _old_result(d, _opts())
+    new = _new_result(store2, d, _opts())
+    assert old == ("refuse", "Could not read adir: Is a directory.")
+    assert new == ("refuse", "Could not read adir: Is a directory.")
+
+
+@pytest.mark.parametrize("raw", ["a,b\n1,2\n".encode("utf-16")[:-1], "a,b\n1,2\n".encode("utf-16-le")[:-1]])
+def test_nit_utf16_truncated_message_names_utf16(tmp_path, store2, raw):
+    old, new = _both(tmp_path, store2, raw)  # default encoding is utf-8-sig: use utf-16 below
+    path = tmp_path / "t16.csv"
+    path.write_bytes(raw)
+    opts = _opts(encoding="utf-16")
+    old = _old_result(path, opts)
+    new = _new_result(store2, path, opts)
+    assert old == ("refuse", "Could not decode t16.csv as utf-16.")
+    assert new == old
+
+
+def test_nit_header_case_policy_is_ascii_only(tmp_path, store2):
+    # the store folds only ASCII letters: E-acute and e-acute are different names
+    old, new = _both(tmp_path, store2, "É,é\n1,2\n".encode())
+    assert old[0] == "ok"
+    assert new[0] == "ok"
+    _check_equal(old, new)
+    _, new_ascii = _both(tmp_path, store2, b"A,a\n1,2\n")
+    assert new_ascii[0] == "refuse" and "cannot be used by the large-file store" in new_ascii[1]
+
+
+def test_bom_before_quoted_first_header_both_encodings(tmp_path, store2):
+    for enc in ("utf-8-sig", "utf-8"):
+        path = tmp_path / f"bom_{enc}.csv"
+        path.write_bytes(b'\xef\xbb\xbf"a,b",c\n1,2\n')
+        opts = _opts(encoding=enc)
+        _check_equal(_old_result(path, opts), _new_result(store2, path, opts))
+        assert ci._detect_malformed_quotes_and_space_before_quote(path, ",") == []
+
+
+def test_utf16_without_bom_imports_and_equals_old(tmp_path, store2):
+    path = tmp_path / "le.csv"
+    path.write_bytes("a,b\r\né,1\r\n".encode("utf-16-le"))
+    opts = _opts(encoding="utf-16")
+    old = _old_result(path, opts)
+    new = _new_result(store2, path, opts)
+    assert old[0] == "ok" and new[0] == "ok"
+    assert new[1:3] == old[1:3] == (["a", "b"], [["é", "1"]])
+
+
+# --- Test gaps (each must fail when its guarded line is removed) ----------------
+
+def _isolated_tmp(tmp_path, monkeypatch):
+    base = tmp_path / "systmp"
+    base.mkdir()
+    monkeypatch.setattr(tempfile, "tempdir", str(base))
+    return base
+
+
+def test_gap_sweep_ignores_folders_of_other_users(tmp_path, monkeypatch):
+    base = _isolated_tmp(tmp_path, monkeypatch)
+    old_dir = base / "analytics_studio_csv_old"
+    old_dir.mkdir()
+    past = time.time() - 3 * 86400
+    os.utime(old_dir, (past, past))
+    monkeypatch.setattr(os, "getuid", lambda: os.stat(old_dir).st_uid + 1)
+    ci._clean_old_temp_folders()
+    assert old_dir.exists(), "a folder owned by another user must not be removed"
+    monkeypatch.undo()
+    monkeypatch.setattr(tempfile, "tempdir", str(base))
+    ci._clean_old_temp_folders()
+    assert not old_dir.exists()
+
+
+def test_gap_sweep_only_touches_directories(tmp_path, monkeypatch):
+    base = _isolated_tmp(tmp_path, monkeypatch)
+    plain = base / "analytics_studio_csv_a_file"
+    plain.write_bytes(b"x")
+    past = time.time() - 3 * 86400
+    os.utime(plain, (past, past))
+    removed = []
+    monkeypatch.setattr(ci.shutil, "rmtree", lambda p, **k: removed.append(p))
+    ci._clean_old_temp_folders()
+    assert removed == []
+
+
+def test_gap_sweep_prefix_and_age(tmp_path, monkeypatch):
+    base = _isolated_tmp(tmp_path, monkeypatch)
+    fresh = base / "analytics_studio_csv_fresh"
+    other = base / "something_else"
+    stale = base / "analytics_studio_csv_stale"
+    for d in (fresh, other, stale):
+        d.mkdir()
+    past = time.time() - 3 * 86400
+    os.utime(other, (past, past))
+    os.utime(stale, (past, past))
+    ci._clean_old_temp_folders()
+    assert fresh.exists() and other.exists() and not stale.exists()
+
+
+def test_gap_cancel_checked_in_every_scan(tmp_path):
+    path = tmp_path / "c.csv"
+    path.write_bytes(b'a,b\n"1","2"\n' * 50)
+    ev = threading.Event()
+    ev.set()
+    with pytest.raises(fi.ImportCancelledError):
+        ci._check_line_endings_and_sentinel(path, b"\x01NULL\x01", cancel_event=ev, chunk_size=64)
+    with pytest.raises(fi.ImportCancelledError):
+        ci._fast_quote_check(path, ",", cancel_event=ev, chunk_size=64)
+    with pytest.raises(fi.ImportCancelledError):
+        ci._exact_quote_scan(path, ",", cancel_event=ev, chunk_size=64)
+    with pytest.raises(fi.ImportCancelledError):
+        ci._detect_malformed_quotes_and_space_before_quote(path, ",", cancel_event=ev)
+
+
+def test_gap_cancel_stops_a_long_exact_quote_scan_quickly(tmp_path):
+    # a quote inside an unquoted field defeats the fast check, so the slow exact scan runs
+    path = tmp_path / "slow.csv"
+    line = b'1,"abc",5" pipe,"x ""y"""\n'
+    path.write_bytes(line * 1_200_000)  # about 31 MB: the exact scan needs several seconds
+    ev = threading.Event()
+    timer = threading.Timer(0.3, ev.set)
+    timer.start()
+    t0 = time.time()
+    try:
+        with pytest.raises(fi.ImportCancelledError):
+            ci._exact_quote_scan(path, ",", cancel_event=ev)
+    finally:
+        timer.cancel()
+    assert time.time() - t0 < 1.5
+
+
+def test_gap_escaped_quote_inside_quoted_field_gives_no_notice(tmp_path, store2, monkeypatch):
+    data = b'a,b\n"x""y",2\n"""",3\n"p ""q"" r",""\n'
+    path = tmp_path / "esc.csv"
+    path.write_bytes(data)
+    assert ci._exact_quote_scan(path, ",") == []
+    # run the whole import through the exact scan only
+    monkeypatch.setattr(ci, "_fast_quote_check", lambda *a, **k: False)
+    old, new = _both(tmp_path, store2, data)
+    _check_equal(old, new)
+    assert new[3] == []
+
+
+def test_gap_interrupt_stops_a_long_duckdb_scan(tmp_path):
+    # 500k rows x 100 columns: the width pre-pass alone keeps DuckDB busy for several seconds.
+    # Without interrupt() the cancel would only be seen after that pre-pass.
+    path = tmp_path / "wide.csv"
+    row = b",".join([b"1"] * 100) + b"\n"
+    path.write_bytes(b",".join(b"h%d" % i for i in range(100)) + b"\n" + row * 500_000)
+    ev = threading.Event()
+    set_at = []
+
+    def fire():
+        set_at.append(time.time())
+        ev.set()
+
+    timer = threading.Timer(0.3, fire)
+    with DuckStore(str(tmp_path / "intr.duckdb")) as store:
+        timer.start()
+        try:
+            with pytest.raises(fi.ImportCancelledError):
+                ci.import_csv_to_store(store, "wide", path, _opts(), cancel_event=ev, max_rows=10**7)
+            latency = time.time() - set_at[0]
+        finally:
+            timer.cancel()
+        assert latency < 1.0, f"cancel took {latency:.2f} s after it was requested"
+        assert not store.has_table("wide")
+        store.create_table("again", [("c0", "text")])
+
+
+def test_gap_watcher_thread_is_joined_and_not_left_running(tmp_path, monkeypatch):
+    joined = []
+    real_join = threading.Thread.join
+
+    def spy_join(self, *args, **kwargs):
+        joined.append(self.name)
+        return real_join(self, *args, **kwargs)
+
+    monkeypatch.setattr(threading.Thread, "join", spy_join)
+    path = tmp_path / "w.csv"
+    path.write_bytes(b"a,b\n" + b"1,2\n" * 120_000)
+    with DuckStore(str(tmp_path / "leak.duckdb")) as store:
+        for i in range(8):
+            ev = threading.Event()
+            with pytest.raises(fi.ImportCancelledError):  # cancelled after the first batch
+                ci.import_csv_to_store(
+                    store, f"t{i}", path, _opts(), cancel_event=ev, progress=lambda _m, e=ev: e.set()
+                )
+            assert joined.count("csv-import-cancel-watch") == 2 * i + 1
+            ci.import_csv_to_store(store, f"ok{i}", path, _opts(), cancel_event=threading.Event())
+            assert joined.count("csv-import-cancel-watch") == 2 * i + 2
+            assert "csv-import-cancel-watch" not in [t.name for t in threading.enumerate()]
+        # no cancel event, no watcher thread
+        before = len(joined)
+        ci.import_csv_to_store(store, "plain", path, _opts())
+        assert len(joined) == before
+
+
+def test_gap_bom_is_skipped_by_the_quote_scans(tmp_path, store2):
+    # a BOM does not count as text before the first quote
+    clean = tmp_path / "bom_clean.csv"
+    clean.write_bytes(b'\xef\xbb\xbf"a,b",c\n1,2\n')
+    assert ci._fast_quote_check(clean, ",") is True
+    bad = tmp_path / "bom_text_after.csv"
+    bad.write_bytes(b'\xef\xbb\xbf"abc"def,2\n1,2\n')
+    assert len(ci._exact_quote_scan(bad, ",")) == 1
+    old, new = _both(tmp_path, store2, b'\xef\xbb\xbf"abc"def,2\n1,2\n')
+    assert old[0] == "refuse" and new[0] == "ok" and len(new[3]) == 1
+    old, new = _both(tmp_path, store2, b'\xef\xbb\xbfa, "b"\n1,2\n')
+    assert new[0] == "refuse" and "space before a quote" in new[1]
+
+
+def test_blocker2_real_8mib_boundary_sentinel_bytes_are_refused(tmp_path, store2):
+    # the internal marker bytes straddle the first 8 MiB chunk boundary: must be refused,
+    # never silently turned into an empty cell
+    block = 8 * 1024 * 1024
+    marker = b"\x01NULL\x01"
+    for split in range(1, len(marker)):
+        head = b"h1,h2\n"
+        pad = block - len(head) - 2 - split
+        data = head + b"x," + b"y" * pad + marker + b"\n"
+        old, new = _both(tmp_path, store2, data)
+        assert old[0] == "ok"
+        assert new[0] == "refuse" and "sentinel" in new[1]
