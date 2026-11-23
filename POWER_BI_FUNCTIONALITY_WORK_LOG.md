@@ -3038,3 +3038,9 @@ Open: 5 refused fresh probes (SAMEPERIODLASTYEAR over DATESMTD/DATESQTD, SUMX ov
 Rule: when filters are carried across relationships, a filtered table starts from its filter rows; it is not first copied in full. The old code copied all rows of every table per context transition, so SUMX(Facts, CALCULATE(SUM(Facts[Sales]))) grew with the square of the row count. Result at 100,000 rows: 28.9 s to 4.2 s (reviewer: 24.6 s to 3.5 s). Answers unchanged: engine_diff 45 of 45, two old-versus-new differentials over relationship models (78 answers x 3 seeds, 464 comparisons) with 0 different, gate passed with 0 DIFF and 0 CRASH.
 
 Open: unfiltered tables are still copied once per call; four unconverted row scans in measures.py; relationship models still slow at several thousand rows (profile next).
+
+## Stage A8: relationship model speed (2026-11-23)
+
+Rules: work that depends only on the loaded rows (relationship keys, key sets, uniqueness checks, Boolean filter row sets) is done once per evaluation, and the heavy indexes are built only when the same table column is asked for a third time; every use of a Boolean filter still gets its own filter object, because the engine compares filters by identity (ALLSELECTED). First review failed because one filter object was shared between two predicates that selected the same rows (answers changed: 6 and 2 instead of 3 and 1); fixed and pinned by tests/test_boolean_filter_identity.py. Results: XT_ exit model 493 formulas 224 s to 36 s; 5-table model at 6,000 rows 144 s to 27 s. All answers identical to before; gate passed with 0 DIFF and 0 CRASH.
+
+Open: the two-column ALLSELECTED shape is not yet compared with Power BI (guest Power BI was not running); more memory on iterated formulas; three row scans left in measures.py.
