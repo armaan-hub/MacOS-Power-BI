@@ -40,6 +40,15 @@ _FIXED_LIMIT_INT = 10**15
 # Wide local context so quantize never overflows the default 28-digit context.
 _FIXED_CTX = decimal.Context(prec=60)
 _BATCH_NAME = "__store_batch__"
+_ARROW_TARGET_TYPES = {
+    "boolean": pa.bool_(),
+    "whole": pa.int64(),
+    "decimal": pa.float64(),
+    "fixed": pa.decimal128(19, 4),
+    "datetime": pa.timestamp("us"),
+    "text": pa.string(),
+}
+
 
 
 def _quote_identifier(ident: str) -> str:
@@ -684,8 +693,10 @@ class DuckStore:
                 raise StoreError(f"Duplicate column name: '{col_name}'")
             seen_ci.add(col_ci)
 
-            if type_name != "text":
-                raise StoreError(f"create_table_from_arrow requires 'text' columns, got {type_name!r}.")
+            if not isinstance(type_name, str) or type_name not in _TYPE_MAP:
+                raise StoreError(
+                    f"Unknown column type {type_name!r}. Must be one of {COLUMN_TYPES}."
+                )
 
             sql_type = _TYPE_MAP[type_name]
             col_names.append(col_name)
@@ -714,11 +725,19 @@ class DuckStore:
                     raise StoreError(
                         f"Batch column names {batch.schema.names} do not match table columns {col_names}."
                     )
-                for field in batch.schema:
-                    if not (pa.types.is_string(field.type) or pa.types.is_large_string(field.type)):
-                        raise StoreError(
-                            f"Batch column '{field.name}' has non-string type {field.type}."
-                        )
+                for idx_field, field in enumerate(batch.schema):
+                    expected_store_type = cols_list[idx_field][1]
+                    expected_arrow_type = _ARROW_TARGET_TYPES[expected_store_type]
+                    if expected_store_type == "text":
+                        if not (field.type == expected_arrow_type or pa.types.is_large_string(field.type)):
+                            raise StoreError(
+                                f"Batch column '{field.name}' has non-string type {field.type}."
+                            )
+                    else:
+                        if field.type != expected_arrow_type:
+                            raise StoreError(
+                                f"Batch column '{field.name}' has type {field.type}, expected {expected_arrow_type}."
+                            )
 
                 batch_len = batch.num_rows
                 if max_rows is not None and total_rows + batch_len > max_rows:
