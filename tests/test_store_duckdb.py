@@ -1182,3 +1182,114 @@ def test_duck_store_checkpoint(tmp_path):
             assert store_chk.row_count("t") == 1000
 
 
+
+
+def _one_text_batch(values):
+    import pyarrow as pa
+
+    return pa.record_batch([pa.array(values, type=pa.string())], names=["a"])
+
+
+def test_table_version_counts_successful_changes(tmp_path):
+    import threading
+
+    path = str(tmp_path / "ver.duckdb")
+    with DuckStore(path) as store:
+        assert store.table_version("t") == 0
+        store.create_table("t", [("a", "text")])
+        v_created = store.table_version("t")
+        assert v_created > 0
+        store.append_rows("t", [("x",)])
+        v_appended = store.table_version("t")
+        assert v_appended > v_created
+        # A failed append rolls back and leaves the token alone.
+        with pytest.raises(StoreError):
+            store.append_rows("t", [("a", "too many")])
+        assert store.table_version("t") == v_appended
+        # Names compare like table names do: ASCII case-insensitive.
+        assert store.table_version("T") == v_appended
+
+        # create_table_from_arrow bumps the new table and nothing else.
+        store.create_table_from_arrow("u", [("a", "text")], iter([_one_text_batch(["p", "q"])]))
+        assert store.table_version("u") > 0
+        assert store.table_version("t") == v_appended
+        # A failed import leaves no table and no token change.
+        before_u2 = store.table_version("u2")
+        with pytest.raises(StoreError):
+            store.create_table_from_arrow("u2", [("b", "text")], iter([_one_text_batch(["p"])]))
+        assert store.table_version("u2") == before_u2
+
+        v_u = store.table_version("u")
+        store.drop_table("u")
+        assert store.table_version("u") > v_u
+
+        # The token can be read while another thread holds the store lock.
+        ready, release = threading.Event(), threading.Event()
+
+        def holder():
+            with store._lock:
+                ready.set()
+                release.wait(20)
+
+        thread = threading.Thread(target=holder)
+        thread.start()
+        try:
+            assert ready.wait(10)
+            assert store.table_version("t") == v_appended
+            with pytest.raises(StoreError, match="busy"):
+                store.row_count("t")
+        finally:
+            release.set()
+            thread.join(20)
+
+    # The token lives in memory only: a new store object starts again at 0.
+    with DuckStore(path) as reopened:
+        assert reopened.table_version("t") == 0
+
+
+def test_checkpoint_inside_open_transaction_raises_and_keeps_the_import(tmp_path):
+    with DuckStore(str(tmp_path / "ck_txn.duckdb")) as store:
+        seen = []
+
+        def batches():
+            yield _one_text_batch(["one"])
+            try:
+                store.checkpoint()
+                seen.append("returned")
+            except StoreError as exc:
+                seen.append(str(exc))
+            yield _one_text_batch(["two"])
+
+        assert store.create_table_from_arrow("t", [("a", "text")], batches()) == 2
+        assert len(seen) == 1 and seen[0] != "returned" and "transaction" in seen[0]
+        assert store.row_count("t") == 2
+
+        seen.clear()
+
+        def rows():
+            yield ("a",)
+            try:
+                store.checkpoint()
+                seen.append("returned")
+            except StoreError as exc:
+                seen.append(str(exc))
+            yield ("b",)
+
+        assert store.append_rows("t", rows()) == 2
+        assert len(seen) == 1 and seen[0] != "returned" and "transaction" in seen[0]
+        assert store.row_count("t") == 4
+        # Outside a transaction it works again.
+        store.checkpoint()
+
+
+def test_drop_view_refuses_a_real_table_even_with_the_reserved_prefix(tmp_path):
+    with DuckStore(str(tmp_path / "real_prefixed.duckdb")) as store:
+        store.create_table("t", [("a", "text")])
+        # A real (non-temporary) table that happens to carry the reserved prefix.
+        store._conn.execute('CREATE TABLE "__stm_real" (a INTEGER)')
+        store._conn.execute('INSERT INTO "__stm_real" VALUES (1)')
+        with pytest.raises(StoreError, match="non-temporary"):
+            store.drop_view("__stm_real")
+        assert store._conn.execute('SELECT count(*) FROM "__stm_real"').fetchone()[0] == 1
+        with pytest.raises(StoreError, match="already exists"):
+            store.create_view_ids("__stm_real", 'SELECT "__rn" FROM "t"')

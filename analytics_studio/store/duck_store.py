@@ -236,6 +236,10 @@ class DuckStore:
         self._lock_fd: Optional[int] = None
         self._lock = threading.RLock()
         self._conn: Optional[duckdb.DuckDBPyConnection] = None
+        # In-memory change counters per table (lower-cased name); never persisted.
+        self._versions: dict[str, int] = {}
+        # True while append_rows or create_table_from_arrow holds an open transaction.
+        self._txn_open = False
 
         try:
             os.makedirs(os.path.dirname(self.path), exist_ok=True)
@@ -314,6 +318,23 @@ class DuckStore:
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.close()
+
+    def _bump_version(self, name: str) -> None:
+        key = _ascii_lower(name)
+        self._versions[key] = self._versions.get(key, 0) + 1
+
+    def table_version(self, name: str) -> int:
+        """Return an in-memory change token for a table.
+
+        The token goes up by one after every successful create_table, append_rows,
+        drop_table and create_table_from_arrow for that table name. It starts at 0 for
+        a name this store object has never changed, it is never saved to disk, and it
+        does not take the store lock, so it can be read while an import runs.
+        Models use it to know that cached facts about a table are out of date.
+        """
+        if not isinstance(name, str):
+            return 0
+        return self._versions.get(_ascii_lower(name), 0)
 
     def _check_open(self) -> duckdb.DuckDBPyConnection:
         if self._conn is None:
@@ -400,6 +421,7 @@ class DuckStore:
             conn.execute(create_sql)
         except Exception as exc:
             raise StoreError(f"Failed to create table '{name}': {exc}") from exc
+        self._bump_version(name)
 
     @_thread_locked
     def has_table(self, name: str) -> bool:
@@ -463,6 +485,7 @@ class DuckStore:
             conn.execute(f"DROP TABLE {quoted_name}")
         except Exception as exc:
             raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
+        self._bump_version(resolved_name)
 
     @_thread_locked
     def append_rows(self, name: str, rows: Iterable[Sequence[Any]]) -> int:
@@ -511,6 +534,7 @@ class DuckStore:
         except Exception as exc:
             raise StoreError(f"Failed to begin transaction: {exc}") from exc
 
+        self._txn_open = True
         try:
             for row in rows:
                 if isinstance(row, (str, bytes, bytearray)) or not isinstance(row, _AbcSequence):
@@ -547,8 +571,10 @@ class DuckStore:
                 current_batch = []
 
             conn.execute("COMMIT")
+            self._txn_open = False
         except BaseException as exc:
             # BaseException on purpose: an interrupt must not leave the transaction open.
+            self._txn_open = False
             try:
                 conn.execute("ROLLBACK")
             except Exception:
@@ -559,6 +585,7 @@ class DuckStore:
                 f"Failed to append rows to '{resolved_name}' at row {overall_row_idx}: {exc}"
             ) from exc
 
+        self._bump_version(resolved_name)
         return total_appended
 
     def _insert_batch(
@@ -687,6 +714,8 @@ class DuckStore:
         committed data is persisted in the main file rather than left in the WAL.
         """
         conn = self._check_open()
+        if self._txn_open:
+            raise StoreError("Cannot checkpoint while a transaction is open.")
         try:
             conn.execute("CHECKPOINT")
         except Exception as exc:
@@ -934,6 +963,7 @@ class DuckStore:
         table_created = False
         try:
             conn.execute("BEGIN TRANSACTION")
+            self._txn_open = True
             conn.execute(create_sql)
             table_created = True
 
@@ -992,8 +1022,11 @@ class DuckStore:
                     raise StoreError("Store contains datetime values outside year 1 to 9999 or non-finite timestamps.")
 
             conn.execute("COMMIT")
+            self._txn_open = False
+            self._bump_version(name)
             return total_rows
         except BaseException as exc:
+            self._txn_open = False
             try:
                 conn.execute("ROLLBACK")
             except Exception:
