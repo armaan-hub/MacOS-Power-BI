@@ -1116,28 +1116,69 @@ def test_create_view_ids_and_drop_view(tmp_path):
         assert store.row_count("t") == 3
 
         # Create view ordering by val asc
-        store.create_view_ids("v_test", 'SELECT "__rn" FROM "t" ORDER BY "val" ASC, "__rn" ASC')
-        res = store.execute('SELECT "__rn", position FROM "v_test" ORDER BY position ASC')
+        store.create_view_ids("__stm_v_test", 'SELECT "__rn" FROM "t" ORDER BY "val" ASC, "__rn" ASC')
+        res = store.execute('SELECT "__rn", position FROM "__stm_v_test" ORDER BY position ASC')
         # Row 1 is (10, 'alice') which was row __rn 1
         # Row 2 is (20, 'bob') which was row __rn 2
         # Row 0 is (30, 'charlie') which was row __rn 0
         assert res == [(1, 0), (2, 1), (0, 2)]
 
-        # Verify temporary table count
+        # Verify temporary table count and that views are hidden from table_names()
         cnt = store.execute("SELECT count(*) FROM duckdb_tables() WHERE temporary")
         assert cnt[0][0] == 1
+        assert store.table_names() == ["t"]
 
         # Drop view
-        store.drop_view("v_test")
+        store.drop_view("__stm_v_test")
         cnt_after = store.execute("SELECT count(*) FROM duckdb_tables() WHERE temporary")
         assert cnt_after[0][0] == 0
 
         # Non-SELECT statement is rejected
         with pytest.raises(StoreError, match="Only SELECT queries are allowed"):
-            store.create_view_ids("v_bad", 'DELETE FROM "t"')
+            store.create_view_ids("__stm_v_bad", 'DELETE FROM "t"')
 
         # Invalid identifier is rejected
         with pytest.raises(StoreError, match="View name"):
             store.create_view_ids("", 'SELECT "__rn" FROM "t"')
+
+        # Refuse names without __stm_ prefix
+        with pytest.raises(StoreError, match="reserved prefix '__stm_'"):
+            store.create_view_ids("v_test", 'SELECT "__rn" FROM "t"')
+        with pytest.raises(StoreError, match="reserved prefix '__stm_'"):
+            store.drop_view("v_test")
+
+        # Refuse dropping real tables
+        with pytest.raises(StoreError, match="reserved prefix '__stm_'"):
+            store.drop_view("t")
+
+        # Collision with existing temp table
+        store.create_view_ids("__stm_dup", 'SELECT "__rn" FROM "t"')
+        try:
+            with pytest.raises(StoreError, match="Temporary table '__stm_dup' already exists"):
+                store.create_view_ids("__stm_dup", 'SELECT "__rn" FROM "t"')
+        finally:
+            store.drop_view("__stm_dup")
+
+
+def test_duck_store_checkpoint(tmp_path):
+    import shutil
+    db_path = str(tmp_path / "chk_test.duckdb")
+    with DuckStore(db_path) as store:
+        store.create_table("t", [("v", "whole")])
+        store.append_rows("t", [(i,) for i in range(1000)])
+
+        # Copy without checkpoint: data is only in WAL, copy has no tables
+        cp_uncheckpointed = str(tmp_path / "copy_no_chk.duckdb")
+        shutil.copyfile(db_path, cp_uncheckpointed)
+        with DuckStore(cp_uncheckpointed) as store_no_chk:
+            assert store_no_chk.table_names() == []
+
+        # Checkpoint and copy again: committed rows are flushed to main file
+        store.checkpoint()
+        cp_checkpointed = str(tmp_path / "copy_chk.duckdb")
+        shutil.copyfile(db_path, cp_checkpointed)
+        with DuckStore(cp_checkpointed) as store_chk:
+            assert store_chk.table_names() == ["t"]
+            assert store_chk.row_count("t") == 1000
 
 

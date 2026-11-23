@@ -210,7 +210,12 @@ def test_rich_column_types_differential(tmp_path, qapp):
 
         store.append_rows("rich", raw_rows)
         headers = [c[0] for c in cols]
-        dict_rows = [dict(zip(headers, r)) for r in raw_rows]
+        dict_rows = []
+        for r in raw_rows:
+            d = dict(zip(headers, r))
+            if d.get("col_date") is not None:
+                d["col_date"] = d["col_date"].date()
+            dict_rows.append(d)
 
         csv_m = CsvTableModel()
         store_m = StoreTableModel(store)
@@ -568,3 +573,311 @@ def test_fuzz_200_seeded_combinations(tmp_path, qapp):
                 csv_m.setColumnFilter(filt_col, op, val)
                 store_m.setColumnFilter(filt_col, op, val)
                 _assert_models_identical(csv_m, store_m, f"fuzz {trial} filter {filt_col} {op} {val}")
+
+
+from analytics_studio.transformations import infer_column_types
+
+def test_all_text_store_main_fixture(tmp_path, qapp):
+    db_path = str(tmp_path / "all_text_main.duckdb")
+    headers = ["whole", "decimal", "fixed", "datetime", "date", "text", "bool", "exotic"]
+    rows_text = [
+        ["100", "1.5", "99.99", "2026-11-23T11:30:45", "2026-01-15", "Apple", "True", " 12 "],
+        ["-50", "-0.5", "-123.45", "2025-05-10 08:00:00", "2025-05-10", "banana", "false", "1_000"],
+        ["0", "2.25", "0.00", "2000-01-01T00:00:00", "2000-01-01", "ORANGE", "TRUE", "1e3"],
+        ["999999999999", "240", "1000.00", "2099-12-31T23:59:59", "2099-12-31", "Grape", "False", "+5"],
+        ["", "", "", "", "", "", "", ".5"],
+        [None, None, None, None, None, None, None, "5."],
+        ["20", "1.50", "50.00", "2026-11-23T11:30:45", "2026-11-23", "café", "true", "plain"],
+    ]
+    dict_rows = [dict(zip(headers, r)) for r in rows_text]
+    col_types = infer_column_types(headers, dict_rows)
+
+    cols = [(h, "text") for h in headers]
+    with DuckStore(db_path) as store:
+        store.create_table("all_text", cols)
+        store.append_rows("all_text", [tuple(r) for r in rows_text])
+
+        csv_m = CsvTableModel()
+        store_m = StoreTableModel(store)
+
+        csv_m.replace_data(headers, dict_rows, column_types=col_types)
+        store_m.replace_data("all_text", headers, column_types=col_types)
+
+        _assert_models_identical(csv_m, store_m, "all_text initial")
+
+        for idx, col in enumerate(headers):
+            csv_m.sortByColumn(idx)
+            store_m.sortByColumn(idx)
+            _assert_models_identical(csv_m, store_m, f"all_text sort asc {col}")
+
+            csv_m.sortByColumn(idx)
+            store_m.sortByColumn(idx)
+            _assert_models_identical(csv_m, store_m, f"all_text sort desc {col}")
+
+        # Clear sort
+        csv_m._sort_column = ""
+        csv_m._apply_sort()
+        csv_m._update_page_rows()
+        store_m._sort_column = ""
+        store_m._materialize_state()
+        store_m._load_page_rows()
+
+        filter_tests = [
+            ("whole", "equals", "100"),
+            ("whole", "not_equals", "100"),
+            ("whole", "greater_than", "0"),
+            ("whole", "is_null", ""),
+            ("whole", "is_not_null", ""),
+            ("decimal", "greater_than", "1.0"),
+            ("decimal", "less_than", "2.0"),
+            ("fixed", "greater_than", "0"),
+            ("datetime", "contains", "11:30"),
+            ("date", "equals", "2026-01-15"),
+            ("text", "contains", "an"),
+            ("bool", "equals", "true"),
+            ("exotic", "equals", " 12 "),
+            ("exotic", "contains", "1"),
+        ]
+        for col, op, val in filter_tests:
+            csv_m.setColumnFilter(col, op, val)
+            store_m.setColumnFilter(col, op, val)
+            _assert_models_identical(csv_m, store_m, f"all_text filter {col} {op} {val}")
+
+def test_fuzz_500_seeded_combinations_on_5k_tables(tmp_path, qapp):
+    """500 random (data, sort, filter) combinations on 5,000-row tables for typed & all-text stores."""
+    rng = random.Random(42)
+    db_path = str(tmp_path / "fuzz5k.duckdb")
+
+    with DuckStore(db_path) as store:
+        # 1. Typed store
+        cols_typed = [
+            ("w", "whole"),
+            ("d", "decimal"),
+            ("dt", "datetime"),
+            ("da", "datetime"),
+            ("s", "text"),
+            ("b", "boolean"),
+        ]
+        types_typed = {
+            "w": "whole_number",
+            "d": "decimal_number",
+            "dt": "datetime",
+            "da": "date",
+            "s": "text",
+            "b": "boolean",
+        }
+        store.create_table("fuzz_typed_5k", cols_typed)
+        raw_rows = []
+        for i in range(5000):
+            raw_rows.append((
+                rng.randint(-1000, 1000) if rng.random() > 0.05 else None,
+                round(rng.uniform(-500, 500), 2) if rng.random() > 0.05 else None,
+                datetime.datetime(2026, 5, rng.randint(1, 28), rng.randint(0, 23), 0, 0) if rng.random() > 0.05 else None,
+                datetime.datetime(2026, 5, rng.randint(1, 28), 0, 0, 0) if rng.random() > 0.05 else None,
+                rng.choice(["Apple", "banana", "CHERRY", "date", "", "123"]) if rng.random() > 0.05 else None,
+                rng.choice([True, False]) if rng.random() > 0.05 else None,
+            ))
+        store.append_rows("fuzz_typed_5k", raw_rows)
+        headers_typed = [c[0] for c in cols_typed]
+        dict_rows_typed = []
+        for r in raw_rows:
+            d = dict(zip(headers_typed, r))
+            if d["da"] is not None:
+                d["da"] = d["da"].date()
+            dict_rows_typed.append(d)
+
+        cm_t = CsvTableModel()
+        sm_t = StoreTableModel(store)
+        cm_t.replace_data(headers_typed, dict_rows_typed, column_types=types_typed)
+        sm_t.replace_data("fuzz_typed_5k", headers_typed, column_types=types_typed)
+
+        for _ in range(250):
+            act = rng.choice(["sort", "filter", "page"])
+            if act == "sort":
+                c = rng.randint(0, len(headers_typed) - 1)
+                cm_t.sortByColumn(c)
+                sm_t.sortByColumn(c)
+            elif act == "filter":
+                col = rng.choice(headers_typed)
+                t = types_typed[col]
+                if t == "whole_number":
+                    cm_t.setColumnFilter(col, "greater_than", "0")
+                    sm_t.setColumnFilter(col, "greater_than", "0")
+                elif t == "text":
+                    cm_t.setColumnFilter(col, "contains", "a")
+                    sm_t.setColumnFilter(col, "contains", "a")
+                else:
+                    cm_t.setColumnFilter(col, "is_not_null", "")
+                    sm_t.setColumnFilter(col, "is_not_null", "")
+            elif act == "page":
+                if cm_t.canGoNext:
+                    cm_t.nextPage()
+                    sm_t.nextPage()
+                elif cm_t.canGoPrevious:
+                    cm_t.previousPage()
+                    sm_t.previousPage()
+            assert cm_t.rowCount() == sm_t.rowCount()
+            assert cm_t.currentPage == sm_t.currentPage
+            for r in range(min(3, cm_t.rowCount())):
+                for c in range(len(headers_typed)):
+                    assert cm_t.data(cm_t.index(r, c)) == sm_t.data(sm_t.index(r, c))
+
+        # 2. All-text store
+        cols_text = [
+            ("w", "text"),
+            ("d", "text"),
+            ("s", "text"),
+            ("b", "text"),
+        ]
+        types_text = {
+            "w": "whole_number",
+            "d": "decimal_number",
+            "s": "text",
+            "b": "boolean",
+        }
+        store.create_table("fuzz_text_5k", cols_text)
+        raw_text_rows = []
+        for i in range(5000):
+            raw_text_rows.append((
+                str(rng.randint(-1000, 1000)) if rng.random() > 0.05 else None,
+                str(round(rng.uniform(-500, 500), 2)) if rng.random() > 0.05 else None,
+                rng.choice(["Apple", "banana", "CHERRY", "date", "", "123"]) if rng.random() > 0.05 else None,
+                rng.choice(["True", "False", "true", "false"]) if rng.random() > 0.05 else None,
+            ))
+        store.append_rows("fuzz_text_5k", raw_text_rows)
+        headers_text = [c[0] for c in cols_text]
+        dict_rows_text = [dict(zip(headers_text, r)) for r in raw_text_rows]
+
+        cm_txt = CsvTableModel()
+        sm_txt = StoreTableModel(store)
+        cm_txt.replace_data(headers_text, dict_rows_text, column_types=types_text)
+        sm_txt.replace_data("fuzz_text_5k", headers_text, column_types=types_text)
+
+        for _ in range(250):
+            act = rng.choice(["sort", "filter", "page"])
+            if act == "sort":
+                c = rng.randint(0, len(headers_text) - 1)
+                cm_txt.sortByColumn(c)
+                sm_txt.sortByColumn(c)
+            elif act == "filter":
+                col = rng.choice(headers_text)
+                t = types_text[col]
+                if t == "whole_number":
+                    cm_txt.setColumnFilter(col, "greater_than", "0")
+                    sm_txt.setColumnFilter(col, "greater_than", "0")
+                elif t == "text":
+                    cm_txt.setColumnFilter(col, "contains", "a")
+                    sm_txt.setColumnFilter(col, "contains", "a")
+                else:
+                    cm_txt.setColumnFilter(col, "is_not_null", "")
+                    sm_txt.setColumnFilter(col, "is_not_null", "")
+            elif act == "page":
+                if cm_txt.canGoNext:
+                    cm_txt.nextPage()
+                    sm_txt.nextPage()
+                elif cm_txt.canGoPrevious:
+                    cm_txt.previousPage()
+                    sm_txt.previousPage()
+            assert cm_txt.rowCount() == sm_txt.rowCount()
+            assert cm_txt.currentPage == sm_txt.currentPage
+            for r in range(min(3, cm_txt.rowCount())):
+                for c in range(len(headers_text)):
+                    assert cm_txt.data(cm_txt.index(r, c)) == sm_txt.data(sm_txt.index(r, c))
+
+def test_regression_blockers_and_mutations(tmp_path, qapp):
+    """Explicit regression tests for B2-B15 and mutation survivors."""
+    db_path = str(tmp_path / "regressions.duckdb")
+    with DuckStore(db_path) as store:
+        # B2: Values filter all=True with NULLs preserved
+        store.create_table("t_b2", [("val", "text")])
+        store.append_rows("t_b2", [("A",), ("B",), (None,)])
+        cm = CsvTableModel()
+        sm = StoreTableModel(store)
+        cm.replace_data(["val"], [{"val": "A"}, {"val": "B"}, {"val": None}])
+        sm.replace_data("t_b2", ["val"])
+        
+        # Exclude 'B' with all=True (values filter exclude some)
+        cm.setColumnFilter("val", "values", {"all": True, "keys": {"B": False}})
+        sm.setColumnFilter("val", "values", {"all": True, "keys": {"B": False}})
+        _assert_models_identical(cm, sm, "B2 values filter NULL preserved")
+
+        # B6: Temp view __stm_ naming & hidden from table_names
+        assert all(t.startswith("__stm_") for t in [sm._active_view_name] if t)
+        assert sm._active_view_name not in store.table_names()
+
+        # B7 & B14: columnFilterValues truncation & ordering
+        store.create_table("t_trunc", [("k", "whole")])
+        store.append_rows("t_trunc", [(i,) for i in range(6000)])
+        sm_tr = StoreTableModel(store)
+        sm_tr.replace_data("t_trunc", ["k"])
+        assert sm_tr.columnFilterValuesTruncated("k") is True
+        assert sm_tr.columnFilterValueTotal("k") == 6000
+        vals = sm_tr.columnFilterValues("k")
+        assert len(vals["values"]) == 2000
+        assert vals["values"][0]["label"] == "0"
+        # Total distinct values is 6000, 2000 returned, sorted by label
+        assert any(v["label"] == "1" for v in vals["values"])
+
+        # B8: Non-ASCII text fallback
+        store.create_table("t_unicode", [("txt", "text")])
+        store.append_rows("t_unicode", [("CAFÉ",), ("café",), ("other",)])
+        cm_u = CsvTableModel()
+        sm_u = StoreTableModel(store)
+        cm_u.replace_data(["txt"], [{"txt": "CAFÉ"}, {"txt": "café"}, {"txt": "other"}])
+        sm_u.replace_data("t_unicode", ["txt"])
+        cm_u.setColumnFilter("txt", "contains", "café")
+        sm_u.setColumnFilter("txt", "contains", "café")
+        _assert_models_identical(cm_u, sm_u, "B8 unicode casefold")
+
+        # B9: Case-sensitive values filter
+        cm_u.setColumnFilter("txt", "values", {"all": False, "keys": {"café": True}})
+        sm_u.setColumnFilter("txt", "values", {"all": False, "keys": {"café": True}})
+        _assert_models_identical(cm_u, sm_u, "B9 case-sensitive values")
+
+        # Mutation: LIKE escaping %, _, \
+        store.create_table("t_like", [("txt", "text")])
+        store.append_rows("t_like", [("100%",), ("100_abc",), ("100\\abc",), ("1000",)])
+        cm_l = CsvTableModel()
+        sm_l = StoreTableModel(store)
+        cm_l.replace_data(["txt"], [{"txt": "100%"}, {"txt": "100_abc"}, {"txt": "100\\abc"}, {"txt": "1000"}])
+        sm_l.replace_data("t_like", ["txt"])
+
+        cm_l.setColumnFilter("txt", "contains", "%")
+        sm_l.setColumnFilter("txt", "contains", "%")
+        _assert_models_identical(cm_l, sm_l, "like escape %")
+
+        cm_l.setColumnFilter("txt", "contains", "_")
+        sm_l.setColumnFilter("txt", "contains", "_")
+        _assert_models_identical(cm_l, sm_l, "like escape _")
+
+        cm_l.setColumnFilter("txt", "contains", "\\")
+        sm_l.setColumnFilter("txt", "contains", "\\")
+        _assert_models_identical(cm_l, sm_l, "like escape \\")
+
+        cm_l.setColumnFilter("txt", "begins_with", "100_")
+        sm_l.setColumnFilter("txt", "begins_with", "100_")
+        _assert_models_identical(cm_l, sm_l, "like begins_with _")
+
+        # Mutation: page reset on sort
+        store.create_table("t_pages", [("id", "whole")])
+        store.append_rows("t_pages", [(i,) for i in range(1200)])
+        sm_p = StoreTableModel(store)
+        sm_p.replace_data("t_pages", ["id"])
+        assert sm_p.currentPage == 1
+        sm_p.nextPage()
+        assert sm_p.currentPage == 2
+        sm_p.sortByColumn(0)
+        assert sm_p.currentPage == 1  # reset to page 1
+
+        # Mutation: filter memory per table key & stale key pruning
+        sm_p.replace_data("t_pages", ["id"], table_key="tbl_key_1")
+        sm_p.setColumnFilter("id", "greater_than", "500")
+        assert "id" in sm_p.activeFilterColumns
+        # Re-replacing data with the same table key should restore filters
+        sm_p.replace_data("t_pages", ["id"], table_key="tbl_key_1")
+        assert "id" in sm_p.activeFilterColumns
+        # Replace data without that column should prune filter
+        store.create_table("t_other", [("other_col", "text")])
+        store.append_rows("t_other", [("hello",)])
+        sm_p.replace_data("t_other", ["other_col"], table_key="tbl_key_1")
+        assert "id" not in sm_p.activeFilterColumns
