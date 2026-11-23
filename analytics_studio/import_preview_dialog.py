@@ -42,12 +42,14 @@ from PySide6.QtWidgets import (
 from analytics_studio.file_import import (
     ImportCancelledError,
     ImportCandidate,
+    ImportLimitError,
     default_options,
     inspect_excel_options,
     kind_for_path,
     list_sqlite_tables,
     normalize_options,
     parse_file,
+    parse_head,
 )
 from analytics_studio.power_query_values import cell_to_text
 from analytics_studio.transformations import infer_column_types
@@ -55,6 +57,9 @@ from analytics_studio.transformations import infer_column_types
 
 PREVIEW_ROW_LIMIT = 100
 ASYNC_PREVIEW_THRESHOLD_BYTES = 256 * 1024
+# Large mode (flag ``large_mode_enabled``): the head shown for a file over the normal limits.
+LARGE_HEAD_ROWS = 1000
+LARGE_MODE_SENTENCE = "It will be loaded into the large-data store."
 _DELIMITERS = (
     (",", "Comma"),
     (";", "Semicolon"),
@@ -75,6 +80,7 @@ class _ImportParseSignals(QObject):
     completed = Signal(int, object)
     failed = Signal(int, str)
     cancelled = Signal(int)
+    limit_exceeded = Signal(int, str)
 
 
 class _ImportParseTask(QRunnable):
@@ -84,12 +90,14 @@ class _ImportParseTask(QRunnable):
         path: Path,
         options: dict[str, Any],
         cancel_event: threading.Event,
+        large_mode: bool = False,
     ) -> None:
         super().__init__()
         self.request_id = request_id
         self.path = path
         self.options = options
         self.cancel_event = cancel_event
+        self.large_mode = large_mode
         self.signals = _ImportParseSignals()
 
     def run(self) -> None:
@@ -105,9 +113,44 @@ class _ImportParseTask(QRunnable):
         except ImportCancelledError:
             self.signals.cancelled.emit(self.request_id)
         except Exception as exc:
+            if self.large_mode and isinstance(exc, ImportLimitError):
+                self.signals.limit_exceeded.emit(self.request_id, exc.limit_kind)
+                return
             self.signals.failed.emit(
                 self.request_id,
                 str(exc) or "Could not parse this file with the selected options.",
+            )
+        else:
+            self.signals.completed.emit(self.request_id, candidate)
+
+
+class _ImportHeadTask(QRunnable):
+    """Parse only the first LARGE_HEAD_ROWS rows of a file that is over the normal limits."""
+
+    def __init__(
+        self,
+        request_id: int,
+        path: Path,
+        options: dict[str, Any],
+        cancel_event: threading.Event,
+    ) -> None:
+        super().__init__()
+        self.request_id = request_id
+        self.path = path
+        self.options = options
+        self.cancel_event = cancel_event
+        self.signals = _ImportParseSignals()
+
+    def run(self) -> None:
+        if self.cancel_event.is_set():
+            self.signals.cancelled.emit(self.request_id)
+            return
+        try:
+            candidate = parse_head(self.path, options=self.options, rows=LARGE_HEAD_ROWS)
+        except Exception as exc:
+            self.signals.failed.emit(
+                self.request_id,
+                str(exc) or "Could not preview this file with the selected options.",
             )
         else:
             self.signals.completed.emit(self.request_id, candidate)
@@ -211,7 +254,7 @@ class ImportPreviewTableModel(QAbstractTableModel):
         self._rows: list[dict[str, Any]] = []
         self._column_types: dict[str, str] = {}
 
-    def set_candidate(self, candidate: ImportCandidate | None) -> None:
+    def set_candidate(self, candidate: ImportCandidate | None, row_limit: int = PREVIEW_ROW_LIMIT) -> None:
         self.beginResetModel()
         if candidate is None:
             self._headers = []
@@ -219,7 +262,7 @@ class ImportPreviewTableModel(QAbstractTableModel):
             self._column_types = {}
         else:
             self._headers = list(candidate.headers)
-            self._rows = list(candidate.rows[:PREVIEW_ROW_LIMIT])
+            self._rows = list(candidate.rows[:row_limit])
             try:
                 self._column_types = infer_column_types(self._headers, self._rows)
             except Exception:
@@ -281,6 +324,7 @@ class FileImportPreviewDialog(QDialog):
         source_editing: bool = False,
         replacement_check: Callable[[ImportCandidate], bool] | None = None,
         allow_transform: bool = True,
+        large_mode_enabled: bool = False,
     ) -> None:
         super().__init__(parent)
         self.path = Path(path).expanduser().resolve()
@@ -288,6 +332,11 @@ class FileImportPreviewDialog(QDialog):
         self.replacement_check = replacement_check
         self.source_editing = bool(source_editing)
         self.allow_transform = bool(allow_transform) and not self.source_editing
+        # Large mode is off unless the caller turns it on (the controller does, later).
+        self.large_mode_enabled = bool(large_mode_enabled)
+        self.large_request: dict[str, Any] | None = None
+        self._large_mode = False
+        self._large_limit_kind = ""
         self.initial_options = dict(initial_options or {})
         self.existing_sqlite_tables = set(existing_sqlite_tables or ())
         self._kind: str | None = None
@@ -990,6 +1039,10 @@ class FileImportPreviewDialog(QDialog):
         model.set_candidate(None)
         self._set_action_buttons_enabled(False)
 
+        if self._large_mode:
+            self._start_large_head()
+            return
+
         if self._requires_background_parse():
             self._start_background_preview()
             return
@@ -997,12 +1050,49 @@ class FileImportPreviewDialog(QDialog):
         try:
             candidate = parse_file(self.path, options=self._current_options())
         except Exception as exc:
+            if self._can_use_large_mode() and isinstance(exc, ImportLimitError):
+                self._enter_large_mode(exc.limit_kind)
+                return
             self._show_preview_error(
                 str(exc) or "Could not parse this file with the selected options."
             )
             return
 
         self._show_preview_candidate(candidate)
+
+    def _can_use_large_mode(self) -> bool:
+        return self.large_mode_enabled and self._kind in {"csv", "parquet"}
+
+    def _enter_large_mode(self, limit_kind: str) -> None:
+        self._large_mode = True
+        self._large_limit_kind = limit_kind
+        self.allow_transform = False
+        self.transform_button.setVisible(False)
+        self._start_large_head()
+
+    def _start_large_head(self) -> None:
+        self._next_parse_id += 1
+        request_id = self._next_parse_id
+        cancel_event = threading.Event()
+        task = _ImportHeadTask(request_id, self.path, self._current_options(), cancel_event)
+        task.signals.progress.connect(self._on_parse_progress)
+        task.signals.completed.connect(self._on_parse_completed)
+        task.signals.failed.connect(self._on_parse_failed)
+        task.signals.cancelled.connect(self._on_parse_cancelled)
+        self._parse_tasks[request_id] = task
+        self._parse_events[request_id] = cancel_event
+        self._active_parse_id = request_id
+        self._set_preview_busy(True)
+        self.count_label.setText("Preparing the large-file preview…")
+        self._parse_pool.start(task)
+
+    def _on_limit_exceeded(self, request_id: int, limit_kind: str) -> None:
+        is_current = self._release_parse_task(request_id)
+        if not is_current:
+            return
+        self._active_parse_id = None
+        self._set_preview_busy(False)
+        self._enter_large_mode(limit_kind)
 
     def _requires_background_parse(self) -> bool:
         # Excel archives can expand far beyond their compressed size, and SQLite
@@ -1025,11 +1115,13 @@ class FileImportPreviewDialog(QDialog):
             self.path,
             dict(options) if options is not None else self._current_options(),
             cancel_event,
+            large_mode=self._can_use_large_mode(),
         )
         task.signals.progress.connect(self._on_parse_progress)
         task.signals.completed.connect(self._on_parse_completed)
         task.signals.failed.connect(self._on_parse_failed)
         task.signals.cancelled.connect(self._on_parse_cancelled)
+        task.signals.limit_exceeded.connect(self._on_limit_exceeded)
         self._parse_tasks[request_id] = task
         self._parse_events[request_id] = cancel_event
         self._active_parse_id = request_id
@@ -1156,18 +1248,28 @@ class FileImportPreviewDialog(QDialog):
         self.replacement_label.setVisible(is_replacing and not self.source_editing)
         model = self.table.model()
         assert isinstance(model, ImportPreviewTableModel)
-        model.set_candidate(candidate)
+        model.set_candidate(
+            candidate, row_limit=LARGE_HEAD_ROWS if self._large_mode else PREVIEW_ROW_LIMIT
+        )
         self.table.resizeColumnsToContents()
         for col in range(model.columnCount()):
             if self.table.columnWidth(col) > 260:
                 self.table.setColumnWidth(col, 260)
         self._clear_error()
-        visible_rows = min(candidate.row_count, PREVIEW_ROW_LIMIT)
-        self.count_label.setText(
-            f"{len(candidate.headers):,} columns · {candidate.row_count:,} rows total · "
-            f"showing {visible_rows:,} rows"
-        )
+        if self._large_mode:
+            self.count_label.setText(
+                f"{len(candidate.headers):,} columns · showing the first "
+                f"{len(candidate.rows):,} rows of a large file"
+            )
+        else:
+            visible_rows = min(candidate.row_count, PREVIEW_ROW_LIMIT)
+            self.count_label.setText(
+                f"{len(candidate.headers):,} columns · {candidate.row_count:,} rows total · "
+                f"showing {visible_rows:,} rows"
+            )
         notices = [str(notice) for notice in candidate.notices if str(notice).strip()]
+        if self._large_mode:
+            notices.append(LARGE_MODE_SENTENCE)
         self.notice_label.setText(" ".join(notices))
         self.notice_label.setVisible(bool(notices))
         self._set_action_buttons_enabled(bool(candidate.headers))
@@ -1188,6 +1290,17 @@ class FileImportPreviewDialog(QDialog):
         if action not in {"load", "transform"}:
             return
         if action == "transform" and not self.allow_transform:
+            return
+        if self._large_mode:
+            self.large_request = {
+                "path": str(self.path),
+                "kind": self._kind,
+                "options": normalize_options(self._kind, self._current_options()),
+                "limit_kind": self._large_limit_kind,
+            }
+            self._accepted_candidate = None
+            self._accepted_action = "load"
+            super().accept()
             return
         if action == "transform" and self._kind == "excel":
             transform_options = self._current_options()
