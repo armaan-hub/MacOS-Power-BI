@@ -24,7 +24,7 @@ from typing import (
 
 import duckdb
 
-from .base import StoreError
+from .base import StoreError, StoreLockedError
 from .duck_store import DuckStore
 
 try:
@@ -37,6 +37,54 @@ except ImportError:
 T = TypeVar("T")
 
 _COPY_CHUNK = 8 * 1024 * 1024  # 8 MiB chunks for copy_to
+
+_READ_ONLY_FOLDER_MESSAGE = (
+    "Cannot create the data file next to the project (folder is read-only). "
+    "Use Save As in a writable folder."
+)
+_READ_ONLY_ERRNOS = (13, 30)  # EACCES, EROFS
+
+
+def _is_permission_error(exc: Optional[BaseException]) -> bool:
+    """True for PermissionError or an OSError whose errno is EACCES / EROFS."""
+    if exc is None:
+        return False
+    if isinstance(exc, PermissionError):
+        return True
+    return isinstance(exc, OSError) and getattr(exc, "errno", None) in _READ_ONLY_ERRNOS
+
+
+def _check_lock_free(data_path: str, in_use_message: str) -> None:
+    """Raise StoreError if <data_path>.lock is held by another open file description.
+
+    A missing lock file means free. A real lock conflict raises in_use_message.
+    Any other OS error while probing raises "Cannot check whether the data file is in use: ...".
+    """
+    lock_path = data_path + ".lock"
+    if not os.path.exists(lock_path):
+        return
+    fd: Optional[int] = None
+    try:
+        try:
+            fd = os.open(lock_path, os.O_RDWR)
+        except OSError as exc:
+            raise StoreError(f"Cannot check whether the data file is in use: {exc}") from exc
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise StoreError(in_use_message) from None
+        except OSError as exc:
+            raise StoreError(f"Cannot check whether the data file is in use: {exc}") from exc
+        try:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        except OSError:
+            pass
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
 
 
 class ProjectStore:
@@ -61,6 +109,7 @@ class ProjectStore:
         self._cancel_event = threading.Event()
         self._busy = False
         self._shutting_down = False
+        self._shutdown_waiters = 0  # shutdown() calls currently in progress
         self._lock = threading.Condition(threading.Lock())
         self._closed = False
 
@@ -101,10 +150,10 @@ class ProjectStore:
         folder = os.path.dirname(os.path.abspath(data_path))
         if os.path.exists(folder):
             if not os.access(folder, os.W_OK):
-                raise StoreError(
-                    "Cannot create the data file next to the project (folder is read-only). "
-                    "Use Save As in a writable folder."
-                )
+                raise StoreError(_READ_ONLY_FOLDER_MESSAGE)
+            # Folder is writable: an existing data file that is not writable gets its own message.
+            if os.path.isfile(data_path) and not os.access(data_path, os.W_OK):
+                raise StoreError(f"The data file is read-only: {os.path.basename(data_path)}.")
         else:
             curr = folder
             while curr and not os.path.exists(curr):
@@ -113,20 +162,14 @@ class ProjectStore:
                     break
                 curr = parent
             if os.path.exists(curr) and not os.access(curr, os.W_OK):
-                raise StoreError(
-                    "Cannot create the data file next to the project (folder is read-only). "
-                    "Use Save As in a writable folder."
-                )
+                raise StoreError(_READ_ONLY_FOLDER_MESSAGE)
 
         spill_id = uuid.uuid4().hex
         spill_dir = os.path.join(tempfile.gettempdir(), "analytics-studio-spill", spill_id)
         try:
             os.makedirs(spill_dir, exist_ok=True)
         except (OSError, PermissionError) as exc:
-            raise StoreError(
-                "Cannot create the data file next to the project (folder is read-only). "
-                "Use Save As in a writable folder."
-            ) from exc
+            raise StoreError(_READ_ONLY_FOLDER_MESSAGE) from exc
 
         try:
             store = DuckStore(
@@ -140,22 +183,11 @@ class ProjectStore:
                 shutil.rmtree(spill_dir, ignore_errors=True)
             except Exception:
                 pass
-            cause = getattr(exc, "__cause__", None)
-            err_text = str(exc)
-            is_ro = (
-                isinstance(exc, PermissionError)
-                or getattr(exc, "errno", None) in (13, 30)
-                or (cause is not None and (isinstance(cause, PermissionError) or getattr(cause, "errno", None) in (13, 30)))
-                or "Permission denied" in err_text
-                or "Errno 13" in err_text
-                or "Errno 30" in err_text
-                or "read-only" in err_text.lower()
-            )
-            if is_ro:
-                raise StoreError(
-                    "Cannot create the data file next to the project (folder is read-only). "
-                    "Use Save As in a writable folder."
-                ) from exc
+            if isinstance(exc, StoreLockedError):
+                raise  # a lock conflict is never a read-only problem, whatever the path says
+            # Read-only is detected from the OS error behind the failure, never from message text.
+            if _is_permission_error(getattr(exc, "__cause__", None)):
+                raise StoreError(_READ_ONLY_FOLDER_MESSAGE) from exc
             raise
 
         return cls(store, unsaved=False, spill_dir=spill_dir, memory_limit=memory_limit, threads=threads)
@@ -363,6 +395,9 @@ class ProjectStore:
             if self._busy:
                 raise StoreError("The store is busy with another operation.")
             self._busy = True
+            # A cancel left over from an earlier job must not stop this operation
+            # (shutdown is refused above, so this never swallows a real shutdown cancel).
+            self._cancel_event.clear()
             store = self._store
 
         try:
@@ -436,9 +471,23 @@ class ProjectStore:
             expected_cols = list(zip(headers, physical_types))
 
             if len(actual_cols) != len(expected_cols):
+                pos = len(min(actual_cols, expected_cols, key=len))
+                for i, (act, exp) in enumerate(zip(actual_cols, expected_cols)):
+                    if act[0] != exp[0] or act[1] != exp[1]:
+                        pos = i
+                        break
+                exp_text = (
+                    f"('{expected_cols[pos][0]}', '{expected_cols[pos][1]}')"
+                    if pos < len(expected_cols) else "no column"
+                )
+                act_text = (
+                    f"('{actual_cols[pos][0]}', '{actual_cols[pos][1]}')"
+                    if pos < len(actual_cols) else "no column"
+                )
                 raise StoreError(
                     f"Columns differ for table '{table}': expected {len(expected_cols)} columns, "
-                    f"found {len(actual_cols)} columns."
+                    f"found {len(actual_cols)} columns; first difference at position {pos}: "
+                    f"expected {exp_text}, found {act_text}."
                 )
 
             for i, (act, exp) in enumerate(zip(actual_cols, expected_cols)):
@@ -468,6 +517,12 @@ class ProjectStore:
 
             return dropped
 
+    def _copy_canceled(self, cancel_event: Optional[threading.Event]) -> bool:
+        """True when the caller's cancel event or the store's own cancel event (shutdown) is set."""
+        if cancel_event is not None and cancel_event.is_set():
+            return True
+        return self._cancel_event.is_set()
+
     def copy_to(
         self,
         target_data_path: str,
@@ -492,6 +547,12 @@ class ProjectStore:
 
             if not overwrite and os.path.exists(target_data_path):
                 raise StoreError(f"The data file already exists: {os.path.basename(target_data_path)}.")
+
+            # Refuse a target that another process or store holds open, before any copying.
+            _check_lock_free(
+                target_data_path,
+                f"The data file is in use by another process: {os.path.basename(target_data_path)}.",
+            )
 
             # 1. Checkpoint
             store.checkpoint()
@@ -541,7 +602,7 @@ class ProjectStore:
                 copied = 0
                 with open(source_path, "rb") as fsrc, open(tmp_path, "wb") as fdst:
                     while True:
-                        if cancel_event is not None and cancel_event.is_set():
+                        if self._copy_canceled(cancel_event):
                             raise ImportCancelledError("Copy canceled.")
                         chunk = fsrc.read(_COPY_CHUNK)
                         if not chunk:
@@ -551,7 +612,7 @@ class ProjectStore:
                         if progress is not None:
                             progress(copied, source_size)
 
-                if cancel_event is not None and cancel_event.is_set():
+                if self._copy_canceled(cancel_event):
                     raise ImportCancelledError("Copy canceled.")
 
                 # Finding 8: fsync temp file before replace
@@ -586,36 +647,27 @@ class ProjectStore:
                 if not overwrite and os.path.exists(target_data_path):
                     raise StoreError(f"The data file already exists: {os.path.basename(target_data_path)}.")
 
-                # Finding 1: probe target lock before replace
-                target_lock = target_data_path + ".lock"
-                if os.path.exists(target_lock):
-                    probe_fd = None
-                    try:
-                        probe_fd = os.open(target_lock, os.O_RDWR)
-                        fcntl.flock(probe_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                        fcntl.flock(probe_fd, fcntl.LOCK_UN)
-                    except (BlockingIOError, OSError):
-                        raise StoreError(f"The data file is in use by another process: {os.path.basename(target_data_path)}.")
-                    finally:
-                        if probe_fd is not None:
-                            try:
-                                os.close(probe_fd)
-                            except OSError:
-                                pass
-
-                # Finding 8: remove pre-existing <target>.wal before os.replace
-                target_wal = target_data_path + ".wal"
-                if os.path.exists(target_wal):
-                    try:
-                        os.remove(target_wal)
-                    except OSError:
-                        pass
+                # Another store may have opened the target during the copy: probe again so
+                # the replace never swaps the file under a lock someone else now holds.
+                _check_lock_free(
+                    target_data_path,
+                    f"The data file is in use by another process: {os.path.basename(target_data_path)}.",
+                )
 
                 os.replace(tmp_path, target_data_path)
-                return os.path.realpath(target_data_path)
             except Exception:
                 _cleanup_tmp()
                 raise
+
+            # Only after a successful replace: drop a stale <target>.wal of the old file
+            # (a failed replace must leave the old target and its WAL untouched).
+            target_wal = target_data_path + ".wal"
+            if os.path.exists(target_wal):
+                try:
+                    os.remove(target_wal)
+                except OSError:
+                    pass
+            return os.path.realpath(target_data_path)
 
     def rebind(self, target_data_path: str, *, delete_old: bool) -> None:
         """Switch the session to target_data_path; removes old files if delete_old and unsaved."""
@@ -639,6 +691,12 @@ class ProjectStore:
 
             if is_same:
                 return
+
+            if not os.path.isfile(target_data_path):
+                raise StoreError(
+                    f"The data file does not exist: {os.path.basename(target_data_path)}. "
+                    "Save a copy first."
+                )
 
             old_store.close()
 
@@ -703,6 +761,12 @@ class ProjectStore:
             if is_same:
                 raise StoreError("Cannot discard the current live store data file.")
 
+        # Never delete a data file that another store or process holds open.
+        _check_lock_free(
+            target_data_path,
+            f"The data file is in use: {os.path.basename(target_data_path)}.",
+        )
+
         for p in [target_data_path, target_data_path + ".wal", target_data_path + ".lock"]:
             try:
                 if os.path.exists(p):
@@ -726,17 +790,31 @@ class ProjectStore:
                 pass
 
     def shutdown(self, timeout: float = 15.0) -> bool:
-        """App quit: request cancel, wait up to timeout for job to end, close and remove spill dir."""
+        """App quit: request cancel, wait up to timeout for job to end, close and remove spill dir.
+
+        Returns True when the store is closed. Returns False when the running job did not end
+        within timeout; the store then stays open and usable again (the "shutting down" state
+        is reset, so the caller may abandon the quit and keep working). Nothing else is undone:
+        the cancel request already sent stays set until the next job() clears it.
+        """
         with self._lock:
             self._shutting_down = True
+            self._shutdown_waiters += 1
         self.request_cancel()
         with self._lock:
             if self._closed:
+                self._shutdown_waiters -= 1
                 return True
             if self._busy:
                 ended = self._lock.wait_for(lambda: not self._busy, timeout=timeout)
                 if not ended or self._busy:
+                    self._shutdown_waiters -= 1
+                    # Reopen only when no other shutdown() call is still waiting.
+                    if self._shutdown_waiters == 0:
+                        self._shutting_down = False
                     return False
+
+            self._shutdown_waiters -= 1
 
             self._closed = True
             store = self._store
