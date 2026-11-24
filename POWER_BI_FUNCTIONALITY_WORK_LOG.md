@@ -3079,3 +3079,12 @@ Built by Antigravity (headless `agy -p`); the StoreTableModel failed Sonnet revi
 Reviewer-measured at 10M rows x 5 text columns: sort amount 0.82 s, filter 0.08 to 0.1 s, columnFilterValues('id') 0.29 s (was 71 s and 8.5 GB), searches 0.02 to 0.06 s; the model adds about 60 MB and DuckDB sort buffers peak at 2.58 GB. Reviewer fuzz (800 sequences per shape, fresh seeds) and the 656, 1,072 and 1,410-compare grids: 0 differences.
 
 Open items: greater_than and less_than_or_equal on a DOUBLE column with +-inf differ from the old model (Parquet only); three untested edges (19 to 30 digit canonical decimal, key re-encode check, _set_page return value); the Python fallback path freezes the UI thread (about 2.5 s per 1M rows, record a worker-thread task); read_page and the Python path assume contiguous __rn. Known differences from the old model are in the table_model.py docstring. Next: B4b.
+
+
+## Stage B4b tasks 2, 6, 7, 8, 9, 10: the store session, jobs, controller plumbing and refusals (2026-11-24)
+
+Merged from branch p22-store-session. New: analytics_studio/store/session.py (ProjectStore: busy flag, cancel, copy/rebind, stale-folder reaper), store/jobs.py (StoreJob and the progress dialog binder), store/stats.py (column statistics), analytics_studio/large_table_error.py (import-light error), and in controller.py the store-table plumbing (`_rows` property, StoreCandidate install, ProjectStore ownership, aboutToQuit shutdown in main.py), the LargeTableError surfacing at silent except sites with a strict sweep test, and whole-model refusals while any large table is loaded: report, measures, filters (R1) and relationships, Power Query, calculated columns, merge/append, refresh, imports, model keys, date table (R2). Silent paths write the refusal notice once per store epoch; user-initiated slots write the exact refusal text every time.
+
+Built by Antigravity (headless `agy -p`, Gemini 3.8 Flash Low); each task failed Team-Thinker review at least once. Task 9 needed three rounds and its last fix was written by a Sonnet fixer in a scratch copy. Gate on fa03125: 43,320 passed, 1 skipped, 26 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
+
+Open: large-file import flow (task 11), profileColumn and export for store tables (12), save/open (13), summary dialog (14), real-app 300k-row test (15), per-table refusal instead of whole-model (17).
