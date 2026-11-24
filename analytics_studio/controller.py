@@ -2031,7 +2031,8 @@ class StudioController(QObject):
         self._project_store: ProjectStore | None = None
         self._store_table_model: StoreTableModel | None = None
         self._app_data_dir: str | None = app_data_dir
-        if app_data_dir is not None or not os.environ.get("ANALYTICS_STUDIO_NO_REAP"):
+        no_reap = os.environ.get("ANALYTICS_STUDIO_NO_REAP", "").strip().lower() in ("1", "true", "yes")
+        if app_data_dir is not None or not no_reap:
             try:
                 from analytics_studio.store.session import ProjectStore as _PS
                 _PS.reap_stale(self._effective_app_data_dir())
@@ -10145,10 +10146,11 @@ class StudioController(QObject):
             })
         return context
 
-    def _active_column_type_map(self) -> dict[str, str]:
+    def _active_column_type_map(self, source_id: str | None = None) -> dict[str, str]:
+        source_id = self._active_source_id if source_id is None else source_id
         table = next(
             (item for item in self._project.get("model", {}).get("tables", [])
-             if item.get("id") == self._active_source_id or item.get("source_id") == self._active_source_id),
+             if item.get("id") == source_id or item.get("source_id") == source_id),
             None,
         )
         stored = table.get("column_types", {}) if table else {}
@@ -14317,6 +14319,35 @@ class StudioController(QObject):
         source_id: str,
         parsed: ImportCandidate,
     ) -> None:
+        from analytics_studio.store.candidate import StoreCandidate
+        if isinstance(parsed, StoreCandidate):
+            # The old source stays fully in place until the store table is attached successfully.
+            from analytics_studio.store.base import StoreError
+            from analytics_studio.store.table_model import StoreTableModel
+            old_model = self._store_table_model
+            reuse = old_model is not None and old_model._store is parsed.session.store
+            model = old_model if reuse else StoreTableModel(parsed.session.store, parent=self)
+            try:
+                success = model.replace_store(
+                    table_name=parsed.store_table,
+                    headers=list(parsed.headers),
+                    column_types=self._active_column_type_map(source_id),
+                    row_count=parsed.row_count,
+                    table_key=source_id,
+                )
+            except StoreError:
+                success = False
+            if not success:
+                if not reuse:
+                    model.deleteLater()
+                self._set_status(f"Could not load table from store: {parsed.store_table}")
+                return
+            if not reuse:
+                if old_model is not None:
+                    old_model.clear()
+                    old_model.deleteLater()
+                self._store_table_model = model
+
         self._loaded_candidates[source_id] = parsed
         self._source_path = path
         self._source_id = source_id
@@ -14326,35 +14357,7 @@ class StudioController(QObject):
         self._active_parser_options = dict(parsed.options)
         self._headers = list(parsed.headers)
 
-        from analytics_studio.store.candidate import StoreCandidate
         if isinstance(parsed, StoreCandidate):
-            if self._store_table_model is None or self._store_table_model._store is not parsed.session.store:
-                if self._store_table_model is not None:
-                    self._store_table_model.clear()
-                    self._store_table_model.deleteLater()
-                from analytics_studio.store.table_model import StoreTableModel
-                self._store_table_model = StoreTableModel(parsed.session.store, parent=self)
-
-            success = self._store_table_model.replace_store(
-                table_name=parsed.store_table,
-                headers=self._headers,
-                column_types=self._active_column_type_map(),
-                row_count=parsed.row_count,
-                table_key=self._active_source_id,
-            )
-            if not success:
-                self._source_path = None
-                self._source_id = None
-                self._active_source_id = None
-                self._active_source_path = None
-                self._active_source_kind = None
-                self._active_parser_options = {}
-                self._headers = []
-                self._rows = []
-                self._set_status(f"Could not load table from store: {parsed.store_table}")
-                self.stateChanged.emit()
-                return
-
             self._active_store_candidate = parsed
             self._rows = []
         else:

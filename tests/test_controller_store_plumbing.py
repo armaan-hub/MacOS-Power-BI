@@ -12,12 +12,15 @@ from typing import Any
 
 import pyarrow as pa
 import pytest
-from PySide6.QtCore import Qt
+import shiboken6
+from PySide6.QtCore import QCoreApplication, QEvent, Qt
 from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import ImportCandidate
+from analytics_studio import main as main_module
 from analytics_studio.main import _on_about_to_quit, install_excepthook
+from analytics_studio.store.base import StoreError
 from analytics_studio.store.candidate import StoreCandidate
 from analytics_studio.store.session import ProjectStore
 from analytics_studio.store.table_model import StoreTableModel
@@ -475,35 +478,207 @@ def test_install_source_rebinds_to_new_project_store(qapp: QApplication, tmp_pat
     ps2.close()
 
 
-def test_install_source_handles_replace_store_failure(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Probe B repro: when replace_store returns False (e.g. busy store StoreError),
-    candidate is not set active, previous source is preserved, and status message is surfaced."""
-    ps = ProjectStore.open(str(tmp_path / "busy_test.npa.data"))
-    b = pa.RecordBatch.from_arrays([pa.array([f"D_{i}" for i in range(900)])], names=["c"])
-    ps.store.create_table_from_arrow("t_busy", [("c", "text")], [b])
-    cand = StoreCandidate("csv", ["c"], {}, [], store_table="t_busy", row_count=900, session=ps)
+def _make_store_candidate(tmp_path: Path, name: str, rows: int, tag: str) -> tuple[ProjectStore, StoreCandidate]:
+    ps = ProjectStore.open(str(tmp_path / f"{name}.npa.data"))
+    batch = pa.RecordBatch.from_arrays([pa.array([f"{tag}_{i}" for i in range(rows)])], names=["c"])
+    ps.store.create_table_from_arrow(f"t_{name}", [("c", "text")], [batch])
+    cand = StoreCandidate("csv", ["c"], {}, [], store_table=f"t_{name}", row_count=rows, session=ps)
+    return ps, cand
 
+
+def _snapshot(controller: StudioController) -> dict[str, Any]:
+    model = controller.dataModel
+    return {
+        "rowCount": controller.rowCount,
+        "headers": list(controller.headers),
+        "rows": list(controller._rows),
+        "active_source_id": controller._active_source_id,
+        "source_id": controller._source_id,
+        "active_kind": controller._active_source_kind,
+        "active_candidate": controller._active_store_candidate,
+        "model": model,
+        "model_type": type(model),
+        "model_rows": model.rowCount(),
+        "first_cell": model.data(model.index(0, 0)),
+        "store_model": controller._store_table_model,
+    }
+
+
+def _raise_store_error(*args: Any, **kwargs: Any) -> bool:
+    raise StoreError("The store is busy with another operation.")
+
+
+def _return_false(*args: Any, **kwargs: Any) -> bool:
+    return False
+
+
+@pytest.mark.parametrize("failure", [_return_false, _raise_store_error], ids=["returns_false", "raises_store_error"])
+@pytest.mark.parametrize("old_kind", ["ordinary", "store_same_session", "store_other_session"])
+def test_install_source_failure_leaves_old_source_in_place(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, old_kind: str, failure: Any
+) -> None:
+    ps_new, cand = _make_store_candidate(tmp_path, "new", 900, "N")
     controller = StudioController()
-    # First install an ordinary candidate
-    ord_cand = ImportCandidate("csv", ["col_orig"], [{"col_orig": "orig_val"}], {}, [])
-    controller._install_source(None, "src_orig", ord_cand)
-    assert controller.rowCount == 1
-    assert controller._rows == [{"col_orig": "orig_val"}]
+    ps_old = None
+    if old_kind == "ordinary":
+        controller._install_source(
+            None, "src_orig", ImportCandidate("csv", ["col_orig"], [{"col_orig": "o1"}, {"col_orig": "o2"}], {}, [])
+        )
+        assert controller.rowCount == 2
+    elif old_kind == "store_same_session":
+        old_cand = StoreCandidate("csv", ["c"], {}, [], store_table="t_new", row_count=900, session=ps_new)
+        controller._install_source(None, "src_orig", old_cand)
+    else:
+        ps_old, old_cand = _make_store_candidate(tmp_path, "old", 600, "O")
+        controller._install_source(None, "src_orig", old_cand)
+    before = _snapshot(controller)
+    assert before["first_cell"] in ("o1", "N_0", "O_0")
 
-    # Simulate replace_store failing (returns False)
-    def failing_replace_store(*args: Any, **kwargs: Any) -> bool:
-        return False
+    monkeypatch.setattr(StoreTableModel, "replace_store", failure)
+    controller._install_source(None, "src_new", cand)
 
-    monkeypatch.setattr(StoreTableModel, "replace_store", failing_replace_store)
+    after = _snapshot(controller)
+    assert after == before
+    assert after["model"] is before["model"]
+    assert controller._active_source_id == "src_orig"
+    assert "src_new" not in controller._loaded_candidates
+    assert controller.statusMessage == "Could not load table from store: t_new"
 
-    controller._install_source(None, "src_busy", cand)
+    ps_new.close()
+    if ps_old is not None:
+        ps_old.close()
 
-    # Active candidate must NOT be set
+
+def test_install_source_failure_with_no_old_source_stays_empty(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ps_new, cand = _make_store_candidate(tmp_path, "new", 50, "N")
+    controller = StudioController()
+    monkeypatch.setattr(StoreTableModel, "replace_store", _return_false)
+    controller._install_source(None, "src_new", cand)
+    assert controller.rowCount == 0
+    assert controller.headers == []
+    assert controller._active_source_id is None
     assert controller._active_store_candidate is None
-    # Previous source state remains in place
-    assert controller.statusMessage == "Could not load table from store: t_busy"
+    assert controller.dataModel is controller._table_model
+    assert controller.statusMessage == "Could not load table from store: t_new"
+    ps_new.close()
 
-    ps.close()
+
+def test_install_source_replaced_store_model_is_scheduled_for_deletion(qapp: QApplication, tmp_path: Path) -> None:
+    ps1, c1 = _make_store_candidate(tmp_path, "one", 600, "A")
+    ps2, c2 = _make_store_candidate(tmp_path, "two", 700, "B")
+    controller = StudioController()
+    controller._install_source(None, "s1", c1)
+    m1 = controller.dataModel
+    assert isinstance(m1, StoreTableModel)
+    assert shiboken6.isValid(m1)
+
+    controller._install_source(None, "s2", c2)
+    m2 = controller.dataModel
+    assert m2 is not m1
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    assert not shiboken6.isValid(m1)
+    assert shiboken6.isValid(m2)
+    assert m2.data(m2.index(0, 0)) == "B_0"
+    ps1.close()
+    ps2.close()
+
+
+@pytest.mark.parametrize("env_value", ["1", "true", "yes", "TRUE"])
+def test_reap_skipped_for_bare_controller_when_env_truthy(
+    qapp: QApplication, monkeypatch: pytest.MonkeyPatch, env_value: str
+) -> None:
+    calls: list[str] = []
+    monkeypatch.setattr(ProjectStore, "reap_stale", lambda path, *a, **k: calls.append(path) or [])
+    monkeypatch.setenv("ANALYTICS_STUDIO_NO_REAP", env_value)
+    StudioController()
+    assert calls == []
+
+
+@pytest.mark.parametrize("env_value", ["0", "", "no", "false"])
+def test_reap_not_disabled_by_falsy_env_values(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, env_value: str
+) -> None:
+    calls: list[str] = []
+    monkeypatch.setattr(ProjectStore, "reap_stale", lambda path, *a, **k: calls.append(path) or [])
+    monkeypatch.setenv("ANALYTICS_STUDIO_NO_REAP", env_value)
+    StudioController(app_data_dir=str(tmp_path))
+    assert calls == [str(tmp_path)]
+    calls.clear()
+    StudioController()  # no dir: the value must still not disable reaping
+    assert len(calls) == 1
+
+
+def test_bare_controller_does_not_reap_under_test_session(qapp: QApplication, monkeypatch: pytest.MonkeyPatch) -> None:
+    """tests/conftest.py disables reaping for the whole test session so a bare StudioController() never
+    touches the real application-data folder."""
+    calls: list[str] = []
+    monkeypatch.setattr(ProjectStore, "reap_stale", lambda path, *a, **k: calls.append(path) or [])
+    StudioController()
+    assert calls == []
+
+
+def test_reap_runs_once_with_given_dir_when_env_removed(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[str] = []
+    monkeypatch.setattr(ProjectStore, "reap_stale", lambda path, *a, **k: calls.append(path) or [])
+    monkeypatch.delenv("ANALYTICS_STUDIO_NO_REAP", raising=False)
+    StudioController(app_data_dir=str(tmp_path))
+    assert calls == [str(tmp_path)]
+
+
+def test_about_to_quit_retry_uses_5s_after_15s(qapp: QApplication, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture) -> None:
+    controller = StudioController()
+    timeouts: list[float] = []
+
+    def fake_shutdown(timeout: float = 15.0) -> bool:
+        timeouts.append(timeout)
+        return len(timeouts) >= 2
+
+    monkeypatch.setattr(controller, "shutdown_store", fake_shutdown)
+    monkeypatch.setattr(main_module.time, "sleep", lambda s: None)
+    with caplog.at_level(logging.ERROR, logger="analytics_studio.main"):
+        _on_about_to_quit(controller)
+    assert timeouts == [15.0, 5.0]
+    assert "Failed to shutdown ProjectStore" not in caplog.text
+
+
+def test_about_to_quit_no_retry_when_first_shutdown_succeeds(qapp: QApplication, monkeypatch: pytest.MonkeyPatch) -> None:
+    controller = StudioController()
+    timeouts: list[float] = []
+
+    def fake_shutdown(timeout: float = 15.0) -> bool:
+        timeouts.append(timeout)
+        return True
+
+    monkeypatch.setattr(controller, "shutdown_store", fake_shutdown)
+    _on_about_to_quit(controller)
+    assert timeouts == [15.0]
+
+
+def test_close_project_store_waits_the_default_15s_once(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import inspect
+
+    assert inspect.signature(ProjectStore.shutdown).parameters["timeout"].default == 15.0
+    controller = StudioController(app_data_dir=str(tmp_path))
+    store = controller._ensure_project_store()
+    shutdown_calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+    real_shutdown = store.shutdown
+
+    def spy_shutdown(*args: Any, **kwargs: Any) -> bool:
+        shutdown_calls.append((args, kwargs))
+        return False  # busy: a second long wait would show up as a second call
+
+    monkeypatch.setattr(store, "shutdown", spy_shutdown)
+    controller._close_project_store()
+    assert len(shutdown_calls) == 1
+    args, kwargs = shutdown_calls[0]
+    assert (args, kwargs) in (((), {}), ((15.0,), {}), ((), {"timeout": 15.0}))
+    assert store.closed is True
+    assert controller._project_store is None
+    del real_shutdown
 
 
 def test_store_candidate_status_text_and_export(qapp: QApplication, tmp_path: Path) -> None:
