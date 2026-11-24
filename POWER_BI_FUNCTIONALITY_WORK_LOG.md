@@ -3113,3 +3113,11 @@ A large-data table now has a summary dialog (one row per column with blank cells
 Gate on 7ba2509: 43,529 passed, 1 skipped, 29 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
 
 Open: task 16 (reload of a large table; compaction and worker sort/filter deferred with a measured trigger), task 17 (per-table refusal), the import load-rules decision.
+
+## 2026-11-25 Stage B4b task 16: reload of a large-data table (merged)
+
+A project with a large-data table can now reload it from its file: a "Reload table" button (shown only while a large table is loaded) imports the same file again into a new table generation. The old table is never dropped at the swap: it is dropped only after a successful Save (or at the next open), so Discard, a crash, a failed save or Save As can never leave a saved project without its data. A reload checks free disk space, refuses when the new file lost columns that measures, relationships or calculated columns use (the check ignores case), asks once when columns were renamed or types changed, keeps sort and filter for columns that still exist, and on any failure or cancel changes nothing and drops only the new table.
+
+Built by Antigravity (task 16), reviewed by Team-Thinker (PASS on the data-loss rules, one state-corruption bug in the swap), fixed by the Sonnet fixer (16b: the swap now updates the grid first and rolls back on failure), and re-reviewed (PASS). Gate on cdd13f0: 43,571 passed, 1 skipped, 29 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
+
+Open: task 17 (per-table refusal; the plan goes to Team-Thinker for an attack first), compaction and worker sort/filter (deferred with a measured trigger), the import load-rules decision, lows in HANDOFF.md.
