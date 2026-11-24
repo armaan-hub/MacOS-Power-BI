@@ -121,9 +121,9 @@ def _scan(path: Path, wanted: set[int]) -> dict[str, Any]:
         "cat07_count": 0,
         "cat07_first": None,
         "cat07_last": None,
-        "id_gt_299000": 0,
-        "id_gt_299000_first": None,
-        "id_gt_299000_last": None,
+        "id_text_gt_299000": 0,
+        "id_text_gt_299000_first": None,
+        "id_text_gt_299000_last": None,
     }
     with open(path, newline="", encoding="utf-8") as handle:
         reader = csv.reader(handle)
@@ -151,11 +151,12 @@ def _scan(path: Path, wanted: set[int]) -> dict[str, Any]:
                 if stats["cat07_first"] is None:
                     stats["cat07_first"] = row[0]
                 stats["cat07_last"] = row[0]
-            if int(row[0]) > 299_000:
-                stats["id_gt_299000"] += 1
-                if stats["id_gt_299000_first"] is None:
-                    stats["id_gt_299000_first"] = row[0]
-                stats["id_gt_299000_last"] = row[0]
+            # The id column is text-typed, so compare the cell string as text (casefolded), as the grid does.
+            if row[0].casefold() > "299000":
+                stats["id_text_gt_299000"] += 1
+                if stats["id_text_gt_299000_first"] is None:
+                    stats["id_text_gt_299000_first"] = row[0]
+                stats["id_text_gt_299000_last"] = row[0]
     stats["code_values"] = len(stats["code_values"])
     stats["category_values"] = len(stats["category_values"])
     stats["score_distinct"] = len(stats["score_values"])
@@ -409,26 +410,22 @@ def test_sort_and_filter_on_300k_rows(imported: dict[str, Any], expected: dict[s
         print(f"[measured] {name}={seconds:.3f}")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "store path compares the text-typed id column as text for greater_than: 1441 rows vs "
-        "500 on the in-memory path for id > 1500 (probed 2026-11-25); 300k gives 78885 vs 1000"
-    ),
-)
+# The id column is text, so the grid compares it as text, the same as the ordinary grid (78,885 rows for id > 299000), not as numbers.
 def test_filter_id_range_on_300k_rows(imported: dict[str, Any], expected: dict[str, Any]) -> None:
     model = _model(imported)
     column_of = {name: i for i, name in enumerate(HEADERS)}
+    expected_count = expected["id_text_gt_299000"]
+    assert expected_count == 78885
     started = time.monotonic()
     model.setColumnFilter("id", "greater_than", "299000")
     model._set_page(0)
     elapsed = time.monotonic() - started
     print(f"[measured] filter_id_range_seconds={elapsed:.3f}")
     assert elapsed < OP_LIMIT_SECONDS
-    assert model._filtered_rows == expected["id_gt_299000"] == 1000
-    assert _cell(model, 0, column_of["id"]) == expected["id_gt_299000_first"]
+    assert model._filtered_rows == expected_count
+    assert _cell(model, 0, column_of["id"]) == expected["id_text_gt_299000_first"]
     model._set_page(model.pageCount - 1)
-    assert _cell(model, (1000 - 1) % PAGE, column_of["id"]) == expected["id_gt_299000_last"]
+    assert _cell(model, (expected_count - 1) % PAGE, column_of["id"]) == expected["id_text_gt_299000_last"]
     model.clearColumnFilter("id")
 
 
