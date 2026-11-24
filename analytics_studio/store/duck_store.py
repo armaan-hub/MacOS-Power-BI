@@ -226,7 +226,13 @@ class DuckStore:
     threads parameter is optional; None preserves DuckDB's default thread count.
     """
 
-    def __init__(self, path: str, memory_limit: str = "2GB", threads: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        path: str,
+        memory_limit: str = "2GB",
+        threads: Optional[int] = None,
+        temp_directory: Optional[str] = None,
+    ) -> None:
         if not isinstance(path, str) or not path.strip():
             raise StoreError("Store path must be a non-empty string.")
 
@@ -247,7 +253,11 @@ class DuckStore:
             raise StoreError(f"Failed to create directory for store '{self.path}': {exc}") from exc
 
         self._acquire_lock()
-        self._init_conn(memory_limit=memory_limit, threads=threads)
+        self._init_conn(
+            memory_limit=memory_limit,
+            threads=threads,
+            temp_directory=temp_directory,
+        )
 
     def _acquire_lock(self) -> None:
         try:
@@ -272,11 +282,22 @@ class DuckStore:
                 self._lock_fd = None
             raise StoreError(f"Failed to acquire lock file at '{self.lock_path}': {exc}") from exc
 
-    def _init_conn(self, memory_limit: str = "2GB", threads: Optional[int] = None) -> None:
+    def _init_conn(
+        self,
+        memory_limit: str = "2GB",
+        threads: Optional[int] = None,
+        temp_directory: Optional[str] = None,
+    ) -> None:
+        spill_target = os.path.realpath(temp_directory) if temp_directory is not None else os.path.dirname(self.path)
+        try:
+            os.makedirs(spill_target, exist_ok=True)
+        except OSError as exc:
+            raise StoreError(f"Failed to create temp directory '{spill_target}': {exc}") from exc
+
         config: dict[str, Any] = {
             "enable_external_access": False,
             "memory_limit": memory_limit,
-            "temp_directory": os.path.dirname(self.path),
+            "temp_directory": spill_target,
         }
         if threads is not None:
             config["threads"] = threads

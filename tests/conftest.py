@@ -13,6 +13,11 @@ import sys
 
 from PySide6 import QtCore  # noqa: F401  (imported first so PySide's own exit cleanup is registered before ours and runs after it)
 
+# A bare StudioController() reaps stale project stores in the real application-data folder.  Switch that off for the
+# whole test session (set at import so every worker of a parallel run has it too).  Tests that want the reaping pass
+# app_data_dir or remove the variable with monkeypatch.delenv.
+os.environ["ANALYTICS_STUDIO_NO_REAP"] = "1"
+
 _status: dict[str, int | None] = {"code": None}
 
 

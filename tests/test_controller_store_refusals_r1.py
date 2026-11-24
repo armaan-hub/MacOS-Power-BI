@@ -1,0 +1,764 @@
+"""Tests for controller store refusals R1 (report, measures, filters) (Stage B4b task 9)."""
+
+from __future__ import annotations
+
+from copy import deepcopy
+from pathlib import Path
+from typing import Any
+from unittest.mock import patch
+
+import pyarrow as pa
+import pytest
+from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QInputDialog, QMessageBox
+
+from analytics_studio.controller import StudioController
+from analytics_studio.file_import import parse_file
+from analytics_studio.measures import MeasureError
+from analytics_studio.store.candidate import StoreCandidate
+from analytics_studio.store.session import ProjectStore
+
+
+@pytest.fixture
+def qapp() -> QApplication:
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(["controller_store_refusals_test"])
+    return app
+
+
+def _make_store_candidate(tmp_path: Path, table_name: str = "tbl_refusals", row_count: int = 1000) -> tuple[ProjectStore, StoreCandidate]:
+    data_file = tmp_path / f"{table_name}.npa.data"
+    project_store = ProjectStore.open(str(data_file))
+    batch = pa.RecordBatch.from_arrays(
+        [
+            pa.array([f"cat_{i % 10}" for i in range(row_count)]),
+            pa.array([f"val_{i}" for i in range(row_count)]),
+        ],
+        names=["cat", "val"],
+    )
+    project_store.store.create_table_from_arrow(table_name, [("cat", "text"), ("val", "text")], [batch])
+    candidate = StoreCandidate(
+        "csv",
+        ["cat", "val"],
+        {},
+        [],
+        store_table=table_name,
+        row_count=row_count,
+        session=project_store,
+    )
+    return project_store, candidate
+
+
+def _setup_store_controller(tmp_path: Path) -> tuple[ProjectStore, StudioController]:
+    ps, sc = _make_store_candidate(tmp_path, "tbl_store_refusal", 500)
+    ctrl = StudioController()
+    ctrl._install_source(None, "s_store", sc)
+    ctrl._project["data_sources"].append({"id": "s_store", "name": "TStore", "kind": "csv"})
+    ctrl._project["model"]["tables"].append({
+        "id": "tbl_store", "source_id": "s_store", "name": "TStore",
+        "column_types": {"cat": "text", "val": "text"},
+    })
+    ctrl._refresh_model_view()
+    return ps, ctrl
+
+
+def _assert_no_dialogs(monkeypatch: pytest.MonkeyPatch) -> None:
+    def bad_dialog(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("Blocking dialog was unexpectedly invoked!")
+
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", bad_dialog)
+    monkeypatch.setattr(QFileDialog, "getSaveFileName", bad_dialog)
+    monkeypatch.setattr(QFileDialog, "getExistingDirectory", bad_dialog)
+    monkeypatch.setattr(QMessageBox, "information", bad_dialog)
+    monkeypatch.setattr(QMessageBox, "warning", bad_dialog)
+    monkeypatch.setattr(QMessageBox, "critical", bad_dialog)
+    monkeypatch.setattr(QMessageBox, "question", bad_dialog)
+    monkeypatch.setattr(QInputDialog, "getText", bad_dialog)
+    monkeypatch.setattr(QInputDialog, "getItem", bad_dialog)
+    monkeypatch.setattr(QDialog, "exec", bad_dialog)
+    monkeypatch.setattr(QDialog, "exec_", bad_dialog)
+    monkeypatch.setattr(QDialog, "open", bad_dialog)
+    monkeypatch.setattr(QDialog, "show", bad_dialog)
+
+
+def test_refusal_helpers(qapp: QApplication, tmp_path: Path) -> None:
+    """Helper _store_tables_loaded and _large_data_refusal produce expected output."""
+    ctrl = StudioController()
+    assert not ctrl._store_tables_loaded()
+    expected_msg = (
+        "Something is not available for large-data tables yet. "
+        "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+        "sort, filter, column statistics and export. Other features arrive in a later release."
+    )
+    assert ctrl._large_data_refusal("Something") == expected_msg
+
+    ps, sc = _make_store_candidate(tmp_path, "tbl_hlp", 100)
+    try:
+        ctrl._loaded_candidates["s_test"] = sc
+        assert ctrl._store_tables_loaded()
+    finally:
+        ps.close()
+
+
+
+def test_refusal_refresh_report(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """_refresh_report clears visuals and sets status to refusal without raising."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        ctrl._reset_silent_refusal_notice()
+        ctrl._refresh_report()
+        expected = ctrl._large_data_refusal("Report view")
+        assert ctrl._status_message == expected
+        assert ctrl._monthly_series == []
+        assert ctrl._region_series == []
+        assert ctrl._monthly_chart_message == expected
+        assert ctrl._region_chart_message == expected
+    finally:
+        ps.close()
+
+
+def test_refusal_refresh_report_async(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """_refresh_report_async cancels worker, clears visuals and sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        ctrl._reset_silent_refusal_notice()
+        ctrl._refresh_report_async()
+        expected = ctrl._large_data_refusal("Report view")
+        assert ctrl._status_message == expected
+        assert ctrl._monthly_series == []
+        assert ctrl._region_series == []
+        assert ctrl._monthly_chart_message == expected
+        assert ctrl._region_chart_message == expected
+    finally:
+        ps.close()
+
+
+def test_refusal_regions_property(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """regions property returns neutral ['All regions'] and sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        val = ctrl.regions
+        assert val == ["All regions"]
+        assert ctrl._status_message == ctrl._large_data_refusal("Region filter")
+    finally:
+        ps.close()
+
+
+def test_refusal_page_filter_values(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """pageFilterValues returns [] and sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        val = ctrl.pageFilterValues("tbl_store", "cat")
+        assert val == []
+        assert ctrl._status_message == ctrl._large_data_refusal("Page filter values")
+    finally:
+        ps.close()
+
+
+def test_refusal_search_page_filter_values(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """searchPageFilterValues returns [] and sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        val = ctrl.searchPageFilterValues("tbl_store", "cat", "cat_1")
+        assert val == []
+        assert ctrl._status_message == ctrl._large_data_refusal("Page filter values")
+    finally:
+        ps.close()
+
+
+def test_refusal_report_filter_context(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """_report_filter_context returns ({}, [], set()) and sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        ctrl._reset_silent_refusal_notice()
+        rows_by_id, context, filter_ids = ctrl._report_filter_context()
+        assert rows_by_id == {}
+        assert context == []
+        assert filter_ids == set()
+        assert ctrl._status_message == ctrl._large_data_refusal("Report filters")
+    finally:
+        ps.close()
+
+
+def test_refusal_visual_getters(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """All visual*Data getters return neutral values and set status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        expected = ctrl._large_data_refusal("Report visual data")
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_gauge = ctrl.visualGaugeData("TestGauge")
+        assert res_gauge == {
+            "value": 0.0, "minimum": 0.0, "maximum": 1.0,
+            "target": None, "highlight_value": None, "has_value": False,
+        }
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_kpi = ctrl.visualKpiData("TestKpi")
+        assert res_kpi == {
+            "field": "", "trend_field": "", "value": 0.0, "target": None,
+            "trend": [], "highlight_value": None, "has_value": False,
+        }
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_map = ctrl.visualMapData("TestMap")
+        assert res_map == []
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_smap = ctrl.visualShapeMapData("TestShapeMap")
+        assert res_smap == []
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_scatter = ctrl.visualScatterData("TestScatter")
+        assert res_scatter == []
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_table = ctrl.visualTableData("TestTable")
+        assert res_table == {"columns": [], "rows": [], "total_rows": 0}
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_matrix = ctrl.visualMatrixData("TestMatrix")
+        assert res_matrix == {"columns": [], "rows": [], "total_rows": 0}
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_card = ctrl.visualCardData("TestCard")
+        assert res_card == {
+            "label": "", "value": "", "aggregation": "",
+            "highlight_value": "", "has_highlights": False,
+        }
+        assert ctrl._status_message == expected
+
+        ctrl._reset_silent_refusal_notice()
+        ctrl._set_status("")
+        res_series = ctrl._generate_dynamic_visual_series("TestChart")
+        assert res_series == []
+        assert ctrl._status_message == expected
+    finally:
+        ps.close()
+
+
+def test_refusal_create_measure(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """create_measure returns False, leaves measures unchanged, sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        snap = deepcopy(ctrl._project.get("model", {}).get("measures", []))
+        ok = ctrl.create_measure("M1", "1 + 1")
+        assert ok is False
+        assert ctrl._project.get("model", {}).get("measures", []) == snap
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+    finally:
+        ps.close()
+
+
+def test_refusal_update_measure(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """update_measure returns False, leaves measures unchanged, sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        snap = deepcopy(ctrl._project.get("model", {}).get("measures", []))
+        ok = ctrl.update_measure("M1", "M1", "2 + 2")
+        assert ok is False
+        assert ctrl._project.get("model", {}).get("measures", []) == snap
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+    finally:
+        ps.close()
+
+
+def test_refusal_remove_measure(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """remove_measure returns False, leaves measures unchanged, sets status to refusal."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        snap = deepcopy(ctrl._project.get("model", {}).get("measures", []))
+        ok = ctrl.remove_measure("M1")
+        assert ok is False
+        assert ctrl._project.get("model", {}).get("measures", []) == snap
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+    finally:
+        ps.close()
+
+
+def test_refusal_measure_dialog_slots(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """_measure_dialog, editMeasure, deleteMeasure refuse without popping dialogs."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        assert ctrl._measure_dialog(quick=False) is False
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+
+        ctrl._set_status("")
+        assert ctrl.editMeasure("M1") is False
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+
+        ctrl._set_status("")
+        assert ctrl.deleteMeasure("M1") is False
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+    finally:
+        ps.close()
+
+
+def test_refusal_measure_preview(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Preview functions refuse and return neutral string/invoke callback with refusal text."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        with pytest.raises(MeasureError) as exc_info:
+            ctrl._build_preview_inputs("M1", "1 + 1")
+        assert ctrl._large_data_refusal("DAX measures") in str(exc_info.value)
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+
+        ctrl._set_status("")
+        res = ctrl._preview_measure_expression("M1", "1 + 1")
+        assert res == "—"
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+
+        ctrl._set_status("")
+        callback_res = []
+        ctrl._preview_measure_expression_async("M1", "1 + 1", on_done=lambda val: callback_res.append(val))
+        assert ctrl._status_message == ctrl._large_data_refusal("DAX measures")
+        assert callback_res == [ctrl._large_data_refusal("DAX measures")]
+    finally:
+        ps.close()
+
+
+def test_refusal_add_report_filter(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """_add_report_filter returns False and leaves report filters unchanged."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._set_status("")
+        snap = deepcopy(ctrl._project.get("report", {}).get("filters", []))
+        ok = ctrl._add_report_filter(
+            table_id="tbl_store", column="cat", operator="equals", value="val_1", report_scope=True
+        )
+        assert ok is False
+        assert ctrl._project.get("report", {}).get("filters", []) == snap
+        assert ctrl._status_message == ctrl._large_data_refusal("Report filters")
+    finally:
+        ps.close()
+
+
+def test_refusal_add_field_to_well(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """add_field_to_well returns None, sets status, leaves well unchanged."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._selected_visual = "TestTable"
+        page = ctrl._active_page()
+        page["visuals"].append({
+            "id": "v_table", "title": "TestTable", "type": "table", "table_id": "tbl_store",
+            "fields": {"Fields": []},
+        })
+        ctrl._set_status("")
+        snap_visual = deepcopy(page["visuals"])
+        ctrl.add_field_to_well("Fields", "cat")
+        assert page["visuals"] == snap_visual
+        assert ctrl._status_message == ctrl._large_data_refusal("Visual fields")
+    finally:
+        ps.close()
+
+
+def test_refusal_measure_table_context(qapp: QApplication, tmp_path: Path) -> None:
+    """_measure_table_context raises MeasureError with exact refusal text when store table is loaded."""
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        with pytest.raises(MeasureError) as exc_info:
+            ctrl._measure_table_context()
+        assert str(exc_info.value) == ctrl._large_data_refusal("DAX measures")
+    finally:
+        ps.close()
+
+
+def test_behavior_with_no_store_table(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """When only ordinary (ImportCandidate) tables are loaded, measures and filters work as before."""
+    source_path = tmp_path / "ord.csv"
+    source_path.write_text("id,amount\n1,10\n2,20\n3,30\n", encoding="utf-8")
+    ctrl = StudioController()
+    assert ctrl._commit_import(source_path, parse_file(source_path))
+
+    assert not ctrl._store_tables_loaded()
+
+    # Create measure should succeed
+    active_tbl = ctrl._active_model_table_id()
+    ok_m = ctrl.create_measure("TotalAmount", f"SUM([{ctrl._headers[1]}])", home_table_id=active_tbl)
+    assert ok_m is True
+    assert any(m["name"] == "TotalAmount" for m in ctrl._project["model"]["measures"])
+
+    # Add filter should succeed
+    ok_f = ctrl._add_report_filter(
+        table_id=active_tbl, column=ctrl._headers[0], operator="equals", value="1", report_scope=True
+    )
+    assert ok_f is True
+    assert any(f["table_id"] == active_tbl for f in ctrl._project["report"]["filters"])
+
+
+def test_remove_table_with_store_loaded_does_not_read_rows(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """removeTable path on store table does not read candidate.rows."""
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        # Patch QMessageBox.question to accept deletion
+        monkeypatch.setattr(QMessageBox, "question", lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
+
+        # If candidate.rows is accessed, StoreCandidate raises LargeTableError
+        with patch.object(StoreCandidate, "rows", property(lambda self: (_ for _ in ()).throw(RuntimeError("rows accessed!")))):
+            res = ctrl.removeTable("s_store")
+            assert res is True
+            assert "s_store" not in ctrl._loaded_candidates
+            assert not ctrl._store_tables_loaded()
+    finally:
+        ps.close()
+
+
+def test_silent_refusal_interleaved_getters_emit_once(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._reset_silent_refusal_notice()
+        em = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        for _ in range(3):
+            ctrl.regions
+            ctrl.visualCardData("SwCard")
+            ctrl.pageFilterValues("tbl_store", "cat")
+        assert len(em) == 1, f"Expected exactly 1 emit, got {len(em)}: {em}"
+        assert em[0] == ctrl._large_data_refusal("Region filter")
+    finally:
+        ps.close()
+
+
+def test_silent_refusal_foreign_status_survives(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl.regions
+        ctrl._set_status("Exported 5 rows to x.csv")
+        for _ in range(3):
+            ctrl.regions
+            ctrl.visualCardData("SwCard")
+            ctrl.pageFilterValues("tbl_store", "cat")
+        assert ctrl._status_message == "Exported 5 rows to x.csv"
+    finally:
+        ps.close()
+
+
+def test_silent_refusal_epoch_reset(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._reset_silent_refusal_notice()
+        em = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        ctrl.regions
+        assert len(em) == 1
+        em.clear()
+        ctrl.regions
+        assert len(em) == 0
+        monkeypatch.setattr(QMessageBox, "question", lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
+        ctrl.removeTable("s_store")
+        em.clear()
+        ps2, sc2 = _make_store_candidate(tmp_path, "tbl_store_refusal_2", 200)
+        try:
+            ctrl._install_source(None, "s_store_2", sc2)
+            # Installing s_store_2 reset the silent refusal notice; during _install_source,
+            # regions was read and set status to refusal.
+            assert ctrl._status_message == ctrl._large_data_refusal("Region filter")
+            assert len(em) == 1
+        finally:
+            ps2.close()
+    finally:
+        ps.close()
+
+
+def test_user_initiated_refusal_repeats_emit_every_time(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        em = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        ctrl.create_measure("M_test", "1+1")
+        ctrl.create_measure("M_test", "1+1")
+        assert len(em) == 2
+        assert em[0] == ctrl._large_data_refusal("DAX measures")
+        assert em[1] == ctrl._large_data_refusal("DAX measures")
+    finally:
+        ps.close()
+
+
+def test_ordinary_set_status_twice_emits_twice(qapp: QApplication) -> None:
+    ctrl = StudioController()
+    em = []
+    ctrl.statusChanged.connect(lambda m: em.append(m))
+    ctrl._set_status("x")
+    ctrl._set_status("x")
+    assert len(em) == 2
+    assert em == ["x", "x"]
+
+
+@pytest.mark.parametrize(
+    ("what", "expected_literal"),
+    [
+        (
+            "Report visual data",
+            "Report visual data is not available for large-data tables yet. "
+            "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+            "sort, filter, column statistics and export. Other features arrive in a later release.",
+        ),
+        (
+            "Region filter",
+            "Region filter is not available for large-data tables yet. "
+            "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+            "sort, filter, column statistics and export. Other features arrive in a later release.",
+        ),
+        (
+            "Page filter values",
+            "Page filter values is not available for large-data tables yet. "
+            "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+            "sort, filter, column statistics and export. Other features arrive in a later release.",
+        ),
+        (
+            "Report filters",
+            "Report filters is not available for large-data tables yet. "
+            "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+            "sort, filter, column statistics and export. Other features arrive in a later release.",
+        ),
+        (
+            "DAX measures",
+            "DAX measures is not available for large-data tables yet. "
+            "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+            "sort, filter, column statistics and export. Other features arrive in a later release.",
+        ),
+        (
+            "Visual fields",
+            "Visual fields is not available for large-data tables yet. "
+            "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+            "sort, filter, column statistics and export. Other features arrive in a later release.",
+        ),
+        (
+            "Report view",
+            "Report view is not available for large-data tables yet. "
+            "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+            "sort, filter, column statistics and export. Other features arrive in a later release.",
+        ),
+    ],
+)
+def test_refusal_literal_text_per_what(what: str, expected_literal: str) -> None:
+    ctrl = StudioController()
+    actual = ctrl._large_data_refusal(what)
+    assert actual == expected_literal
+
+
+def test_silent_refusal_sweep_properties_and_visual_slots_emit_at_most_once(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Every property read and visual read slot, 12 visuals, 3 rounds: no status spam."""
+    from tests.test_controller_store_sweep import (
+        SWEEP_PROPERTIES,
+        VISUAL_READ_SLOTS,
+        _make_sweep_controller,
+    )
+
+    ps, ctrl, titles = _make_sweep_controller(tmp_path, monkeypatch)
+    try:
+        assert len(titles) == 12
+        ctrl._reset_silent_refusal_notice()
+        em: list[str] = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        per_round: list[int] = []
+        for _ in range(3):
+            for name in SWEEP_PROPERTIES:
+                getattr(ctrl, name)
+            for name in VISUAL_READ_SLOTS:
+                for title in titles:
+                    getattr(ctrl, name)(title)
+            per_round.append(len(em))
+        assert len(em) <= 1, f"status written {len(em)} times: {em}"
+        assert per_round[1] == per_round[0] and per_round[2] == per_round[0], per_round
+    finally:
+        ps.close()
+
+
+@pytest.mark.parametrize("name", ["_refresh_report", "_refresh_report_async", "_report_filter_context"])
+def test_silent_refusal_internal_entry_points_emit_at_most_once(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, name: str,
+) -> None:
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._reset_silent_refusal_notice()
+        em: list[str] = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        for _ in range(3):
+            getattr(ctrl, name)()
+        assert len(em) == 1, f"{name}: expected 1 emit, got {len(em)}"
+        assert em[0] == ctrl._large_data_refusal("Report view" if name != "_report_filter_context" else "Report filters")
+        # A status written by another action survives later calls.
+        ctrl._set_status("Exported 5 rows to x.csv")
+        for _ in range(3):
+            getattr(ctrl, name)()
+        assert ctrl._status_message == "Exported 5 rows to x.csv"
+    finally:
+        ps.close()
+
+
+def _prep_column_visual(ctrl: StudioController) -> None:
+    visual = next(v for v in ctrl._active_page()["visuals"] if v["title"] == "SwColumn")
+    visual["fields"]["Y-axis"].append("val")
+    ctrl._selected_visual = "SwColumn"
+
+
+# User-initiated slots that call _refresh_report / _refresh_report_async and set no status
+# of their own: each keeps writing the refusal on every call, even after the silent notice.
+_USER_REFRESH_SLOTS: dict[str, Any] = {
+    "set_visual_interaction": lambda c: c.set_visual_interaction("SwColumn", "SwLine", "highlight"),
+    "setActivePage": lambda c: (c.add_page(), c._set_status(""), c.setActivePage(0)),
+    "remove_field_from_well": lambda c: c.remove_field_from_well("Y-axis", "val"),
+    "set_field_aggregation": lambda c: c.set_field_aggregation("Y-axis", "val", "count"),
+    "set_visual_property": lambda c: c.set_visual_property("title_font_size", 14),
+    "toggle_cross_filter": lambda c: c.toggle_cross_filter("SwColumn", "cat_1"),
+}
+
+
+@pytest.mark.parametrize("slot", sorted(_USER_REFRESH_SLOTS))
+def test_user_initiated_refresh_slots_keep_their_own_refusal(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, slot: str,
+) -> None:
+    from tests.test_controller_store_sweep import _make_sweep_controller
+
+    ps, ctrl, _titles = _make_sweep_controller(tmp_path, monkeypatch)
+    try:
+        _prep_column_visual(ctrl)
+        ctrl.regions  # the silent notice for this epoch is now spent
+        assert ctrl._silent_refusal_notice_shown
+        ctrl._set_status("")
+        em: list[str] = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        _USER_REFRESH_SLOTS[slot](ctrl)
+        assert ctrl._status_message == ctrl._large_data_refusal("Report view")
+        assert em and em[-1] == ctrl._large_data_refusal("Report view")
+    finally:
+        ps.close()
+
+
+# One case per writer of the store epoch (sites that write _loaded_candidates and then
+# call _reset_silent_refusal_notice). The spy records which function made each reset
+# call, so removing the reset from one writer fails its own case even when another
+# writer in the same action would still reset.
+def _drive_install_source(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _ps2, sc2 = _make_store_candidate(tmp_path / "second", "tbl_store_second", 200)
+    ctrl._install_source(None, "s_store_2", sc2)
+
+
+def _drive_clear_source(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ctrl._clear_source()
+
+
+def _drive_remove_table(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
+    assert ctrl.removeTable("s_store") is True
+
+
+def _drive_replace_with_new_project(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ctrl._replace_with_new_project()
+
+
+def _drive_open_project(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from analytics_studio.project import save_project
+
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
+    plain = StudioController()
+    target = tmp_path / "plain.nap"
+    save_project(target, plain._project)
+    assert ctrl.open_project_path(target) is True
+
+
+def _drive_refresh_sources(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ctrl._refresh_sources([ctrl._active_source_id], refresh_all=False)
+
+
+_RESET_SITES = [
+    ("_install_source", _drive_install_source),
+    ("_clear_source", _drive_clear_source),
+    ("removeTable", _drive_remove_table),
+    ("_replace_with_new_project", _drive_replace_with_new_project),
+    ("open_project_path", _drive_open_project),
+    ("_refresh_sources", _drive_refresh_sources),
+]
+
+
+@pytest.mark.parametrize(("site", "drive"), _RESET_SITES, ids=[s for s, _ in _RESET_SITES])
+def test_silent_refusal_epoch_reset_per_writer(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: str, drive: Any,
+) -> None:
+    import inspect
+
+    _assert_no_dialogs(monkeypatch)
+    if site == "_refresh_sources":
+        # A linked csv source is refreshed while a store table is loaded next to it. The csv
+        # is imported first: importing is refused once a store table is loaded.
+        csv = tmp_path / "small.csv"
+        csv.write_text("a,b\n1,2\n3,4\n", encoding="utf-8")
+        ctrl = StudioController()
+        assert ctrl._commit_import(csv, parse_file(csv)) is True
+        ps, sc = _make_store_candidate(tmp_path, "tbl_store_refresh", 200)
+        ctrl._loaded_candidates["s_store"] = sc
+        assert ctrl._store_tables_loaded()
+    else:
+        ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        resetters: list[str] = []
+        real_reset = ctrl._reset_silent_refusal_notice
+
+        def spy() -> None:
+            resetters.append(inspect.stack()[1].function)
+            real_reset()
+
+        monkeypatch.setattr(ctrl, "_reset_silent_refusal_notice", spy)
+        ctrl.regions  # spend the notice for the current epoch
+        assert ctrl._silent_refusal_notice_shown
+        # Control: without the action the notice stays spent.
+        ctrl._set_status("")
+        ctrl.regions
+        assert ctrl._status_message == ""
+        assert resetters == []
+        drive(ctrl, tmp_path, monkeypatch)
+        assert site in resetters, f"{site} did not reset the notice; resets came from {resetters}"
+    finally:
+        ps.close()

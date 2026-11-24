@@ -10,14 +10,21 @@ import csv
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal, DecimalException
 import json
+import logging
 import math
 import os
 from pathlib import Path
 import re
+import sys
 import tempfile
 import threading
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
+
+if TYPE_CHECKING:
+    from analytics_studio.store.candidate import StoreCandidate
+    from analytics_studio.store.session import ProjectStore
+    from analytics_studio.store.table_model import StoreTableModel
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -27,6 +34,7 @@ from PySide6.QtCore import (
     Property,
     Qt,
     QSettings,
+    QStandardPaths,
     Signal,
     Slot,
     QTimer,
@@ -163,6 +171,7 @@ from analytics_studio.transformations import (
 
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
+logger = logging.getLogger(__name__)
 # Axis cards offered per chart type: (X-axis header key, Y-axis header key).
 # The Title switch works on every listed type; a header key is set only where it
 # changes pixels in ChartCard.qml (checked with offscreen grabs), else None.
@@ -1913,6 +1922,9 @@ class CsvTableModel(QAbstractTableModel):
         return {int(Qt.ItemDataRole.DisplayRole): b"display"}
 
 
+from analytics_studio.large_table_error import LargeTableError
+
+
 class StudioController(QObject):
     """Owns application state and exposes deliberate, synchronous QML APIs."""
 
@@ -1922,7 +1934,13 @@ class StudioController(QObject):
     activeSourceReady = Signal()
     reportBusyChanged = Signal(bool)
 
-    def __init__(self, parent: QObject | None = None, settings: QSettings | None = None) -> None:
+    def __init__(
+        self,
+        parent: QObject | None = None,
+        settings: QSettings | None = None,
+        *,
+        app_data_dir: str | None = None,
+    ) -> None:
         super().__init__(parent)
         self._formula_bar = FormulaBarController(self)
         self._project = new_project()
@@ -1931,8 +1949,9 @@ class StudioController(QObject):
         self._dirty = False
         self._current_view = "Report"
         self._active_page_id = self._project["report"]["active_page_id"]
+        self._active_store_candidate: StoreCandidate | None = None
         self._headers: list[str] = []
-        self._rows: list[dict[str, str | None]] = []
+        self._rows_backing: list[dict[str, str | None]] = []
         self._source_path: Path | None = None
         self._source_id: str | None = None
         self._active_source_id: str | None = None
@@ -1946,6 +1965,7 @@ class StudioController(QObject):
         self._sql_server_passwords: dict[str, str] = {}
         self._source_warning = ""
         self._field_query = ""
+        self._silent_refusal_notice_shown = False
         self._table_expanded: dict[str, bool] = {}
         self._field_tree_cache: list[dict[str, Any]] | None = None
         self._field_tree_flat_cache: list[dict[str, Any]] | None = None
@@ -2010,8 +2030,111 @@ class StudioController(QObject):
         self._preview_job: tuple[Any, ...] | None = None
         self._preview_cancel_event: threading.Event | None = None
         self._preview_tasks: dict[int, Any] = {}
+        self._project_store: ProjectStore | None = None
+        self._store_table_model: StoreTableModel | None = None
+        self._app_data_dir: str | None = app_data_dir
+        no_reap = os.environ.get("ANALYTICS_STUDIO_NO_REAP", "").strip().lower() in ("1", "true", "yes")
+        if app_data_dir is not None or not no_reap:
+            try:
+                from analytics_studio.store.session import ProjectStore as _PS
+                _PS.reap_stale(self._effective_app_data_dir())
+            except Exception as exc:
+                logger.warning("Failed to reap stale project stores: %s", exc)
         self._refresh_model_view()
         self._refresh_report()
+
+    @property
+    def _rows(self) -> list[dict[str, str | None]]:
+        if self._active_store_candidate is not None:
+            return []
+        return self._rows_backing
+
+    @_rows.setter
+    def _rows(self, value: list[dict[str, str | None]]) -> None:
+        self._rows_backing = value if isinstance(value, list) else list(value)
+
+    def _active_row_count(self) -> int:
+        if self._active_store_candidate is not None:
+            return self._active_store_candidate.row_count
+        return len(self._rows_backing)
+
+    def _effective_app_data_dir(self) -> str:
+        if self._app_data_dir is not None:
+            return self._app_data_dir
+        loc = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppDataLocation)
+        return loc if loc else tempfile.gettempdir()
+
+    def _ensure_project_store(self) -> ProjectStore:
+        if self._project_store is not None and not self._project_store.closed:
+            return self._project_store
+
+        from analytics_studio.store.session import ProjectStore as _PS
+
+        app_dir = self._effective_app_data_dir()
+        if self._project_path:
+            data_path = _PS.data_file_for(str(self._project_path))
+            self._project_store = _PS.open(data_path)
+        else:
+            self._project_store = _PS.open_unsaved(app_dir)
+        return self._project_store
+
+    def _close_project_store(self) -> None:
+        if self._project_store is not None:
+            store = self._project_store
+            try:
+                store.shutdown()
+            except Exception:
+                pass
+            try:
+                store.close()
+            except Exception:
+                pass
+            if store.closed:
+                self._project_store = None
+
+    def shutdown_store(self, timeout: float = 15.0) -> bool:
+        if self._project_store is None:
+            return True
+        store = self._project_store
+        closed = store.shutdown(timeout=timeout)
+        if closed:
+            self._project_store = None
+        return closed
+
+    def _store_tables_loaded(self) -> bool:
+        """Return True if any StoreCandidate is present in loaded candidates."""
+        mod = sys.modules.get("analytics_studio.store.candidate")
+        if mod is None:
+            return False
+        candidate_cls = getattr(mod, "StoreCandidate", None)
+        if candidate_cls is None:
+            return False
+        return any(isinstance(c, candidate_cls) for c in self._loaded_candidates.values())
+
+    def _reset_silent_refusal_notice(self) -> None:
+        self._silent_refusal_notice_shown = False
+
+    def _notice_silent_refusal(self, what: str) -> None:
+        if not self._silent_refusal_notice_shown:
+            self._silent_refusal_notice_shown = True
+            self._set_status(self._large_data_refusal(what))
+
+    def _report_view_refusal_for_user_action(self) -> None:
+        """Write the report-view refusal on every call of a user-initiated slot.
+
+        Those slots refresh the report right after, and the refresh itself only
+        writes the refusal once per store epoch.
+        """
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report view"))
+
+    def _large_data_refusal(self, what: str) -> str:
+        """Standard refusal message for unsupported large-data table features."""
+        return (
+            f"{what} is not available for large-data tables yet. Tables up to 100,000 "
+            "rows work everywhere; large tables support the data grid, sort, filter, "
+            "column statistics and export. Other features arrive in a later release."
+        )
 
     # QML-facing state. The dictionaries/lists are returned as fresh QVariant values.
     @Property(str, notify=stateChanged)
@@ -2208,6 +2331,7 @@ class StudioController(QObject):
         else:
             interaction["mode"] = mode
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -2530,7 +2654,9 @@ class StudioController(QObject):
 
     @Property(int, notify=stateChanged)
     def rowCount(self) -> int:  # noqa: N802
-        return len(self._rows)
+        if self._active_store_candidate is not None:
+            return self._active_store_candidate.row_count
+        return len(self._rows_backing)
 
     @Property(int, notify=stateChanged)
     def columnCount(self) -> int:  # noqa: N802
@@ -2550,6 +2676,8 @@ class StudioController(QObject):
 
     @Property(QObject, notify=stateChanged)
     def dataModel(self) -> QObject:  # noqa: N802
+        if self._active_store_candidate is not None and self._store_table_model is not None:
+            return self._store_table_model
         return self._table_model
 
     @Property("QVariantList", notify=stateChanged)
@@ -3181,6 +3309,12 @@ class StudioController(QObject):
     def visualGaugeData(
         self, visual_name: str, include_highlights: bool = False
     ) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return {
+                "value": 0.0, "minimum": 0.0, "maximum": 1.0,
+                "target": None, "highlight_value": None, "has_value": False,
+            }
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3224,6 +3358,9 @@ class StudioController(QObject):
                         measure_name, measure_context, filter_table_ids, {},
                         bound_table_id,
                     )
+                except LargeTableError as exc:
+                    self._set_status(str(exc))
+                    return None
                 except (MeasureError, KeyError, TypeError, ValueError):
                     return None
             aggregation = str(visual.get("field_aggregations", {}).get(column, "sum")).casefold()
@@ -3286,6 +3423,12 @@ class StudioController(QObject):
     def visualKpiData(
         self, visual_name: str, include_highlights: bool = False
     ) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return {
+                "field": "", "trend_field": "", "value": 0.0, "target": None,
+                "trend": [], "highlight_value": None, "has_value": False,
+            }
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3355,6 +3498,9 @@ class StudioController(QObject):
     def visualMapData(
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return []
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3431,6 +3577,9 @@ class StudioController(QObject):
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
         """Join report rows to a local GeoJSON/TopoJSON boundary source."""
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return []
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3541,6 +3690,9 @@ class StudioController(QObject):
                             {location_field: set(source_values.values())},
                             bound_table_id,
                         )
+                    except LargeTableError as exc:
+                        self._set_status(str(exc))
+                        metric = None
                     except (MeasureError, KeyError, TypeError, ValueError):
                         metric = None
                 elif not value_field:
@@ -3574,6 +3726,9 @@ class StudioController(QObject):
     def visualScatterData(
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return []
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3906,6 +4061,11 @@ class StudioController(QObject):
                     {dimension_column: group_values[key]},
                     dimension_id,
                 )
+            except LargeTableError as exc:
+                return {
+                    "columns": columns, "rows": [], "total_rows": 0,
+                    "error": str(exc),
+                }
             except (MeasureError, KeyError, RelationshipError, TypeError, ValueError) as exc:
                 detail = str(exc).strip() or "evaluation failed"
                 return {
@@ -3929,6 +4089,9 @@ class StudioController(QObject):
 
     @Slot(str, result="QVariantMap")
     def visualTableData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return {"columns": [], "rows": [], "total_rows": 0}
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -4061,6 +4224,13 @@ class StudioController(QObject):
                         group_filters,
                         bound_table_id,
                     )
+                except LargeTableError as exc:
+                    return {
+                        "columns": columns,
+                        "rows": [],
+                        "total_rows": 0,
+                        "error": str(exc),
+                    }
                 except (MeasureError, KeyError, TypeError, ValueError) as exc:
                     detail = str(exc).strip() or "evaluation failed"
                     return {
@@ -4086,6 +4256,9 @@ class StudioController(QObject):
 
     @Slot(str, result="QVariantMap")
     def visualMatrixData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return {"columns": [], "rows": [], "total_rows": 0}
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -4117,7 +4290,7 @@ class StudioController(QObject):
 
         grouped: defaultdict[tuple[tuple[Any, ...], tuple[Any, ...]], Decimal | None] = defaultdict(Decimal)
         counts: defaultdict[tuple[tuple[Any, ...], tuple[Any, ...]], int] = defaultdict(int)
-        error_cells: set[tuple[tuple[Any, ...], tuple[Any, ...]]] = set()
+        error_cells: dict[tuple[tuple[Any, ...], tuple[Any, ...]], str] = {}
         row_values: dict[tuple[Any, ...], Any] = {}
         column_values: dict[tuple[Any, ...], Any] = {}
         row_displays: dict[tuple[Any, ...], str] = {}
@@ -4143,7 +4316,7 @@ class StudioController(QObject):
             else:
                 raw_value = row.get(value_field)
                 if is_cell_error(raw_value):
-                    error_cells.add(key)
+                    error_cells[key] = "Error"
                     continue
                 if aggregation == "count":
                     if raw_value is None or raw_value == "":
@@ -4169,8 +4342,10 @@ class StudioController(QObject):
                         bound_table_id,
                     )
                     counts[key] = 1
+                except LargeTableError as exc:
+                    error_cells[key] = str(exc).strip() or "table is stored in the large-data store"
                 except (MeasureError, KeyError, TypeError, ValueError):
-                    error_cells.add(key)
+                    error_cells[key] = "Error"
 
         if aggregation == "average" and not measure_name:
             grouped = defaultdict(
@@ -4225,7 +4400,7 @@ class StudioController(QObject):
             for column_key in sorted_columns:
                 data_key = (row_key, column_key)
                 if data_key in error_cells:
-                    values.append("Error")
+                    values.append(error_cells[data_key])
                 elif data_key not in grouped:
                     values.append("")
                 elif grouped[data_key] is None:
@@ -4247,6 +4422,9 @@ class StudioController(QObject):
 
     @Slot(str, result="QVariantMap")
     def visualCardData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return {"label": "", "value": "", "aggregation": "", "highlight_value": "", "has_highlights": False}
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -4286,6 +4464,8 @@ class StudioController(QObject):
                 formatted = (
                     _format_report_number(value) if value is not None else "—"
                 )
+            except LargeTableError as exc:
+                formatted = str(exc).strip() or "table is stored in the large-data store"
             except (MeasureError, KeyError, TypeError, ValueError):
                 formatted = "Error"
             has_highlights = any(
@@ -4311,6 +4491,8 @@ class StudioController(QObject):
                         _format_report_number(highlight_measure_value)
                         if highlight_measure_value is not None else "—"
                     )
+                except LargeTableError as exc:
+                    highlight_value = str(exc).strip() or "table is stored in the large-data store"
                 except (MeasureError, KeyError, TypeError, ValueError):
                     highlight_value = "Error"
             return {
@@ -4404,6 +4586,9 @@ class StudioController(QObject):
 
     @Property("QVariantList", notify=stateChanged)
     def regions(self) -> list[str]:
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Region filter")
+            return ["All regions"]
         column = self._region_column
         values = sorted({str(row.get(column, "")) for row in self._rows if column and row.get(column)})
         return ["All regions", *values]
@@ -4529,6 +4714,9 @@ class StudioController(QObject):
 
     @Slot(str, str, result="QVariantList")
     def pageFilterValues(self, table_id: str, column: str) -> list[dict[str, str]]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Page filter values")
+            return []
         table = next(
             (item for item in self._table_catalog
              if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
@@ -4556,6 +4744,9 @@ class StudioController(QObject):
     def searchPageFilterValues(  # noqa: N802
         self, table_id: str, column: str, search: str
     ) -> list[dict[str, str]]:
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Page filter values")
+            return []
         table = next(
             (item for item in self._table_catalog
              if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
@@ -4633,6 +4824,9 @@ class StudioController(QObject):
     @Slot(str, str, result=bool)
     def setColumnType(self, column: str, type_name: str) -> bool:  # noqa: N802
         """Validate, normalize, and persist a type change for one active column."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Power Query transformations"))
+            return False
         if not self.sourceLoaded or self._active_source_id is None:
             self._set_status("Load a table before changing a column type.")
             return False
@@ -4886,6 +5080,9 @@ class StudioController(QObject):
 
     def _run_relationship_dialog(self, **dialog_kwargs: Any) -> bool:
         """Helper to build, run and save RelationshipDialog."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Model relationships"))
+            return False
         eligible_tables = [
             table for table in self._table_catalog
             if table.get("loaded") and table.get("loadEnabled") and table.get("headers")
@@ -4962,6 +5159,9 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def editRelationship(self, relationship_id: str) -> bool:
         """Open the relationship dialog focusing the given relationship."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Model relationships"))
+            return False
         existing_relationships = self._project.get("model", {}).get("relationships", [])
         if not any(str(r.get("id")) == str(relationship_id) for r in existing_relationships):
             self._set_status("Relationship not found.")
@@ -4971,6 +5171,9 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def deleteRelationship(self, relationship_id: str) -> bool:
         """Prompt confirmation and remove the given relationship."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Model relationships"))
+            return False
         existing_relationships = self._project.get("model", {}).get("relationships", [])
         rel = next(
             (r for r in existing_relationships if str(r.get("id")) == str(relationship_id)),
@@ -5006,6 +5209,8 @@ class StudioController(QObject):
         *,
         allow_unavailable: list[dict[str, Any]] | None = None,
     ) -> list[dict[str, Any]]:
+        if self._store_tables_loaded():
+            raise RelationshipError(self._large_data_refusal("Model relationships"))
         model_tables = self._project.get("model", {}).get("tables", [])
         normalized = normalize_relationships(relationships, model_tables)
         unchanged_by_id = {
@@ -5093,6 +5298,8 @@ class StudioController(QObject):
         candidate_overrides: dict[str, ImportCandidate] | None = None,
     ) -> None:
         """Validate relationships against the current or staged loaded rows."""
+        if self._store_tables_loaded():
+            return
         candidates = dict(self._loaded_candidates)
         candidates.update(candidate_overrides or {})
         relationship_tables = []
@@ -5132,6 +5339,10 @@ class StudioController(QObject):
 
     @Slot(int)
     def openRecentSource(self, index: int) -> bool:  # noqa: N802
+        # task 11: the large-file import must be exempt from this refusal
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         sources = self._recent_source_store.sources
         if index < 0 or index >= len(sources):
             self._set_status("That recent source is no longer in the list.")
@@ -5488,6 +5699,7 @@ class StudioController(QObject):
                     credential_cleanup_failed = True
 
         self._loaded_candidates.pop(source_id, None)
+        self._reset_silent_refusal_notice()
         self._query_candidates.pop(source_id, None)
         self._raw_candidates.pop(source_id, None)
         self._source_load_errors.pop(source_id, None)
@@ -5532,6 +5744,9 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def connectDataSource(self, source_id: str) -> bool:  # noqa: N802
         """Dispatch connector choices that have an implemented local workflow."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         source = next((item for item in DATA_SOURCE_CATALOG if item["id"] == source_id), None)
         if source is None:
             self._set_status("Unknown data source selection")
@@ -5617,6 +5832,9 @@ class StudioController(QObject):
         connection: dict[str, Any],
         parsed: ImportCandidate,
     ) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         options = dict(parsed.options)
         url = connection["url"]
         existing_source = next((
@@ -5731,6 +5949,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -5754,6 +5973,9 @@ class StudioController(QObject):
         connection: dict[str, Any],
         parsed: ImportCandidate,
     ) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         options = dict(parsed.options)
         service_root = connection["service_root"]
         existing_source = next((
@@ -5868,6 +6090,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -5923,6 +6146,9 @@ class StudioController(QObject):
         password: str,
         parsed: ImportCandidate,
     ) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         options = dict(parsed.options)
         identity = (settings["server"], settings["port"], settings["database"], settings["username"])
         existing_source = next((
@@ -6057,6 +6283,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -6136,6 +6363,7 @@ class StudioController(QObject):
         self._selected_visual_ids.clear()
         self._creating_visual = False
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -6301,6 +6529,9 @@ class StudioController(QObject):
         report_scope: bool = False,
         async_refresh: bool = False,
     ) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report filters"))
+            return False
         table = next(
             (item for item in self._table_catalog
              if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
@@ -7055,6 +7286,7 @@ class StudioController(QObject):
         self._active_source_kind = active_source_kind
         self._active_parser_options = active_parser_options
         self._loaded_candidates = loaded_candidates
+        self._reset_silent_refusal_notice()
         self._query_candidates = query_candidates
         self._raw_candidates = raw_candidates
         self._source_load_errors = load_errors
@@ -7092,6 +7324,9 @@ class StudioController(QObject):
         self.import_data_dialog(expected_kind="excel")
 
     def import_data_dialog(self, expected_kind: str | None = None) -> None:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return
         filters = {
             "csv": "CSV files (*.csv);;All files (*)",
             "excel": "Excel workbooks (*.xls *.xlsx *.xlsm);;All files (*)",
@@ -7450,6 +7685,9 @@ class StudioController(QObject):
         return candidate, source_record
 
     def import_folder_dialog(self) -> None:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return
         folder = QFileDialog.getExistingDirectory(
             None,
             "Choose folder to combine",
@@ -7460,6 +7698,9 @@ class StudioController(QObject):
             self._import_folder_path(Path(folder))
 
     def import_folder_path(self, folder: Path) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         return self._import_folder_path(Path(folder))
 
     def _import_folder_path(
@@ -7754,6 +7995,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -7851,12 +8093,15 @@ class StudioController(QObject):
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
-        self._set_status(f"Loaded {table_name} · {len(self._rows):,} rows")
+        self._set_status(f"Loaded {table_name} · {self._active_row_count():,} rows")
         self.activeSourceReady.emit()
         return True
 
     def append_queries_dialog(self) -> bool:
         """Create a saved append query from two loaded tables."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Append queries"))
+            return False
         available = [
             dict(table) for table in self._table_catalog
             if table.get("evaluated") and table.get("sourceId") in self._loaded_candidates
@@ -7899,6 +8144,9 @@ class StudioController(QObject):
 
     def merge_queries_dialog(self) -> bool:
         """Create a saved query by joining two loaded tables on one or more keys."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Merge queries"))
+            return False
         available = [
             dict(table) for table in self._table_catalog
             if table.get("evaluated") and table.get("sourceId") in self._loaded_candidates
@@ -7947,6 +8195,9 @@ class StudioController(QObject):
         output_types: dict[str, str],
     ) -> bool:
         """Commit a derived query only after its definition and result validate."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Power Query transformations"))
+            return False
         if not query_name.strip() or "\x00" in query_name:
             self._set_status("Enter a valid name for the query.")
             return False
@@ -8002,6 +8253,7 @@ class StudioController(QObject):
         model_candidate = _model_candidate_with_format_errors_as_blank(transformed)
         self._project = next_project
         self._loaded_candidates[source_id] = model_candidate
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = transformed
         self._raw_candidates[source_id] = candidate
         self._active_source_id = source_id
@@ -8156,6 +8408,9 @@ class StudioController(QObject):
         open_advanced_editor: bool = False,
         pending_source: tuple[ImportCandidate, dict[str, Any]] | None = None,
     ) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Power Query transformations"))
+            return False
         if not self.sourceLoaded or self._active_source_id is None:
             if pending_source is not None:
                 return self._transform_pending_import_without_active_source(
@@ -8433,6 +8688,9 @@ class StudioController(QObject):
 
     @Slot(result=bool)
     def power_query_m_editor_dialog(self) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Power Query transformations"))
+            return False
         if not self.sourceLoaded or self._active_source_id is None:
             self._set_status("Load a table before opening the Power Query M editor.")
             return False
@@ -8514,6 +8772,9 @@ class StudioController(QObject):
     @Slot(result=bool)
     def calculated_table_dialog(self) -> bool:
         """Create a saved DISTINCT calculated table from one loaded model column."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX calculated tables"))
+            return False
         self._cancel_and_wait_worker()
         tables = [
             dict(table) for table in self._table_catalog
@@ -8541,6 +8802,9 @@ class StudioController(QObject):
     @Slot(result=bool)
     def calendar_table_dialog(self) -> bool:
         """Create a fixed or model-driven, marked calendar table."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX calendar tables"))
+            return False
         tables = [
             dict(table) for table in self._table_catalog
             if table.get("loaded") and table.get("loadEnabled")
@@ -8564,6 +8828,9 @@ class StudioController(QObject):
     @Slot(result=bool)
     def mark_date_table_dialog(self) -> bool:
         """Mark or unmark a loaded Date/DateTime model column as a date table."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Date table"))
+            return False
         tables = [
             dict(table) for table in self._table_catalog
             if table.get("loaded") and table.get("loadEnabled")
@@ -8629,6 +8896,9 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def editMeasure(self, measure_name: str) -> bool:  # noqa: N802
         """Open the DAX editor with an existing measure's saved definition."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         if not self.sourceLoaded:
             self._set_status("Import a table before editing a measure.")
             return False
@@ -8694,6 +8964,9 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def deleteMeasure(self, measure_name: str) -> bool:  # noqa: N802
         """Confirm removal of a saved measure, then validate dependent formulas."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         answer = QMessageBox.question(
             None,
             "Delete measure",
@@ -8711,6 +8984,9 @@ class StudioController(QObject):
     @Slot(result=bool)
     def calculated_column_dialog(self) -> bool:
         """Create, edit, or remove a local DAX calculated column."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX calculated columns"))
+            return False
         source_id = self._active_source_id
         if not self.sourceLoaded or source_id is None:
             self._set_status("Load a table before creating a calculated column.")
@@ -8763,6 +9039,9 @@ class StudioController(QObject):
         Returns ``None`` when the model table is unavailable and raises the engine's own
         error when the formula does not bind, so callers can validate a draft safely.
         """
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX calculated columns"))
+            raise MeasureError(self._large_data_refusal("DAX calculated columns"))
         source = next((
             item for item in self._project.get("data_sources", [])
             if item.get("id") == source_id
@@ -8833,6 +9112,7 @@ class StudioController(QObject):
         next_project, query_candidate, calculated_candidate = plan
         self._project = next_project
         self._loaded_candidates[source_id] = calculated_candidate
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         if source_id == self._active_source_id:
             self._install_source(self._active_source_path, source_id, calculated_candidate)
@@ -8845,6 +9125,10 @@ class StudioController(QObject):
         self, name: str, expression: str, original_name: str = ""
     ) -> str:
         """Dry-run a calculated column; return the engine's error text, or "" when it binds."""
+        if self._store_tables_loaded():
+            refusal = self._large_data_refusal("DAX calculated columns")
+            self._set_status(refusal)
+            return refusal
         source_id = self._active_source_id
         if not self.sourceLoaded or source_id is None:
             return "Load a table before creating a calculated column."
@@ -8863,6 +9147,10 @@ class StudioController(QObject):
         self, name: str, expression: str, original_name: str = ""
     ) -> str:
         """Add or replace a calculated column on the active table; "" on success, else the error."""
+        if self._store_tables_loaded():
+            refusal = self._large_data_refusal("DAX calculated columns")
+            self._set_status(refusal)
+            return refusal
         source_id = self._active_source_id
         if not self.sourceLoaded or source_id is None:
             return "Load a table before creating a calculated column."
@@ -8883,6 +9171,9 @@ class StudioController(QObject):
         return ""
 
     def _measure_dialog(self, *, quick: bool) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
             return False
@@ -9001,6 +9292,9 @@ class StudioController(QObject):
         Shared by the synchronous and the worker-thread preview. Project state
         stays exactly as it was found.
         """
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            raise MeasureError(self._large_data_refusal("DAX measures"))
         measure = normalize_measure(
             name, expression, home_table_id=home_table_id
         )
@@ -9070,6 +9364,9 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> str:
         """Validate and evaluate a draft measure without changing project state."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return "—"
         inputs = self._build_preview_inputs(
             name, expression, editing_name=editing_name, home_table_id=home_table_id
         )
@@ -9103,6 +9400,12 @@ class StudioController(QObject):
         If another engine call cancels the running preview, it is started again
         once that call has returned. A user cancel drops it.
         """
+        # defence in depth: _build_preview_inputs refuses too
+        if self._store_tables_loaded():
+            refusal = self._large_data_refusal("DAX measures")
+            self._set_status(refusal)
+            on_done(refusal)
+            return
         try:
             inputs = self._build_preview_inputs(
                 name, expression, editing_name=editing_name, home_table_id=home_table_id
@@ -9196,6 +9499,9 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate, evaluate, then transactionally add a local DAX measure."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
@@ -9256,6 +9562,9 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate and transactionally replace one saved local DAX measure."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before editing a measure.")
@@ -9343,6 +9652,9 @@ class StudioController(QObject):
 
     def remove_measure(self, name: str) -> bool:
         """Remove one measure only when the remaining model still evaluates."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before removing a measure.")
@@ -9480,6 +9792,8 @@ class StudioController(QObject):
         sort_column: str,
     ) -> tuple[dict[tuple[Any, ...], tuple[str, tuple[Any, ...]]] | None, str]:
         """Validate a complete source column pair and return category order keys."""
+        if self._store_tables_loaded():
+            return None, self._large_data_refusal("Sort by column")
         if not category_column or not sort_column:
             return None, "Choose both a category column and a sort column."
         if category_column == sort_column:
@@ -9562,6 +9876,9 @@ class StudioController(QObject):
         self, model_table_id: str, category_column: str, sort_column: str
     ) -> bool:
         """Persist a valid one-to-one Sort by Column rule transactionally."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Sort by column"))
+            return False
         category_column, sort_column = str(category_column), str(sort_column)
         if sort_column == "":
             return self.clear_model_column_sort_by(model_table_id, category_column)
@@ -9698,6 +10015,9 @@ class StudioController(QObject):
     @Slot(str, str, result=bool)
     def set_model_key_column(self, model_table_id: str, column: str) -> bool:
         """Set or clear one unique loaded source column as this table's key."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Key column"))
+            return False
         column = str(column)
         model_table = next((
             item for item in self._project.get("model", {}).get("tables", [])
@@ -9944,6 +10264,9 @@ class StudioController(QObject):
         column_types: dict[str, str] | None = None,
     ) -> tuple[ImportCandidate, dict[str, str]]:
         """Materialize model calculations after query steps for one table."""
+        # KNOWN: task 13 (open project with mixed ordinary and store tables) must replace this whole-model drop with per-table handling
+        if self._store_tables_loaded():
+            return candidate, {}
         document = project or self._project
         table = self._model_table_for_source(document, source_id)
         if table is None:
@@ -9985,6 +10308,8 @@ class StudioController(QObject):
         self,
         filter_rows_by_table: dict[str, list[dict[str, Any]]] | None = None,
     ) -> list[dict[str, Any]]:
+        if self._store_tables_loaded():
+            raise MeasureError(self._large_data_refusal("DAX measures"))
         filter_rows_by_table = filter_rows_by_table or {}
         context = []
         # Power BI keeps query parameters, custom functions, queries with load off and query folders in the model
@@ -10032,10 +10357,11 @@ class StudioController(QObject):
             })
         return context
 
-    def _active_column_type_map(self) -> dict[str, str]:
+    def _active_column_type_map(self, source_id: str | None = None) -> dict[str, str]:
+        source_id = self._active_source_id if source_id is None else source_id
         table = next(
             (item for item in self._project.get("model", {}).get("tables", [])
-             if item.get("id") == self._active_source_id or item.get("source_id") == self._active_source_id),
+             if item.get("id") == source_id or item.get("source_id") == source_id),
             None,
         )
         stored = table.get("column_types", {}) if table else {}
@@ -10058,6 +10384,9 @@ class StudioController(QObject):
         include_highlights: bool = False,
     ) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]], set[str]]:
         """Build page context plus optional filters for one report visual."""
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report filters")
+            return {}, [], set()
         cache_key = (visual_name, include_highlights)
         cached = self._report_filter_context_cache.get(cache_key)
         if cached is not None:
@@ -10518,6 +10847,8 @@ class StudioController(QObject):
         ]],
     ]:
         """Reread a query's dependency sources without committing project changes."""
+        if self._store_tables_loaded():
+            raise QueryError(self._large_data_refusal("Power Query transformations"))
         session_queries = session_queries or {}
         sources = deepcopy(self._project.get("data_sources", []))
         sources_by_id = {str(source.get("id", "")): source for source in sources}
@@ -10918,6 +11249,15 @@ class StudioController(QObject):
         *,
         project: dict[str, Any] | None = None,
     ) -> ImportCandidate:
+        mod = sys.modules.get("analytics_studio.store.candidate")
+        if mod is not None:
+            candidate_cls = getattr(mod, "StoreCandidate", None)
+            if candidate_cls is not None and any(isinstance(c, candidate_cls) for c in candidates.values()):
+                raise QueryError(
+                    StudioController._large_data_refusal(
+                        None, "Power Query transformations"
+                    )
+                )
         definition = source.get("query_definition", {})
         source_ids = definition.get("source_ids", [])
         try:
@@ -11192,6 +11532,9 @@ class StudioController(QObject):
         previewed_source: ImportCandidate | None = None,
         m_script: str | None = None,
     ) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Power Query transformations"))
+            return False
         try:
             validated_steps = validate_steps(steps)
             source = next(
@@ -11302,6 +11645,7 @@ class StudioController(QObject):
         self._project = next_project
         self._raw_candidates[source_id] = raw_candidate
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = confirmed
         self._query_candidates.update(dependent_query_candidates)
         for updated_id in dependent_candidates:
@@ -11333,6 +11677,9 @@ class StudioController(QObject):
         query_functions: list[dict[str, str]] | None = None,
     ) -> bool:
         """Validate and commit edits from the multi-query Power Query session atomically."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Power Query transformations"))
+            return False
         deleted_query_ids = set(deleted_query_ids or set())
         session_project = deepcopy(self._project)
         original_parameters = deepcopy(
@@ -12505,11 +12852,13 @@ class StudioController(QObject):
                 credential_cleanup_failed = True
         for deleted_id in deleted_query_ids:
             self._loaded_candidates.pop(deleted_id, None)
+            self._reset_silent_refusal_notice()
             self._query_candidates.pop(deleted_id, None)
             self._raw_candidates.pop(deleted_id, None)
             self._source_load_errors.pop(deleted_id, None)
         self._raw_candidates.update(raw_snapshots)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates.update(dependent_query_candidates)
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
@@ -12660,6 +13009,9 @@ class StudioController(QObject):
         return f"{base} ({suffix})"
 
     def refresh_source(self) -> None:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report refresh"))
+            return
         if self.activeSourceExcludedFromRefresh:
             source = next(
                 (item for item in self._project.get("data_sources", [])
@@ -12678,6 +13030,9 @@ class StudioController(QObject):
         self._refresh_sources([self._active_source_id], refresh_all=False)
 
     def refresh_all_sources(self) -> None:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report refresh"))
+            return
         if not self.canRefreshAllSources:
             self._set_status("There are no linked sources available to refresh.")
             return
@@ -12851,6 +13206,7 @@ class StudioController(QObject):
 
         self._project = next_project
         self._loaded_candidates.update(refreshed)
+        self._reset_silent_refusal_notice()
         self._query_candidates.update(query_candidates)
         self._raw_candidates.update(raw_candidates)
         if metadata_changed:
@@ -13002,6 +13358,9 @@ class StudioController(QObject):
 
     @Slot(str, str)
     def add_field_to_well(self, well_name: str, field_name: str) -> None:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Visual fields"))
+            return
         if not self._selected_visual:
             return
         page = self._active_page()
@@ -13251,6 +13610,7 @@ class StudioController(QObject):
         ):
             visual.get("field_aggregations", {}).pop(field_name, None)
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -13295,6 +13655,7 @@ class StudioController(QObject):
             return
         aggregations[field_name] = key
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -13545,6 +13906,7 @@ class StudioController(QObject):
             self._cross_filters.pop(old_title, None)
         visual[property_key] = normalized
         self._report_filter_context_cache.clear()
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self._dirty = True
         self.stateChanged.emit()
@@ -14028,7 +14390,7 @@ class StudioController(QObject):
         finally:
             if temp_path is not None:
                 temp_path.unlink(missing_ok=True)
-        self._set_status(f"Exported {len(self._rows):,} rows to {path.name}")
+        self._set_status(f"Exported {self._active_row_count():,} rows to {path.name}")
         return True
 
     def _save_to(self, path: Path) -> bool:
@@ -14177,6 +14539,7 @@ class StudioController(QObject):
         self._active_source_kind = None
         self._active_parser_options = {}
         self._loaded_candidates = {}
+        self._reset_silent_refusal_notice()
         self._query_candidates = {}
         self._raw_candidates = {}
         self._source_load_errors = {}
@@ -14204,7 +14567,37 @@ class StudioController(QObject):
         source_id: str,
         parsed: ImportCandidate,
     ) -> None:
+        from analytics_studio.store.candidate import StoreCandidate
+        if isinstance(parsed, StoreCandidate):
+            # The old source stays fully in place until the store table is attached successfully.
+            from analytics_studio.store.base import StoreError
+            from analytics_studio.store.table_model import StoreTableModel
+            old_model = self._store_table_model
+            reuse = old_model is not None and old_model._store is parsed.session.store
+            model = old_model if reuse else StoreTableModel(parsed.session.store, parent=self)
+            try:
+                success = model.replace_store(
+                    table_name=parsed.store_table,
+                    headers=list(parsed.headers),
+                    column_types=self._active_column_type_map(source_id),
+                    row_count=parsed.row_count,
+                    table_key=source_id,
+                )
+            except StoreError:
+                success = False
+            if not success:
+                if not reuse:
+                    model.deleteLater()
+                self._set_status(f"Could not load table from store: {parsed.store_table}")
+                return
+            if not reuse:
+                if old_model is not None:
+                    old_model.clear()
+                    old_model.deleteLater()
+                self._store_table_model = model
+
         self._loaded_candidates[source_id] = parsed
+        self._reset_silent_refusal_notice()
         self._source_path = path
         self._source_id = source_id
         self._active_source_id = source_id
@@ -14212,17 +14605,29 @@ class StudioController(QObject):
         self._active_source_kind = parsed.kind
         self._active_parser_options = dict(parsed.options)
         self._headers = list(parsed.headers)
-        self._rows = list(parsed.rows)
-        self._table_model.replace_data(
-            self._headers,
-            self._rows,
-            table_key=self._active_source_id,
-            column_types=self._active_column_type_map(),
-        )
+
+        if isinstance(parsed, StoreCandidate):
+            self._active_store_candidate = parsed
+            self._rows = []
+        else:
+            self._active_store_candidate = None
+            if self._store_table_model is not None:
+                self._store_table_model.clear()
+            self._rows = list(parsed.rows)
+            self._table_model.replace_data(
+                self._headers,
+                self._rows,
+                table_key=self._active_source_id,
+                column_types=self._active_column_type_map(),
+            )
+
         if self._current_region not in self.regions:
             self._current_region = None
+        self.stateChanged.emit()
 
     def _clear_source(self, *, clear_selection: bool = True) -> None:
+        self._reset_silent_refusal_notice()
+        self._active_store_candidate = None
         self._source_path = None
         self._source_id = None
         self._headers = []
@@ -14230,11 +14635,14 @@ class StudioController(QObject):
         self._current_region = None
         self._source_warning = ""
         self._table_model.clear()
+        if self._store_table_model is not None:
+            self._store_table_model.clear()
         if clear_selection:
             self._active_source_id = None
             self._active_source_path = None
             self._active_source_kind = None
             self._active_parser_options = {}
+        self.stateChanged.emit()
 
     def _page_relative_filter_kinds(self) -> tuple[bool, bool]:
 
@@ -14418,6 +14826,16 @@ class StudioController(QObject):
             self._filter_context_error = ""
             self._monthly_chart_message = "No date and numeric sales field found in this source."
             self._region_chart_message = "No region and numeric sales field found in this source."
+            return
+
+        if self._store_tables_loaded():
+            self._kpis = defaults
+            self._monthly_series = []
+            self._region_series = []
+            self._filter_context_error = ""
+            self._monthly_chart_message = self._large_data_refusal("Report view")
+            self._region_chart_message = self._large_data_refusal("Report view")
+            self._notice_silent_refusal("Report view")
             return
 
         if self._current_region is not None and self._current_region not in self.regions:
@@ -14616,6 +15034,23 @@ class StudioController(QObject):
             self._filter_context_error = ""
             self._monthly_chart_message = "No date and numeric sales field found in this source."
             self._region_chart_message = "No region and numeric sales field found in this source."
+            self.stateChanged.emit()
+            return
+
+        if self._store_tables_loaded():
+            self._cancel_and_wait_worker()
+            self._kpis = defaults
+            self._measure_values = {}
+            self._measure_errors = {}
+            self._visual_kpis = {}
+            self._monthly_visual_series = {}
+            self._region_visual_series = {}
+            self._monthly_series = []
+            self._region_series = []
+            self._filter_context_error = ""
+            self._monthly_chart_message = self._large_data_refusal("Report view")
+            self._region_chart_message = self._large_data_refusal("Report view")
+            self._notice_silent_refusal("Report view")
             self.stateChanged.emit()
             return
 
@@ -15111,6 +15546,9 @@ class StudioController(QObject):
         include_highlights: bool = False,
         value_well: str | None = None,
     ) -> list[dict[str, object]]:
+        if self._store_tables_loaded():
+            self._notice_silent_refusal("Report visual data")
+            return []
         page = self._active_page()
         if not page:
             return []
@@ -15222,6 +15660,9 @@ class StudioController(QObject):
                     ),
                     visual_axis_values=visual_axis_values,
                 )
+            except LargeTableError as exc:
+                self._set_status(str(exc))
+                return []
             except (MeasureError, KeyError, TypeError, ValueError):
                 return []
 
@@ -15464,7 +15905,7 @@ class StudioController(QObject):
                     self._source_refresh_included(source) if source else True
                 ),
                 "active": source_id == self._active_source_id,
-                "rowCount": len(parsed.rows) if parsed else 0,
+                "rowCount": parsed.row_count if parsed else 0,
                 "columnCount": len(parsed.headers) if parsed else 0,
                 "headers": list(parsed.headers) if parsed else [],
                 "columnTypes": dict(table.get("column_types", {})),
@@ -15512,7 +15953,7 @@ class StudioController(QObject):
                 "loadEnabled": load_enabled,
                 "includeInReportRefresh": self._source_refresh_included(source),
                 "active": source_id == self._active_source_id,
-                "rowCount": len(parsed.rows) if parsed else 0,
+                "rowCount": parsed.row_count if parsed else 0,
                 "columnCount": len(parsed.headers) if parsed else 0,
                 "headers": list(parsed.headers) if parsed else [],
                 "columnTypes": {},
@@ -15622,6 +16063,7 @@ class StudioController(QObject):
         if not selected_list:
             del self._cross_filters[visual_title]
 
+        self._report_view_refusal_for_user_action()
         self._refresh_report_async()
         self.stateChanged.emit()
 

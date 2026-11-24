@@ -1293,3 +1293,14 @@ def test_drop_view_refuses_a_real_table_even_with_the_reserved_prefix(tmp_path):
         assert store._conn.execute('SELECT count(*) FROM "__stm_real"').fetchone()[0] == 1
         with pytest.raises(StoreError, match="already exists"):
             store.create_view_ids("__stm_real", 'SELECT "__rn" FROM "t"')
+
+
+def test_duck_store_custom_temp_directory(tmp_path):
+    custom_temp = tmp_path / "custom_spill"
+    db_path = str(tmp_path / "custom_temp.duckdb")
+    with DuckStore(db_path, temp_directory=str(custom_temp)) as store:
+        assert custom_temp.is_dir()
+        res = store.execute("SELECT current_setting('temp_directory')")
+        setting_val = res[0][0]
+        assert os.path.realpath(setting_val) == os.path.realpath(str(custom_temp))
+

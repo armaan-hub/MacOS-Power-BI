@@ -19,6 +19,7 @@ from contextlib import contextmanager
 from typing import Any, Iterator
 
 from analytics_studio.file_import import ImportCandidate
+from analytics_studio.large_table_error import LargeTableError
 
 _DEFAULT_WHAT = "This feature"
 
@@ -31,10 +32,6 @@ LARGE_TABLE_REFUSAL_TEXT = (
     "work everywhere; large tables support the data grid, sort, filter, column "
     "statistics and export. Other features arrive in a later release."
 )
-
-
-class LargeTableError(ValueError):
-    """Raised when code tries to read the rows of a store-backed table."""
 
 
 def large_table_message(what: str) -> str:
