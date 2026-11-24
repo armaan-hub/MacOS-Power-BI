@@ -322,3 +322,125 @@ def test_hidden_rn_column_is_skipped(store):
     _make(store, "t", [("a", "text")], [("x",)])
     res = st.compute_table_stats(_RnListingStore(store), "t", ["text"])
     assert [c.name for c in res.columns] == ["a"]
+
+
+# ---------------- Review Finding Repro Tests (Failing First) ----------------
+
+def test_s1_text_column_uses_exact_count_distinct(store, monkeypatch):
+    """S1: text column uses exact count(DISTINCT) so distinct_approx matches exact, and approx_count_distinct not in SQL."""
+    # Build 5000 rows where exactly 4500 are distinct
+    rows = [(f"val_{i}",) for i in range(4500)] + [(f"val_{i % 4500}",) for i in range(500)]
+    _make(store, "t_s1", [("txt", "text")], rows)
+
+    executed_sqls = []
+    orig_execute = store.execute
+    def spy_execute(sql, params=()):
+        executed_sqls.append(sql)
+        return orig_execute(sql, params)
+    monkeypatch.setattr(store, "execute", spy_execute)
+
+    res = st.compute_table_stats(store, "t_s1", ["text"])
+    col = res.columns[0]
+    assert col.distinct_approx == 4500
+
+    # Ensure SQL contains count(DISTINCT "txt") and NOT approx_count_distinct
+    assert any('count(DISTINCT "txt")' in sql for sql in executed_sqls)
+    assert not any('approx_count_distinct' in sql for sql in executed_sqls)
+
+
+def test_s1_non_text_column_keeps_approx_count_distinct(store, monkeypatch):
+    """S1: non-text columns keep approx_count_distinct."""
+    _make(store, "t_num", [("num", "whole")], [(1,), (2,)])
+    executed_sqls = []
+    orig_execute = store.execute
+    def spy_execute(sql, params=()):
+        executed_sqls.append(sql)
+        return orig_execute(sql, params)
+    monkeypatch.setattr(store, "execute", spy_execute)
+
+    res = st.compute_table_stats(store, "t_num", ["whole_number"])
+    assert res.rows == 2
+    assert any('approx_count_distinct' in sql for sql in executed_sqls)
+    assert not any('count(DISTINCT' in sql for sql in executed_sqls)
+
+
+def test_s2_zero_rows_no_table_warnings_even_with_101_columns(store):
+    """S2: 0-row table must produce no table-level warnings even with 101 columns."""
+    _make(store, "wide_0", [(f"c{i}", "text") for i in range(101)])
+    res = st.compute_table_stats(store, "wide_0", ["text"] * 101)
+    assert res.rows == 0
+    assert len(res.columns) == 101
+    assert res.warnings == ()
+
+
+def test_s3_size_warning_divisor_1024_not_1000(store, monkeypatch):
+    """S3: size warning must use 1024**3 divisor and say 'GB'."""
+    # Pick byte count where 1024**3 and 1000**3 format differently:
+    # 2.5 * 1024**3 = 2,684,354,560 bytes.
+    # 2684354560 / 1024**3 = 2.5 GB.
+    # 2684354560 / 1000**3 = 2.684... = 2.7 GB.
+    b = int(2.5 * 1024**3)
+    _make(store, "t_size", [("a", "whole")], [(1,)])
+    monkeypatch.setattr(st, "_LARGE_TABLE_BYTES", 100)
+    monkeypatch.setattr(st, "_EIGHT_BYTE_LABELS", ())
+    # Create a table whose sum(approx_bytes) is b
+    class FakeStore:
+        def columns(self, t): return [("c", "fixed")]
+        def row_count(self, t): return b // 16
+        def execute(self, sql, params=()): return [(0, 0, 1, 0, 0.0, 0)]
+    monkeypatch.setattr(st, "_FIXED_BYTES", 16)
+    res = st.compute_table_stats(FakeStore(), "fake", ["fixed"])
+    assert res.approx_bytes == (b // 16) * 16
+    expected_gb = ((b // 16) * 16) / (1024**3)
+    wrong_gb = ((b // 16) * 16) / (1000**3)
+    assert f"{expected_gb:.1f} GB" != f"{wrong_gb:.1f} GB"
+    assert any(f"{expected_gb:.1f} GB" in w for w in res.warnings)
+
+
+def test_s4_text_byte_size_uses_strlen_not_octet_length_encode(store, monkeypatch):
+    """S4: Text byte size uses strlen instead of octet_length(encode())."""
+    _make(store, "t_s4", [("s", "text")], [("é",), ("日本",), ("a\x00b",)])
+    executed_sqls = []
+    orig_execute = store.execute
+    def spy_execute(sql, params=()):
+        executed_sqls.append(sql)
+        return orig_execute(sql, params)
+    monkeypatch.setattr(store, "execute", spy_execute)
+
+    res = st.compute_table_stats(store, "t_s4", ["text"])
+    col = res.columns[0]
+    # "é": 2 bytes, "日本": 6 bytes, "a\x00b": 3 bytes -> total = 11
+    assert col.approx_bytes == 11
+    assert any('strlen("s")' in sql for sql in executed_sqls)
+    assert not any('octet_length' in sql for sql in executed_sqls)
+    assert not any('encode' in sql for sql in executed_sqls)
+
+
+def test_s5_unique_warning_requires_both_label_and_stored_type_text(store, monkeypatch):
+    """S5: unique-text warning needs BOTH label 'text' and stored_type 'text'."""
+    monkeypatch.setattr(st, "_UNIQUE_MIN_ROWS", 10)
+    # Case 1: stored_type text, but label whole_number
+    _make(store, "t_u1", [("c", "text")], [(f"v{i}",) for i in range(20)])
+    res1 = st.compute_table_stats(store, "t_u1", ["whole_number"])
+    assert not any("mostly unique text" in w for w in res1.columns[0].warnings)
+
+    # Case 2: label text, but stored_type whole
+    _make(store, "t_u2", [("c", "whole")], [(i,) for i in range(20)])
+    res2 = st.compute_table_stats(store, "t_u2", ["text"])
+    assert not any("mostly unique text" in w for w in res2.columns[0].warnings)
+
+
+def test_s5_long_text_warning_requires_stored_type_text(store, monkeypatch):
+    """S5: long text warning needs stored_type text."""
+    monkeypatch.setattr(st, "_LONG_TEXT_CHARS", 5)
+    _make(store, "t_lt", [("c", "whole")], [(1000000,)])
+    res = st.compute_table_stats(store, "t_lt", ["text"])
+    assert not any("characters long" in w for w in res.columns[0].warnings)
+
+
+def test_s5_non_text_columns_report_empty_count_zero(store):
+    """S5: non-text columns report empty_count 0 even if stored type is text-like/fallback."""
+    _make(store, "t_emp", [("n", "whole")], [(1,), (None,)])
+    res = st.compute_table_stats(store, "t_emp", ["whole_number"])
+    assert res.columns[0].empty_count == 0
+

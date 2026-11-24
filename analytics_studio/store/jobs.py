@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import threading
-from typing import Callable, Generic, Optional, TypeVar
+from typing import Any, Callable, Generic, Optional, TypeVar
 
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
 
@@ -59,9 +59,15 @@ class StoreJob(QRunnable, Generic[T]):
         self.signals = StoreJobSignals()
         self._cm: Optional[object] = None
         self._cancel_event: Optional[threading.Event] = None
+        self._lock = threading.Lock()
+        self._running = False
+        self._started = False
 
     def start(self, pool: QThreadPool) -> None:
         """UI thread entry point. Marks store busy BEFORE submitting to the thread pool."""
+        with self._lock:
+            self._running = True
+            self._started = False
         cm = self.project_store.job()
         cancel_evt = cm.__enter__()
         self._cm = cm
@@ -71,16 +77,41 @@ class StoreJob(QRunnable, Generic[T]):
         except Exception:
             self._cm = None
             self._cancel_event = None
+            with self._lock:
+                self._running = False
             cm.__exit__(None, None, None)
             raise
 
     def cancel(self) -> None:
-        """Signal cancellation to the project store."""
+        """Signal cancellation to the project store if this job is currently running."""
+        with self._lock:
+            if not self._running:
+                return
         self.project_store.request_cancel()
+
+    def release_if_not_started(self) -> None:
+        """Release the store's busy context if run() has not yet begun. Idempotent and thread-safe."""
+        cm_to_exit = None
+        with self._lock:
+            if not self._started and self._cm is not None:
+                cm_to_exit = self._cm
+                self._cm = None
+                self._cancel_event = None
+                self._running = False
+        if cm_to_exit is not None:
+            try:
+                cm_to_exit.__exit__(None, None, None)
+            except Exception:
+                logger.exception("Error exiting ProjectStore.job context in release_if_not_started")
 
     def run(self) -> None:
         """Worker thread entry point."""
-        store = self.project_store.store
+        with self._lock:
+            if self._cm is None:
+                # Already released before start (e.g. via release_if_not_started)
+                return
+            self._started = True
+
         cancel_evt = self._cancel_event
         if cancel_evt is None:
             cancel_evt = self.project_store.cancel_event
@@ -91,10 +122,13 @@ class StoreJob(QRunnable, Generic[T]):
         outcome_signal: Optional[Callable[[], None]] = None
 
         try:
+            store = self.project_store.store
             result = self.fn(store, cancel_evt, progress_callback)
             outcome_signal = lambda: self.signals.finished.emit(result)
         except ImportCancelledError:
             outcome_signal = lambda: self.signals.canceled.emit()
+        except (KeyboardInterrupt, SystemExit):
+            outcome_signal = lambda: self.signals.failed.emit("The job was interrupted.")
         except Exception as exc:
             if cancel_evt.is_set():
                 outcome_signal = lambda: self.signals.canceled.emit()
@@ -107,6 +141,9 @@ class StoreJob(QRunnable, Generic[T]):
                 logger.exception("Unexpected error in StoreJob %r", self.title)
                 outcome_signal = lambda: self.signals.failed.emit(msg)
         finally:
+            with self._lock:
+                self._running = False
+
             cm = self._cm
             self._cm = None
             self._cancel_event = None
@@ -131,7 +168,7 @@ class StoreJob(QRunnable, Generic[T]):
 class ProgressDialogBinder(QObject):
     """Binds a modal QProgressDialog to a StoreJob lifecycle."""
 
-    def __init__(self, job: StoreJob, dialog: any, parent: Optional[QObject] = None) -> None:
+    def __init__(self, job: StoreJob, dialog: Any, parent: Optional[QObject] = None) -> None:
         super().__init__(parent)
         self.job = job
         self.dialog = dialog
@@ -139,7 +176,14 @@ class ProgressDialogBinder(QObject):
             dialog.setWindowTitle(job.title)
         dialog.canceled.connect(job.cancel)
         job.signals.progress.connect(self._on_progress)
-        job.signals.done.connect(dialog.close)
+        job.signals.done.connect(self._on_done)
+
+    def _on_done(self) -> None:
+        try:
+            self.dialog.canceled.disconnect(self.job.cancel)
+        except Exception:
+            pass
+        self.dialog.close()
 
     def _on_progress(self, message: str, done: int, total: int) -> None:
         if message:

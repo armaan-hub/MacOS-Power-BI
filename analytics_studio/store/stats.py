@@ -34,7 +34,7 @@ class ColumnStat:
     rows: int
     null_count: int
     empty_count: int
-    distinct_approx: int
+    distinct_approx: int  # exact for text columns, approximate otherwise
     max_chars: int
     avg_chars: float
     approx_bytes: int
@@ -62,22 +62,28 @@ def _label_for(index: int, name: str, column_types) -> str:
     return label if label else "text"
 
 
-def _column_sql(table: str, name: str, stored_type: str) -> str:
+def _column_sql(table: str, name: str, stored_type: str, label: str = "text") -> str:
     q = _quote(name)
     if stored_type == "text":
         empty_part = f"COUNT(*) FILTER (WHERE {q} = ''), "
     else:
         empty_part = "0, "  # '' is not a valid non-text value, never compare
+
+    if label == "text" and stored_type == "text":
+        distinct_part = f"count(DISTINCT {q}), "
+    else:
+        distinct_part = f"approx_count_distinct({q}), "
+
     base = (
         f"COUNT(*) FILTER (WHERE {q} IS NULL), "
         f"{empty_part}"
-        f"approx_count_distinct({q}), "
+        f"{distinct_part}"
     )
     if stored_type == "text":
         extra = (
             f"COALESCE(MAX(length({q})), 0), "
             f"COALESCE(AVG(length({q})), 0), "
-            f"COALESCE(SUM(octet_length(encode({q}))), 0)"
+            f"COALESCE(SUM(strlen({q})), 0)"
         )
     else:
         extra = "0, 0.0, 0"
@@ -128,7 +134,8 @@ def compute_table_stats(store, table: str, column_types, *,
         if progress is not None:
             progress(f"Measuring column {i + 1} of {n}: {name}")
 
-        result = store.execute(_column_sql(table, name, stored_type), [])
+        label = _label_for(i, name, column_types)
+        result = store.execute(_column_sql(table, name, stored_type, label), [])
         null_count, empty_count, distinct, max_chars, avg_chars, octets = result[0]
         if stored_type != "text":
             empty_count = 0
@@ -149,7 +156,6 @@ def compute_table_stats(store, table: str, column_types, *,
         else:
             approx_bytes = 0
 
-        label = _label_for(i, name, column_types)
         stats.append(ColumnStat(
             name=name,
             label=label,
@@ -167,12 +173,12 @@ def compute_table_stats(store, table: str, column_types, *,
 
     total_bytes = sum(s.approx_bytes for s in stats)
     table_warnings: list[str] = []
-    if n > _WIDE_COLUMNS:
+    if rows > 0 and n > _WIDE_COLUMNS:
         table_warnings.append(
             f"The table has {n} columns. Wide tables use much more memory; "
             f"keep only the columns you need."
         )
-    if total_bytes >= _LARGE_TABLE_BYTES:
+    if rows > 0 and total_bytes >= _LARGE_TABLE_BYTES:
         gb = total_bytes / (1024 ** 3)
         table_warnings.append(
             f"The table needs about {gb:.1f} GB in the store. "
