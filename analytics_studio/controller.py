@@ -7588,17 +7588,38 @@ class StudioController(QObject):
                     old_store_to_close.close()
                 except Exception:
                     pass
-            self._project_store = opened_store
-            # Drop unreferenced generations
-            store_tables = [
-                s["store"]["table"]
-                for s in sources
-                if s.get("store") and "table" in s["store"]
+            store_source_ids = [str(s["id"]) for s in sources if s.get("store")]
+            validated_store_ids = [
+                source_id for source_id in store_source_ids
+                if isinstance(loaded_candidates.get(source_id), StoreCandidate)
             ]
-            try:
-                self._project_store.drop_unreferenced(keep=store_tables)
-            except Exception as exc:
-                logger.warning("Could not drop unreferenced store tables: %s", exc)
+            if not validated_store_ids and reopened_same_store:
+                # Same project re-opened: this window already held the file, keep it live
+                # (nothing is dropped, no store source validated).
+                self._project_store = opened_store
+            elif not validated_store_ids:
+                # No store source validated: this window must not keep the data file locked.
+                try:
+                    opened_store.shutdown()
+                except Exception:
+                    pass
+                try:
+                    opened_store.close()
+                except Exception:
+                    pass
+                self._project_store = None
+            else:
+                self._project_store = opened_store
+                # Drop unreferenced generations only when EVERY store source validated;
+                # otherwise a table that a failed source names would be lost for good.
+                if len(validated_store_ids) == len(store_source_ids):
+                    store_tables = [
+                        s["store"]["table"] for s in sources if s.get("store")
+                    ]
+                    try:
+                        self._project_store.drop_unreferenced(keep=store_tables)
+                    except Exception as exc:
+                        logger.warning("Could not drop unreferenced store tables: %s", exc)
         else:
             self._close_project_store()
 
@@ -13927,8 +13948,18 @@ class StudioController(QObject):
                 "",
             )
             suffix = f" · {notice}" if notice else ""
+            skipped_store_names = [
+                str(source.get("name", source.get("id", "")))
+                for source in self._project.get("data_sources", [])
+                if source.get("store")
+            ]
+            skipped_note = (
+                f" Large-data tables are skipped: {', '.join(skipped_store_names)}."
+                if skipped_store_names
+                else ""
+            )
             self._set_status(
-                f"Refreshed all supported linked sources and dependent queries{suffix}"
+                f"Refreshed all supported linked sources and dependent queries{suffix}{skipped_note}"
             )
         else:
             refreshed_active = refreshed.get(self._active_source_id or "")
@@ -15272,12 +15303,15 @@ class StudioController(QObject):
                         self._set_status("Save canceled.")
                         return False
                     if isinstance(exc, (OSError, StoreError)):
+                        failure_text = f"Could not save the large-data table: {exc}"
+                        self._set_status(failure_text)
                         QMessageBox.critical(
                             None,
                             "Could not save the large-data table",
-                            f"Could not save the large-data table: {exc}",
+                            failure_text,
                         )
                     else:
+                        self._set_status(f"Could not save project: {exc}")
                         QMessageBox.critical(None, "Could not save project", str(exc))
                     return False
                 finally:
