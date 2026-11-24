@@ -3105,3 +3105,11 @@ A project with a large-data table now saves and opens: Save As copies the DuckDB
 Built by Antigravity (task 13), then fixed in three rounds after Team-Thinker reviews (13b, 13c, 13d, by the Sonnet fixer after Antigravity's quota ended). The reviews found and fixed: a copy failure reported as "Save canceled."; the old store left open when a new project had no usable store; refresh paths that would parse a huge file for a large-data source; a project JSON naming a missing table that made the open delete the real table (permanent data loss); and a failed or canceled Save As deleting an existing project's data file. Every fix has a test that fails without it. Gate on 16c55d7: 43,455 passed, 1 skipped, 27 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
 
 Open: real-app 300,000-row test (15), summary dialog (14), re-import and compaction (16), per-table refusal (17); lows recorded in HANDOFF.md.
+
+## 2026-11-25 Stage B4b tasks 14, 15 and 15b: summary dialog, 300,000-row real-app test, filter parity (merged)
+
+A large-data table now has a summary dialog (one row per column with blank cells, distinct values, longest text and approximate size; amber rows for warned columns; opened automatically after an import only when the statistics carry a warning, and from a "Table summary" button that shows only while a large table is loaded). A real-app test imports 300,000 rows x 12 columns through the app: import 1.6 to 1.8 s, sort 0.08 s, filter 0.02 s, export 1.0 s, save and reopen well under 1 s; peak memory growth 341 to 457 MB. A 28-test differential proves the large-data grid filters and sorts exactly like the ordinary grid; it found one real difference at import (the ordinary importer drops trailing spaces and collapses case variants, the store importer keeps cells as read), recorded as an open decision. Team-Thinker reviewed task 14 (PASS with small fixes, done in 14b). The gate needed a rerun because one timing test was sized for the old, slower engine; its workload is now 160,000 rows.
+
+Gate on 7ba2509: 43,529 passed, 1 skipped, 29 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
+
+Open: task 16 (reload of a large table; compaction and worker sort/filter deferred with a measured trigger), task 17 (per-table refusal), the import load-rules decision.
