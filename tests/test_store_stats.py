@@ -444,3 +444,42 @@ def test_s5_non_text_columns_report_empty_count_zero(store):
     res = st.compute_table_stats(store, "t_emp", ["whole_number"])
     assert res.columns[0].empty_count == 0
 
+
+
+# ---------------- Round 3 (distinct clamp, exact-count gate) ----------------
+
+def test_r3_non_text_distinct_clamped_to_rows(store, monkeypatch):
+    _make(store, "t_cl", [("n", "whole")], [(1,), (2,)])
+    orig = store.execute
+
+    def spy(sql, params=()):
+        rows = orig(sql, params)
+        if "approx_count_distinct" in sql:
+            null_count, empty_count, _distinct, *rest = rows[0]
+            return [(null_count, empty_count, 999_999, *rest)]
+        return rows
+
+    monkeypatch.setattr(store, "execute", spy)
+    res = st.compute_table_stats(store, "t_cl", ["whole_number"])
+    assert res.rows == 2
+    assert res.columns[0].distinct_approx == 2
+
+
+def test_r3_exact_count_needs_text_label_and_text_stored_type(store, monkeypatch):
+    _make(store, "t_x", [("a", "text"), ("b", "whole"), ("c", "text")],
+          [("p", 1, "u"), ("q", 2, "v")])
+    sqls = []
+    orig = store.execute
+
+    def spy(sql, params=()):
+        sqls.append(sql)
+        return orig(sql, params)
+
+    monkeypatch.setattr(store, "execute", spy)
+    st.compute_table_stats(store, "t_x", ["decimal_number", "text", "text"])
+    by_col = {}
+    for q in ("a", "b", "c"):
+        by_col[q] = next(s for s in sqls if f'"{q}"' in s)
+    assert "approx_count_distinct" in by_col["a"] and "count(DISTINCT" not in by_col["a"]  # text stored, number label
+    assert "approx_count_distinct" in by_col["b"] and "count(DISTINCT" not in by_col["b"]  # number stored, text label
+    assert 'count(DISTINCT "c")' in by_col["c"] and "approx_count_distinct" not in by_col["c"]

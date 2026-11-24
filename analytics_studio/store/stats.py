@@ -70,6 +70,7 @@ def _column_sql(table: str, name: str, stored_type: str, label: str = "text") ->
         empty_part = "0, "  # '' is not a valid non-text value, never compare
 
     if label == "text" and stored_type == "text":
+        # memory: about 130 bytes per distinct text value; a 30M-row unique text column peaked at 4 GB in review
         distinct_part = f"count(DISTINCT {q}), "
     else:
         distinct_part = f"approx_count_distinct({q}), "

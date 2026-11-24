@@ -675,3 +675,437 @@ def test_j4_base_exception_keyboard_interrupt_system_exit(qapp, project_store):
         assert dones == [1]
         assert not project_store.busy
 
+
+
+# ---------------- Round 3: single state variable (N1-N4) ----------------
+
+class _CmSpy:
+    """Wraps the real job() context manager and records __exit__ calls."""
+
+    def __init__(self, real, raise_on_exit=False):
+        self.real = real
+        self.exits = []
+        self.raise_on_exit = raise_on_exit
+
+    def __enter__(self):
+        return self.real.__enter__()
+
+    def __exit__(self, *args):
+        self.exits.append(args)
+        result = self.real.__exit__(*args)
+        if self.raise_on_exit:
+            raise RuntimeError("exit boom")
+        return result
+
+
+def _install_spy(monkeypatch, raise_on_exit=False):
+    """Make ProjectStore.job return spies; returns the list that keeps them alive."""
+    spies = []
+    orig = ProjectStore.job
+
+    def spy_job(self):
+        spy = _CmSpy(orig(self), raise_on_exit=raise_on_exit)
+        spies.append(spy)
+        return spy
+
+    monkeypatch.setattr(ProjectStore, "job", spy_job)
+    return spies
+
+
+class _NoPool:
+    """A pool that accepts the job without running it; tests call job.run() themselves."""
+
+    def start(self, runnable):
+        pass
+
+
+class _Sig:
+    def __init__(self, log, name, raises=False):
+        self.log, self.name, self.raises = log, name, raises
+
+    def emit(self, *args):
+        self.log.append(self.name)
+        if self.raises:
+            raise RuntimeError(f"{self.name} emit boom")
+
+
+class _FakeSignals:
+    def __init__(self, raising=()):
+        self.log = []
+        for n in ("progress", "finished", "failed", "canceled", "done"):
+            setattr(self, n, _Sig(self.log, n, raises=n in raising))
+
+
+def _record(job):
+    events = []
+    job.signals.finished.connect(lambda v: events.append(("finished", v)))
+    job.signals.failed.connect(lambda m: events.append(("failed", m)))
+    job.signals.canceled.connect(lambda: events.append(("canceled",)))
+    job.signals.done.connect(lambda: events.append(("done",)))
+    return events
+
+
+def test_n1_refused_start_then_cancel_does_not_cancel_running_job(qapp, project_store):
+    pool = QThreadPool()
+    gate = threading.Event()
+    seen = []
+    running = StoreJob(project_store, lambda s, e, p: (gate.wait(3), seen.append(e.is_set())))
+    running.start(pool)
+
+    dlg = QProgressDialog()
+    refused = StoreJob(project_store, lambda s, e, p: 1, title="second")
+    binder = ProgressDialogBinder(refused, dlg)
+    assert binder is not None
+    with pytest.raises(StoreError):
+        refused.start(pool)
+    dlg.canceled.emit()  # user clicks Cancel on the dialog of the job that never started
+    refused.cancel()
+    assert not project_store.cancel_event.is_set()
+    gate.set()
+    assert pool.waitForDone(3000)
+    assert seen == [False]
+
+    # The refused job is unchanged, so it can start later.
+    out = []
+    refused.signals.finished.connect(out.append)
+    refused.start(pool)
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 2.0, condition=lambda: out == [1])
+    assert out == [1]
+
+
+def test_n1_cancel_acts_only_while_queued_or_running(qapp, project_store):
+    pool = QThreadPool()
+    job = StoreJob(project_store, lambda s, e, p: 1)
+    job.cancel()  # never started
+    assert not project_store.cancel_event.is_set()
+
+    job.start(pool)
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 1.0)
+
+    gate = threading.Event()
+    seen = []
+    other = StoreJob(project_store, lambda s, e, p: (gate.wait(3), seen.append(e.is_set())))
+    other.start(pool)
+    job.cancel()  # finished job must not cancel the other job's store
+    assert not project_store.cancel_event.is_set()
+    gate.set()
+    assert pool.waitForDone(3000)
+    assert seen == [False]
+
+
+def test_n1_pool_start_failure_restores_state(qapp, project_store):
+    class BadPool:
+        def start(self, runnable):
+            raise RuntimeError("no pool")
+
+    job = StoreJob(project_store, lambda s, e, p: 1)
+    with pytest.raises(RuntimeError, match="no pool"):
+        job.start(BadPool())
+    assert not project_store.busy
+    job.cancel()  # state is back to "not started": must not cancel anything
+    assert not project_store.cancel_event.is_set()
+    out = []
+    job.signals.finished.connect(out.append)
+    pool = QThreadPool()
+    job.start(pool)  # the job object can start again
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 2.0, condition=lambda: out == [1])
+    assert out == [1]
+
+
+def test_n2_second_start_on_running_job_raises_and_keeps_busy(qapp, project_store):
+    pool = QThreadPool()
+    gate = threading.Event()
+    ran = []
+
+    def work(s, e, p):
+        ran.append(1)
+        gate.wait(3)
+        return "ok"
+
+    job = StoreJob(project_store, work)
+    events = _record(job)
+    job.start(pool)
+    deadline = time.time() + 2
+    while not ran and time.time() < deadline:
+        time.sleep(0.005)
+    assert ran
+
+    with pytest.raises(StoreError, match="This job was already started."):
+        job.start(pool)
+    job.release_if_not_started()
+    assert project_store.busy  # first fn still owns the store
+    with pytest.raises(StoreError):
+        with project_store.job():
+            pass
+    gate.set()
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 2.0, condition=lambda: ("done",) in events)
+    assert not project_store.busy
+    assert events == [("finished", "ok"), ("done",)]
+
+    with pytest.raises(StoreError, match="This job was already started."):
+        job.start(pool)  # single-use: also refused after it finished
+    assert not project_store.busy
+
+
+def test_n2_second_start_on_queued_job_raises(qapp, project_store, monkeypatch):
+    spies = _install_spy(monkeypatch)
+    job = StoreJob(project_store, lambda s, e, p: 1)
+    job.start(_NoPool())
+    with pytest.raises(StoreError, match="This job was already started."):
+        job.start(_NoPool())
+    assert len(spies) == 1  # refused before a second context was even created
+    assert project_store.busy
+    job.release_if_not_started()
+    assert not project_store.busy
+
+
+def test_n3_release_emits_canceled_then_done_once_and_run_is_noop(qapp, project_store, monkeypatch):
+    spies = _install_spy(monkeypatch)
+    calls = []
+    job = StoreJob(project_store, lambda s, e, p: calls.append(1))
+    events = []
+    threads = []
+    job.signals.canceled.connect(lambda: (events.append("canceled"), threads.append(threading.get_ident())))
+    job.signals.done.connect(lambda: (events.append("done"), threads.append(threading.get_ident())))
+    job.signals.finished.connect(lambda v: events.append("finished"))
+    job.signals.failed.connect(lambda m: events.append("failed"))
+    job.start(_NoPool())
+    assert project_store.busy
+
+    job.release_if_not_started()
+    job.release_if_not_started()  # idempotent
+    spy = spies[0]
+    assert len(spy.exits) == 1
+    assert not project_store.busy
+    assert events == ["canceled", "done"]
+    assert threads == [threading.get_ident()] * 2
+
+    job.run()  # the pool still runs the dropped job later: nothing happens
+    _drain_events(qapp, 0.2)
+    assert calls == []
+    assert events == ["canceled", "done"]
+    assert len(spy.exits) == 1
+    assert not project_store.busy
+    with pytest.raises(StoreError, match="This job was already started."):
+        job.start(_NoPool())
+
+
+def test_n3_release_ignored_unless_queued(qapp, project_store, monkeypatch):
+    spies = _install_spy(monkeypatch)
+    pool = QThreadPool()
+    gate = threading.Event()
+    entered = threading.Event()
+
+    def work(s, e, p):
+        entered.set()
+        gate.wait(3)
+        return 5
+
+    job = StoreJob(project_store, work)
+    events = _record(job)
+    job.release_if_not_started()  # NEW: nothing to release
+    assert events == []
+    job.start(pool)
+    assert entered.wait(2)
+    job.release_if_not_started()  # RUNNING: must not release
+    assert project_store.busy
+    assert spies[0].exits == []
+    gate.set()
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 2.0, condition=lambda: ("done",) in events)
+    job.release_if_not_started()  # FINISHED: nothing more
+    _drain_events(qapp, 0.2)
+    assert events == [("finished", 5), ("done",)]
+    assert len(spies[0].exits) == 1
+
+
+def test_n3_release_closes_bound_dialog_via_done(qapp, project_store):
+    dlg = QProgressDialog()
+    dlg.show()
+    job = StoreJob(project_store, lambda s, e, p: 1, title="queued")
+    binder = ProgressDialogBinder(job, dlg)
+    assert binder is not None
+    job.start(_NoPool())
+    job.release_if_not_started()
+    _drain_events(qapp, 0.3)
+    assert not dlg.isVisible()
+    assert not project_store.busy
+    assert not project_store.cancel_event.is_set()
+
+
+def test_n3_release_vs_run_race_200_rounds(qapp, project_store):
+    pool = QThreadPool()
+    pool.setMaxThreadCount(1)
+    for i in range(200):
+        ran = []
+        outcome = []
+        job = StoreJob(project_store, lambda s, e, p, ran=ran: ran.append(1))
+        job.signals.canceled.connect(lambda outcome=outcome: outcome.append("canceled"))
+        job.signals.finished.connect(lambda v, outcome=outcome: outcome.append("finished"))
+        job.signals.done.connect(lambda outcome=outcome: outcome.append("done"))
+        job.start(pool)
+        t = threading.Thread(target=job.release_if_not_started)
+        t.start()
+        t.join()
+        assert pool.waitForDone(3000)
+        _drain_events(qapp, 1.0, condition=lambda: "done" in outcome)
+        assert not project_store.busy, f"round {i}"
+        assert len(ran) <= 1
+        assert outcome.count("done") == 1, f"round {i}: {outcome}"
+        if ran:
+            assert outcome == ["finished", "done"], f"round {i}: {outcome}"
+        else:
+            assert outcome == ["canceled", "done"], f"round {i}: {outcome}"
+
+
+def test_j3_store_access_failure_emits_failed_and_done(qapp, project_store, monkeypatch):
+    def boom(self):
+        raise RuntimeError("store gone")
+
+    monkeypatch.setattr(ProjectStore, "store", property(boom))
+    job = StoreJob(project_store, lambda s, e, p: 1)
+    events = _record(job)
+    job.start(_NoPool())
+    job.run()
+    _drain_events(qapp, 0.2)
+    assert events == [("failed", "Unexpected error: RuntimeError: store gone"), ("done",)]
+    assert not project_store.busy
+
+
+def test_guard_context_exit_failure_run_path(qapp, project_store, monkeypatch):
+    spies = _install_spy(monkeypatch, raise_on_exit=True)
+    job = StoreJob(project_store, lambda s, e, p: 9)
+    events = _record(job)
+    job.start(_NoPool())
+    job.run()  # must not raise
+    _drain_events(qapp, 0.2)
+    assert len(spies[0].exits) == 1
+    assert events == [("finished", 9), ("done",)]
+    assert not project_store.busy
+
+
+def test_guard_context_exit_failure_release_path(qapp, project_store, monkeypatch):
+    spies = _install_spy(monkeypatch, raise_on_exit=True)
+    job = StoreJob(project_store, lambda s, e, p: 9)
+    events = _record(job)
+    job.start(_NoPool())
+    job.release_if_not_started()  # must not raise
+    assert len(spies[0].exits) == 1
+    assert events == [("canceled",), ("done",)]
+    assert not project_store.busy
+
+
+def test_guard_outcome_emit_failure_still_emits_done_once(qapp, project_store):
+    job = StoreJob(project_store, lambda s, e, p: 9)
+    job.signals = _FakeSignals(raising=("finished",))
+    job.start(_NoPool())
+    job.run()
+    assert job.signals.log == ["finished", "done"]
+    assert not project_store.busy
+
+
+def test_guard_outcome_emit_failure_on_release(qapp, project_store):
+    job = StoreJob(project_store, lambda s, e, p: 9)
+    job.signals = _FakeSignals(raising=("canceled",))
+    job.start(_NoPool())
+    job.release_if_not_started()
+    assert job.signals.log == ["canceled", "done"]
+    assert not project_store.busy
+
+
+def test_guard_done_emit_failure_does_not_propagate(qapp, project_store):
+    job = StoreJob(project_store, lambda s, e, p: 9)
+    job.signals = _FakeSignals(raising=("done",))
+    job.start(_NoPool())
+    job.run()
+    assert job.signals.log == ["finished", "done"]
+    assert not project_store.busy
+
+
+def test_guard_raising_slots_do_not_block_other_signals(qapp, project_store):
+    pool = QThreadPool()
+    job = StoreJob(project_store, lambda s, e, p: 3)
+    events = _record(job)
+
+    def bad(*args):
+        raise RuntimeError("slot boom")
+
+    job.signals.finished.connect(bad)
+    job.signals.done.connect(bad)
+    job.start(pool)
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 2.0, condition=lambda: ("done",) in events)
+    assert events == [("finished", 3), ("done",)]
+    assert not project_store.busy
+
+
+@pytest.mark.parametrize(
+    "exc, message",
+    [
+        (KeyboardInterrupt(), "The job was interrupted."),
+        (SystemExit(2), "The job was interrupted."),
+        (GeneratorExit(), "Unexpected error: GeneratorExit: "),
+        (type("Weird", (BaseException,), {})("w"), "Unexpected error: Weird: w"),
+    ],
+)
+def test_n4_any_base_exception_becomes_failed_and_is_not_reraised(qapp, project_store, exc, message):
+    def work(s, e, p):
+        raise exc
+
+    job = StoreJob(project_store, work)
+    events = _record(job)
+    job.start(_NoPool())
+    job.run()  # must not raise
+    _drain_events(qapp, 0.2)
+    assert events == [("failed", message), ("done",)]
+    assert not project_store.busy
+
+
+def test_n4_base_exception_in_pool_thread_keeps_pool_usable(qapp, project_store):
+    pool = QThreadPool()
+    events = []
+    job = StoreJob(project_store, lambda s, e, p: (_ for _ in ()).throw(GeneratorExit()))
+    job.signals.done.connect(lambda: events.append("done"))
+    job.start(pool)
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 2.0, condition=lambda: bool(events))
+    assert events == ["done"]
+    out = []
+    job2 = StoreJob(project_store, lambda s, e, p: 7)
+    job2.signals.finished.connect(out.append)
+    job2.start(pool)
+    assert pool.waitForDone(3000)
+    _drain_events(qapp, 2.0, condition=lambda: out == [7])
+    assert out == [7]
+
+
+def test_binder_disconnects_cancel_before_closing(qapp, project_store):
+    """done arriving while the job is still running (chained job) must not cancel through the closing dialog."""
+    pool = QThreadPool()
+    gate = threading.Event()
+    entered = threading.Event()
+    seen = []
+
+    def work(s, e, p):
+        entered.set()
+        gate.wait(3)
+        seen.append(e.is_set())
+        return "ok"
+
+    dlg = QProgressDialog()
+    dlg.show()
+    job = StoreJob(project_store, work, title="chained")
+    binder = ProgressDialogBinder(job, dlg)
+    assert binder is not None
+    job.start(pool)
+    assert entered.wait(2)
+    job.signals.done.emit()  # binder closes the dialog now, while the job is still RUNNING
+    assert not dlg.isVisible()
+    assert not project_store.cancel_event.is_set()
+    gate.set()
+    assert pool.waitForDone(3000)
+    assert seen == [False]

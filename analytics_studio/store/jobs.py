@@ -28,6 +28,7 @@ except ImportError:
         pass
 
 T = TypeVar("T")
+_NEW, _QUEUED, _RUNNING, _FINISHED = "new", "queued", "running", "finished"
 logger = logging.getLogger(__name__)
 
 
@@ -57,62 +58,92 @@ class StoreJob(QRunnable, Generic[T]):
         self.fn = fn
         self.title = title
         self.signals = StoreJobSignals()
-        self._cm: Optional[object] = None
+        self._cm: Optional[Any] = None
         self._cancel_event: Optional[threading.Event] = None
         self._lock = threading.Lock()
-        self._running = False
-        self._started = False
+        self._state = _NEW
 
     def start(self, pool: QThreadPool) -> None:
-        """UI thread entry point. Marks store busy BEFORE submitting to the thread pool."""
+        """UI thread entry point. Marks store busy BEFORE submitting to the thread pool.
+
+        A job object is single-use. No state changes until the store context was entered;
+        any failure leaves the job exactly as it was before the call.
+        """
         with self._lock:
-            self._running = True
-            self._started = False
+            if self._state != _NEW:
+                raise StoreError("This job was already started.")
         cm = self.project_store.job()
         cancel_evt = cm.__enter__()
-        self._cm = cm
-        self._cancel_event = cancel_evt
+        with self._lock:
+            if self._state != _NEW:
+                late = True
+            else:
+                late = False
+                self._cm = cm
+                self._cancel_event = cancel_evt
+                self._state = _QUEUED
+        if late:
+            cm.__exit__(None, None, None)
+            raise StoreError("This job was already started.")
         try:
             pool.start(self)
         except Exception:
-            self._cm = None
-            self._cancel_event = None
             with self._lock:
-                self._running = False
+                if self._state == _QUEUED and self._cm is cm:
+                    self._cm = None
+                    self._cancel_event = None
+                    self._state = _NEW
             cm.__exit__(None, None, None)
             raise
 
     def cancel(self) -> None:
-        """Signal cancellation to the project store if this job is currently running."""
+        """Signal cancellation to the project store, only while this job is queued or running."""
         with self._lock:
-            if not self._running:
+            if self._state not in (_QUEUED, _RUNNING):
                 return
         self.project_store.request_cancel()
 
     def release_if_not_started(self) -> None:
-        """Release the store's busy context if run() has not yet begun. Idempotent and thread-safe."""
-        cm_to_exit = None
+        """Release a queued job whose run() never began. Idempotent and thread-safe.
+
+        Emits canceled then done from the calling thread. A later run() returns at once.
+        """
         with self._lock:
-            if not self._started and self._cm is not None:
-                cm_to_exit = self._cm
-                self._cm = None
-                self._cancel_event = None
-                self._running = False
-        if cm_to_exit is not None:
+            if self._state != _QUEUED:
+                return
+            cm_to_exit = self._cm
+            self._cm = None
+            self._cancel_event = None
+            self._state = _FINISHED
+        self._finish(cm_to_exit, lambda: self.signals.canceled.emit())
+
+    def _finish(self, cm: Optional[Any], outcome_signal: Optional[Callable[[], None]]) -> None:
+        """Release the store context, emit the outcome, then emit done. Every step is guarded."""
+        if cm is not None:
             try:
-                cm_to_exit.__exit__(None, None, None)
+                cm.__exit__(None, None, None)
             except Exception:
-                logger.exception("Error exiting ProjectStore.job context in release_if_not_started")
+                logger.exception("Error exiting ProjectStore.job context")
+
+        if outcome_signal is not None:
+            try:
+                outcome_signal()
+            except Exception:
+                logger.exception("Error emitting StoreJob outcome signal")
+
+        try:
+            self.signals.done.emit()
+        except Exception:
+            logger.exception("Error emitting StoreJob done signal")
 
     def run(self) -> None:
         """Worker thread entry point."""
         with self._lock:
-            if self._cm is None:
-                # Already released before start (e.g. via release_if_not_started)
+            if self._state != _QUEUED:
+                # Never started, already released, or already finished.
                 return
-            self._started = True
-
-        cancel_evt = self._cancel_event
+            self._state = _RUNNING
+            cancel_evt = self._cancel_event
         if cancel_evt is None:
             cancel_evt = self.project_store.cancel_event
 
@@ -140,29 +171,18 @@ class StoreJob(QRunnable, Generic[T]):
                 msg = f"Unexpected error: {exc_type}: {exc}"
                 logger.exception("Unexpected error in StoreJob %r", self.title)
                 outcome_signal = lambda: self.signals.failed.emit(msg)
+        except BaseException as exc:  # GeneratorExit and other BaseException subclasses
+            exc_type = type(exc).__name__
+            msg = f"Unexpected error: {exc_type}: {exc}"
+            logger.error("Unexpected BaseException in StoreJob %r: %s", self.title, msg)
+            outcome_signal = lambda: self.signals.failed.emit(msg)
         finally:
             with self._lock:
-                self._running = False
-
-            cm = self._cm
-            self._cm = None
-            self._cancel_event = None
-            if cm is not None:
-                try:
-                    cm.__exit__(None, None, None)
-                except Exception:
-                    logger.exception("Error exiting ProjectStore.job context")
-
-            if outcome_signal is not None:
-                try:
-                    outcome_signal()
-                except Exception:
-                    logger.exception("Error emitting StoreJob outcome signal")
-
-            try:
-                self.signals.done.emit()
-            except Exception:
-                logger.exception("Error emitting StoreJob done signal")
+                self._state = _FINISHED
+                cm = self._cm
+                self._cm = None
+                self._cancel_event = None
+            self._finish(cm, outcome_signal)
 
 
 class ProgressDialogBinder(QObject):
