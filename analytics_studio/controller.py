@@ -2104,6 +2104,7 @@ class StudioController(QObject):
         self._large_import_path: Path | None = None
         self._large_import_project_store: Any | None = None
         self._large_import_created_store: bool = False
+        self._large_import_is_reload: bool = False
         self._app_data_dir: str | None = app_data_dir
         no_reap = os.environ.get("ANALYTICS_STUDIO_NO_REAP", "").strip().lower() in ("1", "true", "yes")
         if app_data_dir is not None or not no_reap:
@@ -8506,7 +8507,7 @@ class StudioController(QObject):
     def _on_large_import_finished(self, result: Any) -> None:
         path = self._large_import_path
         store = self._large_import_project_store
-        is_reload = getattr(self, "_large_import_is_reload", False)
+        is_reload = self._large_import_is_reload
         if path is not None and store is not None:
             if is_reload:
                 ok = self._commit_store_reload(path, result, store)
@@ -8519,7 +8520,7 @@ class StudioController(QObject):
         self._set_status(message)
 
     def _on_large_import_canceled(self) -> None:
-        if getattr(self, "_large_import_is_reload", False):
+        if self._large_import_is_reload:
             self._set_status("Reload canceled.")
         else:
             self._set_status("Import canceled.")
@@ -8977,6 +8978,7 @@ class StudioController(QObject):
                 QMessageBox.StandardButton.No,
             )
             if answer != QMessageBox.StandardButton.Yes:
+                self._set_status("Reload canceled.")
                 return False
 
         # Validate new table
@@ -8990,6 +8992,11 @@ class StudioController(QObject):
         except StoreError as exc:
             QMessageBox.critical(None, "Could not reload data", str(exc))
             return False
+
+        failed_text = (
+            "Could not load the reloaded table from the store. "
+            "The large-data table was not reloaded."
+        )
 
         new_candidate = StoreCandidate(
             result.kind,
@@ -9006,24 +9013,7 @@ class StudioController(QObject):
         )
         new_candidate.stats = result.stats
 
-        # Update table model via replace_data
-        if self._store_table_model is not None:
-            self._store_table_model.replace_data(
-                table_name=result.table,
-                headers=list(result.headers),
-                column_types=dict(result.model_types),
-                table_key=source_id,
-                row_count=result.row_count,
-            )
-
-        # Update in memory: candidates
-        self._active_store_candidate = new_candidate
-        self._loaded_candidates[source_id] = new_candidate
-        self._raw_candidates[source_id] = new_candidate
-        self._query_candidates[source_id] = new_candidate
-        self._headers = list(result.headers)
-
-        # Update source record in project
+        # Build the updated project first; nothing live changes until it validates.
         data_file = Path(project_store.path).name
         store_dict: dict[str, Any] = {
             "table": result.table,
@@ -9051,31 +9041,99 @@ class StudioController(QObject):
             "store": store_dict,
         }
 
-        existing_sources = list(self._project.get("data_sources", []))
-        updated_sources = []
-        for s in existing_sources:
-            if s.get("id") == source_id:
-                updated_sources.append({**s, **source_record})
-            else:
-                updated_sources.append(s)
-        self._project["data_sources"] = updated_sources
-
-        # Update table record in project
-        model = self._project.setdefault("model", {"tables": [], "relationships": []})
-        tables = list(model.get("tables", []))
-        for index, table in enumerate(tables):
+        next_project = deepcopy(self._project)
+        next_project["data_sources"] = [
+            {**s, **source_record} if s.get("id") == source_id else s
+            for s in next_project.get("data_sources", [])
+        ]
+        next_model = next_project.setdefault("model", {"tables": [], "relationships": []})
+        next_tables = list(next_model.get("tables", []))
+        for index, table in enumerate(next_tables):
             if table.get("id") == source_id or table.get("source_id") == source_id:
-                tables[index] = {
-                    **table,
-                    "column_types": dict(result.model_types),
-                }
+                next_tables[index] = {**table, "column_types": dict(result.model_types)}
                 break
-        model["tables"] = tables
+        next_model["tables"] = next_tables
 
-        self._source_warning = self._compose_source_warning()
-        self._dirty = True
-        self._refresh_model_view()
-        self._refresh_report()
+        try:
+            next_project = validate_project(next_project)
+        except (ProjectFileError, ValueError, TypeError) as exc:
+            logger.warning("Reloaded project did not validate: %s", exc)
+            self._set_status(failed_text)
+            return False
+
+        # Snapshot what the swap changes.
+        old_candidate = candidate
+        old_project = self._project
+        had_loaded = source_id in self._loaded_candidates
+        old_loaded = self._loaded_candidates.get(source_id)
+        had_raw = source_id in self._raw_candidates
+        old_raw = self._raw_candidates.get(source_id)
+        had_query = source_id in self._query_candidates
+        old_query = self._query_candidates.get(source_id)
+        old_headers_live = list(self._headers)
+        old_warning = self._source_warning
+        old_dirty = self._dirty
+        grid = self._store_table_model
+
+        # Switch the grid first; if it cannot show the new table, change nothing.
+        try:
+            grid_ok = True if grid is None else grid.replace_data(
+                table_name=result.table,
+                headers=list(result.headers),
+                column_types=dict(result.model_types),
+                table_key=source_id,
+                row_count=result.row_count,
+            )
+        except Exception as exc:
+            logger.warning("Could not show the reloaded table: %s", exc, exc_info=True)
+            grid_ok = False
+        if not grid_ok:
+            self._set_status(failed_text)
+            return False
+
+        try:
+            self._project = next_project
+            self._active_store_candidate = new_candidate
+            self._loaded_candidates[source_id] = new_candidate
+            self._raw_candidates[source_id] = new_candidate
+            self._query_candidates[source_id] = new_candidate
+            self._headers = list(result.headers)
+            self._source_warning = self._compose_source_warning()
+            self._dirty = True
+            self._refresh_model_view()
+            self._refresh_report()
+        except Exception as exc:
+            logger.warning("Reload could not be completed; restoring the old table: %s", exc, exc_info=True)
+            self._project = old_project
+            self._active_store_candidate = old_candidate
+            for mapping, had, old in (
+                (self._loaded_candidates, had_loaded, old_loaded),
+                (self._raw_candidates, had_raw, old_raw),
+                (self._query_candidates, had_query, old_query),
+            ):
+                if had:
+                    mapping[source_id] = old
+                else:
+                    mapping.pop(source_id, None)
+            self._headers = old_headers_live
+            self._source_warning = old_warning
+            self._dirty = old_dirty
+            try:
+                if grid is not None:
+                    grid.replace_data(
+                        table_name=old_candidate.store_table,
+                        headers=list(old_candidate.headers),
+                        column_types=dict(old_candidate.model_types),
+                        table_key=source_id,
+                        row_count=old_candidate.row_count,
+                    )
+                self._refresh_model_view()
+                self._refresh_report()
+            except Exception as restore_exc:
+                logger.warning("Could not refresh after restoring the old table: %s", restore_exc)
+            self._set_status(failed_text)
+            return False
+
         self._reset_silent_refusal_notice()
         self.stateChanged.emit()
         self._set_status(
@@ -9086,60 +9144,72 @@ class StudioController(QObject):
         return True
 
     def _columns_used_in_project(self, source_id: str, columns: list[str]) -> list[str]:
-        target_cols = set(columns)
+        """Return the removed columns the project still uses. Names compare without case."""
+        from analytics_studio.measures import parse_expression
+
+        target = {str(column).casefold(): str(column) for column in columns}
         used: set[str] = set()
         model = self._project.get("model", {})
 
-        # Check relationships
+        def mark(name: Any) -> None:
+            original = target.get(str(name or "").casefold())
+            if original is not None:
+                used.add(original)
+
+        # Relationships
         for rel in model.get("relationships", []):
             if not isinstance(rel, dict):
                 continue
-            from_t = rel.get("from_table_id")
-            to_t = rel.get("to_table_id")
-            from_c = rel.get("from_column")
-            to_c = rel.get("to_column")
-            if from_t == source_id and from_c in target_cols:
-                used.add(from_c)
-            if to_t == source_id and to_c in target_cols:
-                used.add(to_c)
+            if rel.get("from_table_id") == source_id:
+                mark(rel.get("from_column"))
+            if rel.get("to_table_id") == source_id:
+                mark(rel.get("to_column"))
 
-        # Check calculated columns
-        from analytics_studio.measures import parse_expression
+        source_table_name = next(
+            (
+                str(t.get("name") or "")
+                for t in model.get("tables", [])
+                if t.get("id") == source_id or t.get("source_id") == source_id
+            ),
+            "",
+        ).casefold()
+
+        def scan(expression: str, label: str, in_source_table: bool) -> None:
+            try:
+                refs = self._extract_ast_references(parse_expression(expression))
+            except Exception as exc:
+                # An expression we cannot parse is searched as plain text, so a removed
+                # column named in it still counts as used.
+                logger.warning(
+                    "The %s could not be parsed (%s); searching its text for the removed columns.",
+                    label,
+                    exc,
+                )
+                text = expression.casefold()
+                for key in target:
+                    if key in text:
+                        mark(key)
+                return
+            for table_ref, col_ref in refs:
+                if table_ref:
+                    if source_table_name and table_ref.casefold() == source_table_name:
+                        mark(col_ref)
+                elif in_source_table:
+                    mark(col_ref)
+
+        # Calculated columns
         for tbl in model.get("tables", []):
+            tbl_id = tbl.get("id") or tbl.get("source_id")
             for calc in tbl.get("calculated_columns", []):
                 expr = calc.get("expression", "")
-                if not expr:
-                    continue
-                try:
-                    tree = parse_expression(expr)
-                    refs = self._extract_ast_references(tree)
-                    tbl_id = tbl.get("id") or tbl.get("source_id")
-                    for table_ref, col_ref in refs:
-                        if (not table_ref and tbl_id == source_id) or (table_ref and table_ref == tbl.get("name") and tbl_id == source_id):
-                            if col_ref in target_cols:
-                                used.add(col_ref)
-                except Exception:
-                    pass
+                if expr:
+                    scan(expr, f"calculated column {calc.get('name', '')}", tbl_id == source_id)
 
-        # Check measures
+        # Measures: a reference without a table counts for this table (conservative)
         for m in model.get("measures", []):
             expr = m.get("expression", "")
-            if not expr:
-                continue
-            try:
-                tree = parse_expression(expr)
-                refs = self._extract_ast_references(tree)
-                tbl_name = next(
-                    (str(t.get("name")) for t in model.get("tables", []) if t.get("id") == source_id or t.get("source_id") == source_id),
-                    "",
-                )
-                for table_ref, col_ref in refs:
-                    if table_ref and table_ref == tbl_name and col_ref in target_cols:
-                        used.add(col_ref)
-                    elif not table_ref and col_ref in target_cols:
-                        used.add(col_ref)
-            except Exception:
-                pass
+            if expr:
+                scan(expr, f"measure {m.get('name', '')}", True)
 
         return sorted(used)
 
