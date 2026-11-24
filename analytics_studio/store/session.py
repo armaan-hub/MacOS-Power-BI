@@ -50,12 +50,17 @@ class ProjectStore:
         *,
         unsaved: bool,
         spill_dir: Optional[str] = None,
+        memory_limit: str = "2GB",
+        threads: Optional[int] = None,
     ) -> None:
         self._store: Optional[DuckStore] = store
         self._unsaved = bool(unsaved)
         self._spill_dir = spill_dir
+        self._memory_limit = memory_limit
+        self._threads = threads
         self._cancel_event = threading.Event()
         self._busy = False
+        self._shutting_down = False
         self._lock = threading.Condition(threading.Lock())
         self._closed = False
 
@@ -101,8 +106,13 @@ class ProjectStore:
                     "Use Save As in a writable folder."
                 )
         else:
-            parent = os.path.dirname(folder)
-            if os.path.exists(parent) and not os.access(parent, os.W_OK):
+            curr = folder
+            while curr and not os.path.exists(curr):
+                parent = os.path.dirname(curr)
+                if parent == curr:
+                    break
+                curr = parent
+            if os.path.exists(curr) and not os.access(curr, os.W_OK):
                 raise StoreError(
                     "Cannot create the data file next to the project (folder is read-only). "
                     "Use Save As in a writable folder."
@@ -125,29 +135,30 @@ class ProjectStore:
                 threads=threads,
                 temp_directory=spill_dir,
             )
-        except (PermissionError, OSError) as exc:
-            if isinstance(exc, PermissionError) or exc.errno in (13, 30):  # EACCES, EROFS
-                try:
-                    shutil.rmtree(spill_dir, ignore_errors=True)
-                except Exception:
-                    pass
+        except Exception as exc:
+            try:
+                shutil.rmtree(spill_dir, ignore_errors=True)
+            except Exception:
+                pass
+            cause = getattr(exc, "__cause__", None)
+            err_text = str(exc)
+            is_ro = (
+                isinstance(exc, PermissionError)
+                or getattr(exc, "errno", None) in (13, 30)
+                or (cause is not None and (isinstance(cause, PermissionError) or getattr(cause, "errno", None) in (13, 30)))
+                or "Permission denied" in err_text
+                or "Errno 13" in err_text
+                or "Errno 30" in err_text
+                or "read-only" in err_text.lower()
+            )
+            if is_ro:
                 raise StoreError(
                     "Cannot create the data file next to the project (folder is read-only). "
                     "Use Save As in a writable folder."
                 ) from exc
-            try:
-                shutil.rmtree(spill_dir, ignore_errors=True)
-            except Exception:
-                pass
-            raise
-        except Exception:
-            try:
-                shutil.rmtree(spill_dir, ignore_errors=True)
-            except Exception:
-                pass
             raise
 
-        return cls(store, unsaved=False, spill_dir=spill_dir)
+        return cls(store, unsaved=False, spill_dir=spill_dir, memory_limit=memory_limit, threads=threads)
 
     @classmethod
     def open_unsaved(
@@ -159,7 +170,8 @@ class ProjectStore:
     ) -> "ProjectStore":
         """Open a new data file for an unsaved project under <app_data_dir>/store-tmp/<uuid>/unsaved.npa.data."""
         run_id = uuid.uuid4().hex
-        data_path = os.path.join(app_data_dir, "store-tmp", run_id, "unsaved.npa.data")
+        run_folder = os.path.join(app_data_dir, "store-tmp", run_id)
+        data_path = os.path.join(run_folder, "unsaved.npa.data")
         spill_id = uuid.uuid4().hex
         spill_dir = os.path.join(tempfile.gettempdir(), "analytics-studio-spill", spill_id)
         os.makedirs(spill_dir, exist_ok=True)
@@ -175,8 +187,13 @@ class ProjectStore:
                 shutil.rmtree(spill_dir, ignore_errors=True)
             except Exception:
                 pass
+            try:
+                if os.path.isdir(run_folder) and not os.listdir(run_folder):
+                    os.rmdir(run_folder)
+            except OSError:
+                pass
             raise
-        return cls(store, unsaved=True, spill_dir=spill_dir)
+        return cls(store, unsaved=True, spill_dir=spill_dir, memory_limit=memory_limit, threads=threads)
 
     @staticmethod
     def reap_stale(
@@ -186,7 +203,7 @@ class ProjectStore:
     ) -> list[str]:
         """Remove store-tmp/<uuid> folders older than max_age_hours whose lock is not held."""
         store_tmp_dir = os.path.join(app_data_dir, "store-tmp")
-        if not os.path.isdir(store_tmp_dir):
+        if os.path.islink(store_tmp_dir) or not os.path.isdir(store_tmp_dir):
             return []
 
         import time
@@ -203,8 +220,8 @@ class ProjectStore:
 
         for entry in entries:
             folder_path = os.path.join(store_tmp_dir, entry)
-            # Only direct child directories of store-tmp
-            if not os.path.isdir(folder_path):
+            # Only direct child directories of store-tmp, and do not follow symlinks
+            if os.path.islink(folder_path) or not os.path.isdir(folder_path):
                 continue
 
             try:
@@ -289,36 +306,44 @@ class ProjectStore:
     def resolve_data_file(project_path: str, saved_name: Optional[str]) -> Optional[str]:
         """Resolve the data file path for a project.
 
-        1) data_file_for(project_path) if it exists;
-        2) join(dirname(project_path), saved_name) if saved_name is a BARE filename (no path separator, no ..) and exists;
+        1) data_file_for(project_path) if it exists and is a regular file;
+        2) join(dirname(project_path), saved_name) if saved_name is a BARE filename (no path separator, no ..) and is a regular file;
         else None.
         """
         candidate1 = ProjectStore.data_file_for(project_path)
-        if os.path.exists(candidate1):
+        if os.path.isfile(candidate1):
             return candidate1
 
         if saved_name:
-            if "/" not in saved_name and "\\" not in saved_name and saved_name != ".." and not saved_name.startswith(".."):
+            if (
+                "/" not in saved_name
+                and "\\" not in saved_name
+                and saved_name not in (".", "..")
+                and not saved_name.startswith("..")
+            ):
                 candidate2 = os.path.join(os.path.dirname(project_path), saved_name)
-                if os.path.exists(candidate2):
+                if os.path.isfile(candidate2):
                     return candidate2
 
         return None
 
     @staticmethod
     def table_name(source_id: str, generation: int) -> str:
-        """Return 'src_<id>_g<n>' where id is lower-cased ASCII with [^a-z0-9_] replaced by '_'."""
+        """Return 'src_<id>_g<n>' where id is lower-cased ASCII with [^a-z0-9_] replaced by '_'.
+
+        Callers must pass hex/uuid ids to avoid collisions across different ids that sanitize equally.
+        """
         if not isinstance(source_id, str) or not source_id:
             raise StoreError("source_id must be a non-empty string.")
-        if not isinstance(generation, int) or generation < 0:
+        if type(generation) is not int or generation < 0:
             raise StoreError("generation must be a non-negative integer.")
 
         sanitized_id = "".join(
             c if ("a" <= c <= "z" or "0" <= c <= "9" or c == "_") else "_"
             for c in source_id.lower()
         )
-        if not sanitized_id:
-            raise StoreError("source_id cannot be empty.")
+        if not any("a" <= c <= "z" or "0" <= c <= "9" for c in sanitized_id):
+            raise StoreError("source_id must contain at least one letter or digit.")
 
         t_name = f"src_{sanitized_id}_g{generation}"
         return t_name
@@ -326,6 +351,26 @@ class ProjectStore:
     @staticmethod
     def duckdb_version() -> str:
         return str(duckdb.__version__)
+
+    @contextmanager
+    def _exclusive(self) -> Iterator[DuckStore]:
+        """Context manager for UI thread exclusive operations (copy_to, rebind, drop_unreferenced, validate_table)."""
+        with self._lock:
+            if self._closed or self._store is None:
+                raise StoreError("The store is closed.")
+            if self._shutting_down:
+                raise StoreError("The store is shutting down.")
+            if self._busy:
+                raise StoreError("The store is busy with another operation.")
+            self._busy = True
+            store = self._store
+
+        try:
+            yield store
+        finally:
+            with self._lock:
+                self._busy = False
+                self._lock.notify_all()
 
     @contextmanager
     def job(self) -> Iterator[threading.Event]:
@@ -336,10 +381,13 @@ class ProjectStore:
         with self._lock:
             if self._closed:
                 raise StoreError("The store is closed.")
+            if self._shutting_down:
+                raise StoreError("The store is shutting down.")
             if self._busy:
                 raise StoreError("The store is busy with another operation.")
             self._busy = True
-            self._cancel_event.clear()
+            if not self._shutting_down:
+                self._cancel_event.clear()
 
         try:
             yield self._cancel_event
@@ -353,18 +401,24 @@ class ProjectStore:
         with self._lock:
             if self._closed or self._store is None:
                 raise StoreError("The store is closed.")
+            if self._shutting_down:
+                raise StoreError("The store is shutting down.")
             if self._busy:
                 raise StoreError("The store is busy with another operation.")
-        return fn(self._store)
+            store = self._store
+        return fn(store)
 
     def checkpoint(self) -> None:
         """Checkpoint store; raises busy StoreError if busy."""
         with self._lock:
             if self._closed or self._store is None:
                 raise StoreError("The store is closed.")
+            if self._shutting_down:
+                raise StoreError("The store is shutting down.")
             if self._busy:
                 raise StoreError("The store is busy with another operation.")
-        self._store.checkpoint()
+            store = self._store
+        store.checkpoint()
 
     def validate_table(
         self,
@@ -374,57 +428,45 @@ class ProjectStore:
         row_count: int,
     ) -> None:
         """Validates that table exists, columns match, and row count matches."""
-        with self._lock:
-            if self._closed or self._store is None:
-                raise StoreError("The store is closed.")
-            if self._busy:
-                raise StoreError("The store is busy with another operation.")
-            store = self._store
+        with self._exclusive() as store:
+            if not store.has_table(table):
+                raise StoreError(f"Table '{table}' is missing from the store.")
 
-        if not store.has_table(table):
-            raise StoreError(f"Table '{table}' is missing from the store.")
+            actual_cols = store.columns(table)  # list of (name, type) without __rn
+            expected_cols = list(zip(headers, physical_types))
 
-        actual_cols = store.columns(table)  # list of (name, type) without __rn
-        expected_cols = list(zip(headers, physical_types))
-
-        if len(actual_cols) != len(expected_cols):
-            raise StoreError(
-                f"Columns differ for table '{table}': expected {len(expected_cols)} columns, "
-                f"found {len(actual_cols)} columns."
-            )
-
-        for i, (act, exp) in enumerate(zip(actual_cols, expected_cols)):
-            if act[0] != exp[0] or act[1] != exp[1]:
+            if len(actual_cols) != len(expected_cols):
                 raise StoreError(
-                    f"Columns differ for table '{table}' at position {i}: "
-                    f"expected ('{exp[0]}', '{exp[1]}'), found ('{act[0]}', '{act[1]}')."
+                    f"Columns differ for table '{table}': expected {len(expected_cols)} columns, "
+                    f"found {len(actual_cols)} columns."
                 )
 
-        actual_row_count = store.row_count(table)
-        if actual_row_count != row_count:
-            raise StoreError(
-                f"Row count differs for table '{table}': expected {row_count}, found {actual_row_count}."
-            )
+            for i, (act, exp) in enumerate(zip(actual_cols, expected_cols)):
+                if act[0] != exp[0] or act[1] != exp[1]:
+                    raise StoreError(
+                        f"Columns differ for table '{table}' at position {i}: "
+                        f"expected ('{exp[0]}', '{exp[1]}'), found ('{act[0]}', '{act[1]}')."
+                    )
+
+            actual_row_count = store.row_count(table)
+            if actual_row_count != row_count:
+                raise StoreError(
+                    f"Row count differs for table '{table}': expected {row_count}, found {actual_row_count}."
+                )
 
     def drop_unreferenced(self, keep: Collection[str]) -> list[str]:
         """Drop tables whose name starts with 'src_' and not in keep (ASCII case-insensitive)."""
-        with self._lock:
-            if self._closed or self._store is None:
-                raise StoreError("The store is closed.")
-            if self._busy:
-                raise StoreError("The store is busy with another operation.")
-            store = self._store
+        with self._exclusive() as store:
+            keep_lower = {k.lower() for k in keep}
+            all_tables = store.table_names()
+            dropped: list[str] = []
 
-        keep_lower = {k.lower() for k in keep}
-        all_tables = store.table_names()
-        dropped: list[str] = []
+            for tbl in all_tables:
+                if tbl.lower().startswith("src_") and tbl.lower() not in keep_lower:
+                    store.drop_table(tbl)
+                    dropped.append(tbl)
 
-        for tbl in all_tables:
-            if tbl.lower().startswith("src_") and tbl.lower() not in keep_lower:
-                store.drop_table(tbl)
-                dropped.append(tbl)
-
-        return dropped
+            return dropped
 
     def copy_to(
         self,
@@ -435,135 +477,231 @@ class ProjectStore:
         cancel_event: Optional[threading.Event] = None,
     ) -> str:
         """Atomically copy the store data file to target_data_path."""
-        with self._lock:
-            if self._closed or self._store is None:
-                raise StoreError("The store is closed.")
-            if self._busy:
-                raise StoreError("The store is busy with another operation.")
+        with self._exclusive() as store:
+            source_path = store.path
 
-        source_path = self.path
-        if not overwrite and os.path.exists(target_data_path):
-            raise StoreError(f"The data file already exists: {os.path.basename(target_data_path)}.")
+            # Finding 1: Refuse copying data file onto itself (samefile or case-folded APFS match)
+            if os.path.exists(target_data_path):
+                if os.path.samefile(source_path, target_data_path):
+                    raise StoreError("Cannot copy the data file onto itself.")
+            else:
+                sp_dir = os.path.realpath(os.path.dirname(source_path))
+                tg_dir = os.path.realpath(os.path.dirname(target_data_path))
+                if sp_dir == tg_dir and os.path.basename(source_path).lower() == os.path.basename(target_data_path).lower():
+                    raise StoreError("Cannot copy the data file onto itself.")
 
-        # 1. Checkpoint
-        self.checkpoint()
+            if not overwrite and os.path.exists(target_data_path):
+                raise StoreError(f"The data file already exists: {os.path.basename(target_data_path)}.")
 
-        # 2. Free space check
-        source_size = os.path.getsize(source_path)
-        required_space = int(source_size * 1.1) + 64 * 1024 * 1024
-        target_dir = os.path.dirname(os.path.abspath(target_data_path))
-        os.makedirs(target_dir, exist_ok=True)
-        usage = shutil.disk_usage(target_dir)
-        if usage.free < required_space:
-            raise StoreError(
-                f"Not enough free disk space for the data file: need {required_space}, have {usage.free}."
-            )
+            # 1. Checkpoint
+            store.checkpoint()
 
-        # 3. Copy in chunks to tmp file
-        tmp_id = uuid.uuid4().hex
-        tmp_path = f"{target_data_path}.tmp-{tmp_id}"
+            # Finding 8: Free space check against nearest existing parent BEFORE makedirs
+            source_size = os.path.getsize(source_path)
+            required_space = int(source_size * 1.1) + 64 * 1024 * 1024
+            target_dir = os.path.abspath(os.path.dirname(target_data_path))
 
-        def _cleanup_tmp() -> None:
-            for p in [tmp_path, tmp_path + ".lock", tmp_path + ".wal"]:
-                try:
-                    if os.path.exists(p):
-                        os.remove(p)
-                except OSError:
-                    pass
+            check_dir = target_dir
+            while check_dir and not os.path.exists(check_dir):
+                parent = os.path.dirname(check_dir)
+                if parent == check_dir:
+                    break
+                check_dir = parent
 
-        try:
-            copied = 0
-            with open(source_path, "rb") as fsrc, open(tmp_path, "wb") as fdst:
-                while True:
-                    if cancel_event is not None and cancel_event.is_set():
-                        raise ImportCancelledError("Copy canceled.")
-                    chunk = fsrc.read(_COPY_CHUNK)
-                    if not chunk:
-                        break
-                    fdst.write(chunk)
-                    copied += len(chunk)
-                    if progress is not None:
-                        progress(copied, source_size)
+            if os.path.exists(check_dir):
+                if not os.access(check_dir, os.W_OK):
+                    raise StoreError("Cannot write the data file: folder is read-only.")
+                usage = shutil.disk_usage(check_dir)
+                if usage.free < required_space:
+                    raise StoreError(
+                        f"Not enough free disk space for the data file: need {required_space}, have {usage.free}."
+                    )
 
-            if cancel_event is not None and cancel_event.is_set():
-                raise ImportCancelledError("Copy canceled.")
-
-            # 4. Verify: open temp copy with DuckStore, compare tables and row counts
-            temp_store: Optional[DuckStore] = None
             try:
-                temp_store = DuckStore(tmp_path)
-                src_tables = sorted(self._store.table_names())
-                dst_tables = sorted(temp_store.table_names())
-                if src_tables != dst_tables:
-                    raise StoreError("Verification failed: tables do not match.")
-                for tbl in src_tables:
-                    if self._store.row_count(tbl) != temp_store.row_count(tbl):
-                        raise StoreError(f"Verification failed: row count mismatch for table '{tbl}'.")
-            finally:
-                if temp_store is not None:
-                    try:
-                        temp_store.close()
-                    except Exception:
-                        pass
-                for p in [tmp_path + ".lock", tmp_path + ".wal"]:
+                os.makedirs(target_dir, exist_ok=True)
+            except (OSError, PermissionError) as exc:
+                raise StoreError("Cannot write the data file: folder is read-only.") from exc
+
+            if not os.access(target_dir, os.W_OK):
+                raise StoreError("Cannot write the data file: folder is read-only.")
+
+            # 3. Copy in chunks to tmp file
+            tmp_id = uuid.uuid4().hex
+            tmp_path = f"{target_data_path}.tmp-{tmp_id}"
+
+            def _cleanup_tmp() -> None:
+                for p in [tmp_path, tmp_path + ".lock", tmp_path + ".wal"]:
                     try:
                         if os.path.exists(p):
                             os.remove(p)
                     except OSError:
                         pass
 
-            # Final check before replace
-            if not overwrite and os.path.exists(target_data_path):
-                raise StoreError(f"The data file already exists: {os.path.basename(target_data_path)}.")
+            try:
+                copied = 0
+                with open(source_path, "rb") as fsrc, open(tmp_path, "wb") as fdst:
+                    while True:
+                        if cancel_event is not None and cancel_event.is_set():
+                            raise ImportCancelledError("Copy canceled.")
+                        chunk = fsrc.read(_COPY_CHUNK)
+                        if not chunk:
+                            break
+                        fdst.write(chunk)
+                        copied += len(chunk)
+                        if progress is not None:
+                            progress(copied, source_size)
 
-            os.replace(tmp_path, target_data_path)
-            return os.path.realpath(target_data_path)
-        except Exception:
-            _cleanup_tmp()
-            raise
+                if cancel_event is not None and cancel_event.is_set():
+                    raise ImportCancelledError("Copy canceled.")
+
+                # Finding 8: fsync temp file before replace
+                with open(tmp_path, "rb") as ftmp:
+                    os.fsync(ftmp.fileno())
+
+                # 4. Verify: open temp copy with DuckStore, compare tables and row counts
+                temp_store: Optional[DuckStore] = None
+                try:
+                    temp_store = DuckStore(tmp_path)
+                    src_tables = sorted(store.table_names())
+                    dst_tables = sorted(temp_store.table_names())
+                    if src_tables != dst_tables:
+                        raise StoreError("Verification failed: tables do not match.")
+                    for tbl in src_tables:
+                        if store.row_count(tbl) != temp_store.row_count(tbl):
+                            raise StoreError(f"Verification failed: row count mismatch for table '{tbl}'.")
+                finally:
+                    if temp_store is not None:
+                        try:
+                            temp_store.close()
+                        except Exception:
+                            pass
+                    for p in [tmp_path + ".lock", tmp_path + ".wal"]:
+                        try:
+                            if os.path.exists(p):
+                                os.remove(p)
+                        except OSError:
+                            pass
+
+                # Final check before replace
+                if not overwrite and os.path.exists(target_data_path):
+                    raise StoreError(f"The data file already exists: {os.path.basename(target_data_path)}.")
+
+                # Finding 1: probe target lock before replace
+                target_lock = target_data_path + ".lock"
+                if os.path.exists(target_lock):
+                    probe_fd = None
+                    try:
+                        probe_fd = os.open(target_lock, os.O_RDWR)
+                        fcntl.flock(probe_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        fcntl.flock(probe_fd, fcntl.LOCK_UN)
+                    except (BlockingIOError, OSError):
+                        raise StoreError(f"The data file is in use by another process: {os.path.basename(target_data_path)}.")
+                    finally:
+                        if probe_fd is not None:
+                            try:
+                                os.close(probe_fd)
+                            except OSError:
+                                pass
+
+                # Finding 8: remove pre-existing <target>.wal before os.replace
+                target_wal = target_data_path + ".wal"
+                if os.path.exists(target_wal):
+                    try:
+                        os.remove(target_wal)
+                    except OSError:
+                        pass
+
+                os.replace(tmp_path, target_data_path)
+                return os.path.realpath(target_data_path)
+            except Exception:
+                _cleanup_tmp()
+                raise
 
     def rebind(self, target_data_path: str, *, delete_old: bool) -> None:
         """Switch the session to target_data_path; removes old files if delete_old and unsaved."""
-        with self._lock:
-            if self._closed or self._store is None:
-                raise StoreError("The store is closed.")
-            if self._busy:
-                raise StoreError("The store is busy with another operation.")
+        with self._exclusive() as store:
+            old_store = store
+            old_path = old_store.path
+            was_unsaved = self._unsaved
+            old_spill_dir = self._spill_dir
+            mem_limit = self._memory_limit
+            th = self._threads
 
-        old_store = self._store
-        old_path = old_store.path
-        was_unsaved = self._unsaved
-        old_spill_dir = self._spill_dir
-
-        old_store.close()
-
-        new_store: Optional[DuckStore] = None
-        try:
-            new_store = DuckStore(target_data_path, temp_directory=old_spill_dir)
-        except Exception:
-            # Reopen old path and restore
-            try:
-                self._store = DuckStore(old_path, temp_directory=old_spill_dir)
-            except Exception:
-                pass
-            raise
-
-        self._store = new_store
-        self._unsaved = False
-
-        if delete_old and was_unsaved:
-            for p in [old_path, old_path + ".wal", old_path + ".lock"]:
+            # Finding 7: rebind to same file -> no-op, delete_old ignored
+            is_same = False
+            if os.path.exists(target_data_path) and os.path.exists(old_path):
                 try:
-                    if os.path.exists(p):
-                        os.remove(p)
+                    is_same = os.path.samefile(old_path, target_data_path)
+                except OSError:
+                    pass
+            if not is_same:
+                is_same = (os.path.realpath(old_path) == os.path.realpath(target_data_path))
+
+            if is_same:
+                return
+
+            old_store.close()
+
+            new_store: Optional[DuckStore] = None
+            try:
+                new_store = DuckStore(
+                    target_data_path,
+                    memory_limit=mem_limit,
+                    threads=th,
+                    temp_directory=old_spill_dir,
+                )
+            except Exception:
+                # Reopen old path and restore
+                try:
+                    self._store = DuckStore(
+                        old_path,
+                        memory_limit=mem_limit,
+                        threads=th,
+                        temp_directory=old_spill_dir,
+                    )
+                except Exception:
+                    pass
+                raise
+
+            self._store = new_store
+            self._unsaved = False
+
+            if delete_old and was_unsaved:
+                for p in [old_path, old_path + ".wal", old_path + ".lock"]:
+                    try:
+                        if os.path.exists(p):
+                            os.remove(p)
+                    except OSError:
+                        pass
+                # Finding 11: remove now-empty store-tmp/<uuid> folder if empty
+                old_folder = os.path.dirname(old_path)
+                try:
+                    if os.path.isdir(old_folder) and not os.listdir(old_folder):
+                        os.rmdir(old_folder)
                 except OSError:
                     pass
 
     def discard_copy(self, target_data_path: str) -> None:
         """Remove a copy made by copy_to when the JSON write failed."""
-        real_target = os.path.realpath(target_data_path)
-        if self._store is not None and real_target == self.path:
-            raise StoreError("Cannot discard the current live store data file.")
+        with self._lock:
+            store = self._store
+
+        if store is not None:
+            live_path = store.path
+            is_same = False
+            if os.path.exists(live_path) and os.path.exists(target_data_path):
+                try:
+                    is_same = os.path.samefile(live_path, target_data_path)
+                except OSError:
+                    pass
+            if not is_same:
+                lp_dir = os.path.realpath(os.path.dirname(live_path))
+                tg_dir = os.path.realpath(os.path.dirname(target_data_path))
+                if lp_dir == tg_dir and os.path.basename(live_path).lower() == os.path.basename(target_data_path).lower():
+                    is_same = True
+
+            if is_same:
+                raise StoreError("Cannot discard the current live store data file.")
 
         for p in [target_data_path, target_data_path + ".wal", target_data_path + ".lock"]:
             try:
@@ -576,8 +714,21 @@ class ProjectStore:
         """Signal cancel event."""
         self._cancel_event.set()
 
+    def _cleanup_spill(self, spill_dir: Optional[str]) -> None:
+        """Finding 9: Only remove spill dirs whose parent folder name is 'analytics-studio-spill'."""
+        if spill_dir is None:
+            return
+        parent_name = os.path.basename(os.path.dirname(os.path.abspath(spill_dir)))
+        if parent_name == "analytics-studio-spill":
+            try:
+                shutil.rmtree(spill_dir, ignore_errors=True)
+            except Exception:
+                pass
+
     def shutdown(self, timeout: float = 15.0) -> bool:
         """App quit: request cancel, wait up to timeout for job to end, close and remove spill dir."""
+        with self._lock:
+            self._shutting_down = True
         self.request_cancel()
         with self._lock:
             if self._closed:
@@ -593,17 +744,11 @@ class ProjectStore:
             spill_dir = self._spill_dir
             self._spill_dir = None
 
-        if store is not None:
-            try:
+        try:
+            if store is not None:
                 store.close()
-            except Exception:
-                pass
-
-        if spill_dir is not None:
-            try:
-                shutil.rmtree(spill_dir, ignore_errors=True)
-            except Exception:
-                pass
+        finally:
+            self._cleanup_spill(spill_dir)
 
         return True
 
@@ -620,11 +765,8 @@ class ProjectStore:
             spill_dir = self._spill_dir
             self._spill_dir = None
 
-        if store is not None:
-            store.close()
-
-        if spill_dir is not None:
-            try:
-                shutil.rmtree(spill_dir, ignore_errors=True)
-            except Exception:
-                pass
+        try:
+            if store is not None:
+                store.close()
+        finally:
+            self._cleanup_spill(spill_dir)
