@@ -1,5 +1,8 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Task 16 reload large table (2026-11-25, Antigravity): READY FOR REVIEW**
+Built slot `reloadLargeTable()` and QML entry "Reload table" in `analytics_studio/qml/DataView.qml` (visible when `largeTableLoaded`). Reload checks preconditions (table loaded, store not busy, source file exists, disk free space > 1.1x file size), executes `run_large_import` with `generation = max(source_gen, store_max_gen) + 1`, handles cancellation/failure with new table drop, checks removed/renamed/retyped columns (refuses if referenced in measures/relationships/calc columns, confirms otherwise), preserves old table during in-memory swap to prevent data loss on discard or crash, updates model keeping valid sort/filters, and drops unreferenced tables post-save in `_save_to` (and upon reopen). Record-only lows: free space left behind (the data file stays about 2x until the next Save drops the old table and no compaction exists); compaction and worker sort/filter deferred with the measured trigger (any sort or filter over 1 s; re-measure with 1M rows of long text). 9 comprehensive tests in `tests/test_controller_store_reload.py`. All 7 mutants verified killed. Battery passed twice (799 passed, 2 xfailed, 288 subtests passed in 64.92s and 61.17s). Zero path leaks, clean pyflakes.
+
 **Current plan:** docs/plans/2026-11-21-team-plan.md (approved 2026-11-21; section 11 = docs/plans/2026-11-21-scale-plan-v2.md); evidence: docs/plans/2026-11-21-fable-report.md.
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.

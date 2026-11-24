@@ -8506,8 +8506,12 @@ class StudioController(QObject):
     def _on_large_import_finished(self, result: Any) -> None:
         path = self._large_import_path
         store = self._large_import_project_store
+        is_reload = getattr(self, "_large_import_is_reload", False)
         if path is not None and store is not None:
-            ok = self._commit_store_import(path, result, store)
+            if is_reload:
+                ok = self._commit_store_reload(path, result, store)
+            else:
+                ok = self._commit_store_import(path, result, store)
             if not ok:
                 self._drop_orphan_table(store, result.table)
 
@@ -8515,7 +8519,10 @@ class StudioController(QObject):
         self._set_status(message)
 
     def _on_large_import_canceled(self) -> None:
-        self._set_status("Import canceled.")
+        if getattr(self, "_large_import_is_reload", False):
+            self._set_status("Reload canceled.")
+        else:
+            self._set_status("Import canceled.")
 
     def _on_large_import_done(self) -> None:
         dialog = self._large_import_dialog
@@ -8526,6 +8533,7 @@ class StudioController(QObject):
         self._large_import_path = None
         self._large_import_project_store = None
         self._large_import_created_store = False
+        self._large_import_is_reload = False
         if dialog is not None:
             dialog.deleteLater()
         if created_store and not self._store_tables_loaded():
@@ -8588,6 +8596,7 @@ class StudioController(QObject):
             return False
 
         data_file = Path(project_store.path).name
+        generation = getattr(result, "generation", 1) or 1
         store_dict: dict[str, Any] = {
             "table": result.table,
             "row_count": result.row_count,
@@ -8596,7 +8605,7 @@ class StudioController(QObject):
             "source_id": result.source_id,
             "data_file": data_file,
             "fingerprint": dict(result.fingerprint),
-            "generation": 1,
+            "generation": generation,
             "duckdb_version": ProjectStore.duckdb_version(),
             "column_types": dict(result.model_types),
             "notices": list(result.notices),
@@ -8769,6 +8778,385 @@ class StudioController(QObject):
         )
         dialog = LargeTableSummaryDialog(name, candidate.stats)
         dialog.exec()
+
+    @Slot()
+    def reloadLargeTable(self) -> bool:  # noqa: N802
+        import shutil
+        from analytics_studio.store.base import StoreError
+        candidate = self._active_store_candidate
+        if candidate is None:
+            self._set_status("Open a large-data table first.")
+            return False
+
+        if self._large_import_job is not None:
+            self._set_status("A large-data import is already running.")
+            return False
+
+        project_store = self._project_store
+        if project_store is None or project_store.closed or project_store.busy:
+            self._set_status("The large-data store is busy. Try again in a moment.")
+            return False
+
+        source_id = candidate.source_id
+        source_record = next(
+            (s for s in self._project.get("data_sources", []) if s.get("id") == source_id),
+            None,
+        )
+        if source_record is None or not source_record.get("path"):
+            self._set_status("The source for this table was not found.")
+            return False
+
+        stored_path = source_record["path"]
+        source_path = Path(stored_path).expanduser()
+        if not source_path.is_absolute() and self._project_path is not None:
+            source_path = resolve_source_path(stored_path, self._project_path)
+        source_path = source_path.resolve()
+        if not source_path.is_file():
+            self._set_status(f"The file {source_path} was not found. The large-data table was not reloaded.")
+            return False
+
+        data_file_path = project_store.path
+        try:
+            check_dir = os.path.dirname(os.path.abspath(data_file_path))
+            while check_dir and not os.path.exists(check_dir):
+                parent = os.path.dirname(check_dir)
+                if parent == check_dir:
+                    break
+                check_dir = parent
+            free_space = shutil.disk_usage(check_dir).free
+            current_data_size = os.path.getsize(data_file_path) if os.path.exists(data_file_path) else 0
+
+            required_space = current_data_size * 1.1
+            if free_space < required_space:
+                self._set_status("Not enough free disk space to reload the table.")
+                return False
+        except OSError as exc:
+            logger.warning("Could not check disk usage: %s", exc)
+
+        store_dict = source_record.get("store") or {}
+        store_generation = int(store_dict.get("generation", 1) or 1)
+        store_tables = project_store.call(lambda s: s.table_names())
+        sanitized_id = "".join(
+            c if ("a" <= c <= "z" or "0" <= c <= "9" or c == "_") else "_"
+            for c in source_id.lower()
+        )
+        prefix = f"src_{sanitized_id}_g"
+        highest_table_gen = 0
+        for tbl in store_tables:
+            tbl_lower = tbl.lower()
+            if tbl_lower.startswith(prefix):
+                suffix = tbl_lower[len(prefix):]
+                if suffix.isdigit():
+                    highest_table_gen = max(highest_table_gen, int(suffix))
+
+        new_generation = max(store_generation, highest_table_gen) + 1
+        kind = source_record.get("kind", candidate.kind)
+        options = dict(source_record.get("parser_options", candidate.options))
+
+        from PySide6.QtCore import QThreadPool, Qt
+        from PySide6.QtWidgets import QProgressDialog
+        from analytics_studio.store.jobs import ProgressDialogBinder, StoreJob
+        from analytics_studio.store.large_import import run_large_import
+
+        def fn(store, cancel, progress):
+            def adapt_progress(msg: str) -> None:
+                if progress is not None:
+                    progress(msg, 0, 0)
+
+            return run_large_import(
+                store,
+                source_path,
+                kind,
+                options,
+                source_id=source_id,
+                generation=new_generation,
+                cancel_event=cancel,
+                progress=adapt_progress,
+            )
+
+        job = StoreJob(project_store, fn, title=f"Importing {source_path.name}...")
+        dialog = QProgressDialog(f"Importing {source_path.name}...", "Cancel", 0, 0)
+        dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
+        dialog.setMinimumDuration(0)
+        dialog.setAutoClose(False)
+        dialog.setAutoReset(False)
+
+        binder = ProgressDialogBinder(job, dialog)
+
+        self._large_import_job = job
+        self._large_import_binder = binder
+        self._large_import_dialog = dialog
+        self._large_import_path = source_path
+        self._large_import_project_store = project_store
+        self._large_import_created_store = False
+        self._large_import_is_reload = True
+
+        job.signals.finished.connect(self._on_large_import_finished)
+        job.signals.failed.connect(self._on_large_import_failed)
+        job.signals.canceled.connect(self._on_large_import_canceled)
+        job.signals.done.connect(self._on_large_import_done)
+
+        try:
+            job.start(QThreadPool.globalInstance())
+        except StoreError as exc:
+            self._large_import_job = None
+            self._large_import_binder = None
+            self._large_import_dialog = None
+            self._large_import_path = None
+            self._large_import_project_store = None
+            self._large_import_is_reload = False
+            self._set_status(str(exc))
+            return False
+
+        return True
+
+    def _commit_store_reload(
+        self,
+        path: Path,
+        result: "LargeImportResult",
+        project_store: "ProjectStore",
+    ) -> bool:
+        from analytics_studio.store.base import StoreError
+        from analytics_studio.store.candidate import StoreCandidate
+        from analytics_studio.store.session import ProjectStore
+
+        path = Path(path).expanduser().resolve()
+        source_id = result.source_id
+        candidate = self._active_store_candidate
+        if candidate is None or candidate.source_id != source_id:
+            return False
+
+        old_headers = list(candidate.headers)
+        old_types = dict(candidate.model_types)
+        new_headers = list(result.headers)
+        new_types = dict(result.model_types)
+
+        # Check column differences
+        headers_equal = (old_headers == new_headers)
+        types_equal = (old_types == new_types)
+        columns_changed = not (headers_equal and types_equal)
+
+        if columns_changed:
+            old_set = set(old_headers)
+            new_set = set(new_headers)
+            removed = sorted(old_set - new_set)
+            if removed:
+                used_removed = self._columns_used_in_project(source_id, removed)
+                if used_removed:
+                    names_str = ", ".join(used_removed)
+                    self._set_status(
+                        f"The reloaded file no longer has the columns {names_str} that the project uses. "
+                        "The large-data table was not reloaded."
+                    )
+                    return False
+
+            # Compose confirmation message
+            diff_lines = []
+            if removed:
+                diff_lines.append(f"Removed columns: {', '.join(removed)}")
+            added = sorted(new_set - old_set)
+            if added:
+                diff_lines.append(f"Added columns: {', '.join(added)}")
+            if not removed and not added and old_headers != new_headers:
+                diff_lines.append("Column order changed.")
+            type_diffs = [
+                f"{col} ({old_types.get(col)} -> {new_types.get(col)})"
+                for col in old_headers
+                if col in new_types and old_types.get(col) != new_types.get(col)
+            ]
+            if type_diffs:
+                diff_lines.append(f"Changed column types: {', '.join(type_diffs)}")
+
+            diff_text = "\n".join(diff_lines) if diff_lines else "Columns have changed."
+            msg = f"The columns in the reloaded file differ from the current table:\n\n{diff_text}\n\nContinue with reload?"
+            answer = QMessageBox.question(
+                None,
+                "Reload table",
+                msg,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return False
+
+        # Validate new table
+        try:
+            project_store.validate_table(
+                result.table,
+                result.headers,
+                result.physical_types,
+                result.row_count,
+            )
+        except StoreError as exc:
+            QMessageBox.critical(None, "Could not reload data", str(exc))
+            return False
+
+        new_candidate = StoreCandidate(
+            result.kind,
+            list(result.headers),
+            dict(result.options),
+            list(result.notices),
+            store_table=result.table,
+            row_count=result.row_count,
+            physical_types=list(result.physical_types),
+            model_types=dict(result.model_types),
+            source_id=source_id,
+            session=project_store,
+            source_arrow_types=list(getattr(result, "source_arrow_types", []) or []),
+        )
+        new_candidate.stats = result.stats
+
+        # Update table model via replace_data
+        if self._store_table_model is not None:
+            self._store_table_model.replace_data(
+                table_name=result.table,
+                headers=list(result.headers),
+                column_types=dict(result.model_types),
+                table_key=source_id,
+                row_count=result.row_count,
+            )
+
+        # Update in memory: candidates
+        self._active_store_candidate = new_candidate
+        self._loaded_candidates[source_id] = new_candidate
+        self._raw_candidates[source_id] = new_candidate
+        self._query_candidates[source_id] = new_candidate
+        self._headers = list(result.headers)
+
+        # Update source record in project
+        data_file = Path(project_store.path).name
+        store_dict: dict[str, Any] = {
+            "table": result.table,
+            "row_count": result.row_count,
+            "headers": list(result.headers),
+            "physical_types": list(result.physical_types),
+            "source_id": result.source_id,
+            "data_file": data_file,
+            "fingerprint": dict(result.fingerprint),
+            "generation": getattr(result, "generation", 1) or 1,
+            "duckdb_version": ProjectStore.duckdb_version(),
+            "column_types": dict(result.model_types),
+            "notices": list(result.notices),
+        }
+        if result.source_arrow_types:
+            store_dict["source_arrow_types"] = list(result.source_arrow_types)
+
+        source_record = {
+            "id": source_id,
+            "name": path.name,
+            "kind": result.kind,
+            "path": str(path),
+            "parser_options": dict(result.options),
+            "transform_steps": [],
+            "store": store_dict,
+        }
+
+        existing_sources = list(self._project.get("data_sources", []))
+        updated_sources = []
+        for s in existing_sources:
+            if s.get("id") == source_id:
+                updated_sources.append({**s, **source_record})
+            else:
+                updated_sources.append(s)
+        self._project["data_sources"] = updated_sources
+
+        # Update table record in project
+        model = self._project.setdefault("model", {"tables": [], "relationships": []})
+        tables = list(model.get("tables", []))
+        for index, table in enumerate(tables):
+            if table.get("id") == source_id or table.get("source_id") == source_id:
+                tables[index] = {
+                    **table,
+                    "column_types": dict(result.model_types),
+                }
+                break
+        model["tables"] = tables
+
+        self._source_warning = self._compose_source_warning()
+        self._dirty = True
+        self._refresh_model_view()
+        self._refresh_report()
+        self._reset_silent_refusal_notice()
+        self.stateChanged.emit()
+        self._set_status(
+            f"Reloaded {result.row_count:,} rows into the large-data store: {path.name}."
+        )
+        self.activeSourceReady.emit()
+        self._offer_large_table_summary(new_candidate)
+        return True
+
+    def _columns_used_in_project(self, source_id: str, columns: list[str]) -> list[str]:
+        target_cols = set(columns)
+        used: set[str] = set()
+        model = self._project.get("model", {})
+
+        # Check relationships
+        for rel in model.get("relationships", []):
+            if not isinstance(rel, dict):
+                continue
+            from_t = rel.get("from_table_id")
+            to_t = rel.get("to_table_id")
+            from_c = rel.get("from_column")
+            to_c = rel.get("to_column")
+            if from_t == source_id and from_c in target_cols:
+                used.add(from_c)
+            if to_t == source_id and to_c in target_cols:
+                used.add(to_c)
+
+        # Check calculated columns
+        from analytics_studio.measures import parse_expression
+        for tbl in model.get("tables", []):
+            for calc in tbl.get("calculated_columns", []):
+                expr = calc.get("expression", "")
+                if not expr:
+                    continue
+                try:
+                    tree = parse_expression(expr)
+                    refs = self._extract_ast_references(tree)
+                    tbl_id = tbl.get("id") or tbl.get("source_id")
+                    for table_ref, col_ref in refs:
+                        if (not table_ref and tbl_id == source_id) or (table_ref and table_ref == tbl.get("name") and tbl_id == source_id):
+                            if col_ref in target_cols:
+                                used.add(col_ref)
+                except Exception:
+                    pass
+
+        # Check measures
+        for m in model.get("measures", []):
+            expr = m.get("expression", "")
+            if not expr:
+                continue
+            try:
+                tree = parse_expression(expr)
+                refs = self._extract_ast_references(tree)
+                tbl_name = next(
+                    (str(t.get("name")) for t in model.get("tables", []) if t.get("id") == source_id or t.get("source_id") == source_id),
+                    "",
+                )
+                for table_ref, col_ref in refs:
+                    if table_ref and table_ref == tbl_name and col_ref in target_cols:
+                        used.add(col_ref)
+                    elif not table_ref and col_ref in target_cols:
+                        used.add(col_ref)
+            except Exception:
+                pass
+
+        return sorted(used)
+
+    @staticmethod
+    def _extract_ast_references(node: Any) -> set[tuple[str, str]]:
+        refs: set[tuple[str, str]] = set()
+        if isinstance(node, tuple):
+            if len(node) >= 3 and node[0] == "reference":
+                table_ref = str(node[1] or "")
+                col_ref = str(node[2] or "")
+                refs.add((table_ref, col_ref))
+            for item in node:
+                refs |= StudioController._extract_ast_references(item)
+        elif isinstance(node, list):
+            for item in node:
+                refs |= StudioController._extract_ast_references(item)
+        return refs
 
     def enter_data_dialog(self, use_clipboard: bool = False) -> bool:
         initial_text = QApplication.clipboard().text() if use_clipboard else ""
@@ -15407,6 +15795,20 @@ class StudioController(QObject):
         self._active_page_id = saved["report"]["active_page_id"]
         self.stateChanged.emit()
         self._set_status(f"Saved {path.name}")
+
+        if old_store is not None:
+            active_store = self._project_store or old_store
+            if not active_store.closed and not active_store.busy:
+                keep_tables = [
+                    s["store"]["table"]
+                    for s in saved.get("data_sources", [])
+                    if isinstance(s.get("store"), dict) and s["store"].get("table")
+                ]
+                try:
+                    active_store.drop_unreferenced(keep=keep_tables)
+                except Exception as exc:
+                    logger.warning("Could not drop unreferenced store tables after save: %s", exc)
+
         return True
 
     def _document_for_save(self, path: Path) -> dict[str, Any]:

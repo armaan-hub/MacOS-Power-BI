@@ -490,6 +490,15 @@ Item {
                     onClicked: root.appController.showLargeTableSummary()
                 }
                 Button {
+                    objectName: "reloadTableButton"
+                    visible: root.appController.largeTableLoaded
+                    text: "Reload table"
+                    enabled: root.appController.largeTableLoaded
+                    Accessible.name: "Reload the large-data table"
+                    Accessible.description: "Re-imports the large-data source from disk into a new table generation and updates the project."
+                    onClicked: root.appController.reloadLargeTable()
+                }
+                Button {
                     visible: (root.appController.tableCatalog || []).filter(function(table) {
                         return Boolean(table.evaluated)
                     }).length >= 2

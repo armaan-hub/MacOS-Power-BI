@@ -81,6 +81,7 @@ class LargeImportResult:
     fingerprint: dict[str, Any]
     stats: TableStats
     options: dict[str, Any]
+    generation: int = 1
 
 
 def _check_cancel(cancel_event: Optional[threading.Event]) -> None:
@@ -95,6 +96,7 @@ def run_large_import(
     options: Mapping[str, Any] | None = None,
     *,
     source_id: str,
+    generation: int = 1,
     cancel_event: Optional[threading.Event] = None,
     progress: Optional[Callable[[str], None]] = None,
     max_rows: int = 1_000_000,
@@ -112,7 +114,7 @@ def run_large_import(
     _check_cancel(cancel_event)
 
     # b. Target table name derived from caller-provided source_id
-    target_table = ProjectStore.table_name(source_id, 1)
+    target_table = ProjectStore.table_name(source_id, generation)
     if store.has_table(target_table):
         raise StoreError(f"The large-data table for this source already exists: {target_table}.")
 
@@ -206,6 +208,7 @@ def run_large_import(
             fingerprint=post_fp,
             stats=stats,
             options=opts,
+            generation=generation,
         )
 
     except BaseException as exc:

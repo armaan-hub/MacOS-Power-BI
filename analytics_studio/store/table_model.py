@@ -1229,12 +1229,17 @@ class StoreTableModel(QAbstractTableModel):
                 new_table_key, ("", "")
             )
             raw_filters = deepcopy(self._filters_by_table.get(new_table_key, {}))
+            old_col_types = getattr(self, "_column_types", {}) or {}
             new_col_filters = {
                 column: rule
                 for column, rule in raw_filters.items()
-                if column in new_headers
+                if column in new_headers and (
+                    column not in old_col_types or old_col_types.get(column) == new_col_types.get(column)
+                )
             }
-            if new_sort_col not in new_headers:
+            if new_sort_col not in new_headers or (
+                new_sort_col in old_col_types and old_col_types.get(new_sort_col) != new_col_types.get(new_sort_col)
+            ):
                 new_sort_col = ""
                 new_sort_dir = ""
                 self._sort_by_table.pop(new_table_key, None)
