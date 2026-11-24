@@ -482,6 +482,7 @@ Item {
                 }
                 Button {
                     objectName: "tableSummaryButton"
+                    visible: root.appController.largeTableLoaded
                     text: "Table summary"
                     enabled: root.appController.largeTableLoaded
                     Accessible.name: "Show summary statistics for the large-data table"

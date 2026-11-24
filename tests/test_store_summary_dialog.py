@@ -216,6 +216,39 @@ def test_notes_join_multiple_warnings(qapp: QApplication) -> None:
     dialog.deleteLater()
 
 
+@pytest.mark.parametrize("num_bytes, expected", [
+    (0, "0.0 KB"),
+    (1023, "1.0 KB"),
+    (1024, "1.0 KB"),
+    (1047552, "1023.0 KB"),
+    (1048575, "1.0 MB"),
+    (1048576, "1.0 MB"),
+    (1072693248, "1023.0 MB"),
+    (1073741823, "1.0 GB"),
+    (1073741824, "1.0 GB"),
+    (5 * 1024 ** 4, "5120.0 GB"),
+])
+def test_human_size_unit_follows_the_rounded_value(num_bytes: int, expected: str) -> None:
+    from analytics_studio.store.summary_dialog import human_size
+    assert human_size(num_bytes) == expected
+
+
+def test_header_and_warnings_labels_are_plain_text(qapp: QApplication) -> None:
+    name = "my<b>table</b>&Co"
+    column_name = "<i>x</i>"
+    warning = f"Column '{column_name}' is almost empty & <b>loud</b>."
+    stats = TableStats(table=name, rows=1, columns=(
+        _col(column_name, "text", "text", 1, approx=1, warnings=(warning,)),
+    ), approx_bytes=2048, warnings=(warning,))
+    dialog = _dialog(stats, name=name)
+    assert dialog.header_label.textFormat() == Qt.TextFormat.PlainText
+    assert dialog.warnings_label.textFormat() == Qt.TextFormat.PlainText
+    assert dialog.header_label.text() == f"{name}: 1 rows, 1 columns, about 2.0 KB in memory"
+    assert dialog.warnings_label.text() == warning
+    assert _cell(dialog, 0, 0) == column_name
+    dialog.deleteLater()
+
+
 # ---------------------------------------------------------------- controller
 
 def _wait_for_large_job(controller: StudioController, timeout: float = 30.0) -> None:
@@ -405,3 +438,59 @@ def test_qml_has_table_summary_entry() -> None:
     assert 'text: "Table summary"' in text
     assert "root.appController.showLargeTableSummary()" in text
     assert "enabled: root.appController.largeTableLoaded" in text
+
+
+def test_table_warning_alone_shows_summary_once(qapp: QApplication, tmp_path: Path,
+                                                recorder: list[Any],
+                                                monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(st, "_WIDE_COLUMNS", 3)
+    csv_file = _generate_csv(tmp_path / "wide_table.csv")
+    controller = StudioController()
+    try:
+        _import_csv(controller, csv_file)
+        candidate = controller._active_store_candidate
+        assert not any(column.warnings for column in candidate.stats.columns)
+        assert candidate.stats.warnings
+        assert len(recorder) == 1
+        assert recorder[0] is candidate
+    finally:
+        controller._close_project_store()
+
+
+def test_table_summary_button_visible_only_for_large_table(qapp: QApplication, tmp_path: Path) -> None:
+    from PySide6.QtCore import QObject, QUrl
+    from PySide6.QtQml import QQmlComponent, QQmlEngine
+    from PySide6.QtQuickControls2 import QQuickStyle
+    from analytics_studio.file_import import parse_file
+
+    QQuickStyle.setStyle("Basic")
+    controller = StudioController()
+    engine = QQmlEngine()
+    component = QQmlComponent(engine)
+    component.loadUrl(QUrl.fromLocalFile(str(REPO_ROOT / "analytics_studio" / "qml" / "Main.qml")))
+    assert not component.isError(), "\n".join(error.toString() for error in component.errors())
+    window = component.createWithInitialProperties({"studioController": controller})
+    assert window is not None, "\n".join(error.toString() for error in component.errors())
+    try:
+        controller.setCurrentView("Data")
+        qapp.processEvents()
+        button = window.findChild(QObject, "tableSummaryButton")
+        assert button is not None
+        assert button.property("visible") is False
+
+        small_file = _generate_csv(tmp_path / "ordinary.csv", rows=3)
+        assert controller._commit_import(small_file, parse_file(small_file)) is True
+        qapp.processEvents()
+        assert controller.largeTableLoaded is False
+        assert button.property("visible") is False
+
+        big_file = _generate_csv(tmp_path / "large.csv")
+        _import_csv(controller, big_file)
+        qapp.processEvents()
+        assert controller.largeTableLoaded is True
+        assert button.property("visible") is True
+    finally:
+        window.deleteLater()
+        engine.deleteLater()
+        qapp.processEvents()
+        controller._close_project_store()

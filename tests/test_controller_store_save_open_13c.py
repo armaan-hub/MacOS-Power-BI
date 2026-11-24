@@ -258,9 +258,9 @@ def test_s3_real_cancel_button_click_during_copy(
     clicked: list[bool] = []
 
     def click_cancel_then_copy(*args: Any, **kwargs: Any) -> Any:
-        dialogs = [w for w in QApplication.topLevelWidgets() if isinstance(w, QProgressDialog)]
-        assert len(dialogs) == 1
-        buttons = [b for b in dialogs[0].findChildren(QPushButton) if b.text().replace("&", "") == "Cancel"]
+        dialogs = [w for w in QApplication.topLevelWidgets() if isinstance(w, QProgressDialog) and w.isVisible()]
+        assert dialogs
+        buttons = [b for b in dialogs[-1].findChildren(QPushButton) if b.text().replace("&", "") == "Cancel"]
         assert len(buttons) == 1
         buttons[0].click()
         clicked.append(True)

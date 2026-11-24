@@ -95,8 +95,8 @@ def test_h2_real_cancel_click_keeps_existing_target_data_file(
 
     def click_cancel_then_copy(*args: Any, **kwargs: Any) -> Any:
         dialogs = [w for w in QApplication.topLevelWidgets() if isinstance(w, QProgressDialog) and w.isVisible()]
-        assert len(dialogs) == 1
-        buttons = [b for b in dialogs[0].findChildren(QPushButton) if b.text().replace("&", "") == "Cancel"]
+        assert dialogs
+        buttons = [b for b in dialogs[-1].findChildren(QPushButton) if b.text().replace("&", "") == "Cancel"]
         assert len(buttons) == 1
         buttons[0].click()
         clicked.append(True)

@@ -37,10 +37,14 @@ _NUMERIC_COLUMNS = frozenset({2, 3, 4, 5, 6, 7, 8})
 
 
 def human_size(num_bytes: int) -> str:
-    """Return a size as KB, MB or GB with one decimal."""
-    if num_bytes >= 1024 ** 3:
+    """Return a size as KB, MB or GB with one decimal.
+
+    The unit is chosen from the value as it will be shown, so a size that
+    rounds to 1024.0 of a unit moves to the next unit (1048575 is 1.0 MB).
+    """
+    if round(num_bytes / 1024 ** 2, 1) >= 1024:
         return f"{num_bytes / 1024 ** 3:.1f} GB"
-    if num_bytes >= 1024 ** 2:
+    if round(num_bytes / 1024, 1) >= 1024:
         return f"{num_bytes / 1024 ** 2:.1f} MB"
     return f"{num_bytes / 1024:.1f} KB"
 
@@ -74,6 +78,7 @@ class LargeTableSummaryDialog(QDialog):
             f"{table_name}: {stats.rows:,} rows, {len(stats.columns)} columns, "
             f"about {human_size(stats.approx_bytes)} in memory"
         )
+        self.header_label.setTextFormat(Qt.TextFormat.PlainText)
         self.header_label.setStyleSheet("font-size: 16px; font-weight: 600; color: #273b49;")
         layout.addWidget(self.header_label)
 
@@ -89,6 +94,7 @@ class LargeTableSummaryDialog(QDialog):
         self.warnings_label = QLabel(
             "\n".join(stats.warnings) if stats.warnings else "No warnings."
         )
+        self.warnings_label.setTextFormat(Qt.TextFormat.PlainText)
         self.warnings_label.setWordWrap(True)
         self.warnings_label.setStyleSheet("color: #526477;")
         layout.addWidget(self.warnings_label)
