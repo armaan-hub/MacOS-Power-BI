@@ -445,7 +445,10 @@ def _setup_visual_controller(tmp_path: Path) -> tuple[ProjectStore, StudioContro
 
 
 def test_site_1_visual_gauge_data(qapp: QApplication, tmp_path: Path) -> None:
-    """Site 1 (was 3227): visualGaugeData surfaces LargeTableError in status message."""
+    """Site 1 (was 3227): visualGaugeData surfaces LargeTableError in status message.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):
@@ -479,7 +482,10 @@ def test_site_1_visual_gauge_data(qapp: QApplication, tmp_path: Path) -> None:
 
 
 def test_site_2_visual_shape_map_data(qapp: QApplication, tmp_path: Path) -> None:
-    """Site 2 (was 3544): visualShapeMapData surfaces LargeTableError in status message."""
+    """Site 2 (was 3544): visualShapeMapData surfaces LargeTableError in status message.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):
@@ -517,7 +523,10 @@ def test_site_2_visual_shape_map_data(qapp: QApplication, tmp_path: Path) -> Non
 
 
 def test_site_4_cross_table_table_data(qapp: QApplication, tmp_path: Path) -> None:
-    """Site 4 (was 3909): _cross_table_table_data surfaces LargeTableError message in error field."""
+    """Site 4 (was 3909): _cross_table_table_data surfaces LargeTableError message in error field.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):
@@ -556,7 +565,10 @@ def test_site_4_cross_table_table_data(qapp: QApplication, tmp_path: Path) -> No
 
 
 def test_site_5_visual_table_data(qapp: QApplication, tmp_path: Path) -> None:
-    """Site 5 (was 4064): visualTableData surfaces LargeTableError in error detail."""
+    """Site 5 (was 4064): visualTableData surfaces LargeTableError in error detail.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):
@@ -590,7 +602,10 @@ def test_site_5_visual_table_data(qapp: QApplication, tmp_path: Path) -> None:
 
 
 def test_site_6_visual_matrix_data(qapp: QApplication, tmp_path: Path) -> None:
-    """Site 6 (was 4172): visualMatrixData surfaces LargeTableError in matrix cells."""
+    """Site 6 (was 4172): visualMatrixData surfaces LargeTableError in matrix cells.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):
@@ -621,7 +636,10 @@ def test_site_6_visual_matrix_data(qapp: QApplication, tmp_path: Path) -> None:
 
 
 def test_site_7_visual_card_data(qapp: QApplication, tmp_path: Path) -> None:
-    """Site 7 (was 4289, 4314): visualCardData surfaces LargeTableError in card value and highlight."""
+    """Site 7 (was 4289, 4314): visualCardData surfaces LargeTableError in card value and highlight.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):
@@ -652,7 +670,10 @@ def test_site_7_visual_card_data(qapp: QApplication, tmp_path: Path) -> None:
 
 
 def test_site_8_dynamic_visual_series(qapp: QApplication, tmp_path: Path) -> None:
-    """Site 8 (was 15225): _generate_dynamic_visual_series surfaces LargeTableError in status message."""
+    """Site 8 (was 15225): _generate_dynamic_visual_series surfaces LargeTableError in status message.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):
@@ -705,6 +726,31 @@ def test_controller_import_does_not_load_the_store_stack() -> None:
     )
     assert result.returncode == 0, result.stderr[-400:]
     assert result.stdout.strip() == "", f"controller import loaded: {result.stdout.strip()}"
+
+
+def test_controller_operations_do_not_load_the_store_stack() -> None:
+    """Constructing controller, _refresh_report(), reading regions and calling _store_tables_loaded()
+
+    must not pull duckdb, pyarrow or analytics_studio.store into sys.modules.
+    """
+    root = Path(__file__).resolve().parents[1]
+    code = (
+        "import sys\n"
+        "from analytics_studio.controller import StudioController\n"
+        "ctrl = StudioController()\n"
+        "ctrl._refresh_report()\n"
+        "_ = ctrl.regions\n"
+        "ctrl._store_tables_loaded()\n"
+        "loaded = [m for m in ('duckdb', 'pyarrow', 'analytics_studio.store') if m in sys.modules]\n"
+        "print(','.join(loaded))\n"
+    )
+    env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+    env["QT_QPA_PLATFORM"] = "offscreen"
+    result = subprocess.run(
+        [sys.executable, "-c", code], cwd=root, env=env, capture_output=True, text=True, timeout=120,
+    )
+    assert result.returncode == 0, result.stderr[-400:]
+    assert result.stdout.strip() == "", f"controller operations loaded: {result.stdout.strip()}"
 
 
 def test_large_table_error_is_one_class_everywhere() -> None:
@@ -869,7 +915,10 @@ def test_ordinary_shape_map_keeps_old_results(qapp: QApplication, tmp_path: Path
 
 
 def test_site_7_card_highlight_and_empty_message(qapp: QApplication, tmp_path: Path) -> None:
-    """Card highlight branch with a LargeTableError: message shown, empty message gets the fallback text."""
+    """Card highlight branch with a LargeTableError: message shown, empty message gets the fallback text.
+
+    These LargeTableError surfacing branches are defence in depth: with a store table loaded the task 9 guards return first, so they run only with the guard patched off.
+"""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
         with patch.object(ctrl, "_store_tables_loaded", return_value=False):

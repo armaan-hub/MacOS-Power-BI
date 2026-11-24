@@ -1965,6 +1965,7 @@ class StudioController(QObject):
         self._sql_server_passwords: dict[str, str] = {}
         self._source_warning = ""
         self._field_query = ""
+        self._silent_refusal_notice_shown = False
         self._table_expanded: dict[str, bool] = {}
         self._field_tree_cache: list[dict[str, Any]] | None = None
         self._field_tree_flat_cache: list[dict[str, Any]] | None = None
@@ -2109,6 +2110,14 @@ class StudioController(QObject):
         if candidate_cls is None:
             return False
         return any(isinstance(c, candidate_cls) for c in self._loaded_candidates.values())
+
+    def _reset_silent_refusal_notice(self) -> None:
+        self._silent_refusal_notice_shown = False
+
+    def _notice_silent_refusal(self, what: str) -> None:
+        if not self._silent_refusal_notice_shown:
+            self._silent_refusal_notice_shown = True
+            self._set_status(self._large_data_refusal(what))
 
     def _large_data_refusal(self, what: str) -> str:
         """Standard refusal message for unsupported large-data table features."""
@@ -3291,7 +3300,7 @@ class StudioController(QObject):
         self, visual_name: str, include_highlights: bool = False
     ) -> dict[str, object]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return {
                 "value": 0.0, "minimum": 0.0, "maximum": 1.0,
                 "target": None, "highlight_value": None, "has_value": False,
@@ -3405,7 +3414,7 @@ class StudioController(QObject):
         self, visual_name: str, include_highlights: bool = False
     ) -> dict[str, object]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return {
                 "field": "", "trend_field": "", "value": 0.0, "target": None,
                 "trend": [], "highlight_value": None, "has_value": False,
@@ -3480,7 +3489,7 @@ class StudioController(QObject):
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return []
         page = self._active_page()
         visual = next((
@@ -3559,7 +3568,7 @@ class StudioController(QObject):
     ) -> list[dict[str, object]]:  # noqa: N802
         """Join report rows to a local GeoJSON/TopoJSON boundary source."""
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return []
         page = self._active_page()
         visual = next((
@@ -3708,7 +3717,7 @@ class StudioController(QObject):
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return []
         page = self._active_page()
         visual = next((
@@ -4071,7 +4080,7 @@ class StudioController(QObject):
     @Slot(str, result="QVariantMap")
     def visualTableData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return {"columns": [], "rows": [], "total_rows": 0}
         page = self._active_page()
         visual = next((
@@ -4238,7 +4247,7 @@ class StudioController(QObject):
     @Slot(str, result="QVariantMap")
     def visualMatrixData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return {"columns": [], "rows": [], "total_rows": 0}
         page = self._active_page()
         visual = next((
@@ -4404,7 +4413,7 @@ class StudioController(QObject):
     @Slot(str, result="QVariantMap")
     def visualCardData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return {"label": "", "value": "", "aggregation": "", "highlight_value": "", "has_highlights": False}
         page = self._active_page()
         visual = next((
@@ -4568,7 +4577,7 @@ class StudioController(QObject):
     @Property("QVariantList", notify=stateChanged)
     def regions(self) -> list[str]:
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Region filter"))
+            self._notice_silent_refusal("Region filter")
             return ["All regions"]
         column = self._region_column
         values = sorted({str(row.get(column, "")) for row in self._rows if column and row.get(column)})
@@ -4696,7 +4705,7 @@ class StudioController(QObject):
     @Slot(str, str, result="QVariantList")
     def pageFilterValues(self, table_id: str, column: str) -> list[dict[str, str]]:  # noqa: N802
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Page filter values"))
+            self._notice_silent_refusal("Page filter values")
             return []
         table = next(
             (item for item in self._table_catalog
@@ -4726,7 +4735,7 @@ class StudioController(QObject):
         self, table_id: str, column: str, search: str
     ) -> list[dict[str, str]]:
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Page filter values"))
+            self._notice_silent_refusal("Page filter values")
             return []
         table = next(
             (item for item in self._table_catalog
@@ -5660,6 +5669,7 @@ class StudioController(QObject):
                     credential_cleanup_failed = True
 
         self._loaded_candidates.pop(source_id, None)
+        self._reset_silent_refusal_notice()
         self._query_candidates.pop(source_id, None)
         self._raw_candidates.pop(source_id, None)
         self._source_load_errors.pop(source_id, None)
@@ -5903,6 +5913,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -6040,6 +6051,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -6229,6 +6241,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -7230,6 +7243,7 @@ class StudioController(QObject):
         self._active_source_kind = active_source_kind
         self._active_parser_options = active_parser_options
         self._loaded_candidates = loaded_candidates
+        self._reset_silent_refusal_notice()
         self._query_candidates = query_candidates
         self._raw_candidates = raw_candidates
         self._source_load_errors = load_errors
@@ -7929,6 +7943,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
@@ -8177,6 +8192,7 @@ class StudioController(QObject):
         model_candidate = _model_candidate_with_format_errors_as_blank(transformed)
         self._project = next_project
         self._loaded_candidates[source_id] = model_candidate
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = transformed
         self._raw_candidates[source_id] = candidate
         self._active_source_id = source_id
@@ -9014,6 +9030,7 @@ class StudioController(QObject):
         next_project, query_candidate, calculated_candidate = plan
         self._project = next_project
         self._loaded_candidates[source_id] = calculated_candidate
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = query_candidate
         if source_id == self._active_source_id:
             self._install_source(self._active_source_path, source_id, calculated_candidate)
@@ -9293,6 +9310,7 @@ class StudioController(QObject):
         If another engine call cancels the running preview, it is started again
         once that call has returned. A user cancel drops it.
         """
+        # defence in depth: _build_preview_inputs refuses too
         if self._store_tables_loaded():
             refusal = self._large_data_refusal("DAX measures")
             self._set_status(refusal)
@@ -11512,6 +11530,7 @@ class StudioController(QObject):
         self._project = next_project
         self._raw_candidates[source_id] = raw_candidate
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates[source_id] = confirmed
         self._query_candidates.update(dependent_query_candidates)
         for updated_id in dependent_candidates:
@@ -12715,11 +12734,13 @@ class StudioController(QObject):
                 credential_cleanup_failed = True
         for deleted_id in deleted_query_ids:
             self._loaded_candidates.pop(deleted_id, None)
+            self._reset_silent_refusal_notice()
             self._query_candidates.pop(deleted_id, None)
             self._raw_candidates.pop(deleted_id, None)
             self._source_load_errors.pop(deleted_id, None)
         self._raw_candidates.update(raw_snapshots)
         self._loaded_candidates.update(dependent_candidates)
+        self._reset_silent_refusal_notice()
         self._query_candidates.update(dependent_query_candidates)
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
@@ -13061,6 +13082,7 @@ class StudioController(QObject):
 
         self._project = next_project
         self._loaded_candidates.update(refreshed)
+        self._reset_silent_refusal_notice()
         self._query_candidates.update(query_candidates)
         self._raw_candidates.update(raw_candidates)
         if metadata_changed:
@@ -14390,6 +14412,7 @@ class StudioController(QObject):
         self._active_source_kind = None
         self._active_parser_options = {}
         self._loaded_candidates = {}
+        self._reset_silent_refusal_notice()
         self._query_candidates = {}
         self._raw_candidates = {}
         self._source_load_errors = {}
@@ -14447,6 +14470,7 @@ class StudioController(QObject):
                 self._store_table_model = model
 
         self._loaded_candidates[source_id] = parsed
+        self._reset_silent_refusal_notice()
         self._source_path = path
         self._source_id = source_id
         self._active_source_id = source_id
@@ -14475,6 +14499,7 @@ class StudioController(QObject):
         self.stateChanged.emit()
 
     def _clear_source(self, *, clear_selection: bool = True) -> None:
+        self._reset_silent_refusal_notice()
         self._active_store_candidate = None
         self._source_path = None
         self._source_id = None
@@ -15395,7 +15420,7 @@ class StudioController(QObject):
         value_well: str | None = None,
     ) -> list[dict[str, object]]:
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report visual data"))
+            self._notice_silent_refusal("Report visual data")
             return []
         page = self._active_page()
         if not page:
@@ -15840,8 +15865,6 @@ class StudioController(QObject):
         return {"Monthly revenue": "monthly", "Region revenue": "region"}.get(visual_name)
 
     def _set_status(self, message: str) -> None:
-        if self._status_message == message:
-            return
         self._status_message = message
         self.statusChanged.emit(message)
 
