@@ -92,62 +92,71 @@ class _FakeLargeDialog:
 def test_import_large_csv_end_to_end(qapp: QApplication, tmp_path: Path) -> None:
     csv_file = _generate_csv(tmp_path / "big.csv", rows=2000)
     controller = StudioController()
-    try:
-        with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
-            with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
-                success = controller._import_file_path(csv_file)
-        assert success is True
 
-        _wait_for_large_job(controller)
+    rows_read_count = 0
+    orig_fget = StoreCandidate.rows.fget
 
-        assert controller.sourceLoaded is True
-        assert controller.rowCount == 2000
-        candidate = controller._active_store_candidate
-        assert isinstance(candidate, StoreCandidate)
-        assert candidate.row_count == 2000
-        assert controller.dataModel is not None
-        assert isinstance(controller.dataModel, StoreTableModel)
-        assert controller.dataModel.rowCount() == 500
+    def counting_rows(self: StoreCandidate) -> Any:
+        nonlocal rows_read_count
+        rows_read_count += 1
+        return orig_fget(self)
 
-        # Check first cells / headers
-        headers = controller.headers
-        assert headers == ["id", "name", "score", "is_active", "created_at"]
-        assert controller.dataModel.data(controller.dataModel.index(0, 0)) == "0"
-        assert controller.dataModel.data(controller.dataModel.index(0, 1)) == "name_0"
+    with patch.object(StoreCandidate, "rows", new=property(counting_rows)):
+        try:
+            with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+                with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+                    success = controller._import_file_path(csv_file)
+            assert success is True
 
-        # Check column types
-        types_by_col = {item["column"]: item["type"] for item in controller.columnTypes}
-        assert types_by_col["score"] == "decimal_number"
-        assert types_by_col["is_active"] == "boolean"
-        assert types_by_col["created_at"] == "datetime"
+            _wait_for_large_job(controller)
 
-        # Check store busy is False
-        ps = controller._ensure_project_store()
-        assert ps.busy is False
+            assert controller.sourceLoaded is True
+            assert controller.rowCount == 2000
+            candidate = controller._active_store_candidate
+            assert isinstance(candidate, StoreCandidate)
+            assert candidate.row_count == 2000
+            assert controller.dataModel is not None
+            assert isinstance(controller.dataModel, StoreTableModel)
+            assert controller.dataModel.rowCount() == 500
 
-        # Progress dialog is closed / cleaned up
-        assert controller._large_import_dialog is None
+            # Check first cells / headers
+            headers = controller.headers
+            assert headers == ["id", "name", "score", "is_active", "created_at"]
+            assert controller.dataModel.data(controller.dataModel.index(0, 0)) == "0"
+            assert controller.dataModel.data(controller.dataModel.index(0, 1)) == "name_0"
 
-        # Status text
-        assert f"Loaded 2,000 rows into the large-data store: {csv_file.name}." in controller.statusMessage
+            # Check column types
+            types_by_col = {item["column"]: item["type"] for item in controller.columnTypes}
+            assert types_by_col["score"] == "decimal_number"
+            assert types_by_col["is_active"] == "boolean"
+            assert types_by_col["created_at"] == "datetime"
 
-        # Instrument candidate.rows: no .rows access during import
-        with pytest.raises(Exception):
-            _ = candidate.rows
+            # Check store busy is False
+            ps = controller._ensure_project_store()
+            assert ps.busy is False
 
-        # Project document validation
-        doc = controller._document_for_save(tmp_path / "proj.npa")
-        validated = validate_project(doc)
-        assert validated is not None
-        source_rec = doc["data_sources"][0]
-        assert "store" in source_rec
-        store_meta = source_rec["store"]
-        assert store_meta["row_count"] == 2000
-        assert store_meta["table"] == candidate.store_table
-        assert store_meta["headers"] == headers
-        assert hasattr(candidate, "stats")
-    finally:
-        controller._close_project_store()
+            # Progress dialog is closed / cleaned up
+            assert controller._large_import_dialog is None
+
+            # Status text
+            assert f"Loaded 2,000 rows into the large-data store: {csv_file.name}." in controller.statusMessage
+
+            # Instrument candidate.rows: wrap StoreCandidate.rows and verify 0 reads during flow
+            assert rows_read_count == 0
+
+            # Project document validation
+            doc = controller._document_for_save(tmp_path / "proj.npa")
+            validated = validate_project(doc)
+            assert validated is not None
+            source_rec = doc["data_sources"][0]
+            assert "store" in source_rec
+            store_meta = source_rec["store"]
+            assert store_meta["row_count"] == 2000
+            assert store_meta["table"] == candidate.store_table
+            assert store_meta["headers"] == headers
+            assert hasattr(candidate, "stats")
+        finally:
+            controller._close_project_store()
 
 
 @pytest.mark.skipif(not HAS_PYARROW, reason="pyarrow required for parquet tests")
@@ -222,13 +231,15 @@ def test_csv_differential_types(qapp: QApplication, tmp_path: Path) -> None:
 
 
 def test_confirmation_dialog_measure(qapp: QApplication, tmp_path: Path) -> None:
+    small_csv = _generate_csv(tmp_path / "small_m.csv", rows=100)
     csv_file = _generate_csv(tmp_path / "big_conf_m.csv", rows=2000)
     controller = StudioController()
     try:
-        controller._project["model"]["tables"] = [{"id": "t1", "name": "Table1"}]
-        controller._project["model"]["measures"] = [
-            {"name": "M1", "expression": "1", "home_table_id": "t1"}
-        ]
+        from analytics_studio.file_import import parse_file
+        controller._commit_import(small_csv, parse_file(small_csv))
+        created = controller.create_measure("M1", "SUM(small_m[score])")
+        assert created is True
+        assert bool(controller._project.get("model", {}).get("measures"))
 
         # No -> False, no store opened, no job
         with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
@@ -238,7 +249,7 @@ def test_confirmation_dialog_measure(qapp: QApplication, tmp_path: Path) -> None
         assert mock_q.called
         assert controller._large_import_job is None
         assert controller._project_store is None
-        assert controller.sourceLoaded is False
+        assert controller._store_tables_loaded() is False
 
         # Yes -> True, proceeds
         with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
@@ -253,14 +264,15 @@ def test_confirmation_dialog_measure(qapp: QApplication, tmp_path: Path) -> None
 
 
 def test_confirmation_dialog_visual(qapp: QApplication, tmp_path: Path) -> None:
+    small_csv = _generate_csv(tmp_path / "small_v.csv", rows=100)
     csv_file = _generate_csv(tmp_path / "big_conf_v.csv", rows=2000)
     controller = StudioController()
     try:
-        controller._project["report"]["pages"][0]["visuals"] = [{
-            "id": "v1", "type": "column", "title": "Test Visual",
-            "x": 0, "y": 0, "width": 300, "height": 200, "z_index": 1,
-            "field": "Amount", "wells": {}
-        }]
+        from analytics_studio.file_import import parse_file
+        controller._commit_import(small_csv, parse_file(small_csv))
+        visual_id = controller.add_visual("column", "Test Visual", 0, 0, 300, 200)
+        assert bool(visual_id)
+        assert bool(controller._project["report"]["pages"][0].get("visuals"))
 
         with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
             with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No) as mock_q:
@@ -274,19 +286,31 @@ def test_confirmation_dialog_visual(qapp: QApplication, tmp_path: Path) -> None:
 
 
 def test_confirmation_dialog_relationship(qapp: QApplication, tmp_path: Path) -> None:
+    small_csv1 = _generate_csv(tmp_path / "small_r1.csv", rows=100)
+    small_csv2 = _generate_csv(tmp_path / "small_r2.csv", rows=100)
     csv_file = _generate_csv(tmp_path / "big_conf_r.csv", rows=2000)
     controller = StudioController()
     try:
-        controller._project["model"]["tables"] = [
-            {"id": "t1", "name": "Table1"},
-            {"id": "t2", "name": "Table2"},
-        ]
-        controller._project["model"]["relationships"] = [{
-            "id": "r1", "from": "Table1[c1]", "to": "Table2[c2]",
-            "from_table_id": "t1", "from_column": "c1",
-            "to_table_id": "t2", "to_column": "c2", "cardinality": "many_to_one",
-            "cross_filtering": "single", "active": True
-        }]
+        from analytics_studio.file_import import parse_file
+        controller._commit_import(small_csv1, parse_file(small_csv1))
+        controller._commit_import(small_csv2, parse_file(small_csv2))
+        t1_id = controller._project["model"]["tables"][0]["id"]
+        t2_id = controller._project["model"]["tables"][1]["id"]
+        rel = {
+            "id": "rel1",
+            "from": "small_r1[id]",
+            "to": "small_r2[id]",
+            "from_table_id": t1_id,
+            "from_column": "id",
+            "to_table_id": t2_id,
+            "to_column": "id",
+            "cardinality": "one_to_one",
+            "cross_filtering": "both",
+            "active": True,
+        }
+        ok_rel = controller._save_validated_relationships([rel])
+        assert ok_rel is True
+        assert bool(controller._project["model"].get("relationships"))
 
         with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
             with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No) as mock_q:
@@ -300,13 +324,23 @@ def test_confirmation_dialog_relationship(qapp: QApplication, tmp_path: Path) ->
 
 
 def test_confirmation_dialog_query(qapp: QApplication, tmp_path: Path) -> None:
+    small_csv = _generate_csv(tmp_path / "small_q.csv", rows=100)
     csv_file = _generate_csv(tmp_path / "big_conf_q.csv", rows=2000)
     controller = StudioController()
     try:
-        controller._project["data_sources"] = [
-            {"id": "base1", "name": "base.csv", "kind": "csv", "path": "base.csv", "parser_options": {}, "transform_steps": []},
-            {"id": "q1", "name": "Query 1", "kind": "query", "query_name": "Query1", "query_definition": {"operation": "reference", "source_ids": ["base1"]}, "transform_steps": []}
-        ]
+        from analytics_studio.file_import import parse_file
+        controller._commit_import(small_csv, parse_file(small_csv))
+        cand = parse_file(small_csv)
+        src_id = controller._project["data_sources"][0]["id"]
+        q_created = controller._create_saved_query(
+            "MyRefQuery",
+            [src_id],
+            cand,
+            {"operation": "reference", "source_ids": [src_id]},
+            {"id": "whole_number", "score": "decimal_number"},
+        )
+        assert q_created is True
+        assert any(s.get("kind") == "query" for s in controller._project.get("data_sources", []))
 
         with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
             with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No) as mock_q:
@@ -319,13 +353,53 @@ def test_confirmation_dialog_query(qapp: QApplication, tmp_path: Path) -> None:
         controller._close_project_store()
 
 
+def test_confirmation_dialog_transform_steps_power_query(qapp: QApplication, tmp_path: Path) -> None:
+    small_csv = _generate_csv(tmp_path / "small_steps.csv", rows=100)
+    csv_file = _generate_csv(tmp_path / "big_conf_steps.csv", rows=2000)
+    controller = StudioController()
+    try:
+        from analytics_studio.file_import import parse_file
+        controller._commit_import(small_csv, parse_file(small_csv))
+
+        # With empty transform_steps, confirmation is NOT asked for an ordinary table
+        with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+            with patch.object(QMessageBox, "question") as mock_q_empty:
+                success1 = controller._import_file_path(csv_file)
+        assert success1 is True
+        _wait_for_large_job(controller)
+        assert not mock_q_empty.called
+
+        # Now test with non-empty transform_steps
+        controller._close_project_store()
+        controller2 = StudioController()
+        controller2._commit_import(small_csv, parse_file(small_csv))
+        controller2._project["data_sources"][0]["transform_steps"] = [
+            {"op": "convert_type", "column": "id", "type": "text"}
+        ]
+
+        with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+            with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No) as mock_q_steps:
+                success2 = controller2._import_file_path(csv_file)
+        assert success2 is False
+        assert mock_q_steps.called
+        assert controller2._large_import_job is None
+        assert controller2._project_store is None
+    finally:
+        controller._close_project_store()
+        if "controller2" in locals():
+            controller2._close_project_store()
+
+
 def test_confirmation_dialog_calculated_column(qapp: QApplication, tmp_path: Path) -> None:
+    small_csv = _generate_csv(tmp_path / "small_cc.csv", rows=100)
     csv_file = _generate_csv(tmp_path / "big_conf_cc.csv", rows=2000)
     controller = StudioController()
     try:
-        controller._project["model"]["tables"] = [
-            {"id": "t1", "name": "Table1", "calculated_columns": [{"name": "cc1", "expression": "1"}]}
-        ]
+        from analytics_studio.file_import import parse_file
+        controller._commit_import(small_csv, parse_file(small_csv))
+        res = controller.save_calculated_column("calc_score", "[score] * 2")
+        assert res == ""
+        assert bool(controller._project["model"]["tables"][0].get("calculated_columns"))
 
         with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
             with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No) as mock_q:
@@ -681,4 +755,289 @@ def test_shutdown_store_while_job_running(qapp: QApplication, tmp_path: Path, mo
     assert closed is True
     assert controller._project_store is None
     assert controller.sourceLoaded is False
+
+
+def test_cancel_progress_dialog_cancels_job_and_cleans_up(qapp: QApplication, tmp_path: Path) -> None:
+    """Kills S5, S6, S7, S8, H5-H10: drive real progress dialog, cancel, check modal, label, binder, done cleanup."""
+    import shiboken6
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QPushButton
+    from analytics_studio.store import large_import as li_mod
+
+    csv_file = _generate_csv(tmp_path / "cancel_diag.csv", rows=2000)
+    controller = StudioController()
+
+    started_event = threading.Event()
+    gate_event = threading.Event()
+    received_cancel_events: list[threading.Event] = []
+    orig_run = li_mod.run_large_import
+
+    def gated_run(*args: Any, **kwargs: Any) -> Any:
+        prog = kwargs.get("progress")
+        cancel_ev = kwargs.get("cancel_event")
+        assert cancel_ev is not None, "cancel_event was None (kills S5)!"
+        received_cancel_events.append(cancel_ev)
+        assert prog is not None, "progress callback was None (kills S6)!"
+        prog("Reading rows from disk...")
+        started_event.set()
+        gate_event.wait(timeout=10.0)
+        return orig_run(*args, **kwargs)
+
+    with patch("analytics_studio.store.large_import.run_large_import", side_effect=gated_run):
+        req = {"path": str(csv_file), "kind": "csv", "options": {}}
+        ok = controller._import_large(csv_file, req)
+        assert ok is True
+
+        dialog = controller._large_import_dialog
+        assert dialog is not None
+        # S7: dialog modality is ApplicationModal
+        assert dialog.windowModality() == Qt.WindowModality.ApplicationModal
+        # H9/H10: dialog flags
+        assert dialog.autoClose() is False
+        assert dialog.autoReset() is False
+        assert dialog.minimumDuration() == 0
+
+        # Wait until importer has started and sent progress
+        deadline = time.monotonic() + 5.0
+        while not started_event.is_set() and time.monotonic() < deadline:
+            qapp.processEvents()
+            time.sleep(0.01)
+        assert started_event.is_set()
+
+        # Let progress events dispatch
+        for _ in range(5):
+            qapp.processEvents()
+            time.sleep(0.01)
+
+        # S6: labelText updated by progress adapter
+        assert dialog.labelText() == "Reading rows from disk..."
+
+        # S8 / S5: binder connects Cancel button -> clicks cancel
+        cancel_buttons = [b for b in dialog.findChildren(QPushButton) if b.text() == "Cancel"]
+        assert len(cancel_buttons) >= 1
+        cancel_buttons[0].click()
+        qapp.processEvents()
+
+        # cancel_event was set by click
+        assert len(received_cancel_events) == 1
+        assert received_cancel_events[0].is_set()
+
+        # release worker
+        gate_event.set()
+
+        _wait_for_large_job(controller)
+
+        # Process deferred deletions
+        for _ in range(5):
+            qapp.processEvents()
+            time.sleep(0.01)
+
+        assert controller.statusMessage == "Import canceled."
+        assert len(controller._project["model"]["tables"]) == 0
+
+        # H5-H8: all _large_import_* references cleared
+        assert controller._large_import_binder is None
+        assert controller._large_import_dialog is None
+        assert controller._large_import_path is None
+        assert controller._large_import_project_store is None
+        assert controller._large_import_job is None
+
+        # H6: dialog deleteLater ran
+        assert not shiboken6.isValid(dialog)
+
+
+def test_busy_refusals_pre_and_post(qapp: QApplication, tmp_path: Path) -> None:
+    """Kills G3/G4: (a) store busy before _ensure_project_store; (b) busy after _ensure_project_store."""
+    from unittest.mock import MagicMock
+    csv_file = _generate_csv(tmp_path / "busy_test.csv", rows=2000)
+    controller = StudioController()
+    try:
+        req = {"path": str(csv_file), "kind": "csv", "options": {}}
+
+        # (a) store busy before _ensure_project_store (G3)
+        ps = controller._ensure_project_store()
+        with ps.job():
+            with patch.object(controller, "_ensure_project_store", side_effect=AssertionError("_ensure_project_store called when store was already busy!")):
+                ok = controller._import_large(csv_file, req)
+            assert ok is False
+            assert "The large-data store is busy. Try again in a moment." in controller.statusMessage
+            assert controller._large_import_job is None
+
+        # (b) second busy check after _ensure_project_store (G4)
+        mock_ps = MagicMock()
+        mock_ps.closed = False
+        mock_ps.busy = True
+        with patch.object(controller, "_ensure_project_store", return_value=mock_ps):
+            ok2 = controller._import_large(csv_file, req)
+            assert ok2 is False
+            assert "The large-data store is busy. Try again in a moment." in controller.statusMessage
+            assert controller._large_import_job is None
+    finally:
+        controller._close_project_store()
+
+
+def test_ensure_project_store_raising_store_error(qapp: QApplication, tmp_path: Path) -> None:
+    """Kills S4: _ensure_project_store raising StoreError shows critical message box and returns False."""
+    from analytics_studio.store.base import StoreError
+    csv_file = _generate_csv(tmp_path / "store_err.csv", rows=2000)
+    controller = StudioController()
+    req = {"path": str(csv_file), "kind": "csv", "options": {}}
+
+    with patch.object(controller, "_ensure_project_store", side_effect=StoreError("Store disk is corrupt")):
+        with patch.object(QMessageBox, "critical") as mock_crit:
+            ok = controller._import_large(csv_file, req)
+            assert ok is False
+            assert mock_crit.called
+            title, msg = mock_crit.call_args[0][1:3]
+            assert title == "Could not open the large-data store"
+            assert "Store disk is corrupt" in msg
+            assert controller._large_import_job is None
+
+
+def test_job_start_raising_store_error(qapp: QApplication, tmp_path: Path) -> None:
+    """Kills T5/T6: StoreJob.start raising StoreError clears refs, cleans attempt store, sets status."""
+    from analytics_studio.store.base import StoreError
+    from analytics_studio.store.jobs import StoreJob
+
+    csv_file = _generate_csv(tmp_path / "job_err.csv", rows=2000)
+    controller = StudioController()
+    req = {"path": str(csv_file), "kind": "csv", "options": {}}
+
+    with patch.object(StoreJob, "start", side_effect=StoreError("ThreadPool rejected")):
+        ok = controller._import_large(csv_file, req)
+        assert ok is False
+        assert "ThreadPool rejected" in controller.statusMessage
+        assert controller._large_import_job is None
+        assert controller._large_import_binder is None
+        assert controller._large_import_dialog is None
+        assert controller._large_import_path is None
+        assert controller._large_import_project_store is None
+        # Attempt-created store was closed
+        assert controller._project_store is None
+
+
+def test_options_reach_importer(qapp: QApplication, tmp_path: Path) -> None:
+    """Kills S3: semicolon delimiter in options reaches importer, parses columns correctly."""
+    p_csv = tmp_path / "semi.csv"
+    p_csv.write_text("id;product;price\n1;Widget;19.99\n2;Gadget;29.99\n", encoding="utf-8")
+    controller = StudioController()
+    try:
+        req = {
+            "path": str(p_csv),
+            "kind": "csv",
+            "options": {"delimiter": ";", "has_header": True},
+        }
+        ok = controller._import_large(p_csv, req)
+        assert ok is True
+        _wait_for_large_job(controller)
+
+        assert controller.sourceLoaded is True
+        assert controller._headers == ["id", "product", "price"]
+        assert controller.rowCount == 2
+    finally:
+        controller._close_project_store()
+
+
+def test_confirmation_question_default_button_no(qapp: QApplication, tmp_path: Path) -> None:
+    """Kills C8: QMessageBox.question called with defaultButton=QMessageBox.StandardButton.No."""
+    small_csv = _generate_csv(tmp_path / "small_c8.csv", rows=100)
+    csv_file = _generate_csv(tmp_path / "big_c8.csv", rows=2000)
+    controller = StudioController()
+    try:
+        from analytics_studio.file_import import parse_file
+        controller._commit_import(small_csv, parse_file(small_csv))
+        controller.create_measure("M_c8", "SUM(small_c8[score])")
+
+        call_args_list = []
+
+        def fake_q(*args: Any, **kwargs: Any) -> QMessageBox.StandardButton:
+            call_args_list.append((args, kwargs))
+            return QMessageBox.StandardButton.No
+
+        with patch.object(QMessageBox, "question", side_effect=fake_q):
+            req = {"path": str(csv_file), "kind": "csv", "options": {}}
+            controller._import_large(csv_file, req)
+
+        assert len(call_args_list) == 1
+        args, _ = call_args_list[0]
+        # args: (parent, title, text, buttons, defaultButton)
+        assert args[1] == "Add a large table"
+        assert args[3] == (QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        assert args[4] == QMessageBox.StandardButton.No
+    finally:
+        controller._close_project_store()
+
+
+def test_real_file_import_preview_dialog_e2e_csv_and_parquet(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Pins large_mode_enabled=True and large_request wiring by driving real FileImportPreviewDialog."""
+    from PySide6.QtCore import QTimer
+    monkeypatch.setattr(file_import, "MAX_DATA_ROWS", 500)
+
+    def drive_dialog(timeout: float = 20.0) -> None:
+        t0 = time.monotonic()
+        def tick() -> None:
+            w = QApplication.activeModalWidget()
+            if w is not None and hasattr(w, "import_button") and w.import_button.isEnabled():
+                w.import_button.click()
+                return
+            if time.monotonic() - t0 > timeout:
+                if w is not None:
+                    w.reject()
+                return
+            QTimer.singleShot(20, tick)
+        QTimer.singleShot(20, tick)
+
+    # 1. Real CSV
+    p_csv = _generate_csv(tmp_path / "real_big.csv", rows=2000)
+    controller1 = StudioController()
+    try:
+        drive_dialog()
+        ok1 = controller1._import_file_path(p_csv, "csv", {})
+        assert ok1 is True
+        _wait_for_large_job(controller1)
+        assert controller1.sourceLoaded is True
+        assert controller1.rowCount == 2000
+        assert isinstance(controller1._active_store_candidate, StoreCandidate)
+    finally:
+        controller1._close_project_store()
+
+    # 2. Real Parquet
+    if HAS_PYARROW:
+        p_pq = tmp_path / "real_big.parquet"
+        pq.write_table(
+            pa.table({"id": list(range(2000)), "score": [i * 1.5 for i in range(2000)]}),
+            p_pq,
+        )
+        controller2 = StudioController()
+        try:
+            drive_dialog()
+            ok2 = controller2._import_file_path(p_pq, "parquet", {})
+            assert ok2 is True
+            _wait_for_large_job(controller2)
+            assert controller2.sourceLoaded is True
+            assert controller2.rowCount == 2000
+            assert isinstance(controller2._active_store_candidate, StoreCandidate)
+        finally:
+            controller2._close_project_store()
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="reap_stale imports duckdb at controller start; make it lazy/background in a later task",
+)
+def test_controller_init_does_not_import_duckdb_without_env_var() -> None:
+    """L1: StudioController.__init__ runs reap_stale which imports duckdb when ANALYTICS_STUDIO_NO_REAP is unset."""
+    import subprocess
+    import sys
+
+    code = (
+        "import os, sys\n"
+        "os.environ.pop('ANALYTICS_STUDIO_NO_REAP', None)\n"
+        "from analytics_studio.controller import StudioController\n"
+        "c = StudioController()\n"
+        "assert 'duckdb' not in sys.modules, 'duckdb was imported at controller start'\n"
+    )
+    res = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert res.returncode == 0, res.stderr
+
 

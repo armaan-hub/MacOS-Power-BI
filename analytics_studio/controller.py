@@ -8058,7 +8058,7 @@ class StudioController(QObject):
         has_measures = bool(self._project.get("model", {}).get("measures"))
         has_relationships = bool(self._project.get("model", {}).get("relationships"))
         has_queries = any(
-            source.get("kind") == "query"
+            source.get("kind") == "query" or bool(source.get("transform_steps"))
             for source in self._project.get("data_sources", [])
         )
         has_calc_cols = any(
