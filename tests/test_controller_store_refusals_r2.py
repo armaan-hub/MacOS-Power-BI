@@ -476,3 +476,90 @@ def test_ordinary_tables_behave_normally_without_store(
     # Can save calculated column
     err = ctrl.save_calculated_column("DoubleVal", "[id] * 2")
     assert err == ""
+
+
+# --- B4b-t10b items ---
+
+def test_open_recent_source_refusal_when_store_loaded(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Item 1: openRecentSource refuses Import when store tables are loaded, without opening dialogs or calling import."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        source_entry = type("RecentSource", (), {
+            "path": str(tmp_path / "recent.csv"),
+            "exists": True,
+            "kind": "csv",
+            "display_name": "recent",
+            "parser_options": {},
+        })()
+        ctrl._recent_source_store = type("RecentStore", (), {"sources": [source_entry]})()
+
+        def _forbidden_import(*args: Any, **kwargs: Any) -> Any:
+            raise AssertionError("_import_file_path or _import_folder_path should never be called when store table is loaded")
+
+        monkeypatch.setattr(ctrl, "_import_file_path", _forbidden_import)
+        monkeypatch.setattr(ctrl, "_import_folder_path", _forbidden_import)
+
+        ctrl._set_status("")
+        ret = ctrl.openRecentSource(0)
+        assert ret is False
+        assert ctrl._status_message == ctrl._large_data_refusal("Import")
+    finally:
+        ps.close()
+
+
+def test_set_column_type_refusal_when_store_loaded(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Item 2: setColumnType refuses Power Query transformations when store tables are loaded."""
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        def _forbidden_raw(*args: Any, **kwargs: Any) -> Any:
+            raise AssertionError("_raw_candidate_for_source should never be called when store table is loaded")
+
+        monkeypatch.setattr(ctrl, "_raw_candidate_for_source", _forbidden_raw)
+
+        ctrl._set_status("")
+        ret = ctrl.setColumnType("val", "whole_number")
+        assert ret is False
+        assert ctrl._status_message == ctrl._large_data_refusal("Power Query transformations")
+        # Ensure column types were not mutated
+        col_type = ctrl._active_column_type_map().get("val")
+        assert col_type != "whole_number"
+    finally:
+        ps.close()
+
+
+def test_apply_calculated_columns_drops_when_store_loaded(
+    qapp: QApplication, tmp_path: Path
+) -> None:
+    """Item 3: _apply_calculated_columns returns candidate, {} whenever any store table is loaded.
+
+    KNOWN: task 13 (open project with mixed ordinary and store tables) must replace this whole-model drop with per-table handling
+    """
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ordinary_candidate = ImportCandidate("csv", ["x", "y"], [{"x": "1", "y": "2"}], {}, [])
+        cand, types = ctrl._apply_calculated_columns("s_store", ordinary_candidate)
+        assert cand is ordinary_candidate
+        assert types == {}
+    finally:
+        ps.close()
+
+
+def test_query_candidate_exact_refusal_text() -> None:
+    """Item 5: _query_candidate refusal text matches the exact standard format."""
+    expected = (
+        "Power Query transformations is not available for large-data tables yet. "
+        "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
+        "sort, filter, column statistics and export. Other features arrive in a later release."
+    )
+    # Instantiate a dummy store candidate and pass to _query_candidate
+    dummy_sc = StoreCandidate("csv", ["a"], {}, [], store_table="dummy", row_count=100, session=None)
+    with pytest.raises(QueryError) as exc_info:
+        StudioController._query_candidate({"query_definition": {"source_ids": ["s1"]}}, {"s1": dummy_sc})
+    assert str(exc_info.value) == expected
+

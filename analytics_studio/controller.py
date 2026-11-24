@@ -4824,6 +4824,9 @@ class StudioController(QObject):
     @Slot(str, str, result=bool)
     def setColumnType(self, column: str, type_name: str) -> bool:  # noqa: N802
         """Validate, normalize, and persist a type change for one active column."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Power Query transformations"))
+            return False
         if not self.sourceLoaded or self._active_source_id is None:
             self._set_status("Load a table before changing a column type.")
             return False
@@ -5336,6 +5339,10 @@ class StudioController(QObject):
 
     @Slot(int)
     def openRecentSource(self, index: int) -> bool:  # noqa: N802
+        # task 11: the large-file import must be exempt from this refusal
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         sources = self._recent_source_store.sources
         if index < 0 or index >= len(sources):
             self._set_status("That recent source is no longer in the list.")
@@ -10257,6 +10264,7 @@ class StudioController(QObject):
         column_types: dict[str, str] | None = None,
     ) -> tuple[ImportCandidate, dict[str, str]]:
         """Materialize model calculations after query steps for one table."""
+        # KNOWN: task 13 (open project with mixed ordinary and store tables) must replace this whole-model drop with per-table handling
         if self._store_tables_loaded():
             return candidate, {}
         document = project or self._project
@@ -11246,9 +11254,9 @@ class StudioController(QObject):
             candidate_cls = getattr(mod, "StoreCandidate", None)
             if candidate_cls is not None and any(isinstance(c, candidate_cls) for c in candidates.values()):
                 raise QueryError(
-                    "Power Query transformations is not available for large-data tables yet. "
-                    "Tables up to 100,000 rows work everywhere; large tables support the data grid, "
-                    "sort, filter, column statistics and export. Other features arrive in a later release."
+                    StudioController._large_data_refusal(
+                        None, "Power Query transformations"
+                    )
                 )
         definition = source.get("query_definition", {})
         source_ids = definition.get("source_ids", [])
