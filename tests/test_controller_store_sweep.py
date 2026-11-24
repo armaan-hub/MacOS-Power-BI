@@ -45,8 +45,6 @@ SKIPPED_SLOTS_REASONS: dict[str, str] = {
     "exportReportPdfImages": "Shells out or writes file report PDF/images",
     "manage_relationships": "Opens modal relationship manager dialog",
     "connectDataSource": "Opens modal connect data source dialog",
-    "editMeasure": "Opens modal DAX measure dialog",
-    "deleteMeasure": "Prompts with modal question box to delete measure",
 }
 
 
@@ -150,7 +148,7 @@ def test_controller_store_sweep(qapp: QApplication, tmp_path: Path, monkeypatch:
                 called_names.add(name)
 
         assert prop_count == 68
-        assert slots_called == 136
+        assert slots_called == 138
     finally:
         ps.close()
 
@@ -180,31 +178,32 @@ def test_site_1_visual_gauge_data(qapp: QApplication, tmp_path: Path) -> None:
     """Site 1 (was 3227): visualGaugeData surfaces LargeTableError in status message."""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
-        m_bind = _visual_measure_binding("TotalSales")
-        page = ctrl._active_page()
-        page["visuals"].append({
-            "id": "v_gauge", "title": "TestGauge", "type": "gauge", "table_id": "tbl_store",
-            "fields": {"Value": [m_bind]},
-        })
-        mock_rows = [{"cat": "A", "val": "1"}]
-        mock_context = (
-            {"tbl_store": mock_rows},
-            [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
-            set(),
-        )
+        with patch.object(ctrl, "_store_tables_loaded", return_value=False):
+            m_bind = _visual_measure_binding("TotalSales")
+            page = ctrl._active_page()
+            page["visuals"].append({
+                "id": "v_gauge", "title": "TestGauge", "type": "gauge", "table_id": "tbl_store",
+                "fields": {"Value": [m_bind]},
+            })
+            mock_rows = [{"cat": "A", "val": "1"}]
+            mock_context = (
+                {"tbl_store": mock_rows},
+                [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
+                set(),
+            )
 
-        msg = "Large table refusal: gauge unavailable"
-        with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
-            with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
-                ctrl._set_status("")
-                res = ctrl.visualGaugeData("TestGauge")
-                assert ctrl._status_message == msg
-                assert res["value"] == 0.0
+            msg = "Large table refusal: gauge unavailable"
+            with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
+                with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
+                    ctrl._set_status("")
+                    res = ctrl.visualGaugeData("TestGauge")
+                    assert ctrl._status_message == msg
+                    assert res["value"] == 0.0
 
-            with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
-                ctrl._set_status("")
-                res_ord = ctrl.visualGaugeData("TestGauge")
-                assert res_ord["value"] == 42.0
+                with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
+                    ctrl._set_status("")
+                    res_ord = ctrl.visualGaugeData("TestGauge")
+                    assert res_ord["value"] == 42.0
     finally:
         ps.close()
 
@@ -213,35 +212,36 @@ def test_site_2_visual_shape_map_data(qapp: QApplication, tmp_path: Path) -> Non
     """Site 2 (was 3544): visualShapeMapData surfaces LargeTableError in status message."""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
-        m_bind = _visual_measure_binding("TotalSales")
-        page = ctrl._active_page()
-        page["visuals"].append({
-            "id": "v_map", "title": "TestMap", "type": "shapeMap", "table_id": "tbl_store",
-            "shape_map_file": "fake_map", "shape_map_key": "id",
-            "fields": {"Location": [("tbl_store", "cat")], "Values": [m_bind]},
-        })
-        mock_rows = [{"cat": "A", "val": "1"}]
-        mock_context = (
-            {"tbl_store": mock_rows},
-            [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
-            set(),
-        )
+        with patch.object(ctrl, "_store_tables_loaded", return_value=False):
+            m_bind = _visual_measure_binding("TotalSales")
+            page = ctrl._active_page()
+            page["visuals"].append({
+                "id": "v_map", "title": "TestMap", "type": "shapeMap", "table_id": "tbl_store",
+                "shape_map_file": "fake_map", "shape_map_key": "id",
+                "fields": {"Location": [("tbl_store", "cat")], "Values": [m_bind]},
+            })
+            mock_rows = [{"cat": "A", "val": "1"}]
+            mock_context = (
+                {"tbl_store": mock_rows},
+                [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
+                set(),
+            )
 
-        msg = "Large table refusal: map unavailable"
-        with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
-            with patch("analytics_studio.controller.load_boundary_features", return_value=[{"id": "A", "properties": {"id": "A"}}]):
-                with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
-                    ctrl._set_status("")
-                    res = ctrl.visualShapeMapData("TestMap")
-                    assert ctrl._status_message == msg
-                    assert len(res) == 1
-                    assert res[0]["value"] is None
+            msg = "Large table refusal: map unavailable"
+            with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
+                with patch("analytics_studio.controller.load_boundary_features", return_value=[{"id": "A", "properties": {"id": "A"}}]):
+                    with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
+                        ctrl._set_status("")
+                        res = ctrl.visualShapeMapData("TestMap")
+                        assert ctrl._status_message == msg
+                        assert len(res) == 1
+                        assert res[0]["value"] is None
 
-                with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
-                    ctrl._set_status("")
-                    res_ord = ctrl.visualShapeMapData("TestMap")
-                    assert len(res_ord) == 1
-                    assert res_ord[0]["value"] == 42.0
+                    with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
+                        ctrl._set_status("")
+                        res_ord = ctrl.visualShapeMapData("TestMap")
+                        assert len(res_ord) == 1
+                        assert res_ord[0]["value"] == 42.0
     finally:
         ps.close()
 
@@ -250,36 +250,37 @@ def test_site_4_cross_table_table_data(qapp: QApplication, tmp_path: Path) -> No
     """Site 4 (was 3909): _cross_table_table_data surfaces LargeTableError message in error field."""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
-        m_bind = _visual_measure_binding("TotalSales")
-        page = ctrl._active_page()
-        page["visuals"].append({
-            "id": "v_cross_table", "title": "CrossTable", "type": "table", "table_id": "tbl_dim",
-            "fields": {"Fields": [{"table_id": "tbl_dim", "column": "cat"}, {"table_id": "tbl_store", "column": m_bind}]},
-        })
-        mock_rows = [{"cat": "A"}]
-        mock_context = (
-            {"tbl_dim": mock_rows, "tbl_store": []},
-            [
-                {"id": "tbl_dim", "name": "TDim", "headers": ["cat"], "rows": mock_rows},
-                {"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": []},
-            ],
-            set(),
-        )
+        with patch.object(ctrl, "_store_tables_loaded", return_value=False):
+            m_bind = _visual_measure_binding("TotalSales")
+            page = ctrl._active_page()
+            page["visuals"].append({
+                "id": "v_cross_table", "title": "CrossTable", "type": "table", "table_id": "tbl_dim",
+                "fields": {"Fields": [{"table_id": "tbl_dim", "column": "cat"}, {"table_id": "tbl_store", "column": m_bind}]},
+            })
+            mock_rows = [{"cat": "A"}]
+            mock_context = (
+                {"tbl_dim": mock_rows, "tbl_store": []},
+                [
+                    {"id": "tbl_dim", "name": "TDim", "headers": ["cat"], "rows": mock_rows},
+                    {"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": []},
+                ],
+                set(),
+            )
 
-        msg = "Large table refusal: cross table unavailable"
-        with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
-            with patch.object(ctrl, "_measure_table_context", return_value=mock_context[1]):
-                with patch.object(ctrl, "_measure_reference_table_id", return_value=("tbl_store", None)):
-                    with patch.object(ctrl, "_cross_table_relationship_error", return_value=None):
-                        with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
-                            res = ctrl.visualTableData("CrossTable")
-                            assert res.get("error") == msg
+            msg = "Large table refusal: cross table unavailable"
+            with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
+                with patch.object(ctrl, "_measure_table_context", return_value=mock_context[1]):
+                    with patch.object(ctrl, "_measure_reference_table_id", return_value=("tbl_store", None)):
+                        with patch.object(ctrl, "_cross_table_relationship_error", return_value=None):
+                            with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
+                                res = ctrl.visualTableData("CrossTable")
+                                assert res.get("error") == msg
 
-                        with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
-                            res_ord = ctrl.visualTableData("CrossTable")
-                            assert "error" not in res_ord or not res_ord.get("error")
-                            assert len(res_ord["rows"]) == 1
-                            assert res_ord["rows"][0]["values"] == ["A", "42"]
+                            with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
+                                res_ord = ctrl.visualTableData("CrossTable")
+                                assert "error" not in res_ord or not res_ord.get("error")
+                                assert len(res_ord["rows"]) == 1
+                                assert res_ord["rows"][0]["values"] == ["A", "42"]
     finally:
         ps.close()
 
@@ -288,31 +289,32 @@ def test_site_5_visual_table_data(qapp: QApplication, tmp_path: Path) -> None:
     """Site 5 (was 4064): visualTableData surfaces LargeTableError in error detail."""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
-        m_bind = _visual_measure_binding("TotalSales")
-        page = ctrl._active_page()
-        page["visuals"].append({
-            "id": "v_table", "title": "TestTable", "type": "table", "table_id": "tbl_store",
-            "fields": {"Fields": ["cat", m_bind]},
-        })
-        mock_rows = [{"cat": "A", "val": "1"}]
-        mock_context = (
-            {"tbl_store": mock_rows},
-            [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
-            set(),
-        )
+        with patch.object(ctrl, "_store_tables_loaded", return_value=False):
+            m_bind = _visual_measure_binding("TotalSales")
+            page = ctrl._active_page()
+            page["visuals"].append({
+                "id": "v_table", "title": "TestTable", "type": "table", "table_id": "tbl_store",
+                "fields": {"Fields": ["cat", m_bind]},
+            })
+            mock_rows = [{"cat": "A", "val": "1"}]
+            mock_context = (
+                {"tbl_store": mock_rows},
+                [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
+                set(),
+            )
 
-        msg = "Large table refusal: table visual unavailable"
-        with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
-            with patch.object(ctrl, "_measure_table_context", return_value=mock_context[1]):
-                with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
-                    res = ctrl.visualTableData("TestTable")
-                    assert res.get("error") == msg
+            msg = "Large table refusal: table visual unavailable"
+            with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
+                with patch.object(ctrl, "_measure_table_context", return_value=mock_context[1]):
+                    with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
+                        res = ctrl.visualTableData("TestTable")
+                        assert res.get("error") == msg
 
-                with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
-                    res_ord = ctrl.visualTableData("TestTable")
-                    assert "error" not in res_ord or not res_ord.get("error")
-                    assert len(res_ord["rows"]) == 1
-                    assert res_ord["rows"][0]["values"] == ["A", "42"]
+                    with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
+                        res_ord = ctrl.visualTableData("TestTable")
+                        assert "error" not in res_ord or not res_ord.get("error")
+                        assert len(res_ord["rows"]) == 1
+                        assert res_ord["rows"][0]["values"] == ["A", "42"]
     finally:
         ps.close()
 
@@ -321,28 +323,29 @@ def test_site_6_visual_matrix_data(qapp: QApplication, tmp_path: Path) -> None:
     """Site 6 (was 4172): visualMatrixData surfaces LargeTableError in matrix cells."""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
-        m_bind = _visual_measure_binding("TotalSales")
-        page = ctrl._active_page()
-        page["visuals"].append({
-            "id": "v_matrix", "title": "TestMatrix", "type": "matrix", "table_id": "tbl_store",
-            "fields": {"Rows": [("tbl_store", "cat")], "Columns": [("tbl_store", "cat")], "Values": [m_bind]},
-        })
-        mock_rows = [{"cat": "A", "val": "1"}]
-        mock_context = (
-            {"tbl_store": mock_rows},
-            [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
-            set(),
-        )
+        with patch.object(ctrl, "_store_tables_loaded", return_value=False):
+            m_bind = _visual_measure_binding("TotalSales")
+            page = ctrl._active_page()
+            page["visuals"].append({
+                "id": "v_matrix", "title": "TestMatrix", "type": "matrix", "table_id": "tbl_store",
+                "fields": {"Rows": [("tbl_store", "cat")], "Columns": [("tbl_store", "cat")], "Values": [m_bind]},
+            })
+            mock_rows = [{"cat": "A", "val": "1"}]
+            mock_context = (
+                {"tbl_store": mock_rows},
+                [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
+                set(),
+            )
 
-        msg = "Large table refusal: matrix cell unavailable"
-        with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
-            with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
-                res = ctrl.visualMatrixData("TestMatrix")
-                assert res["rows"][0]["values"][1] == msg
+            msg = "Large table refusal: matrix cell unavailable"
+            with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
+                with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
+                    res = ctrl.visualMatrixData("TestMatrix")
+                    assert res["rows"][0]["values"][1] == msg
 
-            with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
-                res_ord = ctrl.visualMatrixData("TestMatrix")
-                assert res_ord["rows"][0]["values"][1] == "42"
+                with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
+                    res_ord = ctrl.visualMatrixData("TestMatrix")
+                    assert res_ord["rows"][0]["values"][1] == "42"
     finally:
         ps.close()
 
@@ -351,28 +354,29 @@ def test_site_7_visual_card_data(qapp: QApplication, tmp_path: Path) -> None:
     """Site 7 (was 4289, 4314): visualCardData surfaces LargeTableError in card value and highlight."""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
-        m_bind = _visual_measure_binding("TotalSales")
-        page = ctrl._active_page()
-        page["visuals"].append({
-            "id": "v_card", "title": "TestCard", "type": "card", "table_id": "tbl_store",
-            "fields": {"Fields": [m_bind]},
-        })
-        mock_rows = [{"cat": "A", "val": "1"}]
-        mock_context = (
-            {"tbl_store": mock_rows},
-            [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
-            set(),
-        )
+        with patch.object(ctrl, "_store_tables_loaded", return_value=False):
+            m_bind = _visual_measure_binding("TotalSales")
+            page = ctrl._active_page()
+            page["visuals"].append({
+                "id": "v_card", "title": "TestCard", "type": "card", "table_id": "tbl_store",
+                "fields": {"Fields": [m_bind]},
+            })
+            mock_rows = [{"cat": "A", "val": "1"}]
+            mock_context = (
+                {"tbl_store": mock_rows},
+                [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
+                set(),
+            )
 
-        msg = "Large table refusal: card unavailable"
-        with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
-            with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
-                res = ctrl.visualCardData("TestCard")
-                assert res["value"] == msg
+            msg = "Large table refusal: card unavailable"
+            with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
+                with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
+                    res = ctrl.visualCardData("TestCard")
+                    assert res["value"] == msg
 
-            with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
-                res_ord = ctrl.visualCardData("TestCard")
-                assert res_ord["value"] == "42"
+                with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
+                    res_ord = ctrl.visualCardData("TestCard")
+                    assert res_ord["value"] == "42"
     finally:
         ps.close()
 
@@ -381,31 +385,32 @@ def test_site_8_dynamic_visual_series(qapp: QApplication, tmp_path: Path) -> Non
     """Site 8 (was 15225): _generate_dynamic_visual_series surfaces LargeTableError in status message."""
     ps, ctrl = _setup_visual_controller(tmp_path)
     try:
-        m_bind = _visual_measure_binding("TotalSales")
-        page = ctrl._active_page()
-        page["visuals"].append({
-            "id": "v_chart", "title": "TestChart", "type": "clusteredColumn", "table_id": "tbl_store",
-            "fields": {"X-axis": [("tbl_store", "cat")], "Y-axis": [m_bind]},
-        })
-        mock_rows = [{"cat": "A", "val": "1"}, {"cat": "B", "val": "2"}]
-        mock_context = (
-            {"tbl_store": mock_rows},
-            [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
-            set(),
-        )
+        with patch.object(ctrl, "_store_tables_loaded", return_value=False):
+            m_bind = _visual_measure_binding("TotalSales")
+            page = ctrl._active_page()
+            page["visuals"].append({
+                "id": "v_chart", "title": "TestChart", "type": "clusteredColumn", "table_id": "tbl_store",
+                "fields": {"X-axis": [("tbl_store", "cat")], "Y-axis": [m_bind]},
+            })
+            mock_rows = [{"cat": "A", "val": "1"}, {"cat": "B", "val": "2"}]
+            mock_context = (
+                {"tbl_store": mock_rows},
+                [{"id": "tbl_store", "name": "TStore", "headers": ["cat", "val"], "rows": mock_rows}],
+                set(),
+            )
 
-        msg = "Large table refusal: series unavailable"
-        with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
-            with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
-                ctrl._set_status("")
-                res = ctrl._generate_dynamic_visual_series("TestChart")
-                assert ctrl._status_message == msg
-                assert res == []
+            msg = "Large table refusal: series unavailable"
+            with patch.object(ctrl, "_report_filter_context", return_value=mock_context):
+                with patch.object(ctrl, "_measure_value_for_visual_group", side_effect=LargeTableError(msg)):
+                    ctrl._set_status("")
+                    res = ctrl._generate_dynamic_visual_series("TestChart")
+                    assert ctrl._status_message == msg
+                    assert res == []
 
-            with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
-                ctrl._set_status("")
-                res_ord = ctrl._generate_dynamic_visual_series("TestChart")
-                assert len(res_ord) == 2
-                assert res_ord[0]["value"] == 42.0
+                with patch.object(ctrl, "_measure_value_for_visual_group", return_value=Decimal("42")):
+                    ctrl._set_status("")
+                    res_ord = ctrl._generate_dynamic_visual_series("TestChart")
+                    assert len(res_ord) == 2
+                    assert res_ord[0]["value"] == 42.0
     finally:
         ps.close()

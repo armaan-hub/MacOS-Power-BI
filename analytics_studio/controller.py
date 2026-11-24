@@ -21,7 +21,6 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 if TYPE_CHECKING:
-    from analytics_studio.store.candidate import StoreCandidate
     from analytics_studio.store.session import ProjectStore
     from analytics_studio.store.table_model import StoreTableModel
 
@@ -1921,7 +1920,7 @@ class CsvTableModel(QAbstractTableModel):
         return {int(Qt.ItemDataRole.DisplayRole): b"display"}
 
 
-from analytics_studio.store.candidate import LargeTableError
+from analytics_studio.store.candidate import LargeTableError, StoreCandidate
 
 
 class StudioController(QObject):
@@ -2098,6 +2097,18 @@ class StudioController(QObject):
         if closed:
             self._project_store = None
         return closed
+
+    def _store_tables_loaded(self) -> bool:
+        """Return True if any StoreCandidate is present in loaded candidates."""
+        return any(isinstance(c, StoreCandidate) for c in self._loaded_candidates.values())
+
+    def _large_data_refusal(self, what: str) -> str:
+        """Standard refusal message for unsupported large-data table features."""
+        return (
+            f"{what} is not available for large-data tables yet. Tables up to 100,000 "
+            "rows work everywhere; large tables support the data grid, sort, filter, "
+            "column statistics and export. Other features arrive in a later release."
+        )
 
     # QML-facing state. The dictionaries/lists are returned as fresh QVariant values.
     @Property(str, notify=stateChanged)
@@ -3271,6 +3282,12 @@ class StudioController(QObject):
     def visualGaugeData(
         self, visual_name: str, include_highlights: bool = False
     ) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return {
+                "value": 0.0, "minimum": 0.0, "maximum": 1.0,
+                "target": None, "highlight_value": None, "has_value": False,
+            }
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3379,6 +3396,12 @@ class StudioController(QObject):
     def visualKpiData(
         self, visual_name: str, include_highlights: bool = False
     ) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return {
+                "field": "", "trend_field": "", "value": 0.0, "target": None,
+                "trend": [], "highlight_value": None, "has_value": False,
+            }
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3448,6 +3471,9 @@ class StudioController(QObject):
     def visualMapData(
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return []
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3524,6 +3550,9 @@ class StudioController(QObject):
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
         """Join report rows to a local GeoJSON/TopoJSON boundary source."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return []
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -3670,6 +3699,9 @@ class StudioController(QObject):
     def visualScatterData(
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return []
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -4030,6 +4062,9 @@ class StudioController(QObject):
 
     @Slot(str, result="QVariantMap")
     def visualTableData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return {"columns": [], "rows": [], "total_rows": 0}
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -4194,6 +4229,9 @@ class StudioController(QObject):
 
     @Slot(str, result="QVariantMap")
     def visualMatrixData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return {"columns": [], "rows": [], "total_rows": 0}
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -4357,6 +4395,9 @@ class StudioController(QObject):
 
     @Slot(str, result="QVariantMap")
     def visualCardData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return {"label": "", "value": "", "aggregation": "", "highlight_value": "", "has_highlights": False}
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -4518,6 +4559,9 @@ class StudioController(QObject):
 
     @Property("QVariantList", notify=stateChanged)
     def regions(self) -> list[str]:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Region filter"))
+            return ["All regions"]
         column = self._region_column
         values = sorted({str(row.get(column, "")) for row in self._rows if column and row.get(column)})
         return ["All regions", *values]
@@ -4643,6 +4687,9 @@ class StudioController(QObject):
 
     @Slot(str, str, result="QVariantList")
     def pageFilterValues(self, table_id: str, column: str) -> list[dict[str, str]]:  # noqa: N802
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Page filter values"))
+            return []
         table = next(
             (item for item in self._table_catalog
              if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
@@ -4670,6 +4717,9 @@ class StudioController(QObject):
     def searchPageFilterValues(  # noqa: N802
         self, table_id: str, column: str, search: str
     ) -> list[dict[str, str]]:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Page filter values"))
+            return []
         table = next(
             (item for item in self._table_catalog
              if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
@@ -6415,6 +6465,9 @@ class StudioController(QObject):
         report_scope: bool = False,
         async_refresh: bool = False,
     ) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report filters"))
+            return False
         table = next(
             (item for item in self._table_catalog
              if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
@@ -8743,6 +8796,9 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def editMeasure(self, measure_name: str) -> bool:  # noqa: N802
         """Open the DAX editor with an existing measure's saved definition."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         if not self.sourceLoaded:
             self._set_status("Import a table before editing a measure.")
             return False
@@ -8808,6 +8864,9 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def deleteMeasure(self, measure_name: str) -> bool:  # noqa: N802
         """Confirm removal of a saved measure, then validate dependent formulas."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         answer = QMessageBox.question(
             None,
             "Delete measure",
@@ -8997,6 +9056,9 @@ class StudioController(QObject):
         return ""
 
     def _measure_dialog(self, *, quick: bool) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
             return False
@@ -9115,6 +9177,9 @@ class StudioController(QObject):
         Shared by the synchronous and the worker-thread preview. Project state
         stays exactly as it was found.
         """
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            raise MeasureError(self._large_data_refusal("DAX measures"))
         measure = normalize_measure(
             name, expression, home_table_id=home_table_id
         )
@@ -9184,6 +9249,9 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> str:
         """Validate and evaluate a draft measure without changing project state."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return "—"
         inputs = self._build_preview_inputs(
             name, expression, editing_name=editing_name, home_table_id=home_table_id
         )
@@ -9217,6 +9285,11 @@ class StudioController(QObject):
         If another engine call cancels the running preview, it is started again
         once that call has returned. A user cancel drops it.
         """
+        if self._store_tables_loaded():
+            refusal = self._large_data_refusal("DAX measures")
+            self._set_status(refusal)
+            on_done(refusal)
+            return
         try:
             inputs = self._build_preview_inputs(
                 name, expression, editing_name=editing_name, home_table_id=home_table_id
@@ -9310,6 +9383,9 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate, evaluate, then transactionally add a local DAX measure."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
@@ -9370,6 +9446,9 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate and transactionally replace one saved local DAX measure."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before editing a measure.")
@@ -9457,6 +9536,9 @@ class StudioController(QObject):
 
     def remove_measure(self, name: str) -> bool:
         """Remove one measure only when the remaining model still evaluates."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("DAX measures"))
+            return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
             self._set_status("Import a table before removing a measure.")
@@ -10099,6 +10181,8 @@ class StudioController(QObject):
         self,
         filter_rows_by_table: dict[str, list[dict[str, Any]]] | None = None,
     ) -> list[dict[str, Any]]:
+        if self._store_tables_loaded():
+            raise MeasureError(self._large_data_refusal("DAX measures"))
         filter_rows_by_table = filter_rows_by_table or {}
         context = []
         # Power BI keeps query parameters, custom functions, queries with load off and query folders in the model
@@ -10173,6 +10257,9 @@ class StudioController(QObject):
         include_highlights: bool = False,
     ) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]], set[str]]:
         """Build page context plus optional filters for one report visual."""
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report filters"))
+            return {}, [], set()
         cache_key = (visual_name, include_highlights)
         cached = self._report_filter_context_cache.get(cache_key)
         if cached is not None:
@@ -13117,6 +13204,9 @@ class StudioController(QObject):
 
     @Slot(str, str)
     def add_field_to_well(self, well_name: str, field_name: str) -> None:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Visual fields"))
+            return
         if not self._selected_visual:
             return
         page = self._active_page()
@@ -14578,6 +14668,16 @@ class StudioController(QObject):
             self._region_chart_message = "No region and numeric sales field found in this source."
             return
 
+        if self._store_tables_loaded():
+            self._kpis = defaults
+            self._monthly_series = []
+            self._region_series = []
+            self._filter_context_error = ""
+            self._monthly_chart_message = self._large_data_refusal("Report view")
+            self._region_chart_message = self._large_data_refusal("Report view")
+            self._set_status(self._large_data_refusal("Report view"))
+            return
+
         if self._current_region is not None and self._current_region not in self.regions:
             self._current_region = None
         filtered_rows_by_table, measure_table_context, filter_table_ids = (
@@ -14774,6 +14874,23 @@ class StudioController(QObject):
             self._filter_context_error = ""
             self._monthly_chart_message = "No date and numeric sales field found in this source."
             self._region_chart_message = "No region and numeric sales field found in this source."
+            self.stateChanged.emit()
+            return
+
+        if self._store_tables_loaded():
+            self._cancel_and_wait_worker()
+            self._kpis = defaults
+            self._measure_values = {}
+            self._measure_errors = {}
+            self._visual_kpis = {}
+            self._monthly_visual_series = {}
+            self._region_visual_series = {}
+            self._monthly_series = []
+            self._region_series = []
+            self._filter_context_error = ""
+            self._monthly_chart_message = self._large_data_refusal("Report view")
+            self._region_chart_message = self._large_data_refusal("Report view")
+            self._set_status(self._large_data_refusal("Report view"))
             self.stateChanged.emit()
             return
 
@@ -15269,6 +15386,9 @@ class StudioController(QObject):
         include_highlights: bool = False,
         value_well: str | None = None,
     ) -> list[dict[str, object]]:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report visual data"))
+            return []
         page = self._active_page()
         if not page:
             return []
@@ -15712,6 +15832,8 @@ class StudioController(QObject):
         return {"Monthly revenue": "monthly", "Region revenue": "region"}.get(visual_name)
 
     def _set_status(self, message: str) -> None:
+        if self._status_message == message:
+            return
         self._status_message = message
         self.statusChanged.emit(message)
 
