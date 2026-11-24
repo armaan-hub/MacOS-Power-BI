@@ -10,14 +10,20 @@ import csv
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal, DecimalException
 import json
+import logging
 import math
 import os
 from pathlib import Path
 import re
 import tempfile
 import threading
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
+
+if TYPE_CHECKING:
+    from analytics_studio.store.candidate import StoreCandidate
+    from analytics_studio.store.session import ProjectStore
+    from analytics_studio.store.table_model import StoreTableModel
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -27,6 +33,7 @@ from PySide6.QtCore import (
     Property,
     Qt,
     QSettings,
+    QStandardPaths,
     Signal,
     Slot,
     QTimer,
@@ -163,6 +170,7 @@ from analytics_studio.transformations import (
 
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
+logger = logging.getLogger(__name__)
 # Axis cards offered per chart type: (X-axis header key, Y-axis header key).
 # The Title switch works on every listed type; a header key is set only where it
 # changes pixels in ChartCard.qml (checked with offscreen grabs), else None.
@@ -1931,8 +1939,9 @@ class StudioController(QObject):
         self._dirty = False
         self._current_view = "Report"
         self._active_page_id = self._project["report"]["active_page_id"]
+        self._active_store_candidate: StoreCandidate | None = None
         self._headers: list[str] = []
-        self._rows: list[dict[str, str | None]] = []
+        self._rows_backing: list[dict[str, str | None]] = []
         self._source_path: Path | None = None
         self._source_id: str | None = None
         self._active_source_id: str | None = None
@@ -2010,8 +2019,71 @@ class StudioController(QObject):
         self._preview_job: tuple[Any, ...] | None = None
         self._preview_cancel_event: threading.Event | None = None
         self._preview_tasks: dict[int, Any] = {}
+        self._project_store: ProjectStore | None = None
+        self._store_table_model: StoreTableModel | None = None
+        self._app_data_dir: str | None = None
+        try:
+            from analytics_studio.store.session import ProjectStore as _PS
+            _PS.reap_stale(self._effective_app_data_dir())
+        except Exception as exc:
+            logger.warning("Failed to reap stale project stores: %s", exc)
         self._refresh_model_view()
         self._refresh_report()
+
+    @property
+    def _rows(self) -> list[dict[str, str | None]]:
+        if self._active_store_candidate is not None:
+            return []
+        return self._rows_backing
+
+    @_rows.setter
+    def _rows(self, value: list[dict[str, str | None]]) -> None:
+        self._rows_backing = value if isinstance(value, list) else list(value)
+
+    def _active_row_count(self) -> int:
+        if self._active_store_candidate is not None:
+            return self._active_store_candidate.row_count
+        return len(self._rows_backing)
+
+    def _effective_app_data_dir(self) -> str:
+        if self._app_data_dir is not None:
+            return self._app_data_dir
+        loc = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppDataLocation)
+        return loc if loc else tempfile.gettempdir()
+
+    def _ensure_project_store(self) -> ProjectStore:
+        if self._project_store is not None and not self._project_store._closed:
+            return self._project_store
+
+        from analytics_studio.store.session import ProjectStore as _PS
+
+        app_dir = self._effective_app_data_dir()
+        if self._project_path:
+            data_path = _PS.data_file_for(str(self._project_path))
+            self._project_store = _PS.open(data_path)
+        else:
+            self._project_store = _PS.open_unsaved(app_dir)
+        return self._project_store
+
+    def _close_project_store(self) -> None:
+        if self._project_store is not None:
+            store = self._project_store
+            self._project_store = None
+            try:
+                store.shutdown()
+            except Exception:
+                pass
+            try:
+                store.close()
+            except Exception:
+                pass
+
+    def shutdown_store(self) -> bool:
+        if self._project_store is None:
+            return True
+        store = self._project_store
+        self._project_store = None
+        return store.shutdown()
 
     # QML-facing state. The dictionaries/lists are returned as fresh QVariant values.
     @Property(str, notify=stateChanged)
@@ -2530,7 +2602,9 @@ class StudioController(QObject):
 
     @Property(int, notify=stateChanged)
     def rowCount(self) -> int:  # noqa: N802
-        return len(self._rows)
+        if self._active_store_candidate is not None:
+            return self._active_store_candidate.row_count
+        return len(self._rows_backing)
 
     @Property(int, notify=stateChanged)
     def columnCount(self) -> int:  # noqa: N802
@@ -2550,6 +2624,8 @@ class StudioController(QObject):
 
     @Property(QObject, notify=stateChanged)
     def dataModel(self) -> QObject:  # noqa: N802
+        if self._active_store_candidate is not None and self._store_table_model is not None:
+            return self._store_table_model
         return self._table_model
 
     @Property("QVariantList", notify=stateChanged)
@@ -7851,7 +7927,7 @@ class StudioController(QObject):
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
-        self._set_status(f"Loaded {table_name} · {len(self._rows):,} rows")
+        self._set_status(f"Loaded {table_name} · {self._active_row_count():,} rows")
         self.activeSourceReady.emit()
         return True
 
@@ -14028,7 +14104,7 @@ class StudioController(QObject):
         finally:
             if temp_path is not None:
                 temp_path.unlink(missing_ok=True)
-        self._set_status(f"Exported {len(self._rows):,} rows to {path.name}")
+        self._set_status(f"Exported {self._active_row_count():,} rows to {path.name}")
         return True
 
     def _save_to(self, path: Path) -> bool:
@@ -14212,17 +14288,39 @@ class StudioController(QObject):
         self._active_source_kind = parsed.kind
         self._active_parser_options = dict(parsed.options)
         self._headers = list(parsed.headers)
-        self._rows = list(parsed.rows)
-        self._table_model.replace_data(
-            self._headers,
-            self._rows,
-            table_key=self._active_source_id,
-            column_types=self._active_column_type_map(),
-        )
+
+        from analytics_studio.store.candidate import StoreCandidate
+        if isinstance(parsed, StoreCandidate):
+            self._active_store_candidate = parsed
+            self._rows = []
+            if self._store_table_model is None:
+                from analytics_studio.store.table_model import StoreTableModel
+                self._store_table_model = StoreTableModel(parsed.session.store, parent=self)
+            self._store_table_model.replace_store(
+                table_name=parsed.store_table,
+                headers=self._headers,
+                column_types=self._active_column_type_map(),
+                row_count=parsed.row_count,
+                table_key=self._active_source_id,
+            )
+        else:
+            self._active_store_candidate = None
+            if self._store_table_model is not None:
+                self._store_table_model.clear()
+            self._rows = list(parsed.rows)
+            self._table_model.replace_data(
+                self._headers,
+                self._rows,
+                table_key=self._active_source_id,
+                column_types=self._active_column_type_map(),
+            )
+
         if self._current_region not in self.regions:
             self._current_region = None
+        self.stateChanged.emit()
 
     def _clear_source(self, *, clear_selection: bool = True) -> None:
+        self._active_store_candidate = None
         self._source_path = None
         self._source_id = None
         self._headers = []
@@ -14230,11 +14328,14 @@ class StudioController(QObject):
         self._current_region = None
         self._source_warning = ""
         self._table_model.clear()
+        if self._store_table_model is not None:
+            self._store_table_model.clear()
         if clear_selection:
             self._active_source_id = None
             self._active_source_path = None
             self._active_source_kind = None
             self._active_parser_options = {}
+        self.stateChanged.emit()
 
     def _page_relative_filter_kinds(self) -> tuple[bool, bool]:
 
@@ -15464,7 +15565,7 @@ class StudioController(QObject):
                     self._source_refresh_included(source) if source else True
                 ),
                 "active": source_id == self._active_source_id,
-                "rowCount": len(parsed.rows) if parsed else 0,
+                "rowCount": parsed.row_count if parsed else 0,
                 "columnCount": len(parsed.headers) if parsed else 0,
                 "headers": list(parsed.headers) if parsed else [],
                 "columnTypes": dict(table.get("column_types", {})),
@@ -15512,7 +15613,7 @@ class StudioController(QObject):
                 "loadEnabled": load_enabled,
                 "includeInReportRefresh": self._source_refresh_included(source),
                 "active": source_id == self._active_source_id,
-                "rowCount": len(parsed.rows) if parsed else 0,
+                "rowCount": parsed.row_count if parsed else 0,
                 "columnCount": len(parsed.headers) if parsed else 0,
                 "headers": list(parsed.headers) if parsed else [],
                 "columnTypes": {},

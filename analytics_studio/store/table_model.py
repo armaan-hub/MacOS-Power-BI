@@ -1253,6 +1253,25 @@ class StoreTableModel(QAbstractTableModel):
             mutate, (self.pageChanged, self.sortChanged, self.dataReplaced), ev
         )
 
+    def replace_store(
+        self,
+        table_name: str,
+        headers: list[str] | None = None,
+        column_types: dict[str, str] | None = None,
+        row_count: int | None = None,
+        table_key: str | None = None,
+        *,
+        cancel_event: threading.Event | None = None,
+    ) -> bool:
+        """Attach a table from the store. Minimal wrapper around replace_data."""
+        return self.replace_data(
+            table_name=table_name,
+            headers=headers,
+            column_types=column_types,
+            table_key=table_key,
+            cancel_event=cancel_event,
+        )
+
     # ------------------------------------------------------------------
     # Paging
     # ------------------------------------------------------------------

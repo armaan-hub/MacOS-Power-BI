@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 import sys
+import time
 from pathlib import Path
+from types import TracebackType
 
-from PySide6.QtCore import QCoreApplication, QEvent, QTimer, QUrl
+from PySide6.QtCore import QCoreApplication, QEvent, QEventLoop, QThreadPool, QTimer, QUrl
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent
 from PySide6.QtQuickControls2 import QQuickStyle
@@ -13,8 +16,53 @@ from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
 
+logger = logging.getLogger(__name__)
+
+
+def install_excepthook() -> None:
+    """Install a sys.excepthook wrapper that logs tracebacks before chaining."""
+    previous_hook = sys.excepthook
+
+    def _logging_excepthook(
+        exc_type: type[BaseException],
+        exc_value: BaseException,
+        exc_traceback: TracebackType | None,
+    ) -> None:
+        logger.error(
+            "Uncaught exception: %s",
+            exc_value,
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
+        if previous_hook is not None:
+            previous_hook(exc_type, exc_value, exc_traceback)
+
+    sys.excepthook = _logging_excepthook
+
+
+def _on_about_to_quit(controller: StudioController) -> None:
+    """Cleanly shut down background store jobs and the open project store on quit."""
+    if controller._project_store is not None:
+        controller._project_store.request_cancel()
+    global_pool = QThreadPool.globalInstance()
+    if global_pool is not None:
+        global_pool.waitForDone(15000)
+
+    success = controller.shutdown_store()
+    if not success:
+        # Retry once after 2 s with a processEvents loop
+        app = QCoreApplication.instance()
+        end_time = time.time() + 2.0
+        while time.time() < end_time:
+            if app is not None:
+                app.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, 50)
+            time.sleep(0.01)
+        success = controller.shutdown_store()
+        if not success:
+            logger.error("Failed to shutdown ProjectStore on aboutToQuit after retry.")
+
 
 def main() -> int:
+    install_excepthook()
     # Custom QML backgrounds are supported by the Basic Controls style.
     QQuickStyle.setStyle("Basic")
     app = QApplication(sys.argv)
@@ -29,6 +77,7 @@ def main() -> int:
     app.setFont(QFont(ui_font))
 
     controller = StudioController(app)
+    app.aboutToQuit.connect(lambda: _on_about_to_quit(controller))
     engine = QQmlApplicationEngine(app)
     qml_path = Path(__file__).resolve().parent / "qml" / "Main.qml"
     component = QQmlComponent(engine)
