@@ -81,6 +81,7 @@ class StoreCandidate(ImportCandidate):
         source_id: str | None = None,
         header_row_used: int | None = None,
         session: Any = None,
+        source_arrow_types: list[str] | None = None,
     ) -> None:
         self.kind = kind
         self.headers = headers
@@ -92,6 +93,7 @@ class StoreCandidate(ImportCandidate):
         self.physical_types = list(physical_types) if physical_types is not None else []
         self.model_types = dict(model_types) if model_types is not None else {}
         self.session = session
+        self.source_arrow_types = list(source_arrow_types) if source_arrow_types is not None else []
         if source_id:
             self.source_id = source_id
         else:

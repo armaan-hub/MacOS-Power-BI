@@ -24,7 +24,7 @@ from typing import (
 
 import duckdb
 
-from .base import StoreError, StoreLockedError
+from .base import StoreBusyError, StoreError, StoreLockedError
 from .duck_store import DuckStore
 
 try:
@@ -397,7 +397,7 @@ class ProjectStore:
             if self._shutting_down:
                 raise StoreError("The store is shutting down.")
             if self._busy:
-                raise StoreError("The store is busy with another operation.")
+                raise StoreBusyError("The store is busy with another operation.")
             self._busy = True
             # A cancel left over from an earlier job must not stop this operation
             # (shutdown is refused above, so this never swallows a real shutdown cancel).
@@ -415,7 +415,7 @@ class ProjectStore:
     def job(self) -> Iterator[threading.Event]:
         """Marks busy, clears cancel_event, yields cancel_event; unmarks in finally.
 
-        A second job() while busy raises StoreError("The store is busy with another operation.").
+        A second job() while busy raises StoreBusyError("The store is busy with another operation.").
         """
         with self._lock:
             if self._closed:
@@ -423,7 +423,7 @@ class ProjectStore:
             if self._shutting_down:
                 raise StoreError("The store is shutting down.")
             if self._busy:
-                raise StoreError("The store is busy with another operation.")
+                raise StoreBusyError("The store is busy with another operation.")
             self._busy = True
             if not self._shutting_down:
                 self._cancel_event.clear()
@@ -436,26 +436,26 @@ class ProjectStore:
                 self._lock.notify_all()
 
     def call(self, fn: Callable[[DuckStore], T]) -> T:
-        """Call fn(self.store) on UI thread; raises busy StoreError if busy."""
+        """Call fn(self.store) on UI thread; raises busy StoreBusyError if busy."""
         with self._lock:
             if self._closed or self._store is None:
                 raise StoreError("The store is closed.")
             if self._shutting_down:
                 raise StoreError("The store is shutting down.")
             if self._busy:
-                raise StoreError("The store is busy with another operation.")
+                raise StoreBusyError("The store is busy with another operation.")
             store = self._store
         return fn(store)
 
     def checkpoint(self) -> None:
-        """Checkpoint store; raises busy StoreError if busy."""
+        """Checkpoint store; raises busy StoreBusyError if busy."""
         with self._lock:
             if self._closed or self._store is None:
                 raise StoreError("The store is closed.")
             if self._shutting_down:
                 raise StoreError("The store is shutting down.")
             if self._busy:
-                raise StoreError("The store is busy with another operation.")
+                raise StoreBusyError("The store is busy with another operation.")
             store = self._store
         store.checkpoint()
 
@@ -835,12 +835,12 @@ class ProjectStore:
         return True
 
     def close(self) -> None:
-        """Close store and remove spill directory; raises busy StoreError if busy."""
+        """Close store and remove spill directory; raises busy StoreBusyError if busy."""
         with self._lock:
             if self._closed:
                 return
             if self._busy:
-                raise StoreError("The store is busy with another operation.")
+                raise StoreBusyError("The store is busy with another operation.")
             self._closed = True
             store = self._store
             self._store = None

@@ -15,6 +15,11 @@ class StoreLockedError(StoreError):
     pass
 
 
+class StoreBusyError(StoreError):
+    """Raised when the store is busy with another operation."""
+    pass
+
+
 class Store(Protocol):
     """Abstract interface / protocol for table row storage."""
 

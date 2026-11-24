@@ -163,6 +163,7 @@ from analytics_studio.transformations import (
     SUPPORTED_COLUMN_TYPES,
     TransformationError,
     apply_transformations,
+    canonical_column_type,
     column_types_after_steps,
     count_conversion_errors,
     infer_column_types,
@@ -204,6 +205,70 @@ def _profile_cell_type(value: Any) -> str:
     if isinstance(value, time):
         return "time"
     return "text"
+
+
+def _format_store_cell(
+    val: Any,
+    app_type: str | None,
+    target: str,
+    source_arrow_type: str | None = None,
+) -> Any:
+    """Format a raw store cell for profile topValues or export_data_path CSV.
+
+    target: 'profile' -> (formatted_text, cell_type)
+            'export'  -> formatted_text
+    """
+    if val is None:
+        return "" if target == "export" else None
+
+    app_canon = canonical_column_type(app_type) if app_type else ""
+
+    if app_canon == "date":
+        if isinstance(val, (datetime, date)):
+            formatted = val.strftime("%Y-%m-%d")
+            return (formatted, "date") if target == "profile" else formatted
+
+    if app_canon == "datetime":
+        if isinstance(val, (datetime, date)):
+            if isinstance(val, datetime):
+                if target == "profile":
+                    return val.isoformat(), "datetime"
+                formatted = val.strftime("%Y-%m-%d %H:%M:%S")
+                if val.microsecond:
+                    formatted += f".{val.microsecond:06d}"
+                return formatted
+            else:
+                formatted = val.strftime("%Y-%m-%d 00:00:00")
+                return (val.strftime("%Y-%m-%d"), "date") if target == "profile" else formatted
+
+    if isinstance(val, bool):
+        if target == "profile":
+            return ("TRUE" if val else "FALSE"), "boolean"
+        return "True" if val else "False"
+
+    if isinstance(val, Decimal):
+        s = str(val)
+        if source_arrow_type and "decimal128" in source_arrow_type:
+            m = re.search(r"decimal128\(\d+,\s*(\d+)\)", source_arrow_type)
+            if m:
+                scale = int(m.group(1))
+                parts = s.split(".")
+                if len(parts) == 1:
+                    s = parts[0] + "." + "0" * scale if scale > 0 else parts[0]
+                else:
+                    int_part, frac = parts[0], parts[1]
+                    if len(frac) < scale:
+                        s = int_part + "." + frac.ljust(scale, "0")
+                    elif len(frac) > scale:
+                        s = int_part + "." + frac[:scale]
+        return (s, "number") if target == "profile" else s
+
+    if isinstance(val, (int, float)):
+        return (str(val), "number") if target == "profile" else str(val)
+
+    if target == "profile":
+        return str(val), "text"
+    return str(val)
 
 
 def _model_candidate_with_format_errors_as_blank(
@@ -4894,6 +4959,138 @@ class StudioController(QObject):
         """Summarize quality and value distribution for one active table column."""
         if not self.sourceLoaded or column not in self._headers:
             return {}
+
+        if self._active_store_candidate is not None:
+            candidate = self._active_store_candidate
+            session = getattr(candidate, "session", None)
+            if session is None:
+                session = self._project_store
+            if session is None:
+                return {}
+            if getattr(session, "busy", False):
+                self._set_status("The large-data store is busy. Try again in a moment.")
+                return {}
+
+            from analytics_studio.store.duck_store import _quote_identifier
+            from analytics_studio.store.base import StoreBusyError
+            app_type = self._active_column_type_map().get(column, "text")
+            table_name = candidate.store_table
+            col_idx = self._headers.index(column) if column in self._headers else -1
+            phys_types = getattr(candidate, "physical_types", None) or []
+            stored_type = phys_types[col_idx] if 0 <= col_idx < len(phys_types) else "text"
+            source_arrow_types = getattr(candidate, "source_arrow_types", None) or []
+            arrow_type = source_arrow_types[col_idx] if 0 <= col_idx < len(source_arrow_types) else None
+
+            q_col = _quote_identifier(column)
+            q_tbl = _quote_identifier(table_name)
+
+            def _query_profile(store: Any) -> dict[str, Any]:
+                # Store tables never report conversion errors (errorCount is always 0).
+                # The importer decides the column types: a column whose values did not
+                # fit its type was already imported as text, so a stored column has no
+                # conversion errors. DuckDB's TRY_CAST rules differ from the importer's
+                # (a YYYYMMDD date column of 60 valid rows was reported as 60 errors).
+                if stored_type == "text":
+                    empty_sql = f"COUNT(*) FILTER (WHERE {q_col} = '')"
+                    valid_cond = f"{q_col} IS NOT NULL AND {q_col} != ''"
+                else:
+                    empty_sql = "0"
+                    valid_cond = f"{q_col} IS NOT NULL"
+
+                counts_sql = (
+                    f"SELECT COUNT(*), COUNT(*) FILTER (WHERE {q_col} IS NULL), "
+                    f"{empty_sql} FROM {q_tbl}"
+                )
+                counts_row = store.execute(counts_sql)[0]
+                row_c = int(counts_row[0] or 0)
+                null_c = int(counts_row[1] or 0)
+                empty_c = int(counts_row[2] or 0)
+                err_c = 0
+                valid_c = row_c - null_c - empty_c
+
+                # Collision-proof SQL: subquery with __pv_cnt alias
+                dist_sql = (
+                    f"SELECT COUNT(*), COUNT(CASE WHEN __pv_cnt = 1 THEN 1 END) FROM ("
+                    f"SELECT COUNT(*) AS __pv_cnt FROM {q_tbl} "
+                    f"WHERE {valid_cond} GROUP BY {q_col})"
+                )
+                dist_row = store.execute(dist_sql)[0]
+                distinct_c = int(dist_row[0] or 0)
+                unique_c = int(dist_row[1] or 0)
+
+                # exact tie rule: fetches every group whose count >= the 5th-highest count; on a unique
+                # 990,000-row column about 0.7 s and ~100 MB; Stage B caps imports at 1,000,000 rows;
+                # revisit when the cap is raised
+                # Fetch 5th-highest count c5
+                c5_sql = (
+                    f"SELECT __pv_c FROM (SELECT COUNT(*) AS __pv_c FROM {q_tbl} "
+                    f"WHERE {valid_cond} GROUP BY {q_col}) ORDER BY 1 DESC LIMIT 1 OFFSET 4"
+                )
+                c5_res = store.execute(c5_sql)
+                if c5_res:
+                    c5_val = int(c5_res[0][0])
+                    candidate_sql = (
+                        f"SELECT {q_col}, COUNT(*) FROM {q_tbl} WHERE {valid_cond} "
+                        f"GROUP BY 1 HAVING COUNT(*) >= {c5_val}"
+                    )
+                else:
+                    candidate_sql = (
+                        f"SELECT {q_col}, COUNT(*) FROM {q_tbl} WHERE {valid_cond} "
+                        f"GROUP BY 1"
+                    )
+
+                top_rows = store.execute(candidate_sql)
+                raw_entries = []
+                for raw_val, cnt in top_rows:
+                    formatted_val, ptype = _format_store_cell(
+                        raw_val, app_type, target="profile", source_arrow_type=arrow_type
+                    )
+                    raw_entries.append({
+                        "value": formatted_val,
+                        "count": int(cnt),
+                        "type": ptype,
+                    })
+
+                # Sort in Python matching ordinary branch:
+                sorted_entries = sorted(
+                    raw_entries,
+                    key=lambda item: (-item["count"], item["value"].casefold(), item["value"], item["type"]),
+                )[:5]
+
+                top_list = []
+                for item in sorted_entries:
+                    entry: dict[str, Any] = {"value": item["value"], "count": item["count"]}
+                    if item["type"] != "text":
+                        entry["type"] = item["type"]
+                    top_list.append(entry)
+
+                return {
+                    "column": column,
+                    "type": app_type,
+                    "rowCount": row_c,
+                    "validCount": valid_c,
+                    "errorCount": err_c,
+                    "emptyCount": empty_c,
+                    "nullCount": null_c,
+                    "validPercent": round(valid_c * 100 / row_c) if row_c else 0,
+                    "errorPercent": round(err_c * 100 / row_c) if row_c else 0,
+                    "emptyPercent": round(empty_c * 100 / row_c) if row_c else 0,
+                    "nullPercent": round(null_c * 100 / row_c) if row_c else 0,
+                    "distinctCount": distinct_c,
+                    "uniqueCount": unique_c,
+                    "topValues": top_list,
+                }
+
+            try:
+                return session.call(_query_profile)
+            except StoreBusyError:
+                self._set_status("The large-data store is busy. Try again in a moment.")
+                return {}
+            except Exception as exc:
+                logger.exception("Could not profile column %s", column)
+                self._set_status(f"Could not profile column: {exc}")
+                return {}
+
         values = [row.get(column, "") for row in self._rows]
         null_count = sum(value is None for value in values)
         empty_count = sum(value == "" for value in values if not is_cell_error(value))
@@ -8223,6 +8420,7 @@ class StudioController(QObject):
             model_types=dict(result.model_types),
             source_id=source_id,
             session=project_store,
+            source_arrow_types=list(getattr(result, "source_arrow_types", []) or []),
         )
 
         try:
@@ -14719,6 +14917,82 @@ class StudioController(QObject):
         if not self.sourceLoaded or not self._headers:
             self._set_status("Load a table before exporting data.")
             return False
+
+        # Large exports block the UI thread (about 1 s per million rows); move to a StoreJob with progress in a later task.
+        if self._active_store_candidate is not None:
+            candidate = self._active_store_candidate
+            session = getattr(candidate, "session", None)
+            if session is None:
+                session = self._project_store
+            if session is None:
+                self._set_status("Could not export data: Store session not available.")
+                return False
+            if getattr(session, "busy", False):
+                self._set_status("The large-data store is busy. Try again in a moment.")
+                return False
+
+            path = Path(path).expanduser().resolve()
+            temp_path: Path | None = None
+            try:
+                from analytics_studio.store.duck_store import _quote_identifier
+                from analytics_studio.store.base import StoreBusyError
+                table_name = candidate.store_table
+                q_tbl = _quote_identifier(table_name)
+                cols_sql = ", ".join(_quote_identifier(h) for h in self._headers)
+                select_sql = f"SELECT {cols_sql} FROM {q_tbl} ORDER BY \"__rn\" ASC"
+
+                type_map = self._active_column_type_map()
+                headers = list(self._headers)
+                source_arrow_types = getattr(candidate, "source_arrow_types", None) or []
+                col_arrow_types = [
+                    source_arrow_types[i] if 0 <= i < len(source_arrow_types) else None
+                    for i in range(len(headers))
+                ]
+                col_app_types = [type_map.get(h, "text") for h in headers]
+
+                def _stream_to_csv(store: Any) -> int:
+                    nonlocal temp_path
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    fd, temp_name = tempfile.mkstemp(
+                        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+                    )
+                    temp_path = Path(temp_name)
+                    exported_count = 0
+                    chunk_size = 50_000
+
+                    with os.fdopen(fd, "w", encoding="utf-8-sig", newline="") as stream:
+                        writer = csv.writer(stream, lineterminator="\n")
+                        writer.writerow(headers)
+                        for chunk in store.iter_rows(select_sql, chunk_size=chunk_size):
+                            for row_tuple in chunk:
+                                writer.writerow([
+                                    _format_store_cell(
+                                        val, col_app_types[i], target="export", source_arrow_type=col_arrow_types[i]
+                                    )
+                                    for i, val in enumerate(row_tuple)
+                                ])
+                            exported_count += len(chunk)
+                        stream.flush()
+                        os.fsync(stream.fileno())
+                    return exported_count
+
+                exported_rows = session.call(_stream_to_csv)
+                os.replace(temp_path, path)
+                temp_path = None
+            except StoreBusyError:
+                self._set_status("The large-data store is busy. Try again in a moment.")
+                return False
+            except Exception as exc:
+                logger.exception("Could not export data to %s", path)
+                self._set_status(f"Could not export data: {exc}")
+                return False
+            finally:
+                if temp_path is not None:
+                    temp_path.unlink(missing_ok=True)
+
+            self._set_status(f"Exported {exported_rows:,} rows to {path.name}")
+            return True
+
         path = Path(path).expanduser().resolve()
         temp_path: Path | None = None
         try:

@@ -1,6 +1,6 @@
 """Analytics Studio storage layer."""
 
-from .base import COLUMN_TYPES, Store, StoreError, StoreLockedError
+from .base import COLUMN_TYPES, Store, StoreBusyError, StoreError, StoreLockedError
 from .csv_import import CsvImportSummary, import_csv_to_store
 from .duck_store import DuckStore
 from .parquet_import import ParquetImportSummary, import_parquet_to_store
@@ -14,6 +14,7 @@ __all__ = [
     "DuckStore",
     "ProjectStore",
     "StoreTableModel",
+    "StoreBusyError",
     "StoreError",
     "StoreLockedError",
     "COLUMN_TYPES",

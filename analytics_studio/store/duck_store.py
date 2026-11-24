@@ -9,12 +9,12 @@ import os
 import threading
 import uuid
 from collections.abc import Sequence as _AbcSequence
-from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, TypeVar, cast
+from typing import Any, Callable, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar, cast
 
 import duckdb
 import pyarrow as pa
 
-from .base import COLUMN_TYPES, StoreError, StoreLockedError
+from .base import COLUMN_TYPES, StoreBusyError, StoreError, StoreLockedError
 
 _TYPE_MAP = {
     "whole": "BIGINT",
@@ -206,7 +206,7 @@ def _thread_locked(func: _F) -> _F:
         if lock is not None:
             acquired = lock.acquire(blocking=False)
             if not acquired:
-                raise StoreError("The store is busy with another operation.")
+                raise StoreBusyError("The store is busy with another operation.")
             try:
                 return func(self, *args, **kwargs)
             finally:
@@ -726,6 +726,68 @@ class DuckStore:
             return conn.execute(sql, params).fetchall()
         except Exception as exc:
             raise StoreError(f"Query execution failed: {exc}") from exc
+
+    @_thread_locked
+    def iter_rows(
+        self,
+        sql: str,
+        params: Sequence[Any] = (),
+        chunk_size: int = 50_000,
+    ) -> Iterator[List[Tuple[Any, ...]]]:
+        """Validate one SELECT query now and return a generator that yields rows in chunks.
+
+        Validation (non-empty string, one statement, SELECT only) runs eagerly, when
+        iter_rows(...) is called, so a bad query raises at the call and not at the first
+        next(). The lock only guards this validation and the creation of the generator:
+        iterating is NOT locked, so callers must iterate inside session.call (or another
+        owner of the store) and must not let another thread use the store meanwhile.
+        The generator closes its cursor in finally, also when it is closed early.
+        """
+        conn = self._check_open()
+        if not isinstance(sql, str) or not sql.strip():
+            raise StoreError("Query must be a non-empty string.")
+
+        try:
+            stmts = conn.extract_statements(sql)
+        except Exception as exc:
+            raise StoreError(f"Invalid SQL: {exc}") from exc
+
+        if len(stmts) != 1:
+            raise StoreError(
+                f"Only a single statement is allowed; found {len(stmts)} statements."
+            )
+
+        stmt = stmts[0]
+        if stmt.type != duckdb.StatementType.SELECT:
+            raise StoreError(
+                f"Only SELECT queries are allowed; received statement type {stmt.type}."
+            )
+
+        return self._iter_rows_chunks(conn, sql, params, chunk_size)
+
+    def _iter_rows_chunks(
+        self,
+        conn: Any,
+        sql: str,
+        params: Sequence[Any],
+        chunk_size: int,
+    ) -> Iterator[List[Tuple[Any, ...]]]:
+        """Generator behind iter_rows; not locked (see iter_rows)."""
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, params)
+            while True:
+                chunk = cursor.fetchmany(chunk_size)
+                if not chunk:
+                    break
+                yield chunk
+        except Exception as exc:
+            raise StoreError(f"Query execution failed: {exc}") from exc
+        finally:
+            try:
+                cursor.close()
+            except Exception:
+                pass
 
     @_thread_locked
     def checkpoint(self) -> None:

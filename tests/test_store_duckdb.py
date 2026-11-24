@@ -1304,3 +1304,150 @@ def test_duck_store_custom_temp_directory(tmp_path):
         setting_val = res[0][0]
         assert os.path.realpath(setting_val) == os.path.realpath(str(custom_temp))
 
+
+def test_duck_store_iter_rows_chunks_and_cursor_cleanup(tmp_path):
+    """Verify iter_rows yields rows in chunks and closes the cursor on exit or error."""
+    db_path = str(tmp_path / "iter_rows.duckdb")
+    with DuckStore(db_path) as store:
+        store.create_table("t_iter", [("a", "whole"), ("b", "text")])
+        rows = [(i, f"str_{i}") for i in range(250)]
+        store.append_rows("t_iter", rows)
+
+        # 1. Normal streaming in chunks
+        chunks = list(store.iter_rows('SELECT "a", "b" FROM "t_iter" ORDER BY "__rn" ASC', chunk_size=100))
+        assert len(chunks) == 3
+        assert len(chunks[0]) == 100
+        assert len(chunks[1]) == 100
+        assert len(chunks[2]) == 50
+        all_rows = [r for c in chunks for r in c]
+        assert all_rows == rows
+
+        # 2. Invalid SQL raises StoreError
+        with pytest.raises(StoreError):
+            list(store.iter_rows("INVALID SQL QUERY"))
+
+        # 3. Non-SELECT query rejected
+        with pytest.raises(StoreError, match="Only SELECT queries are allowed"):
+            list(store.iter_rows('DELETE FROM "t_iter"'))
+
+        # 4. Generator closed prematurely closes cursor without issue
+        gen = store.iter_rows('SELECT "a" FROM "t_iter"', chunk_size=50)
+        _ = next(gen)
+        gen.close()
+
+
+
+def test_iter_rows_rejects_multi_statement_string(tmp_path):
+    """I3: two statements in one string are refused, even when both are SELECT."""
+    with DuckStore(str(tmp_path / "multi.duckdb")) as store:
+        store.create_table("t_multi", [("a", "whole")])
+        store.append_rows("t_multi", [(1,), (2,)])
+        with pytest.raises(StoreError, match="Only a single statement is allowed"):
+            list(store.iter_rows('SELECT "a" FROM "t_multi"; SELECT "a" FROM "t_multi"'))
+        with pytest.raises(StoreError, match="Only a single statement is allowed"):
+            list(store.iter_rows('SELECT "a" FROM "t_multi"; DELETE FROM "t_multi"'))
+        assert store.row_count("t_multi") == 2
+
+
+def test_iter_rows_validates_eagerly_at_call(tmp_path):
+    """iter_rows validates at the call, not at the first next()."""
+    with DuckStore(str(tmp_path / "eager.duckdb")) as store:
+        store.create_table("t_eager", [("a", "whole")])
+        store.append_rows("t_eager", [(1,)])
+        with pytest.raises(StoreError, match="Only SELECT queries are allowed"):
+            store.iter_rows('DELETE FROM "t_eager"')
+        with pytest.raises(StoreError, match="Only a single statement is allowed"):
+            store.iter_rows("SELECT 1; SELECT 2")
+        with pytest.raises(StoreError, match="non-empty string"):
+            store.iter_rows("  ")
+        with pytest.raises(StoreError, match="Invalid SQL"):
+            store.iter_rows("INVALID SQL QUERY ((")
+        assert store.row_count("t_eager") == 1
+        # A valid query still returns a generator that streams.
+        gen = store.iter_rows('SELECT "a" FROM "t_eager"')
+        assert list(gen) == [[(1,)]]
+
+
+class _SpyCursor:
+    def __init__(self, real):
+        self._real = real
+        self.closed = 0
+
+    def execute(self, *args, **kwargs):
+        self._real.execute(*args, **kwargs)
+        return self
+
+    def fetchmany(self, size):
+        return self._real.fetchmany(size)
+
+    def close(self):
+        self.closed += 1
+        self._real.close()
+
+
+class _SpyConn:
+    def __init__(self, real):
+        self._real = real
+        self.cursors = []
+
+    def cursor(self):
+        spy = _SpyCursor(self._real.cursor())
+        self.cursors.append(spy)
+        return spy
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+
+def test_iter_rows_closes_cursor_when_exhausted_stopped_early_or_failing(tmp_path, monkeypatch):
+    """I1: the cursor is closed after full use, after an early generator close, and after an error."""
+    with DuckStore(str(tmp_path / "spy.duckdb")) as store:
+        store.create_table("t_spy", [("a", "whole")])
+        store.append_rows("t_spy", [(i,) for i in range(250)])
+        spy_conn = _SpyConn(store._conn)
+        monkeypatch.setattr(store, "_check_open", lambda: spy_conn)
+
+        # Fully consumed.
+        assert sum(len(c) for c in store.iter_rows('SELECT "a" FROM "t_spy"', chunk_size=100)) == 250
+        assert [c.closed for c in spy_conn.cursors] == [1]
+
+        # Consumer stops early (generator closed after the first chunk).
+        gen = store.iter_rows('SELECT "a" FROM "t_spy"', chunk_size=100)
+        assert len(next(gen)) == 100
+        assert len(spy_conn.cursors) == 2 and spy_conn.cursors[1].closed == 0
+        gen.close()
+        assert spy_conn.cursors[1].closed == 1
+
+        # Query fails at execution time.
+        with pytest.raises(StoreError, match="Query execution failed"):
+            list(store.iter_rows('SELECT "no_such_col" FROM "t_spy"'))
+        assert len(spy_conn.cursors) == 3 and spy_conn.cursors[2].closed == 1
+
+
+def test_store_own_lock_raises_store_busy_error(tmp_path):
+    """The store's own concurrency guard raises StoreBusyError (a StoreError subclass)."""
+    import threading
+    from analytics_studio.store import StoreBusyError
+
+    with DuckStore(str(tmp_path / "busy_lock.duckdb")) as store:
+        store.create_table("t", [("a", "whole")])
+        held = threading.Event()
+        release = threading.Event()
+
+        def hold():
+            with store._lock:
+                held.set()
+                release.wait(timeout=5.0)
+
+        th = threading.Thread(target=hold)
+        th.start()
+        assert held.wait(timeout=5.0)
+        try:
+            with pytest.raises(StoreBusyError, match="busy with another operation"):
+                store.table_names()
+            with pytest.raises(StoreBusyError):
+                store.iter_rows('SELECT "a" FROM "t"')
+        finally:
+            release.set()
+            th.join()
+        assert store.table_names() == ["t"]

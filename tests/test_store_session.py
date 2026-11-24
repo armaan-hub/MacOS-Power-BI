@@ -1997,3 +1997,46 @@ def test_overlapping_shutdowns_do_not_reopen_the_store_while_one_still_waits(tmp
         slow.join(timeout=10.0)
     assert not th.is_alive() and not slow.is_alive()
     assert results == {"slow": True}
+
+
+def test_store_busy_error_subclass_raised_and_caught(tmp_path):
+    """Verify that StoreBusyError is raised at all busy sites and caught by except StoreError."""
+    from analytics_studio.store.base import StoreBusyError, StoreError
+    assert issubclass(StoreBusyError, StoreError)
+
+    data_file = str(tmp_path / "busy_test.npa.data")
+    ps = ProjectStore.open(data_file)
+    with ps.job():
+        # 1. second job() raises StoreBusyError
+        with pytest.raises(StoreBusyError, match="busy with another operation"):
+            with ps.job():
+                pass
+
+        # 2. call() raises StoreBusyError
+        with pytest.raises(StoreBusyError, match="busy with another operation"):
+            ps.call(lambda store: store.table_names())
+
+        # 3. checkpoint() raises StoreBusyError
+        with pytest.raises(StoreBusyError, match="busy with another operation"):
+            ps.checkpoint()
+
+        # 4. close() raises StoreBusyError
+        with pytest.raises(StoreBusyError, match="busy with another operation"):
+            ps.close()
+
+        # 5. verify except StoreError also catches it
+        caught = False
+        try:
+            ps.checkpoint()
+        except StoreError as e:
+            caught = True
+            assert isinstance(e, StoreBusyError)
+        assert caught is True
+
+    # 5th site: _exclusive internal context manager
+    with ps.job():
+        with pytest.raises(StoreBusyError, match="busy with another operation"):
+            with ps._exclusive():
+                pass
+
+    ps.close()
