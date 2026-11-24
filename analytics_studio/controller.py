@@ -7337,6 +7337,33 @@ class StudioController(QObject):
         load_errors: dict[str, str] = {}
         warnings: list[str] = []
         metadata_changed = False
+
+        from analytics_studio.store.base import StoreError
+        from analytics_studio.store.candidate import StoreCandidate
+        from analytics_studio.store.session import ProjectStore
+
+        # Check if candidate has store sources
+        has_store_sources = any(s.get("store") for s in sources)
+        opened_store: ProjectStore | None = None
+        reopened_same_store = False
+        old_store_to_close: ProjectStore | None = None
+        restore_old_store_path: str | None = None
+
+        if has_store_sources:
+            target_data_file = ProjectStore.data_file_for(str(path))
+            # Plan v2 item 2: two DuckStore on the SAME file raise StoreLockedError
+            if self._project_store is not None and not self._project_store.closed:
+                try:
+                    is_same = os.path.samefile(self._project_store.path, target_data_file)
+                except OSError:
+                    is_same = (os.path.realpath(self._project_store.path) == os.path.realpath(target_data_file))
+                if is_same:
+                    restore_old_store_path = self._project_store.path
+                    self._close_project_store()
+                    reopened_same_store = True
+                else:
+                    old_store_to_close = self._project_store
+
         for source in self._source_dependency_order(sources):
             source_id = str(source["id"])
             kind = str(source.get("kind", ""))
@@ -7347,7 +7374,83 @@ class StudioController(QObject):
             )
             source_paths[source_id] = source_path
             try:
-                if kind == "inline":
+                if source.get("store"):
+                    store_info = source["store"]
+                    orig_name = source_path.name if source_path else source.get("name", source_id)
+                    resolved_file = ProjectStore.resolve_data_file(str(path), store_info.get("data_file"))
+                    if resolved_file is None:
+                        expected_name = store_info.get("data_file") or f"{path.stem}.npa.data"
+                        raise ValueError(
+                            f"The large-data file for {source.get('name', source_id)} is missing: {expected_name}. "
+                            f"Import {orig_name} again."
+                        )
+                    if opened_store is None:
+                        try:
+                            opened_store = ProjectStore.open(resolved_file)
+                        except StoreError as s_exc:
+                            if reopened_same_store and restore_old_store_path is not None:
+                                try:
+                                    self._project_store = ProjectStore.open(restore_old_store_path)
+                                except Exception:
+                                    pass
+                            raise ValueError(f"Could not open large-data store: {s_exc}") from s_exc
+
+                    try:
+                        opened_store.validate_table(
+                            store_info["table"],
+                            store_info["headers"],
+                            store_info["physical_types"],
+                            store_info["row_count"],
+                        )
+                    except StoreError as v_exc:
+                        if reopened_same_store and restore_old_store_path is not None and self._project_store is None:
+                            try:
+                                self._project_store = ProjectStore.open(restore_old_store_path)
+                            except Exception:
+                                pass
+                        raise ValueError(f"Could not load large-data table {source.get('name', source_id)}: {v_exc}") from v_exc
+
+                    # Build StoreCandidate
+                    cand_column_types = store_info.get("column_types")
+                    if not cand_column_types:
+                        for tbl in candidate.get("model", {}).get("tables", []):
+                            if tbl.get("id") == source_id or tbl.get("source_id") == source_id:
+                                cand_column_types = tbl.get("column_types")
+                                break
+                    cand_column_types = cand_column_types or {}
+
+                    raw = StoreCandidate(
+                        kind,
+                        list(store_info["headers"]),
+                        dict(source.get("parser_options", {})),
+                        list(store_info.get("notices", [])),
+                        store_table=store_info["table"],
+                        row_count=store_info["row_count"],
+                        physical_types=list(store_info["physical_types"]),
+                        model_types=dict(cand_column_types),
+                        source_id=source_id,
+                        session=opened_store,
+                        source_arrow_types=list(store_info.get("source_arrow_types", []) or []),
+                    )
+                    raw_candidates[source_id] = raw
+                    query_candidates[source_id] = raw
+                    loaded_candidates[source_id] = raw
+
+                    # Fingerprint check (stat only)
+                    if source_path is not None and source_path.is_file():
+                        try:
+                            fp = store_info.get("fingerprint", {})
+                            st = source_path.stat()
+                            if st.st_size != fp.get("size") or st.st_mtime_ns != fp.get("mtime_ns"):
+                                warnings.append(
+                                    f"{source.get('name', source_id)} changed on disk since it was imported. "
+                                    "Use Import again to load the new version."
+                                )
+                        except OSError:
+                            pass
+                    continue
+                elif kind == "inline":
+                    raw = self._raw_candidate_for_source(source)
                     raw = self._raw_candidate_for_source(source)
                 elif kind == "query":
                     raw = self._query_candidate(
@@ -7473,6 +7576,32 @@ class StudioController(QObject):
         active_source_path = source_paths.get(active_source_id) if active_source_id else None
         active_source_kind = str(linked_source.get("kind", "")) if linked_source else None
         active_parser_options = dict(linked_source.get("parser_options", {})) if linked_source else {}
+
+        # Swap store state
+        if opened_store is not None:
+            if old_store_to_close is not None:
+                try:
+                    old_store_to_close.shutdown()
+                except Exception:
+                    pass
+                try:
+                    old_store_to_close.close()
+                except Exception:
+                    pass
+            self._project_store = opened_store
+            # Drop unreferenced generations
+            store_tables = [
+                s["store"]["table"]
+                for s in sources
+                if s.get("store") and "table" in s["store"]
+            ]
+            try:
+                self._project_store.drop_unreferenced(keep=store_tables)
+            except Exception as exc:
+                logger.warning("Could not drop unreferenced store tables: %s", exc)
+        else:
+            if not has_store_sources:
+                self._close_project_store()
 
         self._formula_bar.reset()
         self._project = candidate
@@ -15022,7 +15151,107 @@ class StudioController(QObject):
         return True
 
     def _save_to(self, path: Path) -> bool:
+        import shutil
+        from PySide6.QtWidgets import QApplication, QMessageBox, QProgressDialog
+        from analytics_studio.store.base import StoreError
+        from analytics_studio.store.session import ProjectStore
+
         path = Path(path).expanduser().resolve()
+        has_store = self._store_tables_loaded() or self._project_store is not None
+        old_store = self._project_store if has_store else None
+
+        target_data_file = ProjectStore.data_file_for(str(path))
+        copy_made = False
+
+        if old_store is not None:
+            if old_store.busy:
+                self._set_status("Cannot save while a store operation is in progress.")
+                return False
+
+            old_store_file = os.path.realpath(old_store.path)
+            target_data_file_real = os.path.realpath(target_data_file)
+            needs_copy = old_store_file != target_data_file_real
+
+            # (a) Checkpoint
+            try:
+                old_store.checkpoint()
+            except StoreError as exc:
+                self._set_status(f"Could not checkpoint large-data store: {exc}")
+                return False
+
+            if needs_copy:
+                # Overwrite prompt if target already exists and is not this store's file
+                if os.path.exists(target_data_file):
+                    ans = QMessageBox.question(
+                        None,
+                        "Replace existing data file",
+                        "A data file with this name already exists next to the project and will be replaced. Continue?",
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                        QMessageBox.StandardButton.No,
+                    )
+                    if ans != QMessageBox.StandardButton.Yes:
+                        return False
+
+                # Free-space check
+                try:
+                    data_file_size = os.path.getsize(old_store.path)
+                    check_dir = os.path.abspath(os.path.dirname(target_data_file))
+                    while check_dir and not os.path.exists(check_dir):
+                        parent = os.path.dirname(check_dir)
+                        if parent == check_dir:
+                            break
+                        check_dir = parent
+                    if os.path.exists(check_dir):
+                        free_space = shutil.disk_usage(check_dir).free
+                        required_space = int(data_file_size * 1.05)
+                        if free_space < required_space:
+                            self._set_status("Not enough free space to save the large-data table next to the project.")
+                            return False
+                except Exception:
+                    pass
+
+                # Modal progress dialog with Cancel
+                dialog = QProgressDialog(f"Saving {os.path.basename(target_data_file)}...", "Cancel", 0, 100)
+                dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
+                dialog.setMinimumDuration(0)
+                dialog.setAutoClose(False)
+                dialog.setAutoReset(False)
+                dialog.setValue(0)
+                dialog.show()
+
+                cancel_event = threading.Event()
+                dialog.canceled.connect(cancel_event.set)
+
+                def on_progress(copied: int, total: int) -> None:
+                    if total > 0:
+                        pct = min(100, max(0, int(copied * 100 / total)))
+                        dialog.setValue(pct)
+                    app = QApplication.instance()
+                    if app is not None:
+                        app.processEvents()
+
+                try:
+                    old_store.copy_to(
+                        target_data_file,
+                        overwrite=True,
+                        progress=on_progress,
+                        cancel_event=cancel_event,
+                    )
+                    copy_made = True
+                except Exception as exc:
+                    dialog.close()
+                    try:
+                        old_store.discard_copy(target_data_file)
+                    except Exception:
+                        pass
+                    if cancel_event.is_set():
+                        self._set_status("Save canceled.")
+                        return False
+                    QMessageBox.critical(None, "Could not save project", str(exc))
+                    return False
+                finally:
+                    dialog.close()
+
         candidate = self._document_for_save(path)
         try:
             saved = save_project(
@@ -15033,8 +15262,24 @@ class StudioController(QObject):
                 ),
             )
         except (OSError, ProjectFileError) as exc:
+            if copy_made and old_store is not None:
+                try:
+                    old_store.discard_copy(target_data_file)
+                except Exception:
+                    pass
             QMessageBox.critical(None, "Could not save project", str(exc))
             return False
+
+        if old_store is not None:
+            old_store_file = os.path.realpath(old_store.path)
+            target_data_file_real = os.path.realpath(target_data_file)
+            if old_store_file != target_data_file_real:
+                was_unsaved = old_store.unsaved
+                try:
+                    old_store.rebind(target_data_file, delete_old=was_unsaved)
+                except StoreError as exc:
+                    QMessageBox.critical(None, "Could not save project", str(exc))
+                    return False
 
         self._project = saved
         self._project_path = path
@@ -15046,6 +15291,8 @@ class StudioController(QObject):
         return True
 
     def _document_for_save(self, path: Path) -> dict[str, Any]:
+        from analytics_studio.store.session import ProjectStore
+
         document = deepcopy(self._project)
         document["active_source_id"] = self._active_source_id
         document["name"] = path.stem if path != self._project_path else self.projectName
@@ -15063,7 +15310,18 @@ class StudioController(QObject):
 
         active_id = self._active_source_id
         active_path = self._active_source_path
-        if active_id is not None and self._active_source_kind == "inline":
+        active_is_store = False
+        if active_id is not None:
+            active_src = next((s for s in document.get("data_sources", []) if s.get("id") == active_id), None)
+            if active_src and active_src.get("store"):
+                active_is_store = True
+
+        if active_is_store:
+            # For store sources, keep the record as imported (do not regenerate from _active_source_path)
+            for source in document.get("data_sources", []):
+                if source.get("kind") not in PATHLESS_SOURCE_KINDS and "path" in source:
+                    source["path"] = self._source_path_for_save(source["path"], path)
+        elif active_id is not None and self._active_source_kind == "inline":
             for source in document.get("data_sources", []):
                 if source.get("id") != active_id and source.get("kind") not in PATHLESS_SOURCE_KINDS:
                     source["path"] = self._source_path_for_save(source["path"], path)
@@ -15125,6 +15383,13 @@ class StudioController(QObject):
             for source in document.get("data_sources", []):
                 if source.get("kind") not in PATHLESS_SOURCE_KINDS:
                     source["path"] = self._source_path_for_save(source["path"], path)
+
+        # Update data_file for every store source to be the bare filename
+        bare_data_file = os.path.basename(ProjectStore.data_file_for(str(path)))
+        for source in document.get("data_sources", []):
+            if isinstance(source.get("store"), dict):
+                source["store"]["data_file"] = bare_data_file
+
         return document
 
     def _source_path_for_save(self, stored_path: str, destination: Path) -> str:
@@ -15154,6 +15419,7 @@ class StudioController(QObject):
         return answer == QMessageBox.StandardButton.Discard
 
     def _replace_with_new_project(self) -> None:
+        self._close_project_store()
         self._formula_bar.reset()
         self._project = new_project()
         self._project_path = None
