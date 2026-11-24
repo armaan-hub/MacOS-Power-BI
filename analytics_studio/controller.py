@@ -8035,12 +8035,7 @@ class StudioController(QObject):
         from analytics_studio.store.session import ProjectStore
 
         path = Path(path).expanduser().resolve()
-        source_id = self._source_id_for_path(
-            path,
-            kind=result.kind,
-            parser_options=result.options,
-            header_row_used=None,
-        ) or str(uuid4())
+        source_id = result.source_id
         table_name = self._unique_table_name(path.stem)
 
         candidate = StoreCandidate(

@@ -15,15 +15,14 @@ from typing import Any, Callable, Mapping, Optional
 from analytics_studio.file_import import (
     FileImportError,
     ImportCancelledError,
-    ImportCandidate,
     normalize_options,
 )
-from analytics_studio.store.base import Store
+from analytics_studio.store.base import Store, StoreError
 from analytics_studio.store.csv_import import import_csv_to_store
 from analytics_studio.store.parquet_import import import_parquet_to_store
-from analytics_studio.store.parquet_source import plan_parquet
 from analytics_studio.store.session import ProjectStore
 from analytics_studio.store.stats import TableStats, compute_table_stats
+from analytics_studio.store.table_model import _STORE_TO_APP_TYPE
 from analytics_studio.store.type_detect import detect_column_types
 
 _ONE_MIB = 1024 * 1024
@@ -84,55 +83,9 @@ class LargeImportResult:
     options: dict[str, Any]
 
 
-def _map_parquet_arrow_type_to_model_type(arrow_type_str: str) -> str:
-    """Map Parquet Arrow type string to application model type name."""
-    s = arrow_type_str.lower()
-    if s.startswith("date32") or s.startswith("date64"):
-        return "date"
-    if s.startswith("timestamp"):
-        return "datetime"
-    if (
-        s.startswith("int8")
-        or s.startswith("int16")
-        or s.startswith("int32")
-        or s.startswith("int64")
-        or s.startswith("uint8")
-        or s.startswith("uint16")
-        or s.startswith("uint32")
-        or s.startswith("uint64")
-    ):
-        return "whole_number"
-    if (
-        s.startswith("float")
-        or s.startswith("double")
-        or s.startswith("halffloat")
-        or s.startswith("decimal128")
-        or s.startswith("decimal256")
-    ):
-        return "decimal_number"
-    if s == "bool" or s == "boolean":
-        return "true_false"
-    return "text"
-
-
 def _check_cancel(cancel_event: Optional[threading.Event]) -> None:
     if cancel_event is not None and cancel_event.is_set():
         raise ImportCancelledError("Import canceled.")
-
-
-def _derive_candidate_source_id(kind: str, path: Path, options: dict[str, Any]) -> str:
-    """Derive candidate source_id before table creation without reading all rows."""
-    if kind == "parquet":
-        plan = plan_parquet(path, options)
-        candidate = ImportCandidate("parquet", plan.headers, [], options, plan.notices)
-        return candidate.source_id or ""
-    elif kind == "csv":
-        from analytics_studio.file_import import _parse_csv_head
-        cand_head = _parse_csv_head(path, options, 1)
-        candidate = ImportCandidate("csv", cand_head.headers, [], options, [])
-        return candidate.source_id or ""
-    else:
-        raise FileImportError(f"Unsupported large import kind: {kind}")
 
 
 def run_large_import(
@@ -141,6 +94,7 @@ def run_large_import(
     kind: str,
     options: Mapping[str, Any] | None = None,
     *,
+    source_id: str,
     cancel_event: Optional[threading.Event] = None,
     progress: Optional[Callable[[str], None]] = None,
     max_rows: int = 1_000_000,
@@ -157,11 +111,12 @@ def run_large_import(
 
     _check_cancel(cancel_event)
 
-    # b. Choose table name directly via candidate_source_id
-    candidate_source_id = _derive_candidate_source_id(kind, source_path, opts)
-    target_table = ProjectStore.table_name(candidate_source_id, 1)
+    # b. Target table name derived from caller-provided source_id
+    target_table = ProjectStore.table_name(source_id, 1)
+    if store.has_table(target_table):
+        raise StoreError(f"The large-data table for this source already exists: {target_table}.")
 
-    table_created = False
+    existed = False
     try:
         if kind == "csv":
             import_summary = import_csv_to_store(
@@ -173,7 +128,6 @@ def run_large_import(
                 progress=progress,
                 max_rows=max_rows,
             )
-            table_created = True
 
             _check_cancel(cancel_event)
 
@@ -196,22 +150,29 @@ def run_large_import(
                 progress=progress,
                 max_rows=max_rows,
             )
-            table_created = True
             import_summary = parquet_summary
 
             _check_cancel(cancel_event)
 
             source_arrow_types = parquet_summary.source_arrow_types
-            model_types = {
-                header: _map_parquet_arrow_type_to_model_type(arrow_type)
-                for header, arrow_type in zip(parquet_summary.headers, source_arrow_types)
-            }
+            physical_map = dict(store.columns(target_table))
+            model_types = {}
+            for header, arrow_type in zip(parquet_summary.headers, source_arrow_types):
+                if arrow_type.startswith("date32") or arrow_type.startswith("date64"):
+                    model_types[header] = "date"
+                else:
+                    phys = physical_map.get(header, "text")
+                    model_types[header] = _STORE_TO_APP_TYPE.get(phys, "text")
 
         _check_cancel(cancel_event)
 
         # a. Re-take fingerprint after import
         post_fp = file_fingerprint(source_path)
-        if post_fp["size"] != initial_fp["size"] or post_fp["mtime_ns"] != initial_fp["mtime_ns"]:
+        if (
+            post_fp["size"] != initial_fp["size"]
+            or post_fp["mtime_ns"] != initial_fp["mtime_ns"]
+            or post_fp["head_tail_sha256"] != initial_fp["head_tail_sha256"]
+        ):
             raise FileImportError("The file changed while it was being imported. Import it again.")
 
         _check_cancel(cancel_event)
@@ -239,7 +200,7 @@ def run_large_import(
             physical_types=physical_types,
             model_types=model_types,
             row_count=import_summary.row_count,
-            source_id=import_summary.source_id,
+            source_id=source_id,
             notices=list(import_summary.notices),
             source_arrow_types=source_arrow_types,
             fingerprint=post_fp,
@@ -247,10 +208,10 @@ def run_large_import(
             options=opts,
         )
 
-    except Exception:
-        if table_created:
+    except BaseException as exc:
+        if not existed and store.has_table(target_table):
             try:
                 store.drop_table(target_table)
-            except Exception:
-                pass
+            except Exception as drop_exc:
+                exc.add_note(f"The partly imported table could not be removed: {drop_exc}")
         raise

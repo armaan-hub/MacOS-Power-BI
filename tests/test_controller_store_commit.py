@@ -107,6 +107,7 @@ def test_commit_csv(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.Monk
             csv_file,
             "csv",
             {},
+            source_id="src_csv_commit",
             cancel_event=threading.Event(),
             max_rows=1_000_000,
         )
@@ -188,6 +189,7 @@ def test_commit_parquet(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.
             pq_file,
             "parquet",
             {},
+            source_id="src_pq_commit",
             cancel_event=threading.Event(),
             max_rows=1_000_000,
         )
@@ -226,6 +228,7 @@ def test_user_action_refused_after_commit(qapp: QApplication, tmp_path: Path, mo
             csv_file,
             "csv",
             {},
+            source_id="src_csv_commit",
             cancel_event=threading.Event(),
             max_rows=1_000_000,
         )
@@ -266,6 +269,7 @@ def test_existing_project_with_ordinary_table(qapp: QApplication, tmp_path: Path
             store_csv,
             "csv",
             {},
+            source_id="src_store_csv_commit",
             cancel_event=threading.Event(),
             max_rows=1_000_000,
         )
@@ -301,6 +305,7 @@ def test_failure_paths_leave_no_half_state(qapp: QApplication, tmp_path: Path, m
             csv_file,
             "csv",
             {},
+            source_id="src_csv_commit",
             cancel_event=threading.Event(),
             max_rows=1_000_000,
         )
