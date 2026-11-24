@@ -15,12 +15,14 @@ import math
 import os
 from pathlib import Path
 import re
+import sys
 import tempfile
 import threading
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 if TYPE_CHECKING:
+    from analytics_studio.store.candidate import StoreCandidate
     from analytics_studio.store.session import ProjectStore
     from analytics_studio.store.table_model import StoreTableModel
 
@@ -1920,7 +1922,7 @@ class CsvTableModel(QAbstractTableModel):
         return {int(Qt.ItemDataRole.DisplayRole): b"display"}
 
 
-from analytics_studio.store.candidate import LargeTableError, StoreCandidate
+from analytics_studio.large_table_error import LargeTableError
 
 
 class StudioController(QObject):
@@ -2100,7 +2102,13 @@ class StudioController(QObject):
 
     def _store_tables_loaded(self) -> bool:
         """Return True if any StoreCandidate is present in loaded candidates."""
-        return any(isinstance(c, StoreCandidate) for c in self._loaded_candidates.values())
+        mod = sys.modules.get("analytics_studio.store.candidate")
+        if mod is None:
+            return False
+        candidate_cls = getattr(mod, "StoreCandidate", None)
+        if candidate_cls is None:
+            return False
+        return any(isinstance(c, candidate_cls) for c in self._loaded_candidates.values())
 
     def _large_data_refusal(self, what: str) -> str:
         """Standard refusal message for unsupported large-data table features."""
