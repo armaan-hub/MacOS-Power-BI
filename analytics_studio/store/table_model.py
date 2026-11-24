@@ -1278,6 +1278,10 @@ class StoreTableModel(QAbstractTableModel):
             cancel_event=cancel_event,
         )
 
+    def set_store(self, store: DuckStore) -> None:
+        """Point the model at a newly bound DuckStore session."""
+        self._store = store
+
     # ------------------------------------------------------------------
     # Paging
     # ------------------------------------------------------------------

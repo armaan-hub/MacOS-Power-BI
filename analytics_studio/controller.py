@@ -7600,8 +7600,7 @@ class StudioController(QObject):
             except Exception as exc:
                 logger.warning("Could not drop unreferenced store tables: %s", exc)
         else:
-            if not has_store_sources:
-                self._close_project_store()
+            self._close_project_store()
 
         self._formula_bar.reset()
         self._project = candidate
@@ -11461,6 +11460,9 @@ class StudioController(QObject):
 
     def _raw_candidate_for_source(self, source: dict[str, Any]) -> ImportCandidate:
         source_id = str(source.get("id", ""))
+        if source.get("store"):
+            source_name = source.get("name", source_id)
+            raise ValueError(f"{source_name} is a large-data table. Import the file again to reload it.")
         if source.get("kind") == "inline":
             headers = list(source["headers"])
             rows = [
@@ -12045,6 +12047,8 @@ class StudioController(QObject):
     @classmethod
     def _source_is_refresh_root(cls, source: dict[str, Any]) -> bool:
         """Return whether a source should refresh independently in Refresh All."""
+        if source.get("store"):
+            return False
         kind = source.get("kind")
         if kind == "query":
             return cls._source_refresh_included(source)
@@ -13732,6 +13736,9 @@ class StudioController(QObject):
             self._set_status("There are no linked sources available to refresh.")
             return
         active_source = sources_by_id.get(self._active_source_id or "")
+        if not refresh_all and active_source is not None and active_source.get("store"):
+            self._set_status(f"{active_source.get('name', 'This table')} is a large-data table. Import the file again to reload it.")
+            return
         if not refresh_all and active_source is None:
             self._set_status("The active source record is unavailable.")
             return
@@ -13808,11 +13815,15 @@ class StudioController(QObject):
                 elif kind == "web":
                     raw = self._web_candidate_for_source(source)
                 elif kind == "folder":
+                    if source.get("store"):
+                        raise ValueError(f"{source.get('name', source_id)} is a large-data table. Import the file again to reload it.")
                     raw = parse_folder(
                         self._resolved_source_path(source),
                         options=source.get("parser_options", {}),
                     )
                 else:
+                    if source.get("store"):
+                        raise ValueError(f"{source.get('name', source_id)} is a large-data table. Import the file again to reload it.")
                     raw = parse_file(
                         self._resolved_source_path(source),
                         options=source.get("parser_options", {}),
@@ -15157,7 +15168,12 @@ class StudioController(QObject):
         from analytics_studio.store.session import ProjectStore
 
         path = Path(path).expanduser().resolve()
-        has_store = self._store_tables_loaded() or self._project_store is not None
+        from analytics_studio.store.candidate import StoreCandidate
+        loaded_store_candidates = [
+            c for c in self._loaded_candidates.values()
+            if isinstance(c, StoreCandidate) and getattr(c, "session", None) is self._project_store
+        ]
+        has_store = len(loaded_store_candidates) > 0
         old_store = self._project_store if has_store else None
 
         target_data_file = ProjectStore.data_file_for(str(path))
@@ -15165,7 +15181,7 @@ class StudioController(QObject):
 
         if old_store is not None:
             if old_store.busy:
-                self._set_status("Cannot save while a store operation is in progress.")
+                self._set_status("The large-data store is busy. Try again in a moment.")
                 return False
 
             old_store_file = os.path.realpath(old_store.path)
@@ -15207,8 +15223,11 @@ class StudioController(QObject):
                         if free_space < required_space:
                             self._set_status("Not enough free space to save the large-data table next to the project.")
                             return False
-                except Exception:
-                    pass
+                except OSError as exc:
+                    logger.warning("Could not check disk usage: %s", exc)
+                except Exception as exc:
+                    QMessageBox.critical(None, "Could not save project", str(exc))
+                    return False
 
                 # Modal progress dialog with Cancel
                 dialog = QProgressDialog(f"Saving {os.path.basename(target_data_file)}...", "Cancel", 0, 100)
@@ -15239,15 +15258,27 @@ class StudioController(QObject):
                     )
                     copy_made = True
                 except Exception as exc:
+                    was_canceled = cancel_event.is_set()
+                    try:
+                        dialog.canceled.disconnect(cancel_event.set)
+                    except Exception:
+                        pass
                     dialog.close()
                     try:
                         old_store.discard_copy(target_data_file)
                     except Exception:
                         pass
-                    if cancel_event.is_set():
+                    if was_canceled:
                         self._set_status("Save canceled.")
                         return False
-                    QMessageBox.critical(None, "Could not save project", str(exc))
+                    if isinstance(exc, (OSError, StoreError)):
+                        QMessageBox.critical(
+                            None,
+                            "Could not save the large-data table",
+                            f"Could not save the large-data table: {exc}",
+                        )
+                    else:
+                        QMessageBox.critical(None, "Could not save project", str(exc))
                     return False
                 finally:
                     dialog.close()
@@ -15280,6 +15311,8 @@ class StudioController(QObject):
                 except StoreError as exc:
                     QMessageBox.critical(None, "Could not save project", str(exc))
                     return False
+                if self._store_table_model is not None and hasattr(self._store_table_model, "set_store"):
+                    self._store_table_model.set_store(old_store.store)
 
         self._project = saved
         self._project_path = path
@@ -15384,10 +15417,17 @@ class StudioController(QObject):
                 if source.get("kind") not in PATHLESS_SOURCE_KINDS:
                     source["path"] = self._source_path_for_save(source["path"], path)
 
-        # Update data_file for every store source to be the bare filename
+        # Update data_file only for loaded StoreCandidates whose session is _project_store
+        # A store source that failed to load keeps its store record UNCHANGED.
         bare_data_file = os.path.basename(ProjectStore.data_file_for(str(path)))
+        from analytics_studio.store.candidate import StoreCandidate
+        loaded_store_source_ids = {
+            source_id
+            for source_id, c in self._loaded_candidates.items()
+            if isinstance(c, StoreCandidate) and getattr(c, "session", None) is self._project_store
+        }
         for source in document.get("data_sources", []):
-            if isinstance(source.get("store"), dict):
+            if isinstance(source.get("store"), dict) and source.get("id") in loaded_store_source_ids:
                 source["store"]["data_file"] = bare_data_file
 
         return document

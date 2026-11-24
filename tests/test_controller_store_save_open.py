@@ -315,6 +315,7 @@ def test_atomicity_json_write_failure(qapp: QApplication, tmp_path: Path, monkey
 
 def test_atomicity_copy_to_failure(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     _assert_no_blocking_dialogs(monkeypatch)
+    monkeypatch.setattr(QMessageBox, "critical", lambda *a, **k: None)
     csv_file = _generate_csv_file(tmp_path, 500)
 
     controller = StudioController()
@@ -421,7 +422,7 @@ def test_store_busy_refusal(qapp: QApplication, tmp_path: Path, monkeypatch: pyt
     with controller._project_store.job():
         success = controller._save_to(project_path)
         assert success is False
-        assert "Cannot save while a store operation is in progress" in controller.statusMessage
+        assert "The large-data store is busy. Try again in a moment." in controller.statusMessage
 
 
 def test_open_missing_data_file(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
