@@ -2021,3 +2021,19 @@ def test_canonical_patterns_reject_what_python_would_read_differently():
     dec = re.compile(mod._CANON_DEC)
     assert dec.fullmatch("+1.50") and not dec.fullmatch(".5") and not dec.fullmatch("5.")
     assert not dec.fullmatch("1e3") and not dec.fullmatch("1_0")
+
+
+def test_replace_store_uses_passed_row_count(tmp_path, qapp):
+    """replace_store must use the passed row_count rather than recomputing it."""
+    db_path = str(tmp_path / "rc.duckdb")
+    with DuckStore(db_path) as store:
+        store.create_table("t_rc", [("id", "whole")])
+        store.append_rows("t_rc", [(1,), (2,), (3,)])
+        sm = StoreTableModel(store)
+
+        # Call replace_store with explicit row_count=999
+        res = sm.replace_store("t_rc", headers=["id"], row_count=999)
+        assert res is True
+        assert sm._total_rows == 999
+        assert sm.rowCount() == 3  # fetched page row count
+

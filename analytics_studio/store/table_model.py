@@ -1185,6 +1185,7 @@ class StoreTableModel(QAbstractTableModel):
         column_types: dict[str, str] | None = None,
         table_key: str | None = None,
         *,
+        row_count: int | None = None,
         cancel_event: threading.Event | None = None,
     ) -> bool:
         """Load data from a store table. Returns True on success, False on StoreError
@@ -1204,11 +1205,15 @@ class StoreTableModel(QAbstractTableModel):
                     new_headers = list(headers)
                 else:
                     new_headers = [name for name, _ in col_info]
-                new_total_rows = self._store.row_count(new_table_name)
+                new_total_rows = (
+                    int(row_count)
+                    if row_count is not None
+                    else self._store.row_count(new_table_name)
+                )
             else:
                 new_store_columns = {}
                 new_headers = list(headers or [])
-                new_total_rows = 0
+                new_total_rows = int(row_count) if row_count is not None else 0
 
             new_col_types = {}
             for h in new_headers:
@@ -1269,6 +1274,7 @@ class StoreTableModel(QAbstractTableModel):
             headers=headers,
             column_types=column_types,
             table_key=table_key,
+            row_count=row_count,
             cancel_event=cancel_event,
         )
 

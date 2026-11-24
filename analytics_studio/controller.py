@@ -1930,7 +1930,13 @@ class StudioController(QObject):
     activeSourceReady = Signal()
     reportBusyChanged = Signal(bool)
 
-    def __init__(self, parent: QObject | None = None, settings: QSettings | None = None) -> None:
+    def __init__(
+        self,
+        parent: QObject | None = None,
+        settings: QSettings | None = None,
+        *,
+        app_data_dir: str | None = None,
+    ) -> None:
         super().__init__(parent)
         self._formula_bar = FormulaBarController(self)
         self._project = new_project()
@@ -2021,12 +2027,13 @@ class StudioController(QObject):
         self._preview_tasks: dict[int, Any] = {}
         self._project_store: ProjectStore | None = None
         self._store_table_model: StoreTableModel | None = None
-        self._app_data_dir: str | None = None
-        try:
-            from analytics_studio.store.session import ProjectStore as _PS
-            _PS.reap_stale(self._effective_app_data_dir())
-        except Exception as exc:
-            logger.warning("Failed to reap stale project stores: %s", exc)
+        self._app_data_dir: str | None = app_data_dir
+        if app_data_dir is not None or not os.environ.get("ANALYTICS_STUDIO_NO_REAP"):
+            try:
+                from analytics_studio.store.session import ProjectStore as _PS
+                _PS.reap_stale(self._effective_app_data_dir())
+            except Exception as exc:
+                logger.warning("Failed to reap stale project stores: %s", exc)
         self._refresh_model_view()
         self._refresh_report()
 
@@ -2052,7 +2059,7 @@ class StudioController(QObject):
         return loc if loc else tempfile.gettempdir()
 
     def _ensure_project_store(self) -> ProjectStore:
-        if self._project_store is not None and not self._project_store._closed:
+        if self._project_store is not None and not self._project_store.closed:
             return self._project_store
 
         from analytics_studio.store.session import ProjectStore as _PS
@@ -2068,7 +2075,6 @@ class StudioController(QObject):
     def _close_project_store(self) -> None:
         if self._project_store is not None:
             store = self._project_store
-            self._project_store = None
             try:
                 store.shutdown()
             except Exception:
@@ -2077,13 +2083,17 @@ class StudioController(QObject):
                 store.close()
             except Exception:
                 pass
+            if store.closed:
+                self._project_store = None
 
-    def shutdown_store(self) -> bool:
+    def shutdown_store(self, timeout: float = 15.0) -> bool:
         if self._project_store is None:
             return True
         store = self._project_store
-        self._project_store = None
-        return store.shutdown()
+        closed = store.shutdown(timeout=timeout)
+        if closed:
+            self._project_store = None
+        return closed
 
     # QML-facing state. The dictionaries/lists are returned as fresh QVariant values.
     @Property(str, notify=stateChanged)
@@ -14291,18 +14301,35 @@ class StudioController(QObject):
 
         from analytics_studio.store.candidate import StoreCandidate
         if isinstance(parsed, StoreCandidate):
-            self._active_store_candidate = parsed
-            self._rows = []
-            if self._store_table_model is None:
+            if self._store_table_model is None or self._store_table_model._store is not parsed.session.store:
+                if self._store_table_model is not None:
+                    self._store_table_model.clear()
+                    self._store_table_model.deleteLater()
                 from analytics_studio.store.table_model import StoreTableModel
                 self._store_table_model = StoreTableModel(parsed.session.store, parent=self)
-            self._store_table_model.replace_store(
+
+            success = self._store_table_model.replace_store(
                 table_name=parsed.store_table,
                 headers=self._headers,
                 column_types=self._active_column_type_map(),
                 row_count=parsed.row_count,
                 table_key=self._active_source_id,
             )
+            if not success:
+                self._source_path = None
+                self._source_id = None
+                self._active_source_id = None
+                self._active_source_path = None
+                self._active_source_kind = None
+                self._active_parser_options = {}
+                self._headers = []
+                self._rows = []
+                self._set_status(f"Could not load table from store: {parsed.store_table}")
+                self.stateChanged.emit()
+                return
+
+            self._active_store_candidate = parsed
+            self._rows = []
         else:
             self._active_store_candidate = None
             if self._store_table_model is not None:

@@ -130,6 +130,10 @@ class ProjectStore:
         return self._unsaved
 
     @property
+    def closed(self) -> bool:
+        return self._closed
+
+    @property
     def cancel_event(self) -> threading.Event:
         return self._cancel_event
 
