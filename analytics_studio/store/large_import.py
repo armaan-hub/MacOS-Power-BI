@@ -209,9 +209,15 @@ def run_large_import(
         )
 
     except BaseException as exc:
-        if not existed and store.has_table(target_table):
+        if not existed:
             try:
-                store.drop_table(target_table)
-            except Exception as drop_exc:
-                exc.add_note(f"The partly imported table could not be removed: {drop_exc}")
+                has_tbl = store.has_table(target_table)
+            except Exception as check_exc:
+                has_tbl = False
+                exc.add_note(f"The partly imported table could not be removed: {check_exc}")
+            if has_tbl:
+                try:
+                    store.drop_table(target_table)
+                except Exception as drop_exc:
+                    exc.add_note(f"The partly imported table could not be removed: {drop_exc}")
         raise

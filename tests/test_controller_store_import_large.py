@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import os
 from pathlib import Path
+import threading
 import time
 from typing import Any
 from unittest.mock import patch
@@ -488,3 +490,195 @@ def test_silent_refusal_notice_reset_after_large_commit(qapp: QApplication, tmp_
         assert controller._silent_refusal_notice_shown is False
     finally:
         controller._close_project_store()
+
+
+def test_failure_cancel_commit_failure_snapshot_and_lifetime(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test item 1 & 2: cancel mid-import, over max_rows, bad file, commit failure.
+    Snapshot equality, store lifetime (closed if created by attempt, kept if existed before),
+    no orphan tables left, new import works after each.
+    """
+    csv_file = _generate_csv(tmp_path / "valid.csv", rows=2000)
+    controller = StudioController()
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+
+    def snapshot() -> dict[str, Any]:
+        return {
+            "loaded_candidates": dict(controller._loaded_candidates),
+            "raw_candidates": dict(controller._raw_candidates),
+            "query_candidates": dict(controller._query_candidates),
+            "project": deepcopy(controller._project),
+            "active_source_id": controller._active_source_id,
+            "dirty": controller._dirty,
+            "active_store_candidate": controller._active_store_candidate,
+            "grid_rows": controller._table_model.rowCount(),
+            "grid_cols": controller._table_model.columnCount(),
+            "store_table_model": controller._store_table_model,
+        }
+
+    base_snap = snapshot()
+
+    # 1. Failure over max_rows
+    from analytics_studio.store import large_import as li_mod
+    orig_run = li_mod.run_large_import
+
+    def run_small_max_rows(*args, **kwargs):
+        kwargs["max_rows"] = 10
+        return orig_run(*args, **kwargs)
+
+    monkeypatch.setattr(li_mod, "run_large_import", run_small_max_rows)
+    with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+            controller._import_file_path(csv_file)
+    _wait_for_large_job(controller)
+
+    assert "import limit" in controller.statusMessage.lower()
+    assert snapshot() == base_snap
+    # Project store was created by this attempt and ended with no store table loaded -> closed
+    assert controller._project_store is None
+    monkeypatch.undo()
+
+    # Verify a new large import works after a failed one
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+    with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+            controller._import_file_path(csv_file)
+    _wait_for_large_job(controller)
+
+    assert controller.sourceLoaded is True
+    assert controller._store_tables_loaded() is True
+    assert controller._project_store is not None and not controller._project_store.closed
+    assert controller._project_store.busy is False
+
+    # Reset controller for clean test of Bad File
+    controller._close_project_store()
+    controller = StudioController()
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+    base_snap = snapshot()
+
+    # 2. Bad file failure
+    bad_file = tmp_path / "corrupt.csv"
+    bad_file.write_bytes(b"\x00\xff\xfe random binary junk")
+    with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+            controller._import_file_path(bad_file)
+    _wait_for_large_job(controller)
+
+    assert snapshot() == base_snap
+    assert controller._project_store is None
+
+    # Reset for Cancel test
+    controller = StudioController()
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+    base_snap = snapshot()
+
+    # 3. Cancel mid-import from progress callback
+    def cancel_on_progress(*args, **kwargs):
+        prog = kwargs.get("progress")
+        cancel_ev = kwargs.get("cancel_event")
+        if prog is not None and cancel_ev is not None:
+            # cancel from progress
+            cancel_ev.set()
+        return orig_run(*args, **kwargs)
+
+    monkeypatch.setattr(li_mod, "run_large_import", cancel_on_progress)
+    with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+            controller._import_file_path(csv_file)
+    _wait_for_large_job(controller)
+
+    assert controller.statusMessage == "Import canceled."
+    assert snapshot() == base_snap
+    assert controller._project_store is None
+    monkeypatch.undo()
+
+    # Verify a new large import works after a canceled one
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+    with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+            controller._import_file_path(csv_file)
+    _wait_for_large_job(controller)
+
+    assert controller.sourceLoaded is True
+    assert controller._project_store is not None and not controller._project_store.closed
+    assert controller._project_store.busy is False
+
+    # 4. Commit failure (_install_source fails): orphan table dropped, store lifetime handled
+    controller._close_project_store()
+    controller = StudioController()
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+    base_snap = snapshot()
+
+    with patch.object(StoreTableModel, "replace_store", return_value=False):
+        with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+            with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+                controller._import_file_path(csv_file)
+        _wait_for_large_job(controller)
+
+    assert "Could not load table from store" in controller.statusMessage
+    assert snapshot() == base_snap
+    # This attempt created the store and failed -> closed
+    assert controller._project_store is None
+
+    # Now test store lifetime when store existed BEFORE the failed attempt
+    ps = controller._ensure_project_store()
+    assert controller._project_store is ps
+    with patch.object(StoreTableModel, "replace_store", return_value=False):
+        with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+            with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+                controller._import_file_path(csv_file)
+        _wait_for_large_job(controller)
+
+    # Store existed before attempt -> left open!
+    assert controller._project_store is ps
+    assert not ps.closed
+    assert ps.busy is False
+    # Check that orphan table was dropped
+    assert ps.call(lambda s: s.table_names()) == []
+    controller._close_project_store()
+
+
+def test_shutdown_store_while_job_running(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test item 3: shutdown_store() while an import job is running cancels it,
+    returns True/False without crash or half-state, done handler does not touch dead objects.
+    """
+    csv_file = _generate_csv(tmp_path / "slow.csv", rows=2000)
+    controller = StudioController()
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+
+    started_event = threading.Event()
+    continue_event = threading.Event()
+
+    from analytics_studio.store import large_import as li_mod
+    orig_run = li_mod.run_large_import
+
+    def slow_run(*args, **kwargs):
+        started_event.set()
+        # Wait until test tells us or until timeout
+        continue_event.wait(timeout=5.0)
+        return orig_run(*args, **kwargs)
+
+    monkeypatch.setattr(li_mod, "run_large_import", slow_run)
+
+    with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+            controller._import_file_path(csv_file)
+
+    # Wait until job has started running in background
+    deadline = time.monotonic() + 10.0
+    while not started_event.is_set() and time.monotonic() < deadline:
+        qapp.processEvents()
+        time.sleep(0.01)
+
+    assert controller._large_import_job is not None
+
+    # Call shutdown_store while running
+    closed = controller.shutdown_store(timeout=5.0)
+    continue_event.set()
+
+    # Wait for job to finish done handler
+    _wait_for_large_job(controller)
+
+    assert closed is True
+    assert controller._project_store is None
+    assert controller.sourceLoaded is False
+

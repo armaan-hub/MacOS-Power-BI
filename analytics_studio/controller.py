@@ -2038,6 +2038,7 @@ class StudioController(QObject):
         self._large_import_dialog: Any | None = None
         self._large_import_path: Path | None = None
         self._large_import_project_store: Any | None = None
+        self._large_import_created_store: bool = False
         self._app_data_dir: str | None = app_data_dir
         no_reap = os.environ.get("ANALYTICS_STUDIO_NO_REAP", "").strip().lower() in ("1", "true", "yes")
         if app_data_dir is not None or not no_reap:
@@ -2099,6 +2100,11 @@ class StudioController(QObject):
                 self._project_store = None
 
     def shutdown_store(self, timeout: float = 15.0) -> bool:
+        if self._large_import_job is not None:
+            try:
+                self._large_import_job.cancel()
+            except Exception:
+                pass
         if self._project_store is None:
             return True
         store = self._project_store
@@ -8077,6 +8083,8 @@ class StudioController(QObject):
             parser_options=request.get("options"),
         ) or str(uuid4())
 
+        store_already_open = self._project_store is not None and not self._project_store.closed
+
         from analytics_studio.store.base import StoreError
         try:
             project_store = self._ensure_project_store()
@@ -8122,6 +8130,7 @@ class StudioController(QObject):
         self._large_import_dialog = dialog
         self._large_import_path = path
         self._large_import_project_store = project_store
+        self._large_import_created_store = not store_already_open
 
         job.signals.finished.connect(self._on_large_import_finished)
         job.signals.failed.connect(self._on_large_import_failed)
@@ -8136,6 +8145,9 @@ class StudioController(QObject):
             self._large_import_dialog = None
             self._large_import_path = None
             self._large_import_project_store = None
+            if self._large_import_created_store and not self._store_tables_loaded():
+                self._close_project_store()
+            self._large_import_created_store = False
             self._set_status(str(exc))
             return False
 
@@ -8145,7 +8157,9 @@ class StudioController(QObject):
         path = self._large_import_path
         store = self._large_import_project_store
         if path is not None and store is not None:
-            self._commit_store_import(path, result, store)
+            ok = self._commit_store_import(path, result, store)
+            if not ok:
+                self._drop_orphan_table(store, result.table)
 
     def _on_large_import_failed(self, message: str) -> None:
         self._set_status(message)
@@ -8155,13 +8169,34 @@ class StudioController(QObject):
 
     def _on_large_import_done(self) -> None:
         dialog = self._large_import_dialog
+        created_store = self._large_import_created_store
         self._large_import_job = None
         self._large_import_binder = None
         self._large_import_dialog = None
         self._large_import_path = None
         self._large_import_project_store = None
+        self._large_import_created_store = False
         if dialog is not None:
             dialog.deleteLater()
+        if created_store and not self._store_tables_loaded():
+            self._close_project_store()
+
+    def _drop_orphan_table(
+        self,
+        project_store: "ProjectStore",
+        table_name: str,
+    ) -> None:
+        """Drop an orphan table from the ProjectStore on commit failure."""
+        try:
+            if project_store.closed or project_store.busy:
+                logger.warning(
+                    "Project store is closed or busy; leaving orphan table %s for next open cleanup",
+                    table_name,
+                )
+                return
+            project_store.call(lambda s: s.drop_table(table_name))
+        except Exception as exc:
+            logger.warning("Could not drop orphan table %s: %s", table_name, exc)
 
     def _commit_store_import(
         self,

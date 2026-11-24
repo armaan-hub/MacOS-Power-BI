@@ -395,3 +395,62 @@ def test_failure_paths_leave_no_half_state(qapp: QApplication, tmp_path: Path, m
     assert "Could not load table from store" in controller.statusMessage
 
     project_store.close()
+
+
+def test_commit_store_import_c01_keeps_result_source_id(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """C01: project already has a source for the SAME path under a different source id.
+    _commit_store_import runs with result.source_id = another id:
+    the new source/table records use result.source_id (not the id recomputed from the path).
+    """
+    _assert_no_blocking_dialogs(monkeypatch)
+    csv_file = _generate_csv_file(tmp_path, 2000)
+
+    controller = StudioController()
+    monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
+    project_store = controller._ensure_project_store()
+
+    # Pre-populate project with a source having the same path but ID "existing_diff_id"
+    from analytics_studio.project import new_project
+    proj = new_project()
+    existing_source = {
+        "id": "existing_diff_id",
+        "name": csv_file.name,
+        "kind": "csv",
+        "path": str(csv_file.resolve()),
+        "parser_options": {"delimiter": ",", "has_header": True},
+        "transform_steps": [],
+    }
+    existing_table = {
+        "id": "existing_diff_id",
+        "name": "ExistingTable",
+        "source_id": "existing_diff_id",
+        "column_types": {},
+    }
+    proj["data_sources"] = [existing_source]
+    proj["model"]["tables"] = [existing_table]
+    controller._project = proj
+
+    # Now import into store using a DIFFERENT source_id "new_diff_id"
+    with project_store.job():
+        store = project_store.store
+        result = run_large_import(
+            store,
+            csv_file,
+            "csv",
+            {"delimiter": ",", "has_header": True},
+            source_id="new_diff_id",
+        )
+
+    ret = controller._commit_store_import(csv_file, result, project_store)
+    assert ret is True
+
+    # The new source and table records MUST use result.source_id ("new_diff_id"), not "existing_diff_id"
+    data_sources = controller._project["data_sources"]
+    assert any(s["id"] == "new_diff_id" for s in data_sources)
+    tables = controller._project["model"]["tables"]
+    assert any(t["id"] == "new_diff_id" and t["source_id"] == "new_diff_id" for t in tables)
+    assert controller._active_source_id == "new_diff_id"
+    assert controller._loaded_candidates["new_diff_id"] is controller._active_store_candidate
+
+    project_store.close()
+

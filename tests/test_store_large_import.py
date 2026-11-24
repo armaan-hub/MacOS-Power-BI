@@ -684,3 +684,88 @@ def test_surviving_mutants_and_options(tmp_path: Path, monkeypatch: pytest.Monke
                 run_large_import(store, csv_file, "csv", {}, source_id="src_early_cancel", cancel_event=early_cancel)
     finally:
         ps.close()
+
+
+def test_parquet_cancel_after_import_before_type_mapping(tmp_path: Path) -> None:
+    """L18: a test that cancels right after the Parquet importer returns and before type mapping."""
+    pa = pytest.importorskip("pyarrow")
+    import pyarrow.parquet as pq
+    from unittest.mock import patch
+    import analytics_studio.store.large_import as li_mod
+
+    pq_file = tmp_path / "cancel_l18.parquet"
+    table = pa.Table.from_arrays([pa.array([1, 2, 3])], names=["col1"])
+    pq.write_table(table, pq_file)
+
+    ps = ProjectStore.open(str(tmp_path / "test_l18.duckdb"))
+    try:
+        with ps.job():
+            store = ps.store
+            cancel_ev = threading.Event()
+
+            orig_import_parquet = li_mod.import_parquet_to_store
+
+            def cancel_on_parquet(*args, **kwargs):
+                res = orig_import_parquet(*args, **kwargs)
+                # Set cancel right after parquet import returns
+                cancel_ev.set()
+                return res
+
+            with patch("analytics_studio.store.large_import.import_parquet_to_store", side_effect=cancel_on_parquet):
+                with patch.object(store, "columns", side_effect=AssertionError("store.columns called despite early cancel")):
+                    with pytest.raises(ImportCancelledError, match="Import canceled."):
+                        run_large_import(
+                            store,
+                            pq_file,
+                            "parquet",
+                            {},
+                            source_id="src_l18",
+                            cancel_event=cancel_ev,
+                        )
+
+            # verify no table left
+            assert not store.has_table("src_l18_g1")
+    finally:
+        ps.close()
+
+
+def test_run_large_import_cleanup_has_table_raises(tmp_path: Path) -> None:
+    """Low: store.has_table(...) in cleanup handler raises; original exception still propagates."""
+    from unittest.mock import patch
+
+    csv_file = tmp_path / "test_cleanup_fail.csv"
+    csv_file.write_text("a,b\n1,2\n", encoding="utf-8")
+
+    ps = ProjectStore.open(str(tmp_path / "test_cleanup.duckdb"))
+    try:
+        with ps.job():
+            store = ps.store
+            orig_has_table = store.has_table
+
+            called_count = 0
+
+            def failing_has_table(t: str) -> bool:
+                nonlocal called_count
+                called_count += 1
+                # Let initial check pass on call 1, but raise on cleanup call 2
+                if called_count > 1 and t == ProjectStore.table_name("src_cleanup", 1):
+                    raise RuntimeError("Simulated store closed error in has_table")
+                return orig_has_table(t)
+
+            with patch.object(store, "has_table", side_effect=failing_has_table):
+                # Cause an error during import, e.g. bad CSV or simulated error
+                with patch("analytics_studio.store.large_import.import_csv_to_store", side_effect=ValueError("Original import error")):
+                    with pytest.raises(ValueError, match="Original import error") as exc_info:
+                        run_large_import(
+                            store,
+                            csv_file,
+                            "csv",
+                            {},
+                            source_id="src_cleanup",
+                        )
+                    # Check notes or verify original error propagated
+                    notes = getattr(exc_info.value, "__notes__", [])
+                    assert any("The partly imported table could not be removed" in n for n in notes)
+    finally:
+        ps.close()
+
