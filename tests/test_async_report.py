@@ -117,8 +117,8 @@ class TestAsyncReport(unittest.TestCase):
             self.assertEqual(actual_value, expected_formatted, f"Worker formatted string for {name} ({actual_value}) != expected ({expected_formatted})")
 
     def test_responsiveness_slow_report_measure(self) -> None:
-        # 8,000 rows for SUMX(T, CALCULATE(COUNTROWS(T)))
-        large_rows = [{"val": str(i)} for i in range(8000)]
+        # 160,000 rows for SUMX(T, CALCULATE(COUNTROWS(T)))
+        large_rows = [{"val": str(i)} for i in range(160000)]
         large_headers = ["val"]
         slow_measure = [{"name": "Slow", "expression": "SUMX(Sales, CALCULATE(COUNTROWS(Sales)))"}]
 
