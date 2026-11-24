@@ -1921,6 +1921,9 @@ class CsvTableModel(QAbstractTableModel):
         return {int(Qt.ItemDataRole.DisplayRole): b"display"}
 
 
+from analytics_studio.store.candidate import LargeTableError
+
+
 class StudioController(QObject):
     """Owns application state and exposes deliberate, synchronous QML APIs."""
 
@@ -3310,6 +3313,9 @@ class StudioController(QObject):
                         measure_name, measure_context, filter_table_ids, {},
                         bound_table_id,
                     )
+                except LargeTableError as exc:
+                    self._set_status(str(exc))
+                    return None
                 except (MeasureError, KeyError, TypeError, ValueError):
                     return None
             aggregation = str(visual.get("field_aggregations", {}).get(column, "sum")).casefold()
@@ -3627,6 +3633,9 @@ class StudioController(QObject):
                             {location_field: set(source_values.values())},
                             bound_table_id,
                         )
+                    except LargeTableError as exc:
+                        self._set_status(str(exc))
+                        metric = None
                     except (MeasureError, KeyError, TypeError, ValueError):
                         metric = None
                 elif not value_field:
@@ -3992,6 +4001,11 @@ class StudioController(QObject):
                     {dimension_column: group_values[key]},
                     dimension_id,
                 )
+            except LargeTableError as exc:
+                return {
+                    "columns": columns, "rows": [], "total_rows": 0,
+                    "error": str(exc),
+                }
             except (MeasureError, KeyError, RelationshipError, TypeError, ValueError) as exc:
                 detail = str(exc).strip() or "evaluation failed"
                 return {
@@ -4147,6 +4161,13 @@ class StudioController(QObject):
                         group_filters,
                         bound_table_id,
                     )
+                except LargeTableError as exc:
+                    return {
+                        "columns": columns,
+                        "rows": [],
+                        "total_rows": 0,
+                        "error": str(exc),
+                    }
                 except (MeasureError, KeyError, TypeError, ValueError) as exc:
                     detail = str(exc).strip() or "evaluation failed"
                     return {
@@ -4203,7 +4224,7 @@ class StudioController(QObject):
 
         grouped: defaultdict[tuple[tuple[Any, ...], tuple[Any, ...]], Decimal | None] = defaultdict(Decimal)
         counts: defaultdict[tuple[tuple[Any, ...], tuple[Any, ...]], int] = defaultdict(int)
-        error_cells: set[tuple[tuple[Any, ...], tuple[Any, ...]]] = set()
+        error_cells: dict[tuple[tuple[Any, ...], tuple[Any, ...]], str] = {}
         row_values: dict[tuple[Any, ...], Any] = {}
         column_values: dict[tuple[Any, ...], Any] = {}
         row_displays: dict[tuple[Any, ...], str] = {}
@@ -4229,7 +4250,7 @@ class StudioController(QObject):
             else:
                 raw_value = row.get(value_field)
                 if is_cell_error(raw_value):
-                    error_cells.add(key)
+                    error_cells[key] = "Error"
                     continue
                 if aggregation == "count":
                     if raw_value is None or raw_value == "":
@@ -4255,8 +4276,10 @@ class StudioController(QObject):
                         bound_table_id,
                     )
                     counts[key] = 1
+                except LargeTableError as exc:
+                    error_cells[key] = str(exc).strip() or "table is stored in the large-data store"
                 except (MeasureError, KeyError, TypeError, ValueError):
-                    error_cells.add(key)
+                    error_cells[key] = "Error"
 
         if aggregation == "average" and not measure_name:
             grouped = defaultdict(
@@ -4311,7 +4334,7 @@ class StudioController(QObject):
             for column_key in sorted_columns:
                 data_key = (row_key, column_key)
                 if data_key in error_cells:
-                    values.append("Error")
+                    values.append(error_cells[data_key])
                 elif data_key not in grouped:
                     values.append("")
                 elif grouped[data_key] is None:
@@ -4372,6 +4395,8 @@ class StudioController(QObject):
                 formatted = (
                     _format_report_number(value) if value is not None else "—"
                 )
+            except LargeTableError as exc:
+                formatted = str(exc).strip() or "table is stored in the large-data store"
             except (MeasureError, KeyError, TypeError, ValueError):
                 formatted = "Error"
             has_highlights = any(
@@ -4397,6 +4422,8 @@ class StudioController(QObject):
                         _format_report_number(highlight_measure_value)
                         if highlight_measure_value is not None else "—"
                     )
+                except LargeTableError as exc:
+                    highlight_value = str(exc).strip() or "table is stored in the large-data store"
                 except (MeasureError, KeyError, TypeError, ValueError):
                     highlight_value = "Error"
             return {
@@ -15350,6 +15377,9 @@ class StudioController(QObject):
                     ),
                     visual_axis_values=visual_axis_values,
                 )
+            except LargeTableError as exc:
+                self._set_status(str(exc))
+                return []
             except (MeasureError, KeyError, TypeError, ValueError):
                 return []
 
