@@ -2119,6 +2119,15 @@ class StudioController(QObject):
             self._silent_refusal_notice_shown = True
             self._set_status(self._large_data_refusal(what))
 
+    def _report_view_refusal_for_user_action(self) -> None:
+        """Write the report-view refusal on every call of a user-initiated slot.
+
+        Those slots refresh the report right after, and the refresh itself only
+        writes the refusal once per store epoch.
+        """
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Report view"))
+
     def _large_data_refusal(self, what: str) -> str:
         """Standard refusal message for unsupported large-data table features."""
         return (
@@ -2322,6 +2331,7 @@ class StudioController(QObject):
         else:
             interaction["mode"] = mode
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -6321,6 +6331,7 @@ class StudioController(QObject):
         self._selected_visual_ids.clear()
         self._creating_visual = False
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -10284,7 +10295,7 @@ class StudioController(QObject):
     ) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]], set[str]]:
         """Build page context plus optional filters for one report visual."""
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report filters"))
+            self._notice_silent_refusal("Report filters")
             return {}, [], set()
         cache_key = (visual_name, include_highlights)
         cached = self._report_filter_context_cache.get(cache_key)
@@ -13486,6 +13497,7 @@ class StudioController(QObject):
         ):
             visual.get("field_aggregations", {}).pop(field_name, None)
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -13530,6 +13542,7 @@ class StudioController(QObject):
             return
         aggregations[field_name] = key
         self._dirty = True
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -13780,6 +13793,7 @@ class StudioController(QObject):
             self._cross_filters.pop(old_title, None)
         visual[property_key] = normalized
         self._report_filter_context_cache.clear()
+        self._report_view_refusal_for_user_action()
         self._refresh_report()
         self._dirty = True
         self.stateChanged.emit()
@@ -14708,7 +14722,7 @@ class StudioController(QObject):
             self._filter_context_error = ""
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
-            self._set_status(self._large_data_refusal("Report view"))
+            self._notice_silent_refusal("Report view")
             return
 
         if self._current_region is not None and self._current_region not in self.regions:
@@ -14923,7 +14937,7 @@ class StudioController(QObject):
             self._filter_context_error = ""
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
-            self._set_status(self._large_data_refusal("Report view"))
+            self._notice_silent_refusal("Report view")
             self.stateChanged.emit()
             return
 
@@ -15936,6 +15950,7 @@ class StudioController(QObject):
         if not selected_list:
             del self._cross_filters[visual_title]
 
+        self._report_view_refusal_for_user_action()
         self._refresh_report_async()
         self.stateChanged.emit()
 

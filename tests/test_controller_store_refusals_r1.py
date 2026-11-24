@@ -107,6 +107,7 @@ def test_refusal_refresh_report(qapp: QApplication, tmp_path: Path, monkeypatch:
     ps, ctrl = _setup_store_controller(tmp_path)
     try:
         ctrl._set_status("")
+        ctrl._reset_silent_refusal_notice()
         ctrl._refresh_report()
         expected = ctrl._large_data_refusal("Report view")
         assert ctrl._status_message == expected
@@ -124,6 +125,7 @@ def test_refusal_refresh_report_async(qapp: QApplication, tmp_path: Path, monkey
     ps, ctrl = _setup_store_controller(tmp_path)
     try:
         ctrl._set_status("")
+        ctrl._reset_silent_refusal_notice()
         ctrl._refresh_report_async()
         expected = ctrl._large_data_refusal("Report view")
         assert ctrl._status_message == expected
@@ -183,6 +185,7 @@ def test_refusal_report_filter_context(qapp: QApplication, tmp_path: Path, monke
     ps, ctrl = _setup_store_controller(tmp_path)
     try:
         ctrl._set_status("")
+        ctrl._reset_silent_refusal_notice()
         rows_by_id, context, filter_ids = ctrl._report_filter_context()
         assert rows_by_id == {}
         assert context == []
@@ -580,3 +583,182 @@ def test_refusal_literal_text_per_what(what: str, expected_literal: str) -> None
     ctrl = StudioController()
     actual = ctrl._large_data_refusal(what)
     assert actual == expected_literal
+
+
+def test_silent_refusal_sweep_properties_and_visual_slots_emit_at_most_once(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Every property read and visual read slot, 12 visuals, 3 rounds: no status spam."""
+    from tests.test_controller_store_sweep import (
+        SWEEP_PROPERTIES,
+        VISUAL_READ_SLOTS,
+        _make_sweep_controller,
+    )
+
+    ps, ctrl, titles = _make_sweep_controller(tmp_path, monkeypatch)
+    try:
+        assert len(titles) == 12
+        ctrl._reset_silent_refusal_notice()
+        em: list[str] = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        per_round: list[int] = []
+        for _ in range(3):
+            for name in SWEEP_PROPERTIES:
+                getattr(ctrl, name)
+            for name in VISUAL_READ_SLOTS:
+                for title in titles:
+                    getattr(ctrl, name)(title)
+            per_round.append(len(em))
+        assert len(em) <= 1, f"status written {len(em)} times: {em}"
+        assert per_round[1] == per_round[0] and per_round[2] == per_round[0], per_round
+    finally:
+        ps.close()
+
+
+@pytest.mark.parametrize("name", ["_refresh_report", "_refresh_report_async", "_report_filter_context"])
+def test_silent_refusal_internal_entry_points_emit_at_most_once(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, name: str,
+) -> None:
+    _assert_no_dialogs(monkeypatch)
+    ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        ctrl._reset_silent_refusal_notice()
+        em: list[str] = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        for _ in range(3):
+            getattr(ctrl, name)()
+        assert len(em) == 1, f"{name}: expected 1 emit, got {len(em)}"
+        assert em[0] == ctrl._large_data_refusal("Report view" if name != "_report_filter_context" else "Report filters")
+        # A status written by another action survives later calls.
+        ctrl._set_status("Exported 5 rows to x.csv")
+        for _ in range(3):
+            getattr(ctrl, name)()
+        assert ctrl._status_message == "Exported 5 rows to x.csv"
+    finally:
+        ps.close()
+
+
+def _prep_column_visual(ctrl: StudioController) -> None:
+    visual = next(v for v in ctrl._active_page()["visuals"] if v["title"] == "SwColumn")
+    visual["fields"]["Y-axis"].append("val")
+    ctrl._selected_visual = "SwColumn"
+
+
+# User-initiated slots that call _refresh_report / _refresh_report_async and set no status
+# of their own: each keeps writing the refusal on every call, even after the silent notice.
+_USER_REFRESH_SLOTS: dict[str, Any] = {
+    "set_visual_interaction": lambda c: c.set_visual_interaction("SwColumn", "SwLine", "highlight"),
+    "setActivePage": lambda c: (c.add_page(), c._set_status(""), c.setActivePage(0)),
+    "remove_field_from_well": lambda c: c.remove_field_from_well("Y-axis", "val"),
+    "set_field_aggregation": lambda c: c.set_field_aggregation("Y-axis", "val", "count"),
+    "set_visual_property": lambda c: c.set_visual_property("title_font_size", 14),
+    "toggle_cross_filter": lambda c: c.toggle_cross_filter("SwColumn", "cat_1"),
+}
+
+
+@pytest.mark.parametrize("slot", sorted(_USER_REFRESH_SLOTS))
+def test_user_initiated_refresh_slots_keep_their_own_refusal(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, slot: str,
+) -> None:
+    from tests.test_controller_store_sweep import _make_sweep_controller
+
+    ps, ctrl, _titles = _make_sweep_controller(tmp_path, monkeypatch)
+    try:
+        _prep_column_visual(ctrl)
+        ctrl.regions  # the silent notice for this epoch is now spent
+        assert ctrl._silent_refusal_notice_shown
+        ctrl._set_status("")
+        em: list[str] = []
+        ctrl.statusChanged.connect(lambda m: em.append(m))
+        _USER_REFRESH_SLOTS[slot](ctrl)
+        assert ctrl._status_message == ctrl._large_data_refusal("Report view")
+        assert em and em[-1] == ctrl._large_data_refusal("Report view")
+    finally:
+        ps.close()
+
+
+# One case per writer of the store epoch (sites that write _loaded_candidates and then
+# call _reset_silent_refusal_notice). The spy records which function made each reset
+# call, so removing the reset from one writer fails its own case even when another
+# writer in the same action would still reset.
+def _drive_install_source(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _ps2, sc2 = _make_store_candidate(tmp_path / "second", "tbl_store_second", 200)
+    ctrl._install_source(None, "s_store_2", sc2)
+
+
+def _drive_clear_source(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ctrl._clear_source()
+
+
+def _drive_remove_table(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
+    assert ctrl.removeTable("s_store") is True
+
+
+def _drive_replace_with_new_project(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ctrl._replace_with_new_project()
+
+
+def _drive_open_project(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from analytics_studio.project import save_project
+
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
+    plain = StudioController()
+    target = tmp_path / "plain.nap"
+    save_project(target, plain._project)
+    assert ctrl.open_project_path(target) is True
+
+
+def _drive_refresh_sources(ctrl: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ctrl._refresh_sources([ctrl._active_source_id], refresh_all=False)
+
+
+_RESET_SITES = [
+    ("_install_source", _drive_install_source),
+    ("_clear_source", _drive_clear_source),
+    ("removeTable", _drive_remove_table),
+    ("_replace_with_new_project", _drive_replace_with_new_project),
+    ("open_project_path", _drive_open_project),
+    ("_refresh_sources", _drive_refresh_sources),
+]
+
+
+@pytest.mark.parametrize(("site", "drive"), _RESET_SITES, ids=[s for s, _ in _RESET_SITES])
+def test_silent_refusal_epoch_reset_per_writer(
+    qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: str, drive: Any,
+) -> None:
+    import inspect
+
+    _assert_no_dialogs(monkeypatch)
+    if site == "_refresh_sources":
+        # A linked csv source is refreshed while a store table is loaded next to it. The csv
+        # is imported first: importing is refused once a store table is loaded.
+        csv = tmp_path / "small.csv"
+        csv.write_text("a,b\n1,2\n3,4\n", encoding="utf-8")
+        ctrl = StudioController()
+        assert ctrl._commit_import(csv, parse_file(csv)) is True
+        ps, sc = _make_store_candidate(tmp_path, "tbl_store_refresh", 200)
+        ctrl._loaded_candidates["s_store"] = sc
+        assert ctrl._store_tables_loaded()
+    else:
+        ps, ctrl = _setup_store_controller(tmp_path)
+    try:
+        resetters: list[str] = []
+        real_reset = ctrl._reset_silent_refusal_notice
+
+        def spy() -> None:
+            resetters.append(inspect.stack()[1].function)
+            real_reset()
+
+        monkeypatch.setattr(ctrl, "_reset_silent_refusal_notice", spy)
+        ctrl.regions  # spend the notice for the current epoch
+        assert ctrl._silent_refusal_notice_shown
+        # Control: without the action the notice stays spent.
+        ctrl._set_status("")
+        ctrl.regions
+        assert ctrl._status_message == ""
+        assert resetters == []
+        drive(ctrl, tmp_path, monkeypatch)
+        assert site in resetters, f"{site} did not reset the notice; resets came from {resetters}"
+    finally:
+        ps.close()
