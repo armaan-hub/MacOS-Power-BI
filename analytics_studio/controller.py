@@ -23,6 +23,7 @@ from uuid import uuid4
 
 if TYPE_CHECKING:
     from analytics_studio.store.candidate import StoreCandidate
+    from analytics_studio.store.large_import import LargeImportResult
     from analytics_studio.store.session import ProjectStore
     from analytics_studio.store.table_model import StoreTableModel
 
@@ -8018,6 +8019,190 @@ class StudioController(QObject):
         except (OSError, TypeError, ValueError) as exc:
             self._set_status(
                 f"Loaded {path.name} · {parsed.row_count:,} rows; recent history could not be saved: {exc}"
+            )
+        else:
+            self.stateChanged.emit()
+        return True
+
+    def _commit_store_import(
+        self,
+        path: Path,
+        result: "LargeImportResult",
+        project_store: "ProjectStore",
+    ) -> bool:
+        from analytics_studio.store.base import StoreError
+        from analytics_studio.store.candidate import StoreCandidate
+        from analytics_studio.store.session import ProjectStore
+
+        path = Path(path).expanduser().resolve()
+        source_id = self._source_id_for_path(
+            path,
+            kind=result.kind,
+            parser_options=result.options,
+            header_row_used=None,
+        ) or str(uuid4())
+        table_name = self._unique_table_name(path.stem)
+
+        candidate = StoreCandidate(
+            result.kind,
+            list(result.headers),
+            dict(result.options),
+            list(result.notices),
+            store_table=result.table,
+            row_count=result.row_count,
+            physical_types=list(result.physical_types),
+            model_types=dict(result.model_types),
+            source_id=source_id,
+            session=project_store,
+        )
+
+        try:
+            project_store.validate_table(
+                result.table,
+                result.headers,
+                result.physical_types,
+                result.row_count,
+            )
+        except StoreError as exc:
+            QMessageBox.critical(None, "Could not import data", str(exc))
+            return False
+
+        data_file = Path(project_store.path).name
+        store_dict: dict[str, Any] = {
+            "table": result.table,
+            "row_count": result.row_count,
+            "headers": list(result.headers),
+            "physical_types": list(result.physical_types),
+            "source_id": result.source_id,
+            "data_file": data_file,
+            "fingerprint": dict(result.fingerprint),
+            "generation": 1,
+            "duckdb_version": ProjectStore.duckdb_version(),
+            "column_types": dict(result.model_types),
+            "notices": list(result.notices),
+        }
+        if result.source_arrow_types:
+            store_dict["source_arrow_types"] = list(result.source_arrow_types)
+
+        source_record: dict[str, Any] = {
+            "id": source_id,
+            "name": path.name,
+            "kind": result.kind,
+            "path": str(path),
+            "parser_options": dict(result.options),
+            "transform_steps": [],
+            "store": store_dict,
+        }
+
+        table_record: dict[str, Any] = {
+            "id": source_id,
+            "name": table_name,
+            "source_id": source_id,
+            "column_types": dict(result.model_types),
+        }
+
+        existing_sources = list(self._project.get("data_sources", []))
+        updated_sources = []
+        source_replaced = False
+        for source in existing_sources:
+            if source.get("id") == source_id:
+                updated_sources.append({**source, **source_record})
+                source_replaced = True
+            else:
+                updated_sources.append(source)
+        if not source_replaced:
+            updated_sources.append(source_record)
+
+        next_project = deepcopy(self._project)
+        next_project["data_sources"] = updated_sources
+        next_project["active_source_id"] = source_id
+
+        model = next_project.setdefault("model", {"tables": [], "relationships": []})
+        tables = list(model.get("tables", []))
+        table_replaced = False
+        for index, table in enumerate(tables):
+            if table.get("id") == source_id or table.get("source_id") == source_id:
+                tables[index] = {**table, **table_record}
+                table_replaced = True
+                break
+        if not table_replaced:
+            tables.append(table_record)
+        model["tables"] = tables
+
+        try:
+            next_project = validate_project(next_project)
+        except (ProjectFileError, ValueError, TypeError) as exc:
+            QMessageBox.critical(None, "Could not import data", str(exc))
+            return False
+
+        # Snapshot state before publishing
+        old_project = deepcopy(self._project)
+        old_active_source_id = self._active_source_id
+        old_active_source_path = self._active_source_path
+        old_active_source_kind = self._active_source_kind
+        old_active_parser_options = (
+            dict(self._active_parser_options)
+            if self._active_parser_options is not None
+            else None
+        )
+        had_loaded = source_id in self._loaded_candidates
+        old_loaded = self._loaded_candidates.get(source_id)
+        had_raw = source_id in self._raw_candidates
+        old_raw = self._raw_candidates.get(source_id)
+        had_query = source_id in self._query_candidates
+        old_query = self._query_candidates.get(source_id)
+
+        # Publish
+        self._project = next_project
+        self._source_load_errors.pop(source_id, None)
+        self._source_load_errors.pop("__active_selection__", None)
+        self._install_source(path, source_id, candidate)
+
+        # Detect installation failure
+        if self._active_store_candidate is not candidate:
+            # Restore snapshot
+            self._project = old_project
+            self._active_source_id = old_active_source_id
+            self._active_source_path = old_active_source_path
+            self._active_source_kind = old_active_source_kind
+            self._active_parser_options = old_active_parser_options
+            if had_loaded:
+                self._loaded_candidates[source_id] = old_loaded
+            else:
+                self._loaded_candidates.pop(source_id, None)
+            if had_raw:
+                self._raw_candidates[source_id] = old_raw
+            else:
+                self._raw_candidates.pop(source_id, None)
+            if had_query:
+                self._query_candidates[source_id] = old_query
+            else:
+                self._query_candidates.pop(source_id, None)
+            return False
+
+        # On success
+        self._raw_candidates[source_id] = candidate
+        self._query_candidates[source_id] = candidate
+        candidate.stats = result.stats
+        self._source_warning = self._compose_source_warning()
+        self._current_region = None
+        self.setFieldQuery("")
+        self._dirty = True
+        self._refresh_model_view()
+        self._refresh_report()
+        self._reset_silent_refusal_notice()
+        self.stateChanged.emit()
+        self._set_status(
+            f"Loaded {result.row_count:,} rows into the large-data store: {path.name}."
+        )
+        self.activeSourceReady.emit()
+        try:
+            self._recent_source_store.add(
+                path, result.kind, result.options, display_name=path.name
+            )
+        except (OSError, TypeError, ValueError) as exc:
+            self._set_status(
+                f"Loaded {result.row_count:,} rows into the large-data store: {path.name}.; recent history could not be saved: {exc}"
             )
         else:
             self.stateChanged.emit()
