@@ -654,6 +654,7 @@ class HomeFileWorkflowTests(unittest.TestCase):
             preview.return_value.exec.return_value = QDialog.DialogCode.Accepted
             preview.return_value.candidate = candidate
             preview.return_value.selected_action = "transform"
+            preview.return_value.large_request = None
             window.runCommand("data.importExcel")
 
         picker.assert_called_once()

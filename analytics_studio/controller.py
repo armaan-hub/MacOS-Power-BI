@@ -2033,6 +2033,11 @@ class StudioController(QObject):
         self._preview_tasks: dict[int, Any] = {}
         self._project_store: ProjectStore | None = None
         self._store_table_model: StoreTableModel | None = None
+        self._large_import_job: Any | None = None
+        self._large_import_binder: Any | None = None
+        self._large_import_dialog: Any | None = None
+        self._large_import_path: Path | None = None
+        self._large_import_project_store: Any | None = None
         self._app_data_dir: str | None = app_data_dir
         no_reap = os.environ.get("ANALYTICS_STUDIO_NO_REAP", "").strip().lower() in ("1", "true", "yes")
         if app_data_dir is not None or not no_reap:
@@ -7811,8 +7816,13 @@ class StudioController(QObject):
                 if source_kind == "excel"
                 else None
             ),
+            large_mode_enabled=True,
         )
-        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return False
+        if dialog.large_request is not None:
+            return self._import_large(path, dialog.large_request)
+        if dialog.candidate is None:
             return False
         if dialog.selected_action == "transform":
             candidate = deepcopy(dialog.candidate)
@@ -8023,6 +8033,135 @@ class StudioController(QObject):
         else:
             self.stateChanged.emit()
         return True
+
+    def _import_large(self, path: Path, request: dict[str, Any]) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
+        if self._large_import_job is not None:
+            self._set_status("A large-data import is already running.")
+            return False
+        if self._project_store is not None and not self._project_store.closed and self._project_store.busy:
+            self._set_status("The large-data store is busy. Try again in a moment.")
+            return False
+
+        has_visuals = any(
+            bool(page.get("visuals"))
+            for page in self._project.get("report", {}).get("pages", [])
+        )
+        has_measures = bool(self._project.get("model", {}).get("measures"))
+        has_relationships = bool(self._project.get("model", {}).get("relationships"))
+        has_queries = any(
+            source.get("kind") == "query"
+            for source in self._project.get("data_sources", [])
+        )
+        has_calc_cols = any(
+            bool(table.get("calculated_columns"))
+            for table in self._project.get("model", {}).get("tables", [])
+        )
+
+        if has_visuals or has_measures or has_relationships or has_queries or has_calc_cols:
+            answer = QMessageBox.question(
+                None,
+                "Add a large table",
+                "Adding a large table turns off reports, measures, relationships and Power Query for this whole project until a later release. Your existing tables stay in the project. Continue?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return False
+
+        source_id = self._source_id_for_path(
+            path,
+            kind=request.get("kind"),
+            parser_options=request.get("options"),
+        ) or str(uuid4())
+
+        from analytics_studio.store.base import StoreError
+        try:
+            project_store = self._ensure_project_store()
+        except StoreError as exc:
+            QMessageBox.critical(None, "Could not open the large-data store", str(exc))
+            return False
+
+        if project_store.busy:
+            self._set_status("The large-data store is busy. Try again in a moment.")
+            return False
+
+        from PySide6.QtCore import QThreadPool, Qt
+        from PySide6.QtWidgets import QProgressDialog
+        from analytics_studio.store.jobs import ProgressDialogBinder, StoreJob
+        from analytics_studio.store.large_import import run_large_import
+
+        def fn(store, cancel, progress):
+            def adapt_progress(msg: str) -> None:
+                if progress is not None:
+                    progress(msg, 0, 0)
+
+            return run_large_import(
+                store,
+                path,
+                request["kind"],
+                request.get("options"),
+                source_id=source_id,
+                cancel_event=cancel,
+                progress=adapt_progress,
+            )
+
+        job = StoreJob(project_store, fn, title=f"Importing {path.name}...")
+        dialog = QProgressDialog(f"Importing {path.name}...", "Cancel", 0, 0)
+        dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
+        dialog.setMinimumDuration(0)
+        dialog.setAutoClose(False)
+        dialog.setAutoReset(False)
+
+        binder = ProgressDialogBinder(job, dialog)
+
+        self._large_import_job = job
+        self._large_import_binder = binder
+        self._large_import_dialog = dialog
+        self._large_import_path = path
+        self._large_import_project_store = project_store
+
+        job.signals.finished.connect(self._on_large_import_finished)
+        job.signals.failed.connect(self._on_large_import_failed)
+        job.signals.canceled.connect(self._on_large_import_canceled)
+        job.signals.done.connect(self._on_large_import_done)
+
+        try:
+            job.start(QThreadPool.globalInstance())
+        except StoreError as exc:
+            self._large_import_job = None
+            self._large_import_binder = None
+            self._large_import_dialog = None
+            self._large_import_path = None
+            self._large_import_project_store = None
+            self._set_status(str(exc))
+            return False
+
+        return True
+
+    def _on_large_import_finished(self, result: Any) -> None:
+        path = self._large_import_path
+        store = self._large_import_project_store
+        if path is not None and store is not None:
+            self._commit_store_import(path, result, store)
+
+    def _on_large_import_failed(self, message: str) -> None:
+        self._set_status(message)
+
+    def _on_large_import_canceled(self) -> None:
+        self._set_status("Import canceled.")
+
+    def _on_large_import_done(self) -> None:
+        dialog = self._large_import_dialog
+        self._large_import_job = None
+        self._large_import_binder = None
+        self._large_import_dialog = None
+        self._large_import_path = None
+        self._large_import_project_store = None
+        if dialog is not None:
+            dialog.deleteLater()
 
     def _commit_store_import(
         self,
