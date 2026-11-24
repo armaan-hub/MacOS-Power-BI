@@ -481,6 +481,14 @@ Item {
                     }
                 }
                 Button {
+                    objectName: "tableSummaryButton"
+                    text: "Table summary"
+                    enabled: root.appController.largeTableLoaded
+                    Accessible.name: "Show summary statistics for the large-data table"
+                    Accessible.description: "Shows rows, blank cells, distinct values, text length, size and warnings for each column of the active large-data table."
+                    onClicked: root.appController.showLargeTableSummary()
+                }
+                Button {
                     visible: (root.appController.tableCatalog || []).filter(function(table) {
                         return Boolean(table.evaluated)
                     }).length >= 2

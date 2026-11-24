@@ -2729,6 +2729,10 @@ class StudioController(QObject):
     def sourceWarning(self) -> str:  # noqa: N802
         return self._source_warning
 
+    @Property(bool, notify=stateChanged)
+    def largeTableLoaded(self) -> bool:  # noqa: N802
+        return self._active_store_candidate is not None
+
     @Property(int, notify=stateChanged)
     def rowCount(self) -> int:  # noqa: N802
         if self._active_store_candidate is not None:
@@ -8722,7 +8726,49 @@ class StudioController(QObject):
             )
         else:
             self.stateChanged.emit()
+        self._offer_large_table_summary(candidate)
         return True
+
+    def _offer_large_table_summary(self, candidate: "StoreCandidate") -> None:
+        """Show the summary once after an import that has warnings. Never undoes the import."""
+        stats = getattr(candidate, "stats", None)
+        if stats is None:
+            return
+        has_warning = bool(stats.warnings) or any(column.warnings for column in stats.columns)
+        if not has_warning:
+            return
+        try:
+            self._run_store_summary_dialog(candidate)
+        except Exception:
+            logger.warning("Large-data table summary could not be shown.", exc_info=True)
+
+    @Slot()
+    def showLargeTableSummary(self) -> None:  # noqa: N802
+        candidate = self._active_store_candidate
+        if candidate is None:
+            self._set_status("Open a large-data table first.")
+            return
+        if getattr(candidate, "stats", None) is None:
+            self._set_status(
+                "Summary statistics are not available for this table. Import the file again to compute them."
+            )
+            return
+        self._run_store_summary_dialog(candidate)
+
+    def _run_store_summary_dialog(self, candidate: "StoreCandidate") -> None:
+        from analytics_studio.store.summary_dialog import LargeTableSummaryDialog
+
+        name = next(
+            (
+                str(table.get("name"))
+                for table in self._project.get("model", {}).get("tables", [])
+                if table.get("source_id") == candidate.source_id
+                or table.get("id") == candidate.source_id
+            ),
+            candidate.store_table,
+        )
+        dialog = LargeTableSummaryDialog(name, candidate.stats)
+        dialog.exec()
 
     def enter_data_dialog(self, use_clipboard: bool = False) -> bool:
         initial_text = QApplication.clipboard().text() if use_clipboard else ""

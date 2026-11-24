@@ -239,7 +239,8 @@ def imported(qapp: QApplication, big_csv: Path, tmp_path_factory: pytest.TempPat
         with patch.object(file_import, "MAX_DATA_ROWS", 500), \
                 patch.object(StoreCandidate, "rows", new=property(counting_rows)), \
                 patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog), \
-                patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+                patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes), \
+                patch.object(StudioController, "_run_store_summary_dialog", lambda self, candidate: None):  # The automatic summary dialog is modal; tests must not open it.
             rss_before = _rss_bytes()
             started = time.monotonic()
             success = controller._import_file_path(big_csv)
