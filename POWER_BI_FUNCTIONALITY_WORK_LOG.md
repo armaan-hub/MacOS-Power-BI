@@ -3097,3 +3097,11 @@ Large csv and parquet files over the normal import limits now load into the Duck
 Built by Antigravity in the live tree (tasks 11a to 11e) and in a scratch copy (task 12, with a Sonnet fixer for the second fix); Team-Thinker reviewed every step and passed the batch. Gate on 966380a: 43,392 passed, 1 skipped, 27 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
 
 Open: save and open of projects with a store table (task 13), real-app 300,000-row test (15), summary dialog (14), re-import and compaction (16), per-table refusal (17).
+
+## 2026-11-25 Stage B4b task 13: save and open of projects with a large-data table (merged)
+
+A project with a large-data table now saves and opens: Save As copies the DuckDB data file next to the project file (atomic replace, progress dialog with Cancel, free-space check, overwrite question), plain Save never copies, and opening a project checks the data file and the file fingerprint without reading rows.
+
+Built by Antigravity (task 13), then fixed in three rounds after Team-Thinker reviews (13b, 13c, 13d, by the Sonnet fixer after Antigravity's quota ended). The reviews found and fixed: a copy failure reported as "Save canceled."; the old store left open when a new project had no usable store; refresh paths that would parse a huge file for a large-data source; a project JSON naming a missing table that made the open delete the real table (permanent data loss); and a failed or canceled Save As deleting an existing project's data file. Every fix has a test that fails without it. Gate on 16c55d7: 43,455 passed, 1 skipped, 27 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
+
+Open: real-app 300,000-row test (15), summary dialog (14), re-import and compaction (16), per-table refusal (17); lows recorded in HANDOFF.md.
