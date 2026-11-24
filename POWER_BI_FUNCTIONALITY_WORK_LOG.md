@@ -3088,3 +3088,12 @@ Merged from branch p22-store-session. New: analytics_studio/store/session.py (Pr
 Built by Antigravity (headless `agy -p`, Gemini 3.8 Flash Low); each task failed Team-Thinker review at least once. Task 9 needed three rounds and its last fix was written by a Sonnet fixer in a scratch copy. Gate on fa03125: 43,320 passed, 1 skipped, 26 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
 
 Open: large-file import flow (task 11), profileColumn and export for store tables (12), save/open (13), summary dialog (14), real-app 300k-row test (15), per-table refusal instead of whole-model (17).
+
+
+## Stage B4b tasks 11 and 12: large-file import and store-backed statistics and export (2026-11-24)
+
+Large csv and parquet files over the normal import limits now load into the DuckDB store from the preview dialog's large mode: a modal progress dialog with Cancel, column types (CSV by the existing detection, Parquet by the Arrow type), a file fingerprint, column statistics, and one confirmation when the project holds anything the whole-model refusal will switch off. Cancel, failure and a failed commit leave no half state and drop the partly imported table. Profile column and data export read from DuckDB for store tables, so a store table never loads its rows into Python.
+
+Built by Antigravity in the live tree (tasks 11a to 11e) and in a scratch copy (task 12, with a Sonnet fixer for the second fix); Team-Thinker reviewed every step and passed the batch. Gate on 966380a: 43,392 passed, 1 skipped, 27 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
+
+Open: save and open of projects with a store table (task 13), real-app 300,000-row test (15), summary dialog (14), re-import and compaction (16), per-table refusal (17).
