@@ -15209,6 +15209,7 @@ class StudioController(QObject):
 
         target_data_file = ProjectStore.data_file_for(str(path))
         copy_made = False
+        target_existed = False
 
         if old_store is not None:
             if old_store.busy:
@@ -15227,8 +15228,10 @@ class StudioController(QObject):
                 return False
 
             if needs_copy:
+                # Recorded before anything is copied: a failed copy removes only what this save created.
+                target_existed = os.path.exists(target_data_file)
                 # Overwrite prompt if target already exists and is not this store's file
-                if os.path.exists(target_data_file):
+                if target_existed:
                     ans = QMessageBox.question(
                         None,
                         "Replace existing data file",
@@ -15295,10 +15298,13 @@ class StudioController(QObject):
                     except Exception:
                         pass
                     dialog.close()
-                    try:
-                        old_store.discard_copy(target_data_file)
-                    except Exception:
-                        pass
+                    # copy_to writes a temp file and replaces atomically (and cleans the temp on
+                    # failure), so a target that existed before this save was never touched.
+                    if not target_existed:
+                        try:
+                            old_store.discard_copy(target_data_file)
+                        except Exception:
+                            pass
                     if was_canceled:
                         self._set_status("Save canceled.")
                         return False
