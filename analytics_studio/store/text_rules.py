@@ -39,6 +39,10 @@ def first_spelling_sql(table: str, column: str, rowid: str = "rowid") -> str:
     """SQL returning (folded, spelling) per folded value, ordered by first appearance.
 
     `table` and `column` are inserted as written, so the caller quotes them if needed.
+
+    `rowid` is the physical DuckDB rowid by default. That is the load order only for a table that was
+    loaded in order and not re-sorted. On a derived or re-ordered table, pass the column that holds the
+    load order (the store's "__rn") or "first-seen" will follow the physical order instead.
     """
     return (
         f"SELECT {fold_sql(column)} AS folded, {first_spelling_expr_sql(column, rowid)} AS spelling "

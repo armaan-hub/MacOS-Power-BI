@@ -18,6 +18,22 @@ from analytics_studio.store import text_rules
 from analytics_studio.store.text_rules import fold_text, trim_text
 
 
+# Characters that look like blanks or letters but are NOT trimmed and NOT folded by the model-load rule.
+_EDGE_CHARS = [
+    "\u0085", "\u00a0", "\u2028", "\u2029", "\u200b", "\u3000", "\ufeff", "\u00ad", "\u180e", "\u2003",
+    "\uff21", "\uff41", "\u0130", "\u0131", "\u212a", "\u017f", "\u1e9e", "\u03a3", "\u03c2", "\u00c5", "\u212b",
+    "\U0001f600", "\U0001f1e6\U0001f1ea", "\u0600", "\u200d", "\u0301", "\x7f", "\x80", "\x9f",
+]
+EDGE_VALUES: list[str | None] = []
+for _char in _EDGE_CHARS:
+    EDGE_VALUES += [_char, "x" + _char, "x" + _char + " ", "X" + _char + "\t", _char + _char + "\x00", "A" + _char + "\x00 "]
+EDGE_VALUES += [
+    "a" * 100000 + " ", "A" * 100000 + "\x00" * 50000, ("\u00e9" * 50000).upper() + " ", "x\x00y\x00",
+    "\x00" * 5000, "A\x00B", "\U0001f600 ",
+    "\uff21\uff41 ", "\uff21", "\uff41",
+]
+
+
 def _generated_values() -> list[str | None]:
     rng = random.Random(7)
     bases = [
@@ -35,6 +51,7 @@ def _generated_values() -> list[str | None]:
         base = rng.choice(bases)
         base = "".join(ch.upper() if rng.random() < 0.5 else ch.lower() for ch in base)
         values.append(rng.choice(["", " ", "\t"]) + base + "".join(rng.choice(controls) for _ in range(rng.randint(0, 4))))
+    values += EDGE_VALUES
     rng.shuffle(values)
     return values
 
@@ -151,3 +168,48 @@ def test_mutant_first_spelling_picks_last_seen(monkeypatch: pytest.MonkeyPatch) 
                         lambda expr, rowid="rowid": f"arg_max({text_rules.trim_sql(expr)}, {rowid})")
     with pytest.raises(AssertionError):
         run_differential(VALUES)
+
+
+def test_mutant_trim_also_strips_unicode_blanks(monkeypatch: pytest.MonkeyPatch) -> None:
+    extra = "".join(chr(code) for code in (0x00A0, 0x0085, 0x2028, 0x200B))
+
+    def trim_mutant(expr: str) -> str:
+        return f"rtrim(COALESCE({expr}, ''), {text_rules.TRIM_CHARS_SQL} || '{extra}')"
+
+    monkeypatch.setattr(text_rules, "trim_sql", trim_mutant)
+    with pytest.raises(AssertionError):
+        run_differential(VALUES)
+
+
+def test_mutant_consistent_unicode_blank_trim_in_sql_and_reference(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Both SQL and the Python reference strip the extra characters: only the edge cases and the old path catch it.
+    extra = "".join(chr(code) for code in (0x00A0, 0x0085, 0x2028, 0x200B))
+    monkeypatch.setattr(text_rules, "TRIM_CHARS_SQL", text_rules.TRIM_CHARS_SQL + f" || '{extra}'")
+    monkeypatch.setattr(text_rules, "_TRIM_CHARS", text_rules._TRIM_CHARS + extra)
+    with pytest.raises(AssertionError):
+        run_differential(VALUES)
+
+
+def test_mutant_consistent_fullwidth_fold_in_sql_and_reference(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(text_rules, "_UPPER", text_rules._UPPER + "\uff21")
+    monkeypatch.setattr(text_rules, "_LOWER", text_rules._LOWER + "\uff41")
+    monkeypatch.setattr(text_rules, "_ASCII_FOLD", str.maketrans(text_rules._UPPER, text_rules._LOWER))
+    with pytest.raises(AssertionError):
+        run_differential(VALUES)
+
+
+def test_edge_characters_are_not_trimmed_or_folded() -> None:
+    for char in ("\u0085", "\u00a0", "\u2028", "\u2029", "\u200b", "\u3000", "\ufeff", "\u00ad"):
+        assert trim_text("x" + char) == "x" + char
+    assert fold_text("\uff21") == "\uff21"
+    assert fold_text("\U0001f600 ") == "\U0001f600"
+
+
+def test_first_spelling_default_is_physical_rowid_and_rn_overrides() -> None:
+    con = duckdb.connect()
+    con.execute("CREATE TABLE d (v VARCHAR, __rn INTEGER)")
+    con.executemany("INSERT INTO d VALUES (?, ?)", [("aB", 2), ("Ab", 1)])
+    default_rows = [tuple(row) for row in con.execute(text_rules.first_spelling_sql("d", "v")).fetchall()]
+    rn_rows = [tuple(row) for row in con.execute(text_rules.first_spelling_sql("d", "v", rowid="__rn")).fetchall()]
+    assert default_rows == [("ab", "aB")]
+    assert rn_rows == [("ab", "Ab")]

@@ -26,7 +26,7 @@ from analytics_studio.controller import StudioController, _format_report_number
 from analytics_studio.file_import import parse_file
 from analytics_studio.measures import evaluate_measures, normalize_measure
 from analytics_studio.store import DuckStore, import_csv_to_store, import_parquet_to_store
-from analytics_studio.store.text_rules import TRIM_CHARS_SQL, first_spelling_expr_sql, fold_sql, trim_sql
+from analytics_studio.store.text_rules import TRIM_CHARS_SQL, first_spelling_expr_sql, fold_sql
 
 
 # Exact numeric comparison: Decimal and int engine values (SUM, AVERAGE, counts) must match exactly (tolerance 0).
@@ -1283,7 +1283,7 @@ def run_comparison(
                     q = f"SELECT cat as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY cat ORDER BY first_rn"
                 elif g_col == "t":
                     fold_t = fold_sql("t")
-                    q = f"SELECT {first_spelling_expr_sql("t")} as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY {fold_t} ORDER BY first_rn"
+                    q = f"SELECT {first_spelling_expr_sql('t')} as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY {fold_t} ORDER BY first_rn"
                 elif g_col == "dt":
                     q = f"SELECT COALESCE(strftime(TRY_CAST(NULLIF(dt, '') AS DATE), '%-m/%-d/%Y'), '') as k, {val_expr} FROM \"t_csv\" GROUP BY TRY_CAST(NULLIF(dt, '') AS DATE) ORDER BY TRY_CAST(NULLIF(dt, '') AS DATE) NULLS FIRST"
                 elif g_col == "flag":
@@ -1447,7 +1447,7 @@ def run_comparison(
                         q = f"SELECT cat as k, {val_expr} FROM \"t_pq\" GROUP BY cat"
                     elif g_col == "t":
                         fold_t = fold_sql("t")
-                        q = f"SELECT FIRST({trim_sql("t")}) as k, {val_expr} FROM \"t_pq\" GROUP BY {fold_t}"
+                        q = f"SELECT {first_spelling_expr_sql('t')} as k, {val_expr} FROM \"t_pq\" GROUP BY {fold_t}"
                     elif g_col == "dt":
                         q = f"SELECT strftime(TRY_CAST(dt AS DATE), '%-m/%-d/%Y') as k, {val_expr} FROM \"t_pq\" GROUP BY TRY_CAST(dt AS DATE)"
                     elif g_col == "flag":
