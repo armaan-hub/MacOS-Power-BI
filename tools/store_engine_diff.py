@@ -1654,6 +1654,9 @@ def build_sweep_catalog(headers: list[str] | None = None) -> list[dict[str, Any]
         for agg in SWEEP_GROUP_AGGS:
             for ctx in SWEEP_GROUP_CONTEXTS:
                 rows.append(_sweep_row("group", agg, ctx, g_col))
+    for g_col in ("sg", "sdt", "sf", "st", "sb"):  # a filter context that removes every row: empty on both sides
+        for agg in ("COUNTROWS(t)", "SUM(t[sw])", "AVERAGE(t[sd])"):
+            rows.append(_sweep_row("group_empty", agg, ('t[scat] = "ZZZ"',), g_col))
     rows.append(_sweep_row("group", "SUM(t[sw])", (), "sw"))  # numeric group key: refused
     rows.append(_sweep_row("group", "CALCULATE(SUM(t[sw]), t[sd] >= 0)", (), "scat"))  # own filter: refused
     rows.append(_sweep_row("group", "SUM(t[sw])", ('t[scat] = "A"',), "scat"))  # same-column slicer: refused
@@ -1672,12 +1675,19 @@ SWEEP_STATUSES = (
 SWEEP_FAILURE_STATUSES = ("differs", "sql-error", "crash")
 
 
-def _parse_engine_keys(tocsv_text: str) -> list[str]:
-    """The distinct keys of a TOCSV(VALUES(col)) result in engine order (a blank line is the blank key)."""
+def _parse_engine_keys(tocsv_text: str, row_count: Any = None) -> list[str]:
+    """The distinct keys of a TOCSV(VALUES(col)) result in engine order (a blank line is the blank key).
+
+    A header-only text is either an empty table or a table whose only key is the blank key. The text cannot tell
+    them apart: pass row_count (COUNTROWS of the same filtered table, None for blank) to decide. Without
+    row_count a header-only text reads as the blank key.
+    """
     import io
 
     head, sep, rest = (tocsv_text or "").partition("\n")
     if not head:
+        return []
+    if sep and rest == "" and row_count is not None and (row_count == 0):
         return []
     keys: list[str] = []
     seen: set[str] = set()
@@ -1761,7 +1771,13 @@ def run_sweep(
         keys_dax = f"VALUES(t[{g_col}])"
         if ctx:
             keys_dax = f"CALCULATETABLE({keys_dax}, " + ", ".join(ctx) + ")"
-        keys = _parse_engine_keys(engine(f"TOCSV({keys_dax}, 100000)"))
+        keys_text = engine(f"TOCSV({keys_dax}, 100000)") or ""
+        head_text, line_sep, rest_text = keys_text.partition("\n")
+        row_count: Any = None
+        if head_text and line_sep and rest_text == "":  # empty table or blank-only key list: COUNTROWS decides
+            counted = engine(with_filter_context("COUNTROWS(t)", ctx))
+            row_count = 0 if counted is None else counted
+        keys = _parse_engine_keys(keys_text, row_count)
         pairs: list[tuple[str, Any]] = []
         for key in keys:
             flat = with_filter_context(dax, (_engine_key_filter(g_col, g_type, key), *ctx))

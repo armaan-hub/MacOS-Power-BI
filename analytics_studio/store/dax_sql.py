@@ -8,6 +8,11 @@ tool (tools/store_engine_diff.py, run_comparison with use_plan=True).
 The first part of this module holds the code moved without a logic change from the rules tool (Refusal, the
 result layer, the fold expression, the legacy WHERE clauses, the mapped SQL builder and the store metadata).
 The second part is the planner (plan_measure).
+
+A plan is a snapshot: it keeps the decimal scale and digit counts read from the store when it was built (and
+re-reads them on every execute). After a reload or `append_rows` that changes those, `execute` returns a
+Refusal ("plan is stale; rebuild it"): REBUILD the plan after any reload or append. Guards (non-ASCII text,
+unreadable dates, stale decimal metadata) run as cheap queries on every execute and are never cached.
 """
 
 from __future__ import annotations
@@ -577,8 +582,10 @@ def column_decimal_meta(store: Any, table: str, columns: list[str]) -> dict[str,
 
 PARQUET_PLAN_REASON = "Parquet plan is not on the store path yet"
 REASON_IN_NON_ASCII_COLUMN = (
-    "the IN or blank-literal column holds non-ASCII text; the engine folds and trims it differently"
+    "the IN, blank-literal or equality-beside-IN column holds non-ASCII text; the engine folds and trims it differently"
 )
+REASON_DATE_UNREADABLE = "date column holds text the store cannot read the way the engine does"
+REASON_PLAN_STALE = "plan is stale; rebuild it"
 REASON_DECIMAL_LITERAL_FIT = "literal does not fit the column's decimal precision"
 MAX_DECIMAL_TOTAL = 38
 
@@ -591,6 +598,42 @@ _SQL_OPERATORS: dict[str, str] = {"=": "=", "<>": "<>", "<": "<", "<=": "<=", ">
 _OR_JOIN = " OR "
 _AND_JOIN = " AND "
 _ASCII_LOWER = str.maketrans(string.ascii_uppercase, string.ascii_lowercase)
+
+
+def in_column_has_non_ascii(store: Any, guard: tuple[str, str]) -> bool:
+    """Does any cell of the (physical table, column) hold a non-ASCII character? One cheap query, never cached."""
+    t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
+    rows = store.execute(f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE strlen({c_q}) <> length({c_q}))")
+    return bool(rows and rows[0][0])
+
+
+def run_plan_guards(
+    store: Any,
+    *,
+    in_guards: tuple[tuple[str, str], ...] = (),
+    date_guards: tuple[tuple[str, str], ...] = (),
+    decimal_stamps: tuple[tuple[str, str, int, int], ...] = (),
+) -> Refusal | None:
+    """The cheap per-execute guard queries shared by every plan kind: a Refusal on the first failure, else None.
+
+    Never cached: the store can change between two executes of one plan.
+    """
+    for physical, column, scale, digits in decimal_stamps:
+        now = column_decimal_meta(store, physical, [column]).get(column)
+        if now is None or now.scale != scale or now.digits != digits:
+            return Refusal(REASON_PLAN_STALE)
+    for guard in in_guards:
+        if in_column_has_non_ascii(store, guard):
+            return Refusal(REASON_IN_NON_ASCII_COLUMN)
+    for physical, column in date_guards:
+        t_q, c_q = quote_identifier(physical), quote_identifier(column)
+        rows = store.execute(
+            f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE {c_q} IS NOT NULL AND trim({c_q}) <> '' "
+            f"AND TRY_CAST({c_q} AS DATE) IS NULL)"
+        )
+        if rows and rows[0][0]:
+            return Refusal(REASON_DATE_UNREADABLE)
+    return None
 
 
 @dataclass(frozen=True)
@@ -608,26 +651,35 @@ class MeasurePlan:
     value_type: str = "number"
     overrides: Mapping[str, Any] | None = field(default=None, compare=False, repr=False)
     in_guards: tuple[tuple[str, str], ...] = ()
+    date_guards: tuple[tuple[str, str], ...] = ()
+    decimal_stamps: tuple[tuple[str, str, int, int], ...] = ()
 
     def _in_column_has_non_ascii(self, store: Any, guard: tuple[str, str]) -> bool:
         """One cheap query per (table, column) on EVERY execute: does any cell hold a non-ASCII character?
 
         Never cached: the store can gain a non-ASCII cell between two executes of one plan.
         """
-        t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
-        rows = store.execute(f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE strlen({c_q}) <> length({c_q}))")
-        return bool(rows and rows[0][0])
+        return in_column_has_non_ascii(store, guard)
 
     def execute(self, store: Any) -> Decimal | dax_dates.DaxDateTime | Refusal | None:
         """Run the SELECT through the store's public read call and return the engine's value.
 
-        A plan with a text IN, or a text equality with an empty or whitespace-only literal, first checks that
-        column for non-ASCII cells on every execute (the engine casefolds and trims those differently from the
-        store's ASCII-only rules); if any exists the answer is a Refusal and the aggregate query is not run.
+        A plan with a text IN (on its IN column AND on every text-equality column of the same plan), or a text
+        equality with an empty or whitespace-only literal, first checks that column for non-ASCII cells on every
+        execute (the engine casefolds and trims those differently from the store's ASCII-only rules). A date
+        column the plan reads must hold only text the store can cast; a decimal column must still have the scale
+        and digits the plan was built with. If a guard fails the answer is a Refusal and the aggregate query is
+        not run.
         """
+        refused = run_plan_guards(store, decimal_stamps=self.decimal_stamps)
+        if refused is not None:
+            return refused
         for guard in self.in_guards:
             if self._in_column_has_non_ascii(store, guard):
                 return Refusal(REASON_IN_NON_ASCII_COLUMN)
+        refused = run_plan_guards(store, date_guards=self.date_guards)
+        if refused is not None:
+            return refused
         rows = store.execute(self.sql)
         if self.kind == "average":
             sum_val, count_val = rows[0] if rows else (None, None)
@@ -767,6 +819,9 @@ class _Planner:
         self.meta = {(t.casefold(), c.casefold()): m for (t, c), m in column_meta.items()}
         self.overrides = dict(overrides)
         self.in_columns: list[tuple[str, str]] = []
+        self.eq_columns: list[tuple[str, str]] = []
+        self.date_columns: list[tuple[str, str]] = []
+        self.decimal_columns: list[tuple[str, str, ColumnMeta]] = []
         self.has_in = False
 
     def resolve(self, ref: Any) -> _Resolved | Refusal:
@@ -851,8 +906,10 @@ class _Planner:
             if op != "=" or not (isinstance(right, tuple) and right and right[0] == "string"):
                 return Refusal("unsupported text predicate")
             refused = self._text_checked(right[1], lambda: text_predicate_sql(col, op, right[1]))
-            if isinstance(refused, str) and right[1].strip() == "":
-                self.in_columns.append((resolved.table, resolved.column))
+            if isinstance(refused, str):
+                self.eq_columns.append((resolved.table, resolved.column))
+                if right[1].strip() == "":
+                    self.in_columns.append((resolved.table, resolved.column))
             return refused
         if resolved.col_type == "whole_number":
             value = _number_literal(right)
@@ -871,11 +928,13 @@ class _Planner:
             literal_int_digits = len(str(int(abs(value)))) if abs(value) >= 1 else 0
             if max(literal_int_digits, meta.digits) + scale > MAX_DECIMAL_TOTAL:
                 return Refusal(REASON_DECIMAL_LITERAL_FIT)
+            self.decimal_columns.append((resolved.table, resolved.column, meta))
             return decimal_predicate_sql(col, op, value, scale)
         if resolved.col_type == "date":
             day = _date_literal(right)
             if day is None:
                 return Refusal("unsupported date predicate")
+            self.date_columns.append((resolved.table, resolved.column))
             return date_predicate_sql(col, op, day)
         return Refusal(f"predicate on a {resolved.col_type} column is not supported")
 
@@ -957,6 +1016,8 @@ class _PlanParts:
     own_predicates: int = 0
     has_in: bool = False
     physical: str = ""
+    date_guards: tuple[tuple[str, str], ...] = ()
+    decimal_stamps: tuple[tuple[str, str, int, int], ...] = ()
 
 
 def _plan_parts(
@@ -1027,13 +1088,28 @@ def _plan_parts(
             if isinstance(sql, Refusal):
                 return sql
             where_parts.append(f"({sql})")
+        def physical_of(table_name: str) -> str | None:
+            return next((p for t, p in store_tables.items() if t.casefold() == table_name.casefold()), None)
+
         in_guards: list[tuple[str, str]] = []
-        for in_table, in_column in planner.in_columns:
-            in_physical = next((p for t, p in store_tables.items() if t.casefold() == in_table.casefold()), None)
+        # A text IN also makes every text-equality column of the plan matter: the engine's behaviour for the
+        # pair depends on the DATA of the equality column (Kelvin sign, ligatures, micro sign), not on the literal.
+        for in_table, in_column in [*planner.in_columns, *(planner.eq_columns if planner.has_in else [])]:
+            in_physical = physical_of(in_table)
             if in_physical is None:
                 return Refusal(f"no store table for '{in_table}'")
             if (in_physical, in_column) not in in_guards:
                 in_guards.append((in_physical, in_column))
+        date_guards: list[tuple[str, str]] = []
+        decimal_stamps: list[tuple[str, str, int, int]] = []
+        date_refs = list(planner.date_columns)
+        for dec_table, dec_column, dec_meta in planner.decimal_columns:
+            dec_physical = physical_of(dec_table)
+            if dec_physical is None:
+                return Refusal(f"no store table for '{dec_table}'")
+            stamp = (dec_physical, dec_column, dec_meta.scale, dec_meta.digits)
+            if stamp not in decimal_stamps:
+                decimal_stamps.append(stamp)
         where_clause = ("WHERE " + _AND_JOIN.join(where_parts)) if where_parts else ""
         if not (isinstance(base, tuple) and base and base[0] == "call"):
             return Refusal("unsupported base expression")
@@ -1051,6 +1127,20 @@ def _plan_parts(
                 if meta is None:
                     return Refusal(f"no decimal metadata for column '{resolved.column}'")
                 scale = meta.scale
+                agg_physical = physical_of(resolved.table)
+                if agg_physical is None:
+                    return Refusal(f"no store table for '{resolved.table}'")
+                stamp = (agg_physical, resolved.column, meta.scale, meta.digits)
+                if stamp not in decimal_stamps:
+                    decimal_stamps.append(stamp)
+            elif c_type == "date":
+                date_refs.append((resolved.table, resolved.column))
+        for date_table, date_column in date_refs:
+            date_physical = physical_of(date_table)
+            if date_physical is None:
+                return Refusal(f"no store table for '{date_table}'")
+            if (date_physical, date_column) not in date_guards:
+                date_guards.append((date_physical, date_column))
     except MeasureError as exc:
         return Refusal(str(exc))
     return _PlanParts(
@@ -1068,6 +1158,8 @@ def _plan_parts(
         own_predicates=len(predicates),
         has_in=planner.has_in,
         physical=physical,
+        date_guards=tuple(date_guards),
+        decimal_stamps=tuple(decimal_stamps),
     )
 
 
@@ -1126,6 +1218,8 @@ def plan_measure(
         value_type=parts.value_type,
         overrides=parts.overrides,
         in_guards=parts.in_guards,
+        date_guards=parts.date_guards,
+        decimal_stamps=parts.decimal_stamps,
     )
 
 
@@ -1164,6 +1258,8 @@ class GroupByPlan:
     in_guards: tuple[tuple[str, str], ...] = ()
     space_guards: tuple[tuple[str, str], ...] = ()
     refuse_fold_keys: bool = False
+    date_guards: tuple[tuple[str, str], ...] = ()
+    decimal_stamps: tuple[tuple[str, str, int, int], ...] = ()
 
     def execute(self, store: Any) -> list[tuple[str, Decimal | dax_dates.DaxDateTime | None]] | Refusal:
         """Run the guard queries on every execute, then the GROUP BY.
@@ -1178,11 +1274,11 @@ class GroupByPlan:
             )
             if rows and rows[0][0]:
                 return Refusal(REASON_GROUP_NON_ASCII_SPACE)
-        for guard in self.in_guards:
-            t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
-            rows = store.execute(f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE strlen({c_q}) <> length({c_q}))")
-            if rows and rows[0][0]:
-                return Refusal(REASON_IN_NON_ASCII_COLUMN)
+        refused = run_plan_guards(
+            store, in_guards=self.in_guards, date_guards=self.date_guards, decimal_stamps=self.decimal_stamps
+        )
+        if refused is not None:
+            return refused
         out: list[tuple[str, Decimal | dax_dates.DaxDateTime | None]] = []
         for row in store.execute(self.sql):
             key = "" if row[0] is None else str(row[0])
@@ -1279,6 +1375,9 @@ def plan_group_by(
     if parts.own_predicates:
         return Refusal(REASON_GROUP_OWN_FILTER)
     in_guards = list(parts.in_guards)
+    date_guards = list(parts.date_guards)
+    if resolved_group.col_type == "date" and (parts.physical, resolved_group.column) not in date_guards:
+        date_guards.append((parts.physical, resolved_group.column))
     g_col = quote_identifier(resolved_group.column)
     group_sql, key_sql, order_plain, order_join = _group_key_sql(
         g_col, resolved_group.col_type, STORE_ORDER_COLUMN, overrides
@@ -1325,4 +1424,6 @@ def plan_group_by(
         in_guards=tuple(in_guards),
         space_guards=((parts.physical, resolved_group.column),) if resolved_group.col_type == "text" else (),
         refuse_fold_keys=parts.has_in and resolved_group.col_type == "text",
+        date_guards=tuple(date_guards),
+        decimal_stamps=parts.decimal_stamps,
     )
