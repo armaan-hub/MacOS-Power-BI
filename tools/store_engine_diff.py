@@ -26,6 +26,7 @@ from analytics_studio.controller import StudioController, _format_report_number
 from analytics_studio.file_import import parse_file
 from analytics_studio.measures import evaluate_measures, normalize_measure
 from analytics_studio.store import DuckStore, import_csv_to_store, import_parquet_to_store
+from analytics_studio.store.text_rules import TRIM_CHARS_SQL, first_spelling_expr_sql, fold_sql, trim_sql
 
 
 # Exact numeric comparison: Decimal and int engine values (SUM, AVERAGE, counts) must match exactly (tolerance 0).
@@ -106,8 +107,7 @@ def group_values_agree(pairs_a: list[tuple[str, Any]] | None, pairs_b: list[tupl
 # The one Parquet refusal that the Parquet difference class parquet_counta_refusal accepts
 PARQUET_COUNTA_REFUSAL_REASON = "COUNTA on Parquet typed columns differs from CSV store"
 
-# Safe SQL expression for the 33 characters U+0000..U+0020
-TRIM_CHARS_SQL = " || ".join(f"chr({i})" for i in range(33))
+# TRIM_CHARS_SQL (the 33 characters U+0000..U+0020) and the fold SQL come from analytics_studio.store.text_rules
 
 
 class Refusal:
@@ -610,6 +610,8 @@ def make_fold_expr(c: str, agg: str | None, overrides: dict[str, Any]) -> str:
         trim_arg = TRIM_CHARS_SQL
     if overrides.get("drop_rtrim"):
         return f"translate(COALESCE({c}, ''), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+    if trim_arg == TRIM_CHARS_SQL:
+        return fold_sql(c)
     return f"translate(rtrim(COALESCE({c}, ''), {trim_arg}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
 
 
@@ -1280,8 +1282,8 @@ def run_comparison(
                 if g_col == "cat":
                     q = f"SELECT cat as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY cat ORDER BY first_rn"
                 elif g_col == "t":
-                    fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
-                    q = f"SELECT arg_min(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), rowid) as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY {fold_t} ORDER BY first_rn"
+                    fold_t = fold_sql("t")
+                    q = f"SELECT {first_spelling_expr_sql("t")} as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY {fold_t} ORDER BY first_rn"
                 elif g_col == "dt":
                     q = f"SELECT COALESCE(strftime(TRY_CAST(NULLIF(dt, '') AS DATE), '%-m/%-d/%Y'), '') as k, {val_expr} FROM \"t_csv\" GROUP BY TRY_CAST(NULLIF(dt, '') AS DATE) ORDER BY TRY_CAST(NULLIF(dt, '') AS DATE) NULLS FIRST"
                 elif g_col == "flag":
@@ -1444,8 +1446,8 @@ def run_comparison(
                     if g_col == "cat":
                         q = f"SELECT cat as k, {val_expr} FROM \"t_pq\" GROUP BY cat"
                     elif g_col == "t":
-                        fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
-                        q = f"SELECT FIRST(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL})) as k, {val_expr} FROM \"t_pq\" GROUP BY {fold_t}"
+                        fold_t = fold_sql("t")
+                        q = f"SELECT FIRST({trim_sql("t")}) as k, {val_expr} FROM \"t_pq\" GROUP BY {fold_t}"
                     elif g_col == "dt":
                         q = f"SELECT strftime(TRY_CAST(dt AS DATE), '%-m/%-d/%Y') as k, {val_expr} FROM \"t_pq\" GROUP BY TRY_CAST(dt AS DATE)"
                     elif g_col == "flag":

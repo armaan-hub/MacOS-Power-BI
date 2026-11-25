@@ -1,5 +1,10 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Stage C1pre: shared text rules module (2026-11-25, uncommitted)**
+Files: `analytics_studio/store/text_rules.py` (new), `tests/test_store_text_rules.py` (new), `tools/store_engine_diff.py` (imports TRIM_CHARS_SQL, fold_sql, trim_sql, first_spelling_expr_sql instead of inline copies; the `drop_rtrim` and `trim_set_space_only` overrides keep their own SQL), `HANDOFF.md`.
+Module: `TRIM_CHARS_SQL`, `trim_sql`, `fold_sql`, `first_spelling_expr_sql`, `first_spelling_sql(table, column, rowid)`, Python `trim_text`, `fold_text`. Rule: drop trailing U+0000..U+0020, ASCII-only A-Z to a-z, first-seen spelling; NULL reads as ''.
+Check: tool at seed 42, 2000 rows, before and after: 842 `results` entries, JSON identical (sort_keys text compare), markdown differs only in the wall-time line. 8 new tests (SQL equals Python reference equals the real `_model_candidate_with_format_errors_as_blank`; 5 mutants fail by behaviour); with `tests/test_store_engine_diff_tool.py` 55 passed (20.10 s, 22.12 s).
+
 **Stage C0g fixes after the Team-Thinker review of C0f (2026-11-25, uncommitted)**
 Files: `tools/store_engine_diff.py`, `tests/test_store_engine_diff_tool.py`, `tools/store_engine_diff_baseline.json` (only `total_formulas` 838 to 842 in both sizes; `differs` lists were already equal to the current run), this file.
 1. Seeds 43, 51, 56 (2000 rows) exited 1 on `arith_sum_d_div_count`: `StoreResultLayer.divide_ratio` built `Decimal(str(float))` (shortest repr), but the engine prints the full binary value of the float. Fix: `Decimal(f_val)`. The other float-to-Decimal places (combo sum, plus scalar, combo sub) already used `Decimal(float)`.
