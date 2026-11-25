@@ -1,18 +1,28 @@
 {
   "version": 1,
-  "description": "Power Query step differential tool baseline (Stage D0e).",
+  "description": "Power Query step differential tool baseline (Stage D0f).",
   "classes": [],
   "refused": [
     "duplicate_column_existing_name",
     "duplicate_column_nonexistent_col",
     "fill_down_missing_col",
     "fill_up_missing_col",
+    "filter_rows_advanced_blank_operator_with_value",
+    "filter_rows_advanced_dirty_numeric_clause",
     "filter_rows_advanced_missing_col",
+    "filter_rows_advanced_numeric_value_not_a_number",
+    "filter_rows_date_value_invalid",
+    "filter_rows_is_blank_with_value",
+    "filter_rows_is_earliest_with_value",
+    "filter_rows_is_latest_with_value",
+    "filter_rows_is_not_blank_with_value",
+    "filter_rows_is_not_null_with_value",
+    "filter_rows_is_null_with_value",
     "filter_rows_missing_col",
-    "filter_rows_numeric_greater_than",
-    "filter_rows_numeric_greater_than_or_equal",
-    "filter_rows_numeric_less_than",
-    "filter_rows_numeric_less_than_or_equal",
+    "filter_rows_numeric_dirty_greater_than",
+    "filter_rows_numeric_dirty_less_than_or_equal",
+    "filter_rows_numeric_value_blank",
+    "filter_rows_numeric_value_not_a_number",
     "keep_columns_missing_col",
     "keep_duplicates_missing_col",
     "remove_column_last_column",
@@ -22,7 +32,6 @@
     "rename_column_nonexistent_col",
     "reorder_columns_missing_col",
     "sort_rows_by_columns_missing_col",
-    "sort_rows_missing_col",
-    "sort_rows_text_col_non_ascii"
+    "sort_rows_missing_col"
   ]
 }

@@ -23,6 +23,8 @@ import random
 import sys
 import tempfile
 import time
+from datetime import date, datetime, time as dt_time
+from decimal import Decimal, localcontext
 from pathlib import Path
 from typing import Any
 
@@ -37,11 +39,18 @@ _RN = '"__rn"'
 
 
 class Refusal:
-    """Explicit refusal object representing an intentionally unsupported or invalid shape."""
+    """Explicit refusal object representing an intentionally unsupported or invalid shape.
 
-    def __init__(self, reason: str, expected_error: str | None = None):
+    `expected_error` is the engine's own error text (substring) when the engine itself rejects the
+    step. A refusal without it is a named limit of the SQL mapping: the engine accepts the step.
+    `rank` orders several engine errors inside one advanced filter the way the engine meets them:
+    (0, clause) validation, (1, clause, sub-step) preparation, (2, row, clause) row scan.
+    """
+
+    def __init__(self, reason: str, expected_error: str | None = None, rank: tuple[int, ...] | None = None):
         self.reason = reason
         self.expected_error = expected_error
+        self.rank = rank if rank is not None else (9,)
 
     def __repr__(self) -> str:
         return f"Refusal({self.reason!r}, expected_error={self.expected_error!r})"
@@ -68,6 +77,97 @@ def normalize_cell(val: Any) -> str | None:
 
 WHITESPACE_CELLS = [" ", "\t", "\u00a0"]
 
+# ---------------------------------------------------------------- engine-rule mirrors
+
+# Every character that Python's str.strip() removes (the engine strips with str.strip()).
+PY_WHITESPACE = "".join(chr(c) for c in range(0x110000) if chr(c).isspace())
+
+# The SQL decimal type for numeric compare and sort: exact, never DOUBLE.
+SQL_DECIMAL = "DECIMAL(38,18)"
+
+# SQL form accepted for a date or datetime cell (checked against the engine on the real distinct values).
+STRICT_ISO_RX = (
+    r"^([1-9][0-9]{3}|0[1-9][0-9]{2}|00[1-9][0-9]|000[1-9])-[0-9]{2}-[0-9]{2}"
+    r"([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]{1,6})?)?)?$"
+)
+
+
+def sql_str(value: str) -> str | Refusal:
+    """The one string-literal helper: double the quote, refuse NUL and lone surrogates."""
+    if "\x00" in value:
+        return Refusal("A filter value with a NUL character cannot be written as a SQL literal.")
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        return Refusal("A filter value with a lone surrogate cannot be written as a SQL literal.")
+    return "'" + value.replace("'", "''") + "'"
+
+
+def engine_number(text: Any) -> Decimal | None:
+    """Mirror of the engine's `_parse_number` for text: Decimal(text.strip()), finite only."""
+    try:
+        number = Decimal(str(text).strip())
+    except (ArithmeticError, ValueError):
+        return None
+    return number if number.is_finite() else None
+
+
+def engine_date(text: Any) -> tuple[str, datetime] | None:
+    """Mirror of the engine's `_parse_row_date_or_datetime`: (kind, comparable datetime) or None.
+
+    kind is 'naive' (a date or a datetime without offset) or 'aware' (with offset or Z).
+    """
+    if text is None or text == "":
+        return None
+    s = str(text).strip()
+    if not s:
+        return None
+    try:
+        return ("naive", datetime.combine(date.fromisoformat(s), dt_time.min))
+    except ValueError:
+        pass
+    try:
+        parsed = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return ("aware" if parsed.tzinfo is not None else "naive", parsed)
+
+
+def _mixed_offset_message() -> str:
+    """The engine's own error text for comparing a naive with an aware datetime (taken from Python)."""
+    try:
+        return str(datetime(2000, 1, 1) < datetime.fromisoformat("2000-01-01T00:00:00+00:00"))
+    except TypeError as exc:
+        return str(exc)
+
+
+def sql_num_expr(col: str) -> str:
+    """Exact numeric value of a cell: strip like Python, drop digit-group underscores, cast to DECIMAL."""
+    ws = sql_str(PY_WHITESPACE)
+    return f"TRY_CAST(replace(trim(\"{col}\", {ws}), '_', '') AS {SQL_DECIMAL})"
+
+
+def sql_dt_expr(col: str) -> str:
+    """Timestamp of a cell in the strict ISO form, else NULL."""
+    ws = sql_str(PY_WHITESPACE)
+    inner = f"trim(\"{col}\", {ws})"
+    return (
+        f"CASE WHEN regexp_matches({inner}, '{STRICT_ISO_RX}') "
+        f"THEN TRY_CAST(replace({inner}, 'T', ' ') AS TIMESTAMP) END"
+    )
+
+
+def decimal_literal(number: Decimal) -> str | None:
+    """Plain digits of a Decimal if SQL_DECIMAL holds it exactly, else None."""
+    if number.adjusted() >= 19 or number.adjusted() < -40:
+        return None
+    with localcontext() as ctx:
+        ctx.prec = 100
+        if number != number.quantize(Decimal(1).scaleb(-18)):
+            return None
+    return format(number, "f")
+
+
 
 def generate_pq_dataset(
     csv_file: Path,
@@ -79,7 +179,7 @@ def generate_pq_dataset(
 
     Planted shapes: an all-blank row every 250th row (measured: both the engine's CSV
     parser and the store import DROP all-blank rows on load, so they never reach a step), one whitespace-only entire row
-    (row rows // 3, moved one down when that is a blank-row slot; spaces in every cell),
+    (row rows // 3, moved one down when that is a blank-row slot; spaces in every cell except num_clean, which stays blank),
     whitespace-only cells (" ", tab, NBSP U+00A0), adjacent duplicate rows and non-adjacent duplicates.
     """
     rnd = random.Random(seed)
@@ -93,7 +193,20 @@ def generate_pq_dataset(
     num_options = ["0", "1", "-5", "100", "200", "999999", "123.45", "-0.50"]
     date_options = ["2026-01-01", "2026-06-15", "2026-12-31", "2025-05-20"]
 
-    headers = ["id", "text_col", "num_col", "date_col", "cat_col", "blank_col"]
+    # num_col is the DIRTY numeric column (a planted thousands shape "1,234.56" keeps it non-numeric);
+    # num_clean is a CLEAN numeric column the engine parses everywhere (integers, decimals, negatives,
+    # exponent forms, padding, digit-group underscore, a value beyond 2^53, blanks); date_col holds ISO
+    # dates and dt_col ISO datetimes (space and T separators, fractions), both with blanks.
+    headers = ["id", "text_col", "num_col", "date_col", "cat_col", "num_clean", "dt_col", "blank_col"]
+    n_cols = len(headers)
+    clean_options = [
+        "0", "1", "10", "50", "100", "2", "9", "-5", "-0.50", "12.5", "0.1000000000000001",
+        "1e3", "+7", ".5", " 5", "10 ", "1_000", "9007199254740993", "007", "-0",
+    ]
+    dt_options = [
+        "2026-06-15 10:30:00", "2026-06-15T08:00:00", "2026-06-14 23:59:59.5", "2026-06-15 00:00:00",
+        "2026-06-15 12:00", "2026-06-16 00:00:01", "2025-12-31 23:59:59", "2026-01-01T00:00:00",
+    ]
 
     ws_row = max(3, rows // 3)
     if include_blank_rows and ws_row % 250 == 0:
@@ -104,28 +217,42 @@ def generate_pq_dataset(
     for i in range(1, rows + 1):
         if include_blank_rows and (i % 250 == 0):
             # Pure blank row: every cell is empty
-            csv_rows.append(["", "", "", "", "", ""])
+            csv_rows.append([""] * n_cols)
             continue
         if i == ws_row:
             # Whitespace-only entire row: kept by Power Query (only null and '' are blank)
-            csv_rows.append([" "] * 6)
+            ws_cells = [" "] * n_cols
+            ws_cells[headers.index("num_clean")] = ""  # a " " cell would make the clean numeric column dirty
+            csv_rows.append(ws_cells)
             continue
 
         dup_kind = rnd.random()
-        if csv_rows and dup_kind < 0.05:
-            # Adjacent duplicate: identical to the previous row
+        if i <= 24:
+            dup_kind = 1.0  # the planted rows 11..20 below must stay in every generated table
+        if csv_rows and dup_kind < 0.05 and any(c.strip() for c in csv_rows[-1]):
+            # Adjacent duplicate: identical to the previous row (never a blank or whitespace-only row)
             csv_rows.append(list(csv_rows[-1]))
             continue
-        if csv_rows and dup_kind < 0.08:
-            # Non-adjacent duplicate: identical to a random earlier row
-            csv_rows.append(list(csv_rows[rnd.randrange(len(csv_rows))]))
-            continue
+        if csv_rows and 0.05 <= dup_kind < 0.08:
+            # Non-adjacent duplicate: identical to a random earlier row (never a blank or whitespace-only row)
+            source = csv_rows[rnd.randrange(len(csv_rows))]
+            if any(c.strip() for c in source):
+                csv_rows.append(list(source))
+                continue
 
         id_str = str(i)
         t_str = rnd.choice(text_options) if rnd.random() >= 0.08 else ""
         n_str = rnd.choice(num_options) if rnd.random() >= 0.08 else ""
         d_str = rnd.choice(date_options) if rnd.random() >= 0.08 else ""
         c_str = rnd.choice(categories) if rnd.random() >= 0.08 else ""
+        # case variants and trailing-space variants of the category (filter and duplicate columns)
+        variant = rnd.random()
+        if c_str and variant < 0.07:
+            c_str = c_str.lower()
+        elif c_str and variant < 0.14:
+            c_str = c_str + " "
+        clean_str = rnd.choice(clean_options) if rnd.random() >= 0.08 else ""
+        dt_str = rnd.choice(dt_options) if rnd.random() >= 0.08 else ""
         b_str = "" if rnd.random() < 0.90 else "non_blank"
 
         # Plant deterministic shapes per brief D0e:
@@ -161,7 +288,7 @@ def generate_pq_dataset(
         if i == 1 or i == rows:
             b_str = ""
 
-        csv_rows.append([id_str, t_str, n_str, d_str, c_str, b_str])
+        csv_rows.append([id_str, t_str, n_str, d_str, c_str, clean_str, dt_str, b_str])
 
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     with open(csv_file, "w", newline="", encoding="utf-8") as f:
@@ -395,24 +522,39 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
 
     # Slice 2 steps:
     # 16. sort_rows
+    sort_text = "cat_col" if "cat_col" in headers else headers[0]
     catalog.append({
         "id": "sort_rows_cat_asc",
-        "step": {"op": "sort_rows", "column": "cat_col" if "cat_col" in headers else headers[0], "direction": "asc"},
+        "step": {"op": "sort_rows", "column": sort_text, "direction": "asc"},
     })
     catalog.append({
         "id": "sort_rows_cat_desc",
-        "step": {"op": "sort_rows", "column": "cat_col" if "cat_col" in headers else headers[0], "direction": "desc"},
+        "step": {"op": "sort_rows", "column": sort_text, "direction": "desc"},
     })
+    if "num_clean" in headers:
+        for direction in ("asc", "desc"):
+            catalog.append({
+                "id": f"sort_rows_num_clean_{direction}",
+                "step": {"op": "sort_rows", "column": "num_clean", "direction": direction},
+            })
     if "num_col" in headers:
+        # num_col holds a thousands shape, so the engine sorts it as text
         catalog.append({
             "id": "sort_rows_num_col_asc",
             "step": {"op": "sort_rows", "column": "num_col", "direction": "asc"},
         })
     if "text_col" in headers:
+        # the engine sorts text in raw code point order (case_sensitive=True); the SQL matches it
         catalog.append({
             "id": "sort_rows_text_col_non_ascii",
             "step": {"op": "sort_rows", "column": "text_col", "direction": "asc"},
         })
+    for col in ("date_col", "dt_col"):
+        if col in headers:
+            catalog.append({
+                "id": f"sort_rows_{col}_desc",
+                "step": {"op": "sort_rows", "column": col, "direction": "desc"},
+            })
     catalog.append({
         "id": "sort_rows_missing_col",
         "step": {"op": "sort_rows", "column": "missing_xyz", "direction": "asc"},
@@ -426,6 +568,13 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
             "id": "sort_rows_by_columns_two_cols",
             "step": {"op": "sort_rows_by_columns", "sorts": [{"column": c1, "direction": "asc"}, {"column": c2, "direction": "desc"}]},
         })
+    if "num_clean" in headers and "cat_col" in headers:
+        catalog.append({
+            "id": "sort_rows_by_columns_num_clean_then_cat",
+            "step": {"op": "sort_rows_by_columns", "sorts": [
+                {"column": "num_clean", "direction": "desc"}, {"column": "cat_col", "direction": "asc"},
+            ]},
+        })
     catalog.append({
         "id": "sort_rows_by_columns_missing_col",
         "step": {"op": "sort_rows_by_columns", "sorts": [{"column": "missing_xyz", "direction": "asc"}]},
@@ -433,96 +582,66 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
 
     # 18. filter_rows
     target_text_col = "cat_col" if "cat_col" in headers else headers[0]
-    catalog.append({
-        "id": "filter_rows_equals",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "equals", "value": "A"},
-    })
-    catalog.append({
-        "id": "filter_rows_not_equals",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "not_equals", "value": "A"},
-    })
-    catalog.append({
-        "id": "filter_rows_is_null",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_null", "value": ""},
-    })
-    catalog.append({
-        "id": "filter_rows_is_not_null",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_not_null", "value": ""},
-    })
-    catalog.append({
-        "id": "filter_rows_is_blank",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_blank", "value": ""},
-    })
-    catalog.append({
-        "id": "filter_rows_is_not_blank",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_not_blank", "value": ""},
-    })
-    catalog.append({
-        "id": "filter_rows_contains",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "contains", "value": "B"},
-    })
-    catalog.append({
-        "id": "filter_rows_does_not_contain",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "does_not_contain", "value": "B"},
-    })
-    catalog.append({
-        "id": "filter_rows_begins_with",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "begins_with", "value": "A"},
-    })
-    catalog.append({
-        "id": "filter_rows_does_not_begin_with",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "does_not_begin_with", "value": "A"},
-    })
-    catalog.append({
-        "id": "filter_rows_ends_with",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "ends_with", "value": "C"},
-    })
-    catalog.append({
-        "id": "filter_rows_does_not_end_with",
-        "step": {"op": "filter_rows", "column": target_text_col, "operator": "does_not_end_with", "value": "C"},
-    })
+
+    def _filter_item(item_id: str, column: str, operator: str, value: str) -> None:
+        catalog.append({
+            "id": item_id,
+            "step": {"op": "filter_rows", "column": column, "operator": operator, "value": value},
+        })
+
+    _filter_item("filter_rows_equals", target_text_col, "equals", "A")
+    _filter_item("filter_rows_not_equals", target_text_col, "not_equals", "A")
+    _filter_item("filter_rows_is_null", target_text_col, "is_null", "")
+    _filter_item("filter_rows_is_not_null", target_text_col, "is_not_null", "")
+    _filter_item("filter_rows_is_blank", target_text_col, "is_blank", "")
+    _filter_item("filter_rows_is_not_blank", target_text_col, "is_not_blank", "")
+    _filter_item("filter_rows_contains", target_text_col, "contains", "B")
+    _filter_item("filter_rows_does_not_contain", target_text_col, "does_not_contain", "B")
+    _filter_item("filter_rows_begins_with", target_text_col, "begins_with", "A")
+    _filter_item("filter_rows_does_not_begin_with", target_text_col, "does_not_begin_with", "A")
+    _filter_item("filter_rows_ends_with", target_text_col, "ends_with", "C")
+    _filter_item("filter_rows_does_not_end_with", target_text_col, "does_not_end_with", "C")
+    # trailing-space and case-variant equality, quotes in the value
+    _filter_item("filter_rows_equals_trailing_space_cat", target_text_col, "equals", "cat")
+    _filter_item("filter_rows_equals_trailing_space_variant", target_text_col, "equals", "A ")
+    _filter_item("filter_rows_equals_lower_variant", target_text_col, "equals", "a")
+    _filter_item("filter_rows_not_equals_lower_variant", target_text_col, "not_equals", "a")
+    _filter_item("filter_rows_ends_with_space", target_text_col, "ends_with", " ")
+    if "text_col" in headers:
+        _filter_item("filter_rows_equals_quote", "text_col", "equals", "with'quote")
+        _filter_item("filter_rows_contains_quote", "text_col", "contains", "'")
+    # a comparison value on an operator that takes none: the engine rejects the step
+    blank_value_target = "date_col" if "date_col" in headers else target_text_col
+    for operator in ("is_blank", "is_not_blank", "is_null", "is_not_null", "is_earliest", "is_latest"):
+        _filter_item(f"filter_rows_{operator}_with_value", blank_value_target, operator, "x")
+    for col, tag in (("date_col", "date"), ("dt_col", "dt")):
+        if col not in headers:
+            continue
+        for operator in ("date_before", "date_after", "date_on_or_before", "date_on_or_after"):
+            _filter_item(f"filter_rows_{operator}" if tag == "date" else f"filter_rows_dt_{operator}", col, operator, "2026-06-15")
+        _filter_item(f"filter_rows_{tag}_is_earliest", col, "is_earliest", "")
+        _filter_item(f"filter_rows_{tag}_is_latest", col, "is_latest", "")
+    if "dt_col" in headers:
+        for operator in ("date_before", "date_after", "date_on_or_before", "date_on_or_after"):
+            _filter_item(f"filter_rows_dt_time_{operator}", "dt_col", operator, "2026-06-15 10:30:00")
     if "date_col" in headers:
-        catalog.append({
-            "id": "filter_rows_date_before",
-            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_before", "value": "2026-06-15"},
-        })
-        catalog.append({
-            "id": "filter_rows_date_after",
-            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_after", "value": "2026-06-15"},
-        })
-        catalog.append({
-            "id": "filter_rows_date_on_or_before",
-            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_on_or_before", "value": "2026-06-15"},
-        })
-        catalog.append({
-            "id": "filter_rows_date_on_or_after",
-            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_on_or_after", "value": "2026-06-15"},
-        })
-        catalog.append({
-            "id": "filter_rows_is_earliest",
-            "step": {"op": "filter_rows", "column": "date_col", "operator": "is_earliest", "value": ""},
-        })
-        catalog.append({
-            "id": "filter_rows_is_latest",
-            "step": {"op": "filter_rows", "column": "date_col", "operator": "is_latest", "value": ""},
-        })
-    if "num_col" in headers:
-        catalog.append({
-            "id": "filter_rows_numeric_greater_than",
-            "step": {"op": "filter_rows", "column": "num_col", "operator": "greater_than", "value": "10"},
-        })
-        catalog.append({
-            "id": "filter_rows_numeric_less_than",
-            "step": {"op": "filter_rows", "column": "num_col", "operator": "less_than", "value": "100"},
-        })
-        catalog.append({
-            "id": "filter_rows_numeric_greater_than_or_equal",
-            "step": {"op": "filter_rows", "column": "num_col", "operator": "greater_than_or_equal", "value": "0"},
-        })
-        catalog.append({
-            "id": "filter_rows_numeric_less_than_or_equal",
-            "step": {"op": "filter_rows", "column": "num_col", "operator": "less_than_or_equal", "value": "50"},
-        })
+        _filter_item("filter_rows_date_value_with_time", "date_col", "date_after", "2026-06-15 12:00:00")
+        _filter_item("filter_rows_date_value_invalid", "date_col", "date_before", "not a date")
+    numeric_target = "num_clean" if "num_clean" in headers else ("num_col" if "num_col" in headers else None)
+    if numeric_target is not None:
+        _filter_item("filter_rows_numeric_greater_than", numeric_target, "greater_than", "10")
+        _filter_item("filter_rows_numeric_less_than", numeric_target, "less_than", "100")
+        _filter_item("filter_rows_numeric_greater_than_or_equal", numeric_target, "greater_than_or_equal", "0")
+        _filter_item("filter_rows_numeric_less_than_or_equal", numeric_target, "less_than_or_equal", "50")
+        _filter_item("filter_rows_numeric_column_equals_text", numeric_target, "equals", "5")
+        _filter_item("filter_rows_numeric_greater_than_exponent_value", numeric_target, "greater_than", "1e1")
+        _filter_item("filter_rows_numeric_greater_than_big", numeric_target, "greater_than", "9007199254740992")
+        _filter_item("filter_rows_numeric_value_not_a_number", numeric_target, "greater_than", "abc")
+        _filter_item("filter_rows_numeric_value_blank", numeric_target, "less_than", "")
+    if "num_col" in headers and numeric_target != "num_col":
+        # the dirty column: the engine stops at its first non-numeric cell
+        _filter_item("filter_rows_numeric_dirty_greater_than", "num_col", "greater_than", "10")
+        _filter_item("filter_rows_numeric_dirty_less_than_or_equal", "num_col", "less_than_or_equal", "50")
     catalog.append({
         "id": "filter_rows_missing_col",
         "step": {"op": "filter_rows", "column": "missing_xyz", "operator": "equals", "value": "test"},
@@ -539,6 +658,36 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
         "id": "filter_rows_advanced_combo",
         "step": {"op": "filter_rows_advanced", "clauses": clauses},
     })
+    if "num_clean" in headers and "dt_col" in headers:
+        catalog.append({
+            "id": "filter_rows_advanced_numeric_and_datetime",
+            "step": {"op": "filter_rows_advanced", "clauses": [
+                {"column": "num_clean", "operator": "greater_than_or_equal", "value": "10", "join": "and"},
+                {"column": "dt_col", "operator": "date_before", "value": "2026-06-15 12:00:00", "join": "and"},
+                {"column": target_text_col, "operator": "equals", "value": "cat ", "join": "or"},
+            ]},
+        })
+    if "num_col" in headers and "num_clean" in headers:
+        catalog.append({
+            "id": "filter_rows_advanced_dirty_numeric_clause",
+            "step": {"op": "filter_rows_advanced", "clauses": [
+                {"column": target_text_col, "operator": "equals", "value": "A", "join": "and"},
+                {"column": "num_col", "operator": "less_than", "value": "5", "join": "and"},
+            ]},
+        })
+        catalog.append({
+            "id": "filter_rows_advanced_numeric_value_not_a_number",
+            "step": {"op": "filter_rows_advanced", "clauses": [
+                {"column": "num_clean", "operator": "greater_than", "value": "1_0x", "join": "and"},
+            ]},
+        })
+    if "dt_col" in headers:
+        catalog.append({
+            "id": "filter_rows_advanced_blank_operator_with_value",
+            "step": {"op": "filter_rows_advanced", "clauses": [
+                {"column": "dt_col", "operator": "is_blank", "value": "x", "join": "and"},
+            ]},
+        })
     catalog.append({
         "id": "filter_rows_advanced_missing_col",
         "step": {"op": "filter_rows_advanced", "clauses": [{"column": "missing_xyz", "operator": "equals", "value": "val", "join": "and"}]},
@@ -613,36 +762,65 @@ def inspect_store_columns(
     store: DuckStore | None,
     table_name: str,
     headers: list[str],
-) -> dict[str, dict[str, bool]]:
-    """Inspect columns in DuckStore to discover if they are purely numeric or contain non-ASCII letters.
+) -> dict[str, dict[str, Any]]:
+    """Facts about every column, read from the store and decided by the ENGINE's rules.
 
-    Returns dict mapping column name to {'is_num': bool, 'has_non_ascii': bool}.
-    Uses public store.execute() with a single batched aggregation query.
+    Per column: `is_num` (every non-blank cell parses as Decimal(text.strip()), finite),
+    `first_bad_number` ((row, text) of the first non-blank cell that does not, in load order),
+    `date_kind_first_row` ({'naive'|'aware': first row} over cells the engine's date parse accepts),
+    `num_sql_exact` / `date_sql_exact` (the SQL expression gives the same exact value as the engine for
+    every distinct cell, measured in the store; if not, the tool refuses that step by name).
+    Uses the public store.execute() only.
     """
-    meta: dict[str, dict[str, bool]] = {}
+    meta: dict[str, dict[str, Any]] = {}
     if not headers or store is None:
         return meta
-    selects: list[str] = []
-    for h in headers:
-        num_rx = r'^[+-]?((\d+(\.\d*)?)|(\.\d+))([eE][+-]?\d+)?$'
-        non_ascii_rx = r'[^\x00-\x7F]'
-        letter_rx = r'\p{L}'
-        selects.append(
-            f'COUNT(CASE WHEN "{h}" IS NOT NULL AND "{h}" != \'\' THEN 1 END), '
-            f'COUNT(CASE WHEN "{h}" IS NOT NULL AND "{h}" != \'\' AND regexp_matches("{h}", \'{num_rx}\') = false THEN 1 END), '
-            f'COUNT(CASE WHEN "{h}" IS NOT NULL AND "{h}" != \'\' AND regexp_matches("{h}", \'{non_ascii_rx}\') AND regexp_matches("{h}", \'{letter_rx}\') THEN 1 END)'
-        )
-    sql = "SELECT " + ", ".join(selects) + f' FROM "{table_name}"'
-    records = store.execute(sql)
-    row = records[0] if isinstance(records, list) else records.fetchall()[0]
-    idx = 0
-    for h in headers:
-        cnt, non_num, non_ascii = row[idx], row[idx + 1], row[idx + 2]
-        meta[h] = {
-            "is_num": (cnt > 0 and non_num == 0),
-            "has_non_ascii": (cnt > 0 and non_ascii > 0),
+    col_list = ", ".join(f'"{h}"' for h in headers)
+    scan = store.execute(f'SELECT {col_list} FROM "{table_name}" ORDER BY {_RN}')
+    for idx, h in enumerate(headers):
+        values = [r[idx] for r in scan]
+        distinct = {v for v in values if v not in (None, "")}
+        numbers = {v: engine_number(v) for v in distinct}
+        dates = {v: engine_date(v) for v in distinct}
+        first_bad: tuple[int, str] | None = None
+        kind_rows: dict[str, int] = {}
+        for n, v in enumerate(values, 1):
+            if v in (None, ""):
+                continue
+            if first_bad is None and numbers[v] is None:
+                first_bad = (n, v)
+            parsed = dates[v]
+            if parsed is not None and parsed[0] not in kind_rows:
+                kind_rows[parsed[0]] = n
+        entry: dict[str, Any] = {
+            "is_num": first_bad is None,
+            "first_bad_number": first_bad,
+            "date_kind_first_row": kind_rows,
+            "num_sql_exact": True,
+            "date_sql_exact": True,
         }
-        idx += 3
+        non_blank = f'"{h}" IS NOT NULL AND "{h}" != \'\''
+        if first_bad is None and distinct:
+            pairs = store.execute(f'SELECT DISTINCT "{h}", {sql_num_expr(h)} FROM "{table_name}" WHERE {non_blank}')
+            for text, sql_value in pairs:
+                py_value = numbers[text]
+                if sql_value is None or py_value is None or Decimal(sql_value) != py_value or decimal_literal(py_value) is None:
+                    entry["num_sql_exact"] = False
+                    break
+        if kind_rows:
+            pairs = store.execute(f'SELECT DISTINCT "{h}", {sql_dt_expr(h)} FROM "{table_name}" WHERE {non_blank}')
+            for text, ts in pairs:
+                parsed = dates[text]
+                if parsed is None:
+                    same = ts is None
+                elif parsed[0] == "naive":
+                    same = ts is not None and ts == parsed[1]
+                else:
+                    same = False
+                if not same:
+                    entry["date_sql_exact"] = False
+                    break
+        meta[h] = entry
     return meta
 
 
@@ -905,21 +1083,12 @@ def _mapped_sql(
     # Helper for sorting a single column
     def _build_sort_expr(col: str, direction: str) -> str | Refusal:
         m = (col_meta or {}).get(col, {})
-        if overrides.get("mutant_sort_ignore_non_ascii"):
-            has_non_ascii = False
-        else:
-            has_non_ascii = m.get("has_non_ascii", False)
-
-        if has_non_ascii:
+        is_num = bool(m.get("is_num", False)) and not overrides.get("mutant_sort_numeric_as_text")
+        if is_num and not m.get("num_sql_exact", True):
             return Refusal(
-                f"Non-ASCII letters in column '{col}' sort differ between Python casefold and SQL lower.",
-                expected_error=None,
+                f"Column '{col}' holds numeric text that SQL_DECIMAL does not represent exactly "
+                f"(non-ASCII digits, more than 18 decimals, 19+ integer digits or a huge exponent)."
             )
-
-        if overrides.get("mutant_sort_numeric_as_text"):
-            is_num = False
-        else:
-            is_num = m.get("is_num", False)
 
         dir_sql = direction.upper()
 
@@ -929,8 +1098,13 @@ def _mapped_sql(
             null_clause = f'CASE WHEN "{col}" IS NULL OR "{col}" = \'\' THEN 1 ELSE 0 END ASC'
 
         if is_num:
-            val_clause = f'TRY_CAST("{col}" AS DOUBLE) {dir_sql}'
+            # The engine sorts by Decimal(value.strip()) when every non-blank cell parses.
+            val_clause = f"{sql_num_expr(col)} {dir_sql}"
+        elif overrides.get("mutant_sort_ignore_non_ascii"):
+            # Mutant (name kept from the old refusal): text sorted case-folded instead of raw code points.
+            val_clause = f'lower("{col}") {dir_sql}'
         else:
+            # The engine sorts text raw (`_sort_rows(case_sensitive=True)`); DuckDB VARCHAR order is bytewise.
             val_clause = f'"{col}" {dir_sql}'
 
         return f"{null_clause}, {val_clause}"
@@ -981,66 +1155,112 @@ def _mapped_sql(
         return (sql, list(headers))
 
     # 18. filter_rows
-    def _build_filter_condition(col: str, operator: str, expected: str) -> str | Refusal:
+    known_ops = {
+        "equals", "not_equals", "contains", "does_not_contain", "begins_with", "does_not_begin_with",
+        "ends_with", "does_not_end_with", "is_blank", "is_not_blank", "is_null", "is_not_null",
+        "greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal",
+        "date_before", "date_after", "date_on_or_before", "date_on_or_after", "is_earliest", "is_latest",
+    }
+    no_value_ops = {"is_null", "is_not_null", "is_blank", "is_not_blank", "is_earliest", "is_latest"}
+    numeric_ops = {"greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal"}
+    date_ops = {"date_before", "date_after", "date_on_or_before", "date_on_or_after"}
+    date_message = "needs a valid date (yyyy-mm-dd) or datetime value."
+
+    def _validate_filter(operator: str, value: str, idx: int, advanced: bool) -> Refusal | None:
+        """The engine's step validation, in the engine's order (phase 0)."""
+        if operator not in known_ops:
+            text = "has an unsupported operator." if advanced else "has an unsupported filter operator."
+            return Refusal(f"Unsupported filter operator {operator!r}.", expected_error=text, rank=(0, idx, 0))
+        if operator in no_value_ops and value:
+            text = (
+                "does not use a comparison value."
+                if advanced else "does not use a comparison value for this filter."
+            )
+            return Refusal(f"Operator {operator!r} takes no comparison value.", expected_error=text, rank=(0, idx, 1))
+        if operator in date_ops and engine_date(value) is None:
+            return Refusal(f"Filter value {value!r} is not a valid date.", expected_error=date_message, rank=(0, idx, 2))
+        return None
+
+    def _date_target(col: str, operator: str, value: str, idx: int) -> str | Refusal:
+        """Comparison for a date filter; engine kinds mixing naive and aware raise inside Python."""
+        m = (col_meta or {}).get(col)
+        if m is None:
+            return Refusal(f"No column facts for {col!r}.")
+        kinds: dict[str, int] = m.get("date_kind_first_row", {})
+        parsed = engine_date(value)
+        assert parsed is not None
+        e_kind, e_dt = parsed
+        others = [kinds[k] for k in kinds if k != e_kind]
+        if others:
+            message = _mixed_offset_message()
+            return Refusal(message, expected_error=message, rank=(2, min(others), idx))
+        if not kinds:
+            return "FALSE"
+        if e_kind == "aware":
+            return Refusal(f"Column {col!r} and the value hold offset-aware datetimes; SQL does not mirror them.")
+        if not m.get("date_sql_exact", True):
+            return Refusal(f"Column {col!r} holds date forms outside the strict ISO form the SQL cast mirrors.")
+        op_map = {"date_before": "<", "date_after": ">", "date_on_or_before": "<=", "date_on_or_after": ">="}
+        if overrides.get("mutant_filter_op_off_by_one"):
+            op_map = {"date_before": "<=", "date_after": ">=", "date_on_or_before": "<", "date_on_or_after": ">"}
+        return f"({sql_dt_expr(col)} {op_map[operator]} TIMESTAMP '{e_dt.isoformat(sep=' ')}')"
+
+    def _numeric_cond(col: str, operator: str, value: str, idx: int) -> str | Refusal:
+        number = engine_number(value)
+        if number is None:
+            return Refusal(
+                f"Filter value {value!r} is not a finite number.",
+                expected_error="Expected a finite number.",
+                rank=(1, idx, 1),
+            )
+        m = (col_meta or {}).get(col)
+        if m is None:
+            return Refusal(f"No column facts for {col!r}.")
+        literal = decimal_literal(number)
+        if literal is None:
+            return Refusal(f"Filter value {value!r} is outside the exact SQL decimal range.", rank=(1, idx, 1))
+        bad = m.get("first_bad_number")
+        if bad is not None:
+            message = f"Value {bad[1]!r} in row {bad[0]} of column {col!r} is not a valid number."
+            return Refusal(message, expected_error=message, rank=(2, bad[0], idx))
+        if not m.get("num_sql_exact", True):
+            return Refusal(f"Column {col!r} holds numeric text SQL does not represent exactly.")
+        op_map = {"greater_than": ">", "greater_than_or_equal": ">=", "less_than": "<", "less_than_or_equal": "<="}
+        if overrides.get("mutant_filter_op_off_by_one"):
+            op_map = {"greater_than": ">=", "greater_than_or_equal": ">", "less_than": "<=", "less_than_or_equal": "<"}
+        return f"({sql_num_expr(col)} {op_map[operator]} CAST('{literal}' AS {SQL_DECIMAL}))"
+
+    def _build_filter_condition(col: str, operator: str, expected: str, idx: int = 0, advanced: bool = False) -> str | Refusal:
+        invalid = _validate_filter(operator, expected, idx, advanced)
+        if invalid is not None:
+            return invalid
         if col not in headers:
             return Refusal(
                 f"Column {col!r} does not exist.",
                 expected_error=f"Column {col!r} does not exist.",
+                rank=(1, idx, 0),
             )
-        m = (col_meta or {}).get(col, {})
-        # Numeric operators
-        if operator in {"greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal"}:
-            if not m.get("is_num", False):
-                return Refusal(
-                    f"Column {col!r} contains non-numeric values.",
-                    expected_error=f"of column '{col}' is not a valid number.",
-                )
-            op_map = {
-                "greater_than": ">",
-                "greater_than_or_equal": ">=",
-                "less_than": "<",
-                "less_than_or_equal": "<=",
-            }
-            if overrides.get("mutant_filter_op_off_by_one"):
-                # Mutant changes strict to inclusive or vice versa
-                op_map = {
-                    "greater_than": ">=",
-                    "greater_than_or_equal": ">",
-                    "less_than": "<=",
-                    "less_than_or_equal": "<",
-                }
-            sql_op = op_map[operator]
-            return f'("{col}" IS NOT NULL AND "{col}" != \'\' AND TRY_CAST("{col}" AS DOUBLE) {sql_op} {expected})'
-
-        # Date operators
-        if operator in {"date_before", "date_after", "date_on_or_before", "date_on_or_after"}:
-            op_map = {
-                "date_before": "<",
-                "date_after": ">",
-                "date_on_or_before": "<=",
-                "date_on_or_after": ">=",
-            }
-            if overrides.get("mutant_filter_op_off_by_one"):
-                op_map = {
-                    "date_before": "<=",
-                    "date_after": ">=",
-                    "date_on_or_before": "<",
-                    "date_on_or_after": ">",
-                }
-            sql_op = op_map[operator]
-            return (
-                f'("{col}" IS NOT NULL AND "{col}" != \'\' AND '
-                f'TRY_CAST(trim("{col}") AS TIMESTAMP) IS NOT NULL AND '
-                f'TRY_CAST(trim("{col}") AS TIMESTAMP) {sql_op} TIMESTAMP \'{expected} 00:00:00\')'
-            )
+        if operator in numeric_ops:
+            return _numeric_cond(col, operator, expected, idx)
+        if operator in date_ops:
+            return _date_target(col, operator, expected, idx)
+        if operator in {"is_earliest", "is_latest"}:
+            # Only reached from an advanced clause: the engine has no clause form of these operators.
+            if total_rows == 0:
+                return "FALSE"
+            message = f"Unsupported filter operator {operator!r}."
+            return Refusal(message, expected_error=message, rank=(2, 1, idx))
 
         # Text and equality operators
+        lit = sql_str(expected)
+        if isinstance(lit, Refusal):
+            return lit
         if operator == "equals":
             if overrides.get("mutant_filter_trim_trailing_spaces"):
-                return f'rtrim(COALESCE("{col}", \'\')) = \'{expected}\''
-            return f'"{col}" = \'{expected}\''
+                return f'rtrim(COALESCE("{col}", \'\')) = {lit}'
+            return f'"{col}" = {lit}'
         if operator == "not_equals":
-            return f'("{col}" IS NULL OR "{col}" != \'{expected}\')'
+            return f'("{col}" IS NULL OR "{col}" != {lit})'
         if operator == "is_null":
             return f'"{col}" IS NULL'
         if operator == "is_not_null":
@@ -1050,17 +1270,17 @@ def _mapped_sql(
         if operator == "is_not_blank":
             return f'("{col}" IS NOT NULL AND "{col}" != \'\')'
         if operator == "contains":
-            return f'instr(COALESCE("{col}", \'\'), \'{expected}\') > 0'
+            return f'instr(COALESCE("{col}", \'\'), {lit}) > 0'
         if operator == "does_not_contain":
-            return f'instr(COALESCE("{col}", \'\'), \'{expected}\') = 0'
+            return f'instr(COALESCE("{col}", \'\'), {lit}) = 0'
         if operator == "begins_with":
-            return f'starts_with(COALESCE("{col}", \'\'), \'{expected}\')'
+            return f'starts_with(COALESCE("{col}", \'\'), {lit})'
         if operator == "does_not_begin_with":
-            return f'NOT starts_with(COALESCE("{col}", \'\'), \'{expected}\')'
+            return f'NOT starts_with(COALESCE("{col}", \'\'), {lit})'
         if operator == "ends_with":
-            return f'ends_with(COALESCE("{col}", \'\'), \'{expected}\')'
+            return f'ends_with(COALESCE("{col}", \'\'), {lit})'
         if operator == "does_not_end_with":
-            return f'NOT ends_with(COALESCE("{col}", \'\'), \'{expected}\')'
+            return f'NOT ends_with(COALESCE("{col}", \'\'), {lit})'
 
         return Refusal(f"Unsupported filter operator {operator!r}")
 
@@ -1068,23 +1288,38 @@ def _mapped_sql(
         col = step["column"]
         operator = step["operator"]
         expected = step.get("value", "")
+        col_list = ", ".join(f'"{c}"' for c in headers)
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         if operator in {"is_earliest", "is_latest"}:
+            invalid = _validate_filter(operator, expected, 0, False)
+            if invalid is not None:
+                return invalid
             if col not in headers:
                 return Refusal(
                     f"Column {col!r} does not exist.",
                     expected_error=f"Column {col!r} does not exist.",
                 )
+            m = (col_meta or {}).get(col)
+            if m is None:
+                return Refusal(f"No column facts for {col!r}.")
+            kinds = m.get("date_kind_first_row", {})
+            if len(kinds) > 1:
+                message = _mixed_offset_message()
+                return Refusal(message, expected_error=message)
+            if "aware" in kinds:
+                return Refusal(f"Column {col!r} holds offset-aware datetimes; SQL does not mirror them.")
+            if not m.get("date_sql_exact", True):
+                return Refusal(f"Column {col!r} holds date forms outside the strict ISO form the SQL cast mirrors.")
             func = "MIN" if operator == "is_earliest" else "MAX"
-            col_list = ", ".join(f'"{c}"' for c in headers)
-            order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+            dt_sql = sql_dt_expr(col)
             sql = (
                 f"WITH _dstats AS ("
-                f'  SELECT {func}(TRY_CAST(trim("{col}") AS TIMESTAMP)) AS _target_dt '
+                f"  SELECT {func}({dt_sql}) AS _target_dt "
                 f"  FROM {t_q} "
-                f'  WHERE "{col}" IS NOT NULL AND "{col}" != \'\' AND TRY_CAST(trim("{col}") AS TIMESTAMP) IS NOT NULL'
+                f"  WHERE {dt_sql} IS NOT NULL"
                 f") "
                 f"SELECT {col_list} FROM {t_q}, _dstats "
-                f'WHERE TRY_CAST(trim("{col}") AS TIMESTAMP) = _dstats._target_dt '
+                f"WHERE {dt_sql} = _dstats._target_dt "
                 f"{order_clause}"
             )
             return (sql, list(headers))
@@ -1092,8 +1327,6 @@ def _mapped_sql(
         cond = _build_filter_condition(col, operator, expected)
         if isinstance(cond, Refusal):
             return cond
-        col_list = ", ".join(f'"{c}"' for c in headers)
-        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         sql = f"SELECT {col_list} FROM {t_q} WHERE {cond} {order_clause}"
         return (sql, list(headers))
 
@@ -1102,19 +1335,27 @@ def _mapped_sql(
         clauses = step["clauses"]
         or_groups: list[list[str]] = []
         curr_and_group: list[str] = []
+        failures: list[Refusal] = []
         for c_idx, cl in enumerate(clauses):
             c_col = cl["column"]
             c_op = cl["operator"]
             c_val = cl.get("value", "")
             c_join = cl.get("join", "and")
-            c_cond = _build_filter_condition(c_col, c_op, c_val)
+            c_cond = _build_filter_condition(c_col, c_op, c_val, idx=c_idx, advanced=True)
             if isinstance(c_cond, Refusal):
-                return c_cond
+                failures.append(c_cond)
+                continue
             if c_idx == 0 or c_join == "and":
                 curr_and_group.append(c_cond)
             else:
                 or_groups.append(curr_and_group)
                 curr_and_group = [c_cond]
+        if failures:
+            # The engine raises the first error it meets (validation, then preparation, then the row scan).
+            engine_failures = [f for f in failures if f.expected_error]
+            if engine_failures:
+                return min(engine_failures, key=lambda f: f.rank)
+            return failures[0]
         or_groups.append(curr_and_group)
 
         group_sqls = ["(" + " AND ".join(grp) + ")" for grp in or_groups if grp]
@@ -1371,8 +1612,12 @@ def run_pq_step_diff(
                     else:
                         status = "refusal-reason-mismatch"
                         diff_reason = f"Refusal reason mismatch: expected {refusal_obj.expected_error!r} vs engine {engine_res!r}"
+                elif refusal_obj.expected_error:
+                    # The tool expected the engine to raise this error, but the engine ran the step
+                    status = "refusal-reason-mismatch"
+                    diff_reason = f"Refusal expected engine error {refusal_obj.expected_error!r} but the engine succeeded"
                 else:
-                    # SQL refused an operation where the engine succeeded
+                    # SQL refused an operation where the engine succeeded (a named limit of the mapping)
                     status = "refused"
                     diff_reason = f"SQL refused step: {refusal_obj.reason}"
             elif isinstance(store_res, str):
@@ -1530,11 +1775,16 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         "3. `keep_range_rows` / `remove_top_rows`: When offset or count exceeds total table row count, Power Query yields an empty table without error. The SQL mapping uses `OFFSET` / `LIMIT` matching this behavior.",
         "4. `remove_alternate_rows`: Alternating row selection cycle logic is mapped to modular arithmetic over `row_number()`. Power Query 1-based indexing semantics verified against step engine.",
         "5. Does Power Query keep an all-blank CSV row (`,,`) as a row of nulls? The app's CSV loader (engine parser and store import) drops all-blank rows at load, so remove_blank_rows on an imported CSV is the identity.",
-        "6. `sort_rows` on mixed columns: The engine sorts numerically only if every non-empty cell parses as a number; otherwise falls back to text casefold sort. Power BI Desktop behaviour on mixed columns needs checking.",
-        "7. `sort_rows` Python casefold vs DuckDB lower: Non-ASCII characters (e.g. 'ß', 'İ', 'Σ') differ in casefold vs lower; column sort is refused when non-ASCII letters are present.",
+        "6. `sort_rows` on mixed columns: The engine sorts numerically (by Decimal of the stripped text, so ' 5 ' and '1_000' count as numbers) only if every non-empty cell parses as a number; otherwise it sorts text in raw code point order. Power BI Desktop behaviour on mixed columns needs checking.",
+        "7. `sort_rows` on text: the engine does NOT casefold (`_sort_rows(case_sensitive=True)`); the SQL matches raw order on sigma forms, sharp s, dotted I, accents, astral and CJK letters. Power BI sorts text with its own culture rules, which needs checking.",
         "8. `filter_rows` on dates: Dates parsed via ISO strings; Power BI culture-specific date parsing needs verification.",
         "9. Duplicate keys on numeric text: `cell_key` treats distinct string representations ('1' vs '1.0') distinctly for un-converted text columns, but equal if converted to Decimal.",
         "10. `fill_down` / `fill_up` whitespace: Whitespace-only cells are treated as non-blank and not overwritten.",
+        "11. Date text '2026/06/15' and '20260615' (the engine uses Python date parsing: the first is not a date, the second is 2026-06-15): what does Power BI do with each?",
+        "12. A date filter value with a time part ('2026-06-15 12:00:00') against a date-only column: the engine compares the cell date at midnight; what does Power BI return?",
+        "13. Sorting numbers padded with spaces (' 5 ') as numbers or as text.",
+        "14. Sorting numbers above 2^53 (9007199254740993 versus 9007199254740992): exact order.",
+        "15. Trailing-space equality: 'cat ' versus 'cat' (the engine treats them as different; does Power BI?).",
         "",
         "## Deferred Steps (Slice 2+)",
         "",
