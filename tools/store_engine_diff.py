@@ -28,6 +28,62 @@ from analytics_studio.measures import evaluate_measures, normalize_measure
 from analytics_studio.store import DuckStore, import_csv_to_store, import_parquet_to_store
 
 
+# Exact numeric comparison tolerance: relative tolerance 1e-12 of max(|engine|, |mapped|)
+NUMERIC_REL_TOLERANCE = Decimal("1e-12")
+
+
+def to_exact_decimal(val: Any) -> Decimal | None:
+    """Convert a numeric scalar value to Decimal for exact comparison.
+
+    Returns None for non-numeric values, booleans, dates, and empty/NaN markers.
+    """
+    if val is None or val is False or val is True:
+        return None
+    if isinstance(val, (dt.date, dt.datetime)):
+        return None
+    if dax_dates.is_date(val):
+        return None
+    if isinstance(val, (int, Decimal)):
+        return Decimal(val)
+    if isinstance(val, float):
+        import math
+        if math.isnan(val) or math.isinf(val):
+            return None
+        return Decimal(repr(val))
+    if isinstance(val, str):
+        if val in ("None", "BLANK", '""', "", "NaN", "nan", "Infinity", "-Infinity"):
+            return None
+        # String dates (e.g. "2026-06-01" or "6/1/2026") or group-by semicolon strings
+        if "-" in val or "/" in val or ";" in val or ":" in val:
+            return None
+        try:
+            return Decimal(val)
+        except InvalidOperation:
+            return None
+    return None
+
+
+def exact_values_agree(val_a: Any, val_b: Any, rel_tol: Decimal = NUMERIC_REL_TOLERANCE) -> bool:
+    """Compare two scalar values for numeric equality within relative tolerance.
+
+    If either value is not a numeric scalar (or cannot be converted to Decimal), returns True
+    so the formatted-text comparison handles equality.
+    When both are exact equal integers or exact equal Decimals, returns True.
+    Otherwise checks if |val_a - val_b| <= rel_tol * max(|val_a|, |val_b|).
+    """
+    da = to_exact_decimal(val_a)
+    db = to_exact_decimal(val_b)
+    if da is None or db is None:
+        return True
+    if da == db:
+        return True
+    diff = abs(da - db)
+    max_val = max(abs(da), abs(db))
+    if max_val == 0:
+        return diff == 0
+    return (diff / max_val) <= rel_tol
+
+
 # The one Parquet refusal that the Parquet difference class parquet_counta_refusal accepts
 PARQUET_COUNTA_REFUSAL_REASON = "COUNTA on Parquet typed columns differs from CSV store"
 
@@ -84,18 +140,26 @@ class StoreResultLayer:
     """Prototypes the app's execution layer: aggregate leaves from SQL, exact Decimal arithmetic."""
 
     @staticmethod
-    def divide(sum_val: Any, cnt_val: Any) -> Decimal | None:
+    def divide(sum_val: Any, cnt_val: Any, overrides: dict[str, Any] | None = None) -> Decimal | None:
         if sum_val is None or cnt_val is None or cnt_val == 0:
             return None
-        return Decimal(str(sum_val)) / Decimal(str(cnt_val))
+        overrides = overrides or {}
+        res = Decimal(str(sum_val)) / Decimal(str(cnt_val))
+        if overrides.get("trunc_div_4"):
+            return res.quantize(Decimal("0.0001"))
+        return res
 
     @staticmethod
-    def divide_ratio(sum_val: Any, cnt_val: Any) -> Decimal | None:
+    def divide_ratio(sum_val: Any, cnt_val: Any, overrides: dict[str, Any] | None = None) -> Decimal | None:
         if sum_val is None or cnt_val is None or cnt_val == 0:
             return None
+        overrides = overrides or {}
         # In DAX, binary `/` between measures evaluates in IEEE 754 float
         f_val = float(sum_val) / float(cnt_val)
-        return Decimal(str(f_val))
+        res = Decimal(str(f_val))
+        if overrides.get("trunc_div_4"):
+            return res.quantize(Decimal("0.0001"))
+        return res
 
     @staticmethod
     def add(a: Any, b: Any) -> Decimal | None:
@@ -498,6 +562,17 @@ def build_formula_catalog(headers: list[str]) -> list[dict[str, Any]]:
                 "filter_type": "group_by",
             })
 
+    # Test formula for forced wrong value mutant testing
+    catalog.append({
+        "id": "forced_wrong_formula",
+        "category": "test",
+        "shape": "SUM",
+        "dax": "SUM(t[w])",
+        "agg": "SUM",
+        "col": "w",
+        "filter_type": None,
+    })
+
     return catalog
 
 
@@ -832,7 +907,9 @@ def generate_sql(
 
     if agg == "AVERAGE":
         # Work item A2: Return special token so run_comparison executes exact sum and count
-        if c_type == "whole_number":
+        if overrides.get("csv_avg_scale_3") and not is_parquet:
+            cast_c = f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, 3))"
+        elif c_type == "whole_number":
             cast_c = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS HUGEINT)"
         else:
             cast_c = (
@@ -1001,7 +1078,7 @@ def run_comparison(
         filter_set = set(formula_filter)
         formulas = [f for f in all_formulas if f["id"] in filter_set or f["shape"] in filter_set]
     else:
-        formulas = all_formulas
+        formulas = [f for f in all_formulas if f["id"] != "forced_wrong_formula"]
 
     if skip_group_by:
         formulas = [f for f in formulas if not f.get("group_col")]
@@ -1107,7 +1184,9 @@ def run_comparison(
                     active_table_id=aid,
                 )["M"]
                 engine_val = res
-                engine_text = format_report_value(res)
+                if overrides.get("forced_wrong_value") and f_id == "forced_wrong_formula":
+                    engine_val = Decimal("10.123456")
+                engine_text = format_report_value(engine_val)
             except Exception as exc:
                 engine_err = str(exc)
                 engine_text = f"ERR:{engine_err[:60]}"
@@ -1136,6 +1215,7 @@ def run_comparison(
         mapped_err = None
         mapped_refusal = None
         mapped_kv: list[list[str]] | None = None
+        mapped_status_reason: str | None = None
 
         if g_col:
             # Group-by mapped execution
@@ -1191,7 +1271,7 @@ def run_comparison(
                             sql_dict[k_str] = r_tuple[1]
                         else:
                             s_part, c_part = r_tuple[1], r_tuple[2]
-                            sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part)
+                            sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part, overrides=overrides)
                     else:
                         sql_dict[k_str] = r_tuple[1]
 
@@ -1241,7 +1321,7 @@ def run_comparison(
                 try:
                     q = f"SELECT SUM({cast_c}), COUNT({cast_c}) FROM \"t_csv\" {where_part}"
                     s_res, c_res = store.execute(q)[0]
-                    mapped_val = StoreResultLayer.divide(s_res, c_res)
+                    mapped_val = StoreResultLayer.divide(s_res, c_res, overrides=overrides)
                     mapped_text = format_report_value(mapped_val)
                 except Exception as exc:
                     mapped_err = str(exc)
@@ -1273,7 +1353,7 @@ def run_comparison(
                     d_sc = store_meta["decimal_scales"].get("d", 4)
                     s_d = store.execute(f'SELECT SUM(TRY_CAST(NULLIF(d, \'\') AS DECIMAL(38, {d_sc}))) FROM "t_csv"')[0][0]
                     c_d = store.execute('SELECT COUNT(NULLIF(d, \'\')) FROM "t_csv"')[0][0]
-                    mapped_val = StoreResultLayer.divide_ratio(s_d, c_d)
+                    mapped_val = StoreResultLayer.divide_ratio(s_d, c_d, overrides=overrides)
                     mapped_text = format_report_value(mapped_val)
                 except Exception as exc:
                     mapped_err = str(exc)
@@ -1282,7 +1362,7 @@ def run_comparison(
                 try:
                     s_w, c_w = store.execute('SELECT SUM(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)), COUNT(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)) FROM "t_csv"')[0]
                     min_w = store.execute('SELECT MIN(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)) FROM "t_csv"')[0][0]
-                    avg_w = StoreResultLayer.divide(s_w, c_w)
+                    avg_w = StoreResultLayer.divide(s_w, c_w, overrides=overrides)
                     diff_f = float(avg_w or 0) - float(Decimal(str(min_w or 0)))
                     mapped_val = Decimal(diff_f)
                     mapped_text = format_report_value(mapped_val)
@@ -1293,6 +1373,8 @@ def run_comparison(
                 try:
                     row_res = store.execute(mapped_sql_res)
                     mapped_val = row_res[0][0] if row_res else None
+                    if overrides.get("forced_wrong_value") and f_id == "forced_wrong_formula":
+                        mapped_val = Decimal("10.123457")
                     mapped_text = format_report_value(mapped_val)
                 except Exception as exc:
                     mapped_err = str(exc)
@@ -1343,7 +1425,7 @@ def run_comparison(
                         k_str = str(r_tuple[0] if r_tuple[0] is not None else "")
                         if g_agg == "AVERAGE":
                             s_part, c_part = r_tuple[1], r_tuple[2]
-                            sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part)
+                            sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part, overrides=overrides)
                         else:
                             sql_dict[k_str] = r_tuple[1]
 
@@ -1376,7 +1458,7 @@ def run_comparison(
                     try:
                         q = f"SELECT SUM({cast_c}), COUNT({cast_c}) FROM \"t_pq\" {where_part}"
                         s_res, c_res = store.execute(q)[0]
-                        pq_val = StoreResultLayer.divide(s_res, c_res)
+                        pq_val = StoreResultLayer.divide(s_res, c_res, overrides=overrides)
                         pq_text = format_report_value(pq_val)
                     except Exception as exc:
                         pq_err = str(exc)
@@ -1406,7 +1488,7 @@ def run_comparison(
                         d_sc = store_meta["decimal_scales"].get("d", 4)
                         s_d = store.execute(f'SELECT SUM(CAST(CAST(d AS VARCHAR) AS DECIMAL(38, {d_sc}))) FROM "t_pq"')[0][0]
                         c_d = store.execute('SELECT COUNT(d) FROM "t_pq"')[0][0]
-                        pq_val = StoreResultLayer.divide_ratio(s_d, c_d)
+                        pq_val = StoreResultLayer.divide_ratio(s_d, c_d, overrides=overrides)
                         pq_text = format_report_value(pq_val)
                     except Exception as exc:
                         pq_err = str(exc)
@@ -1415,7 +1497,7 @@ def run_comparison(
                     try:
                         s_w, c_w = store.execute('SELECT SUM(w), COUNT(w) FROM "t_pq"')[0]
                         min_w = store.execute('SELECT MIN(w) FROM "t_pq"')[0][0]
-                        avg_w = StoreResultLayer.divide(s_w, c_w)
+                        avg_w = StoreResultLayer.divide(s_w, c_w, overrides=overrides)
                         diff_f = float(avg_w or 0) - float(Decimal(str(min_w or 0)))
                         pq_val = Decimal(diff_f)
                         pq_text = format_report_value(pq_val)
@@ -1461,15 +1543,23 @@ def run_comparison(
                 mapped_status = "sql-error"
             elif mapped_refusal is not None:
                 mapped_status = "refused"
-            elif engine_text == mapped_text:
-                mapped_status = "same"
-            else:
+            elif engine_text != mapped_text:
                 mapped_status = "differs"
+            elif not exact_values_agree(engine_val, mapped_val):
+                mapped_status = "differs"
+                mapped_status_reason = "exact-value"
+            else:
+                mapped_status = "same"
 
         if skip_parquet:
             pq_vs_csv_diff = False
         elif pq_err is None and mapped_err is None:
-            pq_vs_csv_diff = pq_text != mapped_text
+            if pq_text != mapped_text:
+                pq_vs_csv_diff = True
+            elif not exact_values_agree(pq_val, mapped_val):
+                pq_vs_csv_diff = True
+            else:
+                pq_vs_csv_diff = False
         else:
             pq_vs_csv_diff = pq_err != mapped_err
 
@@ -1493,6 +1583,7 @@ def run_comparison(
             "mapped_kv": mapped_kv,
             "pq_kv": pq_kv,
             "mapped_status": mapped_status,
+            "mapped_status_reason": mapped_status_reason,
             "pq_val": str(pq_val),
             "pq_text": pq_text,
             "pq_err": pq_err,
@@ -1895,19 +1986,28 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
     lines.append("")
     lines.append("| Status | Naive SQL | Mapped SQL |")
     lines.append("|---|---|---|")
-    all_statuses = ["same", "differs", "refused", "sql-error", "refusal-reason-mismatch", "engine-error", "both-error"]
-    for s in all_statuses:
-        lines.append(f"| {s} | {status_counts_naive.get(s, 0)} | {status_counts_mapped.get(s, 0)} |")
-    lines.append("")
-    lines.append(f"- **Same:** {status_counts_mapped.get('same', 0)}")
-    lines.append(f"- **Differs:** {status_counts_mapped.get('differs', 0)}")
     # Headline refused count = every formula that carries an explicit Refusal; the breakdowns below sum to it
     total_refusals = sum(refused_reasons.values())
     refused_with_engine_value = status_counts_mapped.get("refused", 0)
+    matching_error_refusals = total_refusals - refused_with_engine_value
+    headline_mapped_same = status_counts_mapped.get("same", 0) - matching_error_refusals
+
+    all_statuses = ["same", "differs", "refused", "sql-error", "refusal-reason-mismatch", "engine-error", "both-error"]
+    for s in all_statuses:
+        if s == "refused":
+            m_cnt = total_refusals
+        elif s == "same":
+            m_cnt = headline_mapped_same
+        else:
+            m_cnt = status_counts_mapped.get(s, 0)
+        lines.append(f"| {s} | {status_counts_naive.get(s, 0)} | {m_cnt} |")
+    lines.append("")
+    lines.append(f"- **Same:** {status_counts_mapped.get('same', 0)}")
+    lines.append(f"- **Differs:** {status_counts_mapped.get('differs', 0)}")
     lines.append(
         f"- **Refused:** {total_refusals} "
         f"({refused_with_engine_value} where the engine returns a value and the store refuses, "
-        f"{total_refusals - refused_with_engine_value} where the engine raises an error and the refusal text matches it)"
+        f"{matching_error_refusals} where the engine raises an error and the refusal text matches it)"
     )
     if refused_shapes:
         lines.append(f"  - Refused shapes breakdown: {dict(sorted(refused_shapes.items()))}")
@@ -1924,8 +2024,9 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         for d in differs_mapped:
             e_disp = "(blank)" if d["engine_text"] == "" else d["engine_text"]
             m_disp = "(blank)" if d["mapped_text"] == "" else d["mapped_text"]
+            reason_note = f" [Reason: {d['mapped_status_reason']}]" if d.get("mapped_status_reason") else ""
             cls_note = f" [Class: {d.get('mapped_diff_class')}]" if d.get('mapped_diff_class') else " [UNCLASSIFIED]"
-            lines.append(f"- `{d['id']}` ({d['dax']}): Engine='{e_disp}' vs Mapped='{m_disp}'{cls_note}")
+            lines.append(f"- `{d['id']}` ({d['dax']}): Engine='{e_disp}' vs Mapped='{m_disp}'{reason_note}{cls_note}")
         lines.append("")
 
     if sql_errors_mapped:

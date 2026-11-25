@@ -27,10 +27,12 @@ from tools.store_engine_diff import (
     classify_parquet_diff,
     eval_distinct_numeric_predicate,
     evaluate_exit_policy,
+    exact_values_agree,
     generate_markdown_report,
     generate_sql,
     refusal_matches_engine_error,
     run_comparison,
+    to_exact_decimal,
 )
 
 CLASSES = ["distinct_numeric_text_variants", "parquet_source_precision", "parquet_counta_refusal"]
@@ -634,6 +636,8 @@ def test_report_refused_counts_and_texts(run100: dict[str, Any]) -> None:
 
     assert "distinct textual forms" in md
     assert "DISTINCTCOUNT of 1, 1.0, +1, -0 and 0 in a numeric column: one value or several?" in md
+    # Headline summary table displays total refused count (matching the refused bullet)
+    assert f"| refused | 0 | {len(refusals)} |" in md
 
 
 # ------------------------------------------------------------------ command line exit codes
@@ -674,3 +678,78 @@ def test_exit_policy_subprocess(run50: dict[str, Any]) -> None:
 
     p4 = _cli({"classes": CLASSES, "refused": []})
     assert p4.returncode == 1, f"Expected exit 1 on empty refused list, got {p4.returncode}"
+
+
+# ------------------------------------------------------------------ exact numeric comparison mutants (Stage C0f)
+
+
+def test_mutant_n19_csv_average_scale_3_fails() -> None:
+    """Mutant N19: AVERAGE on CSV cast to DECIMAL(38,3) produces an exact-value diff and exits 1."""
+    data = _run({"csv_avg_scale_3": True}, ["AVERAGE_d_d_lt"], rows=100, seed=42)
+    r = data["results"][0]
+    assert r["mapped_status"] == "differs"
+    assert r.get("mapped_status_reason") == "exact-value"
+    code, messages = _policy(data)
+    assert code == 1
+    assert "un-baselined" in messages[0]
+
+
+def test_mutant_average_hardcode_scale_4_fails() -> None:
+    """AVERAGE with hardcoded scale 4 on higher scale column produces an exact-value diff and exits 1."""
+    data = _run({"hardcode_scale_4": True}, ["AVERAGE_d_w_or"], rows=2000, seed=11)
+    # At seed 11, d has scale 9; hardcoding scale 4 loses precision
+    r = data["results"][0]
+    assert r["mapped_status"] == "differs"
+    assert r.get("mapped_status_reason") == "exact-value"
+    code, messages = _policy(data)
+    assert code == 1
+    assert "un-baselined" in messages[0]
+
+
+def test_mutant_sum_d_as_double_fails() -> None:
+    """SUM of decimal column d computed as DOUBLE produces an unclassified difference and exits 1."""
+    data = _run({"m8_prime_decimal_double": True}, ["SUM_d"], rows=100, seed=42)
+    r = data["results"][0]
+    assert r["mapped_status"] == "differs"
+    assert r.get("mapped_diff_class") is None
+    code, messages = _policy(data)
+    assert code == 1
+    assert "un-baselined" in messages[0]
+
+
+def test_mutant_division_truncated_to_4_decimals_fails() -> None:
+    """StoreResultLayer division truncated to 4 decimals produces an exact-value diff and exits 1."""
+    data = _run({"trunc_div_4": True}, ["AVERAGE_w_text_uni_upper"], rows=100, seed=42)
+    r = data["results"][0]
+    assert r["mapped_status"] == "differs"
+    assert r.get("mapped_status_reason") == "exact-value"
+    code, messages = _policy(data)
+    assert code == 1
+    assert "un-baselined" in messages[0]
+
+
+def test_small_data_third_decimal_diff(tmp_path: Path) -> None:
+    """Small-data hand-checked test: values differing at 3rd decimal agree in formatted-text but fail exact-value check."""
+    # Hand-checked: 10.1234 vs 10.1244 format both to 10.12 in 2-decimal display, but differ at 3rd decimal
+    assert to_exact_decimal("10.1234") == Decimal("10.1234")
+    assert to_exact_decimal("invalid") is None
+    assert not exact_values_agree(Decimal("10.1234"), Decimal("10.1244"))
+    assert exact_values_agree(Decimal("10.1234"), Decimal("10.1234"))
+
+
+def test_forced_wrong_values_tolerance_boundary() -> None:
+    """Forced-wrong-value tests: 10.123456 vs 10.123457 exits 1, 1e14+0.5 vs 1e14+0.5 exits 0."""
+    # 10.123456 vs 10.123457: diff 1e-6 / 10.12 = ~1e-7 > 1e-12 relative tolerance
+    assert not exact_values_agree(Decimal("10.123456"), Decimal("10.123457"))
+    data_wrong = _run({"forced_wrong_value": True}, ["forced_wrong_formula"], rows=50, seed=42)
+    r_wrong = data_wrong["results"][0]
+    assert r_wrong["mapped_status"] == "differs"
+    assert r_wrong.get("mapped_status_reason") == "exact-value"
+    code, messages = _policy(data_wrong)
+    assert code == 1
+    assert "un-baselined" in messages[0]
+
+    # Equal values (e.g. 1e14 + 0.5 vs 1e14 + 0.5) agree exactly and exit 0
+    val_large = Decimal("100000000000000.5")
+    assert exact_values_agree(val_large, val_large)
+
