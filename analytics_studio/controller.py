@@ -11484,16 +11484,13 @@ class StudioController(QObject):
         column_types: dict[str, str] | None = None,
     ) -> tuple[ImportCandidate, dict[str, str]]:
         """Materialize model calculations after query steps for one table."""
-        # Decide per candidate/source, never from controller state.
-        # Calculated columns are skipped only for a table whose own candidate/source is a store table.
-        from analytics_studio.store.candidate import StoreCandidate
-        document = project or self._project
-        source = next(
-            (s for s in document.get("data_sources", []) if s.get("id") == source_id),
-            None,
-        )
-        if isinstance(candidate, StoreCandidate) or (source is not None and bool(source.get("store"))):
+        # Decide ONLY from the candidate, never from controller state or source.get("store").
+        # Calculated columns are skipped only for a candidate that is itself a StoreCandidate.
+        mod = sys.modules.get("analytics_studio.store.candidate")
+        is_store = mod is not None and isinstance(candidate, getattr(mod, "StoreCandidate", ()))
+        if is_store:
             return candidate, {}
+        document = project or self._project
         table = self._model_table_for_source(document, source_id)
         if table is None:
             return candidate, {}

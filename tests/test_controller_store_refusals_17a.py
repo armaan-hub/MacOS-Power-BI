@@ -49,6 +49,11 @@ def _assert_no_blocking_dialogs(monkeypatch: pytest.MonkeyPatch) -> None:
         "question",
         lambda *args, **kwargs: QMessageBox.StandardButton.Yes,
     )
+    monkeypatch.setattr(
+        StudioController,
+        "_run_store_summary_dialog",
+        lambda self, candidate: None,
+    )
 
 
 def _make_csv(path: Path, rows: int = 10) -> Path:
@@ -82,11 +87,16 @@ def _snapshot(c: StudioController) -> dict[str, Any]:
     }
 
 
+def _fail_guard(*args: Any, **kwargs: Any) -> Any:
+    raise AssertionError("guard missing")
+
+
 def test_load_sample_data_refused_when_store_table_loaded(
     qapp: QApplication, tmp_path: Path, small_limit: None, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     c = _setup_controller_with_store_table(tmp_path, monkeypatch)
     snap_before = _snapshot(c)
+    monkeypatch.setattr(c, "_commit_inline", _fail_guard)
 
     res = c.load_sample_data()
     assert res is False
@@ -100,8 +110,11 @@ def test_enter_data_dialog_refused_when_store_table_loaded(
 ) -> None:
     c = _setup_controller_with_store_table(tmp_path, monkeypatch)
     snap_before = _snapshot(c)
+    monkeypatch.setattr(c, "_commit_inline", _fail_guard)
+    monkeypatch.setattr("analytics_studio.controller.EnterDataDialog.exec", _fail_guard)
 
     with patch("analytics_studio.controller.EnterDataDialog") as mock_dlg:
+        mock_dlg.side_effect = lambda *a, **k: (_ for _ in ()).throw(AssertionError("guard missing"))
         res = c.enter_data_dialog()
         assert res is False
         assert mock_dlg.call_count == 0
@@ -115,8 +128,11 @@ def test_ribbon_commands_refused_when_store_table_loaded(
     qapp: QApplication, tmp_path: Path, small_limit: None, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     c = _setup_controller_with_store_table(tmp_path, monkeypatch)
+    monkeypatch.setattr(c, "_commit_inline", _fail_guard)
+    monkeypatch.setattr("analytics_studio.controller.EnterDataDialog.exec", _fail_guard)
 
     with patch("analytics_studio.controller.EnterDataDialog") as mock_dlg:
+        mock_dlg.side_effect = lambda *a, **k: (_ for _ in ()).throw(AssertionError("guard missing"))
         # enterData
         snap = _snapshot(c)
         c.executeCommand("enterData")
@@ -145,6 +161,8 @@ def test_import_paths_refused_when_store_table_loaded(
 ) -> None:
     c = _setup_controller_with_store_table(tmp_path, monkeypatch)
     dummy_csv = _make_csv(tmp_path / "dummy.csv", 5)
+    monkeypatch.setattr(c, "_import_file_path", _fail_guard)
+    monkeypatch.setattr(c, "_commit_import", _fail_guard)
 
     snap = _snapshot(c)
     assert c.import_data_path(dummy_csv) is False
