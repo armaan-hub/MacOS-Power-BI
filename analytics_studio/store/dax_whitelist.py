@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
-from analytics_studio.measures import MeasureError, parse_expression
+from analytics_studio.measures import MeasureError, Token, parse_expression, tokenize
 
 # Canonical column types the whitelist knows. The store has two vocabularies:
 # store/base.py COLUMN_TYPES (whole, decimal, fixed, datetime, text, boolean) and
@@ -76,6 +76,16 @@ COMPOSITE_OPS: frozenset[str] = frozenset({"="})
 ALLOWED_PREDICATE_OPS: set[str] = {"=", "<>", "<", "<=", ">", ">="}
 _TEXT_ORDER_OPS: frozenset[str] = frozenset({"<>", "<", "<=", ">", ">="})
 
+# Shape caps, checked on the token list BEFORE parse_expression runs. The parser is recursive (about 10 Python
+# frames per open bracket, 2 per operator of a chain), so an unbounded input would be refused or admitted
+# depending on sys.getrecursionlimit(). Every cap below is a stable refusal. Measured worst admitted input:
+# a measure chain 32 deep whose last expression holds MAX_NESTING open brackets and a MAX_OR_TERMS chain.
+MAX_OR_TERMS = 50      # operands of one || (or &&) chain
+MAX_PREDICATES = 50    # filter arguments of one CALCULATE
+MAX_IN_ITEMS = 200     # items of one {...} table constructor
+MAX_NESTING = 20       # open ( and { at the same time
+MAX_TOKENS = 1500      # tokens of one expression
+
 # Literal ranges
 WHOLE_MIN = -(2**63)
 WHOLE_MAX = 2**63 - 1
@@ -113,6 +123,11 @@ REASON_COMPOSITE = (
 )
 REASON_OR_SAME_COLUMN = "all operands of || must be on the same column"
 REASON_TOO_DEEP = "expression is too deeply nested for the store whitelist"
+REASON_CAP_OR_TERMS = f"a || chain with more than {MAX_OR_TERMS} operands is not on the store whitelist"
+REASON_CAP_PREDICATES = f"a CALCULATE with more than {MAX_PREDICATES} filter arguments is not on the store whitelist"
+REASON_CAP_IN_ITEMS = f"an IN list with more than {MAX_IN_ITEMS} items is not on the store whitelist"
+REASON_CAP_NESTING = f"brackets nested more than {MAX_NESTING} deep are not on the store whitelist"
+REASON_CAP_TOKENS = f"an expression with more than {MAX_TOKENS} tokens is not on the store whitelist"
 REASON_UNEXPECTED = "unexpected error while classifying"
 REASON_DISTINCTCOUNT_NUMERIC = (
     "DISTINCTCOUNT on a numeric column differs from the engine "
@@ -147,6 +162,42 @@ def _canonical_type(raw_type: Any) -> tuple[str | None, str | None]:
                 "(the rules tool catalog has no such column)"
             )
     return None, f"unknown column type '{raw_type}' is not on the store whitelist"
+
+
+def _check_shape_caps(tokens: list[Token]) -> str | None:
+    """Refusal reason when the token list breaks a shape cap, else None. One pass, no recursion."""
+    if len(tokens) > MAX_TOKENS:
+        return REASON_CAP_TOKENS
+    # One frame per open bracket (plus the outermost level): [is_brace, is_calculate, commas, logical operators]
+    frames: list[list[Any]] = [[False, False, 0, 0]]
+    for position, token in enumerate(tokens):
+        kind = token.kind
+        if kind in ("(", "{"):
+            previous = tokens[position - 1] if position else None
+            is_calculate = (
+                kind == "(" and previous is not None
+                and previous.kind == "identifier" and previous.value == "CALCULATE"
+            )
+            frames.append([kind == "{", is_calculate, 0, 0])
+            if len(frames) - 1 > MAX_NESTING:
+                return REASON_CAP_NESTING
+        elif kind in (")", "}"):
+            if len(frames) > 1:
+                frames.pop()
+        elif kind == ",":
+            frame = frames[-1]
+            frame[2] += 1
+            frame[3] = 0
+            if frame[0] and frame[2] + 1 > MAX_IN_ITEMS:
+                return REASON_CAP_IN_ITEMS
+            if frame[1] and frame[2] > MAX_PREDICATES:
+                return REASON_CAP_PREDICATES
+        elif kind in ("||", "&&"):
+            frame = frames[-1]
+            frame[3] += 1
+            if frame[3] + 1 > MAX_OR_TERMS:
+                return REASON_CAP_OR_TERMS
+    return None
 
 
 def _type_error_reason(agg: str, col_type: str) -> str:
@@ -669,6 +720,14 @@ def _classify_measure(
                 False, None, None, (f"max_digits for '{c_name}' must be an integer",)
             )
         digits_norm[c_name.casefold()] = max(n_digits, digits_norm.get(c_name.casefold(), 0))
+
+    # Shape caps first: tokenize is iterative, and the parser (recursive) only runs on an expression within the caps
+    try:
+        cap_reason = _check_shape_caps(tokenize(expression))
+    except MeasureError as exc:
+        return WhitelistDecision(allowed=False, table=None, shape=None, reasons=(str(exc),))
+    if cap_reason:
+        return WhitelistDecision(allowed=False, table=None, shape=None, reasons=(cap_reason,))
 
     try:
         ast = parse_expression(expression)

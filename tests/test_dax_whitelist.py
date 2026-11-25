@@ -945,42 +945,49 @@ def test_operator_table_is_exactly_the_catalog():
 # ---- never raise ------------------------------------------------------------------------
 
 def test_deep_expressions_refuse_instead_of_raising():
-    """NOT depth 150, a 1200-term OR and 200 nested CALCULATE never raise. Where the parser runs
-    out of stack depends on the recursion limit, so the exact refusal reason is pinned at the
-    default limit of 1000 (pytest.ini sets a higher one)."""
+    """NOT depth 150, a 1200-term OR and 200 nested CALCULATE never raise. Since Stage C1b1 the
+    shape caps (checked on the tokens before the parser runs) refuse them with a stable reason that
+    does not depend on the recursion limit."""
     import sys
+
+    from analytics_studio.store.dax_whitelist import REASON_CAP_NESTING, REASON_CAP_TOKENS
 
     not_150 = "CALCULATE(SUM(t[w]), " + "NOT(" * 150 + "t[w] = 1" + ")" * 150 + ")"
     or_1200 = "CALCULATE(SUM(t[w]), " + " || ".join("t[w] = 1" for _ in range(1200)) + ")"
     calc_200 = "CALCULATE(" * 200 + "SUM(t[w])" + ")" * 200
-    # at the limit pytest.ini sets, the 1200-term OR (one whole column, all =) parses and is a
-    # valid admitted shape; the other two are refused for their nesting or their shape
-    for expr in (not_150, calc_200):
+    wanted = {not_150: REASON_CAP_NESTING, or_1200: REASON_CAP_TOKENS, calc_200: REASON_CAP_NESTING}
+    for expr, reason in wanted.items():
         dec = classify_measure(expr, home_table="t", tables=T2)
-        assert not dec.allowed and dec.reasons
-    assert isinstance(classify_measure(or_1200, home_table="t", tables=T2), WhitelistDecision)
+        assert not dec.allowed and dec.reasons == (reason,), dec.reasons
     previous = sys.getrecursionlimit()
     sys.setrecursionlimit(1000)
     try:
-        for expr in (not_150, or_1200, calc_200):
+        for expr, reason in wanted.items():
             dec = classify_measure(expr, home_table="t", tables=T2)
             assert not dec.allowed
-            assert dec.reasons == (REASON_TOO_DEEP,), dec.reasons
+            assert dec.reasons == (reason,), dec.reasons
     finally:
         sys.setrecursionlimit(previous)
 
 
 def test_long_or_chain_is_flattened_not_recursed():
-    """The classifier walks a || chain with a loop. 400 terms is within the parser's token
-    limit and must be classified (allowed: one whole column, all =), 400 terms over two
-    columns must refuse for the same-column rule."""
-    one = "CALCULATE(SUM(t[w]), " + " || ".join(f"t[w] = {i}" for i in range(400)) + ")"
-    two = "CALCULATE(SUM(t[w]), " + " || ".join(f"t[w{'2' if i % 2 else ''}] = {i}" for i in range(400)) + ")"
-    for expr, ok in ((one, True), (two, False)):
-        dec = classify_measure(expr, home_table="t", tables=T2)
-        if dec.reasons and dec.reasons[0] in (REASON_TOO_DEEP,) or "5000 tokens" in " ".join(dec.reasons):
-            continue  # the parser, not the whitelist, refused this size
-        assert dec.allowed == ok, dec.reasons
+    """The classifier walks a || chain with a loop. A chain of MAX_OR_TERMS operands over one
+    column is allowed, one over two columns refuses for the same-column rule, one operand more
+    or 300 operands is the OR cap, and a 400-term chain (over 1500 tokens) is the token cap."""
+    from analytics_studio.store.dax_whitelist import MAX_OR_TERMS, REASON_CAP_OR_TERMS, REASON_CAP_TOKENS
+
+    def chain(n: int, two_columns: bool) -> str:
+        return "CALCULATE(SUM(t[w]), " + " || ".join(
+            f"t[w{'2' if two_columns and i % 2 else ''}] = {i}" for i in range(n)
+        ) + ")"
+
+    assert classify_measure(chain(MAX_OR_TERMS, False), home_table="t", tables=T2).allowed
+    dec = classify_measure(chain(MAX_OR_TERMS, True), home_table="t", tables=T2)
+    assert not dec.allowed and REASON_OR_SAME_COLUMN in dec.reasons
+    for two in (False, True):
+        for terms, reason in ((MAX_OR_TERMS + 1, REASON_CAP_OR_TERMS), (300, REASON_CAP_OR_TERMS), (400, REASON_CAP_TOKENS)):
+            dec = classify_measure(chain(terms, two), home_table="t", tables=T2)
+            assert not dec.allowed and dec.reasons == (reason,), (terms, dec.reasons)
 
 
 def test_recursion_error_and_unexpected_error_refuse(monkeypatch):
