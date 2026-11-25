@@ -3159,3 +3159,11 @@ New analytics_studio/store/dax_whitelist.py decides, for one measure expression,
 Carried into C1b: literal sweeps for SQL generation (negative numbers, other dates, empty string), a deterministic cap for long || chains.
 
 Gate on 1ff4d31: 43,971 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
+
+## 2026-11-25 Stage C1b1: DAX to SQL planner for whitelisted aggregates and predicates, merged as 48e51f3
+
+New analytics_studio/store/dax_sql.py: the SQL builders moved out of the rules tool (byte-identical results proven at three seeds) plus `plan_measure`, which turns a whitelisted measure into one DuckDB query and returns the same Decimal, date and BLANK values the engine returns. The whitelist got deterministic caps (50 OR terms, 50 predicates, 200 IN items, nesting 20, 1500 tokens). The rules tool has a new `--plan` mode (Rule A+: planner value equals the engine value for every whitelisted formula; 570 of 570 same, 0 differences). Built by the Sonnet fixer; Team-Thinker failed C1b1 on three silent wrong values (decimal column names with spaces rounded to 4 decimals; text IN folds differently from `=` in the engine; whitespace-only text cells counted wrong in COUNTBLANK and DISTINCTCOUNT) and passed C1b1b after a 350-expression plan-versus-engine sweep, text IN sweeps, 29 mutants and injection tests. Measured on 1,000,000 rows: SUM about 4 ms, filtered DISTINCTCOUNT about 7 ms, decimal SUM about 46 ms; query process peak 190 MB.
+
+Open first in C1b2: the text IN guard cache goes stale when a plan is reused; text equality with Unicode whitespace cells (NBSP, NEL, U+3000, U+2003) differs from the engine.
+
+Gate on 48e51f3: 44,050 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
