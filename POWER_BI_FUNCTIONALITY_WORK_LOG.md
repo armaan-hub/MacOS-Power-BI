@@ -3167,3 +3167,13 @@ New analytics_studio/store/dax_sql.py: the SQL builders moved out of the rules t
 Open first in C1b2: the text IN guard cache goes stale when a plan is reused; text equality with Unicode whitespace cells (NBSP, NEL, U+3000, U+2003) differs from the engine.
 
 Gate on 48e51f3: 44,050 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
+
+## 2026-11-26 Stage C1b2 (group-by planner and literal sweep) and Stage D0 (Power Query step differential tool), merged as 4808584
+
+DAX side: plan_group_by and filter_context in dax_sql.py (group keys, first-seen spelling and order, blank key, empty groups as the engine's CALCULATETABLE(VALUES())), a literal sweep mode in the rules tool (1,297 rows: 913 same, 0 differs, the rest named refusals), and execute-time guards found by Team-Thinker: text IN with equality on a column holding special characters (Kelvin sign, ligatures, micro sign, fullwidth letters), compact date text, stale decimal scale (plans refuse "plan is stale; rebuild it" after an append that changes scale or digits), and non-ASCII whitespace group keys. Team-Thinker failed C1b2 once and passed C1b2b: 6,000 random group-by combinations against the real engine 0 differs, every code point 0x80 to 0x2FFFF checked against the equality guard, 40 of 44 mutants killed. Group-by on 1,000,000 rows: 5 keys 10 ms, 100,000 keys about 0.25 s.
+
+Power Query side (tools/pq_store_diff.py, 225 steps): proves, on generated data and against the real step engine, that SQL mappings give the same rows in the same order for columns, row selection, index, blank rows, append, sort, filter, duplicates, fill, group by, replace, text transforms, merge and split. Everything the engine does that SQL cannot match exactly is a named refusal with the engine's error text (non-ASCII case rules, 20+ digit integers, more than 18 decimals, non-ISO date text). Built by Antigravity (D0a, D0e, until its quota ran out), the Sonnet fixer and a Haiku builder; Team-Thinker failed D0a and D0e once each, passed D0b, D0f and D0h. No app behaviour changes yet: nothing is wired to the controller.
+
+Open: date cells before 1900-01-01 in the DAX path; matchable Power Query refusals (non-ASCII lower/upper, bool replacement, average beyond 28 digits); the D0i fixes were verified by the Planner but not re-reviewed.
+
+Gate on 4808584: 44,343 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
