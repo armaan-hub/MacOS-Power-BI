@@ -1,7 +1,17 @@
-"""Power Query step differential tool, first slice (Stage D0a).
+"""Power Query step differential tool, first slice (Stage D0a, fixes D0b).
 
 Proves on generated data that a SQL mapping of each Tier 1 Power Query step
 gives the same result as the existing row-by-row step engine (transformations.py).
+
+Cell rule (one place, `normalize_cell`): a cell is None or text. None is NOT the
+same as ''. The store CSV import keeps a blank cell as '' and the step engine
+returns '' for a blank CSV cell (measured: 0 None cells over 55 steps), so a SQL
+mapping that returns NULL for a blank cell is a difference.
+
+Known limit of the mutant tests: removing ORDER BY from the 5 row-slicing
+operations (`mutant_no_order_by`) cannot be killed by behaviour, because DuckDB
+returns insertion order for a plain scan (measured at 1,000,000 rows). That rule
+is guarded by a SQL-text lint test, which is not a mutant kill.
 """
 
 from __future__ import annotations
@@ -41,11 +51,18 @@ def refusal_matches_engine_error(refusal: Refusal, engine_err: str) -> bool:
     return bool(refusal.expected_error) and refusal.expected_error in engine_err
 
 
-def normalize_cell(val: Any) -> str:
-    """Normalize cell to string: None or empty string equals ''."""
-    if val is None or val == "":
-        return ""
+def normalize_cell(val: Any) -> str | None:
+    """Normalize a cell for comparison: None stays None, everything else becomes text.
+
+    None and '' are different values on both sides. The step engine never returns
+    None for a CSV-parsed table and the store holds '' for a blank CSV cell.
+    """
+    if val is None:
+        return None
     return str(val)
+
+
+WHITESPACE_CELLS = [" ", "\t", "\u00a0"]
 
 
 def generate_pq_dataset(
@@ -54,7 +71,13 @@ def generate_pq_dataset(
     seed: int = 42,
     include_blank_rows: bool = True,
 ) -> dict[str, Any]:
-    """Generate a CSV dataset with mixed case, blanks, unicode, spaces, numbers, and dates."""
+    """Generate a CSV dataset with mixed case, blanks, unicode, spaces, numbers, and dates.
+
+    Planted shapes: an all-blank row every 250th row (measured: both the engine's CSV
+    parser and the store import DROP all-blank rows on load, so they never reach a step), one whitespace-only entire row
+    (row rows // 3, moved one down when that is a blank-row slot; spaces in every cell),
+    whitespace-only cells (" ", tab, NBSP U+00A0), adjacent duplicate rows and non-adjacent duplicates.
+    """
     rnd = random.Random(seed)
 
     text_options = [
@@ -68,12 +91,30 @@ def generate_pq_dataset(
 
     headers = ["id", "text_col", "num_col", "date_col", "cat_col", "blank_col"]
 
+    ws_row = max(3, rows // 3)
+    if include_blank_rows and ws_row % 250 == 0:
+        ws_row += 1
+
     csv_rows: list[list[str]] = []
 
     for i in range(1, rows + 1):
         if include_blank_rows and (i % 250 == 0):
             # Pure blank row: every cell is empty
             csv_rows.append(["", "", "", "", "", ""])
+            continue
+        if i == ws_row:
+            # Whitespace-only entire row: kept by Power Query (only null and '' are blank)
+            csv_rows.append([" "] * 6)
+            continue
+
+        dup_kind = rnd.random()
+        if csv_rows and dup_kind < 0.05:
+            # Adjacent duplicate: identical to the previous row
+            csv_rows.append(list(csv_rows[-1]))
+            continue
+        if csv_rows and dup_kind < 0.08:
+            # Non-adjacent duplicate: identical to a random earlier row
+            csv_rows.append(list(csv_rows[rnd.randrange(len(csv_rows))]))
             continue
 
         id_str = str(i)
@@ -82,6 +123,12 @@ def generate_pq_dataset(
         d_str = rnd.choice(date_options) if rnd.random() >= 0.08 else ""
         c_str = rnd.choice(categories) if rnd.random() >= 0.08 else ""
         b_str = "" if rnd.random() < 0.90 else "non_blank"
+        if rnd.random() < 0.05:
+            t_str = rnd.choice(WHITESPACE_CELLS)
+        if rnd.random() < 0.05:
+            c_str = rnd.choice(WHITESPACE_CELLS)
+        if rnd.random() < 0.03:
+            b_str = rnd.choice(WHITESPACE_CELLS)
 
         csv_rows.append([id_str, t_str, n_str, d_str, c_str, b_str])
 
@@ -97,20 +144,23 @@ def generate_pq_dataset(
 def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
     """Build catalog of parameter sets for Tier 1 Power Query steps."""
     catalog: list[dict[str, Any]] = []
+    n_cols = len(headers)
 
-    # 1. keep_columns
-    catalog.append({
-        "id": "keep_columns_subset",
-        "step": {"op": "keep_columns", "columns": [headers[0], headers[1]]},
-    })
+    # 1. keep_columns (parameter sets that need a 2nd or 3rd column are skipped on narrow tables)
+    if n_cols >= 2:
+        catalog.append({
+            "id": "keep_columns_subset",
+            "step": {"op": "keep_columns", "columns": [headers[0], headers[1]]},
+        })
     catalog.append({
         "id": "keep_columns_single",
         "step": {"op": "keep_columns", "columns": [headers[0]]},
     })
-    catalog.append({
-        "id": "keep_columns_reordered_selection",
-        "step": {"op": "keep_columns", "columns": [headers[2], headers[0]]},
-    })
+    if n_cols >= 2:
+        catalog.append({
+            "id": "keep_columns_reordered_selection",
+            "step": {"op": "keep_columns", "columns": [headers[2] if n_cols >= 3 else headers[1], headers[0]]},
+        })
     catalog.append({
         "id": "keep_columns_all",
         "step": {"op": "keep_columns", "columns": list(headers)},
@@ -121,7 +171,11 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
     })
 
     # 2. remove_column
-    for col in [headers[0], headers[1], headers[-1]]:
+    remove_cols: list[str] = []
+    for col in [headers[0], headers[1] if n_cols >= 2 else headers[0], headers[-1]]:
+        if col not in remove_cols:
+            remove_cols.append(col)
+    for col in remove_cols:
         catalog.append({
             "id": f"remove_column_{col}",
             "step": {"op": "remove_column", "column": col},
@@ -137,7 +191,11 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
     })
 
     # 3. reorder_columns
-    if len(headers) >= 3:
+    catalog.append({
+        "id": "reorder_columns_first_only",
+        "step": {"op": "reorder_columns", "columns": [headers[0]]},
+    })
+    if n_cols >= 2:
         catalog.append({
             "id": "reorder_columns_swap_first_two",
             "step": {"op": "reorder_columns", "columns": [headers[1], headers[0]]},
@@ -146,6 +204,7 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
             "id": "reorder_columns_reverse_all",
             "step": {"op": "reorder_columns", "columns": list(reversed(headers))},
         })
+    if n_cols >= 3:
         catalog.append({
             "id": "reorder_columns_partial_middle",
             "step": {"op": "reorder_columns", "columns": [headers[2], headers[1]]},
@@ -168,10 +227,11 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
         "id": "rename_column_nonexistent_col",
         "step": {"op": "rename_column", "column": "missing_col_xyz", "new_name": "new_name"},
     })
-    catalog.append({
-        "id": "rename_column_existing_name",
-        "step": {"op": "rename_column", "column": headers[0], "new_name": headers[1]},
-    })
+    if n_cols >= 2:
+        catalog.append({
+            "id": "rename_column_existing_name",
+            "step": {"op": "rename_column", "column": headers[0], "new_name": headers[1]},
+        })
 
     # 5. duplicate_column
     catalog.append({
@@ -182,10 +242,11 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
         "id": "duplicate_column_last",
         "step": {"op": "duplicate_column", "column": headers[-1], "new_name": f"{headers[-1]}_copy"},
     })
-    catalog.append({
-        "id": "duplicate_column_existing_name",
-        "step": {"op": "duplicate_column", "column": headers[0], "new_name": headers[1]},
-    })
+    if n_cols >= 2:
+        catalog.append({
+            "id": "duplicate_column_existing_name",
+            "step": {"op": "duplicate_column", "column": headers[0], "new_name": headers[1]},
+        })
     catalog.append({
         "id": "duplicate_column_nonexistent_col",
         "step": {"op": "duplicate_column", "column": "missing_xyz", "new_name": "dup_xyz"},
@@ -284,6 +345,15 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
         "id": "remove_blank_rows",
         "step": {"op": "remove_blank_rows"},
     })
+    # Plain remove_blank_rows is the identity on imported CSV data (all-blank rows are dropped on
+    # load). Keeping the last column(s) first makes rows blank for the step to remove.
+    for tail in (1, 2):
+        if n_cols >= tail:
+            catalog.append({
+                "id": f"remove_blank_rows_after_keep_last_{tail}",
+                "pre_step": {"op": "keep_columns", "columns": list(headers[-tail:])},
+                "step": {"op": "remove_blank_rows"},
+            })
 
     # 15. append
     catalog.append({
@@ -305,8 +375,28 @@ def generate_step_sql(
     """Generate SQL query and expected output columns for a step item.
 
     Returns (sql_query, output_headers) or a Refusal object.
+    `mutant_null_for_blank` (inert by default) wraps every selected column in
+    NULLIF(col, '') so a blank cell comes back as NULL; the tool must flag it.
     """
     overrides = overrides or {}
+    result = _mapped_sql(item, headers, table_name, total_rows, overrides)
+    if isinstance(result, Refusal) or not overrides.get("mutant_null_for_blank"):
+        return result
+    sql, out_headers = result
+    if overrides.get("forced_sql_syntax_error"):
+        return result
+    wrapped = ", ".join(f'NULLIF(CAST("{h}" AS VARCHAR), \'\') AS "{h}"' for h in out_headers)
+    return (f"SELECT {wrapped} FROM ({sql})", out_headers)
+
+
+def _mapped_sql(
+    item: dict[str, Any],
+    headers: list[str],
+    table_name: str,
+    total_rows: int,
+    overrides: dict[str, Any],
+) -> tuple[str, list[str]] | Refusal:
+    """The SQL mapping of each step (see `generate_step_sql`)."""
     t_q = f'"{table_name}"'
     step = item["step"]
     op = step.get("op")
@@ -333,15 +423,16 @@ def generate_step_sql(
     # 2. remove_column
     if op == "remove_column":
         col = step["column"]
-        if item.get("single_column_context") or len(headers) == 1:
-            return Refusal(
-                "Cannot remove the last column from a table.",
-                expected_error="Cannot remove the last column from a table.",
-            )
+        # The engine checks that the column exists before it checks for the last column.
         if col not in headers:
             return Refusal(
                 f"Column {col!r} does not exist.",
                 expected_error=f"Column {col!r} does not exist.",
+            )
+        if len(headers) == 1:
+            return Refusal(
+                "Cannot remove the last column from a table.",
+                expected_error="Cannot remove the last column from a table.",
             )
         out_headers = [h for h in headers if h != col]
         col_list = ", ".join(f'"{c}"' for c in out_headers)
@@ -443,6 +534,10 @@ def generate_step_sql(
         first_row = step["first_row"]
         count = step["count"]
         offset = max(0, first_row - 1)
+        if overrides.get("mutant_range_start_off_by_one"):
+            offset += 1
+        if overrides.get("mutant_range_count_off_by_one"):
+            count += 1
         col_list = ", ".join(f'"{c}"' for c in headers)
         order_clause = "" if overrides.get("mutant_no_order_by") else "ORDER BY rowid"
         return (f"SELECT {col_list} FROM {t_q} {order_clause} OFFSET {offset} LIMIT {count}", list(headers))
@@ -454,6 +549,7 @@ def generate_step_sql(
         kp = step["keep_count"]
         if overrides.get("mutant_alt_offset_wrong"):
             first_to_remove += 1
+        window_order = "ORDER BY rowid DESC" if overrides.get("mutant_window_order_desc") else "ORDER BY rowid"
 
         col_list = ", ".join(f'"{c}"' for c in headers)
         if rem == 0:
@@ -466,7 +562,7 @@ def generate_step_sql(
 
         sql = (
             f"SELECT {col_list} FROM ("
-            f"  SELECT {col_list}, CAST(row_number() OVER () AS BIGINT) AS _rn FROM {t_q}"
+            f"  SELECT {col_list}, CAST(row_number() OVER ({window_order}) AS BIGINT) AS _rn FROM {t_q}"
             f") WHERE {cond} ORDER BY _rn"
         )
         return (sql, list(headers))
@@ -481,7 +577,12 @@ def generate_step_sql(
         start = step["start"]
         inc = step["increment"]
         col_list = ", ".join(f'"{c}"' for c in headers)
-        idx_expr = f"{start} + (CAST(row_number() OVER () AS BIGINT) - 1) * {inc}"
+        if overrides.get("mutant_index_start_off_by_one"):
+            start += 1
+        if overrides.get("mutant_index_increment_one"):
+            inc = 1
+        window_order = "ORDER BY rowid DESC" if overrides.get("mutant_window_order_desc") else "ORDER BY rowid"
+        idx_expr = f"{start} + (CAST(row_number() OVER ({window_order}) AS BIGINT) - 1) * {inc}"
         out_headers = [*headers, new_name]
         order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
         sql = f"SELECT {col_list}, {idx_expr} AS \"{new_name}\" FROM {t_q} {order_clause}"
@@ -504,11 +605,16 @@ def generate_step_sql(
         second_tbl = item.get("second_table", f"{table_name}_2")
         col_list = ", ".join(f'"{c}"' for c in headers)
         order_clause = "ORDER BY _src, _rn"
+        if overrides.get("mutant_append_order_rn_src"):
+            order_clause = "ORDER BY _rn, _src"
+        if overrides.get("mutant_append_order_src_only"):
+            order_clause = "ORDER BY _src"
+        second_cols = ", ".join(f'"{c}"' for c in reversed(headers)) if overrides.get("mutant_append_column_order") else col_list
         sql = (
             f"SELECT {col_list} FROM ("
             f"  SELECT {col_list}, 0 AS _src, rowid AS _rn FROM {t_q}"
             f"  UNION ALL"
-            f"  SELECT {col_list}, 1 AS _src, rowid AS _rn FROM \"{second_tbl}\""
+            f"  SELECT {second_cols}, 1 AS _src, rowid AS _rn FROM \"{second_tbl}\""
             f") {order_clause}"
         )
         return (sql, list(headers))
@@ -520,7 +626,7 @@ def execute_engine_step(
     item: dict[str, Any],
     candidate: ImportCandidate,
     candidate_2: ImportCandidate | None = None,
-) -> tuple[list[str], list[list[str]]] | str:
+) -> tuple[list[str], list[list[str | None]]] | str:
     """Execute step on row-by-row step engine.
 
     Returns (headers, rows_as_text_matrix) or error message string.
@@ -545,10 +651,11 @@ def execute_engine_step(
                     options=candidate.options,
                     notices=candidate.notices,
                 )
-            result = apply_transformations(cand_input, [step])
+            steps = [item["pre_step"], step] if item.get("pre_step") else [step]
+            result = apply_transformations(cand_input, steps)
 
         out_headers = list(result.headers)
-        out_rows: list[list[str]] = []
+        out_rows: list[list[str | None]] = []
         for r in result.rows:
             row_vals = [normalize_cell(r.get(h)) for h in out_headers]
             out_rows.append(row_vals)
@@ -560,18 +667,22 @@ def execute_engine_step(
 def execute_store_step(
     sql_or_refusal: tuple[str, list[str]] | Refusal,
     store: DuckStore,
-) -> tuple[list[str], list[list[str]]] | Refusal | str:
+) -> tuple[list[str], list[list[str | None]]] | Refusal | str:
     """Execute generated SQL against DuckStore.
 
     Returns (headers, rows_as_text_matrix), Refusal, or error message string.
+    The headers come from the cursor description of the executed query, not from
+    the generator's declared list (the declared list is only used for refusals).
     """
     if isinstance(sql_or_refusal, Refusal):
         return sql_or_refusal
 
-    sql, headers = sql_or_refusal
+    sql, _declared_headers = sql_or_refusal
     try:
-        records = store.execute(sql)
-        out_rows: list[list[str]] = []
+        cursor = store._check_open().execute(sql)
+        headers = [str(col[0]) for col in cursor.description]
+        records = cursor.fetchall()
+        out_rows: list[list[str | None]] = []
         for rec in records:
             row_vals = [normalize_cell(val) for val in rec]
             out_rows.append(row_vals)
@@ -585,8 +696,16 @@ def run_pq_step_diff(
     seed: int = 42,
     overrides: dict[str, Any] | None = None,
     item_filter: list[str] | None = None,
+    dataset: dict[str, Any] | None = None,
+    items: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Run differential comparison between step engine and DuckStore SQL."""
+    """Run differential comparison between step engine and DuckStore SQL.
+
+    `dataset` (optional, for small hand-checked tables) is
+    {"headers": [...], "rows": [[...]], "rows_2": [[...]]}: it replaces the generated
+    CSV files; `rows_2` is the second table for append (default: the first table reversed).
+    `items` (optional) replaces the step catalog with explicit step items.
+    """
     overrides = overrides or {}
     t_start = time.time()
 
@@ -598,8 +717,17 @@ def run_pq_step_diff(
         csv_file_2 = t_path / "t2.csv"
         db_file = t_path / "store.db"
 
-        generate_pq_dataset(csv_file, rows=rows, seed=seed, include_blank_rows=True)
-        generate_pq_dataset(csv_file_2, rows=min(rows, 100), seed=seed + 1, include_blank_rows=True)
+        if dataset is None:
+            generate_pq_dataset(csv_file, rows=rows, seed=seed, include_blank_rows=True)
+            generate_pq_dataset(csv_file_2, rows=min(rows, 100), seed=seed + 1, include_blank_rows=True)
+        else:
+            rows = len(dataset["rows"])
+            rows_2 = dataset.get("rows_2", list(reversed(dataset["rows"])))
+            for path, body in ((csv_file, dataset["rows"]), (csv_file_2, rows_2)):
+                with open(path, "w", newline="", encoding="utf-8") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(dataset["headers"])
+                    writer.writerows(body)
 
         cand = parse_file(csv_file)
         cand_2 = parse_file(csv_file_2)
@@ -611,7 +739,7 @@ def run_pq_step_diff(
 
         total_store_rows = store.execute('SELECT COUNT(*) FROM "t_csv"')[0][0]
 
-        catalog = build_step_catalog(headers)
+        catalog = list(items) if items is not None else build_step_catalog(headers)
         if item_filter:
             catalog = [item for item in catalog if item["id"] in set(item_filter)]
 
@@ -625,7 +753,16 @@ def run_pq_step_diff(
             engine_res = execute_engine_step(item, cand, cand_2)
 
             # 2. SQL side: store
-            sql_or_ref = generate_step_sql(item, headers, "t_csv", total_store_rows, overrides=overrides)
+            # The 'remove the last column' item runs on a one-column table: the engine side is
+            # cropped to one column, so the SQL side sees the same one-column header list and
+            # refuses because of that, not because of a flag.
+            sql_headers = headers
+            if item.get("single_column_context"):
+                sql_headers = headers[:1]
+            elif item.get("pre_step"):
+                kept = set(item["pre_step"]["columns"])
+                sql_headers = [h for h in headers if h in kept]
+            sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides)
             store_res = execute_store_step(sql_or_ref, store)
 
             # 3. Compare
@@ -806,7 +943,7 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         "",
         "The following operations in `transformations.py` were deferred from Tier 1:",
         "- Row filtering & sorting: `filter_rows`, `filter_rows_advanced`, `sort_rows`, `sort_rows_by_columns`",
-        "- Column manipulation: `merge_columns`, `split_column*`, `fill_down`, `fill_up`",
+        "- Column manipulation: `merge_columns`, `split_column`, `split_column_by_each_delimiter`, `split_column_by_positions`, `split_column_to_rows`, `extract_text_by_delimiter`, `extract_text_between_delimiters`, `fill_down`, `fill_up`",
         "- Type conversions: `convert_type`, `convert_type_using_locale`",
         "- Value transformations: `replace_value`, `replace_error_values`, `trim_text`, `clean_text`, `lowercase_text`, `uppercase_text`, `proper_case_text`, `reverse_text`",
         "- Reshaping / Aggregation: `group_by`, `pivot_column`, `unpivot_columns`, `unpivot_other_columns`, `transpose_table`",
