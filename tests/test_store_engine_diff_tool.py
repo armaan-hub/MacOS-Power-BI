@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import copy
+import csv
 import json
 import os
 import subprocess
@@ -17,6 +18,8 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 
 from analytics_studio.store import DuckStore, import_csv_to_store
@@ -512,6 +515,8 @@ def _pq_result(**fields: Any) -> dict[str, Any]:
         "pq_text": "",
         "mapped_kv": None,
         "pq_kv": None,
+        "mapped_kv_exact": None,
+        "pq_kv_exact": None,
     }
     base.update(fields)
     return base
@@ -549,13 +554,17 @@ def test_parquet_classes_need_their_data(tmp_path: Path) -> None:
         assert classify_parquet_diff(_pq_result(pq_val="2"), counta, ctx) is None
         assert classify_parquet_diff(dict(exact, mapped_refusal="REFUSED: x"), counta, ctx) is None
 
-        # group-by SUM of d: the Parquet text must equal the per-group sums of the DOUBLE-rounded cells
+        # group-by SUM of d: the Parquet exact group values must equal the per-group sums of the DOUBLE-rounded cells
         gb = {"agg": "SUM", "col": "d", "group_col": "cat", "filter_type": "group_by"}
-        csv_kv = [["A", "123456789012345.7789"], ["B", "BLANK"]]
-        good_gb = _pq_result(mapped_kv=csv_kv, pq_kv=[["A", "123,456,789,012,345.77"], ["B", "BLANK"]], pq_text="A:123,456,789,012,345.77;B:BLANK")
+        csv_exact = [("A", Decimal("123456789012345.7789")), ("B", None)]
+        good_gb = _pq_result(mapped_kv_exact=csv_exact, pq_kv_exact=[("A", Decimal("123456789012345.77")), ("B", None)])
         assert classify_parquet_diff(good_gb, gb, ctx) == "parquet_source_precision"
-        bad_gb = dict(good_gb, pq_text="A:123,456,789,012,345.78;B:BLANK")
+        # one digit beyond the 2-decimal text: the same printed text, but not the sum of the DOUBLE-rounded cells
+        bad_gb = dict(good_gb, pq_kv_exact=[("A", Decimal("123456789012345.7701")), ("B", None)])
         assert classify_parquet_diff(bad_gb, gb, ctx) is None
+        # CSV exact group value with 15 or fewer significant digits: precision loss cannot explain the difference
+        short_gb = dict(good_gb, mapped_kv_exact=[("A", Decimal("123456789012345")), ("B", None)])
+        assert classify_parquet_diff(short_gb, gb, ctx) is None
     finally:
         store.close()
 
@@ -728,19 +737,127 @@ def test_mutant_division_truncated_to_4_decimals_fails() -> None:
     assert "un-baselined" in messages[0]
 
 
-def test_small_data_third_decimal_diff(tmp_path: Path) -> None:
-    """Small-data hand-checked test: values differing at 3rd decimal agree in formatted-text but fail exact-value check."""
-    # Hand-checked: 10.1234 vs 10.1244 format both to 10.12 in 2-decimal display, but differ at 3rd decimal
+def _patch_decimal_column(monkeypatch: pytest.MonkeyPatch, d_for_row: Any) -> None:
+    """Make the tool's generated dataset carry the given text in column d (CSV and Parquet), keeping every other column."""
+    real = store_engine_diff.generate_dataset
+
+    def patched(csv_path: Path, parquet_path: Path, rows: int = 2000, seed: int = 42) -> dict[str, Any]:
+        meta = real(csv_path, parquet_path, rows=rows, seed=seed)
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            table_rows = list(csv.reader(f))
+        d_idx = table_rows[0].index("d")
+        d_cells = [d_for_row(i) for i in range(1, len(table_rows))]
+        for i, cell in enumerate(d_cells, start=1):
+            table_rows[i][d_idx] = cell
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows(table_rows)
+        pq_table = pq.read_table(parquet_path)
+        d_pos = pq_table.schema.get_field_index("d")
+        pq_table = pq_table.set_column(d_pos, "d", pa.array([float(c) if c else None for c in d_cells], pa.float64()))
+        pq.write_table(pq_table, parquet_path)
+        return meta
+
+    monkeypatch.setattr(store_engine_diff, "generate_dataset", patched)
+
+
+def _large_d(i: int) -> str:
+    """Column d around 7e13 with nine random-looking decimals; every tenth cell blank."""
+    return "" if i % 10 == 0 else f"{70000000000000 + (i * 37) % 1000}.{(i * 7919 + 13) % 10**9:09d}"
+
+
+def test_small_data_average_third_decimal_through_real_store_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Hand-checked AVERAGE of d (8 decimals) through the real engine and mapped store path; a wrong scale shows beyond 2 decimals."""
+    cells = {1: "10.12345678", 2: "10.12355678", 3: "10.12365678"}
+    _patch_decimal_column(monkeypatch, lambda i: cells.get(i, ""))
+    # hand check: (10.12345678 + 10.12355678 + 10.12365678) / 3 = 30.37067034 / 3 = 10.12355678, blank cells not counted
+    clean = _run({}, ["AVERAGE_d"], rows=4)
+    r = clean["results"][0]
+    assert r["engine_val"] == "10.12355678"
+    assert r["mapped_val"] == "10.12355678"
+    assert r["mapped_status"] == "same"
+    # the real rule at scale 3 reads 10.123, 10.124, 10.124: 30.371 / 3 = 10.123666..., equal to 2 decimals, different beyond
+    wrong = _run({"csv_avg_scale_3": True}, ["AVERAGE_d"], rows=4)
+    w = wrong["results"][0]
+    assert Decimal(w["mapped_val"]) == Decimal("30.371") / Decimal(3)
+    assert w["engine_text"] == w["mapped_text"] == "10.12"
+    assert w["mapped_status"] == "differs" and w["mapped_status_reason"] == "exact-value"
+    assert _policy(wrong)[0] == 1
+
+
+def test_tolerance_depends_on_the_value_type() -> None:
+    """Decimal and int values need exact equality; only a float engine value gets the 1e-15 relative tolerance."""
+    big = Decimal("100000000000000.5")
+    assert not exact_values_agree(big, Decimal("100000000000000.6"))  # relative 1e-15 apart, both Decimal
+    assert not exact_values_agree(10, Decimal("10.0000000001"))
+    assert exact_values_agree(100000000000000.5, Decimal("100000000000000.55"))  # float engine value, relative 5e-16
+    assert not exact_values_agree(100000000000000.5, Decimal("100000000000001.5"))
+    assert exact_values_agree(big, big)
     assert to_exact_decimal("10.1234") == Decimal("10.1234")
     assert to_exact_decimal("invalid") is None
-    assert not exact_values_agree(Decimal("10.1234"), Decimal("10.1244"))
-    assert exact_values_agree(Decimal("10.1234"), Decimal("10.1234"))
+
+
+def test_mutant_n19_caught_on_large_magnitude_data(monkeypatch: pytest.MonkeyPatch) -> None:
+    """N19 at 7e13: every AVERAGE of d that has a value is flagged, although the old 1e-12 relative tolerance accepted them all."""
+    _patch_decimal_column(monkeypatch, _large_d)
+    headers = ["id", "w", "d", "big", "t", "dt", "flag", "cat", "w_blank", "num_dups"]
+    ids = [f["id"] for f in store_engine_diff.build_formula_catalog(headers) if f["id"].startswith("AVERAGE_d")]
+    assert len(ids) == 33
+    clean = _run({}, ids, rows=300)
+    assert [r["id"] for r in clean["results"] if r["mapped_status"] != "same"] == []
+    wrong = _run({"csv_avg_scale_3": True}, ids, rows=300)
+    valued = [r for r in wrong["results"] if r["engine_val"] != "None"]
+    assert len(valued) >= 20, "most AVERAGE formulas must have a value on this data"
+    old_tolerance = Decimal("1e-12")
+    for r in valued:
+        assert r["mapped_status"] == "differs" and r["mapped_status_reason"] == "exact-value", r["id"]
+        assert exact_values_agree(Decimal(r["engine_val"]), Decimal(r["mapped_val"]), rel_tol=old_tolerance), r["id"]
+    assert [r["id"] for r in wrong["results"] if r["engine_val"] == "None" and r["mapped_status"] != "same"] == []
+    assert _policy(wrong)[0] == 1
+
+
+def test_mutant_f05_group_by_average_scale_3_caught_on_large_groups(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F05: group-by AVERAGE read at scale 3 is flagged per group on data where every group is large."""
+    _patch_decimal_column(monkeypatch, _large_d)
+    ids = ["group_by_cat_AVERAGE_d", "group_by_flag_AVERAGE_d"]
+    clean = _run({}, ids, rows=200, group_by=True)
+    assert [r["mapped_status"] for r in clean["results"]] == ["same", "same"]
+    wrong = _run({"gb_avg_scale_3": True}, ids, rows=200, group_by=True)
+    for r in wrong["results"]:
+        assert r["mapped_status"] == "differs" and r["mapped_status_reason"] == "exact-value", r["id"]
+        assert r["engine_text"] == r["mapped_text"], "the 2-decimal text must be equal so only the exact compare can see it"
+    assert _policy(wrong)[0] == 1
+
+
+def test_parquet_exact_difference_beyond_two_decimals_exits_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F08: a Parquet AVERAGE that differs from CSV only beyond the 2-decimal text is a difference and exits 1."""
+    _patch_decimal_column(monkeypatch, lambda i: "" if i % 7 == 0 else f"{1 + i % 5}.{(i * 7919 + 123456789) % 10**9:09d}")
+    clean = _run({}, ["AVERAGE_d"], rows=40, parquet=True)
+    assert not clean["results"][0]["pq_vs_csv_diff"]
+    wrong = _run({"pq_avg_scale3": True}, ["AVERAGE_d"], rows=40, parquet=True)
+    r = wrong["results"][0]
+    assert r["pq_text"] == r["mapped_text"], "the 2-decimal text must be equal so only the exact compare can see it"
+    assert r["pq_val"] != r["mapped_val"]
+    assert r["pq_vs_csv_diff"] and r["pq_diff_class"] is None
+    code, messages = _policy(wrong)
+    assert code == 1 and "Parquet" in messages[0]
+
+
+def test_parquet_group_by_exact_difference_beyond_two_decimals_exits_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F08c: a Parquet group-by AVERAGE that differs from CSV only beyond the 2-decimal text is a difference and exits 1."""
+    _patch_decimal_column(monkeypatch, lambda i: "" if i % 7 == 0 else f"{1 + i % 5}.{(i * 7919 + 123456789) % 10**9:09d}")
+    ids = ["group_by_cat_AVERAGE_d"]
+    clean = _run({}, ids, rows=60, parquet=True, group_by=True)
+    assert not clean["results"][0]["pq_vs_csv_diff"]
+    wrong = _run({"pq_gb_avg_scale_3": True}, ids, rows=60, parquet=True, group_by=True)
+    r = wrong["results"][0]
+    assert r["pq_text"] == r["mapped_text"], "the 2-decimal text must be equal so only the exact compare can see it"
+    assert r["pq_vs_csv_diff"] and r["pq_diff_class"] is None
+    code, messages = _policy(wrong)
+    assert code == 1 and "Parquet" in messages[0]
 
 
 def test_forced_wrong_values_tolerance_boundary() -> None:
-    """Forced-wrong-value tests: 10.123456 vs 10.123457 exits 1, 1e14+0.5 vs 1e14+0.5 exits 0."""
-    # 10.123456 vs 10.123457: diff 1e-6 / 10.12 = ~1e-7 > 1e-12 relative tolerance
-    assert not exact_values_agree(Decimal("10.123456"), Decimal("10.123457"))
+    """Forced values through the tool path: 10.123456 vs 10.123457 exits 1, equal values 1e14 + 0.5 exit 0."""
     data_wrong = _run({"forced_wrong_value": True}, ["forced_wrong_formula"], rows=50, seed=42)
     r_wrong = data_wrong["results"][0]
     assert r_wrong["mapped_status"] == "differs"
@@ -749,7 +866,8 @@ def test_forced_wrong_values_tolerance_boundary() -> None:
     assert code == 1
     assert "un-baselined" in messages[0]
 
-    # Equal values (e.g. 1e14 + 0.5 vs 1e14 + 0.5) agree exactly and exit 0
-    val_large = Decimal("100000000000000.5")
-    assert exact_values_agree(val_large, val_large)
-
+    data_equal = _run({"forced_equal_value": True}, ["forced_wrong_formula"], rows=50, seed=42)
+    r_equal = data_equal["results"][0]
+    assert r_equal["engine_val"] == r_equal["mapped_val"] == "100000000000000.5"
+    assert r_equal["mapped_status"] == "same"
+    assert _policy(data_equal) == (0, [])

@@ -1,14 +1,23 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Stage C0g fixes after the Team-Thinker review of C0f (2026-11-25, uncommitted)**
+Files: `tools/store_engine_diff.py`, `tests/test_store_engine_diff_tool.py`, `tools/store_engine_diff_baseline.json` (only `total_formulas` 838 to 842 in both sizes; `differs` lists were already equal to the current run), this file.
+1. Seeds 43, 51, 56 (2000 rows) exited 1 on `arith_sum_d_div_count`: `StoreResultLayer.divide_ratio` built `Decimal(str(float))` (shortest repr), but the engine prints the full binary value of the float. Fix: `Decimal(f_val)`. The other float-to-Decimal places (combo sum, plus scalar, combo sub) already used `Decimal(float)`.
+2. Tolerance now depends on the value type: `exact_values_agree` uses exact equality (tolerance 0) when the engine value is a Decimal or int, and relative 1e-15 only when it is a float. N19 (CSV AVERAGE at DECIMAL(38,3)) flags 27 of the 33 AVERAGE_d* formulas on seed 42 at 2000 rows (the other 6 have an empty result, BLANK on both sides); before, 2 of 33.
+3. Group-by results are compared per group on exact values (`group_values_agree`, new results fields `engine_kv_exact`, `mapped_kv_exact`, `pq_kv_exact`), besides the 2-decimal text. The Parquet group-by classifier now checks exact group values (it needed this: 25 group-by Parquet SUM/AVERAGE differences beyond the 2-decimal text appeared, all `parquet_source_precision`; headline Parquet class count 33 became 58 at seed 42).
+4. New hooks only for mutant tests: `gb_avg_scale_3` (F05), `pq_avg_scale3` (F08), `pq_gb_avg_scale_3` (F08c), `forced_equal_value`.
+5. Tests: `test_small_data_third_decimal_diff` replaced by a hand-checked AVERAGE run through the real engine and mapped store path; the "exits 0" half of the forced-value test runs the tool path; new tests for value-type tolerance, N19 and F05 on 7e13 data, Parquet scalar and group-by exact differences. 47 tests, 19.91 s and 18.06 s.
+6. Exit codes at 2000 rows, all 0: seeds 21..60, 1, 3, 5, 7, 11, 15, 99, 123, 2024; seed 42 at 400 and at 5000 rows. Parquet classes: parquet_counta_refusal 97 on every run, parquet_source_precision 58 to 63, no unclassified.
+
 **Stage C0f exact numeric comparison in rules tool (2026-11-25, Antigravity)**
 Files: `tools/store_engine_diff.py`, `tests/test_store_engine_diff_tool.py`, `tools/store_engine_diff_baseline.json`, this file.
 1. Implemented exact-value comparison: numeric scalar engine raw value vs mapped exact Decimal within relative tolerance 1e-12 of `max(|engine|, |mapped|)` (and 0 when both are exactly equal integers/Decimals). Values differing outside tolerance set `mapped_status = "differs"` with `mapped_status_reason = "exact-value"`.
-2. Parquet comparison: `pq_vs_csv_diff` is evaluated on exact values (in addition to formatted text); `classify_parquet_diff` evaluates on exact Decimal results.
+2. Parquet comparison: `pq_vs_csv_diff` is evaluated on exact values (in addition to formatted text); (correction in Stage C0g: `classify_parquet_diff` already evaluated on exact Decimal results before C0f; C0f changed only `pq_vs_csv_diff`).
 3. Exposed unrounded Decimals from `StoreResultLayer` to comparison (`divide`, `divide_ratio`), preserving exact precision.
 4. Report: Headline summary table displays refused count 176 (same as bullet, matching total explicit refusals: 112 where engine succeeds + 64 matching engine error).
 5. Baseline JSON: Synchronized sizes `400` and `2000` refused lists with the 176 top-level refused formulas.
 6. Tests: Added 6 new tests in `tests/test_store_engine_diff_tool.py` (total 42 passed in 16.06s and 16.34s, well under 25s threshold). Tested mutants: N19 (CSV AVERAGE cast at DECIMAL(38,3) killed by AVERAGE_d_d_lt), AVERAGE with scale 4 instead of dynamic scale (killed by AVERAGE_d_w_or on seed 11 with scale 9), SUM of column with 4..9 decimals as DOUBLE (killed by SUM_d), division truncated to 4 decimals (killed by AVERAGE_w_text_uni_upper), small-data test with third-decimal diff, and forced-wrong-value tolerance test (10.123456 vs 10.123457 exits 1, 1e14+0.5 vs 1e14+0.5 exits 0).
-7. Verified exit 0 across all 20 seeds at 2000 rows (42, 1, 7, 99, 3, 5, 11, 15, 123, 2024, 21..30) and seed 42 at 400 rows. Zero path leaks, clean pyflakes.
+7. Exit 0 was seen on these 20 seeds at 2000 rows only: 42, 1, 7, 99, 3, 5, 11, 15, 123, 2024, 21..30 (not "all seeds"; seeds 43, 51, 56 failed, see Stage C0g) and on seed 42 at 400 rows. Zero path leaks, clean pyflakes.
 
 **Stage C0e rules tool fixes after the C0d re-review (2026-11-25; commit 9de323d; Team-Thinker PASS)**
 Files: `tools/store_engine_diff.py`, `tests/test_store_engine_diff_tool.py`, `tools/store_engine_diff_baseline.json` (unchanged content), this file.

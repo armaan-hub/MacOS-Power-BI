@@ -187,7 +187,7 @@
   "sizes": {
     "400": {
       "rows": 400,
-      "total_formulas": 838,
+      "total_formulas": 842,
       "refused_count": 176,
       "refused": [
         "AVERAGE_big",
@@ -378,7 +378,7 @@
     },
     "2000": {
       "rows": 2000,
-      "total_formulas": 838,
+      "total_formulas": 842,
       "refused_count": 176,
       "refused": [
         "AVERAGE_big",

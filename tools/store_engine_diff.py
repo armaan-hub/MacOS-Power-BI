@@ -28,8 +28,9 @@ from analytics_studio.measures import evaluate_measures, normalize_measure
 from analytics_studio.store import DuckStore, import_csv_to_store, import_parquet_to_store
 
 
-# Exact numeric comparison tolerance: relative tolerance 1e-12 of max(|engine|, |mapped|)
-NUMERIC_REL_TOLERANCE = Decimal("1e-12")
+# Exact numeric comparison: Decimal and int engine values (SUM, AVERAGE, counts) must match exactly (tolerance 0).
+# Only a float-valued engine shape (ratio, arithmetic combos) gets a relative tolerance of 1e-15 of max(|a|, |b|).
+FLOAT_REL_TOLERANCE = Decimal("1e-15")
 
 
 def to_exact_decimal(val: Any) -> Decimal | None:
@@ -63,13 +64,13 @@ def to_exact_decimal(val: Any) -> Decimal | None:
     return None
 
 
-def exact_values_agree(val_a: Any, val_b: Any, rel_tol: Decimal = NUMERIC_REL_TOLERANCE) -> bool:
-    """Compare two scalar values for numeric equality within relative tolerance.
+def exact_values_agree(val_a: Any, val_b: Any, rel_tol: Decimal | None = None) -> bool:
+    """Compare two scalar values for numeric equality; the tolerance depends on the value type of val_a.
 
     If either value is not a numeric scalar (or cannot be converted to Decimal), returns True
     so the formatted-text comparison handles equality.
-    When both are exact equal integers or exact equal Decimals, returns True.
-    Otherwise checks if |val_a - val_b| <= rel_tol * max(|val_a|, |val_b|).
+    val_a (the engine value) of type Decimal or int: exact equality, tolerance 0.
+    val_a of type float: |a - b| <= 1e-15 * max(|a|, |b|), unless rel_tol is given.
     """
     da = to_exact_decimal(val_a)
     db = to_exact_decimal(val_b)
@@ -77,11 +78,29 @@ def exact_values_agree(val_a: Any, val_b: Any, rel_tol: Decimal = NUMERIC_REL_TO
         return True
     if da == db:
         return True
+    if rel_tol is None:
+        rel_tol = FLOAT_REL_TOLERANCE if isinstance(val_a, float) else Decimal(0)
+    if rel_tol == 0:
+        return False
     diff = abs(da - db)
     max_val = max(abs(da), abs(db))
     if max_val == 0:
         return diff == 0
     return (diff / max_val) <= rel_tol
+
+
+def group_values_agree(pairs_a: list[tuple[str, Any]] | None, pairs_b: list[tuple[str, Any]] | None) -> bool:
+    """Compare group-by results per group key on exact values (the 2-decimal text comparison is done elsewhere).
+
+    Keys present on one side only are left to the text comparison. The tolerance rule is the one of exact_values_agree.
+    """
+    if not pairs_a or not pairs_b:
+        return True
+    dict_b = dict(pairs_b)
+    for key, val_a in pairs_a:
+        if key in dict_b and not exact_values_agree(val_a, dict_b[key]):
+            return False
+    return True
 
 
 # The one Parquet refusal that the Parquet difference class parquet_counta_refusal accepts
@@ -156,7 +175,8 @@ class StoreResultLayer:
         overrides = overrides or {}
         # In DAX, binary `/` between measures evaluates in IEEE 754 float
         f_val = float(sum_val) / float(cnt_val)
-        res = Decimal(str(f_val))
+        # Exact binary value of the float: the engine prints the full binary tail, not the shortest repr
+        res = Decimal(f_val)
         if overrides.get("trunc_div_4"):
             return res.quantize(Decimal("0.0001"))
         return res
@@ -913,7 +933,7 @@ def generate_sql(
             cast_c = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS HUGEINT)"
         else:
             cast_c = (
-                pq_dec(col, 0 if overrides.get("pq_avg_scale0") else agg_d_scale)
+                pq_dec(col, 0 if overrides.get("pq_avg_scale0") else (3 if overrides.get("pq_avg_scale3") else agg_d_scale))
                 if is_parquet
                 else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {agg_d_scale}))"
             )
@@ -1125,6 +1145,7 @@ def run_comparison(
         engine_err = None
         engine_val = None
         engine_text = ""
+        engine_kv_exact: list[tuple[str, Any]] | None = None
 
         if g_col:
             # F5 / Work item G: Group-by evaluation using engine key order
@@ -1134,6 +1155,7 @@ def run_comparison(
                 val_expr = f"COUNTROWS({tname})" if g_agg == "COUNTROWS" else f"{g_agg}({tname}[{g_target}])"
                 e_keys = engine_group_keys.get(g_col, [])
                 pairs: list[str] = []
+                engine_kv_exact = []
                 for k in e_keys:
                     if k == "":
                         filter_part = f"ISBLANK({tname}[{g_col}])" if g_col in ("dt", "flag") else f'{tname}[{g_col}] = ""'
@@ -1162,6 +1184,7 @@ def run_comparison(
                     disp_str = format_report_value(k)
                     val_str = format_report_value(k_val)
                     pairs.append(f"{disp_str}:{val_str}")
+                    engine_kv_exact.append((disp_str, k_val))
 
                 engine_val = ";".join(pairs)
                 engine_text = engine_val
@@ -1186,6 +1209,8 @@ def run_comparison(
                 engine_val = res
                 if overrides.get("forced_wrong_value") and f_id == "forced_wrong_formula":
                     engine_val = Decimal("10.123456")
+                if overrides.get("forced_equal_value") and f_id == "forced_wrong_formula":
+                    engine_val = Decimal("100000000000000.5")
                 engine_text = format_report_value(engine_val)
             except Exception as exc:
                 engine_err = str(exc)
@@ -1215,6 +1240,7 @@ def run_comparison(
         mapped_err = None
         mapped_refusal = None
         mapped_kv: list[list[str]] | None = None
+        mapped_kv_exact: list[tuple[str, Any]] | None = None
         mapped_status_reason: str | None = None
 
         if g_col:
@@ -1241,7 +1267,8 @@ def run_comparison(
                     if overrides.get("gb_avg_float"):
                         val_expr = f"AVG(TRY_CAST(NULLIF({g_target}, '') AS DOUBLE))"
                     else:
-                        val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale}))), COUNT(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale})))"
+                        avg_scale = 3 if overrides.get("gb_avg_scale_3") else d_scale
+                        val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {avg_scale}))), COUNT(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {avg_scale})))"
                 elif g_agg == "DISTINCTCOUNT":
                     if overrides.get("gb_distinct_no_blank_add"):
                         val_expr = f"COUNT(DISTINCT NULLIF({g_target}, ''))"
@@ -1293,6 +1320,7 @@ def run_comparison(
                     mapped_text = f"ERR:{mapped_err[:60]}"
                 else:
                     mapped_kv = [[format_report_value(k), format_report_value(sql_dict[k])] for k in sql_keys]
+                    mapped_kv_exact = [(format_report_value(k), sql_dict[k]) for k in sql_keys]
                     mapped_val = ";".join(f"{kd}:{vd}" for kd, vd in mapped_kv)
                     mapped_text = mapped_val
             except Exception as exc:
@@ -1375,6 +1403,8 @@ def run_comparison(
                     mapped_val = row_res[0][0] if row_res else None
                     if overrides.get("forced_wrong_value") and f_id == "forced_wrong_formula":
                         mapped_val = Decimal("10.123457")
+                    if overrides.get("forced_equal_value") and f_id == "forced_wrong_formula":
+                        mapped_val = Decimal("100000000000000.5")
                     mapped_text = format_report_value(mapped_val)
                 except Exception as exc:
                     mapped_err = str(exc)
@@ -1386,6 +1416,7 @@ def run_comparison(
         pq_err = None
         pq_refusal = None
         pq_kv: list[list[str]] | None = None
+        pq_kv_exact: list[tuple[str, Any]] | None = None
 
         if not skip_parquet:
             if g_col:
@@ -1403,7 +1434,8 @@ def run_comparison(
                         else:
                             val_expr = f"SUM(CAST(CAST(d AS VARCHAR) AS DECIMAL(38, {d_scale})))"
                     elif g_agg == "AVERAGE":
-                        val_expr = f"SUM(CAST(CAST({g_target} AS VARCHAR) AS DECIMAL(38, {d_scale}))), COUNT(CAST(CAST({g_target} AS VARCHAR) AS DECIMAL(38, {d_scale})))"
+                        avg_scale = 3 if overrides.get("pq_gb_avg_scale_3") else d_scale
+                        val_expr = f"SUM(CAST(CAST({g_target} AS VARCHAR) AS DECIMAL(38, {avg_scale}))), COUNT(CAST(CAST({g_target} AS VARCHAR) AS DECIMAL(38, {avg_scale})))"
                     elif g_agg == "DISTINCTCOUNT":
                         val_expr = f"COUNT(DISTINCT {g_target}) + MAX(CASE WHEN {g_target} IS NULL THEN 1 ELSE 0 END)"
                     elif g_agg == "MIN":
@@ -1431,6 +1463,7 @@ def run_comparison(
 
                     e_keys = engine_group_keys.get(g_col, [])
                     pq_kv = [[format_report_value(k), format_report_value(sql_dict.get(k))] for k in e_keys]
+                    pq_kv_exact = [(format_report_value(k), sql_dict.get(k)) for k in e_keys]
                     pq_val = ";".join(f"{kd}:{vd}" for kd, vd in pq_kv)
                     pq_text = pq_val
                 except Exception as exc:
@@ -1545,7 +1578,7 @@ def run_comparison(
                 mapped_status = "refused"
             elif engine_text != mapped_text:
                 mapped_status = "differs"
-            elif not exact_values_agree(engine_val, mapped_val):
+            elif not exact_values_agree(engine_val, mapped_val) or not group_values_agree(engine_kv_exact, mapped_kv_exact):
                 mapped_status = "differs"
                 mapped_status_reason = "exact-value"
             else:
@@ -1556,7 +1589,7 @@ def run_comparison(
         elif pq_err is None and mapped_err is None:
             if pq_text != mapped_text:
                 pq_vs_csv_diff = True
-            elif not exact_values_agree(pq_val, mapped_val):
+            elif not exact_values_agree(pq_val, mapped_val) or not group_values_agree(pq_kv_exact, mapped_kv_exact):
                 pq_vs_csv_diff = True
             else:
                 pq_vs_csv_diff = False
@@ -1582,6 +1615,9 @@ def run_comparison(
             "mapped_refusal_obj": mapped_refusal,
             "mapped_kv": mapped_kv,
             "pq_kv": pq_kv,
+            "engine_kv_exact": engine_kv_exact,
+            "mapped_kv_exact": mapped_kv_exact,
+            "pq_kv_exact": pq_kv_exact,
             "mapped_status": mapped_status,
             "mapped_status_reason": mapped_status_reason,
             "pq_val": str(pq_val),
@@ -1737,8 +1773,8 @@ def _group_label(g_col: str, v: Any) -> str:
     return str(v)
 
 
-def _pq_group_expected(r: dict[str, Any], f_item: dict[str, Any], ctx: dict[str, Any]) -> str | None:
-    """Expected Parquet text of a group-by SUM or AVERAGE of d, from the DOUBLE-rounded Parquet cells."""
+def _pq_group_expected(f_item: dict[str, Any], ctx: dict[str, Any]) -> list[tuple[str, Decimal | None]]:
+    """Expected Parquet exact group values of SUM or AVERAGE of d, from the DOUBLE-rounded Parquet cells."""
     g_col = f_item["group_col"]
     scale = ctx["store_meta"]["decimal_scales"].get("d", 4)
     cols = ctx["cols"]
@@ -1752,15 +1788,15 @@ def _pq_group_expected(r: dict[str, Any], f_item: dict[str, Any], ctx: dict[str,
             label = _group_label(g_col, gv)
             sums[label] = sums.get(label, Decimal(0)) + _pq_decimal(dv, scale)
             counts[label] = counts.get(label, 0) + 1
-    pairs = []
+    pairs: list[tuple[str, Decimal | None]] = []
     for key in ctx["group_keys"].get(g_col, []):
         label = _fold_text(key) if g_col == "t" else key
         if f_item["agg"] == "SUM":
             val: Decimal | None = sums.get(label)
         else:
             val = StoreResultLayer.divide(sums.get(label), counts.get(label))
-        pairs.append(f"{format_report_value(key)}:{format_report_value(val)}")
-    return ";".join(pairs)
+        pairs.append((format_report_value(key), val))
+    return pairs
 
 
 def _pq_scalar_expected(f_item: dict[str, Any], ctx: dict[str, Any]) -> Decimal | None:
@@ -1808,12 +1844,18 @@ def classify_parquet_diff(r: dict[str, Any], f_item: dict[str, Any], ctx: dict[s
         return None
 
     if f_item.get("group_col"):
-        if f_item.get("col") != "d" or agg not in ("SUM", "AVERAGE") or not r.get("mapped_kv") or not r.get("pq_kv"):
+        mapped_exact = r.get("mapped_kv_exact")
+        pq_exact = r.get("pq_kv_exact")
+        if f_item.get("col") != "d" or agg not in ("SUM", "AVERAGE") or not mapped_exact or not pq_exact:
             return None
-        if _pq_group_expected(r, f_item, ctx) != r["pq_text"]:
+        expected = _pq_group_expected(f_item, ctx)
+        if len(expected) != len(pq_exact) or len(mapped_exact) != len(pq_exact):
             return None
-        differing = [m for m, p in zip(r["mapped_kv"], r["pq_kv"]) if m != p]
-        if differing and all(_sig_digits(m[1]) > 15 for m in differing):
+        for (exp_key, exp_val), (pq_key, pq_val) in zip(expected, pq_exact):
+            if exp_key != pq_key or to_exact_decimal(pq_val) != exp_val:
+                return None
+        differing = [m for m, p in zip(mapped_exact, pq_exact) if to_exact_decimal(m[1]) != to_exact_decimal(p[1])]
+        if differing and all(_sig_digits(format(to_exact_decimal(m[1]) or Decimal(0), "f")) > 15 for m in differing):
             return "parquet_source_precision"
         return None
 
