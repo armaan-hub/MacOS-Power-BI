@@ -3151,3 +3151,11 @@ New analytics_studio/store/text_rules.py holds the model-load text rule (drop tr
 Gate on 3a8aa4e: 43,646 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
 
 Also: Antigravity finished Stage D0a (Power Query step differential tool, 15 simple step types, 62 steps same, seeds 1 to 30 exit 0) in a scratch clone; it is under review and not merged.
+
+## 2026-11-25 Stage C1a: DAX whitelist classifier for the store path, merged as 1ff4d31
+
+New analytics_studio/store/dax_whitelist.py decides, for one measure expression, whether the store SQL path may evaluate it. Default is refuse. First whitelist: single-table aggregates (SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, COUNTBLANK, DISTINCTCOUNT) and COUNTROWS, optionally under CALCULATE with column predicates, with a per-column-type operator table, validated literals, transitive measure references, source-kind and digit-count refusals, and a guarantee that it never raises. No SQL is generated and no app behaviour changes in this slice. Built by Antigravity (C1a) and the Sonnet fixer (C1a2) after Team-Thinker failed C1a on predicate shapes the rules tool cannot compare (text ordering, decimal operators, literals on the left, unvalidated DATE and numeric literals, numeric DISTINCTCOUNT, unknown types) and passed C1a2: 325 tests in about 10 s, 69 mutants (65 killed, 3 equivalent, 1 test gap recorded), 512 adversarial expressions, Rule A = allowed implies the rules tool's mapped status same (570 allowed, 244 refused, 29 skipped of 843 formulas; 0 violations on 5 runs).
+
+Carried into C1b: literal sweeps for SQL generation (negative numbers, other dates, empty string), a deterministic cap for long || chains.
+
+Gate on 1ff4d31: 43,971 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
