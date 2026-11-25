@@ -1210,3 +1210,168 @@ def test_in_guards_direct():
     reasons = []
     _check_predicate(("in", ref, ("tableconstructor", (("string", "A"),))), tables_norm, {"t": "t"}, "t", {}, reasons, set())
     assert reasons == []
+
+
+# ===========================================================================
+# C1b2: refusals the literal sweep proved necessary, and "allowed means same" over the sweep
+# ===========================================================================
+
+from analytics_studio.store.dax_whitelist import (  # noqa: E402
+    REASON_FILTER_CONTEXT_EMPTY,
+    REASON_FILTER_CONTEXT_OTHER_TABLE,
+    REASON_IN_FOLD_EQ_MIX,
+    REASON_IN_NUMERIC_MIX,
+    REASON_SLICER_SAME_COLUMN,
+    REASON_TEXT_NON_ASCII_SPACE,
+    classify_filter_context,
+    in_mix_reason,
+)
+
+# (expression, expected): None = allowed; str = a substring of one refusal reason
+C1B2_ROWS: list[tuple[str, str | None]] = [
+    # text equality with a non-ASCII whitespace literal (NBSP, NEL, U+3000, U+2003): the engine trims it
+    (_cw('t[cat] = " "'), REASON_TEXT_NON_ASCII_SPACE),
+    (_cw('t[cat] = "\u0085"'), REASON_TEXT_NON_ASCII_SPACE),
+    (_cw('t[cat] = "　"'), REASON_TEXT_NON_ASCII_SPACE),
+    (_cw('t[cat] = " "'), REASON_TEXT_NON_ASCII_SPACE),
+    (_cw('t[cat] = "A "'), REASON_TEXT_NON_ASCII_SPACE),
+    (_cw('t[cat] = ""'), None),
+    (_cw('t[cat] = " "'), None),
+    (_cw('t[cat] = "ünï"'), None),
+    # a text IN with a numeric comparison in one CALCULATE: the engine raises a type error on blank cells
+    (_cw('t[cat] IN {"A"}, t[w] > 5'), REASON_IN_NUMERIC_MIX),
+    (_cw('t[w] = 5, t[cat] IN {"A", "B"}'), REASON_IN_NUMERIC_MIX),
+    (_cw('t[cat] IN {"A"}, t[d] >= 0'), REASON_IN_NUMERIC_MIX),
+    (_cw('t[cat] IN {"A"}, NOT(t[w] = 5)'), REASON_IN_NUMERIC_MIX),
+    (_cw('t[cat] IN {"A"}, t[w] = 5 || t[w] = 6'), REASON_IN_NUMERIC_MIX),
+    (_cw('t[cat] IN {"A"}, t[dt] >= DATE(2026, 1, 1)'), None),
+    (_cw('t[cat] IN {"A"}, t[id] = "x"'), None),
+    # a text IN with a text equality on a literal that is non-ASCII or contains ss: the engine ignores the IN
+    (_cw('t[cat] IN {"A"}, t[id] = "ünï"'), REASON_IN_FOLD_EQ_MIX),
+    (_cw('t[cat] IN {"A"}, t[id] = "ss"'), REASON_IN_FOLD_EQ_MIX),
+    (_cw('t[cat] IN {"A"}, t[id] = "ß"'), REASON_IN_FOLD_EQ_MIX),
+    (_cw('t[id] = "SS", t[cat] IN {"A"}'), REASON_IN_FOLD_EQ_MIX),
+]
+
+
+@pytest.mark.parametrize("expr, expected", C1B2_ROWS)
+def test_c1b2_rows(expr, expected):
+    dec = classify_measure(expr, home_table="t", tables=T2, measures=M2)
+    if expected is None:
+        assert dec.allowed, f"{expr!r} should be allowed, reasons: {dec.reasons}"
+        assert dec.reasons == () and dec.table == "t" and dec.shape
+    else:
+        assert not dec.allowed, f"{expr!r} should be refused"
+        assert dec.table is None and dec.shape is None
+        assert any(expected in r for r in dec.reasons), f"{expected!r} not in {dec.reasons}"
+
+
+def test_in_mix_reason_direct():
+    from analytics_studio.measures import parse_expression
+
+    nodes = [parse_expression(text) for text in ('t[cat] IN {"A"}', "t[w] > 1")]
+    assert in_mix_reason(nodes, T2, "t") == REASON_IN_NUMERIC_MIX
+    assert in_mix_reason(nodes[:1], T2, "t") is None and in_mix_reason(nodes[1:], T2, "t") is None
+    assert in_mix_reason([], T2, "t") is None and in_mix_reason(["x", None, ()], T2, "t") is None
+
+
+# (filter context predicates, expected): None = allowed; str = a substring of one refusal reason
+FILTER_CONTEXT_ROWS: list[tuple[tuple[str, ...], str | None]] = [
+    ((), None),
+    (("t[w] > 5",), None),
+    (("t[w] > 5", "t[w] < 15"), None),
+    (('t[cat] IN {"A", "B"}',), None),
+    (("t[w] = 1 || t[w] = 2",), None),
+    (("NOT(t[w] = 1)",), None),
+    (("t[dt] >= DATE(2026, 1, 1)", "t[d] < 0"), None),
+    (("",), REASON_FILTER_CONTEXT_EMPTY),
+    (("   ",), REASON_FILTER_CONTEXT_EMPTY),
+    (("s[val] > 1",), REASON_FILTER_CONTEXT_OTHER_TABLE),
+    (("t[w] > 5", "s[val] > 1"), REASON_FILTER_CONTEXT_OTHER_TABLE),
+    (("t[cat] IN {}",), "IN"),
+    (("t[w] >",), ""),
+    (("t[nosuch] = 1",), "unknown column"),
+    (("t[w] = BLANK()",), REASON_BLANK_COMPARISON),
+    (("t[flag] = TRUE()",), REASON_BOOLEAN_LITERAL),
+    (('t[cat] = "A"', 't[cat] <> "B"'), REASON_TEXT_ORDERING),
+    (("t[w] > 5 && t[w] < 9",), REASON_LOGICAL_AND),
+    (("SUM(t[w])",), "function SUM"),
+    (("t[d] >= 12345678901234567890123456789012345678901",), "38"),
+    ((f"t[w] > {'1'}",) * 51, "filter arguments"),
+]
+
+
+@pytest.mark.parametrize("predicates, expected", FILTER_CONTEXT_ROWS)
+def test_classify_filter_context_rows(predicates, expected):
+    dec = classify_filter_context(predicates, home_table="t", tables=T2)
+    if expected is None:
+        assert dec.allowed and dec.reasons == () and dec.table == "t" and dec.shape == "filter_context"
+    else:
+        assert not dec.allowed and dec.table is None and dec.shape is None and dec.reasons
+        assert any(expected in r for r in dec.reasons), (predicates, dec.reasons)
+
+
+def test_classify_filter_context_same_column_blocked_and_never_raises():
+    dec = classify_filter_context(("t[w] > 5",), home_table="t", tables=T2, blocked_columns=[("T", "W")])
+    assert not dec.allowed and dec.reasons == (REASON_SLICER_SAME_COLUMN,)
+    ok = classify_filter_context(("t[w] > 5",), home_table="t", tables=T2, blocked_columns=[("t", "w2")])
+    assert ok.allowed
+    for weird in (None, "t[w] > 5", (1, 2), ("t[w] > 5", None)):
+        dec = classify_filter_context(weird, home_table="t", tables=T2)  # type: ignore[arg-type]
+        assert isinstance(dec, WhitelistDecision) and not dec.allowed
+    assert not classify_filter_context(("t[w] > 5",), home_table="nosuch", tables=T2).allowed
+    assert not classify_filter_context(("t[w] > 5",), home_table="t", tables=T2, source_kind="orc").allowed
+
+
+# every sweep row the whitelist allows is `same` in the sweep (the sweep itself runs the engine)
+_SWEEP_RUNS: dict[int, Any] = {}
+
+
+def _sweep_run(seed: int) -> Any:
+    if seed not in _SWEEP_RUNS:
+        from tools.store_engine_diff import run_sweep
+
+        _SWEEP_RUNS[seed] = run_sweep(rows=300, seed=seed)
+    return _SWEEP_RUNS[seed]
+
+
+@pytest.mark.parametrize("seed", [1, 7])
+def test_sweep_allowed_means_same(seed):
+    data = _sweep_run(seed)
+    results = data["sweep_results"]
+    assert len(results) >= 1200
+    statuses = collections.Counter(r["status"] for r in results)
+    assert statuses["differs"] == statuses["sql-error"] == statuses["crash"] == 0, statuses
+    # a row refused at plan time or at execute time carries a reason; every other row is `same`
+    for r in results:
+        if r["status"].startswith("refused"):
+            assert r["reason"], r["id"]
+        else:
+            assert r["status"] == "same", (r["id"], r["status"], r["error"])
+    # whitelist-refused rows by reason: the table of stable reasons the sweep exercises
+    reasons = collections.Counter(
+        next((k for k in _SWEEP_WHITELIST_REASONS if k in r["reason"]), "OTHER")
+        for r in results
+        if r["status"] == "refused-whitelist"
+    )
+    assert "OTHER" not in reasons, [r["reason"] for r in results if r["status"] == "refused-whitelist" and not any(k in r["reason"] for k in _SWEEP_WHITELIST_REASONS)][:5]
+    assert set(reasons) >= {
+        REASON_TEXT_NON_ASCII_SPACE, REASON_DISTINCTCOUNT_NUMERIC, "DATE year must be between 1900 and 9999",
+        "DATE arguments are not a valid calendar date", "numeric literal exceeds 38 total digits",
+        REASON_FILTER_CONTEXT_EMPTY, REASON_BOOLEAN_LITERAL,
+    }
+
+
+_SWEEP_WHITELIST_REASONS = [
+    REASON_TEXT_NON_ASCII_SPACE,
+    REASON_DISTINCTCOUNT_NUMERIC,
+    "DATE year must be between 1900 and 9999",
+    "DATE arguments are not a valid calendar date",
+    "numeric literal exceeds 38 total digits",
+    REASON_FILTER_CONTEXT_EMPTY,
+    REASON_BOOLEAN_LITERAL,
+    "IN needs a table or at least one value",
+    "text IN with non-ASCII items or items containing ss",
+    "SUM not supported on text column",
+    "literal type number does not fit text column",
+]

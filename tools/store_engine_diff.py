@@ -36,10 +36,11 @@ from analytics_studio.store.dax_sql import (
     column_decimal_meta,
     generate_mapped_sql,
     make_fold_expr,
+    plan_group_by,
     plan_measure,
     refusal_matches_engine_error,
 )
-from analytics_studio.store.dax_whitelist import classify_measure
+from analytics_studio.store.dax_whitelist import classify_filter_context, classify_measure
 from analytics_studio.store.text_rules import first_spelling_expr_sql, fold_sql
 
 # Names that moved to analytics_studio/store/dax_sql.py and stay importable from this tool
@@ -640,15 +641,19 @@ def evaluate_plan_row(
     tables: dict[str, dict[str, str]],
     plan_meta: dict[tuple[str, str], ColumnMeta],
     overrides: dict[str, Any],
+    engine_kv_exact: list[tuple[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Plan one catalog formula and compare it with the engine (Rule A+). Returns the plan_* result keys.
+
+    A group-by formula goes through plan_group_by and is compared as the tool's own mapped path does: the key
+    set must equal the engine's, then the key order, then every value exactly (same Python class).
 
     Whitelist-allowed: the plan value must equal the engine value exactly, with the same Python class and the
     same report text, else plan-differs. Whitelist-refused: plan_measure must return a Refusal, never SQL.
     """
     base: dict[str, Any] = {"plan_status": "plan-skipped", "plan_value": "None", "plan_refusal": None, "plan_allowed": False, "plan_error": None}
     if f_item.get("group_col"):
-        return base
+        return _evaluate_plan_group_row(f_item, engine_kv_exact, engine_err, store, tables, plan_meta, overrides, base)
     dax_expr = f_item["dax"]
     max_digits = {col: m.digits for (_, col), m in plan_meta.items()}
     try:
@@ -697,6 +702,86 @@ def evaluate_plan_row(
     else:
         base["plan_status"] = "plan-differs"
         base["plan_error"] = f"engine {format_report_value(engine_val)} ({type(engine_val).__name__}) vs plan {format_report_value(plan_val)} ({type(plan_val).__name__})"
+    return base
+
+
+def _evaluate_plan_group_row(
+    f_item: dict[str, Any],
+    engine_kv_exact: list[tuple[str, Any]] | None,
+    engine_err: str | None,
+    store: DuckStore,
+    tables: dict[str, dict[str, str]],
+    plan_meta: dict[tuple[str, str], ColumnMeta],
+    overrides: dict[str, Any],
+    base: dict[str, Any],
+) -> dict[str, Any]:
+    """plan_group_by of one catalog group-by formula against the engine's key list and per-key values."""
+    agg, target, g_col = f_item["agg"], f_item.get("col"), f_item["group_col"]
+    expression = "COUNTROWS(t)" if agg == "COUNTROWS" else f"{agg}(t[{target}])"
+    max_digits = {col: m.digits for (_, col), m in plan_meta.items()}
+    try:
+        decision = classify_measure(expression, home_table="t", tables=tables, max_digits=max_digits or None)
+        plan = plan_group_by(
+            expression,
+            group_by=("t", g_col),
+            home_table="t",
+            tables=tables,
+            store_tables={"t": "t_csv"},
+            column_meta=plan_meta,
+            overrides=overrides,
+        )
+    except Exception as exc:
+        return {**base, "plan_status": "plan-crash", "plan_error": f"{type(exc).__name__}: {exc}"}
+    base["plan_allowed"] = decision.allowed
+    if isinstance(plan, Refusal):
+        base["plan_refusal"] = str(plan)
+        base["plan_status"] = "plan-refused" if not decision.allowed else "plan-refused-allowed"
+        return base
+    if not decision.allowed:
+        base["plan_status"] = "plan-differs"
+        base["plan_error"] = "whitelist refused but the planner returned SQL"
+        return base
+    try:
+        plan_val = plan.execute(store)
+    except StoreError as exc:
+        return {**base, "plan_status": "plan-sql-error", "plan_error": str(exc)[:200]}
+    except Exception as exc:
+        return {**base, "plan_status": "plan-crash", "plan_error": f"{type(exc).__name__}: {exc}"}
+    if isinstance(plan_val, Refusal):
+        base["plan_refusal"] = str(plan_val)
+        base["plan_status"] = "plan-refused-allowed"
+        return base
+    if overrides.get("forced_wrong_plan_value") and f_item["id"] == overrides["forced_wrong_plan_value"] and plan_val:
+        key0, val0 = plan_val[0]
+        plan_val = [(key0, Decimal("1") if val0 is None else val0 + Decimal("0.000001")), *plan_val[1:]]
+    pairs = [(format_report_value(k), v) for k, v in plan_val]
+    base["plan_value"] = ";".join(f"{k}:{format_report_value(v)}" for k, v in pairs)
+    if engine_err or engine_kv_exact is None:
+        base["plan_status"] = "plan-differs"
+        base["plan_error"] = "engine raised an error but the plan returned a value"
+        return base
+    plan_keys = [k for k, _ in pairs]
+    engine_keys = [k for k, _ in engine_kv_exact]
+    if set(plan_keys) != set(engine_keys):
+        base["plan_status"] = "plan-differs"
+        base["plan_error"] = f"group keys differ: engine {engine_keys[:12]} vs plan {plan_keys[:12]}"
+    elif plan_keys != engine_keys:
+        base["plan_status"] = "plan-differs"
+        base["plan_error"] = f"group key order differs: engine {engine_keys[:12]} vs plan {plan_keys[:12]}"
+    else:
+        bad = next(
+            (
+                (k, pv, ev)
+                for (k, pv), (_, ev) in zip(pairs, engine_kv_exact)
+                if not (type(pv) is type(ev) and pv == ev and format_report_value(pv) == format_report_value(ev))
+            ),
+            None,
+        )
+        if bad is None:
+            base["plan_status"] = "plan-same"
+        else:
+            base["plan_status"] = "plan-differs"
+            base["plan_error"] = f"key {bad[0]}: engine {format_report_value(bad[2])} vs plan {format_report_value(bad[1])}"
     return base
 
 
@@ -1278,7 +1363,7 @@ def run_comparison(
         plan_fields: dict[str, Any] = {}
         if use_plan:
             plan_fields = evaluate_plan_row(
-                f_item, engine_val, engine_err, store, {"t": model_types}, plan_meta, overrides
+                f_item, engine_val, engine_err, store, {"t": model_types}, plan_meta, overrides, engine_kv_exact
             )
 
         results.append({
@@ -1349,6 +1434,434 @@ def run_comparison(
         "decimal_scales": decimal_scales,
         "results": results,
         "perf": perf_metrics,
+    }
+
+
+# ==============================================================================
+# SECTION: LITERAL SWEEP (Stage C1b2): literals, filter contexts and group-by against the engine
+# ==============================================================================
+
+SWEEP_HEADERS = ["sid", "sw", "sd", "sdt", "st", "sf", "scat", "swb", "sdb", "sg", "sb"]
+SWEEP_COLUMN_TYPES = {
+    "sid": "text", "sw": "whole_number", "sd": "decimal_number", "sdt": "date", "st": "text", "sf": "boolean",
+    "scat": "text", "swb": "text", "sdb": "text", "sg": "text", "sb": "text",
+}
+# The model infers text for a whole number of 16 or more digits and for a 30-digit decimal (measured with the
+# controller import), so 2^63-1, -2^63 and the 30-digit decimal live in the text columns swb and sdb.
+SWEEP_WHOLE = [
+    "0", "-0", "1", "-1", "5", "99", "15", "6", "-5", "100", "2147483648", "-2147483649", "999999999999999",
+    "-999999999999999", "900719925474099",
+]
+SWEEP_WHOLE_BIG = ["9223372036854775807", "-9223372036854775808", "9223372036854775808", "1234567890123456789012"]
+SWEEP_DECIMAL = [
+    "0", "0.0", "0.00", "-0.5", "0.5", "0.25", "12.345", "0.000001", "-0.0000005", "1.5", "-2.25", "100.123456",
+    "123456789012345678.123456", "1234567890.1234567", "0.1", "0.2", "0.3", "-0.000001", "7", "-7.5", "3.14159",
+]
+SWEEP_DECIMAL_BIG = ["123456789012345678901234567890", "-123456789012345678901234567890.5", "0.1"]
+SWEEP_DATES = [
+    "1900-01-01", "1900-01-02", "9999-12-31", "2000-02-29", "2024-02-29", "2026-06-01", "2026-06-02", "2025-12-31",
+    "2026-01-01", "1999-12-31",
+]
+NBSP_CELLS = ["\u00a0", "\u0085", "\u3000", "\u2003"]
+SWEEP_TEXT = [
+    "", " ", "  ", "A", "a", "A ", "A\t", "B", "b", "C", "SS", "ss", "ß", "ünï", "ÜNÏ", "it's", 'say "hi"',
+    'a,b', "x y", "K", "k", *NBSP_CELLS, "A\u00a0", "\u00a0A",
+]
+SWEEP_CATS = ["A", "B", "C", "D", "E"]
+# ASCII-only text with blanks, spaces and a tab: the column the blank and whitespace equality rows and the
+# IN rows run on (the guard lets an ASCII-only column through)
+SWEEP_ASCII_TEXT = ["", " ", "  ", "\t", "A", "a", "A ", "A\t", "B", "b", "a b", "x", "it's", 'say "hi"', "K", "k", "ss", "SS"]
+# Group-by text column without non-ASCII whitespace: case variants, trailing space and tab, blank, a
+# whitespace-only cell, non-ASCII letters and the ss / eszett pair
+SWEEP_GROUP_TEXT = ["", "A", "a", "A ", "A\t", "B", "b", "ünï", "ÜNÏ", "SS", "ss", "ß", "x y", " ", "C", "c  ", 'q"r']
+
+
+def generate_sweep_dataset(csv_file: Path, rows: int = 300, seed: int = 1) -> dict[str, Any]:
+    """Seeded sweep table: edge literals planted by row number (so every row count above ~60 holds all of
+    them) plus random picks and a planted share of blank cells. Column types: SWEEP_COLUMN_TYPES."""
+    rnd = random.Random(seed)
+
+    def pick(values: list[str], i: int, blank_share: float) -> str:
+        if i <= len(values):
+            return values[i - 1]  # planted: the first len(values) rows hold every special value once
+        if rnd.random() < blank_share:
+            return ""
+        return values[rnd.randint(0, len(values) - 1)]
+
+    out: list[list[str]] = []
+    for i in range(1, rows + 1):
+        w = pick(SWEEP_WHOLE, i, 0.12)
+        if i > len(SWEEP_WHOLE) and w not in ("", "-0") and rnd.random() < 0.5:
+            w = str(rnd.randint(-20, 120))
+        out.append([
+            f"s{i}",
+            w,
+            pick(SWEEP_DECIMAL, i, 0.12),
+            pick(SWEEP_DATES, i, 0.12),
+            pick(SWEEP_TEXT, i, 0.0) if i <= len(SWEEP_TEXT) else (
+                "" if rnd.random() < 0.10 else SWEEP_TEXT[rnd.randint(0, len(SWEEP_TEXT) - 1)]
+            ),
+            "" if rnd.random() < 0.12 else rnd.choice(["TRUE", "FALSE"]),
+            SWEEP_CATS[rnd.randint(0, len(SWEEP_CATS) - 1)] if rnd.random() > 0.08 else "",
+            pick(SWEEP_WHOLE_BIG, i, 0.2),
+            pick(SWEEP_DECIMAL_BIG, i, 0.2),
+            pick(SWEEP_GROUP_TEXT, i, 0.0) if i <= len(SWEEP_GROUP_TEXT) else (
+                "" if rnd.random() < 0.08 else SWEEP_GROUP_TEXT[rnd.randint(0, len(SWEEP_GROUP_TEXT) - 1)]
+            ),
+            SWEEP_ASCII_TEXT[(i - 1) % len(SWEEP_ASCII_TEXT)] if i <= len(SWEEP_ASCII_TEXT) else (
+                SWEEP_ASCII_TEXT[rnd.randint(0, len(SWEEP_ASCII_TEXT) - 1)]
+            ),
+        ])
+    with open(csv_file, "w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(SWEEP_HEADERS)
+        writer.writerows(out)
+    return {"headers": list(SWEEP_HEADERS), "row_count": rows}
+
+
+def _dax_string(text: str) -> str:
+    """A DAX string literal (double quotes doubled)."""
+    return '"' + text.replace('"', '""') + '"'
+
+
+def with_filter_context(dax: str, predicates: tuple[str, ...]) -> str:
+    """The flat engine reference of a measure under a filter context: CALCULATE(<base>, <own>, <context>)."""
+    if not predicates:
+        return dax
+    text = dax.strip()
+    if text.startswith("CALCULATE(") and text.endswith(")"):
+        return text[:-1] + ", " + ", ".join(predicates) + ")"
+    return f"CALCULATE({text}, " + ", ".join(predicates) + ")"
+
+
+SWEEP_VALUE_AGG = {
+    "sw": "SUM(t[sw])", "sd": "SUM(t[sd])", "sdt": "MIN(t[sdt])", "st": "DISTINCTCOUNT(t[st])",
+    "sf": "COUNTA(t[sf])", "scat": "DISTINCTCOUNT(t[scat])", "sb": "DISTINCTCOUNT(t[sb])",
+}
+SWEEP_WHOLE_LITERALS = ["-1", "0", "1", "5", "99", "-9223372036854775808", "9223372036854775807", "2147483648"]
+SWEEP_DECIMAL_LITERALS = [
+    "0", "-0.5", "0.5", "0.25", "12.345", "0.000001", "-0.0000005", "123456789012345678.123456",
+    "123456789012345678901234567890.12345678",  # 38 total digits
+    "1234567890123456789012345678901.12345678",  # 39 digits: refused by the whitelist
+    "0.123456789012345678901234567890",  # integer digits plus scale exceed 38 with the column digits: planner
+]
+SWEEP_DATE_LITERALS = [
+    "DATE(1900,1,1)", "DATE(1900,1,2)", "DATE(9999,12,31)", "DATE(2000,2,29)", "DATE(2024,2,29)", "DATE(2026,6,1)",
+]
+SWEEP_BAD_DATE_LITERALS = ["DATE(1899,12,31)", "DATE(10000,1,1)", "DATE(2023,2,29)", "DATE(2100,2,29)"]
+SWEEP_TEXT_LITERALS = [
+    '""', '"A"', '"a"', '"A "', '"A\t"', '"SS"', '"ss"', '"ß"', '"ünï"', '"it\'s"', '"say ""hi"""', '" "', '"  "',
+    '"\t"', '" "', '"\u0085"', '"　"', '" "', '"A "',
+]
+SWEEP_IN_LISTS = [
+    '{"A", "B"}', '{"A", ""}', '{"A", "A", "a"}', '{"ünï"}', '{"a", "b", "c"}', '{""}', '{"ss"}', '{"K"}', '{"x y"}',
+]
+SWEEP_GROUP_AGGS = [
+    "COUNTROWS(t)", "SUM(t[sw])", "SUM(t[sd])", "AVERAGE(t[sw])", "AVERAGE(t[sd])", "MIN(t[sw])", "MAX(t[sw])",
+    "MIN(t[sd])", "MAX(t[sd])", "MIN(t[sdt])", "MAX(t[sdt])", "COUNT(t[sw])", "COUNT(t[sd])", "COUNT(t[sdt])",
+    "COUNTA(t[sw])", "COUNTA(t[sdt])", "COUNTA(t[st])", "COUNTA(t[sf])", "COUNTA(t[scat])", "COUNTBLANK(t[sw])",
+    "COUNTBLANK(t[sd])", "COUNTBLANK(t[sdt])", "COUNTBLANK(t[st])", "COUNTBLANK(t[sf])", "COUNTBLANK(t[scat])",
+    "DISTINCTCOUNT(t[st])", "DISTINCTCOUNT(t[sdt])", "DISTINCTCOUNT(t[sf])", "DISTINCTCOUNT(t[scat])",
+    "DISTINCTCOUNT(t[sw])",
+]
+SWEEP_GROUP_COLUMNS = ["scat", "sg", "sb", "st", "sdt", "sf"]
+SWEEP_GROUP_CONTEXTS: list[tuple[str, ...]] = [
+    (), ("t[sw] > 5",), ("t[sdt] >= DATE(2026,1,1)",), ('t[scat] IN {"A", "B"}',),
+]
+SWEEP_SCALAR_BASES = [
+    "COUNTROWS(t)", "SUM(t[sw])", "SUM(t[sd])", "AVERAGE(t[sd])", "MIN(t[sdt])", "DISTINCTCOUNT(t[st])",
+    "COUNTBLANK(t[sf])", "CALCULATE(SUM(t[sw]), t[sd] >= 0)", "CALCULATE(COUNTROWS(t), t[sw] > 5)",
+]
+SWEEP_SCALAR_CONTEXTS: list[tuple[str, ...]] = [
+    ("t[sw] > 5",), ('t[scat] IN {"A", "B"}',), ("t[sdt] >= DATE(2026,1,1)",), ('t[st] = "A"',),
+    ("t[sw] > 5", "t[sd] >= 0"), ("t[sw] = 0 || t[sw] = 1",), ('t[scat] = "ZZZ"',), ("t[sw] > 5", "t[sw] < 15"),
+    ("t[sw] < 15",), ("t[sd] < 0",), ('t[scat] IN {}',), ("",), ("t[sf] = TRUE()",),
+]
+SWEEP_EMPTY_AGGS = [
+    "COUNTROWS(t)", "SUM(t[sw])", "AVERAGE(t[sw])", "MIN(t[sw])", "MAX(t[sw])", "COUNT(t[sw])", "COUNTA(t[sw])",
+    "COUNTBLANK(t[sw])", "SUM(t[sd])", "AVERAGE(t[sd])", "MIN(t[sd])", "MAX(t[sd])", "COUNT(t[sd])", "COUNTA(t[sd])",
+    "COUNTBLANK(t[sd])", "MIN(t[sdt])", "MAX(t[sdt])", "COUNT(t[sdt])", "COUNTA(t[sdt])", "COUNTBLANK(t[sdt])",
+    "DISTINCTCOUNT(t[sdt])", "COUNTA(t[st])", "COUNTBLANK(t[st])", "DISTINCTCOUNT(t[st])", "COUNTA(t[sf])",
+    "COUNTBLANK(t[sf])", "DISTINCTCOUNT(t[sf])",
+]
+
+
+def _sweep_row(family: str, dax: str, ctx: tuple[str, ...] = (), group: str | None = None) -> dict[str, Any]:
+    row_id = f"{family}: {dax}"
+    if ctx:
+        row_id += " | ctx " + " ; ".join(ctx)
+    if group:
+        row_id += f" | by {group}"
+    return {
+        "id": row_id, "category": "sweep", "shape": family, "dax": dax, "filter_context": tuple(ctx),
+        "group_by": ("t", group) if group else None,
+    }
+
+
+def build_sweep_catalog(headers: list[str] | None = None) -> list[dict[str, Any]]:
+    """Deterministic literal-sweep rows (ids are built from the content, never from a seed or a counter)."""
+    rows: list[dict[str, Any]] = []
+
+    def both(family: str, predicate_texts: list[str], value_col: str) -> None:
+        preds = ", ".join(predicate_texts)
+        rows.append(_sweep_row(family, f"CALCULATE(COUNTROWS(t), {preds})"))
+        rows.append(_sweep_row(family, f"CALCULATE({SWEEP_VALUE_AGG[value_col]}, {preds})"))
+
+    for col in ("sw", "sd", "sdt", "st", "sf", "scat"):  # unfiltered aggregates of every sweep column
+        rows.append(_sweep_row("plain", SWEEP_VALUE_AGG[col]))
+    rows.append(_sweep_row("plain", "COUNTROWS(t)"))
+    for col in ("swb", "sdb"):  # text columns that hold the huge numbers: numeric aggregates are refused
+        rows.append(_sweep_row("big_text", f"SUM(t[{col}])"))
+        rows.append(_sweep_row("big_text", f"COUNTA(t[{col}])"))
+        rows.append(_sweep_row("big_text", f"CALCULATE(COUNTROWS(t), t[{col}] > 5)"))
+    for op in ("=", "<", "<=", ">", ">=", "<>"):
+        for lit in SWEEP_WHOLE_LITERALS:
+            both(f"whole_{op}", [f"t[sw] {op} {lit}"], "sw")
+    for lit in SWEEP_WHOLE_LITERALS:
+        both("whole_not", [f"NOT(t[sw] = {lit})"], "sw")
+    for a, b, c in (("0", "1", "-1"), ("5", "99", "2147483648"), ("-9223372036854775808", "9223372036854775807", "0")):
+        both("whole_or", [f"t[sw] = {a} || t[sw] = {b} || t[sw] = {c}"], "sw")
+    for op in (">=", "<", "<>"):
+        for lit in SWEEP_DECIMAL_LITERALS:
+            both(f"decimal_{op}", [f"t[sd] {op} {lit}"], "sd")
+    for op in (">=", ">", "<=", "<", "<>"):
+        for lit in SWEEP_DATE_LITERALS:
+            both(f"date_{op}", [f"t[sdt] {op} {lit}"], "sdt")
+    for lit in SWEEP_BAD_DATE_LITERALS:
+        for op in (">=", "<"):
+            both(f"date_bad_{op}", [f"t[sdt] {op} {lit}"], "sdt")
+    for lit in SWEEP_TEXT_LITERALS:
+        both("text_eq", [f"t[st] = {lit}"], "st")
+    for items in SWEEP_IN_LISTS:
+        both("text_in", [f"t[st] IN {items}"], "st")
+    for lit in SWEEP_TEXT_LITERALS:
+        both("text_eq_ascii", [f"t[sb] = {lit}"], "sb")
+    for items in SWEEP_IN_LISTS:
+        both("text_in_ascii", [f"t[sb] IN {items}"], "sb")
+        both("text_in_cat", [f"t[scat] IN {items}"], "scat")
+    both("two_same_column", ["t[sw] > 5", "t[sw] < 15"], "sw")
+    both("two_same_column", ["t[sd] >= 0", "t[sd] < 12.345"], "sd")
+    both("two_columns", ["t[sw] > 5", "t[sd] >= 0"], "sw")
+    both("two_columns", ['t[st] = "A"', "t[sw] <> 0"], "sw")
+    both("two_columns", ["t[sdt] >= DATE(2000,2,29)", 't[scat] IN {"A", "B"}'], "sd")
+    both("two_columns", ["t[sw] = 0", 't[scat] = "ZZZ"'], "sw")
+    for agg in SWEEP_EMPTY_AGGS:
+        rows.append(_sweep_row("empty", f'CALCULATE({agg}, t[scat] = "ZZZ")'))
+    for base in SWEEP_SCALAR_BASES:
+        for ctx in SWEEP_SCALAR_CONTEXTS:
+            rows.append(_sweep_row("context", base, ctx))
+    for g_col in SWEEP_GROUP_COLUMNS:
+        for agg in SWEEP_GROUP_AGGS:
+            for ctx in SWEEP_GROUP_CONTEXTS:
+                rows.append(_sweep_row("group", agg, ctx, g_col))
+    rows.append(_sweep_row("group", "SUM(t[sw])", (), "sw"))  # numeric group key: refused
+    rows.append(_sweep_row("group", "CALCULATE(SUM(t[sw]), t[sd] >= 0)", (), "scat"))  # own filter: refused
+    rows.append(_sweep_row("group", "SUM(t[sw])", ('t[scat] = "A"',), "scat"))  # same-column slicer: refused
+    seen: set[str] = set()
+    for row in rows:
+        if row["id"] in seen:
+            raise ValueError(f"duplicate sweep row id {row['id']}")
+        seen.add(row["id"])
+    return rows
+
+
+SWEEP_STATUSES = (
+    "same", "differs", "refused-whitelist", "refused-planner", "refused-guard",
+    "sql-error", "crash",
+)
+SWEEP_FAILURE_STATUSES = ("differs", "sql-error", "crash")
+
+
+def _parse_engine_keys(tocsv_text: str) -> list[str]:
+    """The distinct keys of a TOCSV(VALUES(col)) result in engine order (a blank line is the blank key)."""
+    import io
+
+    head, sep, rest = (tocsv_text or "").partition("\n")
+    if not head:
+        return []
+    keys: list[str] = []
+    seen: set[str] = set()
+    found = [record[0] if record else "" for record in csv.reader(io.StringIO(rest, newline=""))]
+    if sep and (rest == "" or rest.endswith("\n")):
+        found.append("")  # the csv reader drops a last blank record: the blank key shown last
+    for key in found:
+        if key not in seen:
+            seen.add(key)
+            keys.append(key)
+    return keys
+
+
+def _engine_key_filter(g_col: str, g_type: str, key: str) -> str:
+    """The DAX predicate that selects one engine group key."""
+    if g_type == "boolean":
+        return f"t[{g_col}] = {key}()"
+    if key == "":
+        return f"t[{g_col}] = BLANK()" if g_type == "date" else f't[{g_col}] = ""'
+    if g_type == "date":
+        month, day, year = key.split("/")
+        return f"t[{g_col}] = DATE({year}, {int(month)}, {int(day)})"
+    return f"t[{g_col}] = {_dax_string(key)}"
+
+
+def _sweep_same(plan_val: Any, engine_val: Any) -> bool:
+    return (
+        type(plan_val) is type(engine_val)
+        and plan_val == engine_val
+        and format_report_value(plan_val) == format_report_value(engine_val)
+    )
+
+
+def _sweep_text(value: Any) -> str:
+    if isinstance(value, list):
+        return ";".join(f"{format_report_value(k)}:{format_report_value(v)}" for k, v in value)
+    return format_report_value(value)
+
+
+def run_sweep(
+    rows: int = 300,
+    seed: int = 1,
+    overrides: dict[str, Any] | None = None,
+    row_filter: Any = None,
+) -> dict[str, Any]:
+    """Literal sweep: every row of build_sweep_catalog against the engine, through plan_measure / plan_group_by.
+
+    Own StudioController and DuckStore on a fresh seeded sweep table. A row is `same` (value, or key list in
+    order and every value, equal to the engine's with the same Python class), or a refusal (whitelist, planner,
+    guard), or a failure (differs, sql-error, crash). row_filter(row) -> bool limits the rows (tests).
+    """
+    overrides = overrides or {}
+    temp_dir = tempfile.mkdtemp()
+    t_path = Path(temp_dir)
+    csv_file = t_path / "t.csv"
+    t0 = time.time()
+    generate_sweep_dataset(csv_file, rows=rows, seed=seed)
+    store = DuckStore(str(t_path / "store.db"))
+    import_csv_to_store(store, "t_csv", csv_file, {})
+    col_meta = column_decimal_meta(store, "t_csv", SWEEP_HEADERS)
+    plan_meta: dict[tuple[str, str], ColumnMeta] = {("t", col): m for col, m in col_meta.items()}
+    controller = StudioController()
+    controller._effective_app_data_dir = lambda: str(t_path / "app_data")
+    assert controller._commit_import(csv_file, parse_file(csv_file))
+    ctx_model = controller._measure_table_context()
+    aid = controller._active_model_table_id()
+    tname = controller._active_model_table_name()
+    cand_rows = controller._loaded_candidates[controller._active_source_id].rows
+    cand_headers = controller._headers
+    model_types = controller._project["model"]["tables"][0]["column_types"]
+    tables = {"t": model_types}
+
+    def engine(dax: str) -> Any:
+        measure = normalize_measure("M", dax, home_table_id=aid)
+        return evaluate_measures(
+            [measure], cand_rows, cand_headers, tname, measure_names=["M"], table_context=ctx_model,
+            relationships=[], filter_table_ids=[], active_table_id=aid,
+        )["M"]
+
+    def engine_groups(dax: str, g_col: str, g_type: str, ctx: tuple[str, ...]) -> list[tuple[str, Any]]:
+        keys_dax = f"VALUES(t[{g_col}])"
+        if ctx:
+            keys_dax = f"CALCULATETABLE({keys_dax}, " + ", ".join(ctx) + ")"
+        keys = _parse_engine_keys(engine(f"TOCSV({keys_dax}, 100000)"))
+        pairs: list[tuple[str, Any]] = []
+        for key in keys:
+            flat = with_filter_context(dax, (_engine_key_filter(g_col, g_type, key), *ctx))
+            pairs.append((key, engine(flat)))
+        return pairs
+
+    max_digits = {col: m.digits for (_, col), m in plan_meta.items()}
+    results: list[dict[str, Any]] = []
+    for item in build_sweep_catalog(SWEEP_HEADERS):
+        if row_filter is not None and not row_filter(item):
+            continue
+        ctx = tuple(item["filter_context"])
+        group = item["group_by"]
+        record: dict[str, Any] = {
+            "id": item["id"], "shape": item["shape"], "dax": item["dax"], "filter_context": list(ctx),
+            "group_by": group[1] if group else None, "status": "crash", "engine_text": "", "plan_text": "",
+            "reason": None, "error": None,
+        }
+        results.append(record)
+        try:
+            engine_err: str | None = None
+            engine_val: Any = None
+            try:
+                if group:
+                    g_type = SWEEP_COLUMN_TYPES.get(group[1], "")
+                    engine_val = engine_groups(item["dax"], group[1], g_type, ctx)
+                else:
+                    engine_val = engine(with_filter_context(item["dax"], ctx))
+            except Exception as exc:
+                engine_err = str(exc)
+            record["engine_text"] = f"ERR:{engine_err[:60]}" if engine_err else _sweep_text(engine_val)
+            decision = classify_measure(item["dax"], home_table="t", tables=tables, max_digits=max_digits or None)
+            whitelist_ok = decision.allowed
+            if whitelist_ok and ctx:
+                whitelist_ok = classify_filter_context(
+                    ctx, home_table=decision.table or "t", tables=tables, max_digits=max_digits or None
+                ).allowed
+            kwargs: dict[str, Any] = dict(
+                home_table="t", tables=tables, store_tables={"t": "t_csv"}, column_meta=plan_meta,
+                overrides=overrides, filter_context=ctx,
+            )
+            plan = (
+                plan_group_by(item["dax"], group_by=group, **kwargs) if group else plan_measure(item["dax"], **kwargs)
+            )
+            if isinstance(plan, Refusal):
+                record["reason"] = str(plan)
+                record["status"] = "refused-planner" if whitelist_ok else "refused-whitelist"
+                continue
+            if not whitelist_ok:
+                record["status"] = "differs"
+                record["error"] = "whitelist refused but the planner returned SQL"
+                continue
+            try:
+                plan_val = plan.execute(store)
+            except StoreError as exc:
+                record["status"] = "sql-error"
+                record["error"] = str(exc)[:200]
+                continue
+            if isinstance(plan_val, Refusal):
+                record["reason"] = str(plan_val)
+                record["status"] = "refused-guard"
+                continue
+            if overrides.get("forced_wrong_sweep_row") == item["id"]:
+                if isinstance(plan_val, list):
+                    plan_val = [(k, Decimal("1") if v is None else v + Decimal("0.000001")) for k, v in plan_val]
+                else:
+                    plan_val = Decimal("1") if plan_val is None else plan_val + Decimal("0.000001")
+            record["plan_text"] = _sweep_text(plan_val)
+            if engine_err:
+                record["status"] = "differs"
+                record["error"] = f"engine raised an error but the plan returned a value: {engine_err[:120]}"
+            elif isinstance(plan_val, list):
+                want = engine_val
+                if [k for k, _ in plan_val] != [k for k, _ in want]:
+                    record["status"] = "differs"
+                    record["error"] = "group keys or key order differ: engine %r vs plan %r" % (
+                        [k for k, _ in want][:12], [k for k, _ in plan_val][:12]
+                    )
+                elif all(_sweep_same(pv, ev) for (_, pv), (_, ev) in zip(plan_val, want)):
+                    record["status"] = "same"
+                else:
+                    record["status"] = "differs"
+                    bad = next((k, pv, ev) for (k, pv), (_, ev) in zip(plan_val, want) if not _sweep_same(pv, ev))
+                    record["error"] = f"key {bad[0]!r}: engine {format_report_value(bad[2])} vs plan {format_report_value(bad[1])}"
+            elif _sweep_same(plan_val, engine_val):
+                record["status"] = "same"
+            else:
+                record["status"] = "differs"
+                record["error"] = (
+                    f"engine {format_report_value(engine_val)} ({type(engine_val).__name__}) "
+                    f"vs plan {format_report_value(plan_val)} ({type(plan_val).__name__})"
+                )
+        except Exception as exc:  # a planner crash is a failure, never a skip
+            record["status"] = "crash"
+            record["error"] = f"{type(exc).__name__}: {exc}"
+    store.close()
+    counts = {status: sum(1 for r in results if r["status"] == status) for status in SWEEP_STATUSES}
+    return {
+        "rows": rows, "seed": seed, "wall_sec": time.time() - t0, "results": [], "sweep_results": results,
+        "sweep_counts": counts, "sweep_only": True,
     }
 
 
@@ -1704,6 +2217,34 @@ VM_CHECKLIST = [
 ]
 
 
+def generate_sweep_markdown(data: dict[str, Any]) -> str:
+    """The "Literal sweep" section: counts per status, the refusal reasons and every failure."""
+    sweep = data["sweep_results"]
+    lines = ["## Literal sweep", ""]
+    lines.append(f"- Rows: {len(sweep)} (table rows {data.get('rows')}, seed {data.get('seed')})")
+    for status in SWEEP_STATUSES:
+        lines.append(f"- {status}: {sum(1 for r in sweep if r['status'] == status)}")
+    reasons: dict[str, int] = {}
+    for r in sweep:
+        if r["status"].startswith("refused"):
+            reasons[str(r.get("reason"))] = reasons.get(str(r.get("reason")), 0) + 1
+    if reasons:
+        lines.append("")
+        lines.append("### Refusal reasons")
+        lines.append("")
+        for reason, n in sorted(reasons.items(), key=lambda kv: (-kv[1], kv[0])):
+            lines.append(f"- {n} x {reason}")
+    failures = [r for r in sweep if r["status"] in SWEEP_FAILURE_STATUSES]
+    if failures:
+        lines.append("")
+        lines.append("### Failures")
+        lines.append("")
+        for r in failures:
+            lines.append(f"- `{r['id']}`: {r['status']}: {r.get('error')}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def generate_markdown_report(data: dict[str, Any]) -> str:
     """Format comparison results into markdown report with dynamically generated rules table and VM checklist."""
     results = data["results"]
@@ -1923,6 +2464,23 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
 # SECTION: EXIT POLICY, MAIN CLI & BASELINE
 # ==============================================================================
 
+def evaluate_sweep_policy(sweep_results: list[dict[str, Any]], baseline: dict[str, Any]) -> tuple[int, list[str]]:
+    """Exit policy of the literal sweep: any difference, SQL error or crash exits 1, and the set of refused rows
+    (whitelist, planner or guard) must equal the baseline list `sweep_refused` (row ids are built from content,
+    never from a seed)."""
+    failures = [r for r in sweep_results if r["status"] in SWEEP_FAILURE_STATUSES]
+    if failures:
+        by_status = {st: sum(1 for r in failures if r["status"] == st) for st in SWEEP_FAILURE_STATUSES}
+        first = [f"{r['id']}: {r.get('error')}" for r in failures[:5]]
+        return 1, [f"FAILURE: sweep failures {by_status}: {first}"]
+    expected = set(baseline.get("sweep_refused", []))
+    actual = {r["id"] for r in sweep_results if r["status"].startswith("refused")}
+    if actual != expected:
+        changed = sorted(actual.symmetric_difference(expected))
+        return 1, [f"FAILURE: sweep refused set changed vs baseline ({len(changed)} rows): {changed[:5]}"]
+    return 0, []
+
+
 def evaluate_exit_policy(data: dict[str, Any], baseline: dict[str, Any]) -> tuple[int, list[str]]:
     """Exit policy of the tool: returns (exit code, failure messages).
 
@@ -1931,6 +2489,11 @@ def evaluate_exit_policy(data: dict[str, Any], baseline: dict[str, Any]) -> tupl
     the baseline has a "refused" list, even an empty one) any change of the set of refused formulas.
     """
     results = data["results"]
+
+    if "sweep_results" in data:
+        sweep_code, sweep_messages = evaluate_sweep_policy(data["sweep_results"], baseline)
+        if sweep_code or data.get("sweep_only"):
+            return sweep_code, sweep_messages
 
     plan_refusals_allowed = set(baseline.get("plan_refusals_allowed", []))
     plan_failures = [
@@ -1982,23 +2545,33 @@ def evaluate_exit_policy(data: dict[str, Any], baseline: dict[str, Any]) -> tupl
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Engine versus DuckStore rules diff tool.")
-    parser.add_argument("--rows", type=int, default=2000, help="Row count for generated data (default: 2000)")
+    parser.add_argument(
+        "--rows", type=int, default=None, help="Row count for generated data (default: 2000, 300 with --sweep)"
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
     parser.add_argument("--out", type=str, default="", help="Output markdown file path")
     parser.add_argument("--json", type=str, default="", help="Output JSON file path")
     parser.add_argument("--perf-rows", type=int, default=0, help="Measure query times on N rows (default: 0)")
     parser.add_argument("--baseline", type=str, default="", help="Path to baseline JSON file")
     parser.add_argument("--plan", action="store_true", help="Also evaluate every formula through plan_measure (Rule A+)")
+    parser.add_argument(
+        "--sweep", action="store_true", help="Run the literal sweep (plan_measure / plan_group_by) instead of the catalog run"
+    )
 
     args = parser.parse_args()
 
     try:
-        data = run_comparison(rows=args.rows, seed=args.seed, perf_rows=args.perf_rows, use_plan=args.plan)
+        if args.sweep:
+            data = run_sweep(rows=args.rows or 300, seed=args.seed)
+        else:
+            data = run_comparison(rows=args.rows or 2000, seed=args.seed, perf_rows=args.perf_rows, use_plan=args.plan)
     except Exception as exc:
         print(f"TOOL CRASH: {exc}", file=sys.stderr)
         sys.exit(2)
 
-    md_content = generate_markdown_report(data)
+    md_content = generate_sweep_markdown(data) if data.get("sweep_only") else generate_markdown_report(data)
+    if not data.get("sweep_only") and "sweep_results" in data:
+        md_content += "\n" + generate_sweep_markdown(data)
 
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
@@ -2019,7 +2592,9 @@ def main() -> None:
         sys.exit(1)
 
     code, messages = evaluate_exit_policy(data, baseline_data)
-    if args.plan:
+    if args.sweep:
+        print("Sweep counts: " + ", ".join(f"{k}={v}" for k, v in data["sweep_counts"].items()), file=sys.stderr)
+    elif args.plan:
         counts = plan_counts(data["results"])
         print("Plan (Rule A+) counts: " + ", ".join(f"{k}={v}" for k, v in counts.items()), file=sys.stderr)
     for message in messages:

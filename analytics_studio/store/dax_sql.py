@@ -20,8 +20,18 @@ from typing import Any, Mapping
 
 from analytics_studio import dax_dates
 from analytics_studio.measures import MeasureError, parse_expression
-from analytics_studio.store.dax_whitelist import _canonical_type, classify_measure
-from analytics_studio.store.text_rules import TRIM_CHARS_SQL, first_spelling_sql, fold_sql, trim_sql
+from analytics_studio.store.dax_whitelist import (
+    MAX_PREDICATES,
+    REASON_CAP_PREDICATES,
+    _canonical_type,
+    REASON_IN_FOLD_EQ_MIX,
+    _collect_references,
+    _in_item_folds_differently,
+    classify_filter_context,
+    classify_measure,
+    in_mix_reason,
+)
+from analytics_studio.store.text_rules import TRIM_CHARS_SQL, first_spelling_expr_sql, first_spelling_sql, fold_sql, trim_sql
 
 
 # The one Parquet refusal that the Parquet difference class parquet_counta_refusal accepts
@@ -566,7 +576,9 @@ def column_decimal_meta(store: Any, table: str, columns: list[str]) -> dict[str,
 # ==============================================================================
 
 PARQUET_PLAN_REASON = "Parquet plan is not on the store path yet"
-REASON_IN_NON_ASCII_COLUMN = "the IN column holds non-ASCII text; the engine folds it differently"
+REASON_IN_NON_ASCII_COLUMN = (
+    "the IN or blank-literal column holds non-ASCII text; the engine folds and trims it differently"
+)
 REASON_DECIMAL_LITERAL_FIT = "literal does not fit the column's decimal precision"
 MAX_DECIMAL_TOTAL = 38
 
@@ -596,22 +608,22 @@ class MeasurePlan:
     value_type: str = "number"
     overrides: Mapping[str, Any] | None = field(default=None, compare=False, repr=False)
     in_guards: tuple[tuple[str, str], ...] = ()
-    guard_cache: dict[tuple[str, str], bool] = field(default_factory=dict, compare=False, repr=False)
 
     def _in_column_has_non_ascii(self, store: Any, guard: tuple[str, str]) -> bool:
-        """One cheap query per (table, column) per plan: does any cell hold a non-ASCII character?"""
-        if guard not in self.guard_cache:
-            t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
-            rows = store.execute(f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE strlen({c_q}) <> length({c_q}))")
-            self.guard_cache[guard] = bool(rows and rows[0][0])
-        return self.guard_cache[guard]
+        """One cheap query per (table, column) on EVERY execute: does any cell hold a non-ASCII character?
+
+        Never cached: the store can gain a non-ASCII cell between two executes of one plan.
+        """
+        t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
+        rows = store.execute(f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE strlen({c_q}) <> length({c_q}))")
+        return bool(rows and rows[0][0])
 
     def execute(self, store: Any) -> Decimal | dax_dates.DaxDateTime | Refusal | None:
         """Run the SELECT through the store's public read call and return the engine's value.
 
-        A plan with a text IN first checks the IN column for non-ASCII cells (the engine casefolds those
-        differently for IN than the store's ASCII-only fold); if any exists the answer is a Refusal and the
-        aggregate query is not run.
+        A plan with a text IN, or a text equality with an empty or whitespace-only literal, first checks that
+        column for non-ASCII cells on every execute (the engine casefolds and trims those differently from the
+        store's ASCII-only rules); if any exists the answer is a Refusal and the aggregate query is not run.
         """
         for guard in self.in_guards:
             if self._in_column_has_non_ascii(store, guard):
@@ -755,6 +767,7 @@ class _Planner:
         self.meta = {(t.casefold(), c.casefold()): m for (t, c), m in column_meta.items()}
         self.overrides = dict(overrides)
         self.in_columns: list[tuple[str, str]] = []
+        self.has_in = False
 
     def resolve(self, ref: Any) -> _Resolved | Refusal:
         if not (isinstance(ref, tuple) and len(ref) == 3 and ref[0] == "reference"):
@@ -837,7 +850,10 @@ class _Planner:
         if resolved.col_type == "text":
             if op != "=" or not (isinstance(right, tuple) and right and right[0] == "string"):
                 return Refusal("unsupported text predicate")
-            return self._text_checked(right[1], lambda: text_predicate_sql(col, op, right[1]))
+            refused = self._text_checked(right[1], lambda: text_predicate_sql(col, op, right[1]))
+            if isinstance(refused, str) and right[1].strip() == "":
+                self.in_columns.append((resolved.table, resolved.column))
+            return refused
         if resolved.col_type == "whole_number":
             value = _number_literal(right)
             if value is None or value != value.to_integral_value():
@@ -881,6 +897,7 @@ class _Planner:
         if isinstance(refused, Refusal):
             return refused
         self.in_columns.append((resolved.table, resolved.column))
+        self.has_in = True
         return text_in_sql(quote_identifier(resolved.column), items)
 
     @staticmethod
@@ -922,23 +939,39 @@ def _flatten_measure(
     return node, []
 
 
-def plan_measure(
+@dataclass(frozen=True)
+class _PlanParts:
+    """What plan_measure and plan_group_by share: the checked measure, its WHERE clause and its guards."""
+
+    table: str
+    shape: str
+    t_q: str
+    agg: str
+    col: str | None
+    c_type: str | None
+    scale: int
+    where_clause: str
+    in_guards: tuple[tuple[str, str], ...]
+    value_type: str
+    overrides: dict[str, Any]
+    own_predicates: int = 0
+    has_in: bool = False
+    physical: str = ""
+
+
+def _plan_parts(
     expression: str,
     *,
+    filter_context: tuple[str, ...],
+    blocked_columns: tuple[tuple[str, str], ...],
     home_table: str,
     tables: Mapping[str, Mapping[str, str]],
     store_tables: Mapping[str, str],
     column_meta: Mapping[tuple[str, str], ColumnMeta],
-    measures: Mapping[str, str] | None = None,
-    source_kind: str = "csv",
-    overrides: Mapping[str, Any] | None = None,
-) -> MeasurePlan | Refusal:
-    """Plan one measure expression on the store, or refuse. Never raises for a bad expression.
-
-    `tables` is {table: {column: type}} as classify_measure takes it, `store_tables` {table: physical store
-    table name}, `column_meta` {(table, column): ColumnMeta} from column_decimal_meta. Anything the whitelist
-    refuses is a Refusal with the reasons joined; no SQL is built for it.
-    """
+    measures: Mapping[str, str] | None,
+    source_kind: str,
+    overrides: Mapping[str, Any] | None,
+) -> _PlanParts | Refusal:
     overrides = dict(overrides or {})
     max_digits = {col: meta.digits for (_, col), meta in column_meta.items()}
     decision = classify_measure(
@@ -965,8 +998,31 @@ def plan_measure(
             return flat
         base, predicates = flat
         planner = _Planner(home_table, tables, column_meta, overrides)
+        predicate_nodes = list(predicates)
+        own_columns: list[tuple[str, str]] = []
+        for t_name, c_name in _collect_references(tuple(predicates)):
+            resolved_own = planner.resolve(("reference", t_name, c_name))
+            if not isinstance(resolved_own, Refusal):
+                own_columns.append((resolved_own.table.casefold(), resolved_own.column.casefold()))
+        if filter_context:
+            f_decision = classify_filter_context(
+                filter_context,
+                home_table=decision.table,
+                tables=tables,
+                source_kind=source_kind,
+                max_digits=max_digits or None,
+                blocked_columns=[*own_columns, *blocked_columns],
+            )
+            if not f_decision.allowed:
+                return Refusal("; ".join(f_decision.reasons) or "filter context refused by the whitelist")
+            if len(predicates) + len(filter_context) > MAX_PREDICATES:
+                return Refusal(REASON_CAP_PREDICATES)
+            predicate_nodes.extend(parse_expression(text) for text in filter_context)
+            mix = in_mix_reason(predicate_nodes, tables, home_table)
+            if mix:
+                return Refusal(mix)
         where_parts: list[str] = []
-        for predicate in predicates:
+        for predicate in predicate_nodes:
             sql = planner.predicate(predicate)
             if isinstance(sql, Refusal):
                 return sql
@@ -982,7 +1038,6 @@ def plan_measure(
         if not (isinstance(base, tuple) and base and base[0] == "call"):
             return Refusal("unsupported base expression")
         agg = base[1]
-        t_q = quote_identifier(physical)
         col: str | None = None
         c_type: str | None = None
         scale = 4
@@ -996,25 +1051,278 @@ def plan_measure(
                 if meta is None:
                     return Refusal(f"no decimal metadata for column '{resolved.column}'")
                 scale = meta.scale
-        value_type = "date" if agg in ("MIN", "MAX") and c_type == "date" else "number"
-        if agg == "AVERAGE":
-            cast_c = average_cast_sql(col or "", c_type, scale, False, overrides)
-            sql_text = f"SELECT SUM({cast_c}), COUNT({cast_c}) FROM {t_q} {where_clause}"
-            kind = "average"
-        else:
-            built = aggregate_sql(agg, col, c_type, where_clause, scale, t_q=t_q, is_parquet=False, overrides=overrides)
-            if not isinstance(built, str):
-                return built if isinstance(built, Refusal) else Refusal(f"no SQL for {agg}")
-            sql_text = built
-            kind = "scalar"
     except MeasureError as exc:
         return Refusal(str(exc))
+    return _PlanParts(
+        table=decision.table,
+        shape=decision.shape,
+        t_q=quote_identifier(physical),
+        agg=agg,
+        col=col,
+        c_type=c_type,
+        scale=scale,
+        where_clause=where_clause,
+        in_guards=tuple(in_guards),
+        value_type="date" if agg in ("MIN", "MAX") and c_type == "date" else "number",
+        overrides=overrides,
+        own_predicates=len(predicates),
+        has_in=planner.has_in,
+        physical=physical,
+    )
+
+
+def plan_measure(
+    expression: str,
+    *,
+    home_table: str,
+    tables: Mapping[str, Mapping[str, str]],
+    store_tables: Mapping[str, str],
+    column_meta: Mapping[tuple[str, str], ColumnMeta],
+    measures: Mapping[str, str] | None = None,
+    source_kind: str = "csv",
+    overrides: Mapping[str, Any] | None = None,
+    filter_context: tuple[str, ...] = (),
+) -> MeasurePlan | Refusal:
+    """Plan one measure expression on the store, or refuse. Never raises for a bad expression.
+
+    `tables` is {table: {column: type}} as classify_measure takes it, `store_tables` {table: physical store
+    table name}, `column_meta` {(table, column): ColumnMeta} from column_decimal_meta. Anything the whitelist
+    refuses is a Refusal with the reasons joined; no SQL is built for it. `filter_context` is a tuple of DAX
+    predicate strings (slicers): the value is that of CALCULATE(<measure>, <own predicates>, <context>), all ANDed;
+    a context column that the measure itself filters is refused.
+    """
+    parts = _plan_parts(
+        expression,
+        filter_context=tuple(filter_context),
+        blocked_columns=(),
+        home_table=home_table,
+        tables=tables,
+        store_tables=store_tables,
+        column_meta=column_meta,
+        measures=measures,
+        source_kind=source_kind,
+        overrides=overrides,
+    )
+    if isinstance(parts, Refusal):
+        return parts
+    if parts.agg == "AVERAGE":
+        cast_c = average_cast_sql(parts.col or "", parts.c_type, parts.scale, False, parts.overrides)
+        sql_text = f"SELECT SUM({cast_c}), COUNT({cast_c}) FROM {parts.t_q} {parts.where_clause}"
+        kind = "average"
+    else:
+        built = aggregate_sql(
+            parts.agg, parts.col, parts.c_type, parts.where_clause, parts.scale,
+            t_q=parts.t_q, is_parquet=False, overrides=parts.overrides,
+        )
+        if not isinstance(built, str):
+            return built if isinstance(built, Refusal) else Refusal(f"no SQL for {parts.agg}")
+        sql_text = built
+        kind = "scalar"
     return MeasurePlan(
         kind=kind,
         sql=sql_text,
-        table=decision.table,
-        shape=decision.shape,
-        value_type=value_type,
+        table=parts.table,
+        shape=parts.shape,
+        value_type=parts.value_type,
+        overrides=parts.overrides,
+        in_guards=parts.in_guards,
+    )
+
+
+# ==============================================================================
+# SECTION: GROUP-BY PLANNER (Stage C1b2): one visual axis column, the way a visual shows it
+# ==============================================================================
+
+REASON_GROUP_NON_ASCII_SPACE = (
+    "the group-by column holds a non-ASCII whitespace cell; the engine treats it as blank in a key filter"
+)
+# Every BMP character that str.isspace accepts and that is not ASCII, as a regular expression class body
+NON_ASCII_SPACE_CLASS = "".join(f"\\x{{{c:X}}}" for c in range(0x80, 0x10000) if chr(c).isspace())
+REASON_GROUP_BY_SHAPE = "group_by must be one (table, column) pair"
+REASON_GROUP_OWN_FILTER = (
+    "the group-by column is also filtered by the measure: DAX replaces the outer filter, not checked yet"
+)
+REASON_GROUP_BY_TYPE = "group-by is only on text, date and boolean columns"
+GROUP_BLANK_KEY = ""
+
+
+@dataclass(frozen=True)
+class GroupByPlan:
+    """One GROUP BY SELECT and the rule that turns its rows into [(key text, value)] in SQL order.
+
+    kind is "scalar" (rows are (key, value)) or "average" (rows are (key, sum, count)).
+    """
+
+    kind: str
+    sql: str
+    table: str
+    shape: str
+    group_column: str
+    group_type: str
+    value_type: str = "number"
+    overrides: Mapping[str, Any] | None = field(default=None, compare=False, repr=False)
+    in_guards: tuple[tuple[str, str], ...] = ()
+    space_guards: tuple[tuple[str, str], ...] = ()
+    refuse_fold_keys: bool = False
+
+    def execute(self, store: Any) -> list[tuple[str, Decimal | dax_dates.DaxDateTime | None]] | Refusal:
+        """Run the guard queries on every execute, then the GROUP BY.
+
+        Keys are the strings the engine shows for VALUES(). A text group column holding a non-ASCII whitespace
+        cell is refused: the engine's key filter `col = ""` also selects those cells, the store keeps them apart.
+        """
+        for guard in self.space_guards:
+            t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
+            rows = store.execute(
+                f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE regexp_matches({c_q}, '[{NON_ASCII_SPACE_CLASS}]'))"
+            )
+            if rows and rows[0][0]:
+                return Refusal(REASON_GROUP_NON_ASCII_SPACE)
+        for guard in self.in_guards:
+            t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
+            rows = store.execute(f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE strlen({c_q}) <> length({c_q}))")
+            if rows and rows[0][0]:
+                return Refusal(REASON_IN_NON_ASCII_COLUMN)
+        out: list[tuple[str, Decimal | dax_dates.DaxDateTime | None]] = []
+        for row in store.execute(self.sql):
+            key = "" if row[0] is None else str(row[0])
+            if self.kind == "average":
+                divide = StoreResultLayer.divide_ratio if (self.overrides or {}).get("gb_avg_float") else StoreResultLayer.divide
+                value: Any = divide(row[1], row[2], overrides=dict(self.overrides or {}))
+            else:
+                value = convert_result(row[1], self.value_type)
+            out.append((key, value))
+        if self.refuse_fold_keys and any(_in_item_folds_differently(key) for key, _ in out):
+            return Refusal(REASON_IN_FOLD_EQ_MIX)
+        return out
+
+
+def _group_key_sql(g_col: str, g_type: str, order_col: str, overrides: Mapping[str, Any]) -> tuple[str, str, str, str]:
+    """(group expression, key text expression, ORDER BY of the plain form, ORDER BY of the joined form).
+
+    The joined form (used with a filter context) reads the group keys, their order and their spelling from a
+    subquery `s` over the WHOLE table (the column dictionary does not change with a slicer) and the values from a
+    subquery `v` over the filtered rows.
+    """
+    if g_type == "text":
+        spelling_row = "rowid" if overrides.get("gb_order_rowid") else order_col
+        group = g_col if overrides.get("gb_no_fold") else fold_sql(g_col)
+        if overrides.get("gb_no_fold"):
+            key = trim_sql(g_col)
+        elif overrides.get("gb_last_spelling"):
+            key = f"arg_max({trim_sql(g_col)}, {order_col})"
+        else:
+            key = first_spelling_expr_sql(g_col, spelling_row)
+        first = f"MIN({spelling_row})"
+        if overrides.get("gb_order_sorted"):
+            return group, key, "1", "s.k"
+        if overrides.get("gb_blank_last"):
+            return group, key, f"({group} = '') , {first}", "(s.g = ''), s.o"
+        return group, key, first, "s.o"
+    if g_type == "date":
+        cast = f"TRY_CAST(NULLIF({g_col}, '') AS DATE)"
+        fmt = "%m/%d/%Y" if overrides.get("gb_date_zero_pad") else "%-m/%-d/%Y"
+        nulls = "NULLS LAST" if overrides.get("gb_blank_last") else "NULLS FIRST"
+        return cast, f"COALESCE(strftime({cast}, '{fmt}'), '')", f"{cast} {nulls}", f"s.g {nulls}"
+    flag = f"(CASE WHEN UPPER(TRIM(COALESCE({g_col}, ''))) = 'TRUE' THEN 'TRUE' ELSE 'FALSE' END)"
+    direction = "DESC" if overrides.get("gb_bool_true_first") else "ASC"
+    return flag, flag, f"{flag} {direction}", f"s.g {direction}"
+
+
+def plan_group_by(
+    expression: str,
+    *,
+    group_by: tuple[str, str],
+    filter_context: tuple[str, ...] = (),
+    home_table: str,
+    tables: Mapping[str, Mapping[str, str]],
+    store_tables: Mapping[str, str],
+    column_meta: Mapping[tuple[str, str], ColumnMeta],
+    measures: Mapping[str, str] | None = None,
+    source_kind: str = "csv",
+    overrides: Mapping[str, Any] | None = None,
+) -> GroupByPlan | Refusal:
+    """Plan one measure grouped by ONE text, date or boolean column, or refuse. Never raises for bad input.
+
+    The result is the visual-axis answer: one (key, value) per group in the order the engine shows
+    TOCSV(VALUES(col)): text keys by first appearance after the VertiPaq fold (first-seen spelling, the blank
+    key at its first-seen place), dates ascending with the blank first and `m/d/yyyy` text, booleans FALSE then
+    TRUE. The value per key is that of CALCULATE(<measure>, <key filter>).
+    """
+    if not (isinstance(group_by, tuple) and len(group_by) == 2 and all(isinstance(x, str) for x in group_by)):
+        return Refusal(REASON_GROUP_BY_SHAPE)
+    overrides = dict(overrides or {})
+    if overrides.get("gb_drop_filter"):
+        filter_context = ()  # mutant hook, inert by default
+    probe = _Planner(home_table, tables, column_meta, overrides)
+    resolved_group = probe.resolve(("reference", group_by[0], group_by[1]))
+    if isinstance(resolved_group, Refusal):
+        return resolved_group
+    if resolved_group.col_type not in ("text", "date", "boolean"):
+        return Refusal(REASON_GROUP_BY_TYPE)
+    parts = _plan_parts(
+        expression,
+        filter_context=tuple(filter_context),
+        blocked_columns=((resolved_group.table, resolved_group.column),),
+        home_table=home_table,
+        tables=tables,
+        store_tables=store_tables,
+        column_meta=column_meta,
+        measures=measures,
+        source_kind=source_kind,
         overrides=overrides,
+    )
+    if isinstance(parts, Refusal):
+        return parts
+    if resolved_group.table.casefold() != parts.table.casefold():
+        return Refusal(f"the group-by column is on table '{resolved_group.table}', the measure on '{parts.table}'")
+    if parts.own_predicates:
+        return Refusal(REASON_GROUP_OWN_FILTER)
+    in_guards = list(parts.in_guards)
+    g_col = quote_identifier(resolved_group.column)
+    group_sql, key_sql, order_plain, order_join = _group_key_sql(
+        g_col, resolved_group.col_type, STORE_ORDER_COLUMN, overrides
+    )
+    if parts.agg == "AVERAGE":
+        cast_c = average_cast_sql(parts.col or "", parts.c_type, parts.scale, False, parts.overrides)
+        value_exprs = [f"SUM({cast_c})", f"COUNT({cast_c})"]
+        kind = "average"
+    else:
+        built = aggregate_sql(
+            parts.agg, parts.col, parts.c_type, parts.where_clause, parts.scale,
+            t_q=parts.t_q, is_parquet=False, overrides=parts.overrides,
+        )
+        suffix = f" FROM {parts.t_q} {parts.where_clause}"
+        if not isinstance(built, str):
+            return built if isinstance(built, Refusal) else Refusal(f"no SQL for {parts.agg}")
+        if not (built.startswith("SELECT ") and built.endswith(suffix)):
+            return Refusal(f"no group-by SQL for {parts.agg}")
+        value_exprs = [built[len("SELECT "):-len(suffix)]]
+        kind = "scalar"
+    if not parts.where_clause:
+        sql_text = (
+            f"SELECT {key_sql} AS k, {', '.join(value_exprs)} FROM {parts.t_q} GROUP BY {group_sql} ORDER BY {order_plain}"
+        )
+    else:
+        order_col_sql = f"MIN({STORE_ORDER_COLUMN})"
+        value_names = ", ".join(f"v.x{i}" for i in range(len(value_exprs)))
+        value_cols = ", ".join(f"{expr} AS x{i}" for i, expr in enumerate(value_exprs))
+        sql_text = (
+            f"SELECT s.k, {value_names} FROM "
+            f"(SELECT {group_sql} AS g, {key_sql} AS k, {order_col_sql} AS o FROM {parts.t_q} GROUP BY {group_sql}) s "
+            f"JOIN (SELECT {group_sql} AS g, {value_cols} FROM {parts.t_q} {parts.where_clause} GROUP BY {group_sql}) v "
+            f"ON s.g IS NOT DISTINCT FROM v.g ORDER BY {order_join}"
+        )
+    return GroupByPlan(
+        kind=kind,
+        sql=sql_text,
+        table=parts.table,
+        shape=f"{parts.shape}_by_{resolved_group.col_type}",
+        group_column=resolved_group.column,
+        group_type=resolved_group.col_type,
+        value_type=parts.value_type,
+        overrides=parts.overrides,
         in_guards=tuple(in_guards),
+        space_guards=((parts.physical, resolved_group.column),) if resolved_group.col_type == "text" else (),
+        refuse_fold_keys=parts.has_in and resolved_group.col_type == "text",
     )

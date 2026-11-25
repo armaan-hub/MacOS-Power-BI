@@ -15,7 +15,7 @@ from __future__ import annotations
 import datetime as _dt
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-from typing import Any, Mapping
+from typing import Any, Collection, Mapping, Sequence
 
 from analytics_studio.measures import MeasureError, Token, parse_expression, tokenize
 
@@ -131,6 +131,23 @@ REASON_CAP_TOKENS = f"an expression with more than {MAX_TOKENS} tokens is not on
 REASON_TEXT_IN_FOLD = (
     "text IN with non-ASCII items or items containing ss is not on the store whitelist: "
     "the engine folds those differently"
+)
+REASON_TEXT_NON_ASCII_SPACE = (
+    "text literal with a non-ASCII whitespace character is not on the store whitelist: "
+    "the engine trims and compares those differently"
+)
+REASON_FILTER_CONTEXT_OTHER_TABLE = "a filter context predicate must be on the measure's own table"
+REASON_FILTER_CONTEXT_EMPTY = "a filter context predicate must not be empty"
+REASON_SLICER_SAME_COLUMN = (
+    "same-column filter and slicer: DAX replaces the outer filter, not checked yet"
+)
+REASON_IN_NUMERIC_MIX = (
+    "a text IN together with a comparison on a numeric column in one CALCULATE is not on the store whitelist: "
+    "the engine raises a type error on blank numeric cells (rules tool refusal B1)"
+)
+REASON_IN_FOLD_EQ_MIX = (
+    "a text IN together with a text equality on a non-ASCII literal or a literal containing ss in one CALCULATE "
+    "is not on the store whitelist: the engine ignores the IN (measured by the C1b2 sweep)"
 )
 REASON_UNEXPECTED = "unexpected error while classifying"
 
@@ -364,6 +381,9 @@ def _check_comparison(
         if lit_type != "string":
             reasons.append(f"literal type {lit_type} does not fit text column")
             return None
+        if any(ch.isspace() and not ch.isascii() for ch in str(right[1])):
+            reasons.append(REASON_TEXT_NON_ASCII_SPACE)
+            return None
     elif col_norm_type == "date":
         if lit_type != "date":
             reasons.append(f"literal type {lit_type} does not fit date column")
@@ -388,6 +408,54 @@ def _check_comparison(
     if len(reasons) != n_before:
         return None
     return (resolved_t or "", col_name.casefold()), col_norm_type, op
+
+
+def in_mix_reason(
+    nodes: Sequence[Any],
+    tables: Mapping[str, Mapping[str, str]],
+    home_table: str,
+) -> str | None:
+    """A refusal reason when the predicate nodes mix a text IN with a form the engine mishandles, else None.
+
+    (1) IN with a comparison on a whole or decimal column: the engine raises "Cannot convert value '' of type
+    Text to type Number." whenever the numeric column has a blank cell (REASON_IN_NUMERIC_MIX).
+    (2) IN with a text equality on a literal that is non-ASCII or contains "ss": the engine returns the count of
+    the equality alone, as if the IN were not there (REASON_IN_FOLD_EQ_MIX). Both measured by the C1b2 sweep.
+    """
+    tables_norm, _, _, collision = _normalize_inputs(tables, None)
+    if collision:
+        return None
+    home_norm = home_table.casefold()
+    has_in = False
+    has_numeric = False
+    has_fold_eq = False
+    stack: list[Any] = list(nodes)
+    while stack:
+        node = stack.pop()
+        if not (isinstance(node, tuple) and node):
+            continue
+        if node[0] == "in":
+            has_in = True
+        elif node[0] == "comparison" and len(node) >= 4:
+            ref = node[2] if isinstance(node[2], tuple) and node[2] and node[2][0] == "reference" else node[3]
+            lit = node[3] if ref is node[2] else node[2]
+            if isinstance(ref, tuple) and len(ref) == 3 and ref[0] == "reference":
+                columns = tables_norm.get((ref[1] or "").casefold() or home_norm, {})
+                col_type, _ = _canonical_type(columns.get(ref[2].casefold()))
+                if col_type in ("whole_number", "decimal_number"):
+                    has_numeric = True
+                elif col_type == "text" and isinstance(lit, tuple) and lit and lit[0] == "string":
+                    if _in_item_folds_differently(lit[1]):
+                        has_fold_eq = True
+        elif node[0] == "logical":
+            stack.extend(node[2:])
+        elif node[0] == "call" and node[1] == "NOT":
+            stack.extend(node[2])
+    if has_in and has_numeric:
+        return REASON_IN_NUMERIC_MIX
+    if has_in and has_fold_eq:
+        return REASON_IN_FOLD_EQ_MIX
+    return None
 
 
 def _check_composite(
@@ -858,6 +926,9 @@ def _classify_measure(
                     _check_predicate(
                         pred, tables_norm, tables_orig, home_table_norm, measures_norm, reasons, referenced_tables
                     )
+                mix = in_mix_reason(predicate_args, tables, home_table)
+                if mix:
+                    reasons.append(mix)
                 reasons.extend(
                     _source_reasons(
                         None, predicate_args, tables_norm, tables_orig, home_table_norm,
@@ -911,6 +982,9 @@ def _classify_measure(
             _check_predicate(
                 pred, tables_norm, tables_orig, home_table_norm, measures_norm, reasons, referenced_tables
             )
+        mix = in_mix_reason(predicate_args, tables, home_table)
+        if mix:
+            reasons.append(mix)
         reasons.extend(
             _source_reasons(
                 None, predicate_args, tables_norm, tables_orig, home_table_norm,
@@ -1022,4 +1096,91 @@ def _classify_base_aggregate(
     # Any other function
     return WhitelistDecision(
         False, None, None, (f"function {fn} is not on the store whitelist",)
+    )
+
+
+def classify_filter_context(
+    predicates: Sequence[str],
+    *,
+    home_table: str,
+    tables: Mapping[str, Mapping[str, str]],
+    source_kind: str = "csv",
+    max_digits: Mapping[str, int] | None = None,
+    blocked_columns: Collection[tuple[str, str]] = (),
+) -> WhitelistDecision:
+    """Classify a filter context: a tuple of DAX predicate STRINGS (the forms CALCULATE admits).
+
+    The context means CALCULATE(<measure base>, <measure predicates>, <these predicates>): all ANDed. Every
+    predicate must be on `home_table` (the measure's table). `blocked_columns` are (table, column) pairs
+    (case-insensitive) the measure itself filters or groups by: a predicate on one of them is refused
+    (REASON_SLICER_SAME_COLUMN). Never raises. An empty tuple is allowed (no filter).
+    """
+    try:
+        return _classify_filter_context(
+            predicates, home_table, tables, source_kind, max_digits, blocked_columns
+        )
+    except RecursionError:
+        return WhitelistDecision(False, None, None, (REASON_TOO_DEEP,))
+    except Exception as exc:  # last guard: the gate must refuse, never raise
+        return WhitelistDecision(False, None, None, (f"{REASON_UNEXPECTED}: {type(exc).__name__}",))
+
+
+def _classify_filter_context(
+    predicates: Sequence[str],
+    home_table: str,
+    tables: Mapping[str, Mapping[str, str]],
+    source_kind: str,
+    max_digits: Mapping[str, int] | None,
+    blocked_columns: Collection[tuple[str, str]],
+) -> WhitelistDecision:
+    if source_kind not in SOURCE_KINDS:
+        return WhitelistDecision(False, None, None, (f"unknown source kind '{source_kind}' is not on the store whitelist",))
+    if isinstance(predicates, str) or not all(isinstance(p, str) for p in predicates):
+        return WhitelistDecision(False, None, None, ("a filter context is a tuple of predicate strings",))
+    if len(predicates) > MAX_PREDICATES:
+        return WhitelistDecision(False, None, None, (REASON_CAP_PREDICATES,))
+    tables_norm, tables_orig, measures_norm, collision = _normalize_inputs(tables, None)
+    if collision:
+        return WhitelistDecision(False, None, None, (collision,))
+    home_norm = home_table.casefold()
+    if home_norm not in tables_norm:
+        return WhitelistDecision(False, None, None, (f"unknown table '{home_table}'",))
+    digits_norm: dict[str, int] = {}
+    for c_name, n_digits in (max_digits or {}).items():
+        if not isinstance(n_digits, int) or isinstance(n_digits, bool):
+            return WhitelistDecision(False, None, None, (f"max_digits for '{c_name}' must be an integer",))
+        digits_norm[c_name.casefold()] = max(n_digits, digits_norm.get(c_name.casefold(), 0))
+    blocked = {(t.casefold(), c.casefold()) for t, c in blocked_columns}
+    reasons: list[str] = []
+    nodes: list[Any] = []
+    referenced: set[str] = set()
+    for text in predicates:
+        if not text.strip():
+            return WhitelistDecision(False, None, None, (REASON_FILTER_CONTEXT_EMPTY,))
+        try:
+            cap_reason = _check_shape_caps(tokenize(text))
+            if cap_reason:
+                return WhitelistDecision(False, None, None, (cap_reason,))
+            node = parse_expression(text)
+        except MeasureError as exc:
+            return WhitelistDecision(False, None, None, (str(exc),))
+        nodes.append(node)
+        _check_predicate(node, tables_norm, tables_orig, home_norm, measures_norm, reasons, referenced)
+    for t_name, c_name in _collect_references(tuple(nodes)):
+        t_fold = (t_name or "").casefold() or home_norm
+        if t_fold != home_norm:
+            reasons.append(REASON_FILTER_CONTEXT_OTHER_TABLE)
+        elif (t_fold, c_name.casefold()) in blocked:
+            reasons.append(REASON_SLICER_SAME_COLUMN)
+    if any(t.casefold() != home_norm for t in referenced):
+        reasons.append(REASON_FILTER_CONTEXT_OTHER_TABLE)
+    reasons.extend(
+        _source_reasons(None, tuple(nodes), tables_norm, tables_orig, home_norm, measures_norm, source_kind, digits_norm)
+    )
+    unique = tuple(dict.fromkeys(reasons))
+    return WhitelistDecision(
+        allowed=not unique,
+        table=tables_orig[home_norm] if not unique else None,
+        shape="filter_context" if not unique else None,
+        reasons=unique,
     )

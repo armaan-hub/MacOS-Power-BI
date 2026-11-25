@@ -227,7 +227,11 @@ def check_text_predicates(env: Env) -> None:
     assert isinstance(plan, MeasurePlan), plan
     out = plan.execute(env.store)
     assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_IN_NON_ASCII_COLUMN, out
-    _is(sum_n(env, 's[c] = ""'), Decimal(5))         # the blank cell
+    # a blank "=" is guarded too: on this column it is refused (REASON_IN_NON_ASCII_COLUMN), not answered as 5
+    plan = env.plan('CALCULATE(SUM(s[n]), s[c] = "")')
+    assert isinstance(plan, MeasurePlan), plan
+    out = plan.execute(env.store)
+    assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_IN_NON_ASCII_COLUMN, out
 
 
 def test_text_predicates(env: Env) -> None:
@@ -840,9 +844,9 @@ def test_ascii_in_equals_the_engine_and_costs_two_queries_once(ascii_case: Engin
     got = plan.execute(spy)
     assert len(spy.calls) == 2  # the guard, then the aggregate
     assert type(got) is type(case.engine(expression)) and got == case.engine(expression)
-    assert plan.execute(spy) == got and len(spy.calls) == 3  # the guard result is cached inside the plan
+    assert plan.execute(spy) == got and len(spy.calls) == 4  # no cache: the guard runs again, so each execute costs 2
     other = case.plan(expression)
-    assert isinstance(other, MeasurePlan) and other.guard_cache == {}  # never global
+    assert isinstance(other, MeasurePlan) and not hasattr(other, "guard_cache")  # the guard cache is gone
     for text in ('CALCULATE(SUM(t[n]), t[cat] IN {"a", "kk", ""})', 'CALCULATE(COUNTROWS(t), t[cat] IN {"x y"})'):
         case.same_as_engine(text)
 
@@ -993,3 +997,647 @@ def test_seed_loop_runs_a_rotating_tenth_of_the_catalog_per_seed() -> None:
     per_seed = [sum(1 for i, _ in enumerate(catalog) if i % 10 == seed % 10) for seed in range(1, 41)]
     assert all(len(catalog) // 10 <= n <= len(catalog) // 10 + 1 for n in per_seed)
     assert sum(per_seed) == 4 * len(catalog)
+
+
+# ===========================================================================
+# C1b2 first items: guard on every execute, blank/whitespace text equality, quoted table name
+# ===========================================================================
+
+NON_ASCII_SPACES = [" ", "\u0085", "　", " "]
+
+
+def _fresh_case(base: Path, cells: list[str]) -> EngineCase:
+    return EngineCase(base, ["n", "cat"], [[str(i), c] for i, c in enumerate(cells, 1)])
+
+
+def test_in_guard_runs_on_every_execute_and_sees_a_row_added_between_two_executes(tmp_path: Path) -> None:
+    case = _fresh_case(tmp_path, ["A", "a", "B", "b", "C", ""] * 4)
+    try:
+        plan = case.plan('CALCULATE(COUNTROWS(t), t[cat] IN {"A", "B"})')
+        assert isinstance(plan, MeasurePlan)
+        spy = SpyStore(case.store)
+        first = plan.execute(spy)
+        assert isinstance(first, Decimal) and len(spy.calls) == 2  # the guard, then the aggregate
+        case.store.append_rows("t_csv", [["99", "ß"]])  # the store gains a non-ASCII cell
+        second = plan.execute(spy)
+        assert isinstance(second, Refusal) and second.reason == REASON_IN_NON_ASCII_COLUMN, second
+        assert len(spy.calls) == 3 and "SELECT EXISTS" in spy.calls[2]  # only the guard ran, not the aggregate
+        fresh = case.plan('CALCULATE(COUNTROWS(t), t[cat] IN {"A", "B"})')
+        assert isinstance(fresh, MeasurePlan) and isinstance(fresh.execute(case.store), Refusal)
+        assert not hasattr(plan, "guard_cache")
+    finally:
+        case.store.close()
+
+
+@pytest.fixture(scope="module")
+def space_case(tmp_path_factory: pytest.TempPathFactory) -> EngineCase:
+    cells = ["", " ", "\t", "A", "a", "x y"] + NON_ASCII_SPACES + [" A", "A "]
+    case = _fresh_case(tmp_path_factory.mktemp("sp"), cells * 3)
+    yield case
+    case.store.close()
+
+
+@pytest.mark.parametrize("literal", ['""', '" "', '"  "', '"\t"'])
+def test_blank_or_space_equality_is_refused_on_a_column_with_non_ascii_spaces(
+    space_case: EngineCase, literal: str
+) -> None:
+    expression = f"CALCULATE(COUNTROWS(t), t[cat] = {literal})"
+    plan = space_case.plan(expression)
+    assert isinstance(plan, MeasurePlan) and plan.in_guards == (("t_csv", "cat"),), (expression, plan)
+    spy = SpyStore(space_case.store)
+    out = plan.execute(spy)
+    assert isinstance(out, Refusal) and out.reason == REASON_IN_NON_ASCII_COLUMN, (expression, out)
+    assert len(spy.calls) == 1 and "COUNT(" not in spy.calls[0], spy.calls
+    # the unguarded SQL really differs from the engine on this column (the guard is needed)
+    if literal == '""':
+        unguarded = Decimal(space_case.store.execute(plan.sql)[0][0])
+        assert unguarded != space_case.engine(expression), (expression, unguarded)
+
+
+@pytest.mark.parametrize("char", NON_ASCII_SPACES)
+def test_whitelist_refuses_a_non_ascii_whitespace_text_literal(char: str) -> None:
+    from analytics_studio.store.dax_whitelist import REASON_TEXT_NON_ASCII_SPACE
+
+    for literal in (char, f"A{char}", f"{char}{char}"):
+        decision = _decide(f'CALCULATE(COUNTROWS(t), t[cat] = "{literal}")')
+        assert not decision.allowed and decision.reasons == (REASON_TEXT_NON_ASCII_SPACE,), (literal, decision)
+    assert _decide('CALCULATE(COUNTROWS(t), t[cat] = "ünï")').allowed  # other non-ASCII stays allowed
+
+
+def test_blank_equality_on_an_ascii_column_matches_the_engine_with_two_queries(tmp_path: Path) -> None:
+    case = _fresh_case(tmp_path, ["", " ", "\t", "A", "a", "x y"] * 3)
+    try:
+        for literal in ('""', '" "', '"\t"'):
+            expression = f"CALCULATE(COUNTROWS(t), t[cat] = {literal})"
+            plan = case.plan(expression)
+            assert isinstance(plan, MeasurePlan)
+            spy = SpyStore(case.store)
+            got = plan.execute(spy)
+            assert len(spy.calls) == 2, (expression, spy.calls)
+            want = case.engine(expression)
+            assert type(got) is type(want) and got == want, (expression, got, want)
+        plan = case.plan('CALCULATE(COUNTROWS(t), t[cat] = "a")')
+        spy = SpyStore(case.store)
+        plan.execute(spy)
+        assert len(spy.calls) == 1  # a non-blank literal needs no guard
+    finally:
+        case.store.close()
+
+
+def test_mutant_blank_equality_guard_off_is_caught(space_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        plan = space_case.plan('CALCULATE(COUNTROWS(t), t[cat] = "")')
+        assert isinstance(plan, MeasurePlan)
+        assert isinstance(plan.execute(space_case.store), Refusal)
+
+    check()
+    monkeypatch.setattr(MeasurePlan, "_in_column_has_non_ascii", lambda self, store, guard: False)
+    _fails(check)
+
+
+def test_column_decimal_meta_quotes_a_table_name_with_a_quote_and_a_space(tmp_path: Path) -> None:
+    csv_path = tmp_path / "q.csv"
+    csv_path.write_text("id,amt\n1,1.123456\n2,10.5\n3,\n", encoding="utf-8")
+    table = 'my "t" x'
+    store = DuckStore(str(tmp_path / "q.db"))
+    try:
+        import_csv_to_store(store, table, csv_path, {})
+        physical = store.resolve_table_name(table)
+        meta = column_decimal_meta(store, physical, ["amt"])
+        assert meta["amt"].scale == 6, meta
+    finally:
+        store.close()
+
+
+# ===========================================================================
+# C1b2: group-by planner, filter context, literal sweep
+# ===========================================================================
+
+from analytics_studio.store.dax_sql import (  # noqa: E402
+    REASON_GROUP_BY_TYPE,
+    REASON_GROUP_NON_ASCII_SPACE,
+    GroupByPlan,
+    plan_group_by,
+)
+from analytics_studio.store.dax_whitelist import (  # noqa: E402
+    REASON_SLICER_SAME_COLUMN,
+    classify_filter_context,
+)
+from analytics_studio.store.text_rules import trim_sql  # noqa: E402
+from tools.store_engine_diff import (  # noqa: E402
+    _parse_engine_keys,
+    build_sweep_catalog,
+    evaluate_sweep_policy,
+    run_sweep,
+    with_filter_context,
+)
+
+GB_HEADER = ["n", "cat", "dt", "flag", "v"]
+GB_ROWS = [
+    ["1", "Ab ", "2024-02-29", "TRUE", "1.5"],
+    ["2", "ab", "", "FALSE", "0.25"],
+    ["3", "B", "2026-06-01", "", ""],
+    ["4", "", "2023-01-15", "TRUE", "2"],
+    ["5", "AB", "", "FALSE", "3"],
+    ["6", " ", "2024-02-29", "TRUE", ""],
+    ["7", "b", "2026-06-01", "TRUE", "1"],
+    ["8", "C", "2024-03-01", "FALSE", "0"],
+    ["9", "ab\t", "2024-02-29", "", "0.5"],
+    ["10", "", "", "TRUE", "4"],
+    ["11", "B ", "2023-01-15", "FALSE", "0"],
+    ["12", "c", "2026-06-01", "TRUE", "1.25"],
+]
+
+
+@pytest.fixture(scope="module")
+def gb_case(tmp_path_factory: pytest.TempPathFactory) -> EngineCase:
+    case = EngineCase(tmp_path_factory.mktemp("gb"), GB_HEADER, GB_ROWS)
+    yield case
+    case.store.close()
+
+
+def gb(case: EngineCase, expression: str, group: str, ctx: tuple[str, ...] = (), overrides: Any = None, **kw: Any) -> Any:
+    """plan_group_by on the case table, executed: [(key, value)] or a Refusal."""
+    plan = plan_group_by(
+        expression, group_by=("t", group), filter_context=ctx, home_table="t", tables={"t": case.types},
+        store_tables=kw.pop("store_tables", {"t": "t_csv"}), column_meta=case.meta, overrides=overrides, **kw,
+    )
+    if isinstance(plan, Refusal):
+        return plan
+    assert isinstance(plan, GroupByPlan)
+    return plan.execute(case.store)
+
+
+def D(*values: Any) -> list[Any]:
+    return [Decimal(v) if v is not None else None for v in values]
+
+
+# (a) hand-checked group-by results --------------------------------------------------------------
+
+TEXT_KEYS = ["Ab", "B", "", "C"]
+DATE_KEYS = ["", "1/15/2023", "2/29/2024", "3/1/2024", "6/1/2026"]
+
+
+def check_text_group(case: EngineCase, overrides: Any = None) -> None:
+    assert gb(case, "SUM(t[n])", "cat", overrides=overrides) == list(zip(TEXT_KEYS, D(17, 21, 20, 20)))
+    assert gb(case, "COUNTROWS(t)", "cat", overrides=overrides) == list(zip(TEXT_KEYS, D(4, 3, 3, 2)))
+
+
+def check_date_group(case: EngineCase, overrides: Any = None) -> None:
+    assert gb(case, "SUM(t[n])", "dt", overrides=overrides) == list(zip(DATE_KEYS, D(17, 15, 16, 8, 22)))
+    assert gb(case, "COUNTROWS(t)", "dt", overrides=overrides) == list(zip(DATE_KEYS, D(3, 2, 3, 1, 3)))
+
+
+def check_bool_group(case: EngineCase, overrides: Any = None) -> None:
+    assert gb(case, "SUM(t[n])", "flag", overrides=overrides) == [("FALSE", Decimal(38)), ("TRUE", Decimal(40))]
+    assert gb(case, "COUNTROWS(t)", "flag", overrides=overrides) == [("FALSE", Decimal(6)), ("TRUE", Decimal(6))]
+
+
+def check_average_group(case: EngineCase, overrides: Any = None) -> None:
+    got = gb(case, "AVERAGE(t[n])", "cat", overrides=overrides)
+    assert got == [("Ab", Decimal("4.25")), ("B", Decimal(7)), ("", Decimal(20) / Decimal(3)), ("C", Decimal(10))]
+    assert all(type(v) is Decimal for _, v in got)
+
+
+def check_distinct_group(case: EngineCase, overrides: Any = None) -> None:
+    assert gb(case, "DISTINCTCOUNT(t[cat])", "dt", overrides=overrides) == list(zip(DATE_KEYS, D(2, 2, 2, 1, 2)))
+
+
+def test_group_by_text_merges_case_and_trailing_space_shows_first_spelling_and_blank_at_first_seen_place(
+    gb_case: EngineCase,
+) -> None:
+    check_text_group(gb_case)
+    # the engine shows the same keys in the same order (the rule the planner reproduces)
+    assert _parse_engine_keys(gb_case.engine("TOCSV(VALUES(t[cat]), 100000)")) == TEXT_KEYS
+    assert _parse_engine_keys(gb_case.engine("TOCSV(VALUES(t[dt]), 100000)")) == DATE_KEYS
+    assert _parse_engine_keys(gb_case.engine("TOCSV(VALUES(t[flag]), 100000)")) == ["FALSE", "TRUE"]
+
+
+def test_group_by_date_blank_key_first_and_m_d_yyyy_text(gb_case: EngineCase) -> None:
+    check_date_group(gb_case)
+
+
+def test_group_by_boolean_false_before_true_and_blank_counts_as_false(gb_case: EngineCase) -> None:
+    check_bool_group(gb_case)
+
+
+def test_group_by_average_is_the_exact_quotient_and_distinctcount_adds_the_blank(gb_case: EngineCase) -> None:
+    check_average_group(gb_case)
+    check_distinct_group(gb_case)
+
+
+def test_group_by_values_equal_the_engine_per_key(gb_case: EngineCase) -> None:
+    for expression in ("SUM(t[n])", "COUNTROWS(t)", "AVERAGE(t[v])", "MIN(t[dt])", "COUNTBLANK(t[cat])"):
+        for group, keyed in (("cat", ['t[cat] = "Ab"', 't[cat] = "B"', 't[cat] = ""', 't[cat] = "C"']),
+                             ("flag", ["t[flag] = FALSE()", "t[flag] = TRUE()"])):
+            got = gb(gb_case, expression, group)
+            assert isinstance(got, list) and len(got) == len(keyed)
+            for (_, value), predicate in zip(got, keyed):
+                want = gb_case.engine(with_filter_context(expression, (predicate,)))
+                assert type(value) is type(want) and value == want, (expression, predicate, value, want)
+
+
+def test_group_by_refusals_have_stable_reasons(gb_case: EngineCase) -> None:
+    case = gb_case
+    kinds = {
+        "numeric key": gb(case, "SUM(t[v])", "n"),
+        "own filter": gb(case, "CALCULATE(SUM(t[v]), t[n] > 2)", "cat"),
+        "numeric distinct": gb(case, "DISTINCTCOUNT(t[n])", "cat"),
+        "unknown column": gb(case, "SUM(t[v])", "nope"),
+    }
+    assert all(isinstance(r, Refusal) for r in kinds.values()), kinds
+    assert kinds["numeric key"].reason == REASON_GROUP_BY_TYPE
+    assert "also filtered" in kinds["own filter"].reason or "own" in kinds["own filter"].reason
+    for bad in (("t",), ("t", "cat", "dt"), "cat", None):
+        out = plan_group_by(
+            "SUM(t[v])", group_by=bad, home_table="t", tables={"t": case.types}, store_tables={"t": "t_csv"},
+            column_meta=case.meta,
+        )
+        assert isinstance(out, Refusal), bad
+    other = plan_group_by(
+        "SUM(t[v])", group_by=("u", "cat"), home_table="t", tables={"t": case.types}, store_tables={"t": "t_csv"},
+        column_meta=case.meta,
+    )
+    assert isinstance(other, Refusal)
+    assert gb(case, "SUM(t[v])", "cat", ctx=('t[cat] = "A"',)).reason == REASON_SLICER_SAME_COLUMN
+
+
+def test_group_by_a_text_column_with_a_non_ascii_space_cell_refuses_on_every_execute(tmp_path: Path) -> None:
+    case = _fresh_case(tmp_path, ["A", "a", "B", "", "B "])
+    try:
+        plan = plan_group_by(
+            "COUNTROWS(t)", group_by=("t", "cat"), home_table="t", tables={"t": case.types},
+            store_tables={"t": "t_csv"}, column_meta=case.meta,
+        )
+        assert isinstance(plan, GroupByPlan)
+        assert plan.execute(case.store) == [("A", Decimal(2)), ("B", Decimal(2)), ("", Decimal(1))]
+        case.store.append_rows("t_csv", [["9", " "]])
+        out = plan.execute(case.store)
+        assert isinstance(out, Refusal) and out.reason == REASON_GROUP_NON_ASCII_SPACE, out
+    finally:
+        case.store.close()
+
+
+# (b) filter context ----------------------------------------------------------------------------------
+
+def fc(env: Env, expression: str, *ctx: str) -> Any:
+    return env.value(expression, filter_context=tuple(ctx))
+
+
+def test_filter_context_each_predicate_form_pinned(env: Env) -> None:
+    assert fc(env, "COUNTROWS(s)", "s[x] > 5") == Decimal(2)
+    assert fc(env, "COUNTROWS(s)", "s[x] > -1") == Decimal(4)  # the blank cell counts as 0
+    assert fc(env, "SUM(s[n])", "s[x] = 5") == Decimal(1)
+    assert fc(env, "SUM(s[n])", "NOT(s[x] = 5)") == Decimal(14)
+    assert fc(env, "SUM(s[n])", "s[x] = 5 || s[x] = 7") == Decimal(5)
+    assert fc(env, "COUNTROWS(s)", "s[d] >= 0.25") == Decimal(3)
+    assert fc(env, "COUNTROWS(s)", "s[dt] >= DATE(2024, 3, 1)") == Decimal(2)
+    assert fc(env, "COUNTROWS(s)", 's[c] = "ab"') == Decimal(2)  # "Ab " and "ab"
+    out = fc(env, "COUNTROWS(s)", 's[c] IN {"AB", "it\'s"}')  # column c holds the non-ASCII cell ÄB: guard refusal
+    assert isinstance(out, Refusal) and out.reason == REASON_IN_NON_ASCII_COLUMN, out
+
+
+def test_filter_context_is_anded_with_each_other_and_with_the_measures_own_predicates(env: Env) -> None:
+    assert fc(env, "COUNTROWS(s)", "s[x] > 5", "s[d] < 0") == Decimal(1)  # rows 4
+    assert fc(env, "CALCULATE(SUM(s[n]), s[d] >= 0)", "s[x] > 5") == Decimal(5)  # row 5 only (row 4 has d < 0)
+    assert fc(env, "CALCULATE(SUM(s[n]), s[d] >= 0)", "s[x] > 5", "s[x] < 100") is None
+    both = fc(env, "COUNTROWS(s)", "s[x] > 5", "s[x] < 100")
+    assert both == Decimal(1)  # two predicates on one column inside the context are intersected
+    assert fc(env, "CALCULATE(COUNTROWS(s), s[d] >= 0)", "s[x] >= 5") == Decimal(2)
+
+
+def test_filter_context_empty_result_is_blank_not_zero(env: Env) -> None:
+    for expression in ("COUNTROWS(s)", "SUM(s[n])", "AVERAGE(s[d])", "MIN(s[dt])", "COUNTBLANK(s[c])"):
+        assert fc(env, expression, "s[x] > 1000") is None, expression
+
+
+def test_filter_context_same_column_other_table_and_malformed_are_refused(env: Env) -> None:
+    same = env.plan("CALCULATE(SUM(s[n]), s[x] > 5)", filter_context=("s[x] < 100",))
+    assert isinstance(same, Refusal) and REASON_SLICER_SAME_COLUMN in same.reason, same
+    for bad in ("u[x] > 5", "", "s[x] >", "s[nope] = 1", "s[c] IN {}", "FILTER(s, s[x] > 1)", "s[x] > s[n]"):
+        out = env.plan("SUM(s[n])", filter_context=(bad,))
+        assert isinstance(out, Refusal), bad
+    decision = classify_filter_context(("u[x] > 5",), home_table="s", tables=TABLES)
+    assert not decision.allowed and decision.reasons
+    assert classify_filter_context((), home_table="s", tables=TABLES).allowed
+    assert classify_filter_context(("s[x] > 5",), home_table="s", tables=TABLES).allowed
+    blocked = classify_filter_context(("s[x] > 5",), home_table="s", tables=TABLES, blocked_columns=[("S", "X")])
+    assert not blocked.allowed and blocked.reasons == (REASON_SLICER_SAME_COLUMN,)
+
+
+def test_filter_context_with_a_text_in_and_a_numeric_predicate_is_refused(env: Env) -> None:
+    out = env.plan('CALCULATE(SUM(s[n]), s[x] > 5)', filter_context=('s[c] IN {"ab"}',))
+    assert isinstance(out, Refusal) and "IN" in out.reason, out
+    out = env.plan('SUM(s[n])', filter_context=('s[c] IN {"ab"}', "s[x] > 5"))
+    assert isinstance(out, Refusal) and "IN" in out.reason, out
+
+
+def test_filter_context_text_in_pinned_on_an_ascii_column(gb_case: EngineCase) -> None:
+    plan = plan_measure(
+        "SUM(t[n])", home_table="t", tables={"t": gb_case.types}, store_tables={"t": "t_csv"},
+        column_meta=gb_case.meta, filter_context=('t[cat] IN {"AB", "c"}',),
+    )
+    assert isinstance(plan, MeasurePlan)
+    assert plan.execute(gb_case.store) == Decimal(1 + 2 + 5 + 8 + 9 + 12)  # Ab, ab, AB, ab\t, C, c
+    assert plan.execute(gb_case.store) == gb_case.engine(with_filter_context("SUM(t[n])", ('t[cat] IN {"AB", "c"}',)))
+
+
+def test_filter_context_group_by_keeps_the_whole_table_order_and_drops_empty_groups(gb_case: EngineCase) -> None:
+    case = gb_case
+    # rows 1..5 only (n < 6): groups Ab, B and the blank key survive, C does not; the order is the whole table's
+    assert gb(case, "SUM(t[n])", "cat", ctx=("t[n] < 6",)) == [("Ab", Decimal(8)), ("B", Decimal(3)), ("", Decimal(4))]
+    # a context that hides row 1 does not move the spelling or the order of the key "Ab"
+    got = gb(case, "COUNTROWS(t)", "cat", ctx=("t[n] > 1",))
+    assert [k for k, _ in got] == TEXT_KEYS and got[0] == ("Ab", Decimal(3)), got
+    # a group whose rows are all removed is gone, not zero or blank
+    assert [k for k, _ in gb(case, "COUNTROWS(t)", "dt", ctx=('t[cat] = "B"',))] == ["1/15/2023", "6/1/2026"]
+    assert gb(case, "COUNTROWS(t)", "cat", ctx=("t[n] > 100",)) == []
+    keys = _parse_engine_keys(case.engine("TOCSV(CALCULATETABLE(VALUES(t[cat]), t[n] < 6), 100000)"))
+    assert keys == ["Ab", "B", ""]
+
+
+def test_filter_context_group_by_on_date_and_boolean_against_the_engine(gb_case: EngineCase) -> None:
+    case = gb_case
+    for group in ("dt", "flag", "cat"):
+        for ctx in (("t[n] > 3",), ("t[v] >= 1",), ('t[cat] = "B"',)):
+            if group == "cat" and ctx[0].startswith("t[cat]"):
+                continue
+            got = gb(case, "SUM(t[n])", group, ctx=ctx)
+            keys = _parse_engine_keys(
+                case.engine(f"TOCSV(CALCULATETABLE(VALUES(t[{group}]), {', '.join(ctx)}), 100000)")
+            )
+            assert isinstance(got, list) and [k for k, _ in got] == keys, (group, ctx, got, keys)
+            for key, value in got:
+                predicate = (
+                    f"t[{group}] = {key}()" if group == "flag"
+                    else (f"t[{group}] = BLANK()" if key == "" and group == "dt" else (
+                        f't[{group}] = ""' if key == "" else (
+                            f"t[{group}] = DATE({key.split('/')[2]}, {int(key.split('/')[0])}, {int(key.split('/')[1])})"
+                            if group == "dt" else f't[{group}] = "{key}"')))
+                )
+                want = case.engine(with_filter_context("SUM(t[n])", (predicate, *ctx)))
+                assert value == want, (group, ctx, key, value, want)
+
+
+# (c) the literal sweep ------------------------------------------------------------------------------
+
+import json as _json  # noqa: E402
+import zlib as _zlib  # noqa: E402
+
+_BASELINE = _json.loads((Path(__file__).resolve().parent.parent / "tools" / "store_engine_diff_baseline.json").read_text("utf-8"))
+
+
+def _slice_of(seed: int, parts: int = 40) -> Any:
+    """Row filter: the rows whose id hashes to this seed's slice (seeds 1..40 together cover the catalog once)."""
+    return lambda row: _zlib.crc32(row["id"].encode("utf-8")) % parts == (seed - 1) % parts
+
+
+def test_sweep_catalog_ids_are_stable_unique_and_built_from_content() -> None:
+    first, second = build_sweep_catalog(), build_sweep_catalog()
+    assert [r["id"] for r in first] == [r["id"] for r in second]
+    assert len({r["id"] for r in first}) == len(first) >= 1200
+    assert all(any(c.isalpha() for c in r["id"]) and "seed" not in r["id"] for r in first)
+    shapes = {r["shape"] for r in first}
+    for needed in ("whole_<>", "whole_not", "whole_or", "decimal_>=", "date_<", "date_bad_>=", "text_eq", "text_in_ascii",
+                   "two_same_column", "two_columns", "empty", "context", "group", "big_text"):
+        assert needed in shapes, needed
+    assert any(r["group_by"] and r["filter_context"] for r in first)
+
+
+@pytest.mark.parametrize("seed", range(1, 5))
+def test_sweep_slice_every_row_is_same_or_a_baselined_refusal(seed: int) -> None:
+    data = run_sweep(rows=300, seed=seed, row_filter=_slice_of(seed))
+    results = data["sweep_results"]
+    assert len(results) >= 20
+    failures = [(r["id"], r["status"], r["error"]) for r in results if r["status"] in ("differs", "sql-error", "crash")]
+    assert not failures, failures
+    refused = {r["id"] for r in results if r["status"].startswith("refused")}
+    assert refused <= set(_BASELINE["sweep_refused"]), sorted(refused - set(_BASELINE["sweep_refused"]))
+    assert any(r["status"] == "same" for r in results)
+
+
+def test_sweep_covers_the_unicode_whitespace_cells_and_refuses_what_the_engine_treats_as_blank() -> None:
+    wanted = {r["id"] for r in build_sweep_catalog() if " " in r["id"] or "\u0085" in r["id"]}
+    data = run_sweep(rows=300, seed=1, row_filter=lambda r: r["id"] in wanted or (r["shape"] == "group" and r["group_by"][1] == "st" and not r["filter_context"] and r["dax"] == "COUNTROWS(t)"))
+    by_id = {r["id"]: r for r in data["sweep_results"]}
+    assert all(r["status"] in ("same", "refused-whitelist", "refused-guard") for r in by_id.values()), by_id
+    st_group = [r for r in by_id.values() if r["group_by"] == "st"]
+    assert st_group and all(r["status"] == "refused-guard" and REASON_GROUP_NON_ASCII_SPACE in r["reason"] for r in st_group)
+    literal_rows = [r for r in by_id.values() if r["shape"] in ("text_eq", "text_eq_ascii")]
+    assert literal_rows and all(r["status"] == "refused-whitelist" for r in literal_rows)
+
+
+# (d) forced wrong values exit 1, hooks are inert by default ----------------------------------------------
+
+def test_forced_wrong_value_in_the_sweep_and_in_a_sweep_group_exits_1() -> None:
+    scalar_id = "plain: SUM(t[sw])"
+    group_id = "group: SUM(t[sw]) | by scat"
+    keep = {scalar_id, group_id}
+    clean = run_sweep(rows=300, seed=1, row_filter=lambda r: r["id"] in keep)
+    assert {r["id"]: r["status"] for r in clean["sweep_results"]} == {scalar_id: "same", group_id: "same"}
+    for row_id in (scalar_id, group_id):
+        data = run_sweep(
+            rows=300, seed=1, overrides={"forced_wrong_sweep_row": row_id}, row_filter=lambda r: r["id"] in keep
+        )
+        status = {r["id"]: r["status"] for r in data["sweep_results"]}
+        assert status[row_id] == "differs" and status[next(i for i in keep if i != row_id)] == "same", status
+        code, messages = evaluate_sweep_policy(data["sweep_results"], {"sweep_refused": []})
+        assert code == 1 and "sweep failures" in messages[0], messages
+
+
+def test_sweep_policy_refusal_set_must_equal_the_baseline() -> None:
+    results = [
+        {"id": "a", "status": "same"}, {"id": "b", "status": "refused-whitelist"}, {"id": "c", "status": "refused-guard"},
+    ]
+    assert evaluate_sweep_policy(results, {"sweep_refused": ["b", "c"]}) == (0, [])
+    assert evaluate_sweep_policy(results, {"sweep_refused": ["b"]})[0] == 1  # a new refusal
+    assert evaluate_sweep_policy(results, {"sweep_refused": ["b", "c", "a"]})[0] == 1  # a refusal that went away
+    assert evaluate_sweep_policy(results, {})[0] == 1  # no baseline list: every refusal is new
+    assert evaluate_sweep_policy([{"id": "x", "status": "crash", "error": "boom"}], {"sweep_refused": []})[0] == 1
+
+
+def test_default_mode_policy_does_not_read_the_sweep_key() -> None:
+    data = {"rows": 1, "results": [], "sweep_results": [{"id": "z", "status": "same"}], "sweep_only": True}
+    assert evaluate_exit_policy(data, {"sweep_refused": []}) == (0, [])
+    assert evaluate_exit_policy({"rows": 1, "results": []}, {"classes": [], "refused": []}) == (0, [])
+
+
+def test_catalog_group_by_goes_through_the_planner_and_a_forced_wrong_group_value_exits_1() -> None:
+    ids = ["group_by_cat_SUM_w", "group_by_dt_MIN_dt", "group_by_flag_COUNTROWS_all", "group_by_t_AVERAGE_d"]
+    data = run_comparison(rows=400, seed=1, use_plan=True, formula_filter=ids)
+    by_id = {r["id"]: r for r in data["results"]}
+    assert set(by_id) == set(ids)
+    assert {r["plan_status"] for r in by_id.values()} <= {"plan-same", "plan-refused"}
+    assert by_id["group_by_cat_SUM_w"]["plan_status"] == "plan-same"
+    assert by_id["group_by_dt_MIN_dt"]["plan_status"] == "plan-same"
+    assert by_id["group_by_flag_COUNTROWS_all"]["plan_status"] == "plan-same"
+    assert plan_counts(data["results"])["plan-skipped"] == 0
+    forced = run_comparison(
+        rows=400, seed=1, use_plan=True, formula_filter=ids, overrides={"forced_wrong_plan_value": "group_by_cat_SUM_w"}
+    )
+    row = next(r for r in forced["results"] if r["id"] == "group_by_cat_SUM_w")
+    assert row["plan_status"] == "plan-differs" and "key" in row["plan_error"], row
+    code, _ = evaluate_exit_policy(forced, _BASELINE)
+    assert code == 1
+
+
+def test_parse_engine_keys_handles_a_trailing_blank_key_quotes_and_duplicates() -> None:
+    assert _parse_engine_keys("'t'[x]\nA\nB") == ["A", "B"]
+    assert _parse_engine_keys("'t'[x]\nA\nB\n") == ["A", "B", ""]  # the blank key shown last
+    assert _parse_engine_keys("'t'[x]\n") == [""]
+    assert _parse_engine_keys("'t'[x]\n\nA") == ["", "A"]
+    assert _parse_engine_keys("'t'[x]\nFALSE\nFALSE\nTRUE") == ["FALSE", "TRUE"]
+    assert _parse_engine_keys('\'t\'[x]\n"say ""hi"""\n"a,b"') == ['say "hi"', "a,b"]
+    assert _parse_engine_keys("") == []
+
+
+# (e) mutants --------------------------------------------------------------------------------------------
+
+def _mutant(check: Any, monkeypatch: pytest.MonkeyPatch, patch: Any) -> None:
+    check()  # clean
+    patch(monkeypatch)
+    _fails(check)
+
+
+@pytest.mark.parametrize(
+    "hook, check",
+    [
+        ("gb_order_sorted", check_text_group),
+        ("gb_blank_last", check_text_group),
+        ("gb_blank_last", check_date_group),
+        ("gb_last_spelling", check_text_group),
+        ("gb_no_fold", check_text_group),
+        ("gb_date_zero_pad", check_date_group),
+        ("gb_bool_true_first", check_bool_group),
+        ("gb_avg_float", check_average_group),
+    ],
+)
+def test_mutant_group_by_rules_are_caught(gb_case: EngineCase, hook: str, check: Any) -> None:
+    check(gb_case)
+    _fails(check, gb_case, {hook: True})
+
+
+def test_mutant_distinctcount_per_group_without_the_blank_is_caught(gb_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    original = dax_sql.aggregate_sql
+
+    def without_blank(*args: Any, **kwargs: Any) -> Any:
+        built = original(*args, **kwargs)
+        if isinstance(built, str) and args[0] == "DISTINCTCOUNT" and args[2] == "text":
+            return built.replace(f"MAX(CASE WHEN {trim_sql(args[1])} = '' THEN 1 ELSE 0 END)", "0")
+        return built
+
+    _mutant(lambda: check_distinct_group(gb_case), monkeypatch, lambda mp: mp.setattr(dax_sql, "aggregate_sql", without_blank))
+
+
+def test_mutant_group_order_by_rowid_instead_of_load_order_on_a_re_sorted_table_is_caught(gb_case: EngineCase) -> None:
+    conn = gb_case.store._check_open()
+    conn.execute('CREATE OR REPLACE TABLE "t_sorted" AS SELECT * FROM "t_csv" ORDER BY "cat" DESC, "n" DESC')
+    try:
+        def check(overrides: Any = None) -> None:
+            got = gb(gb_case, "SUM(t[n])", "cat", overrides=overrides, store_tables={"t": "t_sorted"})
+            assert got == list(zip(TEXT_KEYS, D(17, 21, 20, 20))), got  # load order (__rn), not physical order
+
+        check()
+        _fails(check, {"gb_order_rowid": True})
+    finally:
+        conn.execute('DROP TABLE IF EXISTS "t_sorted"')
+
+
+def test_mutant_filter_context_or_instead_of_and_is_caught(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        assert fc(env, "COUNTROWS(s)", "s[x] > 5", "s[d] < 0") == Decimal(1)
+        assert fc(env, "CALCULATE(SUM(s[n]), s[d] >= 0)", "s[x] > 5") == Decimal(5)
+
+    _mutant(check, monkeypatch, lambda mp: mp.setattr(dax_sql, "_AND_JOIN", " OR "))
+
+
+def test_mutant_filter_dropped_for_group_by_is_caught(gb_case: EngineCase) -> None:
+    def check(overrides: Any = None) -> None:
+        got = gb(gb_case, "SUM(t[n])", "cat", ctx=("t[n] < 6",), overrides=overrides)
+        assert got == [("Ab", Decimal(8)), ("B", Decimal(3)), ("", Decimal(4))], got
+
+    check()
+    _fails(check, {"gb_drop_filter": True})
+
+
+def test_mutant_same_column_check_removed_is_caught(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        out = env.plan("CALCULATE(SUM(s[n]), s[x] > 5)", filter_context=("s[x] < 100",))
+        assert isinstance(out, Refusal) and REASON_SLICER_SAME_COLUMN in out.reason
+
+    original = dax_sql.classify_filter_context
+    _mutant(
+        check, monkeypatch,
+        lambda mp: mp.setattr(dax_sql, "classify_filter_context", lambda *a, **k: original(*a, **{**k, "blocked_columns": ()})),
+    )
+
+
+@pytest.fixture(scope="module")
+def sweep_like_case(tmp_path_factory: pytest.TempPathFactory) -> EngineCase:
+    header = ["n", "w", "d", "dt", "c"]
+    rows = [
+        ["1", "5", "0.000001", "", ""], ["2", "", "0", "1900-01-01", " "], ["3", "-3", "", "1900-01-02", "A"],
+        ["4", "0", "0.5", "2024-02-29", "A "], ["5", "7", "-0.25", "", "a b"], ["6", "-0", "123456789012345678.123456", "2026-06-01", ""],
+        ["7", "", "0.000001", "9999-12-31", "A"], ["8", "100", "1", "1900-01-01", "  "],
+    ]
+    case = EngineCase(tmp_path_factory.mktemp("sw"), header, rows)
+    yield case
+    case.store.close()
+
+
+def test_mutant_decimal_literal_compared_at_the_column_scale_is_caught(sweep_like_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    case = sweep_like_case
+    assert case.meta[("t", "d")].scale == 6
+
+    def check() -> None:
+        for op in (">=", "<", "<>"):
+            case.same_as_engine(f"CALCULATE(COUNTROWS(t), t[d] {op} 0.0000004)")
+            case.same_as_engine(f"CALCULATE(COUNTROWS(t), t[d] {op} -0.0000005)")
+
+    original = dax_sql.decimal_predicate_sql
+    _mutant(check, monkeypatch, lambda mp: mp.setattr(dax_sql, "decimal_predicate_sql", lambda col, op, lit, scale: original(col, op, lit, min(scale, 6))))
+
+
+def test_mutant_blank_as_zero_dropped_for_a_negative_whole_literal_is_caught(sweep_like_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        for op in (">", ">=", "<>"):
+            sweep_like_case.same_as_engine(f"CALCULATE(COUNTROWS(t), t[w] {op} -1)")
+
+    _mutant(
+        check, monkeypatch,
+        lambda mp: mp.setattr(
+            dax_sql, "whole_predicate_sql",
+            lambda col, op, lit: f"TRY_CAST(NULLIF({col}, '') AS HUGEINT) {dax_sql._SQL_OPERATORS[op]} {int(lit)}",
+        ),
+    )
+
+
+def test_mutant_blank_date_default_dropped_at_the_1900_boundary_is_caught(sweep_like_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        for op in ("<", "<=", "<>"):
+            sweep_like_case.same_as_engine(f"CALCULATE(COUNTROWS(t), t[dt] {op} DATE(1900, 1, 1))")
+
+    original = dax_sql.date_predicate_sql
+    _mutant(
+        check, monkeypatch,
+        lambda mp: mp.setattr(dax_sql, "date_predicate_sql", lambda c, o, d: original(c, o, d).replace("DATE '1899-12-30'", "DATE '1900-01-01'")),
+    )
+
+
+@pytest.mark.parametrize("literal", ['" "', '"A "', '"  "'])
+def test_mutant_text_literal_trimmed_is_caught(sweep_like_case: EngineCase, monkeypatch: pytest.MonkeyPatch, literal: str) -> None:
+    def check() -> None:
+        sweep_like_case.same_as_engine(f"CALCULATE(COUNTROWS(t), t[c] = {literal})")
+
+    original = dax_sql._fold_literal
+    _mutant(check, monkeypatch, lambda mp: mp.setattr(dax_sql, "_fold_literal", lambda text: original(text).strip()))
+
+
+def test_mutant_38_digit_precision_refusal_removed_is_caught(sweep_like_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    case = sweep_like_case
+
+    def check() -> None:
+        plan = case.plan("CALCULATE(COUNTROWS(t), t[d] >= 0.123456789012345678901234567890)")
+        assert isinstance(plan, Refusal) and plan.reason == dax_sql.REASON_DECIMAL_LITERAL_FIT, plan
+
+    _mutant(check, monkeypatch, lambda mp: mp.setattr(dax_sql, "MAX_DECIMAL_TOTAL", 10**6))
