@@ -3143,3 +3143,11 @@ Gate on e9c4711 (tool and tests only, no app change): 43,622 passed, 1 skipped, 
 The rules tool now compares exact values as well as the 2-decimal display text. Tolerance is by value type: exact equality for Decimal and integer results, relative 1e-15 for float results only. Group-by results are compared per group on exact values. A float ratio bug (SUM/COUNT lost the binary tail of the engine value on 3 of 40 seeds) was found by Team-Thinker and fixed. Parquet class predicates now cover scalar and group-by results by data. Built by Antigravity (C0f, about 3 hours) and the Sonnet fixer (C0g); Team-Thinker failed C0f once and passed C0g on 371aad4: 47 tests in about 18 s, seeds 21 to 80 and 5,000 rows all exit 0, 46 source mutants killed except two equivalent guard clauses.
 
 Gate on c11f287 (tool and tests only, no app change): 43,633 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
+
+## 2026-11-25 Stage C1pre: shared VertiPaq text rules for the store, merged as 3a8aa4e
+
+New analytics_studio/store/text_rules.py holds the model-load text rule (drop trailing U+0000 to U+0020, ASCII-only case fold, first-seen spelling) as SQL builders and Python reference functions; the rules tool uses it. Team-Thinker checked it against the real old path on 2,658 strings (0 mismatches) and found two mutants that survived for lack of edge data (U+00A0, U+0085, U+2028, U+200B, full-width letters, surrogate pairs), a Python 3.12-only f-string in the tool, and a silent rowid default; all fixed. 13 text-rule tests plus 47 tool tests pass in about 19 s.
+
+Gate on 3a8aa4e: 43,646 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
+
+Also: Antigravity finished Stage D0a (Power Query step differential tool, 15 simple step types, 62 steps same, seeds 1 to 30 exit 0) in a scratch clone; it is under review and not merged.
