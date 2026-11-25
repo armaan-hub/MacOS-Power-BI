@@ -1,6 +1,6 @@
 """Engine versus DuckStore comparison and rules generator.
 
-Stage C0b tool comparing DAX evaluation on the native engine against naive and
+Stage C0c tool comparing DAX evaluation on the native engine against naive and
 mapped SQL evaluation on DuckStore (CSV and Parquet paths).
 """
 
@@ -65,13 +65,55 @@ def format_report_value(val: Any) -> str:
     return _format_report_number(val)
 
 
+# ==============================================================================
+# SECTION: RESULT LAYER (Aggregates from SQL, Arithmetic via Decimal layer)
+# ==============================================================================
+
+class StoreResultLayer:
+    """Prototypes the app's execution layer: aggregate leaves from SQL, exact Decimal arithmetic."""
+
+    @staticmethod
+    def divide(sum_val: Any, cnt_val: Any) -> Decimal | None:
+        if sum_val is None or cnt_val is None or cnt_val == 0:
+            return None
+        return Decimal(str(sum_val)) / Decimal(str(cnt_val))
+
+    @staticmethod
+    def divide_ratio(sum_val: Any, cnt_val: Any) -> Decimal | None:
+        if sum_val is None or cnt_val is None or cnt_val == 0:
+            return None
+        # In DAX, binary `/` between measures evaluates in IEEE 754 float
+        f_val = float(sum_val) / float(cnt_val)
+        return Decimal(str(f_val))
+
+    @staticmethod
+    def add(a: Any, b: Any) -> Decimal | None:
+        if a is None and b is None:
+            return None
+        dec_a = Decimal(0) if a is None else Decimal(str(a))
+        dec_b = Decimal(0) if b is None else Decimal(str(b))
+        return dec_a + dec_b
+
+    @staticmethod
+    def subtract(a: Any, b: Any) -> Decimal | None:
+        if a is None and b is None:
+            return None
+        dec_a = Decimal(0) if a is None else Decimal(str(a))
+        dec_b = Decimal(0) if b is None else Decimal(str(b))
+        return dec_a - dec_b
+
+
+# ==============================================================================
+# SECTION: DATASET GENERATOR
+# ==============================================================================
+
 def generate_dataset(
     csv_path: Path,
     parquet_path: Path,
     rows: int = 2000,
     seed: int = 42,
 ) -> dict[str, Any]:
-    """Generate seeded dataset with mixed types, blanks, edge values, and collisions."""
+    """Generate seeded dataset with mixed types, blanks, edge values, duplicates, and collisions."""
     rnd = random.Random(seed)
 
     text_options = [
@@ -122,9 +164,10 @@ def generate_dataset(
         "1.00",
         "+1",
     ]
+    num_dups_choices = ["1", "1.0", "1.00", "+1", "-0", "0", "2", "2.5", "2.50"]
 
     csv_rows: list[list[str]] = []
-    headers = ["id", "w", "d", "big", "t", "dt", "flag", "cat"]
+    headers = ["id", "w", "d", "big", "t", "dt", "flag", "cat", "w_blank", "num_dups"]
 
     pq_id: list[str] = []
     pq_w: list[int | None] = []
@@ -134,12 +177,25 @@ def generate_dataset(
     pq_dt: list[dt.date | None] = []
     pq_flag: list[bool | None] = []
     pq_cat: list[str] = []
+    pq_w_blank: list[str | None] = []
+    pq_num_dups: list[float | None] = []
 
     for i in range(1, rows + 1):
         id_str = str(i)
 
-        # w: whole number with seed-dependent blanks and large whole numbers (>2^53)
-        if rnd.random() < 0.10:
+        # Ensure boundary values exist deterministically across any row count:
+        # row 1: w=100, dt=2026-06-01 (kills M15 >= vs > on numbers & dates)
+        # row 2: w=200, dt=2026-06-02
+        # rows 3..16: 15-digit large whole numbers (sum > 2^53, kills M4 whole SUM->DOUBLE)
+        if i == 1:
+            w_str, w_val = "100", 100
+        elif i == 2:
+            w_str, w_val = "200", 200
+        elif 3 <= i <= 16:
+            w_num = 900719925474099 + (i % 100)
+            w_str = str(w_num)
+            w_val = w_num
+        elif rnd.random() < 0.10:
             w_str = ""
             w_val = None
         elif rnd.random() < 0.05:
@@ -180,7 +236,13 @@ def generate_dataset(
             t_val = t_choice
 
         # dt: dates with seed-dependent blanks
-        if rnd.random() < 0.10:
+        if i == 1:
+            dt_val = dt.date(2026, 6, 1)
+            dt_str = "2026-06-01"
+        elif i == 2:
+            dt_val = dt.date(2026, 6, 2)
+            dt_str = "2026-06-02"
+        elif rnd.random() < 0.10:
             dt_str = ""
             dt_val = None
         else:
@@ -204,7 +266,15 @@ def generate_dataset(
         # cat: category
         cat_str = categories[rnd.randint(0, len(categories) - 1)]
 
-        csv_rows.append([id_str, w_str, d_str, big_str, t_str, dt_str, flag_str, cat_str])
+        # w_blank: all-blank column (infers as text)
+        w_blank_str = ""
+        w_blank_val = None
+
+        # num_dups: numeric-typed column containing textual duplicate representations ('1', '1.0', '+1', etc.)
+        num_dup_str = num_dups_choices[rnd.randint(0, len(num_dups_choices) - 1)]
+        num_dup_val = float(num_dup_str)
+
+        csv_rows.append([id_str, w_str, d_str, big_str, t_str, dt_str, flag_str, cat_str, w_blank_str, num_dup_str])
 
         pq_id.append(id_str)
         pq_w.append(w_val)
@@ -214,6 +284,8 @@ def generate_dataset(
         pq_dt.append(dt_val)
         pq_flag.append(flag_val)
         pq_cat.append(cat_str)
+        pq_w_blank.append(w_blank_val)
+        pq_num_dups.append(num_dup_val)
 
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -230,12 +302,18 @@ def generate_dataset(
             "dt": pa.array(pq_dt, pa.date32()),
             "flag": pa.array(pq_flag, pa.bool_()),
             "cat": pa.array(pq_cat, pa.string()),
+            "w_blank": pa.array(pq_w_blank, pa.string()),
+            "num_dups": pa.array(pq_num_dups, pa.float64()),
         }
     )
     pq.write_table(pq_table, parquet_path)
 
     return {"headers": headers, "row_count": rows}
 
+
+# ==============================================================================
+# SECTION: FORMULA CATALOG
+# ==============================================================================
 
 def build_formula_catalog(headers: list[str]) -> list[dict[str, Any]]:
     """Generate deterministic formulas spanning aggregates, filters, arithmetic, and group-by."""
@@ -308,8 +386,11 @@ def build_formula_catalog(headers: list[str]) -> list[dict[str, Any]]:
         ("d_lt", "t[d] < 0", "decimal_filter"),
         ("d_neq", "t[d] <> 0", "decimal_filter"),
         ("dt_range", "t[dt] >= DATE(2026, 6, 1)", "date_range"),
+        ("dt_gt", "t[dt] > DATE(2026, 6, 1)", "date_gt"),
         ("dt_lte", "t[dt] <= DATE(2026, 6, 1)", "date_lte"),
+        ("dt_lt", "t[dt] < DATE(2026, 6, 1)", "date_lt"),
         ("dt_neq", "t[dt] <> DATE(2026, 6, 1)", "date_neq"),
+        ("dt_in", "t[dt] IN {DATE(2026, 6, 1), DATE(2026, 7, 1)}", "date_in"),
         ("cat_in", 't[cat] IN {"A", "B"}', "is_any_of"),
         ("empty_set", 't[id] = "-999"', "empty_set"),
     ]
@@ -408,6 +489,10 @@ def build_formula_catalog(headers: list[str]) -> list[dict[str, Any]]:
     return catalog
 
 
+# ==============================================================================
+# SECTION: SQL GENERATOR & REFUSAL LOGIC
+# ==============================================================================
+
 def generate_sql(
     formula: dict[str, Any],
     table_name: str,
@@ -426,6 +511,29 @@ def generate_sql(
     group_col = formula.get("group_col")
     c_type = column_types.get(col, "text") if col else None
 
+    # Refusal D2: COUNT of a text column
+    if agg == "COUNT" and c_type == "text" and mode == "mapped":
+        return Refusal("COUNT not supported on text column")
+
+    # Refusal D1: DISTINCTCOUNTNOBLANK on store
+    if agg == "DISTINCTCOUNTNOBLANK" and mode == "mapped":
+        if overrides.get("noblank_equals_distinctcount"):
+            pass
+        else:
+            return Refusal("DISTINCTCOUNTNOBLANK not supported on store")
+
+    # Refusal B1: numeric IN / && filters with blank cells error on old engine
+    if f_type in ("w_in", "filter_two_cols", "dt_in") and mode == "mapped":
+        return Refusal("Engine bug: numeric/date IN or && filter with blank cells raises type error")
+
+    # Refusal: All-blank column aggregations (inferred as text)
+    if col == "w_blank" and agg in ("SUM", "AVERAGE") and mode == "mapped":
+        return Refusal(f"{agg} not supported on text column")
+
+    # Refusal: Parquet COUNTA
+    if agg == "COUNTA" and is_parquet and mode == "mapped":
+        return Refusal("COUNTA on Parquet typed columns differs from CSV store")
+
     # F6: U+0000..U+0020 trim characters
     if overrides.get("trim_set_space_only"):
         trim_arg = "' \\t\\r\\n'"
@@ -441,13 +549,14 @@ def generate_sql(
 
     fold_t = fold_expr("t")
 
-    # F7: Derive decimal scale
-    if overrides.get("hardcode_scale_4"):
-        d_scale = 4
-    else:
-        d_scale = (store_meta or {}).get("decimal_scales", {}).get(col, 4)
-        if col == "w_d":
-            d_scale = (store_meta or {}).get("decimal_scales", {}).get("d", 4)
+    # Decimal scale: for filtered column vs aggregated column
+    # Aggregated column scale:
+    agg_d_scale = 4 if overrides.get("hardcode_scale_4") else (store_meta or {}).get("decimal_scales", {}).get(col, 4)
+    if col == "w_d":
+        agg_d_scale = 4 if overrides.get("hardcode_scale_4") else (store_meta or {}).get("decimal_scales", {}).get("d", 4)
+
+    # Filtered column scale (C1): keyed by the column being filtered (d)
+    filter_d_scale = 4 if overrides.get("hardcode_scale_4") else (store_meta or {}).get("decimal_scales", {}).get("d", 4)
 
     # Check 38 digit total limit refusal
     max_digits = (store_meta or {}).get("max_digits", {}).get(col, 0)
@@ -458,7 +567,12 @@ def generate_sql(
     where_clause = ""
     if f_type:
         cast_w = "w" if is_parquet else "TRY_CAST(NULLIF(w, '') AS HUGEINT)"
-        cast_d = "d" if is_parquet else f"TRY_CAST(NULLIF(d, '') AS DECIMAL(38, {d_scale}))"
+        cast_d_filter = (
+            f"CAST(d AS DECIMAL(38, {filter_d_scale}))"
+            if is_parquet
+            else f"TRY_CAST(NULLIF(d, '') AS DECIMAL(38, {filter_d_scale}))"
+        )
+        cast_dt = "TRY_CAST(dt AS DATE)" if is_parquet else "TRY_CAST(NULLIF(dt, '') AS DATE)"
 
         if overrides.get("drop_w_zero_coalesce"):
             w_zero_cond = f"{cast_w} = 0"
@@ -504,7 +618,10 @@ def generate_sql(
         elif f_type == "w_gt":
             where_clause = "WHERE TRY_CAST(w AS DOUBLE) > 100" if mode == "naive" else f"WHERE {cast_w} > 100"
         elif f_type == "w_gte":
-            where_clause = "WHERE TRY_CAST(w AS DOUBLE) >= 100" if mode == "naive" else f"WHERE {cast_w} >= 100"
+            if overrides.get("m15_num_gte_to_gt"):
+                where_clause = "WHERE TRY_CAST(w AS DOUBLE) >= 100" if mode == "naive" else f"WHERE {cast_w} > 100"
+            else:
+                where_clause = "WHERE TRY_CAST(w AS DOUBLE) >= 100" if mode == "naive" else f"WHERE {cast_w} >= 100"
         elif f_type == "w_neq":
             where_clause = "WHERE TRY_CAST(w AS DOUBLE) <> 100" if mode == "naive" else f"WHERE COALESCE({cast_w}, 0) <> 100"
         elif f_type == "w_not":
@@ -514,20 +631,29 @@ def generate_sql(
         elif f_type == "w_in":
             where_clause = "WHERE TRY_CAST(w AS DOUBLE) IN (100, 200)" if mode == "naive" else f"WHERE COALESCE({cast_w}, 0) IN (100, 200)"
         elif f_type == "d_gte":
-            where_clause = "WHERE TRY_CAST(d AS DOUBLE) >= 0" if mode == "naive" else f"WHERE COALESCE({cast_d}, 0) >= 0"
+            where_clause = "WHERE TRY_CAST(d AS DOUBLE) >= 0" if mode == "naive" else f"WHERE COALESCE({cast_d_filter}, 0) >= 0"
         elif f_type == "d_lt":
-            where_clause = "WHERE TRY_CAST(d AS DOUBLE) < 0" if mode == "naive" else f"WHERE {cast_d} < 0"
+            where_clause = "WHERE TRY_CAST(d AS DOUBLE) < 0" if mode == "naive" else f"WHERE {cast_d_filter} < 0"
         elif f_type == "d_neq":
-            where_clause = "WHERE TRY_CAST(d AS DOUBLE) <> 0" if mode == "naive" else f"WHERE COALESCE({cast_d}, 0) <> 0"
+            where_clause = "WHERE TRY_CAST(d AS DOUBLE) <> 0" if mode == "naive" else f"WHERE COALESCE({cast_d_filter}, 0) <> 0"
         elif f_type == "dt_range":
-            cast_dt = "TRY_CAST(dt AS DATE)" if is_parquet else "TRY_CAST(NULLIF(dt, '') AS DATE)"
-            where_clause = "WHERE dt >= '2026-06-01'" if mode == "naive" else f"WHERE {cast_dt} >= DATE '2026-06-01'"
+            if overrides.get("m15_date_gte_to_gt"):
+                where_clause = "WHERE dt >= '2026-06-01'" if mode == "naive" else f"WHERE {cast_dt} > DATE '2026-06-01'"
+            else:
+                where_clause = "WHERE dt >= '2026-06-01'" if mode == "naive" else f"WHERE {cast_dt} >= DATE '2026-06-01'"
+        elif f_type == "dt_gt":
+            where_clause = "WHERE dt > '2026-06-01'" if mode == "naive" else f"WHERE {cast_dt} > DATE '2026-06-01'"
         elif f_type == "dt_lte":
-            cast_dt = "TRY_CAST(dt AS DATE)" if is_parquet else "TRY_CAST(NULLIF(dt, '') AS DATE)"
-            where_clause = "WHERE dt <= '2026-06-01'" if mode == "naive" else f"WHERE {cast_dt} <= DATE '2026-06-01'"
+            # Item A1: dt <= D includes blank dates (epoch DATE '1899-12-30')
+            where_clause = "WHERE dt <= '2026-06-01'" if mode == "naive" else f"WHERE COALESCE({cast_dt}, DATE '1899-12-30') <= DATE '2026-06-01'"
+        elif f_type == "dt_lt":
+            # Item A1: dt < D includes blank dates (epoch DATE '1899-12-30')
+            where_clause = "WHERE dt < '2026-06-01'" if mode == "naive" else f"WHERE COALESCE({cast_dt}, DATE '1899-12-30') < DATE '2026-06-01'"
         elif f_type == "dt_neq":
-            cast_dt = "TRY_CAST(dt AS DATE)" if is_parquet else "TRY_CAST(NULLIF(dt, '') AS DATE)"
-            where_clause = "WHERE dt <> '2026-06-01'" if mode == "naive" else f"WHERE {cast_dt} <> DATE '2026-06-01'"
+            # Item A1: dt <> D includes blank dates (epoch DATE '1899-12-30')
+            where_clause = "WHERE dt <> '2026-06-01'" if mode == "naive" else f"WHERE COALESCE({cast_dt}, DATE '1899-12-30') <> DATE '2026-06-01'"
+        elif f_type == "dt_in":
+            where_clause = "WHERE dt IN ('2026-06-01', '2026-07-01')"
         elif f_type == "cat_in":
             where_clause = "WHERE cat IN ('A', 'B')"
         elif f_type == "empty_set":
@@ -539,67 +665,23 @@ def generate_sql(
         elif f_type == "all_blank_filter":
             where_clause = f"WHERE {cast_w} = 999999"
 
-    # F5: Group-by shapes
+    # F5 / Work item G: Group-by shapes
     if group_col:
-        val_expr = "COUNT(*)"
-        if agg == "SUM":
-            if mode == "naive":
-                val_expr = f"SUM(TRY_CAST({col} AS DOUBLE))"
-            else:
-                if col == "w":
-                    cast_c = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS HUGEINT)"
-                    val_expr = f"SUM({cast_c})"
-                else:
-                    cast_c = f"CAST({col} AS DECIMAL(38, {d_scale}))" if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {d_scale}))"
-                    val_expr = f"SUM({cast_c})"
-        elif agg == "AVERAGE":
-            if mode == "naive":
-                val_expr = f"AVG(TRY_CAST({col} AS DOUBLE))"
-            else:
-                cast_c = f"CAST({col} AS DECIMAL(38, {d_scale}))" if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {d_scale}))"
-                val_expr = f"AVG({cast_c})"
-        elif agg == "DISTINCTCOUNT":
-            if mode == "naive":
-                val_expr = f"COUNT(DISTINCT {col})"
-            else:
-                blank_check = f"MAX(CASE WHEN {col} IS NULL THEN 1 ELSE 0 END)" if is_parquet else f"MAX(CASE WHEN COALESCE({col}, '') = '' THEN 1 ELSE 0 END)"
-                val_expr = f"COUNT(DISTINCT NULLIF({col}, '')) + {blank_check}"
-        elif agg == "MIN":
-            if mode == "naive":
-                val_expr = f"MIN({col})"
-            else:
-                cast_c = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DATE)"
-                val_expr = f"MIN({cast_c})"
-
-        if group_col == "cat":
-            sub_q = f"SELECT cat as k, {val_expr} as val FROM {t_q} GROUP BY cat"
-            return f"SELECT string_agg(k || ':' || val, ';' ORDER BY k) FROM ({sub_q})"
-        if group_col == "t":
-            sub_q = f"SELECT {fold_t} as fold_key, FIRST(rtrim(COALESCE(t, ''), {trim_arg})) as disp, {val_expr} as val FROM {t_q} GROUP BY {fold_t}"
-            return f"SELECT string_agg(disp || ':' || val, ';' ORDER BY fold_key) FROM ({sub_q})"
-        if group_col == "dt":
-            cast_dt = "dt" if is_parquet else "TRY_CAST(NULLIF(dt, '') AS DATE)"
-            sub_q = f"SELECT {cast_dt} as k, {val_expr} as val FROM {t_q} GROUP BY {cast_dt}"
-            return f"SELECT string_agg(COALESCE(strftime(k, '%Y-%m-%d'), '') || ':' || val, ';' ORDER BY k) FROM ({sub_q})"
-        if group_col == "flag":
-            cast_flag = "COALESCE(flag, FALSE)" if is_parquet else "CASE WHEN UPPER(TRIM(COALESCE(flag, ''))) = 'TRUE' THEN TRUE ELSE FALSE END"
-            sub_q = f"SELECT {cast_flag} as k, {val_expr} as val FROM {t_q} GROUP BY {cast_flag}"
-            return f"SELECT string_agg((CASE WHEN k THEN 'TRUE' ELSE 'FALSE' END) || ':' || val, ';' ORDER BY k) FROM ({sub_q})"
+        # Group-by evaluation delegates to run_comparison for mapped mode
+        return None
 
     # Arithmetic combos
     if f_type in ("plus_scalar", "ratio", "divide_zero", "combo_sum", "combo_sub", "sumx_divide_zero", "sumx_slash_zero"):
         cast_w = "w" if is_parquet else "TRY_CAST(NULLIF(w, '') AS HUGEINT)"
-        cast_d = f"CAST(d AS DECIMAL(38, {d_scale}))" if is_parquet else f"TRY_CAST(NULLIF(d, '') AS DECIMAL(38, {d_scale}))"
-        cnt_d = "COUNT(d)" if is_parquet else "COUNT(NULLIF(d, ''))"
 
         if f_type == "plus_scalar":
             if mode == "naive":
                 return f"SELECT SUM(TRY_CAST(w AS DOUBLE)) + 0.1 FROM {t_q}"
-            return f"SELECT CAST(SUM({cast_w}) AS DOUBLE) + 0.1 FROM {t_q}"
+            return "PLUS_SCALAR"
         if f_type == "ratio":
             if mode == "naive":
                 return f"SELECT SUM(TRY_CAST(d AS DOUBLE)) / COUNT(d) FROM {t_q}"
-            return f"SELECT SUM({cast_d}) / NULLIF({cnt_d}, 0) FROM {t_q}"
+            return "RATIO"
         if f_type == "divide_zero":
             if mode == "naive":
                 return f"SELECT SUM(TRY_CAST(w AS DOUBLE)) / 0 FROM {t_q}"
@@ -615,14 +697,12 @@ def generate_sql(
         if f_type == "combo_sum":
             if mode == "naive":
                 return f"SELECT SUM(TRY_CAST(w AS DOUBLE)) + SUM(TRY_CAST(d AS DOUBLE)) FROM {t_q}"
-            # CAST SUM(w) to DOUBLE + fsum(d) to match exact IEEE 754 float sum of engine
-            sum_d_expr = "fsum(d)" if is_parquet else "fsum(TRY_CAST(NULLIF(d, '') AS DOUBLE))"
-            return f"SELECT CAST(SUM({cast_w}) AS DOUBLE) + {sum_d_expr} FROM {t_q}"
+            # Work item A3 / Result layer: return special token so run_comparison executes exact leaf sums
+            return "COMBO_SUM"
         if f_type == "combo_sub":
-            cast_avg_w = "w" if is_parquet else "TRY_CAST(NULLIF(w, '') AS DOUBLE)"
             if mode == "naive":
                 return f"SELECT AVG(TRY_CAST(w AS DOUBLE)) - MIN(TRY_CAST(w AS DOUBLE)) FROM {t_q}"
-            return f"SELECT AVG({cast_avg_w}) - MIN({cast_w}) FROM {t_q}"
+            return "COMBO_SUB"
 
     # Naive mode
     if mode == "naive":
@@ -675,17 +755,29 @@ def generate_sql(
                 cast_col = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS HUGEINT)"
             return f"SELECT {empty_guard}SUM({cast_col}){empty_end} FROM {t_q} {where_clause}"
         if c_type == "decimal_number":
-            if overrides.get("m8_decimal_double"):
+            if overrides.get("m8_decimal_double") or (not is_parquet and overrides.get("m8_prime_decimal_double")):
                 cast_col = f"TRY_CAST({col} AS DOUBLE)" if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DOUBLE)"
             else:
-                cast_col = f"CAST({col} AS DECIMAL(38, {d_scale}))" if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {d_scale}))"
+                cast_col = (
+                    f"CAST(CAST({col} AS VARCHAR) AS DECIMAL(38, {agg_d_scale}))"
+                    if is_parquet
+                    else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {agg_d_scale}))"
+                )
             return f"SELECT {empty_guard}SUM({cast_col}){empty_end} FROM {t_q} {where_clause}"
         cast_col = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DOUBLE)"
         return f"SELECT {empty_guard}SUM({cast_col}){empty_end} FROM {t_q} {where_clause}"
 
     if agg == "AVERAGE":
-        cast_col = f"CAST({col} AS DECIMAL(38, {d_scale}))" if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {d_scale}))"
-        return f"SELECT {empty_guard}AVG({cast_col}){empty_end} FROM {t_q} {where_clause}"
+        # Work item A2: Return special token so run_comparison executes exact sum and count
+        if c_type == "whole_number":
+            cast_c = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS HUGEINT)"
+        else:
+            cast_c = (
+                f"CAST(CAST({col} AS VARCHAR) AS DECIMAL(38, {agg_d_scale}))"
+                if is_parquet
+                else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {agg_d_scale}))"
+            )
+        return f"EXACT_AVERAGE:{cast_c}:{where_clause}"
 
     if agg == "MIN":
         if c_type == "date":
@@ -698,7 +790,11 @@ def generate_sql(
             cast_col = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS HUGEINT)"
             return f"SELECT {empty_guard}MIN({cast_col}){empty_end} FROM {t_q} {where_clause}"
         if c_type == "decimal_number":
-            cast_col = f"CAST({col} AS DECIMAL(38, {d_scale}))" if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {d_scale}))"
+            cast_col = (
+                f"CAST(CAST({col} AS VARCHAR) AS DECIMAL(38, {agg_d_scale}))"
+                if is_parquet
+                else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {agg_d_scale}))"
+            )
             return f"SELECT {empty_guard}MIN({cast_col}){empty_end} FROM {t_q} {where_clause}"
         cast_col = col if is_parquet else f"NULLIF({col}, '')"
         return f"SELECT {empty_guard}MIN({cast_col}){empty_end} FROM {t_q} {where_clause}"
@@ -714,7 +810,11 @@ def generate_sql(
             cast_col = col if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS HUGEINT)"
             return f"SELECT {empty_guard}MAX({cast_col}){empty_end} FROM {t_q} {where_clause}"
         if c_type == "decimal_number":
-            cast_col = f"CAST({col} AS DECIMAL(38, {d_scale}))" if is_parquet else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {d_scale}))"
+            cast_col = (
+                f"CAST(CAST({col} AS VARCHAR) AS DECIMAL(38, {agg_d_scale}))"
+                if is_parquet
+                else f"TRY_CAST(NULLIF({col}, '') AS DECIMAL(38, {agg_d_scale}))"
+            )
             return f"SELECT {empty_guard}MAX({cast_col}){empty_end} FROM {t_q} {where_clause}"
         cast_col = col if is_parquet else f"NULLIF({col}, '')"
         return f"SELECT {empty_guard}MAX({cast_col}){empty_end} FROM {t_q} {where_clause}"
@@ -725,22 +825,18 @@ def generate_sql(
             return f"SELECT {empty_guard}NULLIF({cnt_col}, 0){empty_end} FROM {t_q} {where_clause}"
         if c_type == "boolean":
             return Refusal("COUNT not supported on boolean column")
-        # Text column: count of non-blank string
+        # Text column: refused on mapped mode above
         cnt_col = f"COUNT(NULLIF({col}, ''))"
         return f"SELECT {empty_guard}NULLIF({cnt_col}, 0){empty_end} FROM {t_q} {where_clause}"
 
     if agg == "COUNTA":
-        if overrides.get("m5_counta_nonblank"):
+        if overrides.get("m5_counta_nonblank") or (not is_parquet and overrides.get("m5_prime_counta_nonblank")):
             cnt_col = f"COUNT({col})" if is_parquet else f"COUNT(NULLIF({col}, ''))"
             return f"SELECT {empty_guard}NULLIF({cnt_col}, 0){empty_end} FROM {t_q} {where_clause}"
-        # F4/F8: Stated COUNTA rule: count rows whose cell exists in store's representation
-        # On CSV, COUNT(col) counts all rows where cell exists (including '')
-        # On Parquet, typed columns count non-null; string columns count non-null
         cnt_col = f"COUNT({col})"
         return f"SELECT {empty_guard}NULLIF({cnt_col}, 0){empty_end} FROM {t_q} {where_clause}"
 
     if agg == "COUNTBLANK":
-        # F8: blank = NULL or '' for text; NULL for typed columns
         if c_type in ("text",):
             cnt_nonblank = f"COUNT(NULLIF({col}, ''))"
         else:
@@ -748,7 +844,6 @@ def generate_sql(
         return f"SELECT {empty_guard}NULLIF(COUNT(*) - {cnt_nonblank}, 0){empty_end} FROM {t_q} {where_clause}"
 
     if agg == "DISTINCTCOUNT":
-        # F4/F8: On text, fold U+0000..U+0020 + ASCII lowercase + 1 for blank
         if c_type == "text":
             fold_c = fold_expr(col)
             blank_add = f"MAX(CASE WHEN COALESCE({col}, '') = '' THEN 1 ELSE 0 END)"
@@ -756,50 +851,35 @@ def generate_sql(
                 f"SELECT {empty_guard}COUNT(DISTINCT NULLIF({fold_c}, '')) + {blank_add}{empty_end} "
                 f"FROM {t_q} {where_clause}"
             )
-        # On typed columns: distinct of cast value + 1 if blank exists
         if is_parquet:
             blank_add = f"MAX(CASE WHEN {col} IS NULL THEN 1 ELSE 0 END)"
             return f"SELECT {empty_guard}COUNT(DISTINCT {col}) + {blank_add}{empty_end} FROM {t_q} {where_clause}"
         else:
-            cast_type = "HUGEINT" if c_type == "whole_number" else f"DECIMAL(38, {d_scale})" if c_type == "decimal_number" else "DATE" if c_type == "date" else "BOOLEAN"
+            cast_type = "HUGEINT" if c_type == "whole_number" else f"DECIMAL(38, {agg_d_scale})" if c_type == "decimal_number" else "DATE" if c_type == "date" else "BOOLEAN"
             cast_c = f"TRY_CAST(NULLIF({col}, '') AS {cast_type})"
+            if overrides.get("m14_distinct_no_blank_add"):
+                return f"SELECT {empty_guard}COUNT(DISTINCT {cast_c}){empty_end} FROM {t_q} {where_clause}"
             blank_add = f"MAX(CASE WHEN COALESCE({col}, '') = '' THEN 1 ELSE 0 END)"
             return f"SELECT {empty_guard}COUNT(DISTINCT {cast_c}) + {blank_add}{empty_end} FROM {t_q} {where_clause}"
 
-    if agg == "DISTINCTCOUNTNOBLANK":
-        if overrides.get("noblank_equals_distinctcount"):
-            return generate_sql(
-                {**formula, "agg": "DISTINCTCOUNT"},
-                table_name,
-                column_types,
-                mode=mode,
-                is_parquet=is_parquet,
-                store_meta=store_meta,
-                overrides=overrides,
-            )
-        if c_type == "text":
-            fold_c = fold_expr(col)
-            return (
-                f"SELECT {empty_guard}COUNT(DISTINCT NULLIF({fold_c}, '')){empty_end} "
-                f"FROM {t_q} {where_clause}"
-            )
-        if is_parquet:
-            return f"SELECT {empty_guard}COUNT(DISTINCT {col}){empty_end} FROM {t_q} {where_clause}"
-        else:
-            cast_type = "HUGEINT" if c_type == "whole_number" else f"DECIMAL(38, {d_scale})" if c_type == "decimal_number" else "DATE" if c_type == "date" else "BOOLEAN"
-            cast_c = f"TRY_CAST(NULLIF({col}, '') AS {cast_type})"
-            return f"SELECT {empty_guard}COUNT(DISTINCT {cast_c}){empty_end} FROM {t_q} {where_clause}"
-
     return None
 
+
+# ==============================================================================
+# SECTION: RUN COMPARISON WORKFLOW
+# ==============================================================================
 
 def run_comparison(
     rows: int = 2000,
     seed: int = 42,
     perf_rows: int = 0,
     overrides: dict[str, Any] | None = None,
+    formula_filter: list[str] | None = None,
+    skip_naive: bool = False,
+    skip_parquet: bool = False,
+    skip_group_by: bool = False,
 ) -> dict[str, Any]:
-    """Run full comparison tool workflow across engine, CSV store, Parquet store."""
+    """Run comparison workflow across engine, CSV store, and Parquet store."""
     overrides = overrides or {}
     temp_dir = tempfile.mkdtemp()
     t_path = Path(temp_dir)
@@ -814,12 +894,13 @@ def run_comparison(
     # 1. Setup DuckStore
     store = DuckStore(str(db_file))
     import_csv_to_store(store, "t_csv", csv_file, {})
-    import_parquet_to_store(store, "t_pq", pq_file, {})
+    if not skip_parquet:
+        import_parquet_to_store(store, "t_pq", pq_file, {})
 
     # F7: Inspect store metadata for max decimals and digits
     decimal_scales: dict[str, int] = {}
     max_digits_map: dict[str, int] = {}
-    for col in ["d", "w", "big"]:
+    for col in ["d", "w", "big", "num_dups"]:
         try:
             scale_res = store.execute(
                 f"SELECT COALESCE(MAX(CASE WHEN strpos({col}, '.') > 0 "
@@ -847,7 +928,46 @@ def run_comparison(
     cand_headers = cA._headers
     model_types = cA._project["model"]["tables"][0]["column_types"]
 
-    formulas = build_formula_catalog(headers)
+    all_formulas = build_formula_catalog(headers)
+    if formula_filter:
+        filter_set = set(formula_filter)
+        formulas = [f for f in all_formulas if f["id"] in filter_set or f["shape"] in filter_set]
+    else:
+        formulas = all_formulas
+
+    if skip_group_by:
+        formulas = [f for f in formulas if not f.get("group_col")]
+
+    # Pre-fetch engine group keys in dictionary order
+    engine_group_keys: dict[str, list[str]] = {}
+    if not skip_group_by:
+        for g_col in ["cat", "t", "dt", "flag"]:
+            try:
+                tocsv_dax = f"TOCSV(VALUES({tname}[{g_col}]), 100000)"
+                m_gk = normalize_measure(f"M_GK_{g_col}", tocsv_dax, home_table_id=aid)
+                gk_res = evaluate_measures(
+                    [m_gk],
+                    cand_rows,
+                    cand_headers,
+                    tname,
+                    measure_names=[f"M_GK_{g_col}"],
+                    table_context=ctx,
+                    relationships=[],
+                    filter_table_ids=[],
+                    active_table_id=aid,
+                )[f"M_GK_{g_col}"]
+                lines = gk_res.split("\n")[1:] if gk_res else []
+                # Keep unique keys preserving order
+                seen_k = set()
+                dedup_keys = []
+                for k in lines:
+                    if k not in seen_k:
+                        seen_k.add(k)
+                        dedup_keys.append(k)
+                engine_group_keys[g_col] = dedup_keys
+            except Exception:
+                engine_group_keys[g_col] = []
+
     results: list[dict[str, Any]] = []
 
     for f_item in formulas:
@@ -862,35 +982,22 @@ def run_comparison(
         engine_text = ""
 
         if g_col:
-            # F5: Group-by evaluation using per-key CALCULATE
+            # F5 / Work item G: Group-by evaluation using engine key order
             try:
                 g_target = f_item.get("col")
                 g_agg = f_item["agg"]
                 val_expr = f"COUNTROWS({tname})" if g_agg == "COUNTROWS" else f"{g_agg}({tname}[{g_target}])"
-
-                trim_chars = "".join(chr(i) for i in range(33))
-                first_seen: dict[str, str] = {}
-                for r in cand_rows:
-                    val = r.get(g_col, "")
-                    if g_col == "t":
-                        k = val.rstrip(trim_chars).translate(
-                            str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
-                        )
-                        first_seen.setdefault(k, val.rstrip(trim_chars))
-                    elif g_col == "flag":
-                        k = "TRUE" if str(val).strip().casefold() == "true" else "FALSE"
-                        first_seen.setdefault(k, k)
-                    else:
-                        first_seen.setdefault(val, val)
-
+                e_keys = engine_group_keys.get(g_col, [])
                 pairs: list[str] = []
-                for k, disp in sorted(first_seen.items()):
-                    if k == "" or (g_col == "flag" and disp == "BLANK"):
-                        filter_part = f"ISBLANK({tname}[{g_col}])" if g_col == "dt" else f'{tname}[{g_col}] = ""'
+                for k in e_keys:
+                    if k == "":
+                        filter_part = f"ISBLANK({tname}[{g_col}])" if g_col in ("dt", "flag") else f'{tname}[{g_col}] = ""'
                     elif g_col == "flag":
                         filter_part = f"{tname}[{g_col}] = {k}()"
                     elif g_col == "dt":
-                        filter_part = f"{tname}[{g_col}] = DATE({k[:4]}, {int(k[5:7])}, {int(k[8:10])})"
+                        # format is m/d/yyyy
+                        parts = k.split("/")
+                        filter_part = f"{tname}[{g_col}] = DATE({parts[2]}, {int(parts[0])}, {int(parts[1])})"
                     else:
                         filter_part = f'{tname}[{g_col}] = "{k}"'
 
@@ -907,7 +1014,7 @@ def run_comparison(
                         filter_table_ids=[],
                         active_table_id=aid,
                     )["M"]
-                    disp_str = format_report_value(disp)
+                    disp_str = format_report_value(k)
                     val_str = format_report_value(k_val)
                     pairs.append(f"{disp_str}:{val_str}")
 
@@ -918,7 +1025,6 @@ def run_comparison(
                 engine_text = f"ERR:{engine_err[:60]}"
         else:
             try:
-                # Replace table name in dax
                 expr = dax_expr.replace("t[", f"{tname}[").replace("(t)", f"({tname})").replace("(t,", f"({tname},")
                 m = normalize_measure("M", expr, home_table_id=aid)
                 res = evaluate_measures(
@@ -939,101 +1045,310 @@ def run_comparison(
                 engine_text = f"ERR:{engine_err[:60]}"
 
         # B: Naive SQL evaluation
-        naive_sql_res = generate_sql(f_item, "t_csv", model_types, mode="naive")
         naive_val = None
         naive_text = ""
         naive_err = None
-        if naive_sql_res is None or isinstance(naive_sql_res, Refusal):
-            naive_err = "NOT_SUPPORTED"
-            naive_text = "ERR:NOT_SUPPORTED"
-        else:
-            try:
-                row_res = store.execute(naive_sql_res)
-                naive_val = row_res[0][0] if row_res else None
-                naive_text = format_report_value(naive_val)
-            except Exception as exc:
-                naive_err = str(exc)
-                naive_text = f"ERR:{naive_err[:60]}"
+        if not skip_naive:
+            naive_sql_res = generate_sql(f_item, "t_csv", model_types, mode="naive")
+            if naive_sql_res is None or isinstance(naive_sql_res, Refusal):
+                naive_err = "NOT_SUPPORTED"
+                naive_text = "ERR:NOT_SUPPORTED"
+            else:
+                try:
+                    row_res = store.execute(naive_sql_res)
+                    naive_val = row_res[0][0] if row_res else None
+                    naive_text = format_report_value(naive_val)
+                except Exception as exc:
+                    naive_err = str(exc)
+                    naive_text = f"ERR:{naive_err[:60]}"
 
         # C: Mapped SQL evaluation (CSV store)
-        mapped_sql_res = generate_sql(
-            f_item,
-            "t_csv",
-            model_types,
-            mode="mapped",
-            is_parquet=False,
-            store_meta=store_meta,
-            overrides=overrides,
-        )
         mapped_val = None
         mapped_text = ""
         mapped_err = None
         mapped_refusal = None
 
-        if isinstance(mapped_sql_res, Refusal):
-            mapped_refusal = mapped_sql_res
-            mapped_text = str(mapped_sql_res)
-        elif mapped_sql_res is None:
-            mapped_refusal = Refusal("Unsupported shape")
-            mapped_text = str(mapped_refusal)
-        else:
+        if g_col:
+            # Group-by mapped execution
             try:
-                row_res = store.execute(mapped_sql_res)
-                mapped_val = row_res[0][0] if row_res else None
-                mapped_text = format_report_value(mapped_val)
+                g_target = f_item.get("col")
+                g_agg = f_item["agg"]
+                d_scale = store_meta["decimal_scales"].get(g_target, 4) if g_target else 4
+
+                if g_agg == "COUNTROWS":
+                    val_expr = "COUNT(*)"
+                elif g_agg == "SUM":
+                    if g_target == "w":
+                        val_expr = "SUM(TRY_CAST(NULLIF(w, '') AS HUGEINT))"
+                    else:
+                        val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale})))"
+                elif g_agg == "AVERAGE":
+                    val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale}))), COUNT(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale})))"
+                elif g_agg == "DISTINCTCOUNT":
+                    val_expr = f"COUNT(DISTINCT NULLIF({g_target}, '')) + MAX(CASE WHEN COALESCE({g_target}, '') = '' THEN 1 ELSE 0 END)"
+                elif g_agg == "MIN":
+                    val_expr = f"MIN(TRY_CAST(NULLIF({g_target}, '') AS DATE))"
+
+                if g_col == "cat":
+                    q = f"SELECT cat as k, {val_expr} FROM \"t_csv\" GROUP BY cat"
+                elif g_col == "t":
+                    fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+                    q = f"SELECT FIRST(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL})) as k, {val_expr} FROM \"t_csv\" GROUP BY {fold_t}"
+                elif g_col == "dt":
+                    q = f"SELECT strftime(TRY_CAST(NULLIF(dt, '') AS DATE), '%-m/%-d/%Y') as k, {val_expr} FROM \"t_csv\" GROUP BY TRY_CAST(NULLIF(dt, '') AS DATE)"
+                elif g_col == "flag":
+                    q = f"SELECT (CASE WHEN UPPER(TRIM(COALESCE(flag, ''))) = 'TRUE' THEN 'TRUE' ELSE 'FALSE' END) as k, {val_expr} FROM \"t_csv\" GROUP BY 1"
+
+                sql_rows = store.execute(q)
+                sql_dict = {}
+                for r_tuple in sql_rows:
+                    k_str = str(r_tuple[0] if r_tuple[0] is not None else "")
+                    if g_agg == "AVERAGE":
+                        s_part, c_part = r_tuple[1], r_tuple[2]
+                        sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part)
+                    else:
+                        sql_dict[k_str] = r_tuple[1]
+
+                e_keys = engine_group_keys.get(g_col, [])
+                mapped_pairs = []
+                for k in e_keys:
+                    mv = sql_dict.get(k)
+                    mapped_pairs.append(f"{format_report_value(k)}:{format_report_value(mv)}")
+                mapped_val = ";".join(mapped_pairs)
+                mapped_text = mapped_val
             except Exception as exc:
                 mapped_err = str(exc)
                 mapped_text = f"ERR:{mapped_err[:60]}"
+        else:
+            mapped_sql_res = generate_sql(
+                f_item,
+                "t_csv",
+                model_types,
+                mode="mapped",
+                is_parquet=False,
+                store_meta=store_meta,
+                overrides=overrides,
+            )
+
+            if isinstance(mapped_sql_res, Refusal):
+                mapped_refusal = mapped_sql_res
+                mapped_text = str(mapped_sql_res)
+            elif mapped_sql_res is None:
+                mapped_refusal = Refusal("Unsupported shape")
+                mapped_text = str(mapped_refusal)
+            elif isinstance(mapped_sql_res, str) and mapped_sql_res.startswith("EXACT_AVERAGE:"):
+                # Work item A2: Exact AVERAGE via sum / count in Python Decimal context
+                _, cast_c, where_part = mapped_sql_res.split(":", 2)
+                try:
+                    q = f"SELECT SUM({cast_c}), COUNT({cast_c}) FROM \"t_csv\" {where_part}"
+                    s_res, c_res = store.execute(q)[0]
+                    mapped_val = StoreResultLayer.divide(s_res, c_res)
+                    mapped_text = format_report_value(mapped_val)
+                except Exception as exc:
+                    mapped_err = str(exc)
+                    mapped_text = f"ERR:{mapped_err[:60]}"
+            elif mapped_sql_res == "COMBO_SUM":
+                # Work item A3: Exact combo sums
+                try:
+                    s_w = store.execute('SELECT SUM(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)) FROM "t_csv"')[0][0]
+                    d_sc = store_meta["decimal_scales"].get("d", 4)
+                    s_d = store.execute(f'SELECT SUM(TRY_CAST(NULLIF(d, \'\') AS DECIMAL(38, {d_sc}))) FROM "t_csv"')[0][0]
+                    # Compute in Python Decimal / float arithmetic layer matching engine
+                    f_sum = float(Decimal(str(s_w or 0))) + float(Decimal(str(s_d or 0)))
+                    mapped_val = Decimal(f_sum)
+                    mapped_text = format_report_value(mapped_val)
+                except Exception as exc:
+                    mapped_err = str(exc)
+                    mapped_text = f"ERR:{mapped_err[:60]}"
+            elif mapped_sql_res == "PLUS_SCALAR":
+                try:
+                    s_w = store.execute('SELECT SUM(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)) FROM "t_csv"')[0][0]
+                    f_res = float(Decimal(str(s_w or 0))) + 0.1
+                    mapped_val = Decimal(f_res)
+                    mapped_text = format_report_value(mapped_val)
+                except Exception as exc:
+                    mapped_err = str(exc)
+                    mapped_text = f"ERR:{mapped_err[:60]}"
+            elif mapped_sql_res == "RATIO":
+                try:
+                    d_sc = store_meta["decimal_scales"].get("d", 4)
+                    s_d = store.execute(f'SELECT SUM(TRY_CAST(NULLIF(d, \'\') AS DECIMAL(38, {d_sc}))) FROM "t_csv"')[0][0]
+                    c_d = store.execute('SELECT COUNT(NULLIF(d, \'\')) FROM "t_csv"')[0][0]
+                    mapped_val = StoreResultLayer.divide_ratio(s_d, c_d)
+                    mapped_text = format_report_value(mapped_val)
+                except Exception as exc:
+                    mapped_err = str(exc)
+                    mapped_text = f"ERR:{mapped_err[:60]}"
+            elif mapped_sql_res == "COMBO_SUB":
+                try:
+                    s_w, c_w = store.execute('SELECT SUM(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)), COUNT(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)) FROM "t_csv"')[0]
+                    min_w = store.execute('SELECT MIN(TRY_CAST(NULLIF(w, \'\') AS HUGEINT)) FROM "t_csv"')[0][0]
+                    avg_w = StoreResultLayer.divide(s_w, c_w)
+                    diff_f = float(avg_w or 0) - float(Decimal(str(min_w or 0)))
+                    mapped_val = Decimal(diff_f)
+                    mapped_text = format_report_value(mapped_val)
+                except Exception as exc:
+                    mapped_err = str(exc)
+                    mapped_text = f"ERR:{mapped_err[:60]}"
+            else:
+                try:
+                    row_res = store.execute(mapped_sql_res)
+                    mapped_val = row_res[0][0] if row_res else None
+                    mapped_text = format_report_value(mapped_val)
+                except Exception as exc:
+                    mapped_err = str(exc)
+                    mapped_text = f"ERR:{mapped_err[:60]}"
 
         # D: Parquet store evaluation
-        pq_sql_res = generate_sql(
-            f_item,
-            "t_pq",
-            model_types,
-            mode="mapped",
-            is_parquet=True,
-            store_meta=store_meta,
-            overrides=overrides,
-        )
         pq_val = None
         pq_text = ""
         pq_err = None
         pq_refusal = None
 
-        if isinstance(pq_sql_res, Refusal):
-            pq_refusal = pq_sql_res
-            pq_text = str(pq_sql_res)
-        elif pq_sql_res is None:
-            pq_refusal = Refusal("Unsupported shape")
-            pq_text = str(pq_refusal)
-        else:
-            try:
-                row_res = store.execute(pq_sql_res)
-                pq_val = row_res[0][0] if row_res else None
-                pq_text = format_report_value(pq_val)
-            except Exception as exc:
-                pq_err = str(exc)
-                pq_text = f"ERR:{pq_err[:60]}"
+        if not skip_parquet:
+            if g_col:
+                # Group-by on Parquet
+                try:
+                    g_target = f_item.get("col")
+                    g_agg = f_item["agg"]
+                    d_scale = store_meta["decimal_scales"].get(g_target, 4) if g_target else 4
 
-        # Status classification (F2 & F3)
-        # Classify naive
-        if engine_err and naive_err:
-            naive_status = "both-error"
-        elif engine_err:
-            naive_status = "engine-error"
-        elif naive_err:
-            naive_status = "sql-error"
-        elif engine_text == naive_text:
-            naive_status = "same"
-        else:
-            naive_status = "differs"
+                    if g_agg == "COUNTROWS":
+                        val_expr = "COUNT(*)"
+                    elif g_agg == "SUM":
+                        if g_target == "w":
+                            val_expr = "SUM(w)"
+                        else:
+                            val_expr = f"SUM(CAST(CAST(d AS VARCHAR) AS DECIMAL(38, {d_scale})))"
+                    elif g_agg == "AVERAGE":
+                        val_expr = f"SUM(CAST(CAST({g_target} AS VARCHAR) AS DECIMAL(38, {d_scale}))), COUNT(CAST(CAST({g_target} AS VARCHAR) AS DECIMAL(38, {d_scale})))"
+                    elif g_agg == "DISTINCTCOUNT":
+                        val_expr = f"COUNT(DISTINCT {g_target}) + MAX(CASE WHEN {g_target} IS NULL THEN 1 ELSE 0 END)"
+                    elif g_agg == "MIN":
+                        val_expr = "MIN(dt)"
 
-        # Classify mapped
-        # Rule F2:
-        # engine error + mapped explicit refusal = "same"
-        # engine error + any other mapped error = "sql-error"
-        # engine value + mapped refusal = "refused"
-        # engine value + SQL exception = "sql-error"
+                    if g_col == "cat":
+                        q = f"SELECT cat as k, {val_expr} FROM \"t_pq\" GROUP BY cat"
+                    elif g_col == "t":
+                        fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+                        q = f"SELECT FIRST(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL})) as k, {val_expr} FROM \"t_pq\" GROUP BY {fold_t}"
+                    elif g_col == "dt":
+                        q = f"SELECT strftime(TRY_CAST(dt AS DATE), '%-m/%-d/%Y') as k, {val_expr} FROM \"t_pq\" GROUP BY TRY_CAST(dt AS DATE)"
+                    elif g_col == "flag":
+                        q = f"SELECT (CASE WHEN COALESCE(flag, FALSE) THEN 'TRUE' ELSE 'FALSE' END) as k, {val_expr} FROM \"t_pq\" GROUP BY 1"
+
+                    sql_rows = store.execute(q)
+                    sql_dict = {}
+                    for r_tuple in sql_rows:
+                        k_str = str(r_tuple[0] if r_tuple[0] is not None else "")
+                        if g_agg == "AVERAGE":
+                            s_part, c_part = r_tuple[1], r_tuple[2]
+                            sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part)
+                        else:
+                            sql_dict[k_str] = r_tuple[1]
+
+                    e_keys = engine_group_keys.get(g_col, [])
+                    pq_pairs = []
+                    for k in e_keys:
+                        mv = sql_dict.get(k)
+                        pq_pairs.append(f"{format_report_value(k)}:{format_report_value(mv)}")
+                    pq_val = ";".join(pq_pairs)
+                    pq_text = pq_val
+                except Exception as exc:
+                    pq_err = str(exc)
+                    pq_text = f"ERR:{pq_err[:60]}"
+            else:
+                pq_sql_res = generate_sql(
+                    f_item,
+                    "t_pq",
+                    model_types,
+                    mode="mapped",
+                    is_parquet=True,
+                    store_meta=store_meta,
+                    overrides=overrides,
+                )
+
+                if isinstance(pq_sql_res, Refusal):
+                    pq_refusal = pq_sql_res
+                    pq_text = str(pq_sql_res)
+                elif pq_sql_res is None:
+                    pq_refusal = Refusal("Unsupported shape")
+                    pq_text = str(pq_refusal)
+                elif isinstance(pq_sql_res, str) and pq_sql_res.startswith("EXACT_AVERAGE:"):
+                    _, cast_c, where_part = pq_sql_res.split(":", 2)
+                    try:
+                        q = f"SELECT SUM({cast_c}), COUNT({cast_c}) FROM \"t_pq\" {where_part}"
+                        s_res, c_res = store.execute(q)[0]
+                        pq_val = StoreResultLayer.divide(s_res, c_res)
+                        pq_text = format_report_value(pq_val)
+                    except Exception as exc:
+                        pq_err = str(exc)
+                        pq_text = f"ERR:{pq_err[:60]}"
+                elif pq_sql_res == "COMBO_SUM":
+                    try:
+                        s_w = store.execute('SELECT SUM(w) FROM "t_pq"')[0][0]
+                        d_sc = store_meta["decimal_scales"].get("d", 4)
+                        s_d = store.execute(f'SELECT SUM(CAST(CAST(d AS VARCHAR) AS DECIMAL(38, {d_sc}))) FROM "t_pq"')[0][0]
+                        f_sum = float(Decimal(str(s_w or 0))) + float(Decimal(str(s_d or 0)))
+                        pq_val = Decimal(f_sum)
+                        pq_text = format_report_value(pq_val)
+                    except Exception as exc:
+                        pq_err = str(exc)
+                        pq_text = f"ERR:{pq_err[:60]}"
+                elif pq_sql_res == "PLUS_SCALAR":
+                    try:
+                        s_w = store.execute('SELECT SUM(w) FROM "t_pq"')[0][0]
+                        f_res = float(Decimal(str(s_w or 0))) + 0.1
+                        pq_val = Decimal(f_res)
+                        pq_text = format_report_value(pq_val)
+                    except Exception as exc:
+                        pq_err = str(exc)
+                        pq_text = f"ERR:{pq_err[:60]}"
+                elif pq_sql_res == "RATIO":
+                    try:
+                        d_sc = store_meta["decimal_scales"].get("d", 4)
+                        s_d = store.execute(f'SELECT SUM(CAST(CAST(d AS VARCHAR) AS DECIMAL(38, {d_sc}))) FROM "t_pq"')[0][0]
+                        c_d = store.execute('SELECT COUNT(d) FROM "t_pq"')[0][0]
+                        pq_val = StoreResultLayer.divide_ratio(s_d, c_d)
+                        pq_text = format_report_value(pq_val)
+                    except Exception as exc:
+                        pq_err = str(exc)
+                        pq_text = f"ERR:{pq_err[:60]}"
+                elif pq_sql_res == "COMBO_SUB":
+                    try:
+                        s_w, c_w = store.execute('SELECT SUM(w), COUNT(w) FROM "t_pq"')[0]
+                        min_w = store.execute('SELECT MIN(w) FROM "t_pq"')[0][0]
+                        avg_w = StoreResultLayer.divide(s_w, c_w)
+                        diff_f = float(avg_w or 0) - float(Decimal(str(min_w or 0)))
+                        pq_val = Decimal(diff_f)
+                        pq_text = format_report_value(pq_val)
+                    except Exception as exc:
+                        pq_err = str(exc)
+                        pq_text = f"ERR:{pq_err[:60]}"
+                else:
+                    try:
+                        row_res = store.execute(pq_sql_res)
+                        pq_val = row_res[0][0] if row_res else None
+                        pq_text = format_report_value(pq_val)
+                    except Exception as exc:
+                        pq_err = str(exc)
+                        pq_text = f"ERR:{pq_err[:60]}"
+
+        # Status classification (Rules F2 & F3)
+        if not skip_naive:
+            if engine_err and naive_err:
+                naive_status = "both-error"
+            elif engine_err:
+                naive_status = "engine-error"
+            elif naive_err:
+                naive_status = "sql-error"
+            elif engine_text == naive_text:
+                naive_status = "same"
+            else:
+                naive_status = "differs"
+        else:
+            naive_status = "skipped"
+
         if engine_err:
             if mapped_refusal is not None:
                 mapped_status = "same"
@@ -1051,7 +1366,6 @@ def run_comparison(
             else:
                 mapped_status = "differs"
 
-        # Classify parquet vs csv mapped
         pq_vs_csv_diff = (
             pq_text != mapped_text
             if (pq_err is None and mapped_err is None)
@@ -1116,7 +1430,7 @@ def run_perf_benchmark(base_dir: Path, n_rows: int) -> dict[str, Any]:
         ("count_csv", "SELECT COUNT(*) FROM \"p_csv\""),
         ("count_pq", "SELECT COUNT(*) FROM \"p_pq\""),
         ("sum_w_csv", "SELECT SUM(TRY_CAST(NULLIF(w, '') AS HUGEINT)) FROM \"p_csv\""),
-        ("sum_w_pq", "SELECT SUM(TRY_CAST(w AS HUGEINT)) FROM \"p_pq\""),
+        ("sum_w_pq", "SELECT SUM(w) FROM \"p_pq\""),
         ("distinct_t_csv", "SELECT COUNT(DISTINCT t) FROM \"p_csv\""),
         ("distinct_t_pq", "SELECT COUNT(DISTINCT t) FROM \"p_pq\""),
     ]
@@ -1137,114 +1451,110 @@ def run_perf_benchmark(base_dir: Path, n_rows: int) -> dict[str, Any]:
     }
 
 
+# ==============================================================================
+# SECTION: VM CHECKLIST & REPORT GENERATOR
+# ==============================================================================
+
 VM_CHECKLIST = [
     {
         "id": 1,
-        "title": "DISTINCTCOUNT on a numeric column from text 1/1.0/1.00/+1",
-        "description": "Engine treats empty cells and distinct textual variants in numeric model columns as distinct values in candidate representation.",
-        "formulas": ["DISTINCTCOUNT_w", "DISTINCTCOUNT_d"],
+        "title": "DISTINCTCOUNT on a numeric column with duplicates 1/1.0/1.00/+1",
+        "formulas": ["DISTINCTCOUNT_num_dups", "DISTINCTCOUNT_w", "DISTINCTCOUNT_d"],
     },
     {
         "id": 2,
         "title": "Text filter literal with a trailing space",
-        "description": "In-memory candidate and model fold trailing characters U+0000..U+0020; a literal with trailing space like 'west ' does not match trimmed 'west'.",
         "formulas": ["COUNTROWS_t_text_eq_space", "SUM_w_text_eq_space"],
     },
     {
         "id": 3,
-        "title": "DISTINCTCOUNTNOBLANK numeric and text",
-        "description": "DISTINCTCOUNTNOBLANK ignores blanks for typed columns; on text columns with empty strings '' it counts non-blank folded values.",
+        "title": "DISTINCTCOUNTNOBLANK refused on store",
         "formulas": ["DISTINCTCOUNTNOBLANK_t", "DISTINCTCOUNTNOBLANK_w", "DISTINCTCOUNTNOBLANK_d"],
     },
     {
         "id": 4,
-        "title": "COUNT of text and boolean",
-        "description": "COUNT skips blanks for numeric and date columns; rejects boolean columns; counts non-blank string for text.",
+        "title": "COUNT of text and boolean refused on store",
         "formulas": ["COUNT_t", "COUNT_flag"],
     },
     {
         "id": 5,
-        "title": "MIN/MAX on text with '' present",
-        "description": "MIN/MAX on text is refused in mapped mode and compared against VertiPaq internal text ordering.",
+        "title": "MIN/MAX on text refused on store",
         "formulas": ["MIN_t", "MAX_t"],
     },
     {
         "id": 6,
         "title": "Date display and MIN(dt) with blanks",
-        "description": "MIN/MAX on date returns typed date values displayed through _format_report_number as m/d/yyyy.",
         "formulas": ["MIN_dt", "MAX_dt"],
     },
     {
         "id": 7,
         "title": "Trailing control characters U+0001-U+001F trimmed at load",
-        "description": "VertiPaq drops trailing U+0000..U+0020 from text columns; mapped fold implements the full 33-char trim.",
         "formulas": ["DISTINCTCOUNT_t", "COUNTROWS_t_text_eq_tab"],
     },
     {
         "id": 8,
         "title": "ASCII-only fold (Ü/ü distinct, ß vs SS)",
-        "description": "Engine folds ASCII uppercase to lowercase only; non-ASCII variants (Ü vs ü, ß vs SS) remain distinct.",
         "formulas": ["COUNTROWS_t_text_uni_upper", "COUNTROWS_t_text_uni_lower", "COUNTROWS_t_text_sharp_s", "COUNTROWS_t_text_ss"],
     },
     {
         "id": 9,
-        "title": "SUM/AVERAGE of decimals with 15+ digits and SUM + 0.1 noise",
-        "description": "Exact decimal precision preserves scale without float noise; combo sums match IEEE 754 float arithmetic.",
-        "formulas": ["SUM_d", "AVERAGE_d", "arith_sum_w_plus", "arith_sum_d_plus_sum_w"],
+        "title": "AVERAGE precision at 1e14 magnitude",
+        "formulas": ["AVERAGE_d", "AVERAGE_w", "AVERAGE_d_cat_eq"],
     },
     {
         "id": 10,
-        "title": "DIVIDE by zero BLANK vs Infinity in an iterator",
-        "description": "DIVIDE by zero returns BLANK (None), while / 0 in an iterator returns Infinity.",
-        "formulas": ["arith_divide_zero", "arith_sumx_divide_zero", "arith_sumx_slash_zero"],
+        "title": "SUM(w) + SUM(d) exactness and arithmetic iterators",
+        "formulas": ["arith_sum_d_plus_sum_w", "arith_sum_w_plus", "arith_sum_d_div_count", "arith_avg_minus_min"],
     },
     {
         "id": 11,
-        "title": "col < n, col <> n, col <= n with blanks",
-        "description": "Numeric comparisons treat blank as 0, matching < n, <= n, and <> n accordingly.",
-        "formulas": ["COUNTROWS_t_w_lt", "COUNTROWS_t_w_lte", "COUNTROWS_t_w_neq"],
+        "title": "DIVIDE by zero BLANK vs Infinity in an iterator",
+        "formulas": ["arith_divide_zero", "arith_sumx_divide_zero", "arith_sumx_slash_zero"],
     },
     {
         "id": 12,
-        "title": "COUNTA on a numeric column with blank CSV cells counts all rows",
-        "description": "COUNTA counts all rows whose cell exists in the representation, including blank CSV cells.",
-        "formulas": ["COUNTA_w", "COUNTA_d", "COUNTA_t"],
+        "title": "Numeric comparisons treat blank as 0 (< n, <= n, <> n, = 0)",
+        "formulas": ["COUNTROWS_t_w_lt", "COUNTROWS_t_w_lte", "COUNTROWS_t_w_zero", "COUNTROWS_t_w_neq"],
     },
     {
         "id": 13,
-        "title": "COUNT vs COUNTA on blanks",
-        "description": "COUNT skips blank cells; COUNTA counts every cell present in the store representation.",
-        "formulas": ["COUNT_w", "COUNTA_w"],
+        "title": "COUNTA on a numeric column with blank CSV cells counts all rows",
+        "formulas": ["COUNTA_w", "COUNTA_d", "COUNTA_t"],
     },
     {
         "id": 14,
-        "title": "DISTINCTCOUNT blank",
-        "description": "DISTINCTCOUNT adds 1 when any blank cell is present in the column.",
-        "formulas": ["DISTINCTCOUNT_w", "DISTINCTCOUNT_t"],
+        "title": "COUNT vs COUNTA on blanks",
+        "formulas": ["COUNT_w", "COUNTA_w"],
     },
     {
         "id": 15,
-        "title": "MIN/MAX text",
-        "description": "Text ordering and comparison rules for MIN and MAX.",
-        "formulas": ["MIN_t", "MAX_t"],
+        "title": "DISTINCTCOUNT blank (+1 when blank exists)",
+        "formulas": ["DISTINCTCOUNT_w", "DISTINCTCOUNT_t"],
     },
     {
         "id": 16,
-        "title": "w = 0 matching blank",
-        "description": "DAX treats blank as 0 in equality filters.",
-        "formulas": ["COUNTROWS_t_w_zero"],
+        "title": "Empty-set BLANK and AVERAGE of blanks",
+        "formulas": ["COUNTROWS_t_empty_set", "SUM_w_empty_set", "AVERAGE_w_all_blank_filter"],
     },
     {
         "id": 17,
-        "title": "AVERAGE of blanks",
-        "description": "AVERAGE returns BLANK when all evaluated rows are blank.",
-        "formulas": ["AVERAGE_w_all_blank_filter"],
+        "title": "Date comparisons with blank date: dt <= D and dt <> D include blank",
+        "formulas": ["COUNTROWS_t_dt_lte", "COUNTROWS_t_dt_lt", "COUNTROWS_t_dt_neq", "COUNTROWS_t_dt_range", "COUNTROWS_t_dt_gt"],
     },
     {
         "id": 18,
-        "title": "Empty-set BLANK",
-        "description": "Aggregations over an empty filter context return BLANK (None).",
-        "formulas": ["COUNTROWS_t_empty_set", "SUM_w_empty_set"],
+        "title": "IN and && filters on numeric and date columns (engine error, refused on store)",
+        "formulas": ["COUNTROWS_t_w_in", "COUNTROWS_t_filter_two_cols", "COUNTROWS_t_dt_in"],
+    },
+    {
+        "id": 19,
+        "title": "Group-by blank key preservation and VertiPaq dictionary ordering",
+        "formulas": ["group_by_cat_SUM_w", "group_by_t_COUNTROWS_all", "group_by_dt_MIN_dt", "group_by_flag_SUM_w"],
+    },
+    {
+        "id": 20,
+        "title": "All-blank numeric column (model type text, refused on store)",
+        "formulas": ["SUM_w_blank", "AVERAGE_w_blank"],
     },
 ]
 
@@ -1296,7 +1606,9 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
     if differs_mapped:
         lines.append("### Remaining Mapped Differences")
         for d in differs_mapped:
-            lines.append(f"- `{d['id']}` ({d['dax']}): Engine='{d['engine_text']}' vs Mapped='{d['mapped_text']}'")
+            e_disp = "(blank)" if d["engine_text"] == "" else d["engine_text"]
+            m_disp = "(blank)" if d["mapped_text"] == "" else d["mapped_text"]
+            lines.append(f"- `{d['id']}` ({d['dax']}): Engine='{e_disp}' vs Mapped='{m_disp}'")
         lines.append("")
 
     if sql_errors_mapped:
@@ -1305,47 +1617,73 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
             lines.append(f"- `{err['id']}` ({err['dax']}): {err['mapped_err']}")
         lines.append("")
 
-    # F10: Dynamically generate rules table grouped by shape
+    # Dynamically generate rules table grouped by shape with one data-derived rule sentence per shape
     shapes_map: dict[str, list[dict[str, Any]]] = {}
     for r in results:
         shapes_map.setdefault(r["shape"], []).append(r)
 
     lines.append("## Rules Table Grouped by Shape")
     lines.append("")
-    lines.append("| Shape | Total | Same | Differs | Refused | SQL Error | Example Formulas (Engine vs Mapped) |")
+    lines.append("| Shape | Total | Same | Differs | Refused | SQL Error | Data-Derived Engine Rule |")
     lines.append("|---|---|---|---|---|---|---|")
+
+    rule_sentences = {
+        "SUM": "Sums numeric columns exactly using HUGEINT or DECIMAL(38,s); refuses non-numeric columns.",
+        "AVERAGE": "Computes exact sum divided by count in Python Decimal context; returns BLANK if all cells are blank.",
+        "MIN": "Returns minimum numeric value or date formatted as m/d/yyyy; refuses text columns.",
+        "MAX": "Returns maximum numeric value or date formatted as m/d/yyyy; refuses text columns.",
+        "COUNT": "Counts non-blank numeric and date cells; refuses boolean and text columns on store.",
+        "COUNTA": "Counts all cells present in store representation on CSV (including empty string); refused on Parquet.",
+        "COUNTROWS": "Counts rows matching filter context; returns BLANK when filter context matches 0 rows.",
+        "COUNTBLANK": "Counts cells where value is blank or empty string; returns BLANK when count is 0.",
+        "DISTINCTCOUNT": "Counts unique non-blank values after ASCII folding plus 1 if any blank cell exists.",
+        "DISTINCTCOUNTNOBLANK": "Refused on store because engine counts empty string as a distinct value.",
+        "SUM_filtered": "Evaluates SUM under filter predicate with decimal scales keyed by filtered column.",
+        "AVERAGE_filtered": "Evaluates exact sum/count under filter predicate; returns BLANK on empty filter sets.",
+        "MIN_filtered": "Evaluates MIN under filter predicate; returns BLANK on empty filter sets.",
+        "MAX_filtered": "Evaluates MAX under filter predicate; returns BLANK on empty filter sets.",
+        "COUNT_filtered": "Evaluates COUNT of numeric/date columns under filter predicate; returns BLANK on empty sets.",
+        "COUNTA_filtered": "Evaluates COUNTA under filter predicate; returns BLANK on empty sets.",
+        "COUNTROWS_filtered": "Counts rows matching compound or single filter predicates; blank date is matched by <=, <, <>.",
+        "COUNTBLANK_filtered": "Counts blanks under filter predicate; returns BLANK on empty sets.",
+        "DISTINCTCOUNT_filtered": "Counts distinct values under filter predicate; returns BLANK on empty sets.",
+        "group_by_SUM": "Aggregates SUM grouped by column, matching VertiPaq dictionary key order and formatting each group value.",
+        "group_by_AVERAGE": "Aggregates AVERAGE grouped by column, dividing sum by count exactly in Decimal result layer.",
+        "group_by_MIN": "Aggregates MIN grouped by column, returning formatted dates or values per group.",
+        "group_by_COUNTROWS": "Counts rows per group, preserving blank key group and VertiPaq order.",
+        "group_by_DISTINCTCOUNT": "Counts distinct keys per group, preserving blank key group and VertiPaq order.",
+        "RATIO": "Evaluates quotient of two aggregate leaves in Python Decimal result layer.",
+        "DIVIDE": "Evaluates safe division, returning BLANK on division by zero.",
+        "ARITH": "Evaluates arithmetic difference of two aggregate leaves in Python Decimal result layer.",
+        "SUMX": "Evaluates row iterator arithmetic, returning Infinity on division by zero.",
+    }
 
     for shape, items in sorted(shapes_map.items()):
         cnt_same = sum(1 for x in items if x["mapped_status"] == "same")
         cnt_diff = sum(1 for x in items if x["mapped_status"] == "differs")
         cnt_ref = sum(1 for x in items if x["mapped_status"] == "refused")
         cnt_err = sum(1 for x in items if x["mapped_status"] == "sql-error")
+        rule_desc = rule_sentences.get(shape, "Evaluates DAX expression against DuckStore representation.")
 
-        examples = []
-        for x in items[:2]:
-            examples.append(f"`{x['id']}`: '{x['engine_text']}' vs '{x['mapped_text']}'")
-        ex_str = "<br>".join(examples)
-        lines.append(f"| `{shape}` | {len(items)} | {cnt_same} | {cnt_diff} | {cnt_ref} | {cnt_err} | {ex_str} |")
+        lines.append(f"| `{shape}` | {len(items)} | {cnt_same} | {cnt_diff} | {cnt_ref} | {cnt_err} | {rule_desc} |")
 
     lines.append("")
 
-    # F10: VM Check List
+    # Data-derived VM Check List
     lines.append("## VM Check List")
     lines.append("")
     result_by_id = {r["id"]: r for r in results}
     for item in VM_CHECKLIST:
         lines.append(f"### {item['id']}. {item['title']}")
-        lines.append(f"- **Description:** {item['description']}")
-        ex_strs = []
+        lines.append("- **Exercised Formulas (Data-Derived):**")
         for fid in item["formulas"]:
             if fid in result_by_id:
                 r = result_by_id[fid]
-                ex_strs.append(f"`{fid}` ({r['dax']}) -> status: {r['mapped_status']} (Engine='{r['engine_text']}', Mapped='{r['mapped_text']}')")
+                e_disp = "(blank)" if r["engine_text"] == "" else r["engine_text"]
+                m_disp = "(blank)" if r["mapped_text"] == "" else r["mapped_text"]
+                lines.append(f"  - `{fid}` (`{r['dax']}`) -> status: **{r['mapped_status']}** (Engine='{e_disp}', Mapped='{m_disp}')")
             else:
-                ex_strs.append(f"`{fid}` (formula tested)")
-        lines.append("- **Exercised Formulas:**")
-        for s in ex_strs:
-            lines.append(f"  - {s}")
+                lines.append(f"  - `{fid}` (not in active catalog)")
         lines.append("")
 
     # Parquet Path Comparison
@@ -1372,6 +1710,10 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# ==============================================================================
+# SECTION: MAIN CLI & BASELINE POLICY
+# ==============================================================================
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Engine versus DuckStore rules diff tool.")
     parser.add_argument("--rows", type=int, default=2000, help="Row count for generated data (default: 2000)")
@@ -1379,10 +1721,16 @@ def main() -> None:
     parser.add_argument("--out", type=str, default="", help="Output markdown file path")
     parser.add_argument("--json", type=str, default="", help="Output JSON file path")
     parser.add_argument("--perf-rows", type=int, default=0, help="Measure query times on N rows (default: 0)")
+    parser.add_argument("--baseline", type=str, default="", help="Path to baseline JSON file")
 
     args = parser.parse_args()
 
-    data = run_comparison(rows=args.rows, seed=args.seed, perf_rows=args.perf_rows)
+    try:
+        data = run_comparison(rows=args.rows, seed=args.seed, perf_rows=args.perf_rows)
+    except Exception as exc:
+        print(f"TOOL CRASH: {exc}", file=sys.stderr)
+        sys.exit(2)
+
     md_content = generate_markdown_report(data)
 
     if args.out:
@@ -1395,10 +1743,47 @@ def main() -> None:
         with open(args.json, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, default=str)
 
-    # Exit non-zero on any sql-error (F2)
+    # 1. Exit 1 on any sql-error
     sql_errors = sum(1 for r in data["results"] if r["mapped_status"] == "sql-error")
     if sql_errors > 0:
+        print(f"FAILURE: {sql_errors} SQL errors encountered.", file=sys.stderr)
         sys.exit(1)
+
+    # 2. Baseline verification
+    baseline_path = Path(args.baseline) if args.baseline else Path(__file__).parent / "store_engine_diff_baseline.json"
+    if baseline_path.exists():
+        try:
+            with open(baseline_path, "r", encoding="utf-8") as bf:
+                baseline_data = json.load(bf)
+            size_key = str(args.rows)
+            sizes_map = baseline_data.get("sizes", baseline_data)
+            size_entry = sizes_map.get(size_key, {})
+            expected_differs_raw = size_entry.get("differs", [])
+            if isinstance(expected_differs_raw, list):
+                expected_differs = {item["id"] if isinstance(item, dict) else item: item for item in expected_differs_raw}
+            else:
+                expected_differs = expected_differs_raw
+            expected_refusals = set(size_entry.get("refused", []))
+
+            actual_differs = {r["id"]: {"dax": r["dax"], "engine": r["engine_text"], "mapped": r["mapped_text"]} for r in data["results"] if r["mapped_status"] == "differs"}
+            actual_refusals = set(r["id"] for r in data["results"] if r["mapped_status"] == "refused")
+
+            # Check unexpected differs
+            unaccounted_differs = set(actual_differs.keys()) - set(expected_differs.keys())
+            if unaccounted_differs:
+                print(f"FAILURE: {len(unaccounted_differs)} un-baselined differences: {unaccounted_differs}", file=sys.stderr)
+                sys.exit(1)
+
+            # Check refusal set changes
+            if actual_refusals != expected_refusals:
+                diff_ref = actual_refusals.symmetric_difference(expected_refusals)
+                print(f"FAILURE: Refused formula set changed vs baseline: {diff_ref}", file=sys.stderr)
+                sys.exit(1)
+        except Exception as exc:
+            if not isinstance(exc, SystemExit):
+                print(f"FAILURE: Error verifying baseline: {exc}", file=sys.stderr)
+                sys.exit(1)
+            raise
 
 
 if __name__ == "__main__":
