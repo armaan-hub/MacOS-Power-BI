@@ -3137,3 +3137,9 @@ Added tools/store_engine_diff.py, its baseline and tests/test_store_engine_diff_
 Findings: the engine counts distinct textual forms of numeric cells in DISTINCTCOUNT ("0" and "-0"), the mapped SQL counts values (one named class, distinct_numeric_text_variants); Parquet DOUBLE sums lose digits at 1e14 (class parquet_source_precision); COUNTA refused on Parquet; ENGINE BUG: IN and && on numeric and date columns with blank cells raise a conversion error. Open: the tool compares 2-decimal text so errors under half a cent hide (task C0f); VM checks of the data-derived rules list.
 
 Gate on e9c4711 (tool and tests only, no app change): 43,622 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
+
+## 2026-11-25 Stage C0f and C0g: exact-value comparison in the rules tool, merged as c11f287
+
+The rules tool now compares exact values as well as the 2-decimal display text. Tolerance is by value type: exact equality for Decimal and integer results, relative 1e-15 for float results only. Group-by results are compared per group on exact values. A float ratio bug (SUM/COUNT lost the binary tail of the engine value on 3 of 40 seeds) was found by Team-Thinker and fixed. Parquet class predicates now cover scalar and group-by results by data. Built by Antigravity (C0f, about 3 hours) and the Sonnet fixer (C0g); Team-Thinker failed C0f once and passed C0g on 371aad4: 47 tests in about 18 s, seeds 21 to 80 and 5,000 rows all exit 0, 46 source mutants killed except two equivalent guard clauses.
+
+Gate on c11f287 (tool and tests only, no app change): 43,633 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
