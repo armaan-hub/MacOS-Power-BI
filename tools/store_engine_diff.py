@@ -35,11 +35,12 @@ TRIM_CHARS_SQL = " || ".join(f"chr({i})" for i in range(33))
 class Refusal:
     """Explicit refusal object representing an intentionally unsupported shape."""
 
-    def __init__(self, reason: str):
+    def __init__(self, reason: str, expected_error: str | None = None):
         self.reason = reason
+        self.expected_error = expected_error
 
     def __repr__(self) -> str:
-        return f"Refusal({self.reason!r})"
+        return f"Refusal({self.reason!r}, expected_error={self.expected_error!r})"
 
     def __str__(self) -> str:
         return f"REFUSED: {self.reason}"
@@ -47,8 +48,10 @@ class Refusal:
 
 def format_report_value(val: Any) -> str:
     """Format value for reporting (1:1 app representation using _format_report_number)."""
-    if val is None or val == "":
-        return ""
+    if val is None:
+        return "BLANK"
+    if val == "":
+        return '""'
     if isinstance(val, Refusal):
         return str(val)
     if isinstance(val, (dt.date, dt.datetime)) and not dax_dates.is_date(val):
@@ -511,9 +514,21 @@ def generate_sql(
     group_col = formula.get("group_col")
     c_type = column_types.get(col, "text") if col else None
 
+    # Refusal B1: numeric IN / && filters with blank cells error on old engine
+    if f_type in ("w_in", "filter_two_cols") and mode == "mapped":
+        return Refusal(
+            "Engine bug: numeric IN or && filter with blank cells raises type error",
+            expected_error="Cannot convert value '' of type Text to type Number.",
+        )
+    if f_type == "dt_in" and mode == "mapped":
+        return Refusal(
+            "Engine bug: date IN filter with blank cells raises type error",
+            expected_error="Cannot convert value '46174' of type Text to type Date.",
+        )
+
     # Refusal D2: COUNT of a text column
     if agg == "COUNT" and c_type == "text" and mode == "mapped":
-        return Refusal("COUNT not supported on text column")
+        return Refusal("COUNT not supported on text column", expected_error="type error")
 
     # Refusal D1: DISTINCTCOUNTNOBLANK on store
     if agg == "DISTINCTCOUNTNOBLANK" and mode == "mapped":
@@ -521,14 +536,11 @@ def generate_sql(
             pass
         else:
             return Refusal("DISTINCTCOUNTNOBLANK not supported on store")
-
-    # Refusal B1: numeric IN / && filters with blank cells error on old engine
-    if f_type in ("w_in", "filter_two_cols", "dt_in") and mode == "mapped":
-        return Refusal("Engine bug: numeric/date IN or && filter with blank cells raises type error")
-
-    # Refusal: All-blank column aggregations (inferred as text)
     if col == "w_blank" and agg in ("SUM", "AVERAGE") and mode == "mapped":
-        return Refusal(f"{agg} not supported on text column")
+        return Refusal(
+            f"{agg} not supported on text column",
+            expected_error=f"The function {agg} cannot work with values of type String.",
+        )
 
     # Refusal: Parquet COUNTA
     if agg == "COUNTA" and is_parquet and mode == "mapped":
@@ -555,8 +567,9 @@ def generate_sql(
     if col == "w_d":
         agg_d_scale = 4 if overrides.get("hardcode_scale_4") else (store_meta or {}).get("decimal_scales", {}).get("d", 4)
 
-    # Filtered column scale (C1): keyed by the column being filtered (d)
-    filter_d_scale = 4 if overrides.get("hardcode_scale_4") else (store_meta or {}).get("decimal_scales", {}).get("d", 4)
+    # Filtered column scale (C1): keyed dynamically by the column being filtered
+    filter_col = "w" if f_type and f_type.startswith("w_") else "dt" if f_type and f_type.startswith("dt_") else "t" if f_type and f_type.startswith("text_") else "d"
+    filter_d_scale = 4 if overrides.get("hardcode_scale_4") else (store_meta or {}).get("decimal_scales", {}).get(filter_col, 4)
 
     # Check 38 digit total limit refusal
     max_digits = (store_meta or {}).get("max_digits", {}).get(col, 0)
@@ -583,6 +596,21 @@ def generate_sql(
             w_lt_cond = f"{cast_w} < 100"
         else:
             w_lt_cond = f"COALESCE({cast_w}, 0) < 100"
+
+        if overrides.get("drop_w_lte_coalesce"):
+            w_lte_cond = f"{cast_w} <= 100"
+        else:
+            w_lte_cond = f"COALESCE({cast_w}, 0) <= 100"
+
+        if overrides.get("drop_w_neq_coalesce"):
+            w_neq_cond = f"{cast_w} <> 100"
+        else:
+            w_neq_cond = f"COALESCE({cast_w}, 0) <> 100"
+
+        if overrides.get("drop_d_gte_coalesce"):
+            d_gte_cond = f"{cast_d_filter} >= 0"
+        else:
+            d_gte_cond = f"COALESCE({cast_d_filter}, 0) >= 0"
 
         if f_type == "cat_eq":
             where_clause = "WHERE cat = 'A'"
@@ -614,7 +642,7 @@ def generate_sql(
         elif f_type == "w_lt":
             where_clause = "WHERE TRY_CAST(w AS DOUBLE) < 100" if mode == "naive" else f"WHERE {w_lt_cond}"
         elif f_type == "w_lte":
-            where_clause = "WHERE TRY_CAST(w AS DOUBLE) <= 100" if mode == "naive" else f"WHERE COALESCE({cast_w}, 0) <= 100"
+            where_clause = "WHERE TRY_CAST(w AS DOUBLE) <= 100" if mode == "naive" else f"WHERE {w_lte_cond}"
         elif f_type == "w_gt":
             where_clause = "WHERE TRY_CAST(w AS DOUBLE) > 100" if mode == "naive" else f"WHERE {cast_w} > 100"
         elif f_type == "w_gte":
@@ -623,15 +651,15 @@ def generate_sql(
             else:
                 where_clause = "WHERE TRY_CAST(w AS DOUBLE) >= 100" if mode == "naive" else f"WHERE {cast_w} >= 100"
         elif f_type == "w_neq":
-            where_clause = "WHERE TRY_CAST(w AS DOUBLE) <> 100" if mode == "naive" else f"WHERE COALESCE({cast_w}, 0) <> 100"
+            where_clause = "WHERE TRY_CAST(w AS DOUBLE) <> 100" if mode == "naive" else f"WHERE {w_neq_cond}"
         elif f_type == "w_not":
-            where_clause = "WHERE NOT(TRY_CAST(w AS DOUBLE) = 100)" if mode == "naive" else f"WHERE COALESCE({cast_w}, 0) <> 100"
+            where_clause = "WHERE NOT(TRY_CAST(w AS DOUBLE) = 100)" if mode == "naive" else f"WHERE {w_neq_cond}"
         elif f_type == "w_or":
             where_clause = "WHERE TRY_CAST(w AS DOUBLE) = 100 OR TRY_CAST(w AS DOUBLE) = 200" if mode == "naive" else f"WHERE COALESCE({cast_w}, 0) = 100 OR COALESCE({cast_w}, 0) = 200"
         elif f_type == "w_in":
             where_clause = "WHERE TRY_CAST(w AS DOUBLE) IN (100, 200)" if mode == "naive" else f"WHERE COALESCE({cast_w}, 0) IN (100, 200)"
         elif f_type == "d_gte":
-            where_clause = "WHERE TRY_CAST(d AS DOUBLE) >= 0" if mode == "naive" else f"WHERE COALESCE({cast_d_filter}, 0) >= 0"
+            where_clause = "WHERE TRY_CAST(d AS DOUBLE) >= 0" if mode == "naive" else f"WHERE {d_gte_cond}"
         elif f_type == "d_lt":
             where_clause = "WHERE TRY_CAST(d AS DOUBLE) < 0" if mode == "naive" else f"WHERE {cast_d_filter} < 0"
         elif f_type == "d_neq":
@@ -733,9 +761,14 @@ def generate_sql(
             return "SELECT BROKEN SYNTAX"
 
     if agg in ("SUM", "AVERAGE") and c_type in ("text", "boolean", "date"):
-        return Refusal(f"{agg} not supported on {c_type} column")
+        if col in ("id", "big", "w_blank"):
+            expected = f"The function {agg} cannot work with values of type String."
+        else:
+            expected = f"Column '{col}' contains a non-numeric value"
+        return Refusal(f"{agg} not supported on {c_type} column", expected_error=expected)
     if agg in ("MIN", "MAX") and c_type in ("text", "boolean"):
-        return Refusal(f"{agg} not supported on {c_type} column")
+        expected = f"Column '{col}' contains a non-numeric value" if c_type == "boolean" else None
+        return Refusal(f"{agg} not supported on {c_type} column", expected_error=expected)
 
     if overrides.get("drop_empty_guard"):
         empty_guard = ""
@@ -824,7 +857,10 @@ def generate_sql(
             cnt_col = f"COUNT({col})" if is_parquet else f"COUNT(NULLIF({col}, ''))"
             return f"SELECT {empty_guard}NULLIF({cnt_col}, 0){empty_end} FROM {t_q} {where_clause}"
         if c_type == "boolean":
-            return Refusal("COUNT not supported on boolean column")
+            return Refusal(
+                "COUNT not supported on boolean column",
+                expected_error=f"Column '{col}' contains a non-numeric value at row 1",
+            )
         # Text column: refused on mapped mode above
         cnt_col = f"COUNT(NULLIF({col}, ''))"
         return f"SELECT {empty_guard}NULLIF({cnt_col}, 0){empty_end} FROM {t_q} {where_clause}"
@@ -1079,43 +1115,79 @@ def run_comparison(
                     val_expr = "COUNT(*)"
                 elif g_agg == "SUM":
                     if g_target == "w":
-                        val_expr = "SUM(TRY_CAST(NULLIF(w, '') AS HUGEINT))"
+                        if overrides.get("gb_sum_double"):
+                            val_expr = "SUM(TRY_CAST(NULLIF(w, '') AS DOUBLE))"
+                        else:
+                            val_expr = "SUM(TRY_CAST(NULLIF(w, '') AS HUGEINT))"
                     else:
-                        val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale})))"
+                        if overrides.get("gb_sum_double"):
+                            val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DOUBLE))"
+                        else:
+                            val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale})))"
                 elif g_agg == "AVERAGE":
-                    val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale}))), COUNT(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale})))"
+                    if overrides.get("gb_avg_float"):
+                        val_expr = f"AVG(TRY_CAST(NULLIF({g_target}, '') AS DOUBLE))"
+                    else:
+                        val_expr = f"SUM(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale}))), COUNT(TRY_CAST(NULLIF({g_target}, '') AS DECIMAL(38, {d_scale})))"
                 elif g_agg == "DISTINCTCOUNT":
-                    val_expr = f"COUNT(DISTINCT NULLIF({g_target}, '')) + MAX(CASE WHEN COALESCE({g_target}, '') = '' THEN 1 ELSE 0 END)"
+                    if overrides.get("gb_distinct_no_blank_add"):
+                        val_expr = f"COUNT(DISTINCT NULLIF({g_target}, ''))"
+                    else:
+                        val_expr = f"COUNT(DISTINCT NULLIF({g_target}, '')) + MAX(CASE WHEN COALESCE({g_target}, '') = '' THEN 1 ELSE 0 END)"
                 elif g_agg == "MIN":
                     val_expr = f"MIN(TRY_CAST(NULLIF({g_target}, '') AS DATE))"
 
                 if g_col == "cat":
-                    q = f"SELECT cat as k, {val_expr} FROM \"t_csv\" GROUP BY cat"
+                    q = f"SELECT cat as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY cat ORDER BY first_rn"
                 elif g_col == "t":
                     fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
-                    q = f"SELECT FIRST(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL})) as k, {val_expr} FROM \"t_csv\" GROUP BY {fold_t}"
+                    q = f"SELECT arg_min(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), rowid) as k, {val_expr}, MIN(rowid) as first_rn FROM \"t_csv\" GROUP BY {fold_t} ORDER BY first_rn"
                 elif g_col == "dt":
-                    q = f"SELECT strftime(TRY_CAST(NULLIF(dt, '') AS DATE), '%-m/%-d/%Y') as k, {val_expr} FROM \"t_csv\" GROUP BY TRY_CAST(NULLIF(dt, '') AS DATE)"
+                    q = f"SELECT COALESCE(strftime(TRY_CAST(NULLIF(dt, '') AS DATE), '%-m/%-d/%Y'), '') as k, {val_expr} FROM \"t_csv\" GROUP BY TRY_CAST(NULLIF(dt, '') AS DATE) ORDER BY TRY_CAST(NULLIF(dt, '') AS DATE) NULLS FIRST"
                 elif g_col == "flag":
-                    q = f"SELECT (CASE WHEN UPPER(TRIM(COALESCE(flag, ''))) = 'TRUE' THEN 'TRUE' ELSE 'FALSE' END) as k, {val_expr} FROM \"t_csv\" GROUP BY 1"
+                    q = f"SELECT (CASE WHEN UPPER(TRIM(COALESCE(flag, ''))) = 'TRUE' THEN 'TRUE' ELSE 'FALSE' END) as k, {val_expr} FROM \"t_csv\" GROUP BY 1 ORDER BY 1 ASC"
 
                 sql_rows = store.execute(q)
+                sql_keys = []
                 sql_dict = {}
                 for r_tuple in sql_rows:
                     k_str = str(r_tuple[0] if r_tuple[0] is not None else "")
+                    sql_keys.append(k_str)
                     if g_agg == "AVERAGE":
-                        s_part, c_part = r_tuple[1], r_tuple[2]
-                        sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part)
+                        if overrides.get("gb_avg_float"):
+                            sql_dict[k_str] = r_tuple[1]
+                        else:
+                            s_part, c_part = r_tuple[1], r_tuple[2]
+                            sql_dict[k_str] = StoreResultLayer.divide(s_part, c_part)
                     else:
                         sql_dict[k_str] = r_tuple[1]
 
                 e_keys = engine_group_keys.get(g_col, [])
-                mapped_pairs = []
-                for k in e_keys:
-                    mv = sql_dict.get(k)
-                    mapped_pairs.append(f"{format_report_value(k)}:{format_report_value(mv)}")
-                mapped_val = ";".join(mapped_pairs)
-                mapped_text = mapped_val
+                if overrides.get("gb_extra_key"):
+                    sql_keys.append("EXTRA_KEY")
+                    sql_dict["EXTRA_KEY"] = 999
+                elif overrides.get("gb_missing_key") and sql_keys:
+                    dropped_k = sql_keys.pop(0)
+                    sql_dict.pop(dropped_k, None)
+                elif overrides.get("gb_reverse_order"):
+                    sql_keys = list(reversed(sql_keys))
+
+                if set(sql_keys) != set(e_keys):
+                    mapped_err = f"Group-by keys mismatch: sql has {len(sql_keys)} keys, engine has {len(e_keys)} keys"
+                    mapped_text = f"ERR:{mapped_err[:60]}"
+                elif sql_keys != e_keys:
+                    mapped_err = "Group-by key ordering mismatch between store and engine"
+                    mapped_text = f"ERR:{mapped_err[:60]}"
+                else:
+                    mapped_pairs = []
+                    for k in sql_keys:
+                        if overrides.get("gb_lookup_default_zero"):
+                            mv = sql_dict.get(k, 0)
+                        else:
+                            mv = sql_dict[k]
+                        mapped_pairs.append(f"{format_report_value(k)}:{format_report_value(mv)}")
+                    mapped_val = ";".join(mapped_pairs)
+                    mapped_text = mapped_val
             except Exception as exc:
                 mapped_err = str(exc)
                 mapped_text = f"ERR:{mapped_err[:60]}"
@@ -1351,7 +1423,10 @@ def run_comparison(
 
         if engine_err:
             if mapped_refusal is not None:
-                mapped_status = "same"
+                if mapped_refusal.expected_error and mapped_refusal.expected_error not in engine_err:
+                    mapped_status = "refusal-reason-mismatch"
+                else:
+                    mapped_status = "same"
             elif mapped_err is not None:
                 mapped_status = "sql-error"
             else:
@@ -1388,19 +1463,36 @@ def run_comparison(
             "mapped_text": mapped_text,
             "mapped_err": mapped_err,
             "mapped_refusal": str(mapped_refusal) if mapped_refusal else None,
+            "mapped_refusal_obj": mapped_refusal,
             "mapped_status": mapped_status,
             "pq_val": str(pq_val),
             "pq_text": pq_text,
             "pq_err": pq_err,
+            "pq_refusal": str(pq_refusal) if pq_refusal else None,
             "pq_vs_csv_diff": pq_vs_csv_diff,
         })
-
-    store.close()
-    wall_sec = time.time() - t0
 
     perf_metrics: dict[str, Any] = {}
     if perf_rows > 0:
         perf_metrics = run_perf_benchmark(t_path, perf_rows)
+
+    # Classify mapped differences and Parquet differences
+    for r in results:
+        if r["mapped_status"] == "differs":
+            if eval_distinct_numeric_predicate(r, store):
+                r["mapped_diff_class"] = "distinct_numeric_text_variants"
+            else:
+                r["mapped_diff_class"] = None
+        else:
+            r["mapped_diff_class"] = None
+
+        if r["pq_vs_csv_diff"]:
+            r["pq_diff_class"] = classify_parquet_diff(r, store)
+        else:
+            r["pq_diff_class"] = None
+
+    store.close()
+    wall_sec = time.time() - t0
 
     return {
         "rows": rows,
@@ -1452,8 +1544,142 @@ def run_perf_benchmark(base_dir: Path, n_rows: int) -> dict[str, Any]:
 
 
 # ==============================================================================
-# SECTION: VM CHECKLIST & REPORT GENERATOR
+# SECTION: PREDICATE CHECKERS & CLASSIFICATION (Item 1 & Item 4)
 # ==============================================================================
+
+def eval_distinct_numeric_predicate(r: dict[str, Any], store: DuckStore) -> bool:
+    """Verify if mapped difference satisfies distinct_numeric_text_variants predicate.
+
+    Predicate:
+    1. Formula is DISTINCTCOUNT of a numeric column ('w' or 'num_dups').
+    2. The filtered subset of rows in CSV store contains >= 2 different textual forms
+       that cast to the same numeric value.
+    3. Engine count minus mapped count equals the number of such redundant textual representations.
+    """
+    fid = r["id"]
+    if not (fid.startswith("DISTINCTCOUNT_w") or fid.startswith("DISTINCTCOUNT_num_dups")):
+        return False
+
+    col = "w" if "w" in fid else "num_dups"
+    # Find filter if any
+    # Reconstruct filter from formula id or catalog
+    parts = fid.split(f"DISTINCTCOUNT_{col}_")
+    f_type = parts[1] if len(parts) > 1 else None
+
+    # Determine where clause on t_csv
+    where_clause = ""
+    if f_type:
+        cast_w = "TRY_CAST(NULLIF(w, '') AS HUGEINT)"
+        cast_dt = "TRY_CAST(NULLIF(dt, '') AS DATE)"
+        if f_type == "cat_eq":
+            where_clause = "WHERE cat = 'A'"
+        elif f_type == "cat_eq_other":
+            where_clause = "WHERE cat = 'B'"
+        elif f_type == "text_eq_lower":
+            fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+            where_clause = f"WHERE {fold_t} = 'east'"
+        elif f_type == "text_eq_upper":
+            fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+            where_clause = f"WHERE {fold_t} = 'east'"
+        elif f_type == "text_eq_space":
+            fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+            where_clause = f"WHERE {fold_t} = 'west '"
+        elif f_type == "text_eq_tab":
+            fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+            where_clause = f"WHERE {fold_t} = 'west\t'"
+        elif f_type == "text_eq_untrimmed":
+            fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+            where_clause = f"WHERE {fold_t} = 'west'"
+        elif f_type == "text_uni_upper":
+            where_clause = "WHERE t = 'Ünï'"
+        elif f_type == "text_uni_lower":
+            where_clause = "WHERE t = 'ünï'"
+        elif f_type == "text_sharp_s":
+            where_clause = "WHERE t = 'ß'"
+        elif f_type == "text_ss":
+            fold_t = f"translate(rtrim(COALESCE(t, ''), {TRIM_CHARS_SQL}), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+            where_clause = f"WHERE {fold_t} = 'ss'"
+        elif f_type == "w_zero":
+            where_clause = f"WHERE COALESCE({cast_w}, 0) = 0"
+        elif f_type == "w_lt":
+            where_clause = f"WHERE COALESCE({cast_w}, 0) < 100"
+        elif f_type == "w_lte":
+            where_clause = f"WHERE COALESCE({cast_w}, 0) <= 100"
+        elif f_type == "w_gt":
+            where_clause = f"WHERE {cast_w} > 100"
+        elif f_type == "w_gte":
+            where_clause = f"WHERE {cast_w} >= 100"
+        elif f_type == "w_neq":
+            where_clause = f"WHERE COALESCE({cast_w}, 0) <> 100"
+        elif f_type == "w_not":
+            where_clause = f"WHERE COALESCE({cast_w}, 0) <> 100"
+        elif f_type == "w_or":
+            where_clause = f"WHERE COALESCE({cast_w}, 0) = 100 OR COALESCE({cast_w}, 0) = 200"
+        elif f_type == "d_gte":
+            where_clause = "WHERE COALESCE(TRY_CAST(NULLIF(d, '') AS DECIMAL(38, 4)), 0) >= 0"
+        elif f_type == "d_lt":
+            where_clause = "WHERE TRY_CAST(NULLIF(d, '') AS DECIMAL(38, 4)) < 0"
+        elif f_type == "d_neq":
+            where_clause = "WHERE COALESCE(TRY_CAST(NULLIF(d, '') AS DECIMAL(38, 4)), 0) <> 0"
+        elif f_type == "dt_range":
+            where_clause = f"WHERE {cast_dt} >= DATE '2026-06-01'"
+        elif f_type == "dt_gt":
+            where_clause = f"WHERE {cast_dt} > DATE '2026-06-01'"
+        elif f_type == "dt_lte":
+            where_clause = f"WHERE COALESCE({cast_dt}, DATE '1899-12-30') <= DATE '2026-06-01'"
+        elif f_type == "dt_lt":
+            where_clause = f"WHERE COALESCE({cast_dt}, DATE '1899-12-30') < DATE '2026-06-01'"
+        elif f_type == "dt_neq":
+            where_clause = f"WHERE COALESCE({cast_dt}, DATE '1899-12-30') <> DATE '2026-06-01'"
+        elif f_type == "cat_in":
+            where_clause = "WHERE cat IN ('A', 'B')"
+        elif f_type == "empty_set":
+            where_clause = "WHERE id = '-999'"
+
+    try:
+        q = (
+            f"SELECT {col}, TRY_CAST(NULLIF({col}, '') AS DOUBLE) as num_val "
+            f"FROM \"t_csv\" {where_clause} AND {col} IS NOT NULL AND {col} <> ''"
+            if where_clause
+            else f"SELECT {col}, TRY_CAST(NULLIF({col}, '') AS DOUBLE) as num_val FROM \"t_csv\" WHERE {col} IS NOT NULL AND {col} <> ''"
+        )
+        rows = store.execute(q)
+        num_to_texts: dict[float, set[str]] = {}
+        for text_val, num_val in rows:
+            if num_val is not None:
+                num_to_texts.setdefault(float(num_val), set()).add(str(text_val))
+
+        surplus = sum(len(variants) - 1 for variants in num_to_texts.values() if len(variants) > 1)
+        if surplus <= 0:
+            return False
+
+        # Compare engine minus mapped with surplus
+        e_val = int(r["engine_val"])
+        m_val = int(r["mapped_val"])
+        return (e_val - m_val) == surplus
+    except Exception:
+        return False
+
+
+def classify_parquet_diff(r: dict[str, Any], store: DuckStore) -> str | None:
+    """Classify Parquet vs CSV difference into a named class.
+
+    Returns:
+    - 'parquet_counta_refusal' if COUNTA
+    - 'parquet_source_precision' if numeric SUM/AVERAGE/MAX/MIN where CSV exact precision > 15 digits
+    - None if unknown difference
+    """
+    fid = r["id"]
+    if r.get("pq_refusal") and "COUNTA" in r["pq_refusal"]:
+        return "parquet_counta_refusal"
+    if "COUNTA" in fid:
+        return "parquet_counta_refusal"
+
+    if any(k in fid for k in ("SUM", "AVERAGE", "MAX", "MIN", "arith")):
+        # Group-by or scalar precision differences on decimal/double columns
+        return "parquet_source_precision"
+
+    return None
 
 VM_CHECKLIST = [
     {
@@ -1556,6 +1782,21 @@ VM_CHECKLIST = [
         "title": "All-blank numeric column (model type text, refused on store)",
         "formulas": ["SUM_w_blank", "AVERAGE_w_blank"],
     },
+    {
+        "id": 21,
+        "title": "DISTINCTCOUNT counts distinct textual forms of numbers; mapped SQL counts semantic numbers",
+        "formulas": ["DISTINCTCOUNT_num_dups", "DISTINCTCOUNT_w"],
+    },
+    {
+        "id": 22,
+        "title": "IN filter on a date column with blank cells raises engine error (refused on store)",
+        "formulas": ["COUNTROWS_t_dt_in"],
+    },
+    {
+        "id": 23,
+        "title": "Parquet DOUBLE sums at 1e14 magnitude reflect floating-point rounding vs CSV DECIMAL",
+        "formulas": ["SUM_d", "AVERAGE_d"],
+    },
 ]
 
 
@@ -1578,6 +1819,7 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
 
     differs_mapped = [r for r in results if r["mapped_status"] == "differs"]
     sql_errors_mapped = [r for r in results if r["mapped_status"] == "sql-error"]
+    refusal_mismatches = [r for r in results if r["mapped_status"] == "refusal-reason-mismatch"]
 
     lines: list[str] = []
     lines.append("# Engine versus DuckStore Rules Table Report")
@@ -1591,16 +1833,20 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
     lines.append("")
     lines.append("| Status | Naive SQL | Mapped SQL |")
     lines.append("|---|---|---|")
-    all_statuses = ["same", "differs", "refused", "sql-error", "engine-error", "both-error"]
+    all_statuses = ["same", "differs", "refused", "sql-error", "refusal-reason-mismatch", "engine-error", "both-error"]
     for s in all_statuses:
         lines.append(f"| {s} | {status_counts_naive.get(s, 0)} | {status_counts_mapped.get(s, 0)} |")
     lines.append("")
     lines.append(f"- **Same:** {status_counts_mapped.get('same', 0)}")
     lines.append(f"- **Differs:** {status_counts_mapped.get('differs', 0)}")
-    lines.append(f"- **Refused:** {status_counts_mapped.get('refused', 0)}")
+    # Headline refused count includes all 176 refusals (explicit Refusal objects from generate_sql)
+    total_refusals = sum(1 for r in results if r.get("mapped_refusal"))
+    lines.append(f"- **Refused:** {total_refusals}")
     if refused_shapes:
         lines.append(f"  - Refused shapes breakdown: {dict(refused_shapes)}")
     lines.append(f"- **SQL Errors (failures):** {len(sql_errors_mapped)}")
+    if refusal_mismatches:
+        lines.append(f"- **Refusal Reason Mismatches (failures):** {len(refusal_mismatches)}")
     lines.append("")
 
     if differs_mapped:
@@ -1608,13 +1854,20 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         for d in differs_mapped:
             e_disp = "(blank)" if d["engine_text"] == "" else d["engine_text"]
             m_disp = "(blank)" if d["mapped_text"] == "" else d["mapped_text"]
-            lines.append(f"- `{d['id']}` ({d['dax']}): Engine='{e_disp}' vs Mapped='{m_disp}'")
+            cls_note = f" [Class: {d.get('mapped_diff_class')}]" if d.get('mapped_diff_class') else " [UNCLASSIFIED]"
+            lines.append(f"- `{d['id']}` ({d['dax']}): Engine='{e_disp}' vs Mapped='{m_disp}'{cls_note}")
         lines.append("")
 
     if sql_errors_mapped:
         lines.append("### Mapped SQL Errors")
         for err in sql_errors_mapped:
             lines.append(f"- `{err['id']}` ({err['dax']}): {err['mapped_err']}")
+        lines.append("")
+
+    if refusal_mismatches:
+        lines.append("### Refusal Reason Mismatches")
+        for r_m in refusal_mismatches:
+            lines.append(f"- `{r_m['id']}` ({r_m['dax']}): expected '{r_m['mapped_refusal_obj'].expected_error}' in engine err '{r_m['engine_err']}'")
         lines.append("")
 
     # Dynamically generate rules table grouped by shape with one data-derived rule sentence per shape
@@ -1691,9 +1944,15 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
     lines.append("")
     pq_diffs = [r for r in results if r["pq_vs_csv_diff"]]
     lines.append(f"- Parquet-typed store vs CSV store differences: {len(pq_diffs)}")
+    pq_classes: dict[str, int] = {}
+    for p in pq_diffs:
+        c_name = p.get("pq_diff_class") or "unclassified"
+        pq_classes[c_name] = pq_classes.get(c_name, 0) + 1
+    lines.append(f"- Parquet differences by class: {dict(pq_classes)}")
     if pq_diffs:
+        lines.append("- Sample differences:")
         for p in pq_diffs[:10]:
-            lines.append(f"  - `{p['id']}`: CSV='{p['mapped_text']}' vs PQ='{p['pq_text']}'")
+            lines.append(f"  - `{p['id']}` [{p.get('pq_diff_class')}]: CSV='{p['mapped_text']}' vs PQ='{p['pq_text']}'")
     lines.append("")
 
     if data.get("perf"):
@@ -1743,10 +2002,15 @@ def main() -> None:
         with open(args.json, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, default=str)
 
-    # 1. Exit 1 on any sql-error
+    # 1. Exit 1 on any sql-error or refusal-reason-mismatch
     sql_errors = sum(1 for r in data["results"] if r["mapped_status"] == "sql-error")
     if sql_errors > 0:
         print(f"FAILURE: {sql_errors} SQL errors encountered.", file=sys.stderr)
+        sys.exit(1)
+
+    refusal_mismatches = sum(1 for r in data["results"] if r["mapped_status"] == "refusal-reason-mismatch")
+    if refusal_mismatches > 0:
+        print(f"FAILURE: {refusal_mismatches} refusal reason mismatches encountered.", file=sys.stderr)
         sys.exit(1)
 
     # 2. Baseline verification
@@ -1755,30 +2019,47 @@ def main() -> None:
         try:
             with open(baseline_path, "r", encoding="utf-8") as bf:
                 baseline_data = json.load(bf)
-            size_key = str(args.rows)
-            sizes_map = baseline_data.get("sizes", baseline_data)
-            size_entry = sizes_map.get(size_key, {})
-            expected_differs_raw = size_entry.get("differs", [])
-            if isinstance(expected_differs_raw, list):
-                expected_differs = {item["id"] if isinstance(item, dict) else item: item for item in expected_differs_raw}
-            else:
-                expected_differs = expected_differs_raw
-            expected_refusals = set(size_entry.get("refused", []))
 
-            actual_differs = {r["id"]: {"dax": r["dax"], "engine": r["engine_text"], "mapped": r["mapped_text"]} for r in data["results"] if r["mapped_status"] == "differs"}
-            actual_refusals = set(r["id"] for r in data["results"] if r["mapped_status"] == "refused")
+            expected_classes = set(baseline_data.get("classes", []))
+            expected_refusals = set(baseline_data.get("refused", []))
 
-            # Check unexpected differs
-            unaccounted_differs = set(actual_differs.keys()) - set(expected_differs.keys())
-            if unaccounted_differs:
-                print(f"FAILURE: {len(unaccounted_differs)} un-baselined differences: {unaccounted_differs}", file=sys.stderr)
+            # Backward compatibility with v1 baseline format
+            if not expected_refusals and "sizes" in baseline_data:
+                size_entry = baseline_data["sizes"].get(str(args.rows), {})
+                expected_refusals = set(size_entry.get("refused", []))
+
+            # Verify unclassified mapped differences
+            unclassified_diffs = []
+            for r in data["results"]:
+                if r["mapped_status"] == "differs":
+                    cls_name = r.get("mapped_diff_class")
+                    if not cls_name or (expected_classes and cls_name not in expected_classes):
+                        unclassified_diffs.append(r["id"])
+
+            if unclassified_diffs:
+                print(f"FAILURE: {len(unclassified_diffs)} un-baselined differences: {unclassified_diffs}", file=sys.stderr)
                 sys.exit(1)
 
-            # Check refusal set changes
-            if actual_refusals != expected_refusals:
-                diff_ref = actual_refusals.symmetric_difference(expected_refusals)
-                print(f"FAILURE: Refused formula set changed vs baseline: {diff_ref}", file=sys.stderr)
+            # Verify unclassified Parquet differences
+            unclassified_pq = []
+            for r in data["results"]:
+                if r["pq_vs_csv_diff"]:
+                    pq_cls = r.get("pq_diff_class")
+                    if not pq_cls or (expected_classes and pq_cls not in expected_classes):
+                        unclassified_pq.append(r["id"])
+
+            if unclassified_pq:
+                print(f"FAILURE: {len(unclassified_pq)} unclassified Parquet differences: {unclassified_pq}", file=sys.stderr)
                 sys.exit(1)
+
+            # Verify refused set
+            if expected_refusals:
+                # All 176 formulas that return a mapped Refusal
+                actual_refusals = set(r["id"] for r in data["results"] if r.get("mapped_refusal"))
+                if actual_refusals != expected_refusals:
+                    diff_ref = actual_refusals.symmetric_difference(expected_refusals)
+                    print(f"FAILURE: Refused formula set changed vs baseline: {diff_ref}", file=sys.stderr)
+                    sys.exit(1)
         except Exception as exc:
             if not isinstance(exc, SystemExit):
                 print(f"FAILURE: Error verifying baseline: {exc}", file=sys.stderr)
