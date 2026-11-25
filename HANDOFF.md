@@ -1,5 +1,16 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Stage D0a: Power Query step differential tool, first slice (2026-11-25, Antigravity)**
+Branch: `d0-pq-store-diff`. Files: `tools/pq_store_diff.py`, `tools/pq_store_diff_baseline.json`, `tests/test_pq_store_diff_tool.py`, this file.
+1. Implemented `tools/pq_store_diff.py` differential tool comparing Tier 1 Power Query steps on DuckStore SQL vs the row-by-row step engine (`apply_transformations` / `transformations.py`).
+2. Covered Tier 1 steps: keep/remove/reorder/rename/duplicate column; keep/remove top, bottom, range, alternate rows; count_rows; add_index_column; remove_blank_rows; append (identical ordered schemas).
+3. Explicit row order enforced across all SQL mappings (`ORDER BY rowid` or `row_number() OVER ()`).
+4. Cell normalization rule defined uniformly: `normalize_cell(val)` maps `None` and `""` to `""`.
+5. Baseline `tools/pq_store_diff_baseline.json` contains class list and 8 parameter-refused shapes (error shapes matching engine errors).
+6. Exit policy: exits 0 across all seeds 1..30 at 2,000 rows, and seed 1 at 400 rows.
+7. Tests: 13 unit tests in `tests/test_pq_store_diff_tool.py` (hand-checked small tables, exit policy checks, and 4 behavioural mutant tests). Runs in ~1.1s.
+8. Status: READY FOR REVIEW.
+
 **Stage C0g fixes after the Team-Thinker review of C0f (2026-11-25, uncommitted)**
 Files: `tools/store_engine_diff.py`, `tests/test_store_engine_diff_tool.py`, `tools/store_engine_diff_baseline.json` (only `total_formulas` 838 to 842 in both sizes; `differs` lists were already equal to the current run), this file.
 1. Seeds 43, 51, 56 (2000 rows) exited 1 on `arith_sum_d_div_count`: `StoreResultLayer.divide_ratio` built `Decimal(str(float))` (shortest repr), but the engine prints the full binary value of the float. Fix: `Decimal(f_val)`. The other float-to-Decimal places (combo sum, plus scalar, combo sub) already used `Decimal(float)`.

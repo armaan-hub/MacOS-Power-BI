@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "description": "Power Query step differential tool baseline (Stage D0a).",
+  "classes": [],
+  "refused": [
+    "duplicate_column_existing_name",
+    "duplicate_column_nonexistent_col",
+    "keep_columns_missing_col",
+    "remove_column_last_column",
+    "remove_column_nonexistent_col",
+    "rename_column_existing_name",
+    "rename_column_nonexistent_col",
+    "reorder_columns_missing_col"
+  ]
+}
