@@ -8100,12 +8100,21 @@ class StudioController(QObject):
         return self._commit_import(folder, dialog.candidate)
 
     def import_csv_path(self, path: Path) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         return self._import_file_path(path, expected_kind="csv")
 
     def import_excel_path(self, path: Path) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         return self._import_file_path(path, expected_kind="excel")
 
     def import_data_path(self, path: Path) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         return self._import_file_path(path)
 
     def _import_file_path(
@@ -9229,6 +9238,9 @@ class StudioController(QObject):
         return refs
 
     def enter_data_dialog(self, use_clipboard: bool = False) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         initial_text = QApplication.clipboard().text() if use_clipboard else ""
         dialog = EnterDataDialog(
             replacing=False,
@@ -9239,6 +9251,9 @@ class StudioController(QObject):
         return self._commit_inline(dialog.candidate)
 
     def load_sample_data(self) -> bool:
+        if self._store_tables_loaded():
+            self._set_status(self._large_data_refusal("Import"))
+            return False
         return self._commit_inline(sample_candidate())
 
     def _commit_inline(self, parsed: ImportCandidate) -> bool:
@@ -11469,10 +11484,16 @@ class StudioController(QObject):
         column_types: dict[str, str] | None = None,
     ) -> tuple[ImportCandidate, dict[str, str]]:
         """Materialize model calculations after query steps for one table."""
-        # KNOWN: task 13 (open project with mixed ordinary and store tables) must replace this whole-model drop with per-table handling
-        if self._store_tables_loaded():
-            return candidate, {}
+        # Decide per candidate/source, never from controller state.
+        # Calculated columns are skipped only for a table whose own candidate/source is a store table.
+        from analytics_studio.store.candidate import StoreCandidate
         document = project or self._project
+        source = next(
+            (s for s in document.get("data_sources", []) if s.get("id") == source_id),
+            None,
+        )
+        if isinstance(candidate, StoreCandidate) or (source is not None and bool(source.get("store"))):
+            return candidate, {}
         table = self._model_table_for_source(document, source_id)
         if table is None:
             return candidate, {}
