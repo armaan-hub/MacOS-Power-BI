@@ -1,6 +1,7 @@
 {
   "version": 2,
   "description": "Store engine diff tool baseline for Stage C0d (class-based differences and complete refusal set).",
+  "plan_refusals_allowed": [],
   "classes": [
     "distinct_numeric_text_variants",
     "parquet_source_precision",

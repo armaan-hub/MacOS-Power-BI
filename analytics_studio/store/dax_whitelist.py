@@ -128,7 +128,16 @@ REASON_CAP_PREDICATES = f"a CALCULATE with more than {MAX_PREDICATES} filter arg
 REASON_CAP_IN_ITEMS = f"an IN list with more than {MAX_IN_ITEMS} items is not on the store whitelist"
 REASON_CAP_NESTING = f"brackets nested more than {MAX_NESTING} deep are not on the store whitelist"
 REASON_CAP_TOKENS = f"an expression with more than {MAX_TOKENS} tokens is not on the store whitelist"
+REASON_TEXT_IN_FOLD = (
+    "text IN with non-ASCII items or items containing ss is not on the store whitelist: "
+    "the engine folds those differently"
+)
 REASON_UNEXPECTED = "unexpected error while classifying"
+
+
+def _in_item_folds_differently(text: str) -> bool:
+    """True for an IN item the engine casefolds differently from the store's ASCII-only fold."""
+    return not text.isascii() or "ss" in text.lower()
 REASON_DISTINCTCOUNT_NUMERIC = (
     "DISTINCTCOUNT on a numeric column differs from the engine "
     "(open Power BI answer check: distinct_numeric_text_variants)"
@@ -497,7 +506,9 @@ def _check_predicate(
         for item in items:
             if not isinstance(item, tuple) or item[0] != "string":
                 reasons.append("IN values must be string literals")
-                break
+                return
+        if any(_in_item_folds_differently(item[1]) for item in items):
+            reasons.append(REASON_TEXT_IN_FOLD)
         return
 
     # Comparison predicate

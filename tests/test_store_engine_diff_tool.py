@@ -871,3 +871,50 @@ def test_forced_wrong_values_tolerance_boundary() -> None:
     assert r_equal["engine_val"] == r_equal["mapped_val"] == "100000000000000.5"
     assert r_equal["mapped_status"] == "same"
     assert _policy(data_equal) == (0, [])
+
+
+# ------------------------------------------------------------------ C1b1b: plan-refused-allowed is a failure
+
+def _plan_run(ids: list[str], overrides: dict[str, Any] | None = None) -> dict[str, Any]:
+    return run_comparison(
+        rows=100, seed=42, overrides=overrides, formula_filter=ids,
+        skip_naive=True, skip_parquet=True, skip_group_by=True, use_plan=True,
+    )
+
+
+def test_plan_refused_allowed_exits_one_unless_the_baseline_lists_the_formula() -> None:
+    data = _plan_run(["SUM_w", "COUNTROWS"])
+    assert {r["plan_status"] for r in data["results"]} == {"plan-same"}
+    broken = {**data, "results": [{**data["results"][0], "plan_status": "plan-refused-allowed"}, *data["results"][1:]]}
+    failed_id = broken["results"][0]["id"]
+    code, messages = evaluate_exit_policy(broken, {"classes": []})
+    assert code == 1 and failed_id in messages[0] and "plan-refused-allowed" in messages[0]
+    assert evaluate_exit_policy(broken, {"classes": [], "plan_refusals_allowed": []})[0] == 1
+    assert evaluate_exit_policy(broken, {"classes": [], "plan_refusals_allowed": ["other_id"]})[0] == 1
+    assert evaluate_exit_policy(broken, {"classes": [], "plan_refusals_allowed": [failed_id]})[0] == 0
+
+
+def test_a_planner_that_refuses_everything_cannot_pass(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(store_engine_diff, "plan_measure", lambda *a, **k: Refusal("refuse everything"))
+    data = _plan_run(["SUM_w", "COUNTROWS"])
+    assert {r["plan_status"] for r in data["results"]} == {"plan-refused-allowed"}
+    assert evaluate_exit_policy(data, {"classes": []})[0] == 1
+
+
+def test_a_guard_refusal_at_execute_time_is_plan_refused_allowed(monkeypatch: pytest.MonkeyPatch) -> None:
+    real = store_engine_diff.plan_measure
+
+    def guarded(*args: Any, **kwargs: Any) -> Any:
+        plan = real(*args, **kwargs)
+        monkeypatch.setattr(type(plan), "execute", lambda self, store: Refusal("guard says no"), raising=False)
+        return plan
+
+    monkeypatch.setattr(store_engine_diff, "plan_measure", guarded)
+    data = _plan_run(["SUM_w"])
+    assert [r["plan_status"] for r in data["results"]] == ["plan-refused-allowed"]
+    assert "guard says no" in data["results"][0]["plan_refusal"]
+
+
+def test_the_committed_baseline_lists_no_allowed_plan_refusals() -> None:
+    baseline = json.loads(BASELINE_FILE.read_text(encoding="utf-8"))
+    assert baseline["plan_refusals_allowed"] == []

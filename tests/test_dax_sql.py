@@ -222,7 +222,11 @@ def check_text_predicates(env: Env) -> None:
     _is(sum_n(env, 's[c] = "ÄB"'), Decimal(3))       # only A-Z fold: Ä stays, B becomes b
     _is(sum_n(env, 's[c] = "äb"'), None)             # ä is not Ä
     _is(sum_n(env, 's[c] = "IT\'S"'), Decimal(2))    # single quote inside the literal
-    _is(sum_n(env, 's[c] IN {"AB", "it\'s"}'), Decimal(7))
+    # the column holds the non-ASCII cell "ÄB": a text IN is refused (REASON_IN_NON_ASCII_COLUMN)
+    plan = env.plan('CALCULATE(SUM(s[n]), s[c] IN {"AB", "it\'s"})')
+    assert isinstance(plan, MeasurePlan), plan
+    out = plan.execute(env.store)
+    assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_IN_NON_ASCII_COLUMN, out
     _is(sum_n(env, 's[c] = ""'), Decimal(5))         # the blank cell
 
 
@@ -640,11 +644,352 @@ def test_plan_sql_error_and_crash_exit_one() -> None:
     for status in ("plan-sql-error", "plan-crash", "plan-differs"):
         broken = {**data, "results": [{**data["results"][0], "plan_status": status}]}
         assert evaluate_exit_policy(broken, {"classes": []})[0] == 1, status
-    ok = {**data, "results": [{**data["results"][0], "plan_status": "plan-refused-allowed"}]}
-    assert evaluate_exit_policy(ok, {"classes": []})[0] == 0
+    refused = {**data, "results": [{**data["results"][0], "plan_status": "plan-refused-allowed"}]}
+    assert evaluate_exit_policy(refused, {"classes": []})[0] == 1
+    listed = {"classes": [], "plan_refusals_allowed": [data["results"][0]["id"]]}
+    assert evaluate_exit_policy(refused, listed)[0] == 0
 
 
 def test_column_decimal_meta(env: Env) -> None:
     meta = column_decimal_meta(env.store, "s_csv", ["d", "x"])
     assert meta["d"] == ColumnMeta(scale=4, digits=5)
     assert meta["x"].digits == 3
+
+
+# ===========================================================================
+# C1b1b: review fixes. Each case below is compared with the REAL engine (evaluate_measures).
+# ===========================================================================
+
+import csv as _csv  # noqa: E402
+
+from analytics_studio.controller import StudioController  # noqa: E402
+from analytics_studio.file_import import parse_file  # noqa: E402
+from analytics_studio.measures import evaluate_measures, normalize_measure  # noqa: E402
+from analytics_studio.store.dax_sql import REASON_IN_NON_ASCII_COLUMN  # noqa: E402
+from analytics_studio.store.dax_whitelist import REASON_TEXT_IN_FOLD  # noqa: E402
+
+
+class EngineCase:
+    """A small CSV table named "t" loaded in the real engine AND in a store, with decimal metadata."""
+
+    def __init__(self, base: Path, header: list[str], rows: list[list[str]]) -> None:
+        csv_path = base / "t.csv"
+        with open(csv_path, "w", newline="", encoding="utf-8") as handle:
+            writer = _csv.writer(handle)
+            writer.writerow(header)
+            writer.writerows(rows)
+        self.controller = StudioController()
+        self.controller._effective_app_data_dir = lambda: str(base / "app")
+        assert self.controller._commit_import(csv_path, parse_file(csv_path))
+        self.context = self.controller._measure_table_context()
+        self.table_id = self.controller._active_model_table_id()
+        self.table_name = self.controller._active_model_table_name()
+        assert self.table_name == "t"
+        self.rows = self.controller._loaded_candidates[self.controller._active_source_id].rows
+        self.headers = self.controller._headers
+        self.types: dict[str, str] = self.controller._project["model"]["tables"][0]["column_types"]
+        self.store = DuckStore(str(base / "t.db"))
+        import_csv_to_store(self.store, "t_csv", csv_path, {})
+        self.meta = {("t", c): m for c, m in column_decimal_meta(self.store, "t_csv", header).items()}
+
+    def engine(self, expression: str) -> Any:
+        measure = normalize_measure("M", expression, home_table_id=self.table_id)
+        return evaluate_measures(
+            [measure], self.rows, self.headers, "t", measure_names=["M"], table_context=self.context,
+            relationships=[], filter_table_ids=[], active_table_id=self.table_id,
+        )["M"]
+
+    def plan(self, expression: str, meta: Any = None) -> Any:
+        return plan_measure(
+            expression, home_table="t", tables={"t": self.types}, store_tables={"t": "t_csv"},
+            column_meta=self.meta if meta is None else meta,
+        )
+
+    def same_as_engine(self, expression: str) -> Any:
+        """The plan's value, asserted equal to the engine's (same class, same value)."""
+        plan = self.plan(expression)
+        assert isinstance(plan, MeasurePlan), (expression, plan)
+        got = plan.execute(self.store)
+        want = self.engine(expression)
+        assert type(got) is type(want) and got == want, (expression, got, want)
+        return got
+
+
+# ---- item 1: decimal columns with names that break unquoted SQL -------------------------------------
+
+ODD_NAMES = ["amt x", 'a"b', "a;b", "select", "c]d"]
+
+
+def _dax_ref(name: str) -> str:
+    return "t[" + name.replace("]", "]]") + "]"
+
+
+@pytest.fixture(scope="module")
+def odd_decimal_case(tmp_path_factory: pytest.TempPathFactory) -> EngineCase:
+    rows = [[str(i)] + [f"{i}.123{j}4546" for j in range(len(ODD_NAMES))] for i in range(1, 6)]
+    case = EngineCase(tmp_path_factory.mktemp("odd"), ["id"] + ODD_NAMES, rows)
+    yield case
+    case.store.close()
+
+
+@pytest.mark.parametrize("name", ODD_NAMES)
+def test_decimal_column_with_odd_name_sums_exactly_like_the_engine(odd_decimal_case: EngineCase, name: str) -> None:
+    case = odd_decimal_case
+    assert case.types[name] == "decimal_number"
+    assert case.meta[("t", name)].scale == 8  # not the made-up default of 4
+    value = case.same_as_engine(f"SUM({_dax_ref(name)})")
+    assert value % Decimal("0.0001") != 0  # a result rounded to 4 decimals would not pass the check above
+
+
+class FailingMetaStore:
+    """Forwards everything but raises on the decimal metadata queries; records every query."""
+
+    def __init__(self, store: Any) -> None:
+        self.store = store
+        self.calls: list[str] = []
+
+    def execute(self, sql: str, params: Any = ()) -> Any:
+        self.calls.append(sql)
+        if "strpos" in sql or "regexp_replace" in sql:
+            raise StoreError("forced metadata failure")
+        return self.store.execute(sql, params)
+
+
+def test_metadata_failure_is_a_refusal_and_runs_no_aggregate_query(odd_decimal_case: EngineCase) -> None:
+    case = odd_decimal_case
+    failing = FailingMetaStore(case.store)
+    meta = column_decimal_meta(failing, "t_csv", ODD_NAMES)
+    assert meta == {}  # no made-up ColumnMeta(4, 0)
+    column_meta = {("t", c): m for c, m in meta.items()}
+    metadata_queries = len(failing.calls)
+    assert metadata_queries > 0
+    for expression in ("SUM(t[amt x])", 'CALCULATE(COUNTROWS(t), t[amt x] >= 1)', "AVERAGE(t[select])"):
+        out = case.plan(expression, meta=column_meta)
+        assert isinstance(out, Refusal) and "no decimal metadata for column" in out.reason, (expression, out)
+    assert len(failing.calls) == metadata_queries  # the plan step ran no query at all
+
+
+# ---- item 2: text IN versus the engine ----------------------------------------------------------------
+
+IN_MISMATCH_LITERALS = [['"ünï"'], ['"ß"'], ['"ss"'], ['"ünï"', '"ß"'], ['"A"', '"ünï"'], ['"SS"'], ['"Mississippi"']]
+
+
+@pytest.mark.parametrize("items", IN_MISMATCH_LITERALS)
+def test_whitelist_refuses_in_items_that_fold_differently(items: list[str]) -> None:
+    expression = "CALCULATE(COUNTROWS(t), t[cat] IN {" + ", ".join(items) + "})"
+    decision = _decide(expression)
+    assert not decision.allowed and decision.reasons == (REASON_TEXT_IN_FOLD,), (items, decision)
+    assert REASON_TEXT_IN_FOLD == (
+        "text IN with non-ASCII items or items containing ss is not on the store whitelist: "
+        "the engine folds those differently"
+    )
+
+
+def test_whitelist_still_allows_ascii_in_and_equality() -> None:
+    assert _decide('CALCULATE(COUNTROWS(t), t[cat] IN {"A", "B"})').allowed
+    assert _decide('CALCULATE(COUNTROWS(t), t[cat] = "ünï")').allowed
+    assert _decide('CALCULATE(COUNTROWS(t), t[cat] = "ss")').allowed
+
+
+@pytest.fixture(scope="module")
+def unicode_case(tmp_path_factory: pytest.TempPathFactory) -> EngineCase:
+    cells = ["A", "a", "B", "ß", "ünï", "ÜNÏ", "SS", "ss", "K", "K", "k", "x y", ""]
+    case = EngineCase(tmp_path_factory.mktemp("uni"), ["n", "cat"], [[str(i), c] for i, c in enumerate(cells * 3, 1)])
+    yield case
+    case.store.close()
+
+
+@pytest.fixture(scope="module")
+def ascii_case(tmp_path_factory: pytest.TempPathFactory) -> EngineCase:
+    cells = ["A", "a", "B", "b", "C", "x y", "", "Kk"]
+    case = EngineCase(tmp_path_factory.mktemp("asc"), ["n", "cat"], [[str(i), c] for i, c in enumerate(cells * 4, 1)])
+    yield case
+    case.store.close()
+
+
+def test_planner_refuses_in_on_a_column_with_non_ascii_cells(unicode_case: EngineCase) -> None:
+    case = unicode_case
+    for items in (['"a"'], ['"A"', '"B"'], ['"k"'], ['"x y"']):
+        expression = "CALCULATE(COUNTROWS(t), t[cat] IN {" + ", ".join(items) + "})"
+        plan = case.plan(expression)
+        assert isinstance(plan, MeasurePlan), (expression, plan)
+        spy = SpyStore(case.store)
+        out = plan.execute(spy)
+        assert isinstance(out, Refusal) and out.reason == REASON_IN_NON_ASCII_COLUMN, (expression, out)
+        assert len(spy.calls) == 1 and "COUNT(" not in spy.calls[0], spy.calls  # only the guard query ran
+    # equality stays on the plan: the engine and the plan agree on it for the same column
+    for literal in ('"a"', '"k"', '"ünï"', '"ss"', '"ß"'):
+        case.same_as_engine(f"CALCULATE(COUNTROWS(t), t[cat] = {literal})")
+
+
+def test_the_guard_is_needed_the_engine_folds_kelvin_sign_and_eszett_for_in(unicode_case: EngineCase) -> None:
+    case = unicode_case
+    expression = 'CALCULATE(COUNTROWS(t), t[cat] IN {"k"})'
+    plan = case.plan(expression)
+    assert isinstance(plan, MeasurePlan)
+    unguarded = Decimal(case.store.execute(plan.sql)[0][0])
+    assert unguarded != case.engine(expression)
+
+
+def test_ascii_in_equals_the_engine_and_costs_two_queries_once(ascii_case: EngineCase) -> None:
+    case = ascii_case
+    expression = 'CALCULATE(COUNTROWS(t), t[cat] IN {"A", "B"})'
+    plan = case.plan(expression)
+    assert isinstance(plan, MeasurePlan)
+    spy = SpyStore(case.store)
+    got = plan.execute(spy)
+    assert len(spy.calls) == 2  # the guard, then the aggregate
+    assert type(got) is type(case.engine(expression)) and got == case.engine(expression)
+    assert plan.execute(spy) == got and len(spy.calls) == 3  # the guard result is cached inside the plan
+    other = case.plan(expression)
+    assert isinstance(other, MeasurePlan) and other.guard_cache == {}  # never global
+    for text in ('CALCULATE(SUM(t[n]), t[cat] IN {"a", "kk", ""})', 'CALCULATE(COUNTROWS(t), t[cat] IN {"x y"})'):
+        case.same_as_engine(text)
+
+
+def test_plans_without_in_run_exactly_one_query(ascii_case: EngineCase) -> None:
+    spy = SpyStore(ascii_case.store)
+    for expression in ("COUNTROWS(t)", 'CALCULATE(SUM(t[n]), t[cat] = "a")', "SUM(t[n])"):
+        plan = ascii_case.plan(expression)
+        assert isinstance(plan, MeasurePlan)
+        before = len(spy.calls)
+        plan.execute(spy)
+        assert len(spy.calls) == before + 1, expression
+
+
+def test_mutant_in_guard_off_is_caught(unicode_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        plan = unicode_case.plan('CALCULATE(COUNTROWS(t), t[cat] IN {"k"})')
+        assert isinstance(plan, MeasurePlan)
+        assert isinstance(plan.execute(unicode_case.store), Refusal)
+
+    check()
+    monkeypatch.setattr(MeasurePlan, "_in_column_has_non_ascii", lambda self, store, guard: False)
+    _fails(check)
+
+
+# ---- item 3: whitespace-only text cells in COUNTBLANK and DISTINCTCOUNT ------------------------------
+
+@pytest.fixture(scope="module")
+def blank_case(tmp_path_factory: pytest.TempPathFactory) -> EngineCase:
+    cells = [
+        ("1", " "), ("1", "\t"), ("1", ""), ("1", "   "),      # group 1: only blank-like cells
+        ("2", "a"), ("2", "A"), ("2", "b "), ("2", " "),       # group 2: values and one blank-like cell
+        ("3", "x"), ("3", "x "), ("3", " x"),                  # group 3: no blank-like cell
+    ]
+    case = EngineCase(tmp_path_factory.mktemp("blank"), ["g", "cat"], [[g, c] for g, c in cells])
+    yield case
+    case.store.close()
+
+
+@pytest.mark.parametrize("expression", [
+    "COUNTBLANK(t[cat])",
+    "DISTINCTCOUNT(t[cat])",
+    "CALCULATE(COUNTBLANK(t[cat]), t[g] = 1)",
+    "CALCULATE(DISTINCTCOUNT(t[cat]), t[g] = 1)",
+    "CALCULATE(COUNTBLANK(t[cat]), t[g] = 2)",
+    "CALCULATE(DISTINCTCOUNT(t[cat]), t[g] = 2)",
+    "CALCULATE(COUNTBLANK(t[cat]), t[g] = 3)",
+    "CALCULATE(DISTINCTCOUNT(t[cat]), t[g] = 3)",
+    "CALCULATE(COUNTROWS(t), t[g] = 1)",
+])
+def test_whitespace_only_text_cells_count_like_the_engine(blank_case: EngineCase, expression: str) -> None:
+    blank_case.same_as_engine(expression)
+
+
+def test_whitespace_only_values_are_the_expected_numbers(blank_case: EngineCase) -> None:
+    # hand count: group 1 has four blank-like cells; the whole table has five; DISTINCTCOUNT = a, b, x, blank
+    _is(blank_case.same_as_engine("CALCULATE(COUNTBLANK(t[cat]), t[g] = 1)"), Decimal(4))
+    _is(blank_case.same_as_engine("COUNTBLANK(t[cat])"), Decimal(5))
+    _is(blank_case.same_as_engine("CALCULATE(DISTINCTCOUNT(t[cat]), t[g] = 1)"), Decimal(1))
+
+
+def test_mutant_blank_count_back_to_empty_string_is_caught(blank_case: EngineCase, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        blank_case.same_as_engine("COUNTBLANK(t[cat])")
+        blank_case.same_as_engine("CALCULATE(DISTINCTCOUNT(t[cat]), t[g] = 1)")
+
+    check()
+    monkeypatch.setattr(dax_sql, "trim_sql", lambda expr: f"COALESCE({expr}, '')")
+    _fails(check)
+
+
+# ---- item 5: literal cap numbers, the blank-date boundary --------------------------------------------
+
+def _literal_chain(n: int) -> str:
+    return " || ".join(f"t[w] = {i}" for i in range(n))
+
+
+def test_cap_numbers_are_pinned_to_their_literal_values() -> None:
+    assert (dax_whitelist.MAX_OR_TERMS, dax_whitelist.MAX_PREDICATES, dax_whitelist.MAX_IN_ITEMS) == (50, 50, 200)
+    assert (dax_whitelist.MAX_NESTING, dax_whitelist.MAX_TOKENS) == (20, 1500)
+    assert _decide("CALCULATE(SUM(t[w]), " + _literal_chain(50) + ")").allowed
+    over = _decide("CALCULATE(SUM(t[w]), " + _literal_chain(51) + ")")
+    assert over.reasons == (dax_whitelist.REASON_CAP_OR_TERMS,)
+    assert _decide("CALCULATE(SUM(t[w]), " + ", ".join(f"t[w] > {i}" for i in range(50)) + ")").allowed
+    over = _decide("CALCULATE(SUM(t[w]), " + ", ".join(f"t[w] > {i}" for i in range(51)) + ")")
+    assert over.reasons == (dax_whitelist.REASON_CAP_PREDICATES,)
+    assert _decide("CALCULATE(SUM(t[w]), t[cat] IN {" + ", ".join(f'"a{i}"' for i in range(200)) + "})").allowed
+    over = _decide("CALCULATE(SUM(t[w]), t[cat] IN {" + ", ".join(f'"a{i}"' for i in range(201)) + "})")
+    assert over.reasons == (dax_whitelist.REASON_CAP_IN_ITEMS,)
+    assert _decide("CALCULATE(SUM(t[w]), " + "(" * 19 + "t[w] = 1" + ")" * 19 + ")").allowed
+    over = _decide("CALCULATE(SUM(t[w]), " + "(" * 20 + "t[w] = 1" + ")" * 20 + ")")
+    assert over.reasons == (dax_whitelist.REASON_CAP_NESTING,)
+
+
+def _expression_with_tokens(target: int) -> str:
+    """CALCULATE with 50 predicates (the cap) made of `||` chains; a leading minus adds one token to a literal."""
+    from analytics_studio.measures import tokenize
+
+    def build(minus: int) -> str:
+        preds, counter = [], 0
+        for _ in range(50):
+            terms = []
+            for _ in range(6):
+                terms.append(f"t[w] = {'-' if counter < minus else ''}{counter % 7}")
+                counter += 1
+            preds.append(" || ".join(terms))
+        return "CALCULATE(SUM(t[w]), " + ", ".join(preds) + ")"
+
+    base = len(tokenize(build(0)))
+    assert base <= target <= base + 300
+    expression = build(target - base)
+    assert len(tokenize(expression)) == target
+    return expression
+
+
+def test_token_cap_is_exactly_1500() -> None:
+    assert _decide(_expression_with_tokens(1500)).allowed
+    assert _decide(_expression_with_tokens(1501)).reasons == (dax_whitelist.REASON_CAP_TOKENS,)
+
+
+def test_blank_dates_compare_as_1899_12_30_at_the_1900_boundary(env: Env) -> None:
+    # the blank date (row 2, n = 2) is 1899-12-30: below 1900-01-01 (DATE() cannot go lower)
+    _is(sum_n(env, "s[dt] < DATE(1900, 1, 1)"), Decimal(2))
+    _is(sum_n(env, "s[dt] <= DATE(1900, 1, 1)"), Decimal(2))
+    _is(sum_n(env, "s[dt] >= DATE(1900, 1, 1)"), Decimal(13))
+    _is(sum_n(env, "s[dt] <> DATE(1900, 1, 1)"), Decimal(15))
+
+
+def test_mutant_blank_date_default_1900_01_01_is_caught(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    def check() -> None:
+        _is(sum_n(env, "s[dt] < DATE(1900, 1, 1)"), Decimal(2))
+        _is(sum_n(env, "s[dt] <> DATE(1900, 1, 1)"), Decimal(15))
+
+    check()
+    original = dax_sql.date_predicate_sql
+    monkeypatch.setattr(
+        dax_sql, "date_predicate_sql",
+        lambda col, op, day: original(col, op, day).replace("DATE '1899-12-30'", "DATE '1900-01-01'"),
+    )
+    _fails(check)
+
+
+def test_seed_loop_runs_a_rotating_tenth_of_the_catalog_per_seed() -> None:
+    """Names the shape of test_rule_a_plus_seeds_1_to_40_rotating_slice: each seed runs only the formulas whose
+    catalog index is congruent to the seed modulo 10 (a tenth), so one formula runs on 4 of the 40 seeds."""
+    headers = ["id", "w", "d", "big", "t", "dt", "flag", "cat", "w_blank", "num_dups"]
+    catalog = [f for f in build_formula_catalog(headers) if f["id"] != "forced_wrong_formula" and not f.get("group_col")]
+    per_seed = [sum(1 for i, _ in enumerate(catalog) if i % 10 == seed % 10) for seed in range(1, 41)]
+    assert all(len(catalog) // 10 <= n <= len(catalog) // 10 + 1 for n in per_seed)
+    assert sum(per_seed) == 4 * len(catalog)

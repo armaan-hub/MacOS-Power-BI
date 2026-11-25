@@ -678,6 +678,10 @@ def evaluate_plan_row(
         return {**base, "plan_status": "plan-sql-error", "plan_error": str(exc)[:200]}
     except Exception as exc:
         return {**base, "plan_status": "plan-crash", "plan_error": f"{type(exc).__name__}: {exc}"}
+    if isinstance(plan_val, Refusal):
+        base["plan_refusal"] = str(plan_val)
+        base["plan_status"] = "plan-refused-allowed"
+        return base
     if overrides.get("forced_wrong_plan_value") and f_item["id"] == overrides["forced_wrong_plan_value"]:
         plan_val = Decimal("1") if plan_val is None else plan_val + Decimal("0.000001")
     base["plan_value"] = str(plan_val)
@@ -1928,9 +1932,17 @@ def evaluate_exit_policy(data: dict[str, Any], baseline: dict[str, Any]) -> tupl
     """
     results = data["results"]
 
-    plan_failures = [r["id"] for r in results if r.get("plan_status") in PLAN_FAILURE_STATUSES]
+    plan_refusals_allowed = set(baseline.get("plan_refusals_allowed", []))
+    plan_failures = [
+        r["id"] for r in results
+        if r.get("plan_status") in PLAN_FAILURE_STATUSES
+        or (r.get("plan_status") == "plan-refused-allowed" and r["id"] not in plan_refusals_allowed)
+    ]
     if plan_failures:
         by_class = {c: sum(1 for r in results if r.get("plan_status") == c) for c in PLAN_FAILURE_STATUSES}
+        by_class["plan-refused-allowed"] = sum(
+            1 for r in results if r.get("plan_status") == "plan-refused-allowed" and r["id"] not in plan_refusals_allowed
+        )
         return 1, [f"FAILURE: plan (Rule A+) failures {by_class}: {plan_failures}"]
 
     sql_errors = sum(1 for r in results if r["mapped_status"] == "sql-error")

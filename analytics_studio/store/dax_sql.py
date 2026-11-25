@@ -21,7 +21,7 @@ from typing import Any, Mapping
 from analytics_studio import dax_dates
 from analytics_studio.measures import MeasureError, parse_expression
 from analytics_studio.store.dax_whitelist import _canonical_type, classify_measure
-from analytics_studio.store.text_rules import TRIM_CHARS_SQL, first_spelling_sql, fold_sql
+from analytics_studio.store.text_rules import TRIM_CHARS_SQL, first_spelling_sql, fold_sql, trim_sql
 
 
 # The one Parquet refusal that the Parquet difference class parquet_counta_refusal accepts
@@ -390,7 +390,7 @@ def aggregate_sql(
 
     if agg == "COUNTBLANK":
         if c_type in ("text",):
-            cnt_nonblank = f"COUNT(NULLIF({col}, ''))"
+            cnt_nonblank = f"COUNT(NULLIF({trim_sql(col)}, ''))"
         else:
             cnt_nonblank = f"COUNT({col})" if is_parquet else f"COUNT(NULLIF({col}, ''))"
         return f"SELECT {empty_guard}NULLIF(COUNT(*) - {cnt_nonblank}, 0){empty_end} FROM {t_q} {where_clause}"
@@ -398,7 +398,7 @@ def aggregate_sql(
     if agg == "DISTINCTCOUNT":
         if c_type == "text":
             fold_c = make_fold_expr(col, agg, overrides)
-            blank_add = f"MAX(CASE WHEN COALESCE({col}, '') = '' THEN 1 ELSE 0 END)"
+            blank_add = f"MAX(CASE WHEN {trim_sql(col)} = '' THEN 1 ELSE 0 END)"
             return (
                 f"SELECT {empty_guard}COUNT(DISTINCT NULLIF({fold_c}, '')) + {blank_add}{empty_end} "
                 f"FROM {t_q} {where_clause}"
@@ -536,22 +536,28 @@ class ColumnMeta:
 
 
 def column_decimal_meta(store: Any, table: str, columns: list[str]) -> dict[str, ColumnMeta]:
-    """Decimal scale (at least 4) and max digit count per column of a physical store table."""
+    """Decimal scale (at least 4) and max digit count per column of a physical store table.
+
+    Column and table names are quoted. A column whose metadata query fails is left OUT of the result (never
+    given a made-up scale): plan_measure then refuses a decimal use of it with "no decimal metadata".
+    """
     meta: dict[str, ColumnMeta] = {}
+    t_q = quote_identifier(table)
     for col in columns:
+        c_q = quote_identifier(col)
         try:
             scale_res = store.execute(
-                f"SELECT COALESCE(MAX(CASE WHEN strpos({col}, '.') > 0 "
-                f"THEN length(regexp_extract({col}, '\\.([0-9]+)', 1)) ELSE 0 END), 0) FROM \"{table}\""
+                f"SELECT COALESCE(MAX(CASE WHEN strpos({c_q}, '.') > 0 "
+                f"THEN length(regexp_extract({c_q}, '\\.([0-9]+)', 1)) ELSE 0 END), 0) FROM {t_q}"
+            )
+            digits_res = store.execute(
+                f"SELECT COALESCE(MAX(length(regexp_replace({c_q}, '[^0-9]', '', 'g'))), 0) FROM {t_q}"
             )
             scale = max(4, int(scale_res[0][0])) if scale_res else 4
-            digits_res = store.execute(
-                f"SELECT COALESCE(MAX(length(regexp_replace({col}, '[^0-9]', '', 'g'))), 0) FROM \"{table}\""
-            )
             digits = int(digits_res[0][0]) if digits_res else 0
-            meta[col] = ColumnMeta(scale, digits)
         except Exception:
-            meta[col] = ColumnMeta(4, 0)
+            continue
+        meta[col] = ColumnMeta(scale, digits)
     return meta
 
 
@@ -560,6 +566,7 @@ def column_decimal_meta(store: Any, table: str, columns: list[str]) -> dict[str,
 # ==============================================================================
 
 PARQUET_PLAN_REASON = "Parquet plan is not on the store path yet"
+REASON_IN_NON_ASCII_COLUMN = "the IN column holds non-ASCII text; the engine folds it differently"
 REASON_DECIMAL_LITERAL_FIT = "literal does not fit the column's decimal precision"
 MAX_DECIMAL_TOTAL = 38
 
@@ -588,9 +595,27 @@ class MeasurePlan:
     shape: str
     value_type: str = "number"
     overrides: Mapping[str, Any] | None = field(default=None, compare=False, repr=False)
+    in_guards: tuple[tuple[str, str], ...] = ()
+    guard_cache: dict[tuple[str, str], bool] = field(default_factory=dict, compare=False, repr=False)
 
-    def execute(self, store: Any) -> Decimal | dax_dates.DaxDateTime | None:
-        """Run the SELECT through the store's public read call and return the engine's value."""
+    def _in_column_has_non_ascii(self, store: Any, guard: tuple[str, str]) -> bool:
+        """One cheap query per (table, column) per plan: does any cell hold a non-ASCII character?"""
+        if guard not in self.guard_cache:
+            t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
+            rows = store.execute(f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE strlen({c_q}) <> length({c_q}))")
+            self.guard_cache[guard] = bool(rows and rows[0][0])
+        return self.guard_cache[guard]
+
+    def execute(self, store: Any) -> Decimal | dax_dates.DaxDateTime | Refusal | None:
+        """Run the SELECT through the store's public read call and return the engine's value.
+
+        A plan with a text IN first checks the IN column for non-ASCII cells (the engine casefolds those
+        differently for IN than the store's ASCII-only fold); if any exists the answer is a Refusal and the
+        aggregate query is not run.
+        """
+        for guard in self.in_guards:
+            if self._in_column_has_non_ascii(store, guard):
+                return Refusal(REASON_IN_NON_ASCII_COLUMN)
         rows = store.execute(self.sql)
         if self.kind == "average":
             sum_val, count_val = rows[0] if rows else (None, None)
@@ -729,6 +754,7 @@ class _Planner:
         self.tables = {t.casefold(): (t, {c.casefold(): (c, ty) for c, ty in cols.items()}) for t, cols in tables.items()}
         self.meta = {(t.casefold(), c.casefold()): m for (t, c), m in column_meta.items()}
         self.overrides = dict(overrides)
+        self.in_columns: list[tuple[str, str]] = []
 
     def resolve(self, ref: Any) -> _Resolved | Refusal:
         if not (isinstance(ref, tuple) and len(ref) == 3 and ref[0] == "reference"):
@@ -820,8 +846,10 @@ class _Planner:
         if resolved.col_type == "decimal_number":
             value = _number_literal(right)
             meta = self.meta_for(resolved)
-            if value is None or meta is None:
+            if value is None:
                 return Refusal("unsupported decimal predicate")
+            if meta is None:
+                return Refusal(f"no decimal metadata for column '{resolved.column}'")
             literal_scale = max(0, -int(value.as_tuple().exponent)) if isinstance(value.as_tuple().exponent, int) else 0
             scale = max(meta.scale, literal_scale)
             literal_int_digits = len(str(int(abs(value)))) if abs(value) >= 1 else 0
@@ -849,7 +877,11 @@ class _Planner:
             items.append(item[1])
         if not items:
             return Refusal("unsupported IN predicate")
-        return self._text_checked(items, lambda: text_in_sql(quote_identifier(resolved.column), items))
+        refused = self._text_checked(items, lambda: "")
+        if isinstance(refused, Refusal):
+            return refused
+        self.in_columns.append((resolved.table, resolved.column))
+        return text_in_sql(quote_identifier(resolved.column), items)
 
     @staticmethod
     def _text_checked(literal: str | list[str], build: Any) -> str | Refusal:
@@ -939,6 +971,13 @@ def plan_measure(
             if isinstance(sql, Refusal):
                 return sql
             where_parts.append(f"({sql})")
+        in_guards: list[tuple[str, str]] = []
+        for in_table, in_column in planner.in_columns:
+            in_physical = next((p for t, p in store_tables.items() if t.casefold() == in_table.casefold()), None)
+            if in_physical is None:
+                return Refusal(f"no store table for '{in_table}'")
+            if (in_physical, in_column) not in in_guards:
+                in_guards.append((in_physical, in_column))
         where_clause = ("WHERE " + _AND_JOIN.join(where_parts)) if where_parts else ""
         if not (isinstance(base, tuple) and base and base[0] == "call"):
             return Refusal("unsupported base expression")
@@ -977,4 +1016,5 @@ def plan_measure(
         shape=decision.shape,
         value_type=value_type,
         overrides=overrides,
+        in_guards=tuple(in_guards),
     )
