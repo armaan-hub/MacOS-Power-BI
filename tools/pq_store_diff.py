@@ -1,4 +1,4 @@
-"""Power Query step differential tool, first slice (Stage D0a, fixes D0b).
+"""Power Query step differential tool (Stage D0a to D0h: slice 3 adds group by, replace, text, merge, split).
 
 Proves on generated data that a SQL mapping of each Tier 1 Power Query step
 gives the same result as the existing row-by-row step engine (transformations.py).
@@ -6,7 +6,9 @@ gives the same result as the existing row-by-row step engine (transformations.py
 Cell rule (one place, `normalize_cell`): a cell is None or text. None is NOT the
 same as ''. The store CSV import keeps a blank cell as '' and the step engine
 returns '' for a blank CSV cell (measured: 0 None cells over 55 steps), so a SQL
-mapping that returns NULL for a blank cell is a difference.
+mapping that returns NULL for a blank cell is a difference. From D0h on the engine itself returns
+None for a COMPUTED null (a null replacement, a split part a short cell does not have, the sum of a
+group of blanks); there the SQL must return NULL, and '' is a difference.
 
 Known limit of the mutant tests: removing ORDER BY from the 5 row-slicing
 operations (`mutant_no_order_by`) cannot be killed by behaviour, because DuckDB
@@ -28,7 +30,7 @@ from decimal import Decimal, localcontext
 from pathlib import Path
 from typing import Any
 
-from analytics_studio.file_import import ImportCandidate, parse_file
+from analytics_studio.file_import import MAX_COLUMNS, ImportCandidate, parse_file
 from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
 from analytics_studio.transformations import TransformationError, apply_transformations
@@ -190,6 +192,56 @@ def decimal_literal(number: Decimal) -> str | None:
 
 
 
+# D0h planted shapes for the group-by key, numeric aggregate, split, replace and text-transform columns.
+# Rows 1..24 are fixed (every generated table with 24 or more rows holds them); later rows draw at random.
+GRP_KEY_PLANT = [
+    "g1", "G1", "g1 ", "g2", "", "g2", "g1", "1", "1.0", "g3", "G1", "g1 ",
+    " ", "g2", "", "g3", "g1", "1", "g2", "G1", "1.0", "g3", "", "g1",
+]
+GRP_KEY_OPTIONS = ["g1", "G1", "g1 ", "g2", "g3", "", "1", "1.0", " "]
+GRP_KEY2_OPTIONS = ["x", "y", "X", "", "z "]
+AGG_NUM_PLANT = [
+    "1", "2", " 4 ", "1_000", "-5", "-0.50", "7", "0.1", "7", "1", "007", "",
+    "+3", "07", "3", "2", "-0", "0.30", "1e2", "5", "", "2", "4", "07",
+]
+AGG_NUM_OPTIONS = [
+    "1", "2", "3", "4", " 4 ", "1_000", "-5", "-0.50", "12.5", "0.1", "0.2", "007", "7", "07", "+3",
+    "-0", "1e2", ".5", "10 ", "0.30",
+]
+SPLIT_PLANT = [
+    "a|b", "a|b|c", "|a", "a||b|", "", "a|b|c|d|e", "|", "abc", "x|", "|x|", "a.b.c", "a, b, c",
+    "a::b::c", "a,b", "01|1.0", " | ", "a|b|", "||", "ab|cd", "a b|c d", "aaa", "aaaa|aa", "a|b|c", "\u00e9|\u00fc|\u00f1",
+]
+SPLIT_PARTS = ["a", "b", "", "cc", "ab", " ", "x.y"]
+REP_PLANT = [
+    "ab", "xaby", "xab", "abxab", "ababab", "aab", "AB", "Ab", "a%b", "a_b", "a\\b", "a.b",
+    "it's", "aaa", "aaaa", "", "ab ab", " ab ", "abc", "bab", "x'y\"z", "100%", "[ab]", "(ab)*",
+]
+WORD_PLANT = [
+    "hello world", "HELLO WORLD", "  lead", "tail  ", "tab\there", "\tx\t", "new\nline", "mC donald",
+    "o'neil", "a1b2c3", "Title Case Words", "x\x1fy", "\x1fpad\x1f", "\x0bvt\x0b", "", "ab\x07cd",
+    "x-y_z", "UPPER lower MiXeD", "123", "a  b", "d\x7fe", "tHIS iS", "end ", "\x1c\x1d\x1e x \x1e",
+]
+
+
+def _d0h_cells(rnd_h: random.Random, row_number: int) -> list[str]:
+    """Cells of the six D0h columns for one row: planted for rows 1..24, random after."""
+    k = row_number - 1
+    blank = lambda: rnd_h.random() < 0.08
+    if k < 24:
+        # keep the random stream length the same for planted and random rows
+        for _ in range(8):
+            rnd_h.random()
+        return [GRP_KEY_PLANT[k], GRP_KEY2_OPTIONS[k % 5], AGG_NUM_PLANT[k], SPLIT_PLANT[k], REP_PLANT[k], WORD_PLANT[k]]
+    grp = "" if blank() else rnd_h.choice(GRP_KEY_OPTIONS)
+    grp2 = rnd_h.choice(GRP_KEY2_OPTIONS)
+    agg = "" if blank() else rnd_h.choice(AGG_NUM_OPTIONS)
+    split = "" if blank() else "|".join(rnd_h.choice(SPLIT_PARTS) for _ in range(rnd_h.randint(1, 4)))
+    rep = "" if blank() else rnd_h.choice(REP_PLANT)
+    word = "" if blank() else rnd_h.choice(WORD_PLANT)
+    return [grp, grp2, agg, split, rep, word]
+
+
 def generate_pq_dataset(
     csv_file: Path,
     rows: int = 2000,
@@ -218,8 +270,17 @@ def generate_pq_dataset(
     # num_clean is a CLEAN numeric column the engine parses everywhere (integers, decimals, negatives,
     # exponent forms, padding, digit-group underscore, a value beyond 2^53, blanks); date_col holds ISO
     # dates and dt_col ISO datetimes (space and T separators, fractions), both with blanks.
-    headers = ["id", "text_col", "num_col", "date_col", "cat_col", "num_clean", "dt_col", "blank_col"]
+    # D0h columns (grp_key, grp_key2, agg_num, split_col, rep_col, word_col) sit before dt_col so the
+    # last two columns stay dt_col and blank_col. They draw from their own generator (`rnd_h`), so the
+    # random draws of every older column are unchanged.
+    headers = [
+        "id", "text_col", "num_col", "date_col", "cat_col", "num_clean",
+        "grp_key", "grp_key2", "agg_num", "split_col", "rep_col", "word_col",
+        "dt_col", "blank_col",
+    ]
     n_cols = len(headers)
+    rnd_h = random.Random(f"d0h-{seed}")
+    clean_numeric_cols = ("num_clean", "agg_num")
     clean_options = [
         "0", "1", "10", "50", "100", "2", "9", "-5", "-0.50", "12.5", "0.1000000000000001",
         "1e3", "+7", ".5", " 5", "10 ", "1_000", "9007199254740993", "007", "-0",
@@ -243,7 +304,8 @@ def generate_pq_dataset(
         if i == ws_row:
             # Whitespace-only entire row: kept by Power Query (only null and '' are blank)
             ws_cells = [" "] * n_cols
-            ws_cells[headers.index("num_clean")] = ""  # a " " cell would make the clean numeric column dirty
+            for numeric_name in clean_numeric_cols:
+                ws_cells[headers.index(numeric_name)] = ""  # a " " cell would make a clean numeric column dirty
             csv_rows.append(ws_cells)
             continue
 
@@ -301,6 +363,13 @@ def generate_pq_dataset(
         elif i == 21:
             # case-variant pair with row 20: a case-folding duplicate key merges them (mutant_duplicate_casefold)
             c_str = "Cat"
+            clean_str = "0.1000000000000001"
+        elif i in (22, 24):
+            # a 16-digit integer next to a 16-decimal number: the engine's average precision rule needs more than
+            # 28 digits, so the refusal does not depend on the seed (two rows each, the whitespace row hides one)
+            clean_str = "9007199254740993"
+        elif i == 23:
+            clean_str = "0.1000000000000001"
 
         if rnd.random() < 0.05 and i > 21:
             t_str = rnd.choice(WHITESPACE_CELLS)
@@ -312,7 +381,8 @@ def generate_pq_dataset(
         if i == 1 or i == rows:
             b_str = ""
 
-        csv_rows.append([id_str, t_str, n_str, d_str, c_str, clean_str, dt_str, b_str])
+        h_cells = _d0h_cells(rnd_h, i)
+        csv_rows.append([id_str, t_str, n_str, d_str, c_str, clean_str, *h_cells, dt_str, b_str])
 
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     with open(csv_file, "w", newline="", encoding="utf-8") as f:
@@ -779,7 +849,119 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
         "step": {"op": "fill_up", "columns": ["missing_xyz"]},
     })
 
+    catalog.extend(_d0h_catalog(headers))
+
     return catalog
+
+
+def _d0h_catalog(headers: list[str]) -> list[dict[str, Any]]:
+    """D0h step items: group by, replace, text transforms, merge, split. Each needs its columns in `headers`."""
+    h = set(headers)
+    items: list[dict[str, Any]] = []
+
+    def add(item_id: str, step: dict[str, Any]) -> None:
+        items.append({"id": item_id, "step": step})
+
+    # --- group by
+    if {"grp_key", "grp_key2", "agg_num", "cat_col", "word_col"} <= h:
+        def agg(op: str, column: str | None, name: str) -> dict[str, str]:
+            return {"operation": op, "new_name": name, **({"column": column} if column else {})}
+
+        key = ["grp_key"]
+        add("group_by_count_rows", {"op": "group_by", "columns": key, "aggregations": [agg("count_rows", None, "n")]})
+        add("group_by_count_distinct_rows", {"op": "group_by", "columns": key, "aggregations": [agg("count_distinct_rows", None, "n")]})
+        add("group_by_count_distinct_values", {"op": "group_by", "columns": key, "aggregations": [agg("count_distinct_values", "cat_col", "n")]})
+        for op in ("average",):
+            add(f"group_by_{op}_agg_num", {"op": "group_by", "columns": key, "aggregations": [agg(op, "agg_num", "v")]})
+        add("group_by_all_aggregates", {"op": "group_by", "columns": key, "aggregations": [
+            agg("count_rows", None, "rows"), agg("count_distinct_rows", None, "distinct_rows"),
+            agg("count_distinct_values", "cat_col", "cats"), agg("sum", "agg_num", "total"),
+            agg("average", "agg_num", "mean"), agg("median", "agg_num", "mid"),
+            agg("min", "agg_num", "lo"), agg("max", "agg_num", "hi"),
+            agg("min", "word_col", "lo_text"), agg("max", "word_col", "hi_text"),
+        ]})
+        add("group_by_two_keys", {"op": "group_by", "columns": ["grp_key", "grp_key2"], "aggregations": [
+            agg("count_rows", None, "n"), agg("sum", "agg_num", "total")]})
+        add("group_by_key_blank_col", {"op": "group_by", "columns": ["blank_col"], "aggregations": [
+            agg("count_rows", None, "n"), agg("min", "grp_key2", "lo")]})
+        add("group_by_sum_missing_key", {"op": "group_by", "columns": ["missing_xyz"], "aggregations": [agg("count_rows", None, "n")]})
+        add("group_by_sum_missing_agg_column", {"op": "group_by", "columns": key, "aggregations": [agg("sum", "missing_xyz", "v")]})
+        add("group_by_duplicate_key", {"op": "group_by", "columns": ["grp_key", "grp_key"], "aggregations": [agg("count_rows", None, "n")]})
+        add("group_by_output_name_conflict", {"op": "group_by", "columns": key, "aggregations": [agg("count_rows", None, "grp_key")]})
+        if "num_col" in h:
+            add("group_by_sum_dirty_num_col", {"op": "group_by", "columns": key, "aggregations": [agg("sum", "num_col", "v")]})
+            add("group_by_min_dirty_num_col", {"op": "group_by", "columns": key, "aggregations": [agg("min", "num_col", "v")]})
+        if "num_clean" in h:
+            add("group_by_sum_num_clean", {"op": "group_by", "columns": key, "aggregations": [agg("sum", "num_clean", "v")]})
+            add("group_by_average_num_clean", {"op": "group_by", "columns": key, "aggregations": [agg("average", "num_clean", "v")]})
+        if "text_col" in h:
+            add("group_by_sum_text_col", {"op": "group_by", "columns": key, "aggregations": [agg("sum", "text_col", "v")]})
+            add("group_by_min_text_col", {"op": "group_by", "columns": key, "aggregations": [agg("min", "text_col", "v")]})
+            add("group_by_key_text_col", {"op": "group_by", "columns": ["text_col"], "aggregations": [agg("count_rows", None, "n")]})
+
+    # --- replace_value and replace_error_values
+    if "rep_col" in h:
+        def rep(item_id: str, value: Any, replacement: Any, replacer: str | None = None, column: str = "rep_col") -> None:
+            step = {"op": "replace_value", "column": column, "value": value, "replacement": replacement}
+            if replacer:
+                step["replacer"] = replacer
+            add(item_id, step)
+
+        rep("replace_value_whole_cell", "ab", "Z")
+        rep("replace_value_whole_cell_empty_replacement", "ab", "")
+        rep("replace_value_other_case", "AB", "Z")
+        rep("replace_value_blank_target", "", "Z")
+        rep("replace_value_null_replacement", "ab", None)
+        rep("replace_value_null_target", None, "Z")
+        rep("replace_value_number_target", 5, "Z")
+        rep("replace_value_bool_replacement", "ab", True)
+        rep("replace_value_regex_chars", "(ab)*", "r")
+        rep("replace_text_substring", "ab", "Z", "text")
+        rep("replace_text_overlapping", "aa", "X", "text")
+        rep("replace_text_repeated_search_in_replacement", "a", "aa", "text")
+        rep("replace_text_empty_replacement", "a", "", "text")
+        rep("replace_text_other_case", "AB", "Z", "text")
+        rep("replace_text_not_present", "zzz", "Z", "text")
+        rep("replace_text_backslash", "\\", "/", "text")
+        rep("replace_text_quote", "'", "''", "text")
+        rep("replace_text_dot", ".", "!", "text")
+        rep("replace_text_regex_star", "(ab)*", "r", "text")
+        rep("replace_text_empty_search", "", "Z", "text")
+        rep("replace_text_null_replacement", "ab", None, "text")
+        rep("replace_value_missing_col", "ab", "Z", column="missing_xyz")
+        rep("replace_text_missing_col", "ab", "Z", "text", column="missing_xyz")
+        if "num_clean" in h:
+            rep("replace_text_in_number_column", "1", "9", "text", column="num_clean")
+        add("replace_error_values_identity", {"op": "replace_error_values", "replacements": [["rep_col", "x"]]})
+        add("replace_error_values_missing_col", {"op": "replace_error_values", "replacements": [["missing_xyz", "x"]]})
+
+    # --- text transforms
+    for column in [c for c in ("word_col", "text_col") if c in h]:
+        for op in ("trim_text", "clean_text", "lowercase_text", "uppercase_text", "proper_case_text", "reverse_text"):
+            add(f"{op}_{column}", {"op": op, "column": column})
+    add("trim_text_missing_col", {"op": "trim_text", "column": "missing_xyz"})
+
+    # --- merge columns
+    if {"grp_key", "cat_col", "blank_col"} <= h:
+        add("merge_columns_two_dash", {"op": "merge_columns", "columns": ["grp_key", "cat_col"], "separator": "-", "new_name": "merged"})
+        add("merge_columns_three_empty_separator", {"op": "merge_columns", "columns": ["cat_col", "blank_col", "grp_key"], "separator": "", "new_name": "merged"})
+        add("merge_columns_long_separator", {"op": "merge_columns", "columns": ["grp_key", "blank_col"], "separator": " ::%_'\\ ", "new_name": "merged"})
+        add("merge_columns_name_of_selected", {"op": "merge_columns", "columns": ["grp_key", "cat_col"], "separator": ",", "new_name": "cat_col"})
+        add("merge_columns_name_collision", {"op": "merge_columns", "columns": ["grp_key", "cat_col"], "separator": ",", "new_name": "blank_col"})
+        add("merge_columns_one_column", {"op": "merge_columns", "columns": ["grp_key"], "separator": ",", "new_name": "merged"})
+        add("merge_columns_missing_col", {"op": "merge_columns", "columns": ["grp_key", "missing_xyz"], "separator": ",", "new_name": "merged"})
+
+    # --- split column
+    if "split_col" in h:
+        for name, delimiter in (("pipe", "|"), ("dot", "."), ("double_a", "aa")):
+            add(f"split_column_{name}", {"op": "split_column", "column": "split_col", "delimiter": delimiter})
+            add(f"split_column_by_each_delimiter_{name}", {"op": "split_column_by_each_delimiter", "column": "split_col", "delimiter": delimiter})
+        add("split_column_from_end_pipe", {"op": "split_column", "column": "split_col", "delimiter": "|", "from_end": True})
+        add("split_column_from_end_double_a", {"op": "split_column", "column": "split_col", "delimiter": "aa", "from_end": True})
+        add("split_column_empty_delimiter", {"op": "split_column", "column": "split_col", "delimiter": ""})
+        add("split_column_missing_col", {"op": "split_column", "column": "missing_xyz", "delimiter": "|"})
+
+    return items
 
 
 def inspect_store_columns(
@@ -824,15 +1006,37 @@ def inspect_store_columns(
             "date_kind_first_row": kind_rows,
             "num_sql_exact": True,
             "date_sql_exact": True,
+            # D0h: ASCII-only column (guards the Unicode case rules), and the exponent facts of the
+            # engine's aggregate precision rule over the non-zero numbers of the column.
+            "ascii_only": all(v.isascii() for v in distinct),
+            "num_max_adjusted": None,
+            "num_min_exponent": None,
+            "num_abs_sum": None,
         }
+        if first_bad is None:
+            with localcontext() as ctx:
+                ctx.prec = 400
+                # upper bound of any group sum or pair of values: the sum of every cell's absolute value
+                entry["num_abs_sum"] = sum((abs(numbers[v]) for v in values if v not in (None, "")), Decimal(0))
+            non_zero = [n for n in numbers.values() if n is not None and n]
+            if non_zero:
+                entry["num_max_adjusted"] = max(n.adjusted() for n in non_zero)
+                entry["num_min_exponent"] = min(n.as_tuple().exponent for n in non_zero)
         non_blank = f'"{h}" IS NOT NULL AND "{h}" != \'\''
-        if first_bad is None and distinct:
+        entry["num_cast_agrees"] = True
+        if distinct:
             pairs = store.execute(f'SELECT DISTINCT "{h}", {sql_num_expr(h)} FROM "{table_name}" WHERE {non_blank}')
             for text, sql_value in pairs:
                 py_value = numbers[text]
-                if sql_value is None or py_value is None or Decimal(sql_value) != py_value or decimal_literal(py_value) is None:
-                    entry["num_sql_exact"] = False
+                if py_value is None:
+                    agrees = sql_value is None  # the SQL must not read a number the engine rejects
+                else:
+                    agrees = sql_value is not None and Decimal(sql_value) == py_value and decimal_literal(py_value) is not None
+                if not agrees:
+                    entry["num_cast_agrees"] = False
                     break
+            if first_bad is None:
+                entry["num_sql_exact"] = entry["num_cast_agrees"]
         if kind_rows:
             pairs = store.execute(f'SELECT DISTINCT "{h}", {sql_dt_expr(h)} FROM "{table_name}" WHERE {non_blank}')
             for text, ts in pairs:
@@ -850,6 +1054,527 @@ def inspect_store_columns(
     return meta
 
 
+# ---------------------------------------------------------------- D0h: group by, replace, text, merge, split
+
+GROUP_DECIMAL_OPS = {"sum", "average", "median"}
+PYTHON_PRECISION = 28  # the engine's minimum aggregate precision (`_aggregate_precision`)
+DECIMAL_INTEGER_DIGITS = 20  # DECIMAL(38,18) holds 20 integer digits
+NON_ASCII_CASE_REASON = (
+    "engine uses Python str case rules (full Unicode: final sigma, ß to SS, İ to i + U+0307, ŉ, ﬁ); "
+    "DuckDB lower/upper map one code point at a time and differ on those characters"
+)
+
+
+def missing_column_refusal(name: str) -> Refusal:
+    return Refusal(f"Column {name!r} does not exist.", expected_error=f"Column {name!r} does not exist.")
+
+
+def canon_decimal_text(text: str | None) -> str | None:
+    """Plain digits of a decimal cell without trailing zeros: the value, not the engine's exponent form.
+
+    The engine returns Decimal results with the exponent Python arithmetic gives ('4.00', '1E+3');
+    the SQL gives a fixed scale. Both sides are compared as exact values through this one function.
+    """
+    if text is None:
+        return None
+    try:
+        number = Decimal(text)
+    except ArithmeticError:
+        return text
+    plain = format(number, "f")
+    if "." in plain:
+        plain = plain.rstrip("0").rstrip(".")
+    return "0" if plain in ("-0", "") else plain
+
+
+def divide_pair_text(text: str | None) -> str | None:
+    """SQL gives an average or median as 'exact numerator/denominator'; divide like the engine (28 digits)."""
+    if text is None or "/" not in text:
+        return text
+    numerator, denominator = text.split("/")
+    with localcontext() as ctx:
+        ctx.prec = PYTHON_PRECISION
+        return str(Decimal(numerator) / Decimal(denominator))
+
+
+def canonicalize_group_by_rows(
+    step: dict[str, Any],
+    engine_rows: list[list[str | None]],
+    store_rows: list[list[str | None]],
+) -> tuple[list[list[str | None]], list[list[str | None]]]:
+    """Compare sum, average and median columns as exact values (see `canon_decimal_text`)."""
+    first = len(step["columns"])
+    decimal_at = [first + i for i, a in enumerate(step["aggregations"]) if a["operation"] in GROUP_DECIMAL_OPS]
+    pair_at = [first + i for i, a in enumerate(step["aggregations"]) if a["operation"] in {"average", "median"}]
+
+    def fix(rows: list[list[str | None]], divide: bool) -> list[list[str | None]]:
+        out = []
+        for row in rows:
+            row = list(row)
+            for k in decimal_at:
+                value = divide_pair_text(row[k]) if divide and k in pair_at else row[k]
+                row[k] = canon_decimal_text(value)
+            out.append(row)
+        return out
+
+    return fix(engine_rows, False), fix(store_rows, True)
+
+
+def group_by_first_data_error(store: DuckStore, table_name: str, step: dict[str, Any]) -> str | None:
+    """The first engine error of a group by over non-numeric text, found the way the engine meets it.
+
+    The engine builds the groups in first-seen order, then for each group and each aggregation in order parses
+    the group's non-blank cells; the first cell that is not a finite number aborts with its row in the table.
+    """
+    keys = step["columns"]
+    aggs = step["aggregations"]
+    needed = list(dict.fromkeys(keys + [a["column"] for a in aggs if a["operation"] in GROUP_DECIMAL_OPS]))
+    col_list = ", ".join(f'"{c}"' for c in needed)
+    at = {c: i for i, c in enumerate(needed)}
+    groups: dict[tuple[Any, ...], list[tuple[int, tuple[Any, ...]]]] = {}
+    for n, row in enumerate(store.execute(f'SELECT {col_list} FROM "{table_name}" ORDER BY {_RN}'), 1):
+        groups.setdefault(tuple(row[at[k]] for k in keys), []).append((n, row))
+    for members in groups.values():
+        for aggregate in aggs:
+            if aggregate["operation"] not in GROUP_DECIMAL_OPS:
+                continue
+            column = aggregate["column"]
+            for n, row in members:
+                value = row[at[column]]
+                if value not in (None, "") and engine_number(value) is None:
+                    return f"Value {value!r} in row {n} of column {column!r} is not a valid number."
+    return None
+
+
+def _group_by_validation_refusal(step: dict[str, Any], headers: list[str]) -> Refusal | None:
+    keys = step["columns"]
+    if len(set(keys)) != len(keys):
+        return Refusal("duplicate group column", expected_error="contains a duplicate group column.")
+    outputs = set(keys)
+    for aggregate in step["aggregations"]:
+        name = aggregate["new_name"].strip()
+        if name in outputs:
+            return Refusal(
+                f"output column {name!r} conflicts",
+                expected_error=f"Group output column {name!r} conflicts with another output column.",
+            )
+        outputs.add(name)
+    for key in keys:
+        if key not in headers:
+            return missing_column_refusal(key)
+    for aggregate in step["aggregations"]:
+        if "column" in aggregate and aggregate["column"] not in headers:
+            return missing_column_refusal(aggregate["column"])
+    return None
+
+
+def _map_group_by(
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    table_name: str,
+    total_rows: int,
+    overrides: dict[str, Any],
+    col_meta: dict[str, dict[str, Any]] | None,
+    store: DuckStore | None,
+) -> tuple[str, list[str]] | Refusal:
+    """Group by: exact keys in first-seen order, aggregates as the engine's `_aggregate_group`.
+
+    Rule table (engine `_group_by`, `_aggregate_group`, `_aggregate_precision`):
+      key cell       exact text (cell_key), case-sensitive, '' is a value, '1' and '1.0' are two keys;
+                     SQL GROUP BY on VARCHAR is byte-exact, so the same.
+      group order    first seen (smallest "__rn" of the group).
+      count_rows / count_distinct_rows (all columns) / count_distinct_values (blank counts as a value):
+                     COUNT(*), COUNT(DISTINCT ROW(all columns)), COUNT(DISTINCT col).
+      sum            Decimal(strip) of every non-blank cell, exact (precision = max(28, needed)); SQL SUM of
+                     DECIMAL(38,18), refused when the column's absolute values add up to 10^20 or more.
+      average/median Exact sum (or the two middle values) divided by the count (or 2) at 28 digits. DuckDB divides
+                     DECIMAL by DECIMAL in DOUBLE (measured), so the SQL returns the exact numerator and the
+                     denominator and `divide_pair_text` divides them; refused when the engine's precision rule
+                     needs more than 28 digits for the column.
+      min/max        Non-blank cells; all numeric: by value, the first of equal values; else by Python casefold
+                     of the text (SQL lower(), equal only for ASCII, so non-ASCII text columns are refused).
+      all blank      None (SQL NULL) for sum, average, median, min, max.
+      non-numeric    sum, average, median over a non-number abort with the engine's text, found by
+                     `group_by_first_data_error`.
+      error cells    cannot occur in CSV data (the engine aborts on an error key; not reachable here).
+    """
+    refusal = _group_by_validation_refusal(step, headers)
+    if refusal is not None:
+        return refusal
+    keys = step["columns"]
+    aggs = step["aggregations"]
+    meta = col_meta or {}
+    for aggregate in aggs:
+        reason = unsafe_header_reason(aggregate["new_name"].strip())
+        if reason:
+            return Refusal(reason)
+    decimal_aggs = [a for a in aggs if a["operation"] in GROUP_DECIMAL_OPS]
+    if any("is_num" not in meta.get(a["column"], {}) for a in decimal_aggs):
+        return Refusal("No column facts for a numeric aggregate column.")
+    if any(not meta[a["column"]]["is_num"] for a in decimal_aggs):
+        if store is None:
+            return Refusal("The first non-numeric cell cannot be located without the store.")
+        message = group_by_first_data_error(store, table_name, step)
+        if message is None:
+            return Refusal("A numeric aggregate column holds a non-number but the engine would not stop.")
+        return Refusal(message, expected_error=message)
+
+    digits_n = len(str(max(total_rows, 1)))
+    for aggregate in aggs:
+        operation = aggregate["operation"]
+        if operation in GROUP_DECIMAL_OPS or operation in {"min", "max"}:
+            fact = meta.get(aggregate["column"])
+            if fact is None:
+                return Refusal(f"No column facts for column {aggregate['column']!r}.")
+            if not fact.get("num_cast_agrees", True):
+                return Refusal(
+                    f"Column {aggregate['column']!r} holds numeric text SQL does not read exactly like the engine "
+                    "(more than 18 decimals, 20+ integer digits, or a form only one side accepts)."
+                )
+        if operation in GROUP_DECIMAL_OPS:
+            fact = meta[aggregate["column"]]
+            max_adj, min_exp = fact.get("num_max_adjusted"), fact.get("num_min_exponent")
+            abs_sum = fact.get("num_abs_sum")
+            if abs_sum is not None and abs_sum >= Decimal(10) ** DECIMAL_INTEGER_DIGITS:
+                return Refusal(
+                    f"A {operation} over column {aggregate['column']!r} could leave DECIMAL(38,18): "
+                    "the cells' absolute values add up to 10^20 or more."
+                )
+            if operation in {"average", "median"} and max_adj is not None:
+                required = max_adj - min_exp + digits_n + 2
+                if required > PYTHON_PRECISION:
+                    return Refusal(
+                        f"The engine's aggregate precision rule needs {required} digits for column "
+                        f"{aggregate['column']!r}; the harness division mirrors 28."
+                    )
+        if operation in {"min", "max"}:
+            fact = meta[aggregate["column"]]
+            if not fact.get("is_num") and not fact.get("ascii_only"):
+                return Refusal(
+                    f"{operation} of non-numeric text uses Python casefold; SQL lower() differs for non-ASCII; "
+                    f"column {aggregate['column']!r} holds non-ASCII text."
+                )
+
+    selects: list[str] = []
+    if overrides.get("mutant_group_key_casefold"):
+        group_exprs = [f'lower("{k}")' for k in keys]
+    elif overrides.get("mutant_group_blank_key_merged"):
+        group_exprs = [f'CASE WHEN trim("{k}") = \'\' THEN \'\' ELSE "{k}" END' for k in keys]
+    else:
+        group_exprs = [f'"{k}"' for k in keys]
+    if group_exprs == [f'"{k}"' for k in keys]:
+        selects.extend(f'"{k}"' for k in keys)
+    else:
+        selects.extend(f'arg_min("{k}", {_RN}) AS "{k}"' for k in keys)
+
+    for aggregate in aggs:
+        operation = aggregate["operation"]
+        name = aggregate["new_name"].strip()
+        column = aggregate.get("column")
+        if operation == "count_rows":
+            expr = "COUNT(*)"
+        elif operation == "count_distinct_rows":
+            expr = "COUNT(DISTINCT ROW(" + ", ".join(f'"{h}"' for h in headers) + "))"
+        elif operation == "count_distinct_values":
+            if overrides.get("mutant_group_count_skips_blank"):
+                expr = f"COUNT(DISTINCT NULLIF(\"{column}\", ''))"
+            else:
+                expr = f'COUNT(DISTINCT "{column}")'
+        else:
+            num = sql_num_expr(column)
+            non_blank = f'"{column}" <> \'\''
+            if operation == "sum":
+                expr = f"SUM({num})"
+            elif operation == "average":
+                if overrides.get("mutant_group_average_float"):
+                    expr = f"CAST(AVG({num}) AS VARCHAR)"
+                else:
+                    expr = f"CASE WHEN COUNT({num}) = 0 THEN NULL ELSE CAST(SUM({num}) AS VARCHAR) || '/' || CAST(COUNT({num}) AS VARCHAR) END"
+            elif operation == "median":
+                ordered = f"list_sort(list({num}) FILTER (WHERE {num} IS NOT NULL))"
+                n_vals = f"COUNT({num})"
+                expr = (
+                    f"CASE WHEN {n_vals} = 0 THEN NULL "
+                    f"WHEN {n_vals} % 2 = 1 THEN CAST({ordered}[({n_vals} + 1) // 2] AS VARCHAR) || '/1' "
+                    f"ELSE CAST({ordered}[{n_vals} // 2] + {ordered}[{n_vals} // 2 + 1] AS VARCHAR) || '/2' END"
+                )
+            else:  # min / max over non-blank cells, numeric when every non-blank cell of the group is a number
+                pick = "arg_min" if operation == "min" else "arg_max"
+                num_key = f"row({num}, {_RN})" if operation == "min" else f"row({num}, -{_RN})"
+                text_key = f'row(lower("{column}"), {_RN})' if operation == "min" else f'row(lower("{column}"), -{_RN})'
+                expr = (
+                    f"CASE WHEN COUNT(*) FILTER (WHERE {non_blank}) = 0 THEN NULL "
+                    f"WHEN bool_and({num} IS NOT NULL) FILTER (WHERE {non_blank}) "
+                    f'THEN {pick}("{column}", {num_key}) FILTER (WHERE {non_blank}) '
+                    f'ELSE {pick}("{column}", {text_key}) FILTER (WHERE {non_blank}) END'
+                )
+        selects.append(f'{expr} AS "{name}"')
+
+    order = ", ".join(f'"{k}"' for k in keys) if overrides.get("mutant_group_order_not_first_seen") else f"MIN({_RN})"
+    sql = f"SELECT {', '.join(selects)} FROM {t_q} GROUP BY {', '.join(group_exprs)} ORDER BY {order}"
+    return (sql, [*keys, *(a["new_name"].strip() for a in aggs)])
+
+
+def _map_replace_value(
+    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    """replace_value. Rule table (engine `replace_value` branch and `_replace_cell_matches_value`):
+      value form (default)  a text target replaces a cell only when the WHOLE cell equals it (case-sensitive,
+                            no trimming, '' is a blank cell target); a null, number or bool target matches no
+                            text cell (the match is by kind); a null replacement writes a null cell.
+      text form             Python str.replace on every cell: all non-overlapping left-to-right occurrences,
+                            case-sensitive; the search text must be a non-empty string and the replacement a string.
+      literals              quotes, %, _, backslash and regex characters are plain text on both sides (SQL
+                            replace() and '=' compare text, never a pattern).
+    """
+    column, value, replacement = step["column"], step["value"], step["replacement"]
+    replacer = step.get("replacer")
+    if replacer == "text":
+        if not isinstance(value, str) or value == "":
+            message = "needs a non-empty text value to find."
+            return Refusal("ReplaceText search text is empty", expected_error=message)
+        if not isinstance(replacement, str):
+            return Refusal("ReplaceText needs a text replacement", expected_error="ReplaceText needs a text replacement.")
+    if column not in headers:
+        return missing_column_refusal(column)
+    if replacement is None:
+        repl_sql = "NULL"
+    elif isinstance(replacement, str):
+        repl_sql = sql_str(replacement)
+    elif isinstance(replacement, int) and not isinstance(replacement, bool):
+        repl_sql = sql_str(str(replacement))
+    else:
+        return Refusal("A bool, float or decimal replacement keeps its type in the engine; the store cell is text.")
+    if isinstance(repl_sql, Refusal):
+        return repl_sql
+    if replacer == "text":
+        old_sql = sql_str(value)
+        if isinstance(old_sql, Refusal):
+            return old_sql
+        if overrides.get("mutant_replace_text_whole_cell"):
+            expr = f'CASE WHEN "{column}" = {old_sql} THEN {repl_sql} ELSE "{column}" END'
+        elif overrides.get("mutant_replace_case_insensitive"):
+            expr = f"replace(lower(\"{column}\"), lower({old_sql}), {repl_sql})"
+        else:
+            expr = f'replace("{column}", {old_sql}, {repl_sql})'
+    elif isinstance(value, str):
+        old_sql = sql_str(value)
+        if isinstance(old_sql, Refusal):
+            return old_sql
+        if overrides.get("mutant_replace_value_substring"):
+            expr = f'replace("{column}", {old_sql}, {repl_sql})'
+        elif overrides.get("mutant_replace_case_insensitive"):
+            expr = f'CASE WHEN lower("{column}") = lower({old_sql}) THEN {repl_sql} ELSE "{column}" END'
+        else:
+            expr = f'CASE WHEN "{column}" = {old_sql} THEN {repl_sql} ELSE "{column}" END'
+    else:
+        expr = f'"{column}"'  # a null, number or bool target never equals a text cell
+    cols = ", ".join(f'{expr} AS "{h}"' if h == column else f'"{h}"' for h in headers)
+    return (f"SELECT {cols} FROM {t_q} ORDER BY {_RN}", list(headers))
+
+
+CLEAN_CC_REGEX = "[\\x00-\\x1f\\x7f-\\x{9f}]"  # Unicode category Cc, the engine's clean_text set
+
+
+def _map_text_transform(
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    overrides: dict[str, Any],
+    col_meta: dict[str, dict[str, Any]] | None,
+) -> tuple[str, list[str]] | Refusal:
+    """trim, clean, lowercase, uppercase, proper case, reverse. Rule table (engine text branches):
+      trim_text        str.strip(): removes every character with str.isspace() (PY_WHITESPACE); SQL trim with that set.
+      clean_text       removes every character of Unicode category Cc (U+0000-001F, U+007F-009F); SQL regex class.
+      lowercase_text   str.lower(): full Unicode (final sigma, İ to two code points).
+      uppercase_text   str.upper(): full Unicode (ß to SS, ŉ, ﬁ).
+      proper_case_text str.title(): a cased letter after a non-letter starts a word (digits and ' count as
+                       non-letters), every other cased letter is lowered.
+      reverse_text     reverses code points (value[::-1]), combining marks and flags included.
+      Mapped to SQL: trim, clean, reverse (all text), and lower, upper, proper case only on ASCII-only columns.
+      Refused by name on non-ASCII columns for lower, upper, proper case (DuckDB differs; see the probe test).
+    """
+    op = step["op"]
+    column = step["column"]
+    if column not in headers:
+        return missing_column_refusal(column)
+    c = f'"{column}"'
+    if op == "trim_text":
+        ws = sql_str(PY_WHITESPACE)
+        expr = f"trim({c})" if overrides.get("mutant_trim_spaces_only") else f"trim({c}, {ws})"
+    elif op == "clean_text":
+        expr = f"regexp_replace({c}, '{CLEAN_CC_REGEX}', '', 'g')"
+    elif op == "reverse_text":
+        expr = f"CASE WHEN {c} IS NULL THEN NULL ELSE COALESCE(array_to_string(list_reverse(regexp_extract_all({c}, '(?s).')), ''), '') END"
+    else:
+        fact = (col_meta or {}).get(column)
+        if fact is None:
+            return Refusal(f"No column facts for column {column!r}.")
+        unguarded = op == "lowercase_text" and overrides.get("mutant_lower_non_ascii")
+        if not fact.get("ascii_only") and not unguarded:
+            return Refusal(f"{NON_ASCII_CASE_REASON}; column {column!r} holds non-ASCII text.")
+        if op == "lowercase_text":
+            expr = f"lower({c})"
+        elif op == "uppercase_text":
+            expr = f"upper({c})"
+        else:
+            expr = (
+                f"CASE WHEN {c} IS NULL THEN NULL ELSE COALESCE(array_to_string(list_transform(regexp_extract_all({c}, '(?s).'), "
+                f"(x, i) -> CASE WHEN i > 1 AND regexp_matches(regexp_extract_all({c}, '(?s).')[i - 1], '^[A-Za-z]$') "
+                f"THEN lower(x) ELSE upper(x) END), ''), '') END"
+            )
+    cols = ", ".join(f'{expr} AS "{h}"' if h == column else f'"{h}"' for h in headers)
+    return (f"SELECT {cols} FROM {t_q} ORDER BY {_RN}", list(headers))
+
+
+def _map_merge_columns(
+    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    """merge_columns. Rule table (engine `_merge_columns`):
+      join order       the order of `columns` as given; the separator goes between neighbours only.
+      blank / null     a blank or null cell contributes '' (the separator stays), never skipped.
+      position         the merged column sits where the leftmost selected column was; the other selected
+                       columns are removed; a new name equal to a selected column is allowed, equal to any
+                       other column is an engine error.
+      separator        any text (quotes, %, regex characters are plain text).
+    """
+    columns = step["columns"]
+    if len(columns) < 2:
+        return Refusal("fewer than two merge columns", expected_error="needs at least two columns to merge.")
+    if len(set(columns)) != len(columns):
+        return Refusal("duplicate merge column", expected_error="contains a duplicate merge column.")
+    for name in columns:
+        if name not in headers:
+            return missing_column_refusal(name)
+    new_name = step["new_name"].strip()
+    selected = set(columns)
+    if new_name in headers and new_name not in selected:
+        message = f"Cannot merge columns: output column {new_name!r} already exists."
+        return Refusal(message, expected_error=message)
+    reason = unsafe_header_reason(new_name)
+    if reason:
+        return Refusal(reason)
+    separator = step["separator"]
+    if overrides.get("mutant_merge_separator_off"):
+        separator = separator[1:]
+    sep_sql = sql_str(separator)
+    if isinstance(sep_sql, Refusal):
+        return sep_sql
+    if overrides.get("mutant_merge_skip_blank"):
+        parts = ", ".join(f'"{c}"' for c in columns)
+        merged = f"array_to_string(list_filter([{parts}], x -> x <> ''), {sep_sql})"
+    else:
+        merged = f" || {sep_sql} || ".join(f"COALESCE(\"{c}\", '')" for c in columns)
+    first = min(headers.index(c) for c in columns)
+    out_headers: list[str] = []
+    exprs: list[str] = []
+    for index, header in enumerate(headers):
+        if index == first:
+            out_headers.append(new_name)
+            exprs.append(f'{merged} AS "{new_name}"')
+        if header not in selected:
+            out_headers.append(header)
+            exprs.append(f'"{header}"')
+    return (f"SELECT {', '.join(exprs)} FROM {t_q} ORDER BY {_RN}", out_headers)
+
+
+def _map_split_column(
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    table_name: str,
+    overrides: dict[str, Any],
+    store: DuckStore | None,
+) -> tuple[str, list[str]] | Refusal:
+    """split_column (first delimiter, or the last with from_end) and split_column_by_each_delimiter.
+
+    Rule table (engine `_split_column`, `_split_column_by_each_delimiter`):
+      delimiter        any non-empty text, matched literally, left to right without overlap (str.partition,
+                       str.split); SQL string_split is a literal split too (a regex is never used).
+      split_column     two columns '<name>.1' and '<name>.2': text before the first (from_end: last) delimiter and the
+                       rest; no delimiter: the whole text and a null; a delimiter at an end gives an empty part.
+      each delimiter   one column per part, as many as the LONGEST cell has (at least two), named '<name>.1' ...;
+                       a row with fewer parts gets nulls; a blank cell is one empty part. The width is read
+                       from the data with SQL before the query is written.
+      collision        an output name that already exists is an engine error.
+    """
+    op = step["op"]
+    column, delimiter = step["column"], step["delimiter"]
+    if delimiter == "":
+        return Refusal("empty delimiter", expected_error="needs a non-empty delimiter.")
+    if column not in headers:
+        return missing_column_refusal(column)
+    delim_sql = sql_str(delimiter)
+    if isinstance(delim_sql, Refusal):
+        return delim_sql
+    c = f'"{column}"'
+    if op == "split_column_by_each_delimiter":
+        if store is None:
+            return Refusal("The split width needs a read of the data; no store given.")
+        if overrides.get("mutant_split_width_first_row"):
+            width_sql = f'SELECT len(string_split({c}, {delim_sql})) FROM {t_q} ORDER BY {_RN} LIMIT 1'
+        else:
+            width_sql = f"SELECT max(len(string_split({c}, {delim_sql}))) FROM {t_q}"
+        found = store.execute(width_sql)
+        longest = found[0][0] if found and found[0][0] is not None else 1
+        width = max(2, longest)
+        if width > MAX_COLUMNS - len(headers) + 1:
+            message = f"Splitting {column!r} exceeds the {MAX_COLUMNS}-column import limit."
+            return Refusal(message, expected_error=message)
+    else:
+        width = 2
+    out_names = [f"{column}.{k}" for k in range(1, width + 1)]
+    remaining = [h for h in headers if h != column]
+    collision = next((name for name in out_names if name in remaining), None)
+    if collision is not None:
+        message = f"Cannot split {column!r}: output column {collision!r} already exists."
+        return Refusal(message, expected_error=message)
+    sp = '"__sp"'
+    inner_expr = f"string_split({c}, {delim_sql})"
+    if op == "split_column_by_each_delimiter":
+        part_exprs = [f"{sp}[{k}]" for k in range(1, width + 1)]
+    elif step.get("from_end"):
+        # rpartition scans from the right (overlapping delimiters such as 'aa' split differently from the left):
+        # split the code point reversal of the text on the reversed delimiter, then reverse the two parts back.
+        rev_delim_sql = sql_str(delimiter[::-1])
+        reverse = lambda e: f"COALESCE(array_to_string(list_reverse(regexp_extract_all({e}, '(?s).')), ''), '')"
+        inner_expr = f"string_split({reverse(c)}, {rev_delim_sql})"
+        part_exprs = [
+            f"CASE WHEN len({sp}) > 1 THEN {reverse(f'array_to_string({sp}[2:], {rev_delim_sql})')} ELSE {c} END",
+            f"CASE WHEN len({sp}) > 1 THEN {reverse(f'{sp}[1]')} END",
+        ]
+    else:
+        part_exprs = [f"{sp}[1]", f"CASE WHEN len({sp}) > 1 THEN array_to_string({sp}[2:], {delim_sql}) END"]
+    out_headers: list[str] = []
+    exprs: list[str] = []
+    for header in headers:
+        if header == column:
+            for name, expr in zip(out_names, part_exprs):
+                out_headers.append(name)
+                exprs.append(f'{expr} AS "{name}"')
+        else:
+            out_headers.append(header)
+            exprs.append(f'"{header}"')
+    inner = f'SELECT *, {inner_expr} AS {sp} FROM {t_q}'
+    return (f"SELECT {', '.join(exprs)} FROM ({inner}) ORDER BY {_RN}", out_headers)
+
+
+def _map_replace_error_values(
+    step: dict[str, Any], headers: list[str], t_q: str
+) -> tuple[str, list[str]] | Refusal:
+    """replace_error_values: a CSV table holds no error cells, so a valid step is the identity.
+
+    The engine checks every named column exists (first missing one, in order) and stops with its own text.
+    """
+    for pair in step["replacements"]:
+        if pair[0] not in headers:
+            message = f"Error replacement column {pair[0]!r} does not exist."
+            return Refusal(message, expected_error=message)
+    col_list = ", ".join(f'"{h}"' for h in headers)
+    return (f"SELECT {col_list} FROM {t_q} ORDER BY {_RN}", list(headers))
+
+
 def generate_step_sql(
     item: dict[str, Any],
     headers: list[str],
@@ -857,6 +1582,7 @@ def generate_step_sql(
     total_rows: int,
     overrides: dict[str, Any] | None = None,
     col_meta: dict[str, dict[str, bool]] | None = None,
+    store: DuckStore | None = None,
 ) -> tuple[str, list[str]] | Refusal:
     """Generate SQL query and expected output columns for a step item.
 
@@ -865,7 +1591,7 @@ def generate_step_sql(
     NULLIF(col, '') so a blank cell comes back as NULL; the tool must flag it.
     """
     overrides = overrides or {}
-    result = _mapped_sql(item, headers, table_name, total_rows, overrides, col_meta=col_meta)
+    result = _mapped_sql(item, headers, table_name, total_rows, overrides, col_meta=col_meta, store=store)
     if isinstance(result, Refusal) or not overrides.get("mutant_null_for_blank"):
         return result
     sql, out_headers = result
@@ -882,6 +1608,7 @@ def _mapped_sql(
     total_rows: int,
     overrides: dict[str, Any],
     col_meta: dict[str, dict[str, bool]] | None = None,
+    store: DuckStore | None = None,
 ) -> tuple[str, list[str]] | Refusal:
     """The SQL mapping of each step (see `generate_step_sql`)."""
     t_q = f'"{table_name}"'
@@ -1476,6 +2203,20 @@ def _mapped_sql(
         sql = f"SELECT {col_list} FROM {t_q} ORDER BY {_RN}"
         return (sql, list(headers))
 
+    # D0h steps
+    if op == "group_by":
+        return _map_group_by(step, headers, t_q, table_name, total_rows, overrides, col_meta, store)
+    if op == "replace_value":
+        return _map_replace_value(step, headers, t_q, overrides)
+    if op in {"trim_text", "clean_text", "lowercase_text", "uppercase_text", "proper_case_text", "reverse_text"}:
+        return _map_text_transform(step, headers, t_q, overrides, col_meta)
+    if op == "merge_columns":
+        return _map_merge_columns(step, headers, t_q, overrides)
+    if op in {"split_column", "split_column_by_each_delimiter"}:
+        return _map_split_column(step, headers, t_q, table_name, overrides, store)
+    if op == "replace_error_values":
+        return _map_replace_error_values(step, headers, t_q)
+
     return Refusal(f"Unknown or unsupported step operation: {op}")
 
 
@@ -1556,14 +2297,27 @@ def run_pq_step_diff(
     dataset: dict[str, Any] | None = None,
     items: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    """One differential run (see `run_pq_step_diff_many`)."""
+    return run_pq_step_diff_many(rows, seed, [overrides or {}], item_filter, dataset, items)[0]
+
+
+def run_pq_step_diff_many(
+    rows: int,
+    seed: int,
+    override_sets: list[dict[str, Any]],
+    item_filter: list[str] | None = None,
+    dataset: dict[str, Any] | None = None,
+    items: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     """Run differential comparison between step engine and DuckStore SQL.
 
     `dataset` (optional, for small hand-checked tables) is
     {"headers": [...], "rows": [[...]], "rows_2": [[...]]}: it replaces the generated
     CSV files; `rows_2` is the second table for append (default: the first table reversed).
     `items` (optional) replaces the step catalog with explicit step items.
+    `override_sets`: one result per set of mutation switches; the data, the store and the engine result of
+    every step are made once and shared (the engine never sees a switch), only the SQL side is run per set.
     """
-    overrides = overrides or {}
     t_start = time.time()
 
     temp_dir = tempfile.mkdtemp(prefix="pq_store_diff_")
@@ -1601,7 +2355,7 @@ def run_pq_step_diff(
         if item_filter:
             catalog = [item for item in catalog if item["id"] in set(item_filter)]
 
-        results: list[dict[str, Any]] = []
+        results_sets: list[list[dict[str, Any]]] = [[] for _ in override_sets]
 
         for item in catalog:
             i_id = item["id"]
@@ -1610,101 +2364,109 @@ def run_pq_step_diff(
             # 1. Reference side: step engine
             engine_res = execute_engine_step(item, cand, cand_2)
 
-            # 2. SQL side: store
-            # The 'remove the last column' item runs on a one-column table: the engine side is
-            # cropped to one column, so the SQL side sees the same one-column header list and
-            # refuses because of that, not because of a flag.
-            sql_headers = headers
-            if item.get("single_column_context"):
-                sql_headers = headers[:1]
-            elif item.get("pre_step"):
-                kept = set(item["pre_step"]["columns"])
-                sql_headers = [h for h in headers if h in kept]
-            unsafe_reasons = [r for r in (unsafe_header_reason(h) for h in sql_headers) if r]
-            if unsafe_reasons:
-                sql_or_ref = Refusal(unsafe_reasons[0])
-            else:
-                sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides, col_meta=col_meta)
-            store_res = execute_store_step(sql_or_ref, store)
+            for set_index, overrides in enumerate(override_sets):
+                # 2. SQL side: store
+                # The 'remove the last column' item runs on a one-column table: the engine side is
+                # cropped to one column, so the SQL side sees the same one-column header list and
+                # refuses because of that, not because of a flag.
+                sql_headers = headers
+                if item.get("single_column_context"):
+                    sql_headers = headers[:1]
+                elif item.get("pre_step"):
+                    kept = set(item["pre_step"]["columns"])
+                    sql_headers = [h for h in headers if h in kept]
+                unsafe_reasons = [r for r in (unsafe_header_reason(h) for h in sql_headers) if r]
+                if unsafe_reasons:
+                    sql_or_ref = Refusal(unsafe_reasons[0])
+                else:
+                    sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides, col_meta=col_meta, store=store)
+                store_res = execute_store_step(sql_or_ref, store)
 
-            # 3. Compare
-            diff_reason = ""
-            diff_class = None
-            status = "same"
-            refusal_obj: Refusal | None = None
+                # 3. Compare
+                diff_reason = ""
+                diff_class = None
+                status = "same"
+                refusal_obj: Refusal | None = None
 
-            if isinstance(store_res, Refusal):
-                refusal_obj = store_res
-                if isinstance(engine_res, str):
-                    # Engine failed
-                    if refusal_matches_engine_error(refusal_obj, engine_res):
-                        status = "same"
-                    else:
+                if isinstance(store_res, Refusal):
+                    refusal_obj = store_res
+                    if isinstance(engine_res, str):
+                        # Engine failed
+                        if refusal_matches_engine_error(refusal_obj, engine_res):
+                            status = "same"
+                        else:
+                            status = "refusal-reason-mismatch"
+                            diff_reason = f"Refusal reason mismatch: expected {refusal_obj.expected_error!r} vs engine {engine_res!r}"
+                    elif refusal_obj.expected_error:
+                        # The tool expected the engine to raise this error, but the engine ran the step
                         status = "refusal-reason-mismatch"
-                        diff_reason = f"Refusal reason mismatch: expected {refusal_obj.expected_error!r} vs engine {engine_res!r}"
-                elif refusal_obj.expected_error:
-                    # The tool expected the engine to raise this error, but the engine ran the step
-                    status = "refusal-reason-mismatch"
-                    diff_reason = f"Refusal expected engine error {refusal_obj.expected_error!r} but the engine succeeded"
-                else:
-                    # SQL refused an operation where the engine succeeded (a named limit of the mapping)
-                    status = "refused"
-                    diff_reason = f"SQL refused step: {refusal_obj.reason}"
-            elif isinstance(store_res, str):
-                # SQL execution threw an error
-                status = "sql-error"
-                diff_reason = f"SQL execution error: {store_res}"
-            elif isinstance(engine_res, str):
-                # Engine threw an error but SQL did not refuse
-                status = "differs"
-                diff_reason = f"Engine raised error but SQL succeeded: {engine_res}"
-            else:
-                # Both succeeded with (headers, rows)
-                eng_headers, eng_rows = engine_res
-                sql_headers, sql_rows = store_res
-
-                if overrides.get("forced_wrong_value") and i_id == catalog[0]["id"]:
-                    eng_rows = [["forced_diff_val"]]
-
-                if eng_headers != sql_headers:
+                        diff_reason = f"Refusal expected engine error {refusal_obj.expected_error!r} but the engine succeeded"
+                    else:
+                        # SQL refused an operation where the engine succeeded (a named limit of the mapping)
+                        status = "refused"
+                        diff_reason = f"SQL refused step: {refusal_obj.reason}"
+                elif isinstance(store_res, str):
+                    # SQL execution threw an error
+                    status = "sql-error"
+                    diff_reason = f"SQL execution error: {store_res}"
+                elif isinstance(engine_res, str):
+                    # Engine threw an error but SQL did not refuse
                     status = "differs"
-                    diff_reason = f"Header mismatch: engine={eng_headers} vs sql={sql_headers}"
-                elif len(eng_rows) != len(sql_rows):
-                    status = "differs"
-                    diff_reason = f"Row count mismatch: engine={len(eng_rows)} vs sql={len(sql_rows)}"
+                    diff_reason = f"Engine raised error but SQL succeeded: {engine_res}"
                 else:
-                    mismatch_sample = None
-                    for r_idx, (e_row, s_row) in enumerate(zip(eng_rows, sql_rows)):
-                        if e_row != s_row:
-                            mismatch_sample = (r_idx, e_row, s_row)
-                            break
-                    if mismatch_sample is not None:
+                    # Both succeeded with (headers, rows)
+                    eng_headers, eng_rows = engine_res
+                    sql_headers, sql_rows = store_res
+
+                    if overrides.get("forced_wrong_value") and i_id == catalog[0]["id"]:
+                        eng_rows = [["forced_diff_val"]]
+
+                    if step_op == "group_by" and eng_headers == sql_headers:
+                        eng_rows, sql_rows = canonicalize_group_by_rows(item["step"], eng_rows, sql_rows)
+
+                    if eng_headers != sql_headers:
                         status = "differs"
-                        r_idx, e_row, s_row = mismatch_sample
-                        diff_reason = f"Row {r_idx} mismatch: engine={e_row[:3]} vs sql={s_row[:3]}"
+                        diff_reason = f"Header mismatch: engine={eng_headers} vs sql={sql_headers}"
+                    elif len(eng_rows) != len(sql_rows):
+                        status = "differs"
+                        diff_reason = f"Row count mismatch: engine={len(eng_rows)} vs sql={len(sql_rows)}"
+                    else:
+                        mismatch_sample = None
+                        for r_idx, (e_row, s_row) in enumerate(zip(eng_rows, sql_rows)):
+                            if e_row != s_row:
+                                mismatch_sample = (r_idx, e_row, s_row)
+                                break
+                        if mismatch_sample is not None:
+                            status = "differs"
+                            r_idx, e_row, s_row = mismatch_sample
+                            diff_reason = f"Row {r_idx} mismatch: engine={e_row[:3]} vs sql={s_row[:3]}"
 
-            if status == "differs" and overrides.get("forced_diff_class"):
-                diff_class = overrides["forced_diff_class"]
+                if status == "differs" and overrides.get("forced_diff_class"):
+                    diff_class = overrides["forced_diff_class"]
 
-            results.append({
-                "id": i_id,
-                "step_op": step_op,
-                "status": status,
-                "diff_reason": diff_reason,
-                "diff_class": diff_class,
-                "refusal": str(refusal_obj) if refusal_obj else None,
-                "refusal_reason": refusal_obj.reason if refusal_obj else None,
-            })
+                results_sets[set_index].append({
+                    "id": i_id,
+                    "step_op": step_op,
+                    "status": status,
+                    "diff_reason": diff_reason,
+                    "diff_class": diff_class,
+                    "refusal": str(refusal_obj) if refusal_obj else None,
+                    "refusal_reason": refusal_obj.reason if refusal_obj else None,
+                })
+
 
         wall_sec = round(time.time() - t_start, 3)
-        return {
-            "version": 1,
-            "rows": rows,
-            "seed": seed,
-            "wall_sec": wall_sec,
-            "total_steps": len(catalog),
-            "results": results,
-        }
+        return [
+            {
+                "version": 1,
+                "rows": rows,
+                "seed": seed,
+                "wall_sec": wall_sec,
+                "total_steps": len(catalog),
+                "results": results,
+            }
+            for results in results_sets
+        ]
     finally:
         import shutil
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -1815,16 +2577,24 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         "13. Sorting numbers padded with spaces (' 5 ') as numbers or as text.",
         "14. Sorting numbers above 2^53 (9007199254740993 versus 9007199254740992): exact order.",
         "15. Trailing-space equality: 'cat ' versus 'cat' (the engine treats them as different; does Power BI?).",
+        "16. `group_by` key equality: the engine groups on exact text ('a', 'A', 'a ', '', ' ', '1' and '1.0' are separate groups; a blank key is its own group, in first-seen order). Does Power BI Group By do the same with these keys?",
+        "17. `group_by` sum, average, median over text numbers (' 4 ', '1_000', '1e2', '+3', '-0', '007'): the engine reads them with Decimal of the stripped text and averages at 28 digits. Does Power BI read them the same after its type step, and which digits does it keep?",
+        "18. `group_by` min and max: all-numeric groups compare by value (first of equal values, '7' before '07'); other groups compare by Python casefold of the text. Does Power BI do the same for text, and what does it return for a group of blanks?",
+        "19. `replace_value`: the default form replaces only a WHOLE cell that equals the target (case-sensitive, no trimming); the text form replaces every occurrence left to right without overlap (aa in aaa gives Xa). Check both, and a null replacement.",
+        "20. Text transforms on Unicode: `lowercase_text`, `uppercase_text`, `proper_case_text` follow Python (final sigma, sharp s to SS, dotted I); `trim_text` strips every Python whitespace character; `clean_text` removes the control characters U+0000-001F and U+007F-009F; `reverse_text` reverses code points (a combining mark moves). Check each on those characters.",
+        "21. `split_column_by_each_delimiter`: the width is the longest cell (at least two); short and blank cells give nulls (a blank cell is one empty part); a delimiter at an end or two in a row give empty parts; `split_column` with `from_end` splits at the LAST delimiter scanning from the right.",
+        "22. `merge_columns`: a blank or null cell contributes empty text and the separator stays. Does Power BI Merge Columns keep the separator for a blank?",
         "",
         "## Deferred Steps (Slice 2+)",
         "",
+        "Covered in slice 3 (D0h): `group_by`, `replace_value`, `replace_error_values`, `trim_text`, `clean_text`, `lowercase_text`, `uppercase_text`, `proper_case_text`, `reverse_text`, `merge_columns`, `split_column`, `split_column_by_each_delimiter`.",
+        "Named refusals inside those steps: `lowercase_text`, `uppercase_text`, `proper_case_text` on a non-ASCII column; `group_by` min and max of non-numeric non-ASCII text; `group_by` average and median when the engine's precision rule needs more than 28 digits; numbers SQL does not read exactly; typed (bool, float) replacements.",
         "The following operations in `transformations.py` remain deferred:",
-        "- Column manipulation: `merge_columns`, `split_column`, `split_column_by_each_delimiter`, `split_column_by_positions`, `split_column_to_rows`, `extract_text_by_delimiter`, `extract_text_between_delimiters`",
+        "- Column manipulation: `split_column_by_positions`, `split_column_to_rows`, `extract_text_by_delimiter`, `extract_text_between_delimiters`",
         "- Type conversions: `convert_type`, `convert_type_using_locale`",
-        "- Value transformations: `replace_value`, `replace_error_values`, `trim_text`, `clean_text`, `lowercase_text`, `uppercase_text`, `proper_case_text`, `reverse_text`",
-        "- Reshaping / Aggregation: `group_by`, `pivot_column`, `unpivot_columns`, `unpivot_other_columns`, `transpose_table`",
+        "- Reshaping: `pivot_column`, `unpivot_columns`, `unpivot_other_columns`, `transpose_table`",
         "- Header / Table structure: `promote_headers`, `demote_headers`, `table_pass_through`",
-        "- Scripting & Custom: `m_script`, `add_custom_column`, `conditional_column`, `m_sparse_boundary_helper`",
+        "- Scripting & Custom: `m_script`, `add_custom_column`, `conditional_column` (its own comparison function `_conditional_clause_matches`, not the filter operators: deferred), `m_sparse_boundary_helper`",
         "- Error handling: `remove_rows_with_errors`, `keep_rows_with_errors`",
         "- Sparse row removal: `remove_sparse_top_rows`, `remove_sparse_bottom_rows`",
         "",
