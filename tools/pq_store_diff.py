@@ -30,7 +30,7 @@ from decimal import Decimal, localcontext
 from pathlib import Path
 from typing import Any
 
-from analytics_studio.file_import import MAX_COLUMNS, ImportCandidate, parse_file
+from analytics_studio.file_import import MAX_CELLS, MAX_COLUMNS, ImportCandidate, parse_file
 from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
 from analytics_studio.transformations import TransformationError, apply_transformations
@@ -958,6 +958,7 @@ def _d0h_catalog(headers: list[str]) -> list[dict[str, Any]]:
             add(f"split_column_by_each_delimiter_{name}", {"op": "split_column_by_each_delimiter", "column": "split_col", "delimiter": delimiter})
         add("split_column_from_end_pipe", {"op": "split_column", "column": "split_col", "delimiter": "|", "from_end": True})
         add("split_column_from_end_double_a", {"op": "split_column", "column": "split_col", "delimiter": "aa", "from_end": True})
+        add("split_column_from_end_ab", {"op": "split_column", "column": "split_col", "delimiter": "ab", "from_end": True})
         add("split_column_empty_delimiter", {"op": "split_column", "column": "split_col", "delimiter": ""})
         add("split_column_missing_col", {"op": "split_column", "column": "missing_xyz", "delimiter": "|"})
 
@@ -1146,12 +1147,30 @@ def group_by_first_data_error(store: DuckStore, table_name: str, step: dict[str,
     return None
 
 
+GROUP_ROW_OPERATIONS = {"count_rows", "count_distinct_rows"}
+GROUP_COLUMN_OPERATIONS = {"sum", "average", "median", "min", "max", "count_distinct_values"}
+
+
 def _group_by_validation_refusal(step: dict[str, Any], headers: list[str]) -> Refusal | None:
+    """Mirror the engine's order: group columns, duplicates, aggregations, each aggregation's shape, output names."""
     keys = step["columns"]
+    if not isinstance(keys, list) or not keys or any(not isinstance(k, str) or not k.strip() for k in keys):
+        return Refusal("The group step needs one or more group columns.", expected_error="needs one or more group columns.")
     if len(set(keys)) != len(keys):
         return Refusal("duplicate group column", expected_error="contains a duplicate group column.")
+    aggregations = step["aggregations"]
+    if not isinstance(aggregations, list) or not aggregations:
+        return Refusal("The group step needs one or more aggregations.", expected_error="needs one or more aggregations.")
     outputs = set(keys)
-    for aggregate in step["aggregations"]:
+    for number, aggregate in enumerate(aggregations, 1):
+        if not isinstance(aggregate, dict):
+            return Refusal(f"Aggregation {number} in step 1 must be an object.", expected_error=f"Aggregation {number} in step 1 must be an object.")
+        operation = aggregate.get("operation")
+        if operation not in GROUP_ROW_OPERATIONS | GROUP_COLUMN_OPERATIONS:
+            return Refusal(f"Aggregation {number} in step 1 has an unsupported operation.", expected_error=f"Aggregation {number} in step 1 has an unsupported operation.")
+        expected = {"operation", "new_name"} | ({"column"} if operation in GROUP_COLUMN_OPERATIONS else set())
+        if not expected <= set(aggregate) <= expected | {"m_type"} or any(not isinstance(v, str) for v in aggregate.values()):
+            return Refusal(f"Aggregation {number} in step 1 has missing or invalid fields.", expected_error=f"Aggregation {number} in step 1 has missing or invalid fields.")
         name = aggregate["new_name"].strip()
         if name in outputs:
             return Refusal(
@@ -1227,7 +1246,7 @@ def _map_group_by(
             fact = meta.get(aggregate["column"])
             if fact is None:
                 return Refusal(f"No column facts for column {aggregate['column']!r}.")
-            if not fact.get("num_cast_agrees", True):
+            if not fact.get("num_cast_agrees", True) and not overrides.get("mutant_cast_agree_refusal_off"):
                 return Refusal(
                     f"Column {aggregate['column']!r} holds numeric text SQL does not read exactly like the engine "
                     "(more than 18 decimals, 20+ integer digits, or a form only one side accepts)."
@@ -1236,7 +1255,11 @@ def _map_group_by(
             fact = meta[aggregate["column"]]
             max_adj, min_exp = fact.get("num_max_adjusted"), fact.get("num_min_exponent")
             abs_sum = fact.get("num_abs_sum")
-            if abs_sum is not None and abs_sum >= Decimal(10) ** DECIMAL_INTEGER_DIGITS:
+            if (
+                abs_sum is not None
+                and abs_sum >= Decimal(10) ** DECIMAL_INTEGER_DIGITS
+                and not overrides.get("mutant_abs_sum_refusal_off")
+            ):
                 return Refusal(
                     f"A {operation} over column {aggregate['column']!r} could leave DECIMAL(38,18): "
                     "the cells' absolute values add up to 10^20 or more."
@@ -1440,8 +1463,9 @@ def _map_merge_columns(
       separator        any text (quotes, %, regex characters are plain text).
     """
     columns = step["columns"]
-    if len(columns) < 2:
+    if not isinstance(columns, list) or len(columns) < 2 or any(not isinstance(c, str) or not c.strip() for c in columns):
         return Refusal("fewer than two merge columns", expected_error="needs at least two columns to merge.")
+    columns = [c.strip() for c in columns]  # the engine looks the stripped names up
     if len(set(columns)) != len(columns):
         return Refusal("duplicate merge column", expected_error="contains a duplicate merge column.")
     for name in columns:
@@ -1522,6 +1546,10 @@ def _map_split_column(
         if width > MAX_COLUMNS - len(headers) + 1:
             message = f"Splitting {column!r} exceeds the {MAX_COLUMNS}-column import limit."
             return Refusal(message, expected_error=message)
+        row_count = store.execute(f"SELECT COUNT(*) FROM {t_q}")[0][0]
+        if row_count * (len(headers) - 1 + width) > MAX_CELLS:
+            message = f"Splitting {column!r} exceeds the {MAX_CELLS:,}-cell import limit."
+            return Refusal(message, expected_error=message)
     else:
         width = 2
     out_names = [f"{column}.{k}" for k in range(1, width + 1)]
@@ -1537,7 +1565,7 @@ def _map_split_column(
     elif step.get("from_end"):
         # rpartition scans from the right (overlapping delimiters such as 'aa' split differently from the left):
         # split the code point reversal of the text on the reversed delimiter, then reverse the two parts back.
-        rev_delim_sql = sql_str(delimiter[::-1])
+        rev_delim_sql = delim_sql if overrides.get("mutant_split_from_end_same_delim") else sql_str(delimiter[::-1])
         reverse = lambda e: f"COALESCE(array_to_string(list_reverse(regexp_extract_all({e}, '(?s).')), ''), '')"
         inner_expr = f"string_split({reverse(c)}, {rev_delim_sql})"
         part_exprs = [
@@ -1573,6 +1601,35 @@ def _map_replace_error_values(
             return Refusal(message, expected_error=message)
     col_list = ", ".join(f'"{h}"' for h in headers)
     return (f"SELECT {col_list} FROM {t_q} ORDER BY {_RN}", list(headers))
+
+
+_TEXT_STEP_FIELDS = {"op", "column"}
+D0H_STEP_FIELDS: dict[str, set[str]] = {
+    "group_by": {"op", "columns", "aggregations"},
+    "replace_value": {"op", "column", "value", "replacement"},
+    "merge_columns": {"op", "columns", "separator", "new_name"},
+    "split_column": {"op", "column", "delimiter"},
+    "split_column_by_each_delimiter": {"op", "column", "delimiter"},
+    "replace_error_values": {"op", "replacements"},
+    **{name: _TEXT_STEP_FIELDS for name in (
+        "trim_text", "clean_text", "lowercase_text", "uppercase_text", "proper_case_text", "reverse_text")},
+}
+D0H_OPTIONAL_STEP_FIELDS: dict[str, set[str]] = {
+    "replace_value": {"replacer"},
+    "split_column": {"from_end", "missing_part"},
+    "split_column_by_each_delimiter": {"from_end", "missing_part"},
+}
+
+
+def _d0h_shape_refusal(step: dict[str, Any]) -> Refusal | None:
+    """A D0h step with a missing or unknown field: the engine's text (checked before anything else), never a KeyError."""
+    op = step.get("op")
+    required = D0H_STEP_FIELDS.get(op)
+    if required is None:
+        return None
+    if not required <= set(step) <= required | D0H_OPTIONAL_STEP_FIELDS.get(op, set()):
+        return Refusal("The step has missing or unsupported fields.", expected_error="has missing or unsupported fields.")
+    return None
 
 
 def generate_step_sql(
@@ -2204,6 +2261,9 @@ def _mapped_sql(
         return (sql, list(headers))
 
     # D0h steps
+    shape = _d0h_shape_refusal(step)
+    if shape is not None:
+        return shape
     if op == "group_by":
         return _map_group_by(step, headers, t_q, table_name, total_rows, overrides, col_meta, store)
     if op == "replace_value":
