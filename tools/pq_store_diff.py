@@ -32,6 +32,10 @@ from analytics_studio.store import DuckStore, import_csv_to_store
 from analytics_studio.transformations import TransformationError, apply_transformations
 
 
+# The store's own load-order column (hidden); DuckStore.read_page orders by it, never by the physical rowid.
+_RN = '"__rn"'
+
+
 class Refusal:
     """Explicit refusal object representing an intentionally unsupported or invalid shape."""
 
@@ -417,7 +421,7 @@ def _mapped_sql(
         selected_set = set(cols)
         out_headers = [h for h in headers if h in selected_set]
         col_list = ", ".join(f'"{c}"' for c in out_headers)
-        order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause}", out_headers)
 
     # 2. remove_column
@@ -436,7 +440,7 @@ def _mapped_sql(
             )
         out_headers = [h for h in headers if h != col]
         col_list = ", ".join(f'"{c}"' for c in out_headers)
-        order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause}", out_headers)
 
     # 3. reorder_columns
@@ -455,7 +459,7 @@ def _mapped_sql(
         for idx, c in zip(slots, cols):
             out_headers[idx] = c
         col_list = ", ".join(f'"{c}"' for c in out_headers)
-        order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause}", out_headers)
 
     # 4. rename_column
@@ -475,7 +479,7 @@ def _mapped_sql(
         out_headers = [new_name if h == col else h for h in headers]
         select_items = [f'"{h}" AS "{new_name}"' if h == col else f'"{h}"' for h in headers]
         col_list = ", ".join(select_items)
-        order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause}", out_headers)
 
     # 5. duplicate_column
@@ -494,7 +498,7 @@ def _mapped_sql(
             )
         out_headers = [*headers, new_name]
         col_list = ", ".join(f'"{c}"' for c in headers) + f', "{col}" AS "{new_name}"'
-        order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause}", out_headers)
 
     # 6. keep_top_rows
@@ -503,14 +507,14 @@ def _mapped_sql(
         if overrides.get("mutant_top_off_by_one"):
             count += 1
         col_list = ", ".join(f'"{c}"' for c in headers)
-        order_clause = "" if overrides.get("mutant_no_order_by") else "ORDER BY rowid"
+        order_clause = "" if overrides.get("mutant_no_order_by") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause} LIMIT {count}", list(headers))
 
     # 7. remove_top_rows
     if op == "remove_top_rows":
         count = step["count"]
         col_list = ", ".join(f'"{c}"' for c in headers)
-        order_clause = "" if overrides.get("mutant_no_order_by") else "ORDER BY rowid"
+        order_clause = "" if overrides.get("mutant_no_order_by") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause} OFFSET {count}", list(headers))
 
     # 8. keep_bottom_rows
@@ -518,7 +522,7 @@ def _mapped_sql(
         count = step["count"]
         offset = max(0, total_rows - count)
         col_list = ", ".join(f'"{c}"' for c in headers)
-        order_clause = "" if overrides.get("mutant_no_order_by") else "ORDER BY rowid"
+        order_clause = "" if overrides.get("mutant_no_order_by") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause} OFFSET {offset} LIMIT {count}", list(headers))
 
     # 9. remove_bottom_rows
@@ -526,7 +530,7 @@ def _mapped_sql(
         count = step["count"]
         keep_count = max(0, total_rows - count)
         col_list = ", ".join(f'"{c}"' for c in headers)
-        order_clause = "" if overrides.get("mutant_no_order_by") else "ORDER BY rowid"
+        order_clause = "" if overrides.get("mutant_no_order_by") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause} LIMIT {keep_count}", list(headers))
 
     # 10. keep_range_rows
@@ -539,7 +543,7 @@ def _mapped_sql(
         if overrides.get("mutant_range_count_off_by_one"):
             count += 1
         col_list = ", ".join(f'"{c}"' for c in headers)
-        order_clause = "" if overrides.get("mutant_no_order_by") else "ORDER BY rowid"
+        order_clause = "" if overrides.get("mutant_no_order_by") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} {order_clause} OFFSET {offset} LIMIT {count}", list(headers))
 
     # 11. remove_alternate_rows
@@ -549,7 +553,7 @@ def _mapped_sql(
         kp = step["keep_count"]
         if overrides.get("mutant_alt_offset_wrong"):
             first_to_remove += 1
-        window_order = "ORDER BY rowid DESC" if overrides.get("mutant_window_order_desc") else "ORDER BY rowid"
+        window_order = f"ORDER BY {_RN} DESC" if overrides.get("mutant_window_order_desc") else f"ORDER BY {_RN}"
 
         col_list = ", ".join(f'"{c}"' for c in headers)
         if rem == 0:
@@ -581,10 +585,10 @@ def _mapped_sql(
             start += 1
         if overrides.get("mutant_index_increment_one"):
             inc = 1
-        window_order = "ORDER BY rowid DESC" if overrides.get("mutant_window_order_desc") else "ORDER BY rowid"
+        window_order = f"ORDER BY {_RN} DESC" if overrides.get("mutant_window_order_desc") else f"ORDER BY {_RN}"
         idx_expr = f"{start} + (CAST(row_number() OVER ({window_order}) AS BIGINT) - 1) * {inc}"
         out_headers = [*headers, new_name]
-        order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         sql = f"SELECT {col_list}, {idx_expr} AS \"{new_name}\" FROM {t_q} {order_clause}"
         return (sql, out_headers)
 
@@ -597,7 +601,7 @@ def _mapped_sql(
         else:
             non_blank_preds = [f"COALESCE(\"{c}\", '') != ''" for c in headers]
         where_clause = " OR ".join(non_blank_preds)
-        order_clause = "ORDER BY rowid DESC" if overrides.get("mutant_reverse_order") else "ORDER BY rowid"
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
         return (f"SELECT {col_list} FROM {t_q} WHERE ({where_clause}) {order_clause}", list(headers))
 
     # 15. append
@@ -612,9 +616,9 @@ def _mapped_sql(
         second_cols = ", ".join(f'"{c}"' for c in reversed(headers)) if overrides.get("mutant_append_column_order") else col_list
         sql = (
             f"SELECT {col_list} FROM ("
-            f"  SELECT {col_list}, 0 AS _src, rowid AS _rn FROM {t_q}"
+            f"  SELECT {col_list}, 0 AS _src, {_RN} AS _rn FROM {t_q}"
             f"  UNION ALL"
-            f"  SELECT {second_cols}, 1 AS _src, rowid AS _rn FROM \"{second_tbl}\""
+            f"  SELECT {second_cols}, 1 AS _src, {_RN} AS _rn FROM \"{second_tbl}\""
             f") {order_clause}"
         )
         return (sql, list(headers))
@@ -679,9 +683,9 @@ def execute_store_step(
 
     sql, _declared_headers = sql_or_refusal
     try:
-        cursor = store._check_open().execute(sql)
-        headers = [str(col[0]) for col in cursor.description]
-        records = cursor.fetchall()
+        # Public guard path only: execute() is SELECT-only; DESCRIBE is wrapped in a SELECT.
+        headers = [str(r[0]) for r in store.execute(f"SELECT column_name FROM (DESCRIBE {sql})")]
+        records = store.execute(sql)
         out_rows: list[list[str | None]] = []
         for rec in records:
             row_vals = [normalize_cell(val) for val in rec]
@@ -938,6 +942,7 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         "2. `append`: In this slice, tables share identical ordered columns. In Power BI, appending tables with disparate or mismatched schemas unions columns by name; disparate schemas are deferred to Tier 2/3.",
         "3. `keep_range_rows` / `remove_top_rows`: When offset or count exceeds total table row count, Power Query yields an empty table without error. The SQL mapping uses `OFFSET` / `LIMIT` matching this behavior.",
         "4. `remove_alternate_rows`: Alternating row selection cycle logic is mapped to modular arithmetic over `row_number()`. Power Query 1-based indexing semantics verified against step engine.",
+        "5. Does Power Query keep an all-blank CSV row (`,,`) as a row of nulls? The app's CSV loader (engine parser and store import) drops all-blank rows at load, so remove_blank_rows on an imported CSV is the identity.",
         "",
         "## Deferred Steps (Slice 2+)",
         "",

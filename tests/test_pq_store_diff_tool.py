@@ -10,10 +10,12 @@ from __future__ import annotations
 import copy
 import csv
 import json
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
 
+import duckdb
 import pytest
 
 from analytics_studio.file_import import ImportCandidate, parse_file
@@ -514,7 +516,7 @@ def test_none_is_a_difference_even_without_the_mutant_hook() -> None:
         eng = pq_store_diff.execute_engine_step(
             {"id": "k", "step": {"op": "keep_columns", "columns": ["a"]}}, parse_file(path)
         )
-        sql_h, sql_r = pq_store_diff.execute_store_step(("SELECT NULLIF(\"a\", '') AS \"a\" FROM \"t\" ORDER BY rowid", ["a"]), store)
+        sql_h, sql_r = pq_store_diff.execute_store_step(("SELECT NULLIF(\"a\", '') AS \"a\" FROM \"t\" ORDER BY \"__rn\"", ["a"]), store)
         assert eng[1] == [["1"], [""]]
         assert sql_r == [["1"], [None]]
         assert eng[1] != sql_r
@@ -705,7 +707,7 @@ def test_mutant_append_order_src_only_killed_at_300_rows() -> None:
 
 
 def test_mutant_alternate_rows_window_order() -> None:
-    """remove_alternate_rows(1,1,1) on 8 rows keeps ids 2,4,6,8; a window over rowid DESC keeps 1,3,5,7."""
+    """remove_alternate_rows(1,1,1) on 8 rows keeps ids 2,4,6,8; a window over "__rn" DESC keeps 1,3,5,7."""
     clean = [["2", "b"], ["4", "d"], ["6", "f"], ["8", "h"]]
     _assert_mutant_differs_and_exits_1(T8, ITEM_ALT, "mutant_window_order_desc", clean)
 
@@ -741,7 +743,7 @@ def test_lint_windows_are_explicitly_ordered() -> None:
     for item in (ITEM_ALT, ITEM_INDEX):
         sql, _ = generate_step_sql(item, headers, "t_csv", 8)
         assert "OVER ()" not in sql
-        assert "OVER (ORDER BY rowid)" in sql
+        assert 'OVER (ORDER BY "__rn")' in sql
 
 
 # ------------------------------------------------------------------ item 4
@@ -803,3 +805,126 @@ def test_full_catalog_at_300_rows_has_no_difference() -> None:
     data = run_pq_step_diff(rows=300, seed=11)
     _assert_all_same(data)
     assert evaluate_exit_policy(data, _baseline())[0] == 0
+
+
+# ------------------------------------------------------------------ D0c: row-order key and private access
+
+
+def _scrambled_store(td: str, dataset: dict[str, Any]) -> tuple[DuckStore, Path]:
+    """Import `dataset` through the store, then rewrite the physical row order to the REVERSE of load order.
+
+    The store's load-order column "__rn" stays ascending (0..n-1) while the physical rowid runs backwards,
+    so `rowid` and "__rn" disagree on every row. Two plain DuckDB statements on the same file; no private
+    DuckStore attribute is used.
+    """
+    csv_path = Path(td) / "t.csv"
+    csv_path_2 = Path(td) / "t2.csv"
+    for p, body in ((csv_path, dataset["rows"]), (csv_path_2, dataset["rows_2"])):
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(body)
+    db = str(Path(td) / "s.db")
+    store = DuckStore(db)
+    import_csv_to_store(store, "t_csv", csv_path, {})
+    import_csv_to_store(store, "t_csv_2", csv_path_2, {})
+    store.close()
+    conn = duckdb.connect(db)
+    for tbl in ("t_csv", "t_csv_2"):
+        conn.execute(f'CREATE TABLE tmp_swap AS SELECT * FROM "{tbl}" ORDER BY "__rn" DESC')
+        conn.execute(f'DROP TABLE "{tbl}"')
+        conn.execute(f'ALTER TABLE tmp_swap RENAME TO "{tbl}"')
+    conn.close()
+    return DuckStore(db), csv_path
+
+
+def _order_sensitive_items(headers: list[str]) -> list[dict[str, Any]]:
+    wanted = {
+        "keep_top_rows", "remove_top_rows", "keep_bottom_rows", "remove_bottom_rows", "keep_range_rows",
+        "remove_alternate_rows", "add_index_column", "remove_blank_rows", "append",
+    }
+    items = [i for i in pq_store_diff.build_step_catalog(headers) if i["step"]["op"] in wanted]
+    assert {i["step"]["op"] for i in items} == wanted
+    return items
+
+
+def _differing_ids_on_scrambled_store() -> list[str]:
+    """Ids of order-sensitive steps whose SQL answer differs from the step engine on the scrambled table."""
+    with tempfile.TemporaryDirectory() as td:
+        store, csv_path = _scrambled_store(td, T8)
+        cand = parse_file(csv_path)
+        cand_2 = parse_file(Path(td) / "t2.csv")
+        bad: list[str] = []
+        for item in _order_sensitive_items(list(cand.headers)):
+            eng = pq_store_diff.execute_engine_step(item, cand, cand_2)
+            sql_headers = list(cand.headers)
+            if item.get("pre_step"):
+                kept = set(item["pre_step"]["columns"])
+                sql_headers = [h for h in sql_headers if h in kept]
+            sql = generate_step_sql(item, sql_headers, "t_csv", 8)
+            got = pq_store_diff.execute_store_step(sql, store)
+            assert not isinstance(eng, str) and not isinstance(got, (str, pq_store_diff.Refusal)), (item["id"], eng, got)
+            if eng != got:
+                bad.append(item["id"])
+        store.close()
+        return bad
+
+
+def test_row_order_follows_hidden_rn_not_physical_rowid() -> None:
+    """With physical rowid reversed against "__rn", every order-sensitive mapping still equals the engine."""
+    with tempfile.TemporaryDirectory() as td:
+        store, _ = _scrambled_store(td, T8)
+        rows = store.execute('SELECT "id", rowid, "__rn" FROM "t_csv" ORDER BY rowid')
+        store.close()
+    assert [r[0] for r in rows] == list("87654321")  # physical order is the reverse of load order
+    assert all(r[1] != r[2] for r in rows[:3])  # rowid and "__rn" disagree
+    assert _differing_ids_on_scrambled_store() == []
+
+
+def test_mutant_rowid_instead_of_rn_fails_by_behaviour(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Switching the row key back to rowid makes the scrambled table differ from the engine."""
+    monkeypatch.setattr(pq_store_diff, "_RN", "rowid")
+    bad = _differing_ids_on_scrambled_store()
+    assert bad, "the rowid mutant was not detected"
+
+
+def test_mapping_sql_never_mentions_rowid() -> None:
+    """LINT: neither the tool source nor any generated mapping uses the physical rowid."""
+    src = Path(pq_store_diff.__file__).read_text(encoding="utf-8")
+    code = "\n".join(line for line in src.splitlines() if not line.lstrip().startswith("#"))
+    assert not re.search(r"\browid\b", re.sub(r'"""[\s\S]*?"""', "", code))
+    headers = ["id", "name"]
+    for item in _order_sensitive_items(headers):
+        sql, _ = generate_step_sql(item, headers, "t_csv", 8)
+        assert "rowid" not in sql, item["id"]
+
+
+def test_headers_via_public_describe_for_renamed_and_count_columns() -> None:
+    """Public guard path: DESCRIBE inside a SELECT gives the real names of renamed and COUNT(*) columns."""
+    with tempfile.TemporaryDirectory() as td:
+        store = DuckStore(str(Path(td) / "s.db"))
+        csv_path = Path(td) / "t.csv"
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows([["a", "b"], ["1", "x"], ["2", "y"]])
+        import_csv_to_store(store, "t", csv_path, {})
+        h1, r1 = pq_store_diff.execute_store_step(('SELECT "a" AS "x y", "b" AS "B2" FROM "t" ORDER BY "__rn"', ["a", "b"]), store)
+        h2, r2 = pq_store_diff.execute_store_step(('SELECT COUNT(*) AS "Count" FROM "t"', ["Count"]), store)
+        store.close()
+    assert h1 == ["x y", "B2"] and r1 == [["1", "x"], ["2", "y"]]
+    assert h2 == ["Count"] and r2 == [["2"]]
+
+
+def test_tool_stays_select_only_through_the_public_guard() -> None:
+    """A non-SELECT statement is rejected by the store's guard and reported as an error string."""
+    with tempfile.TemporaryDirectory() as td:
+        store = DuckStore(str(Path(td) / "s.db"))
+        res = pq_store_diff.execute_store_step(("CREATE TABLE z AS SELECT 1 AS a", ["a"]), store)
+        store.close()
+    assert isinstance(res, str) and res
+
+
+def test_tool_never_touches_private_duckstore_attributes() -> None:
+    """LINT: the tool module has no `._check_open` and no other private attribute access on the store."""
+    src = Path(pq_store_diff.__file__).read_text(encoding="utf-8")
+    assert "._check_open" not in src
+    assert not re.search(r"\bstore\._[a-z]", src)
