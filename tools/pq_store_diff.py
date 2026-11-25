@@ -103,6 +103,27 @@ def sql_str(value: str) -> str | Refusal:
     return "'" + value.replace("'", "''") + "'"
 
 
+QUOTE_HEADER_REASON = "header name contains a double quote; not on the store path"
+UNSAFE_HEADER_REASON = "header name contains a NUL or lone surrogate; not on the store path"
+
+
+def unsafe_header_reason(name: str) -> str | None:
+    """Why a header name cannot be pasted into a SQL identifier, or None.
+
+    The store path quotes identifiers as "name" without escaping, so a double quote (or a
+    NUL or lone surrogate) breaks the SQL. Such columns are refused by name, never escaped.
+    """
+    if '"' in name:
+        return QUOTE_HEADER_REASON
+    if "\x00" in name:
+        return UNSAFE_HEADER_REASON
+    try:
+        name.encode("utf-8")
+    except UnicodeEncodeError:
+        return UNSAFE_HEADER_REASON
+    return None
+
+
 def engine_number(text: Any) -> Decimal | None:
     """Mirror of the engine's `_parse_number` for text: Decimal(text.strip()), finite only."""
     try:
@@ -277,12 +298,15 @@ def generate_pq_dataset(
             c_str = "cat "
         elif i == 20:
             c_str = "cat"
+        elif i == 21:
+            # case-variant pair with row 20: a case-folding duplicate key merges them (mutant_duplicate_casefold)
+            c_str = "Cat"
 
-        if rnd.random() < 0.05 and i > 20:
+        if rnd.random() < 0.05 and i > 21:
             t_str = rnd.choice(WHITESPACE_CELLS)
-        if rnd.random() < 0.05 and i > 20:
+        if rnd.random() < 0.05 and i > 21:
             c_str = rnd.choice(WHITESPACE_CELLS)
-        if rnd.random() < 0.03 and i > 20:
+        if rnd.random() < 0.03 and i > 21:
             b_str = rnd.choice(WHITESPACE_CELLS)
 
         if i == 1 or i == rows:
@@ -773,6 +797,8 @@ def inspect_store_columns(
     Uses the public store.execute() only.
     """
     meta: dict[str, dict[str, Any]] = {}
+    # Names that cannot be quoted safely get no facts; the step loop refuses them by name.
+    headers = [h for h in headers if unsafe_header_reason(h) is None]
     if not headers or store is None:
         return meta
     col_list = ", ".join(f'"{h}"' for h in headers)
@@ -1087,7 +1113,7 @@ def _mapped_sql(
         if is_num and not m.get("num_sql_exact", True):
             return Refusal(
                 f"Column '{col}' holds numeric text that SQL_DECIMAL does not represent exactly "
-                f"(non-ASCII digits, more than 18 decimals, 19+ integer digits or a huge exponent)."
+                f"(non-ASCII digits, more than 18 decimals, 20+ integer digits or a huge exponent)."
             )
 
         dir_sql = direction.upper()
@@ -1594,7 +1620,11 @@ def run_pq_step_diff(
             elif item.get("pre_step"):
                 kept = set(item["pre_step"]["columns"])
                 sql_headers = [h for h in headers if h in kept]
-            sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides, col_meta=col_meta)
+            unsafe_reasons = [r for r in (unsafe_header_reason(h) for h in sql_headers) if r]
+            if unsafe_reasons:
+                sql_or_ref = Refusal(unsafe_reasons[0])
+            else:
+                sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides, col_meta=col_meta)
             store_res = execute_store_step(sql_or_ref, store)
 
             # 3. Compare

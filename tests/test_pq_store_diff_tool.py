@@ -1448,3 +1448,30 @@ def test_all_blank_numeric_column_and_empty_table_filters_compare_cleanly() -> N
     assert set(_all_status(blank, items).values()) == {"same"}
     empty = _tab(["id", "v"], [])
     assert set(_all_status(empty, items).values()) == {"same"}
+
+
+# ------------------------------------------------------------------ D0g: header names with a double quote
+
+
+@pytest.mark.parametrize("bad_header", ['a"b', 'x","id'])
+def test_double_quote_header_is_refused_by_name_not_a_crash(bad_header: str) -> None:
+    """A header with a double quote used to break the SQL identifier and crash the run (exit 2).
+
+    The steps on that table are refused by name with the stable reason; the run finishes.
+    """
+    dataset = _tab(["id", bad_header], [["1", "x"], ["2", "y"], ["3", "x"]])
+    items = [_sort_item(bad_header), {"id": "d", "step": {"op": "remove_duplicates", "columns": [bad_header]}}]
+    data = _run_items(dataset, items)
+    assert data["results"]
+    assert {r["status"] for r in data["results"]} == {"refused"}
+    assert {r["refusal_reason"] for r in data["results"]} == {pq_store_diff.QUOTE_HEADER_REASON}
+    code, _msgs = evaluate_exit_policy(data, _baseline())
+    assert code in (0, 1)
+
+
+@pytest.mark.parametrize("seed", range(1, 16))
+def test_mutant_duplicate_casefold_killed_at_30_rows_every_seed(seed: int) -> None:
+    """The planted 'cat' / 'Cat' pair (rows 20 and 21) kills the case-folding mutant at 30 rows, not by chance."""
+    data = run_pq_step_diff(rows=30, seed=seed, overrides={"mutant_duplicate_casefold": True})
+    code, _msgs = evaluate_exit_policy(data, _baseline())
+    assert code == 1, seed
