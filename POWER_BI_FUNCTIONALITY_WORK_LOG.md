@@ -3129,3 +3129,11 @@ A Team-Thinker attack on the plan for task 17 (refuse only the large table inste
 Built by Antigravity, reviewed twice by Team-Thinker (17a FAIL on one regression and hanging tests, 17b PASS). Gate on 0a0690a: 43,584 passed, 1 skipped, 29 xfailed; 2 tests failed only beside other tests and passed alone (test_store_session::test_spill_dir_removed_when_open_fails, test_static_visual_lifecycle::test_static_visuals_insert_render; recorded as order-dependent lows); 575 of 575 on the real app; replay DIFF 0, CRASH 0.
 
 Stage B4b is complete except task 17 (deferred). Open: Stage C plan, the import load-rules decision, compaction and worker sort/filter (deferred with a measured trigger), lows in HANDOFF.md.
+
+## 2026-11-25 Stage C0 rules tool (engine versus store SQL), merged as e9c4711
+
+Added tools/store_engine_diff.py, its baseline and tests/test_store_engine_diff_tool.py. The tool compares the native engine, a naive SQL translation and the mapped DuckStore SQL (CSV and Parquet) on seeded generated data (842 formulas at 2,000 rows) and exits 1 on any difference outside a named class. Built by Antigravity (C0a to C0d) and the Sonnet fixer (C0e); Team-Thinker failed C0c and C0d and passed C0e on 9de323d (36 tests in about 17 s; seeds 1 to 40 at 2,000 rows and 5,000 rows all exit 0; its mutant set is killed except two equivalents).
+
+Findings: the engine counts distinct textual forms of numeric cells in DISTINCTCOUNT ("0" and "-0"), the mapped SQL counts values (one named class, distinct_numeric_text_variants); Parquet DOUBLE sums lose digits at 1e14 (class parquet_source_precision); COUNTA refused on Parquet; ENGINE BUG: IN and && on numeric and date columns with blank cells raise a conversion error. Open: the tool compares 2-decimal text so errors under half a cent hide (task C0f); VM checks of the data-derived rules list.
+
+Gate on e9c4711 (tool and tests only, no app change): 43,622 passed, 1 skipped, 29 xfailed; real app 575 of 575 equal to Power BI; replay DIFF 0, CRASH 0.
