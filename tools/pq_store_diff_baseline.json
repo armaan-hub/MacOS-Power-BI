@@ -1,15 +1,28 @@
 {
   "version": 1,
-  "description": "Power Query step differential tool baseline (Stage D0a).",
+  "description": "Power Query step differential tool baseline (Stage D0e).",
   "classes": [],
   "refused": [
     "duplicate_column_existing_name",
     "duplicate_column_nonexistent_col",
+    "fill_down_missing_col",
+    "fill_up_missing_col",
+    "filter_rows_advanced_missing_col",
+    "filter_rows_missing_col",
+    "filter_rows_numeric_greater_than",
+    "filter_rows_numeric_greater_than_or_equal",
+    "filter_rows_numeric_less_than",
+    "filter_rows_numeric_less_than_or_equal",
     "keep_columns_missing_col",
+    "keep_duplicates_missing_col",
     "remove_column_last_column",
     "remove_column_nonexistent_col",
+    "remove_duplicates_missing_col",
     "rename_column_existing_name",
     "rename_column_nonexistent_col",
-    "reorder_columns_missing_col"
+    "reorder_columns_missing_col",
+    "sort_rows_by_columns_missing_col",
+    "sort_rows_missing_col",
+    "sort_rows_text_col_non_ascii"
   ]
 }

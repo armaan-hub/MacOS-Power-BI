@@ -127,12 +127,39 @@ def generate_pq_dataset(
         d_str = rnd.choice(date_options) if rnd.random() >= 0.08 else ""
         c_str = rnd.choice(categories) if rnd.random() >= 0.08 else ""
         b_str = "" if rnd.random() < 0.90 else "non_blank"
-        if rnd.random() < 0.05:
+
+        # Plant deterministic shapes per brief D0e:
+        # non-ASCII letters in text_col, numeric variations in num_col, trailing space ties in cat_col
+        if i == 11:
+            t_str = "café"
+        elif i == 12:
+            t_str = "İSTANBUL"
+        elif i == 13:
+            t_str = "Σ"
+        elif i == 14:
+            t_str = "straße"
+        elif i == 15:
+            n_str = "+123"
+        elif i == 16:
+            n_str = "1e3"
+        elif i == 17:
+            n_str = "-0.50"
+        elif i == 18:
+            n_str = "1,234.56"
+        elif i == 19:
+            c_str = "cat "
+        elif i == 20:
+            c_str = "cat"
+
+        if rnd.random() < 0.05 and i > 20:
             t_str = rnd.choice(WHITESPACE_CELLS)
-        if rnd.random() < 0.05:
+        if rnd.random() < 0.05 and i > 20:
             c_str = rnd.choice(WHITESPACE_CELLS)
-        if rnd.random() < 0.03:
+        if rnd.random() < 0.03 and i > 20:
             b_str = rnd.choice(WHITESPACE_CELLS)
+
+        if i == 1 or i == rows:
+            b_str = ""
 
         csv_rows.append([id_str, t_str, n_str, d_str, c_str, b_str])
 
@@ -366,7 +393,257 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
         "second_table": "t_csv_2",
     })
 
+    # Slice 2 steps:
+    # 16. sort_rows
+    catalog.append({
+        "id": "sort_rows_cat_asc",
+        "step": {"op": "sort_rows", "column": "cat_col" if "cat_col" in headers else headers[0], "direction": "asc"},
+    })
+    catalog.append({
+        "id": "sort_rows_cat_desc",
+        "step": {"op": "sort_rows", "column": "cat_col" if "cat_col" in headers else headers[0], "direction": "desc"},
+    })
+    if "num_col" in headers:
+        catalog.append({
+            "id": "sort_rows_num_col_asc",
+            "step": {"op": "sort_rows", "column": "num_col", "direction": "asc"},
+        })
+    if "text_col" in headers:
+        catalog.append({
+            "id": "sort_rows_text_col_non_ascii",
+            "step": {"op": "sort_rows", "column": "text_col", "direction": "asc"},
+        })
+    catalog.append({
+        "id": "sort_rows_missing_col",
+        "step": {"op": "sort_rows", "column": "missing_xyz", "direction": "asc"},
+    })
+
+    # 17. sort_rows_by_columns
+    if n_cols >= 2:
+        c1 = "cat_col" if "cat_col" in headers else headers[0]
+        c2 = headers[1] if headers[1] != c1 and headers[1] != "text_col" else headers[0]
+        catalog.append({
+            "id": "sort_rows_by_columns_two_cols",
+            "step": {"op": "sort_rows_by_columns", "sorts": [{"column": c1, "direction": "asc"}, {"column": c2, "direction": "desc"}]},
+        })
+    catalog.append({
+        "id": "sort_rows_by_columns_missing_col",
+        "step": {"op": "sort_rows_by_columns", "sorts": [{"column": "missing_xyz", "direction": "asc"}]},
+    })
+
+    # 18. filter_rows
+    target_text_col = "cat_col" if "cat_col" in headers else headers[0]
+    catalog.append({
+        "id": "filter_rows_equals",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "equals", "value": "A"},
+    })
+    catalog.append({
+        "id": "filter_rows_not_equals",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "not_equals", "value": "A"},
+    })
+    catalog.append({
+        "id": "filter_rows_is_null",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_null", "value": ""},
+    })
+    catalog.append({
+        "id": "filter_rows_is_not_null",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_not_null", "value": ""},
+    })
+    catalog.append({
+        "id": "filter_rows_is_blank",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_blank", "value": ""},
+    })
+    catalog.append({
+        "id": "filter_rows_is_not_blank",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "is_not_blank", "value": ""},
+    })
+    catalog.append({
+        "id": "filter_rows_contains",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "contains", "value": "B"},
+    })
+    catalog.append({
+        "id": "filter_rows_does_not_contain",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "does_not_contain", "value": "B"},
+    })
+    catalog.append({
+        "id": "filter_rows_begins_with",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "begins_with", "value": "A"},
+    })
+    catalog.append({
+        "id": "filter_rows_does_not_begin_with",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "does_not_begin_with", "value": "A"},
+    })
+    catalog.append({
+        "id": "filter_rows_ends_with",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "ends_with", "value": "C"},
+    })
+    catalog.append({
+        "id": "filter_rows_does_not_end_with",
+        "step": {"op": "filter_rows", "column": target_text_col, "operator": "does_not_end_with", "value": "C"},
+    })
+    if "date_col" in headers:
+        catalog.append({
+            "id": "filter_rows_date_before",
+            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_before", "value": "2026-06-15"},
+        })
+        catalog.append({
+            "id": "filter_rows_date_after",
+            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_after", "value": "2026-06-15"},
+        })
+        catalog.append({
+            "id": "filter_rows_date_on_or_before",
+            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_on_or_before", "value": "2026-06-15"},
+        })
+        catalog.append({
+            "id": "filter_rows_date_on_or_after",
+            "step": {"op": "filter_rows", "column": "date_col", "operator": "date_on_or_after", "value": "2026-06-15"},
+        })
+        catalog.append({
+            "id": "filter_rows_is_earliest",
+            "step": {"op": "filter_rows", "column": "date_col", "operator": "is_earliest", "value": ""},
+        })
+        catalog.append({
+            "id": "filter_rows_is_latest",
+            "step": {"op": "filter_rows", "column": "date_col", "operator": "is_latest", "value": ""},
+        })
+    if "num_col" in headers:
+        catalog.append({
+            "id": "filter_rows_numeric_greater_than",
+            "step": {"op": "filter_rows", "column": "num_col", "operator": "greater_than", "value": "10"},
+        })
+        catalog.append({
+            "id": "filter_rows_numeric_less_than",
+            "step": {"op": "filter_rows", "column": "num_col", "operator": "less_than", "value": "100"},
+        })
+        catalog.append({
+            "id": "filter_rows_numeric_greater_than_or_equal",
+            "step": {"op": "filter_rows", "column": "num_col", "operator": "greater_than_or_equal", "value": "0"},
+        })
+        catalog.append({
+            "id": "filter_rows_numeric_less_than_or_equal",
+            "step": {"op": "filter_rows", "column": "num_col", "operator": "less_than_or_equal", "value": "50"},
+        })
+    catalog.append({
+        "id": "filter_rows_missing_col",
+        "step": {"op": "filter_rows", "column": "missing_xyz", "operator": "equals", "value": "test"},
+    })
+
+    # 19. filter_rows_advanced
+    clauses = [
+        {"column": target_text_col, "operator": "equals", "value": "A", "join": "and"},
+    ]
+    if "date_col" in headers:
+        clauses.append({"column": "date_col", "operator": "date_before", "value": "2026-06-15", "join": "and"})
+    clauses.append({"column": target_text_col, "operator": "equals", "value": "B", "join": "or"})
+    catalog.append({
+        "id": "filter_rows_advanced_combo",
+        "step": {"op": "filter_rows_advanced", "clauses": clauses},
+    })
+    catalog.append({
+        "id": "filter_rows_advanced_missing_col",
+        "step": {"op": "filter_rows_advanced", "clauses": [{"column": "missing_xyz", "operator": "equals", "value": "val", "join": "and"}]},
+    })
+
+    # 20. remove_duplicates
+    catalog.append({
+        "id": "remove_duplicates_single_col",
+        "step": {"op": "remove_duplicates", "columns": [target_text_col]},
+    })
+    if n_cols >= 2:
+        c_sec = headers[1] if headers[0] == target_text_col else headers[0]
+        catalog.append({
+            "id": "remove_duplicates_two_cols",
+            "step": {"op": "remove_duplicates", "columns": [target_text_col, c_sec]},
+        })
+    catalog.append({
+        "id": "remove_duplicates_missing_col",
+        "step": {"op": "remove_duplicates", "columns": ["missing_xyz"]},
+    })
+
+    # 21. keep_duplicates
+    catalog.append({
+        "id": "keep_duplicates_single_col",
+        "step": {"op": "keep_duplicates", "columns": [target_text_col]},
+    })
+    if n_cols >= 2:
+        c_sec = headers[1] if headers[0] == target_text_col else headers[0]
+        catalog.append({
+            "id": "keep_duplicates_two_cols",
+            "step": {"op": "keep_duplicates", "columns": [target_text_col, c_sec]},
+        })
+    catalog.append({
+        "id": "keep_duplicates_missing_col",
+        "step": {"op": "keep_duplicates", "columns": ["missing_xyz"]},
+    })
+
+    # 22. fill_down & fill_up
+    catalog.append({
+        "id": "fill_down_single_col",
+        "step": {"op": "fill_down", "columns": [target_text_col]},
+    })
+    if n_cols >= 2:
+        c_sec = headers[1] if headers[0] == target_text_col else headers[0]
+        catalog.append({
+            "id": "fill_down_two_cols",
+            "step": {"op": "fill_down", "columns": [target_text_col, c_sec]},
+        })
+    catalog.append({
+        "id": "fill_down_missing_col",
+        "step": {"op": "fill_down", "columns": ["missing_xyz"]},
+    })
+    catalog.append({
+        "id": "fill_up_single_col",
+        "step": {"op": "fill_up", "columns": [target_text_col]},
+    })
+    if n_cols >= 2:
+        c_sec = headers[1] if headers[0] == target_text_col else headers[0]
+        catalog.append({
+            "id": "fill_up_two_cols",
+            "step": {"op": "fill_up", "columns": [target_text_col, c_sec]},
+        })
+    catalog.append({
+        "id": "fill_up_missing_col",
+        "step": {"op": "fill_up", "columns": ["missing_xyz"]},
+    })
+
     return catalog
+
+
+def inspect_store_columns(
+    store: DuckStore | None,
+    table_name: str,
+    headers: list[str],
+) -> dict[str, dict[str, bool]]:
+    """Inspect columns in DuckStore to discover if they are purely numeric or contain non-ASCII letters.
+
+    Returns dict mapping column name to {'is_num': bool, 'has_non_ascii': bool}.
+    Uses public store.execute() with a single batched aggregation query.
+    """
+    meta: dict[str, dict[str, bool]] = {}
+    if not headers or store is None:
+        return meta
+    selects: list[str] = []
+    for h in headers:
+        num_rx = r'^[+-]?((\d+(\.\d*)?)|(\.\d+))([eE][+-]?\d+)?$'
+        non_ascii_rx = r'[^\x00-\x7F]'
+        letter_rx = r'\p{L}'
+        selects.append(
+            f'COUNT(CASE WHEN "{h}" IS NOT NULL AND "{h}" != \'\' THEN 1 END), '
+            f'COUNT(CASE WHEN "{h}" IS NOT NULL AND "{h}" != \'\' AND regexp_matches("{h}", \'{num_rx}\') = false THEN 1 END), '
+            f'COUNT(CASE WHEN "{h}" IS NOT NULL AND "{h}" != \'\' AND regexp_matches("{h}", \'{non_ascii_rx}\') AND regexp_matches("{h}", \'{letter_rx}\') THEN 1 END)'
+        )
+    sql = "SELECT " + ", ".join(selects) + f' FROM "{table_name}"'
+    records = store.execute(sql)
+    row = records[0] if isinstance(records, list) else records.fetchall()[0]
+    idx = 0
+    for h in headers:
+        cnt, non_num, non_ascii = row[idx], row[idx + 1], row[idx + 2]
+        meta[h] = {
+            "is_num": (cnt > 0 and non_num == 0),
+            "has_non_ascii": (cnt > 0 and non_ascii > 0),
+        }
+        idx += 3
+    return meta
 
 
 def generate_step_sql(
@@ -375,6 +652,7 @@ def generate_step_sql(
     table_name: str,
     total_rows: int,
     overrides: dict[str, Any] | None = None,
+    col_meta: dict[str, dict[str, bool]] | None = None,
 ) -> tuple[str, list[str]] | Refusal:
     """Generate SQL query and expected output columns for a step item.
 
@@ -383,7 +661,7 @@ def generate_step_sql(
     NULLIF(col, '') so a blank cell comes back as NULL; the tool must flag it.
     """
     overrides = overrides or {}
-    result = _mapped_sql(item, headers, table_name, total_rows, overrides)
+    result = _mapped_sql(item, headers, table_name, total_rows, overrides, col_meta=col_meta)
     if isinstance(result, Refusal) or not overrides.get("mutant_null_for_blank"):
         return result
     sql, out_headers = result
@@ -399,6 +677,7 @@ def _mapped_sql(
     table_name: str,
     total_rows: int,
     overrides: dict[str, Any],
+    col_meta: dict[str, dict[str, bool]] | None = None,
 ) -> tuple[str, list[str]] | Refusal:
     """The SQL mapping of each step (see `generate_step_sql`)."""
     t_q = f'"{table_name}"'
@@ -623,6 +902,313 @@ def _mapped_sql(
         )
         return (sql, list(headers))
 
+    # Helper for sorting a single column
+    def _build_sort_expr(col: str, direction: str) -> str | Refusal:
+        m = (col_meta or {}).get(col, {})
+        if overrides.get("mutant_sort_ignore_non_ascii"):
+            has_non_ascii = False
+        else:
+            has_non_ascii = m.get("has_non_ascii", False)
+
+        if has_non_ascii:
+            return Refusal(
+                f"Non-ASCII letters in column '{col}' sort differ between Python casefold and SQL lower.",
+                expected_error=None,
+            )
+
+        if overrides.get("mutant_sort_numeric_as_text"):
+            is_num = False
+        else:
+            is_num = m.get("is_num", False)
+
+        dir_sql = direction.upper()
+
+        if overrides.get("mutant_sort_nulls_first"):
+            null_clause = f'CASE WHEN "{col}" IS NULL OR "{col}" = \'\' THEN 0 ELSE 1 END ASC'
+        else:
+            null_clause = f'CASE WHEN "{col}" IS NULL OR "{col}" = \'\' THEN 1 ELSE 0 END ASC'
+
+        if is_num:
+            val_clause = f'TRY_CAST("{col}" AS DOUBLE) {dir_sql}'
+        else:
+            val_clause = f'"{col}" {dir_sql}'
+
+        return f"{null_clause}, {val_clause}"
+
+    # 16. sort_rows
+    if op == "sort_rows":
+        col = step["column"]
+        if col not in headers:
+            return Refusal(
+                f"Column {col!r} does not exist.",
+                expected_error=f"Column {col!r} does not exist.",
+            )
+        direction = step["direction"]
+        sort_expr = _build_sort_expr(col, direction)
+        if isinstance(sort_expr, Refusal):
+            return sort_expr
+        col_list = ", ".join(f'"{c}"' for c in headers)
+        if overrides.get("mutant_sort_no_rn_tiebreak"):
+            rn_clause = ""
+        else:
+            rn_clause = f', {_RN} ASC' if not overrides.get("mutant_sort_reverse_ties") else f', {_RN} DESC'
+        sql = f"SELECT {col_list} FROM {t_q} ORDER BY {sort_expr}{rn_clause}"
+        return (sql, list(headers))
+
+    # 17. sort_rows_by_columns
+    if op == "sort_rows_by_columns":
+        sorts = step["sorts"]
+        sort_parts: list[str] = []
+        for s in sorts:
+            col = s["column"]
+            if col not in headers:
+                return Refusal(
+                    f"Column {col!r} does not exist.",
+                    expected_error=f"Column {col!r} does not exist.",
+                )
+            direction = s["direction"]
+            sort_expr = _build_sort_expr(col, direction)
+            if isinstance(sort_expr, Refusal):
+                return sort_expr
+            sort_parts.append(sort_expr)
+        col_list = ", ".join(f'"{c}"' for c in headers)
+        combined_sort = ", ".join(sort_parts)
+        if overrides.get("mutant_sort_no_rn_tiebreak"):
+            rn_clause = ""
+        else:
+            rn_clause = f', {_RN} ASC' if not overrides.get("mutant_sort_reverse_ties") else f', {_RN} DESC'
+        sql = f"SELECT {col_list} FROM {t_q} ORDER BY {combined_sort}{rn_clause}"
+        return (sql, list(headers))
+
+    # 18. filter_rows
+    def _build_filter_condition(col: str, operator: str, expected: str) -> str | Refusal:
+        if col not in headers:
+            return Refusal(
+                f"Column {col!r} does not exist.",
+                expected_error=f"Column {col!r} does not exist.",
+            )
+        m = (col_meta or {}).get(col, {})
+        # Numeric operators
+        if operator in {"greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal"}:
+            if not m.get("is_num", False):
+                return Refusal(
+                    f"Column {col!r} contains non-numeric values.",
+                    expected_error=f"of column '{col}' is not a valid number.",
+                )
+            op_map = {
+                "greater_than": ">",
+                "greater_than_or_equal": ">=",
+                "less_than": "<",
+                "less_than_or_equal": "<=",
+            }
+            if overrides.get("mutant_filter_op_off_by_one"):
+                # Mutant changes strict to inclusive or vice versa
+                op_map = {
+                    "greater_than": ">=",
+                    "greater_than_or_equal": ">",
+                    "less_than": "<=",
+                    "less_than_or_equal": "<",
+                }
+            sql_op = op_map[operator]
+            return f'("{col}" IS NOT NULL AND "{col}" != \'\' AND TRY_CAST("{col}" AS DOUBLE) {sql_op} {expected})'
+
+        # Date operators
+        if operator in {"date_before", "date_after", "date_on_or_before", "date_on_or_after"}:
+            op_map = {
+                "date_before": "<",
+                "date_after": ">",
+                "date_on_or_before": "<=",
+                "date_on_or_after": ">=",
+            }
+            if overrides.get("mutant_filter_op_off_by_one"):
+                op_map = {
+                    "date_before": "<=",
+                    "date_after": ">=",
+                    "date_on_or_before": "<",
+                    "date_on_or_after": ">",
+                }
+            sql_op = op_map[operator]
+            return (
+                f'("{col}" IS NOT NULL AND "{col}" != \'\' AND '
+                f'TRY_CAST(trim("{col}") AS TIMESTAMP) IS NOT NULL AND '
+                f'TRY_CAST(trim("{col}") AS TIMESTAMP) {sql_op} TIMESTAMP \'{expected} 00:00:00\')'
+            )
+
+        # Text and equality operators
+        if operator == "equals":
+            if overrides.get("mutant_filter_trim_trailing_spaces"):
+                return f'rtrim(COALESCE("{col}", \'\')) = \'{expected}\''
+            return f'"{col}" = \'{expected}\''
+        if operator == "not_equals":
+            return f'("{col}" IS NULL OR "{col}" != \'{expected}\')'
+        if operator == "is_null":
+            return f'"{col}" IS NULL'
+        if operator == "is_not_null":
+            return f'"{col}" IS NOT NULL'
+        if operator == "is_blank":
+            return f'("{col}" IS NULL OR "{col}" = \'\')'
+        if operator == "is_not_blank":
+            return f'("{col}" IS NOT NULL AND "{col}" != \'\')'
+        if operator == "contains":
+            return f'instr(COALESCE("{col}", \'\'), \'{expected}\') > 0'
+        if operator == "does_not_contain":
+            return f'instr(COALESCE("{col}", \'\'), \'{expected}\') = 0'
+        if operator == "begins_with":
+            return f'starts_with(COALESCE("{col}", \'\'), \'{expected}\')'
+        if operator == "does_not_begin_with":
+            return f'NOT starts_with(COALESCE("{col}", \'\'), \'{expected}\')'
+        if operator == "ends_with":
+            return f'ends_with(COALESCE("{col}", \'\'), \'{expected}\')'
+        if operator == "does_not_end_with":
+            return f'NOT ends_with(COALESCE("{col}", \'\'), \'{expected}\')'
+
+        return Refusal(f"Unsupported filter operator {operator!r}")
+
+    if op == "filter_rows":
+        col = step["column"]
+        operator = step["operator"]
+        expected = step.get("value", "")
+        if operator in {"is_earliest", "is_latest"}:
+            if col not in headers:
+                return Refusal(
+                    f"Column {col!r} does not exist.",
+                    expected_error=f"Column {col!r} does not exist.",
+                )
+            func = "MIN" if operator == "is_earliest" else "MAX"
+            col_list = ", ".join(f'"{c}"' for c in headers)
+            order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+            sql = (
+                f"WITH _dstats AS ("
+                f'  SELECT {func}(TRY_CAST(trim("{col}") AS TIMESTAMP)) AS _target_dt '
+                f"  FROM {t_q} "
+                f'  WHERE "{col}" IS NOT NULL AND "{col}" != \'\' AND TRY_CAST(trim("{col}") AS TIMESTAMP) IS NOT NULL'
+                f") "
+                f"SELECT {col_list} FROM {t_q}, _dstats "
+                f'WHERE TRY_CAST(trim("{col}") AS TIMESTAMP) = _dstats._target_dt '
+                f"{order_clause}"
+            )
+            return (sql, list(headers))
+
+        cond = _build_filter_condition(col, operator, expected)
+        if isinstance(cond, Refusal):
+            return cond
+        col_list = ", ".join(f'"{c}"' for c in headers)
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+        sql = f"SELECT {col_list} FROM {t_q} WHERE {cond} {order_clause}"
+        return (sql, list(headers))
+
+    # 19. filter_rows_advanced
+    if op == "filter_rows_advanced":
+        clauses = step["clauses"]
+        or_groups: list[list[str]] = []
+        curr_and_group: list[str] = []
+        for c_idx, cl in enumerate(clauses):
+            c_col = cl["column"]
+            c_op = cl["operator"]
+            c_val = cl.get("value", "")
+            c_join = cl.get("join", "and")
+            c_cond = _build_filter_condition(c_col, c_op, c_val)
+            if isinstance(c_cond, Refusal):
+                return c_cond
+            if c_idx == 0 or c_join == "and":
+                curr_and_group.append(c_cond)
+            else:
+                or_groups.append(curr_and_group)
+                curr_and_group = [c_cond]
+        or_groups.append(curr_and_group)
+
+        group_sqls = ["(" + " AND ".join(grp) + ")" for grp in or_groups if grp]
+        where_sql = " OR ".join(group_sqls)
+        col_list = ", ".join(f'"{c}"' for c in headers)
+        order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+        sql = f"SELECT {col_list} FROM {t_q} WHERE ({where_sql}) {order_clause}"
+        return (sql, list(headers))
+
+    # 20. remove_duplicates
+    if op == "remove_duplicates":
+        cols = step.get("columns", headers)
+        for c in cols:
+            if c not in headers:
+                return Refusal(
+                    f"Column {c!r} does not exist.",
+                    expected_error=f"Column {c!r} does not exist.",
+                )
+        if overrides.get("mutant_duplicate_casefold"):
+            part_exprs = [f'("{c}" IS NULL), lower("{c}")' for c in cols]
+        else:
+            part_exprs = [f'("{c}" IS NULL), "{c}"' for c in cols]
+        part_clause = ", ".join(part_exprs)
+        col_list = ", ".join(f'"{c}"' for c in headers)
+        sql = (
+            f"SELECT {col_list} FROM ("
+            f"  SELECT {col_list}, "
+            f"         row_number() OVER (PARTITION BY {part_clause} ORDER BY {_RN}) AS _dup_rn, "
+            f"         {_RN} "
+            f"  FROM {t_q}"
+            f") WHERE _dup_rn = 1 ORDER BY {_RN}"
+        )
+        return (sql, list(headers))
+
+    # 21. keep_duplicates
+    if op == "keep_duplicates":
+        cols = step.get("columns", headers)
+        for c in cols:
+            if c not in headers:
+                return Refusal(
+                    f"Column {c!r} does not exist.",
+                    expected_error=f"Column {c!r} does not exist.",
+                )
+        if overrides.get("mutant_duplicate_casefold"):
+            part_exprs = [f'("{c}" IS NULL), lower("{c}")' for c in cols]
+        else:
+            part_exprs = [f'("{c}" IS NULL), "{c}"' for c in cols]
+        part_clause = ", ".join(part_exprs)
+        col_list = ", ".join(f'"{c}"' for c in headers)
+        sql = (
+            f"SELECT {col_list} FROM ("
+            f"  SELECT {col_list}, "
+            f"         count(*) OVER (PARTITION BY {part_clause}) AS _dup_cnt, "
+            f"         {_RN} "
+            f"  FROM {t_q}"
+            f") WHERE _dup_cnt > 1 ORDER BY {_RN}"
+        )
+        return (sql, list(headers))
+
+    # 22. fill_down & fill_up
+    if op in {"fill_down", "fill_up"}:
+        cols = step["columns"]
+        for c in cols:
+            if c not in headers:
+                return Refusal(
+                    f"Column {c!r} does not exist.",
+                    expected_error=f"Column {c!r} does not exist.",
+                )
+        fill_set = set(cols)
+        c_exprs: list[str] = []
+        for h in headers:
+            if h in fill_set:
+                if overrides.get("mutant_fill_across_whitespace"):
+                    # Blank defined by trim(c) != '' so whitespace cell is overwritten
+                    non_null_expr = f'CASE WHEN "{h}" IS NOT NULL AND trim("{h}") != \'\' THEN "{h}" END'
+                else:
+                    non_null_expr = f'CASE WHEN "{h}" IS NOT NULL THEN "{h}" END'
+
+                if op == "fill_down":
+                    c_exprs.append(
+                        f'COALESCE(last_value({non_null_expr} IGNORE NULLS) '
+                        f'OVER (ORDER BY {_RN} ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), "{h}") AS "{h}"'
+                    )
+                else:
+                    c_exprs.append(
+                        f'COALESCE(first_value({non_null_expr} IGNORE NULLS) '
+                        f'OVER (ORDER BY {_RN} ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING), "{h}") AS "{h}"'
+                    )
+            else:
+                c_exprs.append(f'"{h}"')
+        col_list = ", ".join(c_exprs)
+        sql = f"SELECT {col_list} FROM {t_q} ORDER BY {_RN}"
+        return (sql, list(headers))
+
     return Refusal(f"Unknown or unsupported step operation: {op}")
 
 
@@ -742,6 +1328,7 @@ def run_pq_step_diff(
         import_csv_to_store(store, "t_csv_2", csv_file_2, {})
 
         total_store_rows = store.execute('SELECT COUNT(*) FROM "t_csv"')[0][0]
+        col_meta = inspect_store_columns(store, "t_csv", headers)
 
         catalog = list(items) if items is not None else build_step_catalog(headers)
         if item_filter:
@@ -766,7 +1353,7 @@ def run_pq_step_diff(
             elif item.get("pre_step"):
                 kept = set(item["pre_step"]["columns"])
                 sql_headers = [h for h in headers if h in kept]
-            sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides)
+            sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides, col_meta=col_meta)
             store_res = execute_store_step(sql_or_ref, store)
 
             # 3. Compare
@@ -943,16 +1530,19 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         "3. `keep_range_rows` / `remove_top_rows`: When offset or count exceeds total table row count, Power Query yields an empty table without error. The SQL mapping uses `OFFSET` / `LIMIT` matching this behavior.",
         "4. `remove_alternate_rows`: Alternating row selection cycle logic is mapped to modular arithmetic over `row_number()`. Power Query 1-based indexing semantics verified against step engine.",
         "5. Does Power Query keep an all-blank CSV row (`,,`) as a row of nulls? The app's CSV loader (engine parser and store import) drops all-blank rows at load, so remove_blank_rows on an imported CSV is the identity.",
+        "6. `sort_rows` on mixed columns: The engine sorts numerically only if every non-empty cell parses as a number; otherwise falls back to text casefold sort. Power BI Desktop behaviour on mixed columns needs checking.",
+        "7. `sort_rows` Python casefold vs DuckDB lower: Non-ASCII characters (e.g. 'ß', 'İ', 'Σ') differ in casefold vs lower; column sort is refused when non-ASCII letters are present.",
+        "8. `filter_rows` on dates: Dates parsed via ISO strings; Power BI culture-specific date parsing needs verification.",
+        "9. Duplicate keys on numeric text: `cell_key` treats distinct string representations ('1' vs '1.0') distinctly for un-converted text columns, but equal if converted to Decimal.",
+        "10. `fill_down` / `fill_up` whitespace: Whitespace-only cells are treated as non-blank and not overwritten.",
         "",
         "## Deferred Steps (Slice 2+)",
         "",
-        "The following operations in `transformations.py` were deferred from Tier 1:",
-        "- Row filtering & sorting: `filter_rows`, `filter_rows_advanced`, `sort_rows`, `sort_rows_by_columns`",
-        "- Column manipulation: `merge_columns`, `split_column`, `split_column_by_each_delimiter`, `split_column_by_positions`, `split_column_to_rows`, `extract_text_by_delimiter`, `extract_text_between_delimiters`, `fill_down`, `fill_up`",
+        "The following operations in `transformations.py` remain deferred:",
+        "- Column manipulation: `merge_columns`, `split_column`, `split_column_by_each_delimiter`, `split_column_by_positions`, `split_column_to_rows`, `extract_text_by_delimiter`, `extract_text_between_delimiters`",
         "- Type conversions: `convert_type`, `convert_type_using_locale`",
         "- Value transformations: `replace_value`, `replace_error_values`, `trim_text`, `clean_text`, `lowercase_text`, `uppercase_text`, `proper_case_text`, `reverse_text`",
         "- Reshaping / Aggregation: `group_by`, `pivot_column`, `unpivot_columns`, `unpivot_other_columns`, `transpose_table`",
-        "- Row deduplication: `remove_duplicates`, `keep_duplicates`",
         "- Header / Table structure: `promote_headers`, `demote_headers`, `table_pass_through`",
         "- Scripting & Custom: `m_script`, `add_custom_column`, `conditional_column`, `m_sparse_boundary_helper`",
         "- Error handling: `remove_rows_with_errors`, `keep_rows_with_errors`",

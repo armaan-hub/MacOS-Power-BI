@@ -803,7 +803,8 @@ def test_mutant_blank_counts_whitespace_kills_on_generated_300_rows() -> None:
 def test_full_catalog_at_300_rows_has_no_difference() -> None:
     """The generated shapes (whitespace, duplicates, blank rows) agree on every step at 300 rows."""
     data = run_pq_step_diff(rows=300, seed=11)
-    _assert_all_same(data)
+    bad = {k: v for k, v in _statuses(data).items() if v not in ("same", "refused")}
+    assert not bad, bad
     assert evaluate_exit_policy(data, _baseline())[0] == 0
 
 
@@ -928,3 +929,339 @@ def test_tool_never_touches_private_duckstore_attributes() -> None:
     src = Path(pq_store_diff.__file__).read_text(encoding="utf-8")
     assert "._check_open" not in src
     assert not re.search(r"\bstore\._[a-z]", src)
+
+
+# ------------------------------------------------------------------ Slice 2: hand-checked small tables & mutants
+
+
+def test_hand_checked_small_tables_slice_2() -> None:
+    """Hand-check all Slice 2 step operations on small known tables."""
+    with tempfile.TemporaryDirectory() as td:
+        csv_file = Path(td) / "slice2.csv"
+        db_file = Path(td) / "store.db"
+
+        with open(csv_file, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["id", "num", "cat", "date", "val"])
+            w.writerow(["1", "20", "Beta", "2023-01-05", "foo"])
+            w.writerow(["2", "5", "alpha", "2023-01-01", ""])
+            w.writerow(["3", "10", "Alpha", "2023-01-10", "bar"])
+
+        store = DuckStore(str(db_file))
+        import_csv_to_store(store, "t_slice2", csv_file, {})
+        cand = parse_file(csv_file)
+        headers = ["id", "num", "cat", "date", "val"]
+        col_meta = pq_store_diff.inspect_store_columns(store, "t_slice2", headers)
+
+        # 1. sort_rows numeric ascending
+        item = {"id": "test_sort_num", "step": {"op": "sort_rows", "column": "num", "direction": "asc"}}
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        sql, h = generate_step_sql(item, headers, "t_slice2", 3, col_meta=col_meta)
+        st_h, st_r = pq_store_diff.execute_store_step((sql, h), store)
+        assert eng_h == st_h == headers
+        assert eng_r == st_r == [
+            ["2", "5", "alpha", "2023-01-01", ""],
+            ["3", "10", "Alpha", "2023-01-10", "bar"],
+            ["1", "20", "Beta", "2023-01-05", "foo"],
+        ]
+
+        # 2. sort_rows text descending
+        item = {"id": "test_sort_cat", "step": {"op": "sort_rows", "column": "cat", "direction": "desc"}}
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        sql, h = generate_step_sql(item, headers, "t_slice2", 3, col_meta=col_meta)
+        st_h, st_r = pq_store_diff.execute_store_step((sql, h), store)
+        assert eng_r == st_r == [
+            ["2", "5", "alpha", "2023-01-01", ""],
+            ["1", "20", "Beta", "2023-01-05", "foo"],
+            ["3", "10", "Alpha", "2023-01-10", "bar"],
+        ]
+
+        # 3. filter_rows numeric greater_than
+        item = {"id": "test_filt_num", "step": {"op": "filter_rows", "column": "num", "operator": "greater_than", "value": "7"}}
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        sql, h = generate_step_sql(item, headers, "t_slice2", 3, col_meta=col_meta)
+        st_h, st_r = pq_store_diff.execute_store_step((sql, h), store)
+        assert eng_r == st_r == [
+            ["1", "20", "Beta", "2023-01-05", "foo"],
+            ["3", "10", "Alpha", "2023-01-10", "bar"],
+        ]
+
+        # 4. filter_rows date_before
+        item = {"id": "test_filt_date", "step": {"op": "filter_rows", "column": "date", "operator": "date_before", "value": "2023-01-06"}}
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        sql, h = generate_step_sql(item, headers, "t_slice2", 3, col_meta=col_meta)
+        st_h, st_r = pq_store_diff.execute_store_step((sql, h), store)
+        assert eng_r == st_r == [
+            ["1", "20", "Beta", "2023-01-05", "foo"],
+            ["2", "5", "alpha", "2023-01-01", ""],
+        ]
+
+        # 5. remove_duplicates
+        item = {"id": "test_rem_dup", "step": {"op": "remove_duplicates", "columns": ["cat"]}}
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        sql, h = generate_step_sql(item, headers, "t_slice2", 3, col_meta=col_meta)
+        st_h, st_r = pq_store_diff.execute_store_step((sql, h), store)
+        assert eng_r == st_r == [
+            ["1", "20", "Beta", "2023-01-05", "foo"],
+            ["2", "5", "alpha", "2023-01-01", ""],
+            ["3", "10", "Alpha", "2023-01-10", "bar"],
+        ]
+
+        # 6. fill_down
+        item = {"id": "test_fill_down", "step": {"op": "fill_down", "columns": ["val"]}}
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        sql, h = generate_step_sql(item, headers, "t_slice2", 3, col_meta=col_meta)
+        st_h, st_r = pq_store_diff.execute_store_step((sql, h), store)
+        assert eng_r == st_r == [
+            ["1", "20", "Beta", "2023-01-05", "foo"],
+            ["2", "5", "alpha", "2023-01-01", ""],
+            ["3", "10", "Alpha", "2023-01-10", "bar"],
+        ]
+        store.close()
+
+
+def test_mutant_sort_ignore_non_ascii() -> None:
+    """Mutant: sort_rows on non-ascii column without refusal produces a differ / refusal mismatch vs baseline."""
+    item = {"id": "sort_rows_text_col_non_ascii", "step": {"op": "sort_rows", "column": "txt", "direction": "asc"}}
+    dataset = {
+        "headers": ["id", "txt"],
+        "rows": [["1", "café"], ["2", "cafe"], ["3", "CAFE"]],
+        "rows_2": [],
+    }
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        col_meta = pq_store_diff.inspect_store_columns(s, "t", dataset["headers"])
+        res_clean = generate_step_sql(item, dataset["headers"], "t", 3, col_meta=col_meta)
+        assert isinstance(res_clean, pq_store_diff.Refusal)
+
+        res_mut = generate_step_sql(
+            item, dataset["headers"], "t", 3, col_meta=col_meta, overrides={"mutant_sort_ignore_non_ascii": True}
+        )
+        assert isinstance(res_mut, tuple)  # Non-refusal tuple
+        s.close()
+
+    # Full tool execution fails exit policy when mutant is active
+    data = run_pq_step_diff(rows=50, seed=42, overrides={"mutant_sort_ignore_non_ascii": True})
+    code, msgs = evaluate_exit_policy(data, _baseline())
+    assert code == 1
+    assert any("Refused step set changed vs baseline" in m for m in msgs)
+
+
+def test_mutant_sort_numeric_as_text() -> None:
+    """Mutant: sorting numeric column as text orders lexicographically ('10' before '2')."""
+    item = {"id": "sort_num", "step": {"op": "sort_rows", "column": "num", "direction": "asc"}}
+    dataset = {"headers": ["id", "num"], "rows": [["1", "2"], ["2", "10"]], "rows_2": []}
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        cand = parse_file(p)
+        col_meta = {"num": {"is_num": True, "has_non_ascii": False}}
+
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        assert eng_r == [["1", "2"], ["2", "10"]]
+
+        sql_c, h_c = generate_step_sql(item, dataset["headers"], "t", 2, col_meta=col_meta)
+        c_h, c_r = pq_store_diff.execute_store_step((sql_c, h_c), s)
+        assert c_r == eng_r
+
+        sql_m, h_m = generate_step_sql(
+            item, dataset["headers"], "t", 2, col_meta=col_meta, overrides={"mutant_sort_numeric_as_text": True}
+        )
+        m_h, m_r = pq_store_diff.execute_store_step((sql_m, h_m), s)
+        assert m_r == [["2", "10"], ["1", "2"]]  # '10' before '2'
+        s.close()
+
+
+def test_mutant_sort_reverse_ties() -> None:
+    """Mutant: reverse tie-break ordering breaks stability of sort."""
+    item = {"id": "sort_cat", "step": {"op": "sort_rows", "column": "cat", "direction": "asc"}}
+    dataset = {"headers": ["id", "cat"], "rows": [["1", "same"], ["2", "same"]], "rows_2": []}
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        cand = parse_file(p)
+        col_meta = {"cat": {"is_num": False, "has_non_ascii": False}}
+
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        assert eng_r == [["1", "same"], ["2", "same"]]
+
+        sql_c, h_c = generate_step_sql(item, dataset["headers"], "t", 2, col_meta=col_meta)
+        c_h, c_r = pq_store_diff.execute_store_step((sql_c, h_c), s)
+        assert c_r == eng_r
+
+        sql_m, h_m = generate_step_sql(
+            item, dataset["headers"], "t", 2, col_meta=col_meta, overrides={"mutant_sort_reverse_ties": True}
+        )
+        m_h, m_r = pq_store_diff.execute_store_step((sql_m, h_m), s)
+        assert m_r == [["2", "same"], ["1", "same"]]
+        s.close()
+
+
+def test_mutant_sort_nulls_first() -> None:
+    """Mutant: sorting with NULLS FIRST places empty string before values, differing from engine."""
+    item = {"id": "sort_cat", "step": {"op": "sort_rows", "column": "cat", "direction": "asc"}}
+    dataset = {"headers": ["id", "cat"], "rows": [["1", ""], ["2", "A"]], "rows_2": []}
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        cand = parse_file(p)
+        col_meta = {"cat": {"is_num": False, "has_non_ascii": False}}
+
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        assert eng_r == [["2", "A"], ["1", ""]]  # NULLS / blanks last
+
+        sql_c, h_c = generate_step_sql(item, dataset["headers"], "t", 2, col_meta=col_meta)
+        c_h, c_r = pq_store_diff.execute_store_step((sql_c, h_c), s)
+        assert c_r == eng_r
+
+        sql_m, h_m = generate_step_sql(
+            item, dataset["headers"], "t", 2, col_meta=col_meta, overrides={"mutant_sort_nulls_first": True}
+        )
+        m_h, m_r = pq_store_diff.execute_store_step((sql_m, h_m), s)
+        assert m_r == [["1", ""], ["2", "A"]]  # blanks first
+        s.close()
+
+
+def test_mutant_sort_no_rn_tiebreak() -> None:
+    """LINT: verify sort mappings always include '__rn' in ORDER BY unless mutant_sort_no_rn_tiebreak active."""
+    item = {"id": "sort_cat", "step": {"op": "sort_rows", "column": "cat", "direction": "asc"}}
+    sql_c, _ = generate_step_sql(item, ["id", "cat"], "t", 2)
+    sql_m, _ = generate_step_sql(item, ["id", "cat"], "t", 2, overrides={"mutant_sort_no_rn_tiebreak": True})
+    assert '"__rn" ASC' in sql_c
+    assert '"__rn"' not in sql_m
+
+
+def test_mutant_filter_op_off_by_one() -> None:
+    """Mutant: filter comparison operator off by one (> becoming >=) includes boundary value."""
+    item = {"id": "filt_num", "step": {"op": "filter_rows", "column": "num", "operator": "greater_than", "value": "10"}}
+    dataset = {"headers": ["id", "num"], "rows": [["1", "10"], ["2", "20"]], "rows_2": []}
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        cand = parse_file(p)
+        col_meta = {"num": {"is_num": True, "has_non_ascii": False}}
+
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        assert eng_r == [["2", "20"]]
+
+        sql_c, h_c = generate_step_sql(item, dataset["headers"], "t", 2, col_meta=col_meta)
+        c_h, c_r = pq_store_diff.execute_store_step((sql_c, h_c), s)
+        assert c_r == eng_r
+
+        sql_m, h_m = generate_step_sql(
+            item, dataset["headers"], "t", 2, col_meta=col_meta, overrides={"mutant_filter_op_off_by_one": True}
+        )
+        m_h, m_r = pq_store_diff.execute_store_step((sql_m, h_m), s)
+        assert m_r == [["1", "10"], ["2", "20"]]
+        s.close()
+
+
+def test_mutant_filter_trim_trailing_spaces() -> None:
+    """Mutant: trimming trailing spaces on equals matches 'cat ' when searching 'cat'."""
+    item = {"id": "filt_eq", "step": {"op": "filter_rows", "column": "txt", "operator": "equals", "value": "cat"}}
+    dataset = {"headers": ["id", "txt"], "rows": [["1", "cat "], ["2", "dog"]], "rows_2": []}
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        cand = parse_file(p)
+        col_meta = {"txt": {"is_num": False, "has_non_ascii": False}}
+
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        assert eng_r == []
+
+        sql_c, h_c = generate_step_sql(item, dataset["headers"], "t", 2, col_meta=col_meta)
+        c_h, c_r = pq_store_diff.execute_store_step((sql_c, h_c), s)
+        assert c_r == eng_r
+
+        sql_m, h_m = generate_step_sql(
+            item, dataset["headers"], "t", 2, col_meta=col_meta, overrides={"mutant_filter_trim_trailing_spaces": True}
+        )
+        m_h, m_r = pq_store_diff.execute_store_step((sql_m, h_m), s)
+        assert m_r == [["1", "cat "]]
+        s.close()
+
+
+def test_mutant_duplicate_casefold() -> None:
+    """Mutant: case folding duplicate keys causes 'Apple' and 'apple' to be considered duplicate."""
+    item = {"id": "rem_dup", "step": {"op": "remove_duplicates", "columns": ["txt"]}}
+    dataset = {"headers": ["id", "txt"], "rows": [["1", "Apple"], ["2", "apple"]], "rows_2": []}
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        cand = parse_file(p)
+
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        assert eng_r == [["1", "Apple"], ["2", "apple"]]
+
+        sql_c, h_c = generate_step_sql(item, dataset["headers"], "t", 2)
+        c_h, c_r = pq_store_diff.execute_store_step((sql_c, h_c), s)
+        assert c_r == eng_r
+
+        sql_m, h_m = generate_step_sql(item, dataset["headers"], "t", 2, overrides={"mutant_duplicate_casefold": True})
+        m_h, m_r = pq_store_diff.execute_store_step((sql_m, h_m), s)
+        assert m_r == [["1", "Apple"]]
+        s.close()
+
+
+def test_mutant_fill_across_whitespace() -> None:
+    """Mutant: treating whitespace as blank overwrites whitespace cells during fill_down."""
+    item = {"id": "fill_down", "step": {"op": "fill_down", "columns": ["val"]}}
+    dataset = {"headers": ["id", "val"], "rows": [["1", "A"], ["2", "   "], ["3", "B"]], "rows_2": []}
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "t.csv"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(dataset["headers"])
+            w.writerows(dataset["rows"])
+        s = DuckStore(str(Path(td) / "s.db"))
+        import_csv_to_store(s, "t", p, {})
+        cand = parse_file(p)
+
+        eng_h, eng_r = pq_store_diff.execute_engine_step(item, cand)
+        assert eng_r == [["1", "A"], ["2", "   "], ["3", "B"]]
+
+        sql_c, h_c = generate_step_sql(item, dataset["headers"], "t", 3)
+        c_h, c_r = pq_store_diff.execute_store_step((sql_c, h_c), s)
+        assert c_r == eng_r
+
+        sql_m, h_m = generate_step_sql(item, dataset["headers"], "t", 3, overrides={"mutant_fill_across_whitespace": True})
+        m_h, m_r = pq_store_diff.execute_store_step((sql_m, h_m), s)
+        assert m_r == [["1", "A"], ["2", "A"], ["3", "B"]]
+        s.close()
+
