@@ -3121,3 +3121,11 @@ A project with a large-data table can now reload it from its file: a "Reload tab
 Built by Antigravity (task 16), reviewed by Team-Thinker (PASS on the data-loss rules, one state-corruption bug in the swap), fixed by the Sonnet fixer (16b: the swap now updates the grid first and rolls back on failure), and re-reviewed (PASS). Gate on cdd13f0: 43,571 passed, 1 skipped, 29 xfailed; 575 of 575 on the real app; replay DIFF 0, CRASH 0.
 
 Open: task 17 (per-table refusal; the plan goes to Team-Thinker for an attack first), compaction and worker sort/filter (deferred with a measured trigger), the import load-rules decision, lows in HANDOFF.md.
+
+## 2026-11-25 Stage B4b task 17a: refusal gaps beside a large-data table (merged); task 17 deferred
+
+A Team-Thinker attack on the plan for task 17 (refuse only the large table instead of the whole project) found it would turn today's loud refusal into seven kinds of silent failure (blank cards from the active-table fallback, INFO.* and unqualified measures resolving to the wrong table, saved filters and relationships silently ignored, and more), so it is deferred to Stage C (DAX on the store). Only the safe prefix was built (17a, 17b): an ordinary table keeps its calculated columns beside a large table (they were dropped silently on re-import or when opening an ordinary project), five import entry points that could create a mixed model now refuse like their neighbours, and an AST test requires every refusal site and every import entry point to be classified, so a new gap fails a test.
+
+Built by Antigravity, reviewed twice by Team-Thinker (17a FAIL on one regression and hanging tests, 17b PASS). Gate on 0a0690a: 43,584 passed, 1 skipped, 29 xfailed; 2 tests failed only beside other tests and passed alone (test_store_session::test_spill_dir_removed_when_open_fails, test_static_visual_lifecycle::test_static_visuals_insert_render; recorded as order-dependent lows); 575 of 575 on the real app; replay DIFF 0, CRASH 0.
+
+Stage B4b is complete except task 17 (deferred). Open: Stage C plan, the import load-rules decision, compaction and worker sort/filter (deferred with a measured trigger), lows in HANDOFF.md.
