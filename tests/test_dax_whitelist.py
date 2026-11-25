@@ -67,9 +67,11 @@ def dataset_and_catalog() -> tuple[dict[str, str], list[dict[str, Any]], list[st
 # (i) Differential Test: Catalog vs Whitelist (Rule A & Rule B)
 # ---------------------------------------------------------------------------
 
-def test_differential_catalog_rules(dataset_and_catalog):
+def test_differential_catalog_rules(dataset_and_catalog, rules_runs):
     col_types, catalog, headers = dataset_and_catalog
     tables = {"t": col_types}
+    # Rule A uses the cached rules tool run at 2000 rows, seed 42 (same as the test below).
+    by_id = rules_runs[(2000, 42)]
 
     allowed_count = 0
     refused_count = 0
@@ -78,8 +80,8 @@ def test_differential_catalog_rules(dataset_and_catalog):
 
     for f in catalog:
         dax = f.get("dax")
-        # Skip group_by pseudo-DAX
-        if not dax or f.get("group_col") or dax.startswith("group_by("):
+        # Skip group_by pseudo-DAX, and formulas the rules tool does not run (forced_wrong_formula)
+        if not dax or f.get("group_col") or dax.startswith("group_by(") or f["id"] not in by_id:
             skipped_count += 1
             continue
 
@@ -87,10 +89,10 @@ def test_differential_catalog_rules(dataset_and_catalog):
 
         if decision.allowed:
             allowed_count += 1
-            # Rule A (safety): if allowed, mapped generate_sql must return a str, not a Refusal
-            sql = generate_sql(f, "t_csv", col_types, mode="mapped")
-            assert isinstance(sql, str), (
-                f"Rule A violated for {f['id']} ({dax}): generate_sql returned {sql}"
+            # Rule A (safety): if allowed, the rules tool mapped status must be 'same' with no refusal
+            r = by_id[f["id"]]
+            assert r["mapped_status"] == "same" and r["mapped_refusal"] is None, (
+                f"Rule A violated for {f['id']} ({dax}): mapped {r['mapped_status']} {r['mapped_refusal']}"
             )
             # Verify shape matches catalog shape
             assert decision.shape == f["shape"], (
@@ -106,13 +108,15 @@ def test_differential_catalog_rules(dataset_and_catalog):
                 rule_b_by_shape[shape] = rule_b_by_shape.get(shape, 0) + 1
 
     # Assert catalog numbers
-    assert skipped_count == 28
-    assert allowed_count == 632
-    assert refused_count == 183
+    assert skipped_count == 29
+    assert allowed_count == 570
+    assert refused_count == 244
     assert len(catalog) == 843
 
-    # Rule B counts: 7 formulas the mapped store can do (arithmetic and SUMX) that whitelist refuses
-    expected_rule_b = {"SUM": 2, "RATIO": 1, "DIVIDE": 1, "ARITH": 1, "SUMX": 2}
+    # Rule B counts: formulas the mapped store can do that whitelist refuses. The 61 DISTINCTCOUNT
+    # ones are refused on purpose (numeric DISTINCTCOUNT differs from the engine); 7 are arithmetic and SUMX.
+    expected_rule_b = {"SUM": 2, "RATIO": 1, "DIVIDE": 1, "ARITH": 1, "SUMX": 2,
+                       "DISTINCTCOUNT": 3, "DISTINCTCOUNT_filtered": 58}
     assert rule_b_by_shape == expected_rule_b
 
 
@@ -207,6 +211,19 @@ NEGATIVE_CASES = [
     ("IF(SUM(t[w]) > 0, 1, 0)", "t", "function IF is not on the store whitelist"),
     # 43. SWITCH conditional function
     ("SWITCH(t[cat], \"A\", 1, 0)", "t", "function SWITCH is not on the store whitelist"),
+    # 44. NOT over a text column (moved from positive table; NOT is whole-number = only)
+    ('CALCULATE(MAX(t[w]), NOT(t[cat] = "A"))', "t",
+     "NOT and || are only on the store whitelist over whole-number = comparisons"),
+    # 45. || over a text column (moved from positive table; || is whole-number = only)
+    ('CALCULATE(COUNTA(t[cat]), t[cat] = "A" || t[cat] = "B")', "t",
+     "NOT and || are only on the store whitelist over whole-number = comparisons"),
+    # 46. Numeric DISTINCTCOUNT under a text IN filter (moved from positive table)
+    ('CALCULATE(DISTINCTCOUNT(t[w]), t[cat] IN {"A", "B", "C"})', "t",
+     "DISTINCTCOUNT on a numeric column differs from the engine "
+     "(open Power BI answer check: distinct_numeric_text_variants)"),
+    # 47. NOT over a text column, lowercase with extra whitespace (moved from positive table)
+    ('  calculate(  sum( t[w] ),   not( t[cat] = "A" ) )  ', "t",
+     "NOT and || are only on the store whitelist over whole-number = comparisons"),
 ]
 
 
@@ -289,21 +306,13 @@ POSITIVE_CASES = [
     ("CALCULATE(COUNT(t[w]), t[dt] >= DATE(2026, 6, 1))", "t", "COUNT_filtered", "t"),
     # 22. CALCULATE with unary minus on number
     ("CALCULATE(MIN(t[w]), t[w] > -10)", "t", "MIN_filtered", "t"),
-    # 23. CALCULATE with NOT predicate
-    ('CALCULATE(MAX(t[w]), NOT(t[cat] = "A"))', "t", "MAX_filtered", "t"),
-    # 24. CALCULATE with || OR predicate
-    ('CALCULATE(COUNTA(t[cat]), t[cat] = "A" || t[cat] = "B")', "t", "COUNTA_filtered", "t"),
-    # 25. CALCULATE with text IN tableconstructor
-    ('CALCULATE(DISTINCTCOUNT(t[w]), t[cat] IN {"A", "B", "C"})', "t", "DISTINCTCOUNT_filtered", "t"),
-    # 26. Lowercase function names and extra whitespace
-    ('  calculate(  sum( t[w] ),   not( t[cat] = "A" ) )  ', "t", "SUM_filtered", "t"),
-    # 27. Case-insensitive table and column names
+    # 23. Case-insensitive table and column names
     ('CALCULATE(SUM(T[W]), T[CAT] = "A")', "t", "SUM_filtered", "t"),
-    # 28. Transitive measure reference (bare [BaseSum])
+    # 24. Transitive measure reference (bare [BaseSum])
     ("[BaseSum]", "t", "SUM", "t"),
-    # 29. Transitive measure in CALCULATE with filter
+    # 25. Transitive measure in CALCULATE with filter
     ('CALCULATE([BaseSum], t[cat] = "A")', "t", "SUM_filtered", "t"),
-    # 30. Unqualified column in home table inside AGG
+    # 26. Unqualified column in home table inside AGG
     ("SUM([w])", "t", "SUM", "t"),
 ]
 
@@ -574,3 +583,623 @@ def test_fuzz_ast_classifier(dataset_and_catalog):
             f = catalog_by_dax[expr]
             sql = generate_sql(f, "t_csv", col_types, mode="mapped")
             assert isinstance(sql, str), f"Fuzzed expression {expr} allowed but violated Rule A"
+
+
+# ===========================================================================
+# Stage C1a2: review fixes (per-type operator table, literal validation, never
+# raise, numeric DISTINCTCOUNT, strict types, source-dependent refusals, name
+# collisions) and the tests that kill the surviving mutants.
+# The five tests above that this section supersedes are
+# test_differential_catalog_rules (old counts and old Rule A) and four rows of
+# test_positive_expressions (NOT / || over text, numeric DISTINCTCOUNT).
+# ===========================================================================
+
+import collections  # noqa: E402
+
+from analytics_studio.store import dax_whitelist as _wl  # noqa: E402
+from analytics_studio.store.dax_whitelist import (  # noqa: E402
+    PREDICATE_OPS_BY_TYPE,
+    REASON_COMPOSITE,
+    REASON_DECIMAL_DIGITS,
+    REASON_DISTINCTCOUNT_NUMERIC,
+    REASON_LITERAL_LEFT,
+    REASON_OR_SAME_COLUMN,
+    REASON_PARQUET_COUNTA,
+    REASON_TEXT_ORDERING,
+    REASON_TOO_DEEP,
+    REASON_UNEXPECTED,
+    _canonical_type,
+    _check_predicate,
+)
+from tools.store_engine_diff import Refusal, run_comparison  # noqa: E402
+
+# (rows, seed) of the rules tool runs that give the mapped status of every formula.
+RULES_RUNS = ((400, 1), (400, 7), (2000, 42), (2000, 1))
+
+
+@pytest.fixture(scope="module")
+def rules_runs() -> dict[tuple[int, int], dict[str, dict[str, Any]]]:
+    """One rules tool run per (rows, seed), cached for the whole module."""
+    out: dict[tuple[int, int], dict[str, dict[str, Any]]] = {}
+    for rows, seed in RULES_RUNS:
+        res = run_comparison(
+            rows=rows, seed=seed, skip_naive=True, skip_parquet=True, skip_group_by=True
+        )
+        out[(rows, seed)] = {r["id"]: r for r in res["results"]}
+    return out
+
+
+def test_rule_a_allowed_means_mapped_status_same(dataset_and_catalog, rules_runs):
+    """Rule A: every formula the whitelist allows has mapped_status 'same' and no mapped
+    refusal in every rules tool run. Counts are the measured ones (allowed / refused /
+    skipped / catalog)."""
+    col_types, catalog, _ = dataset_and_catalog
+    tables = {"t": col_types}
+    # Formulas the store can do but the whitelist refuses (Rule B). Numeric DISTINCTCOUNT is
+    # refused on purpose (it differs in some seeds); arithmetic is a later stage.
+    expected_gap_shapes = {"DISTINCTCOUNT", "DISTINCTCOUNT_filtered"}
+    for key, by_id in rules_runs.items():
+        allowed = refused = skipped = 0
+        violations: list[Any] = []
+        gaps: collections.Counter[str] = collections.Counter()
+        for f in catalog:
+            if f.get("group_col") or f["dax"].startswith("group_by(") or f["id"] not in by_id:
+                skipped += 1
+                continue
+            decision = classify_measure(f["dax"], home_table="t", tables=tables)
+            r = by_id[f["id"]]
+            if decision.allowed:
+                allowed += 1
+                if r["mapped_status"] != "same" or r["mapped_refusal"] is not None:
+                    violations.append((f["id"], r["mapped_status"], r["mapped_refusal"]))
+                assert decision.shape == f["shape"], f["id"]
+                assert decision.table == "t", f["id"]
+            else:
+                refused += 1
+                if r["mapped_status"] == "same" and r["mapped_refusal"] is None:
+                    gaps[f["shape"] if f["category"] != "arithmetic" else "arithmetic"] += 1
+        assert violations == [], f"Rule A violated at {key}: {violations}"
+        assert (allowed, refused, skipped, len(catalog)) == (570, 244, 29, 843), key
+        assert set(gaps) <= expected_gap_shapes | {"arithmetic"}, f"unexpected Rule B gaps at {key}: {gaps}"
+        assert gaps["arithmetic"] == 7, key
+
+
+def test_rule_a_source_parquet_counta(dataset_and_catalog):
+    """With source_kind='parquet' every COUNTA is refused, as the rules tool does, and every
+    formula still allowed has a mapped SQL on the Parquet path."""
+    col_types, catalog, _ = dataset_and_catalog
+    tables = {"t": col_types}
+    counta_seen = 0
+    for f in catalog:
+        if f.get("group_col") or f["dax"].startswith("group_by("):
+            continue
+        csv_dec = classify_measure(f["dax"], home_table="t", tables=tables)
+        pq_dec = classify_measure(f["dax"], home_table="t", tables=tables, source_kind="parquet")
+        if pq_dec.allowed:
+            sql = generate_sql(f, "t_pq", col_types, mode="mapped", is_parquet=True)
+            assert isinstance(sql, str), f"{f['id']} allowed on parquet but the rules tool refuses"
+        if f["agg"] == "COUNTA" and csv_dec.allowed:
+            counta_seen += 1
+            assert not pq_dec.allowed, f["id"]
+            assert REASON_PARQUET_COUNTA in pq_dec.reasons, pq_dec.reasons
+            ref = generate_sql(f, "t_pq", col_types, mode="mapped", is_parquet=True)
+            assert isinstance(ref, Refusal) and ref.reason == REASON_PARQUET_COUNTA
+    assert counta_seen > 0
+
+
+def test_rule_a_max_digits_matches_rules_tool(dataset_and_catalog):
+    """A column with more than 38 digits refuses with the rules tool wording."""
+    col_types, catalog, _ = dataset_and_catalog
+    tables = {"t": col_types}
+    meta = {"max_digits": {"d": 39}}
+    f = next(x for x in catalog if x["dax"] == "SUM(t[d])")
+    ref = generate_sql(f, "t_csv", col_types, mode="mapped", store_meta=meta)
+    assert isinstance(ref, Refusal)
+    dec = classify_measure("SUM(t[d])", home_table="t", tables=tables, max_digits={"d": 39})
+    assert not dec.allowed and dec.reasons == (ref.reason,) == (REASON_DECIMAL_DIGITS,)
+    # 38 digits is still fine; the key is case-insensitive; other columns are not affected
+    assert classify_measure("SUM(t[d])", home_table="t", tables=tables, max_digits={"d": 38}).allowed
+    assert not classify_measure("AVERAGE(t[d])", home_table="t", tables=tables, max_digits={"D": 40}).allowed
+    assert classify_measure("SUM(t[w])", home_table="t", tables=tables, max_digits={"d": 40}).allowed
+    # a predicate on such a column and a measure that expands to it refuse as well
+    assert not classify_measure(
+        "CALCULATE(COUNTROWS(t), t[d] >= 1)", home_table="t", tables=tables, max_digits={"d": 39}
+    ).allowed
+    assert not classify_measure(
+        "[M]", home_table="t", tables=tables, measures={"M": "SUM(t[d])"}, max_digits={"d": 39}
+    ).allowed
+    # bad values refuse instead of raising
+    assert not classify_measure("SUM(t[d])", home_table="t", tables=tables, max_digits={"d": "x"}).allowed
+
+
+def test_source_kind_unknown_refuses():
+    tables = {"t": {"cat": "text"}}
+    for kind in ("CSV", "xlsx", "", None):
+        dec = classify_measure("COUNTA(t[cat])", home_table="t", tables=tables, source_kind=kind)
+        assert not dec.allowed and "unknown source kind" in dec.reasons[0]
+    assert classify_measure("COUNTA(t[cat])", home_table="t", tables=tables, source_kind="csv").allowed
+    assert not classify_measure("COUNTA(t[cat])", home_table="t", tables=tables, source_kind="parquet").allowed
+    # COUNTA through a measure and under CALCULATE refuses on parquet too
+    for expr in ("[M]", 'CALCULATE([M], t[cat] = "A")', 'CALCULATE(COUNTA(t[cat]), t[cat] = "A")'):
+        assert classify_measure(expr, home_table="t", tables=tables, measures={"M": "COUNTA(t[cat])"}).allowed
+        assert not classify_measure(
+            expr, home_table="t", tables=tables, measures={"M": "COUNTA(t[cat])"}, source_kind="parquet"
+        ).allowed
+    # SUM on parquet is unaffected
+    assert classify_measure("COUNT(t[w])", home_table="t", tables={"t": {"w": "whole_number"}}, source_kind="parquet").allowed
+
+
+T2 = {
+    "t": {
+        "w": "whole_number", "w2": "whole_number", "d": "decimal_number", "dt": "date",
+        "cat": "text", "id": "text", "flag": "boolean",
+        "ts": "datetime", "tm": "time", "fx": "fixed",
+        "wh": "whole", "dc": "decimal", "ty": "whol", "nt": None,
+    },
+    "s": {"val": "whole_number"},
+}
+M2 = {
+    "BaseSum": "SUM(t[w])",
+    "Filt": 'CALCULATE(SUM(t[w]), t[cat] = "A")',
+    "M2": "[BaseSum]",
+    "CycA": "[CycB]",
+    "CycB": "[CycA]",
+    "Arith": "SUM(t[w]) + 1",
+    "TextSum": "SUM(t[cat])",
+    "OtherSum": "SUM(s[val])",
+}
+
+
+def _cw(pred: str, agg: str = "SUM(t[w])") -> str:
+    return f"CALCULATE({agg}, {pred})"
+
+
+# (expression, expected): None = allowed; str = a substring of one refusal reason
+C1A2_ROWS: list[tuple[str, str | None]] = [
+    # ---- operators per column type -------------------------------------------------
+    (_cw('t[cat] = "A"'), None),
+    (_cw('t[cat] <> "A"'), REASON_TEXT_ORDERING),
+    (_cw('t[cat] < "A"'), REASON_TEXT_ORDERING),
+    (_cw('t[cat] <= "A"'), REASON_TEXT_ORDERING),
+    (_cw('t[cat] > "A"'), REASON_TEXT_ORDERING),
+    (_cw('t[cat] >= "A"'), REASON_TEXT_ORDERING),
+    (_cw('t[cat] IN {"A", "B"}'), None),
+    (_cw("t[cat] IN {}"), "IN needs a table or at least one value"),
+    (_cw('t[cat] IN {"A", 1}'), "IN values must be string literals"),
+    (_cw("t[cat] IN {1}"), "IN values must be string literals"),
+    (_cw("t[w] = 1"), None),
+    (_cw("t[w] < 1"), None),
+    (_cw("t[w] <= 1"), None),
+    (_cw("t[w] > 1"), None),
+    (_cw("t[w] >= 1"), None),
+    (_cw("t[w] <> 1"), None),
+    (_cw("t[w] >= -10"), None),
+    (_cw("t[d] >= 0"), None),
+    (_cw("t[d] < 100.5"), None),
+    (_cw("t[d] <> 0"), None),
+    (_cw("t[d] = 1.5"), "operator = is not on the store whitelist for decimal_number"),
+    (_cw("t[d] > 1.5"), "operator > is not on the store whitelist for decimal_number"),
+    (_cw("t[d] <= 1.5"), "operator <= is not on the store whitelist for decimal_number"),
+    (_cw("t[dt] >= DATE(2026, 6, 1)"), None),
+    (_cw("t[dt] > DATE(2026, 6, 1)"), None),
+    (_cw("t[dt] <= DATE(2026, 6, 1)"), None),
+    (_cw("t[dt] < DATE(2026, 6, 1)"), None),
+    (_cw("t[dt] <> DATE(2026, 6, 1)"), None),
+    (_cw("t[dt] = DATE(2026, 6, 1)"), "operator = is not on the store whitelist for date"),
+    (_cw("t[dt] IN {DATE(2026, 6, 1)}"), "IN filter not supported on date column"),
+    (_cw("t[flag] = 1"), "boolean column comparison not supported"),
+    (_cw("t[flag] = TRUE"), "boolean literals are not supported"),
+    (_cw("t[flag] <> FALSE"), "boolean literals are not supported"),
+    # ---- the literal must be on the right ------------------------------------------
+    (_cw("5 < t[w]"), REASON_LITERAL_LEFT),
+    (_cw("1 = t[w]"), REASON_LITERAL_LEFT),
+    (_cw('"A" = t[cat]'), REASON_LITERAL_LEFT),
+    (_cw("DATE(2026, 1, 1) <= t[dt]"), REASON_LITERAL_LEFT),
+    (_cw("t[w] = t[w2]"), "comparison between two columns"),
+    (_cw("1 = 1"), "comparison must involve a column reference"),
+    # ---- NOT and || ----------------------------------------------------------------
+    (_cw("NOT(t[w] = 100)"), None),
+    (_cw("t[w] = 100 || t[w] = 200"), None),
+    (_cw("t[w] = 1 || t[w] = 2 || t[w] = 3 || t[w] = 4"), None),
+    (_cw('NOT(t[cat] = "A")'), REASON_COMPOSITE),
+    (_cw('t[cat] = "A" || t[cat] = "B"'), REASON_COMPOSITE),
+    (_cw("NOT(t[w] < 1)"), REASON_COMPOSITE),
+    (_cw("NOT(t[d] >= 1)"), REASON_COMPOSITE),
+    (_cw("t[w] < 1 || t[w] = 2"), REASON_COMPOSITE),
+    (_cw("t[w] = 1 || t[w2] = 2"), REASON_OR_SAME_COLUMN),
+    (_cw("t[w] = 1 || t[d] >= 2"), REASON_COMPOSITE),
+    (_cw("NOT(NOT(t[w] = 1))"), REASON_COMPOSITE),
+    (_cw("NOT(t[w] = 1 || t[w] = 2)"), REASON_COMPOSITE),
+    (_cw("NOT(t[w] = 1 && t[w] = 2)"), REASON_LOGICAL_AND),
+    (_cw("t[w] = 1 || t[w] = 2 && t[w] = 3"), REASON_LOGICAL_AND),
+    (_cw("t[w] = 1 || t[flag]"), REASON_COMPOSITE),
+    (_cw("t[w] = 1 || BLANK()"), REASON_COMPOSITE),
+    # ---- DATE literal validity -----------------------------------------------------
+    (_cw("t[dt] >= DATE(2026, 13, 45)"), "valid calendar date"),
+    (_cw("t[dt] >= DATE(2026, 0, 0)"), "valid calendar date"),
+    (_cw("t[dt] >= DATE(0, 1, 1)"), "DATE year must be between 1900 and 9999"),
+    (_cw("t[dt] >= DATE(99999, 1, 1)"), "DATE year must be between 1900 and 9999"),
+    (_cw("t[dt] >= DATE(1899, 12, 31)"), "DATE year must be between 1900 and 9999"),
+    (_cw("t[dt] >= DATE(1900, 1, 1)"), None),
+    (_cw("t[dt] >= DATE(9999, 12, 31)"), None),
+    (_cw("t[dt] >= DATE(2024, 2, 29)"), None),
+    (_cw("t[dt] >= DATE(2023, 2, 29)"), "valid calendar date"),
+    (_cw("t[dt] >= DATE(2026, 2, 30)"), "valid calendar date"),
+    (_cw("t[dt] >= DATE(-1, 1, 1)"), "DATE arguments must be integer literals"),
+    (_cw("t[dt] >= DATE(2026.5, 1, 1)"), "DATE arguments must be integer literals"),
+    (_cw("t[dt] >= DATE(2026, 1)"), "DATE"),
+    (_cw("t[dt] >= DATE(2026, 1, 1, 1)"), "DATE"),
+    (_cw('t[dt] >= DATE("a", 1, 1)'), "DATE arguments must be integer literals"),
+    (_cw('t[dt] >= DATE("2026", 1, 1)'), "DATE arguments must be integer literals"),
+    (_cw("t[dt] >= DATE(YEAR(TODAY()), 1, 1)"), "DATE arguments must be integer literals"),
+    (_cw("t[dt] >= TODAY()"), "not a valid literal"),
+    # ---- numeric literal validity --------------------------------------------------
+    (_cw("t[w] = 1.5"), "integer-valued"),
+    (_cw("t[w] = 1.0"), None),
+    (_cw("t[w] = 1e400"), "exceeds 38 total digits"),
+    (_cw("t[w] = 9223372036854775807"), None),
+    (_cw("t[w] = -9223372036854775808"), None),
+    (_cw("t[w] = 9223372036854775808"), "64-bit range"),
+    (_cw("t[w] = -9223372036854775809"), "64-bit range"),
+    (_cw("t[w] = 99999999999999999999999999999999999999"), "64-bit range"),
+    (_cw("t[w] = 12345678901234567890123456789012345678901"), "exceeds 38 total digits"),
+    (_cw("t[d] >= 12345678901234567890123456789012345678"), None),
+    (_cw("t[d] >= 123456789012345678901234567890123456789"), "exceeds 38 total digits"),
+    (_cw("t[d] >= 1e400"), "exceeds 38 total digits"),
+    (_cw("t[d] >= 0.0000000000000000000000000000000000000001"), "exceeds 38 total digits"),
+    (_cw('t[w] = "5"'), "literal type string does not fit whole_number column"),
+    (_cw("t[w] = DATE(2026, 1, 1)"), "literal type date does not fit whole_number column"),
+    (_cw("t[w] = +1"), "not a valid literal"),
+    (_cw("t[w] = - -1"), "unary operator"),
+    (_cw("t[w] = BLANK()"), REASON_BLANK_COMPARISON),
+    # ---- column types: known names only --------------------------------------------
+    ("SUM(t[w])", None),
+    ("SUM(t[wh])", None),
+    ("SUM(t[dc])", None),
+    ("SUM(t[ts])", "column type 'datetime' is not on the store whitelist"),
+    ("COUNTA(t[ts])", "no such column"),
+    ("MIN(t[ts])", "column type 'datetime'"),
+    ("SUM(t[fx])", "column type 'fixed' is not on the store whitelist"),
+    ("SUM(t[tm])", "unknown column type 'time'"),
+    ("SUM(t[ty])", "unknown column type 'whol'"),
+    ("COUNT(t[nt])", "unknown column type 'None'"),
+    (_cw("t[ts] >= DATE(2026, 1, 1)"), "column type 'datetime'"),
+    (_cw("t[nt] = 1"), "unknown column type 'None'"),
+    (_cw('t[ty] IN {"A"}'), "unknown column type 'whol'"),
+    # ---- DISTINCTCOUNT on numeric columns --------------------------------------------
+    ("DISTINCTCOUNT(t[w])", REASON_DISTINCTCOUNT_NUMERIC),
+    ("DISTINCTCOUNT(t[d])", REASON_DISTINCTCOUNT_NUMERIC),
+    (_cw('t[cat] IN {"A", "B"}', "DISTINCTCOUNT(t[w])"), REASON_DISTINCTCOUNT_NUMERIC),
+    ("DISTINCTCOUNT(t[cat])", None),
+    ("DISTINCTCOUNT(t[dt])", None),
+    ("DISTINCTCOUNT(t[flag])", None),
+    (_cw("t[w] > 1", "DISTINCTCOUNT(t[dt])"), None),
+    # ---- surviving mutants of the C1a review ----------------------------------------
+    (_cw("1"), "CALCULATE filters must be column comparisons"),
+    (_cw("t[w]"), "node kind reference is not on the store whitelist"),
+    (_cw('"x"'), "CALCULATE filters must be column comparisons"),
+    (_cw("TRUE()"), "CALCULATE filters must be column comparisons"),
+    (_cw("t[w] == 1"), "node kind strict_equal is not on the store whitelist"),
+    (_cw("t[w] + 1 = 2"), "comparison must involve a column reference"),
+    (_cw("t[w] = 1 + 1"), "node kind binary is not a valid literal"),
+    # ---- shapes and measures ---------------------------------------------------------
+    ("[BaseSum]", None),
+    ("[M2]", None),
+    ("CALCULATE([BaseSum], t[w] > 1)", None),
+    ("CALCULATE([Filt], t[w] > 1)", REASON_NESTED_CALCULATE),
+    ("[CycA]", "cycle detected"),
+    ("[Arith]", REASON_ARITHMETIC),
+    ("[TextSum]", "SUM not supported on text column"),
+    ("[NoSuch]", "unknown column or measure"),
+    ("CALCULATE(SUM(t[w]), s[val] = 1)", "multiple tables"),
+    ("CALCULATE([OtherSum], t[w] = 1)", "multiple tables"),
+    ("SUM(t[nosuch])", "unknown column 'nosuch'"),
+    ("SUM(nosuch[w])", "unknown table 'nosuch'"),
+    ("SUM(t[w]) // trailing comment", None),
+    ("SUMX(t, t[w])", "function SUMX"),
+    ("DIVIDE(SUM(t[w]), 2)", "function DIVIDE"),
+    ("CALCULATE(SUM(t[w]), ALL(t))", "function ALL"),
+    ("CALCULATE(SUM(t[w]), KEEPFILTERS(t[cat] = \"A\"))", "is not on the store whitelist"),
+    ("VAR x = 1 RETURN SUM(t[w])", REASON_LET),
+    ("", None),
+]
+
+
+@pytest.mark.parametrize("expr, expected", C1A2_ROWS)
+def test_c1a2_rows(expr, expected):
+    dec = classify_measure(expr, home_table="t", tables=T2, measures=M2)
+    if expr == "":
+        assert not dec.allowed and dec.reasons
+        return
+    if expected is None:
+        assert dec.allowed, f"{expr!r} should be allowed, reasons: {dec.reasons}"
+        assert dec.reasons == () and dec.table == "t" and dec.shape
+    else:
+        assert not dec.allowed, f"{expr!r} should be refused"
+        assert dec.table is None and dec.shape is None
+        assert any(expected in r for r in dec.reasons), f"{expected!r} not in {dec.reasons}"
+
+
+def test_operator_table_is_exactly_the_catalog():
+    """The per-type operator table equals what the rules tool catalog compares."""
+    assert PREDICATE_OPS_BY_TYPE == {
+        "text": frozenset({"="}),
+        "whole_number": frozenset({"=", "<", "<=", ">", ">=", "<>"}),
+        "decimal_number": frozenset({">=", "<", "<>"}),
+        "date": frozenset({">=", ">", "<=", "<", "<>"}),
+        "boolean": frozenset(),
+    }
+    # every type x operator pair is decided by the table, nothing else
+    literal = {"text": '"A"', "whole_number": "1", "decimal_number": "1", "date": "DATE(2026, 1, 1)"}
+    column = {"text": "t[cat]", "whole_number": "t[w]", "decimal_number": "t[d]", "date": "t[dt]"}
+    for ctype, ops in PREDICATE_OPS_BY_TYPE.items():
+        if ctype == "boolean":
+            continue
+        for op in ("=", "<>", "<", "<=", ">", ">="):
+            dec = classify_measure(
+                _cw(f"{column[ctype]} {op} {literal[ctype]}"), home_table="t", tables=T2
+            )
+            assert dec.allowed == (op in ops), (ctype, op, dec.reasons)
+
+
+# ---- never raise ------------------------------------------------------------------------
+
+def test_deep_expressions_refuse_instead_of_raising():
+    """NOT depth 150, a 1200-term OR and 200 nested CALCULATE never raise. Where the parser runs
+    out of stack depends on the recursion limit, so the exact refusal reason is pinned at the
+    default limit of 1000 (pytest.ini sets a higher one)."""
+    import sys
+
+    not_150 = "CALCULATE(SUM(t[w]), " + "NOT(" * 150 + "t[w] = 1" + ")" * 150 + ")"
+    or_1200 = "CALCULATE(SUM(t[w]), " + " || ".join("t[w] = 1" for _ in range(1200)) + ")"
+    calc_200 = "CALCULATE(" * 200 + "SUM(t[w])" + ")" * 200
+    # at the limit pytest.ini sets, the 1200-term OR (one whole column, all =) parses and is a
+    # valid admitted shape; the other two are refused for their nesting or their shape
+    for expr in (not_150, calc_200):
+        dec = classify_measure(expr, home_table="t", tables=T2)
+        assert not dec.allowed and dec.reasons
+    assert isinstance(classify_measure(or_1200, home_table="t", tables=T2), WhitelistDecision)
+    previous = sys.getrecursionlimit()
+    sys.setrecursionlimit(1000)
+    try:
+        for expr in (not_150, or_1200, calc_200):
+            dec = classify_measure(expr, home_table="t", tables=T2)
+            assert not dec.allowed
+            assert dec.reasons == (REASON_TOO_DEEP,), dec.reasons
+    finally:
+        sys.setrecursionlimit(previous)
+
+
+def test_long_or_chain_is_flattened_not_recursed():
+    """The classifier walks a || chain with a loop. 400 terms is within the parser's token
+    limit and must be classified (allowed: one whole column, all =), 400 terms over two
+    columns must refuse for the same-column rule."""
+    one = "CALCULATE(SUM(t[w]), " + " || ".join(f"t[w] = {i}" for i in range(400)) + ")"
+    two = "CALCULATE(SUM(t[w]), " + " || ".join(f"t[w{'2' if i % 2 else ''}] = {i}" for i in range(400)) + ")"
+    for expr, ok in ((one, True), (two, False)):
+        dec = classify_measure(expr, home_table="t", tables=T2)
+        if dec.reasons and dec.reasons[0] in (REASON_TOO_DEEP,) or "5000 tokens" in " ".join(dec.reasons):
+            continue  # the parser, not the whitelist, refused this size
+        assert dec.allowed == ok, dec.reasons
+
+
+def test_recursion_error_and_unexpected_error_refuse(monkeypatch):
+    def boom_recursion(_expr):
+        raise RecursionError("x")
+
+    monkeypatch.setattr(_wl, "parse_expression", boom_recursion)
+    dec = classify_measure("SUM(t[w])", home_table="t", tables=T2)
+    assert not dec.allowed and dec.reasons == (REASON_TOO_DEEP,)
+
+    def boom_value(_expr):
+        raise ValueError("secret details must not leak")
+
+    monkeypatch.setattr(_wl, "parse_expression", boom_value)
+    dec = classify_measure("SUM(t[w])", home_table="t", tables=T2)
+    assert not dec.allowed and dec.reasons == (f"{REASON_UNEXPECTED}: ValueError",)
+
+
+def test_odd_inputs_refuse_instead_of_raising():
+    for expr in (None, 5, b"SUM(t[w])"):
+        dec = classify_measure(expr, home_table="t", tables=T2)  # type: ignore[arg-type]
+        assert not dec.allowed and dec.reasons == ("Enter a DAX expression.",)
+    # a bad tables mapping reaches the last guard and names only the exception type
+    dec = classify_measure("SUM(t[w])", home_table="t", tables={"t": None})  # type: ignore[dict-item]
+    assert not dec.allowed and dec.reasons == (f"{REASON_UNEXPECTED}: AttributeError",)
+    # an unknown home table matters only for unqualified [column] references
+    assert classify_measure("SUM(t[w])", home_table="nosuch", tables=T2).allowed
+    dec = classify_measure("SUM([w])", home_table="nosuch", tables=T2)
+    assert not dec.allowed and dec.reasons == ("unknown home table 'nosuch'",)
+
+
+# ---- types ----------------------------------------------------------------------------------
+
+def test_canonical_type_maps_only_known_names():
+    for raw, want in (
+        ("whole", "whole_number"), ("whole_number", "whole_number"),
+        ("decimal", "decimal_number"), ("decimal_number", "decimal_number"),
+        ("date", "date"), ("boolean", "boolean"), ("text", "text"),
+    ):
+        assert _canonical_type(raw) == (want, None)
+    for raw in ("datetime", "fixed"):
+        canon, why = _canonical_type(raw)
+        assert canon is None and raw in why and "no such column" in why
+    for raw in (None, "", "time", "Text", "TEXT", "whol", "int64", "integer", "float", "double", "currency", "bool", "fixed_decimal", 5):
+        canon, why = _canonical_type(raw)  # type: ignore[arg-type]
+        assert canon is None and str(raw) in why, (raw, why)
+
+
+# ---- names that collide after case folding --------------------------------------------------
+
+def test_case_colliding_names_refuse():
+    cases = [
+        ({"t": {"a": "text", "A": "whole_number"}}, None, "column names"),
+        ({"t": {"w": "whole_number"}, "T": {"w": "whole_number"}}, None, "table names"),
+        ({"t": {"w": "whole_number"}}, {"M": "SUM(t[w])", "m": "SUM(t[w])"}, "measure names"),
+    ]
+    for tables, measures, word in cases:
+        dec = classify_measure("SUM(t[w])", home_table="t", tables=tables, measures=measures)
+        assert not dec.allowed
+        assert word in dec.reasons[0] and "collide" in dec.reasons[0]
+    # without a collision the same shapes pass
+    assert classify_measure("SUM(t[w])", home_table="t", tables={"t": {"w": "whole_number", "a": "text"}}).allowed
+
+
+# ---- depth cap boundary (32 allowed, 33 refused) --------------------------------------------
+
+def _chain(n: int) -> dict[str, str]:
+    m = {f"C{i}": f"[C{i + 1}]" for i in range(1, n)}
+    m[f"C{n}"] = "SUM(t[w])"
+    return m
+
+
+def test_measure_chain_depth_boundary():
+    tables = {"t": {"w": "whole_number"}}
+    assert classify_measure("[C1]", home_table="t", tables=tables, measures=_chain(32)).allowed
+    dec = classify_measure("[C1]", home_table="t", tables=tables, measures=_chain(33))
+    assert not dec.allowed and dec.reasons == (REASON_MAX_DEPTH_EXCEEDED,)
+    assert not classify_measure("[C1]", home_table="t", tables=tables, measures=_chain(200)).allowed
+
+
+# ---- NOT arity (the parser stops it first, so the guard is tested directly) ------------------
+
+def test_not_arity_guard_direct():
+    tables_norm = {"t": {"w": "whole_number"}}
+    node = (
+        "call", "NOT",
+        (
+            ("comparison", "=", ("reference", "t", "w"), ("number", 1, "1")),
+            ("comparison", "=", ("reference", "t", "w"), ("number", 2, "2")),
+        ),
+    )
+    reasons: list[str] = []
+    _check_predicate(node, tables_norm, {"t": "t"}, "t", {}, reasons, set())
+    assert reasons == ["call NOT requires exactly one argument"]
+    reasons = []
+    _check_predicate(("call", "NOT", ()), tables_norm, {"t": "t"}, "t", {}, reasons, set())
+    assert reasons == ["call NOT requires exactly one argument"]
+
+
+# ---- unqualified references: measure first for [x], column for the aggregate rule ----------
+
+def test_unqualified_reference_rule_is_pinned():
+    """A measure named like a column. [w] returns the MEASURE. SUM([w]) is refused: the engine
+    takes the COLUMN there, so the two readings could differ and the whitelist does not guess
+    (stricter than the engine on purpose)."""
+    tables = {"t": {"w": "whole_number", "d": "decimal_number"}}
+    measures = {"w": "SUM(t[d])"}
+    bare = classify_measure("[w]", home_table="t", tables=tables, measures=measures)
+    assert bare.allowed and bare.shape == "SUM" and bare.table == "t"
+    wrapped = classify_measure("SUM([w])", home_table="t", tables=tables, measures=measures)
+    assert not wrapped.allowed
+    assert wrapped.reasons == ("measure reference 'w' not expected in column context",)
+    # a predicate on [w] refuses the same way
+    pred = classify_measure("CALCULATE(SUM(t[d]), [w] > 1)", home_table="t", tables=tables, measures=measures)
+    assert not pred.allowed
+    # without a measure of that name the unqualified name is the home table column
+    assert classify_measure("SUM([w])", home_table="t", tables=tables).allowed
+    assert classify_measure("CALCULATE(SUM(t[d]), [w] > 1)", home_table="t", tables=tables).allowed
+
+
+# ---- the rules the reviewer's 258-expression sweep found; typed in by hand ------------------
+
+SWEEP_REFUSED = [
+    "SUM(t[w]) + 1", "1 + SUM(t[w])", "-SUM(t[w])", "SUM(t[w]) = 1",
+    "SUM()", "SUM(t[w], t[w])", "SUM(t)", "SUM(1)", '"x"', "1", "BLANK()", "TRUE()", "{1, 2}",
+    "CALCULATE()", "CALCULATE(SUM(t[w]), )", "SUM(t[w]", "SUM(t[w]]",
+    "SUM(t[w ])", "SUM(t[ w])", "SUM(t[ｗ])",
+    "CALCULATE(CALCULATE(SUM(t[w]), t[w] = 1), t[cat] = \"A\")",
+    "CALCULATE(CALCULATE(SUM(t[w])), t[cat] = \"A\")",
+    "CALCULATE(SUM(t[w]), CALCULATE(t[w] = 1))",
+    "CALCULATE(SUM(t[w]), t[w])", "CALCULATE(SUM(t[w]), 1)", "CALCULATE(SUM(t[w]), TRUE())",
+    "CALCULATE(SUM(t[w]), t[flag])", "CALCULATE(SUM(t[w]), NOT(t[flag]))",
+    "CALCULATE(SUM(t[w]), t[w] <> BLANK())", "CALCULATE(SUM(t[w]), BLANK() = t[w])",
+    "CALCULATE(SUM(t[w]), ISBLANK(t[w]))", "CALCULATE(SUM(t[w]), t[w] = t[d])",
+    "CALCULATE(SUM(t[w]), t[w] = 1 && t[d] >= 2)", "CALCULATE(SUM(t[w]), t[w] IN {1, 2})",
+    "CALCULATE(SUM(t[w]), t[cat] IN VALUES(t[cat]))", "CALCULATE(SUM(t[w]), t[cat] IN t[cat])",
+    "CALCULATE(SUM(t[w]), t[w] = -\"1\")", "CALCULATE(SUM(t[w]), t[dt] = \"2026-01-01\")",
+    "CALCULATE(SUM(t[w]), t[dt] >= 5)", "CALCULATE(SUM(t[w]), t[cat] = 1)",
+    "CALCULATE(SUM(t[w]), \"A\" > t[cat])", "CALCULATE(SUM(t[w]), \"\" = t[cat])",
+    "CALCULATE(SUM(t[w]), DATE(2026, 1, 1) < t[dt])", "CALCULATE(SUM(t[w]), 5 > t[w])",
+    "CALCULATE(COUNTROWS(t), t)", "COUNTROWS(t[w])", "COUNTROWS(t, t)", "COUNTROWS()", "COUNTROWS(nosuch)",
+    "DISTINCTCOUNT(t)", "DISTINCTCOUNTNOBLANK(t[cat])", "DISTINCTCOUNT(t[w])",
+    "SUM(t[cat])", "SUM(t[id])", "SUM(t[dt])", "SUM(t[flag])", "AVERAGE(t[cat])", "MIN(t[cat])",
+    "MAX(t[flag])", "COUNT(t[cat])", "COUNT(t[flag])", "SUM(t[ts])", "SUM(t[fx])",
+    "TOTALYTD(SUM(t[w]), t[dt])", "SELECTEDVALUE(t[cat])", "IF(SUM(t[w]) > 1, 1, 0)",
+    "CALCULATE(SUM(t[w]), FILTER(t, t[w] > 1))", "CALCULATE(SUM(t[w]), ALLEXCEPT(t, t[cat]))",
+]
+
+
+@pytest.mark.parametrize("expr", SWEEP_REFUSED)
+def test_sweep_refused(expr):
+    dec = classify_measure(expr, home_table="t", tables=T2, measures=M2)
+    assert not dec.allowed, f"{expr!r} was allowed"
+    assert dec.reasons and dec.table is None and dec.shape is None
+
+
+SWEEP_ALLOWED = [
+    ("SUM(t[w])", "SUM"), ("sum(t[w])", "SUM"), ("  SUM ( t[w] )  ", "SUM"), ("SUM('t'[w])", "SUM"),
+    ("SUM(T[W])", "SUM"), ("COUNTROWS(t)", "COUNTROWS"), ("COUNTROWS(T)", "COUNTROWS"),
+    ("COUNTROWS('t')", "COUNTROWS"), ("AVERAGE(t[d])", "AVERAGE"), ("MIN(t[dt])", "MIN"),
+    ("COUNTA(t[cat])", "COUNTA"), ("COUNTBLANK(t[id])", "COUNTBLANK"),
+    ("SUM(t[w]) /* comment */", "SUM"), ("/* c */ SUM(t[w])", "SUM"), ("SUM(t\n[w])", "SUM"),
+    ('CALCULATE(SUM(t[w]), t[cat] = "it\'s")', "SUM_filtered"),
+    ('CALCULATE(SUM(t[w]), t[cat] = "say ""hi""")', "SUM_filtered"),
+    ('CALCULATE(SUM(t[w]), t[cat] = "")', "SUM_filtered"),
+    ('CALCULATE(SUM(t[w]), t[cat] = "SUM(t[w])")', "SUM_filtered"),
+    ("CALCULATE(SUM(t[w]), t[w] > 5, t[w] < 15)", "SUM_filtered"),
+    ("CALCULATE(COUNTROWS(t), t[dt] >= DATE(2026, 6, 1))", "COUNTROWS_filtered"),
+    ("[m2]", "SUM"),
+]
+
+
+@pytest.mark.parametrize("expr, shape", SWEEP_ALLOWED)
+def test_sweep_allowed(expr, shape):
+    dec = classify_measure(expr, home_table="t", tables=T2, measures=M2)
+    assert dec.allowed, f"{expr!r}: {dec.reasons}"
+    assert dec.shape == shape and dec.table == "t"
+
+
+# ---- guards the parser cannot reach, tested with hand-built nodes ---------------------------
+
+def test_predicate_default_refusals_direct():
+    """Kinds the parser never hands to a predicate (it refuses a bare literal first) still end in
+    a refusal in _check_predicate: removing the default refusal must fail here."""
+    tables_norm = {"t": {"w": "whole_number", "cat": "text"}}
+    nodes = [
+        ("number", 1, "1"),
+        ("string", "x"),
+        ("boolean", True),
+        ("reference", "t", "w"),
+        ("table", "t"),
+        ("binary", "+", ("number", 1, "1"), ("number", 2, "2")),
+        ("let", (), ("number", 1, "1")),
+        ("strict_equal", ("reference", "t", "w"), ("number", 1, "1")),
+        ("mystery_kind", 1),
+    ]
+    for node in nodes:
+        reasons: list[str] = []
+        _check_predicate(node, tables_norm, {"t": "t"}, "t", {}, reasons, set())
+        assert reasons, f"{node[0]} was admitted as a predicate"
+    reasons = []
+    _check_predicate(("call", "FILTER", ()), tables_norm, {"t": "t"}, "t", {}, reasons, set())
+    assert reasons == ["function FILTER is not on the store whitelist"]
+
+
+def test_in_guards_direct():
+    tables_norm = {"t": {"w": "whole_number", "cat": "text"}}
+    ref = ("reference", "t", "cat")
+    cases = [
+        (("in", ref, ("tableconstructor", ())), "IN needs at least one string literal"),
+        (("in", ref, ("tableconstructor", (("string", "A"), ("number", 1, "1")))), "IN values must be string literals"),
+        (("in", ref, ("number", 1, "1")), "right side of IN must be a table constructor"),
+        (("in", ("number", 1, "1"), ("tableconstructor", (("string", "A"),))), "left side of IN must be a column reference"),
+        (("in", ("reference", "t", "w"), ("tableconstructor", (("string", "A"),))), "IN filter not supported on whole_number column"),
+    ]
+    for node, want in cases:
+        reasons: list[str] = []
+        _check_predicate(node, tables_norm, {"t": "t"}, "t", {}, reasons, set())
+        assert any(want in r for r in reasons), (node, reasons)
+    reasons = []
+    _check_predicate(("in", ref, ("tableconstructor", (("string", "A"),))), tables_norm, {"t": "t"}, "t", {}, reasons, set())
+    assert reasons == []

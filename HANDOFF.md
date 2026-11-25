@@ -1,38 +1,26 @@
 # HANDOFF: message board between Claude and Antigravity
 
-**Stage C1a: DAX whitelist classifier for the store SQL path (2026-11-25, Antigravity)**
+**Stage C1a: DAX whitelist classifier for the store SQL path (2026-11-25, Antigravity; review fixes C1a2 2026-11-25, uncommitted)**
 Files: `analytics_studio/store/dax_whitelist.py`, `tests/test_dax_whitelist.py`, `HANDOFF.md`.
-Module: `classify_measure(expression, *, home_table, tables, measures=None) -> WhitelistDecision(allowed, table, shape, reasons)`.
-Whitelist tables:
-- `ALLOWED_AGGREGATES`: `SUM` (whole_number, decimal_number), `AVERAGE` (whole_number, decimal_number), `MIN` (whole_number, decimal_number, date), `MAX` (whole_number, decimal_number, date), `COUNT` (whole_number, decimal_number, date), `COUNTA` (all types), `COUNTBLANK` (all types), `DISTINCTCOUNT` (all types).
-- `ALLOWED_PREDICATE_OPS`: `=`, `<>`, `<`, `<=`, `>`, `>=`.
-- Admitted predicates: column against literal (number, string, DATE(y,m,d) call with numeric args and optional unary minus); NOT(<predicate>); `||` of two admitted predicates; `IN` of text column against string tableconstructor; multi-argument CALCULATE predicates.
-- Default REFUSE: all iterators (SUMX, FILTER), ALL, ALLEXCEPT, VAR/RETURN, arithmetic, DIVIDE, IF, SWITCH, related tables, `&&` filters, numeric/date IN, column-to-column comparisons, BLANK() comparisons, boolean literals, DISTINCTCOUNTNOBLANK.
-- Catalog counts (total 843 formulas):
-  - Skipped: 28 formulas (group-by pseudo-DAX `group_by(...)`).
-  - Allowed: 632 formulas (100% pass Rule A safety against `tools.store_engine_diff.generate_sql`).
-  - Refused: 183 formulas (including 7 arithmetic/SUMX formulas mapped in rules tool: SUM: 2, RATIO: 1, DIVIDE: 1, ARITH: 1, SUMX: 2).
-- Refusal reasons: stable plain-text strings mirroring rules tool:
-  - `{AGG} not supported on {TYPE} column`
-  - `IN filter not supported on {TYPE} column`
-  - `logical && filter not supported on store`
-  - `DISTINCTCOUNTNOBLANK not supported on store`
-  - `arithmetic is not on the store whitelist`
-  - `VAR/RETURN syntax is not on the store whitelist`
-  - `comparison between two columns is not supported`
-  - `BLANK() comparisons are not supported`
-  - `boolean literals are not supported in predicates`
-  - `nested CALCULATE filters are not on the store whitelist`
-  - `measure reference chain too deep`
-  - `cycle detected in measure reference '{name}'`
-  - `measure references multiple tables: {tables}`
-  - `function {NAME} is not on the store whitelist`
-  - `node kind {KIND} is not on the store whitelist`
-- Open questions for Power BI answer checks (from rules tool):
+Module: `classify_measure(expression, *, home_table, tables, measures=None, source_kind="csv", max_digits=None) -> WhitelistDecision(allowed, table, shape, reasons)`. It never raises: a parse error, a too deeply nested expression (RecursionError) or any other exception comes back as a refusal.
+Rule: a shape is admitted only when the rules tool catalog (`build_formula_catalog`) compares it AND its mapped status is `same`. The whitelist is a safety gate: a wrongly allowed shape is a silent wrong answer.
+Whitelist tables (canonical types only; known names `whole`, `whole_number`, `decimal`, `decimal_number`, `date`, `boolean`, `text`; `datetime`, `fixed`, `time`, `None` and any other name refuse with a reason naming the type):
+- `ALLOWED_AGGREGATES`: `SUM`, `AVERAGE` (whole_number, decimal_number); `MIN`, `MAX`, `COUNT` (whole_number, decimal_number, date); `COUNTA`, `COUNTBLANK` (whole_number, decimal_number, date, text, boolean); `DISTINCTCOUNT` (date, text, boolean; numeric refuses).
+- `PREDICATE_OPS_BY_TYPE`: text `=`; whole_number `= < <= > >= <>`; decimal_number `>= < <>`; date `>= > <= < <>`; boolean none. The literal must be on the right. `IN` only on text over string literals. `NOT(...)` and `||` only over whole-number `=` comparisons, all operands of one `||` on the same column.
+- Literals: `DATE(y,m,d)` needs three integer literals forming a valid calendar date, year 1900-9999. Whole-number column: integer-valued literal in the 64-bit range. Decimal column: at most 38 total digits.
+- Source-dependent: `source_kind="parquet"` refuses COUNTA; `max_digits={column: digits}` refuses any aggregate or predicate on a column with more than 38 digits; an unknown `source_kind` refuses. Names that collide after case folding (tables, columns, measures) refuse.
+- Default REFUSE: iterators, ALL, ALLEXCEPT, VAR/RETURN, arithmetic, DIVIDE, IF, SWITCH, related tables, `&&` filters, numeric/date IN, column-to-column comparisons, BLANK() comparisons, boolean literals, DISTINCTCOUNTNOBLANK.
+- Rule A (allowed implies mapped status `same` and no mapped refusal), measured with `run_comparison(skip_naive, skip_parquet, skip_group_by)` at 400 rows seeds 1 and 7 and 2000 rows seeds 42 and 1: in all four runs allowed 570, refused 244, skipped 29 (28 group-by pseudo-DAX plus `forced_wrong_formula`), catalog 843, zero violations. Rule B gaps (store can do it, whitelist refuses): 7 arithmetic/SUMX formulas and the numeric DISTINCTCOUNT formulas (refused on purpose, they differ in some seeds).
+- Refusal reasons (stable strings): `{AGG} not supported on {TYPE} column`; `IN filter not supported on {TYPE} column`; `logical && filter not supported on store`; `DISTINCTCOUNTNOBLANK not supported on store`; `arithmetic is not on the store whitelist`; `VAR/RETURN syntax is not on the store whitelist`; `comparison between two columns is not supported`; `BLANK() comparisons are not supported`; `boolean literals are not supported in predicates`; `nested CALCULATE filters are not on the store whitelist`; `measure reference chain too deep`; `cycle detected in measure reference '{name}'`; `measure references multiple tables: {tables}`; `function {NAME} is not on the store whitelist`; `node kind {KIND} is not on the store whitelist`; new in C1a2: `text comparison other than = is not on the store whitelist (...)`, `operator {op} is not on the store whitelist for {TYPE} columns`, `the literal must be on the right side of the comparison`, `NOT and || are only on the store whitelist over whole-number = comparisons`, `all operands of || must be on the same column`, `DATE year must be between 1900 and 9999`, `DATE arguments are not a valid calendar date`, `DATE arguments must be integer literals`, `whole-number column needs an integer-valued literal`, `whole-number literal is outside the 64-bit range`, `numeric literal exceeds 38 total digits`, `DISTINCTCOUNT on a numeric column differs from the engine (...)`, `column type '{T}' is not on the store whitelist (the rules tool catalog has no such column)` (datetime, fixed), `unknown column type '{T}' is not on the store whitelist`, `COUNTA on Parquet typed columns differs from CSV store`, `Decimal value exceeds 38 total digits`, `unknown source kind '{K}' is not on the store whitelist`, `... collide when compared case-insensitively`, `expression is too deeply nested for the store whitelist`, `unexpected error while classifying: {ExceptionType}`.
+- Open questions for Power BI answer checks:
   - Blank cells in numeric and date columns with `IN` or `&&` filters: engine raises type conversion error on `''`, store path refuses.
-  - DISTINCTCOUNT on numeric columns with textual representations ('1', '1.0', '+1'): engine counts text spellings, store counts numeric values.
+  - DISTINCTCOUNT on numeric columns with textual representations ('1', '1.0', '+1'): engine counts text spellings, store counts numeric values (class `distinct_numeric_text_variants`; 17 formulas differ at seed 42). Numeric DISTINCTCOUNT stays refused until checked.
   - Parquet COUNTA semantics on text columns with blanks.
-Tests: `tests/test_dax_whitelist.py` 82 passed in 0.72s and 0.64s; existing `tests/test_store_engine_diff_tool.py` 47 passed in 23.07s. Pyflakes clean, path grep clean.
+  - Text ordering collation: DAX text `<`, `<=`, `>`, `>=`, `<>` use locale collation, DuckDB's is binary; text `<>` and ordering stay refused.
+  - DATE overflow: how Power BI treats `DATE` arguments outside 1900-9999 or with month/day overflow (the whitelist refuses all of them).
+  - Datetime and fixed-decimal columns: the catalog has none, so they refuse.
+  - Unqualified `[w]` with a measure `w` returns the measure, but `SUM([w])` with a measure `w` and a column `w`: the engine takes the column, the whitelist refuses (stricter on purpose, pinned by a test).
+Tests: `tests/test_dax_whitelist.py` 320 passed, 5 failed in 12.7 s and 11.0 s (two runs). The 5 failures are old C1a tests that the C1a2 spec makes wrong and that were not edited: `test_differential_catalog_rules` (old counts 632/183 and old Rule A) and four rows of `test_positive_expressions` (NOT and `||` over text, numeric DISTINCTCOUNT). The new `test_rule_a_allowed_means_mapped_status_same` and the C1a2 tests replace them; the five stale tests need an owner decision. `tests/test_store_engine_diff_tool.py` 47 passed in 19.84 s. Pyflakes clean, path grep on added lines clean.
 
 
 **Stage C1pre: shared text rules module (2026-11-25, committed a8bdbfc; review fixes uncommitted)**
