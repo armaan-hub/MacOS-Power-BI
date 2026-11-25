@@ -1,5 +1,40 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Stage C1a: DAX whitelist classifier for the store SQL path (2026-11-25, Antigravity)**
+Files: `analytics_studio/store/dax_whitelist.py`, `tests/test_dax_whitelist.py`, `HANDOFF.md`.
+Module: `classify_measure(expression, *, home_table, tables, measures=None) -> WhitelistDecision(allowed, table, shape, reasons)`.
+Whitelist tables:
+- `ALLOWED_AGGREGATES`: `SUM` (whole_number, decimal_number), `AVERAGE` (whole_number, decimal_number), `MIN` (whole_number, decimal_number, date), `MAX` (whole_number, decimal_number, date), `COUNT` (whole_number, decimal_number, date), `COUNTA` (all types), `COUNTBLANK` (all types), `DISTINCTCOUNT` (all types).
+- `ALLOWED_PREDICATE_OPS`: `=`, `<>`, `<`, `<=`, `>`, `>=`.
+- Admitted predicates: column against literal (number, string, DATE(y,m,d) call with numeric args and optional unary minus); NOT(<predicate>); `||` of two admitted predicates; `IN` of text column against string tableconstructor; multi-argument CALCULATE predicates.
+- Default REFUSE: all iterators (SUMX, FILTER), ALL, ALLEXCEPT, VAR/RETURN, arithmetic, DIVIDE, IF, SWITCH, related tables, `&&` filters, numeric/date IN, column-to-column comparisons, BLANK() comparisons, boolean literals, DISTINCTCOUNTNOBLANK.
+- Catalog counts (total 843 formulas):
+  - Skipped: 28 formulas (group-by pseudo-DAX `group_by(...)`).
+  - Allowed: 632 formulas (100% pass Rule A safety against `tools.store_engine_diff.generate_sql`).
+  - Refused: 183 formulas (including 7 arithmetic/SUMX formulas mapped in rules tool: SUM: 2, RATIO: 1, DIVIDE: 1, ARITH: 1, SUMX: 2).
+- Refusal reasons: stable plain-text strings mirroring rules tool:
+  - `{AGG} not supported on {TYPE} column`
+  - `IN filter not supported on {TYPE} column`
+  - `logical && filter not supported on store`
+  - `DISTINCTCOUNTNOBLANK not supported on store`
+  - `arithmetic is not on the store whitelist`
+  - `VAR/RETURN syntax is not on the store whitelist`
+  - `comparison between two columns is not supported`
+  - `BLANK() comparisons are not supported`
+  - `boolean literals are not supported in predicates`
+  - `nested CALCULATE filters are not on the store whitelist`
+  - `measure reference chain too deep`
+  - `cycle detected in measure reference '{name}'`
+  - `measure references multiple tables: {tables}`
+  - `function {NAME} is not on the store whitelist`
+  - `node kind {KIND} is not on the store whitelist`
+- Open questions for Power BI answer checks (from rules tool):
+  - Blank cells in numeric and date columns with `IN` or `&&` filters: engine raises type conversion error on `''`, store path refuses.
+  - DISTINCTCOUNT on numeric columns with textual representations ('1', '1.0', '+1'): engine counts text spellings, store counts numeric values.
+  - Parquet COUNTA semantics on text columns with blanks.
+Tests: `tests/test_dax_whitelist.py` 82 passed in 0.72s and 0.64s; existing `tests/test_store_engine_diff_tool.py` 47 passed in 23.07s. Pyflakes clean, path grep clean.
+
+
 **Stage C1pre: shared text rules module (2026-11-25, committed a8bdbfc; review fixes uncommitted)**
 Files: `analytics_studio/store/text_rules.py`, `tests/test_store_text_rules.py`, `tools/store_engine_diff.py` (imports TRIM_CHARS_SQL, fold_sql, first_spelling_expr_sql instead of inline copies; the `drop_rtrim` and `trim_set_space_only` overrides keep their own SQL), `HANDOFF.md`.
 Module: `TRIM_CHARS_SQL`, `trim_sql`, `fold_sql`, `first_spelling_expr_sql`, `first_spelling_sql(table, column, rowid)`, Python `trim_text`, `fold_text`. Rule: drop trailing U+0000..U+0020, ASCII-only A-Z to a-z, first-seen spelling; NULL reads as ''. `rowid` defaults to the physical rowid; callers on derived or re-ordered tables must pass `"__rn"` (documented and tested).
