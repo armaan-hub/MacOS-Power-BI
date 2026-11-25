@@ -16,7 +16,7 @@ from tools.store_engine_diff import (
 
 def test_tool_runs_end_to_end_and_has_unique_ids() -> None:
     """Tool runs end-to-end offscreen, formula list >= 200 with unique ids."""
-    assert os.environ.get("QT_QPA_PLATFORM") == "offscreen" or True
+    assert os.environ.get("QT_QPA_PLATFORM") == "offscreen"
 
     data = run_comparison(rows=400, seed=7)
     results = data["results"]
@@ -92,55 +92,47 @@ def test_tool_deterministic() -> None:
 
 
 def test_mutants_fail_when_mapped_rule_broken() -> None:
-    """Break mapped rules and verify assertions catch the divergence."""
-    types = {"t": "text", "w": "whole_number"}
-    formula_distinct_t: dict[str, Any] = {
-        "id": "DISTINCTCOUNT_t",
-        "agg": "DISTINCTCOUNT",
-        "col": "t",
-        "shape": "DISTINCTCOUNT",
-        "category": "aggregate",
-    }
+    """Break mapped rules via overrides and verify assertions catch divergence (kills mutants)."""
+    base_data = run_comparison(rows=400, seed=42)
+    base_counts: dict[str, int] = {}
+    for r in base_data["results"]:
+        st = r["mapped_status"]
+        base_counts[st] = base_counts.get(st, 0) + 1
 
-    # Proper mapped SQL folds text
-    proper_sql = generate_sql(formula_distinct_t, "t_csv", types, mode="mapped")
-    assert proper_sql is not None
-    assert "translate(" in proper_sql
-
-    # Mutant 1: Drop fold in DISTINCTCOUNT
-    mutant_sql_1 = "SELECT COUNT(DISTINCT t) FROM \"t_csv\""
-    assert "translate(" not in mutant_sql_1
-    assert mutant_sql_1 != proper_sql
-
-    # Mutant 2: Break w = 0 rule by dropping COALESCE (excluding blanks)
-    formula_w_zero: dict[str, Any] = {
-        "id": "w_zero",
+    # Verify text_eq_space generates real fold comparison rather than hardcoded 1 = 0 fudge
+    formula_space: dict[str, Any] = {
+        "id": "text_eq_space",
         "agg": "COUNTROWS",
         "col": None,
-        "filter_type": "w_zero",
+        "filter_type": "text_eq_space",
         "shape": "COUNTROWS_filtered",
-        "category": "filter",
     }
-    proper_w_zero = generate_sql(formula_w_zero, "t_csv", types, mode="mapped")
-    assert proper_w_zero is not None
-    assert "COALESCE(" in proper_w_zero
+    proper_space = generate_sql(formula_space, "t_csv", {"t": "text"}, mode="mapped")
+    assert proper_space is not None
+    assert "translate(" in proper_space
+    assert "WHERE 1 = 0" not in proper_space
 
-    mutant_w_zero = 'SELECT COUNT(*) FROM "t_csv" WHERE TRY_CAST(NULLIF(w, \'\') AS HUGEINT) = 0'
-    assert "COALESCE(" not in mutant_w_zero
-    assert mutant_w_zero != proper_w_zero
+    # Mutants list to be killed through run_comparison overrides
+    mutants = [
+        ("M1 drop DISTINCTCOUNT fold", {"drop_distinct_fold": True}),
+        ("M2 drop COALESCE in w=0", {"drop_w_zero_coalesce": True}),
+        ("M3 drop rtrim in fold", {"drop_rtrim": True}),
+        ("M4 SUM whole HUGEINT->DOUBLE", {"m4_whole_double": True}),
+        ("M5 COUNTA counts non-blank only", {"m5_counta_nonblank": True}),
+        ("M6 date serial epoch off by one", {"m6_date_epoch_off": True}),
+        ("M8 SUM decimal DECIMAL->DOUBLE", {"m8_decimal_double": True}),
+        ("M9 broken SQL where engine errors", {"broken_sql_m9": True}),
+        ("M10 filter w<100 drop COALESCE", {"drop_w_lt_coalesce": True}),
+        ("M11 empty-set guard removed", {"drop_empty_guard": True}),
+        ("trim set space only", {"trim_set_space_only": True}),
+        ("scale hardcoded 4", {"hardcode_scale_4": True}),
+        ("NOBLANK = DISTINCTCOUNT", {"noblank_equals_distinctcount": True}),
+    ]
 
-    # Mutant 3: Break date serial by using raw string min instead of date_diff serial
-    formula_min_dt: dict[str, Any] = {
-        "id": "MIN_dt",
-        "agg": "MIN",
-        "col": "dt",
-        "shape": "MIN",
-        "category": "aggregate",
-    }
-    proper_min_dt = generate_sql(formula_min_dt, "t_csv", {"dt": "date"}, mode="mapped")
-    assert proper_min_dt is not None
-    assert "date_diff(" in proper_min_dt
-
-    mutant_min_dt = 'SELECT MIN(dt) FROM "t_csv"'
-    assert "date_diff(" not in mutant_min_dt
-    assert mutant_min_dt != proper_min_dt
+    for name, overrides in mutants:
+        mut_data = run_comparison(rows=400, seed=42, overrides=overrides)
+        mut_counts: dict[str, int] = {}
+        for r in mut_data["results"]:
+            st = r["mapped_status"]
+            mut_counts[st] = mut_counts.get(st, 0) + 1
+        assert mut_counts != base_counts, f"Mutant '{name}' was not killed by assertions!"
