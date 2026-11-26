@@ -18,6 +18,7 @@ import re
 import sys
 import tempfile
 import threading
+from time import monotonic as _monotonic
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
@@ -2032,6 +2033,8 @@ class StudioController(QObject):
         self._source_warning = ""
         self._field_query = ""
         self._silent_refusal_notice_shown = False
+        self._store_visual_batch_deadline: float | None = None
+        self._store_visual_last_end = 0.0
         self._table_expanded: dict[str, bool] = {}
         self._field_tree_cache: list[dict[str, Any]] | None = None
         self._field_tree_flat_cache: list[dict[str, Any]] | None = None
@@ -2197,13 +2200,20 @@ class StudioController(QObject):
             self._silent_refusal_notice_shown = True
             self._set_status(self._large_data_refusal(what))
 
+    def _notice_silent_message(self, message: str) -> None:
+        """Like _notice_silent_refusal, with the route's own sentence: the first one of a store epoch is shown."""
+        if not self._silent_refusal_notice_shown:
+            self._silent_refusal_notice_shown = True
+            self._set_status(message)
+
     def _report_view_refusal_for_user_action(self) -> None:
         """Write the report-view refusal on every call of a user-initiated slot.
 
         Those slots refresh the report right after, and the refresh itself only
-        writes the refusal once per store epoch.
+        writes the refusal once per store epoch. A project in the one shape the large-table path
+        answers (S1) shows its visuals, so there is nothing to refuse.
         """
-        if self._store_tables_loaded():
+        if self._store_tables_loaded() and not self._store_s1():
             self._set_status(self._large_data_refusal("Report view"))
 
     def _large_data_refusal(self, what: str) -> str:
@@ -2243,6 +2253,7 @@ class StudioController(QObject):
         *,
         measures: dict[str, str] | None = None,
         deadline: float | None = None,
+        filter_context: tuple[str, ...] = (),
     ) -> Any:
         """The ONE way a measure value is read from a large table (route_measure); never the in-memory engine."""
         route = self._dax_route()
@@ -2257,6 +2268,7 @@ class StudioController(QObject):
                 candidates=self._loaded_candidates,
                 measures=measures,
                 deadline=deadline,
+                filter_context=filter_context,
             )
         except Exception as exc:  # nothing from the large-table path may escape into a refresh, a save or a preview
             return route.RouteRefusal(
@@ -2275,15 +2287,359 @@ class StudioController(QObject):
         """
         route = self._dax_route()
         deadline = route.refresh_deadline()
+        filter_context, filter_refusal = self._store_filter_context(None)
         for measure in self._project.get("model", {}).get("measures", []):
             name = str(measure["name"])
-            answer = self._route_store_measure(name, deadline=deadline)
+            if filter_refusal:
+                self._measure_errors[name] = filter_refusal
+                continue
+            answer = self._route_store_measure(name, deadline=deadline, filter_context=filter_context)
             if isinstance(answer, route.RouteRefusal):
                 self._measure_errors[name] = answer.message
             else:
                 text = self._store_answer_text(answer)
                 self._measure_values[name] = text
                 self._kpis[name] = text
+
+    # --- Visuals, slicers and filters of a large table (Stage C2b). Every answer comes from dax_route. ---
+    _STORE_VISUAL_TYPES = frozenset({
+        "column", "bar", "line", "area", "pie", "donut", "funnel", "stackedBar", "stackedColumn", "bar100",
+        "column100", "stackedArea", "area100", "ribbon", "lineClusteredColumn", "waterfall", "treemap", "slicer",
+    })
+    _STORE_VALUE_WELLS = frozenset({"Y-axis", "Column Y-axis", "Line Y-axis"})
+    _STORE_LEGEND_WELLS = frozenset({"Legend", "Column legend", "Small multiples", "Details"})
+    _STORE_VISUAL_BATCH_GAP_S = 0.3
+
+    def _store_table(self) -> dict[str, Any] | None:
+        tables = self._project.get("model", {}).get("tables", [])
+        return tables[0] if len(tables) == 1 and isinstance(tables[0], dict) else None
+
+    def _store_filter_list(
+        self, visual_name: str | None, *, include_highlights: bool = False
+    ) -> tuple[list[dict[str, Any]], str]:
+        """The filters that apply to one visual (or to the cards when visual_name is None), as the saved filter dicts.
+
+        The same sources, in the same order, as _report_filter_context reads: the region filter, report filters,
+        page filters, the visual's own filters and the selections of other visuals (slicers, clicked bars).
+        The text is a refusal sentence, or empty.
+        """
+        filters: list[dict[str, Any]] = []
+        page = self._active_page()
+        table_id = self._active_model_table_id()
+        if self._current_region is not None and self._region_column and table_id:
+            filters.append({
+                "table_id": table_id, "column": self._region_column, "logic": "and",
+                "clauses": [{"operator": "equals", "value": self._current_region}],
+            })
+        filters.extend(f for f in self._project.get("report", {}).get("filters", []) if isinstance(f, dict))
+        filters.extend(f for f in (page.get("filters", []) if page else []) if isinstance(f, dict))
+        for visual_filter in (page.get("visual_filters", []) if page else []):
+            if visual_name is None or visual_filter.get("visual_name") != visual_name:
+                continue
+            if any(c.get("operator") == _REPORT_FILTER_TOP_N for c in visual_filter.get("clauses", [])):
+                return [], "A Top N filter cannot be used on a large table yet."
+            filters.append(visual_filter)
+        visuals = [item for item in (page.get("visuals", []) if page else []) if isinstance(item, dict)]
+        target = next((item for item in visuals if item.get("title") == visual_name), None)
+        for source_title, selected in self._cross_filters.items():
+            if source_title == visual_name or not isinstance(selected, list) or not selected:
+                continue
+            source = next((item for item in visuals if item.get("title") == source_title), None)
+            if source is None:
+                continue
+            if target is not None:
+                mode = self._visual_interaction_mode(source, target)
+                if mode == "none" or (mode == "highlight" and not include_highlights):
+                    continue
+            else:
+                modes = [self._visual_interaction_mode(source, item) for item in visuals if item is not source]
+                if "filter" not in modes:
+                    continue
+            binding = self._store_category_binding(source)
+            if binding is None:
+                return [], f"A selection in {source_title} cannot be used on a large table yet."
+            filters.append({
+                "table_id": binding[0], "column": binding[1], "logic": "and",
+                "clauses": [{"operator": "is_any_of", "values": [str(value) for value in selected]}],
+            })
+        return filters, ""
+
+    def _store_category_binding(self, visual: dict[str, Any]) -> tuple[str, str] | None:
+        """(table id, column) a visual groups by (its first category field), or None when it has none we can read."""
+        if visual.get("type") not in self._STORE_VISUAL_TYPES:
+            return None
+        fields = visual.get("fields", {})
+        default_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        for well in ("Fields", "X-axis"):
+            wells = fields.get(well, [])
+            if isinstance(wells, list) and len(wells) == 1:
+                binding = _visual_well_binding(wells, default_table_id)
+                if binding is not None and binding[1] in self._headers and _visual_measure_name(binding[1]) is None:
+                    return binding
+        return None
+
+    def _store_filter_context(
+        self, visual_name: str | None, *, include_highlights: bool = False
+    ) -> tuple[tuple[str, ...], str]:
+        """(predicate strings, refusal sentence) for the filters of one visual, through route_filter_context."""
+        route = self._dax_route()
+        filters, refusal = self._store_filter_list(visual_name, include_highlights=include_highlights)
+        if refusal:
+            return (), refusal
+        try:
+            context = route.route_filter_context(self._project, filters, candidates=self._loaded_candidates)
+        except Exception as exc:  # nothing from the large-table path may escape into a refresh
+            return (), f"The filters could not be read ({type(exc).__name__})."
+        if isinstance(context, route.RouteRefusal):
+            return (), context.message
+        return context, ""
+
+    def _store_visual_deadline(self) -> float:
+        """One deadline for the visuals of one page refresh: visuals asked for back to back share it."""
+        route = self._dax_route()
+        now = _monotonic()
+        if self._store_visual_batch_deadline is None or now - self._store_visual_last_end > self._STORE_VISUAL_BATCH_GAP_S:
+            self._store_visual_batch_deadline = route.refresh_deadline(route.DEFAULT_VISUAL_REFRESH_BUDGET_S)
+        return self._store_visual_batch_deadline
+
+    def _store_ordered_rows(
+        self,
+        rows: list[tuple[str, Any]],
+        model_table_id: str,
+        column: str,
+        row_context_table_id: str,
+    ) -> list[dict[str, object]]:
+        """The series of a grouped store answer in the app's order, blank values dropped.
+
+        The in-memory path orders the keys with _ordered_category_keys (the model sort-by order when it applies, else
+        the case-folded label) and drops the keys whose value is None; this calls the same helpers with the same
+        fallback key, so for keys that differ by more than case the two paths list the same labels in the same order.
+        """
+        # key order: app casefold order applied after the store returns; Power BI answer check pending (is the
+        # visual order in Power BI by the label, by the value, or by the sort-by column?)
+        values = {cell_key(label): label for label, _ in rows}
+        by_key = {cell_key(label): value for label, value in rows}
+        order = self._active_model_column_sort_order(model_table_id, column, row_context_table_id, values)
+        keys = self._ordered_category_keys(
+            set(values), order,
+            lambda key: (_report_cell_text(values[key]).casefold(), _report_cell_text(values[key]), repr(key)),
+        )
+        return [
+            {"label": _report_cell_text(values[key]), "value": float(by_key[key])}
+            for key in keys if by_key[key] is not None
+        ]
+
+    def _store_visual_series(
+        self, visual_name: str, *, include_highlights: bool = False, value_well: str | None = None
+    ) -> list[dict[str, object]]:
+        """The series of one bar, column, line, pie or slicer visual of a large table, from the store.
+
+        Never raises. A refusal returns [] and sets one status line (once per store epoch).
+        """
+        started = _monotonic()
+        try:
+            return self._store_visual_series_inner(
+                visual_name, include_highlights=include_highlights, value_well=value_well
+            )
+        except Exception as exc:
+            self._notice_silent_message(f"{visual_name} could not be computed ({type(exc).__name__}).")
+            return []
+        finally:
+            self._store_visual_last_end = max(_monotonic(), started)
+
+    def _store_visual_series_inner(
+        self, visual_name: str, *, include_highlights: bool, value_well: str | None
+    ) -> list[dict[str, object]]:
+        route = self._dax_route()
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None:
+            return []
+        vtype = str(visual.get("type", ""))
+        if vtype not in self._STORE_VISUAL_TYPES:
+            self._notice_silent_message(f"{visual_name} cannot show a large table yet.")
+            return []
+        fields = visual.get("fields", {})
+        if value_well is None:
+            value_well = "Column Y-axis" if vtype == "lineClusteredColumn" else "Y-axis"
+        x_axis = fields.get("Fields", []) if vtype == "slicer" and not fields.get("X-axis") else fields.get("X-axis", [])
+        y_axis = fields.get(value_well, [])
+        if vtype == "lineClusteredColumn" and not y_axis:
+            return []
+        if not x_axis and not y_axis:
+            return []
+        grouping = list(x_axis) if isinstance(x_axis, list) else []
+        grouping += [item for well in self._STORE_LEGEND_WELLS for item in (fields.get(well) or [])]
+        if len(grouping) > 1:
+            self._notice_silent_message(
+                f"{visual_name} uses more than one grouping field, which large tables do not support yet."
+            )
+            return []
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        x_binding = _visual_well_binding(x_axis, bound_table_id)
+        if x_binding is None or _visual_measure_name(x_binding[1]) is not None:
+            return []
+        if include_highlights:
+            self._notice_silent_message("Highlight interactions are not available on a large table yet.")
+            return []
+        table = self._store_table()
+        table_name = str(table.get("name", "")) if table else ""
+        if table is None or x_binding[0] != str(table.get("id") or table.get("source_id") or "") or not table_name:
+            self._notice_silent_message(f"{visual_name} refers to a table that large tables cannot show yet.")
+            return []
+        project_store = self._project_store
+        if project_store is None:
+            return []
+        context, refusal = self._store_filter_context(visual_name, include_highlights=include_highlights)
+        if refusal:
+            self._notice_silent_message(refusal)
+            return []
+        deadline = self._store_visual_deadline()
+        column = x_binding[1]
+        if vtype == "slicer":
+            labels = route.route_distinct_values(
+                self._project, table_name, column, project_store=project_store, filter_context=context,
+                deadline=deadline, candidates=self._loaded_candidates,
+            )
+            if isinstance(labels, route.RouteRefusal):
+                self._notice_silent_message(labels.message)
+                return []
+            return self._store_ordered_rows([(label, Decimal(1)) for label in labels], x_binding[0], column, bound_table_id)
+        measure_name = _visual_measure_name(_visual_field_column(y_axis[0])) if y_axis else None
+        if measure_name is None:
+            self._notice_silent_message(f"{visual_name} needs a DAX measure in its value well on a large table.")
+            return []
+        answer = route.route_grouped(
+            self._project, measure_name, (table_name, column), project_store=project_store,
+            filter_context=context, deadline=deadline, candidates=self._loaded_candidates,
+        )
+        if isinstance(answer, route.RouteRefusal):
+            self._notice_silent_message(answer.message)
+            return []
+        column_type = str(table.get("column_types", {}).get(column, "text"))
+        rows = [(route.label_for_key(key, column_type), value) for key, value in answer.rows]
+        return self._store_ordered_rows(rows, x_binding[0], column, bound_table_id)
+
+    def _store_distinct_values(self, table_id: str, column: str, *, search: str = "") -> list[str] | None:
+        """The values of one column of the store table for a slicer or filter list, or None after a refusal (status set)."""
+        route = self._dax_route()
+        table = self._store_table()
+        if self._project_store is None or table is None or table_id != str(table.get("id") or table.get("source_id") or ""):
+            self._notice_silent_message("Values of another table cannot be listed on a large table yet.")
+            return None
+        try:
+            values = route.route_distinct_values(
+                self._project, str(table.get("name", "")), column, project_store=self._project_store, search=search,
+                deadline=route.refresh_deadline(route.DEFAULT_VISUAL_REFRESH_BUDGET_S), candidates=self._loaded_candidates,
+            )
+        except Exception as exc:
+            self._notice_silent_message(f"The values could not be listed ({type(exc).__name__}).")
+            return None
+        if isinstance(values, route.RouteRefusal):
+            self._notice_silent_message(values.message)
+            return None
+        return values
+
+    def _store_regions(self) -> list[str]:
+        """The region list of a large table: the different non-blank values of the region column, sorted."""
+        column = self._region_column
+        table = self._store_table()
+        if not column or table is None:
+            return ["All regions"]
+        values = self._store_distinct_values(str(table.get("id") or table.get("source_id") or ""), column)
+        if values is None:
+            return ["All regions"]
+        return ["All regions", *sorted({value for value in values if value})]
+
+    def _store_filter_values(self, table_id: str, column: str, search: str, cap: int) -> list[dict[str, str]]:
+        """The value list of the page-filter pane (label and encoded value), ordered as the in-memory list is."""
+        table = next(
+            (item for item in self._table_catalog
+             if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
+            None,
+        )
+        if table is None or column not in table.get("headers", []):
+            return []
+        # The whole list is read and searched here by the label the pane shows (for example "(Empty text)").
+        values = self._store_distinct_values(table_id, column)
+        if values is None:
+            return []
+        distinct: dict[str, str] = {}
+        for text in values:
+            encoded = _encode_report_filter_value(text)
+            distinct[encoded] = _report_filter_token_label(encoded)
+        distinct = _disambiguate_report_filter_labels(distinct)
+        query = (search or "").strip().casefold()
+        ordered = sorted(
+            ((value, label) for value, label in distinct.items() if not query or query in label.casefold()),
+            key=lambda item: (item[1].casefold(), item[1], item[0]),
+        )[:cap]
+        return [{"label": label, "value": value} for value, label in ordered]
+
+    def _store_well_refusal(self, well_name: str, field_name: str) -> str:
+        """Why a field cannot go into a well of a visual of a large table (S1), or the empty text."""
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is None:
+            return ""
+        title, vtype = str(visual.get("title", "")), str(visual.get("type", ""))
+        if vtype not in self._STORE_VISUAL_TYPES:
+            return f"A {vtype} visual cannot show a large table yet."
+        measure_name = _visual_measure_name(field_name)
+        if measure_name is not None:
+            if well_name not in self._STORE_VALUE_WELLS:
+                return ""  # the ordinary rules say where a measure may go
+            route = self._dax_route()
+            answer = self._route_store_measure(measure_name)
+            return answer.message if isinstance(answer, route.RouteRefusal) else ""
+        if well_name in self._STORE_VALUE_WELLS:
+            return "A visual of a large table needs a DAX measure in its value well, not a column."
+        if well_name in self._STORE_LEGEND_WELLS:
+            return f"{title} uses more than one grouping field, which large tables do not support yet."
+        if well_name not in ("X-axis", "Fields"):
+            return "This well cannot be used with a large table yet."
+        table = self._store_table() or {}
+        if str(table.get("column_types", {}).get(field_name, "text")) not in ("text", "date", "boolean"):
+            return self._dax_route().GROUP_TYPE_MESSAGE
+        if visual.get("fields", {}).get(well_name):
+            return f"{title} uses more than one grouping field, which large tables do not support yet."
+        return ""
+
+    def _store_selection_refusal(self, source_title: str, label: str) -> str:
+        """Why a click on a slicer or bar cannot filter the other visuals of a large table, or the empty text."""
+        if label in self._cross_filters.get(source_title, []):
+            return ""  # clearing a selection is always allowed
+        page = self._active_page()
+        visuals = [item for item in (page.get("visuals", []) if page else []) if isinstance(item, dict)]
+        source = next((item for item in visuals if item.get("title") == source_title), None)
+        if source is None:
+            return ""
+        binding = self._store_category_binding(source)
+        if binding is None:
+            return f"A selection in {source_title} cannot be used on a large table yet."
+        route = self._dax_route()
+        checked = route.route_filter_context(self._project, [{
+            "table_id": binding[0], "column": binding[1], "logic": "and",
+            "clauses": [{"operator": "is_any_of", "values": [str(label)]}],
+        }], candidates=self._loaded_candidates)
+        if isinstance(checked, route.RouteRefusal):
+            return checked.message
+        for target in visuals:
+            if target is source or self._visual_interaction_mode(source, target) == "none":
+                continue
+            other = self._store_category_binding(target)
+            if other is not None and other[1].casefold() == binding[1].casefold():
+                return (
+                    f"A slicer on {binding[1]} cannot be used with a visual grouped by the same column "
+                    "on a large table yet."
+                )
+        return ""
 
     def _validate_store_measures(self, candidate_measures: list[dict[str, Any]], names: list[str]) -> None:
         """Raise MeasureError(message) when the large table cannot compute one of `names` (checked with the candidates)."""
@@ -4748,6 +5104,8 @@ class StudioController(QObject):
     @Property("QVariantList", notify=stateChanged)
     def regions(self) -> list[str]:
         if self._store_tables_loaded():
+            if self._store_s1():
+                return self._store_regions()
             self._notice_silent_refusal("Region filter")
             return ["All regions"]
         column = self._region_column
@@ -4876,6 +5234,8 @@ class StudioController(QObject):
     @Slot(str, str, result="QVariantList")
     def pageFilterValues(self, table_id: str, column: str) -> list[dict[str, str]]:  # noqa: N802
         if self._store_tables_loaded():
+            if self._store_s1():
+                return self._store_filter_values(table_id, column, "", 1000)
             self._notice_silent_refusal("Page filter values")
             return []
         table = next(
@@ -4906,6 +5266,8 @@ class StudioController(QObject):
         self, table_id: str, column: str, search: str
     ) -> list[dict[str, str]]:
         if self._store_tables_loaded():
+            if self._store_s1():
+                return self._store_filter_values(table_id, column, search, 200)
             self._notice_silent_refusal("Page filter values")
             return []
         table = next(
@@ -6823,8 +7185,15 @@ class StudioController(QObject):
         async_refresh: bool = False,
     ) -> bool:
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Report filters"))
-            return False
+            if not self._store_s1():
+                self._set_status(self._large_data_refusal("Report filters"))
+                return False
+            if operator in {_REPORT_FILTER_TOP_N, _REPORT_FILTER_RELATIVE_DATE, _REPORT_FILTER_RELATIVE_TIME}:
+                self._set_status(
+                    f"The filter on {column} ({_REPORT_FILTER_OPERATOR_LABELS[operator]}) cannot be used on a "
+                    "large table yet."
+                )
+                return False
         table = next(
             (item for item in self._table_catalog
              if item.get("id") == table_id and item.get("loaded") and item.get("loadEnabled")),
@@ -7064,6 +7433,13 @@ class StudioController(QObject):
         }
         if visual_name:
             report_filter["visual_name"] = visual_name
+        if self._store_s1():
+            # A filter the large table cannot apply is not created: it would silently do nothing.
+            route = self._dax_route()
+            checked = route.route_filter_context(self._project, [report_filter], candidates=self._loaded_candidates)
+            if isinstance(checked, route.RouteRefusal):
+                self._set_status(checked.message)
+                return False
         filters.append(report_filter)
         try:
             self._project = validate_project(next_project)
@@ -14754,8 +15130,13 @@ class StudioController(QObject):
     @Slot(str, str)
     def add_field_to_well(self, well_name: str, field_name: str) -> None:
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("Visual fields"))
-            return
+            if not self._store_s1():
+                self._set_status(self._large_data_refusal("Visual fields"))
+                return
+            refusal = self._store_well_refusal(well_name, field_name)
+            if refusal:
+                self._set_status(refusal)
+                return
         if not self._selected_visual:
             return
         page = self._active_page()
@@ -16495,9 +16876,10 @@ class StudioController(QObject):
             self._filter_context_error = ""
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
-            self._notice_silent_refusal("Report view")
             if self._store_s1():
-                self._refresh_store_cards()  # the cards only; visuals follow in a later release
+                self._refresh_store_cards()  # the cards; the visuals ask the store when they are drawn
+            else:
+                self._notice_silent_refusal("Report view")
             return
 
         if self._current_region is not None and self._current_region not in self.regions:
@@ -16712,9 +17094,10 @@ class StudioController(QObject):
             self._filter_context_error = ""
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
-            self._notice_silent_refusal("Report view")
             if self._store_s1():
                 self._refresh_store_cards()  # on the window thread: the store is not touched from the worker
+            else:
+                self._notice_silent_refusal("Report view")
             self.stateChanged.emit()
             return
 
@@ -17211,6 +17594,10 @@ class StudioController(QObject):
         value_well: str | None = None,
     ) -> list[dict[str, object]]:
         if self._store_tables_loaded():
+            if self._store_s1():
+                return self._store_visual_series(
+                    visual_name, include_highlights=include_highlights, value_well=value_well
+                )
             self._notice_silent_refusal("Report visual data")
             return []
         page = self._active_page()
@@ -17718,6 +18105,11 @@ class StudioController(QObject):
 
     @Slot(str, str)
     def toggle_cross_filter(self, visual_title: str, label: str) -> None:
+        if self._store_s1():
+            refusal = self._store_selection_refusal(visual_title, label)
+            if refusal:
+                self._set_status(refusal)
+                return
         selected_list = self._cross_filters.setdefault(visual_title, [])
         if label in selected_list:
             selected_list.remove(label)

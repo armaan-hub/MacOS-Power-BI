@@ -12,12 +12,14 @@ engine.
 
 from __future__ import annotations
 
+import base64
+import json
 import re
 import threading
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from analytics_studio import dax_dates
 from analytics_studio.large_table_error import LargeTableError
@@ -40,9 +42,12 @@ CODE_STALE = "stale"
 CODE_BUSY = "busy"
 CODE_TIMEOUT = "timeout"
 CODE_CLOSED = "closed"
+CODE_FILTER = "filter"
+CODE_TOO_MANY = "too_many"
 
 DEFAULT_BUDGET_S = 0.5
 DEFAULT_REFRESH_BUDGET_S = 1.5
+DEFAULT_VISUAL_REFRESH_BUDGET_S = 2.0
 # Source kinds a store table can come from; the planner takes the first, and refuses the second on its own.
 S1_SOURCE_KINDS = frozenset({"csv", "parquet"})
 
@@ -53,6 +58,9 @@ DEADLINE_MESSAGE = (
     "Not computed: the refresh took too long. Large-table calculations run in the background in a later release."
 )
 _RE_REINTERRUPT_S = 0.05
+MAX_GROUPS = 2000
+DISTINCT_LIMIT = 1000
+GROUP_TYPE_MESSAGE = "Large tables can only group by text, date or yes/no columns for now."
 
 
 @dataclass(frozen=True)
@@ -131,7 +139,7 @@ FRAGMENTS: dict[str, str] = {
     _S.REASON_DECIMAL_LITERAL_FIT: "a number in a filter does not fit the column's precision",
     _S.REASON_GROUP_NON_ASCII_SPACE: "the grouping column holds a special space character",
     _S.REASON_GROUP_BY_SHAPE: "the grouping must be one column",
-    _S.REASON_GROUP_OWN_FILTER: "it filters the same column the result is grouped by",
+    _S.REASON_GROUP_OWN_FILTER: "it has a CALCULATE filter of its own, which large tables cannot combine with grouping yet",
     _S.REASON_GROUP_BY_TYPE: "results can only be grouped by a text, date or true/false column",
 }
 
@@ -646,8 +654,342 @@ def route_measure(
         return RouteRefusal(f"{name} cannot be computed: the large table is closed.", str(exc), CODE_CLOSED)
 
 
+# ---------------------------------------------------------------------------------------------------------
+# Visuals, slicers and filters (Stage C2b)
+# ---------------------------------------------------------------------------------------------------------
+_DATE_KEY = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
+
+
+def label_for_key(key: str, column_type: str) -> str:
+    """The text the in-memory path shows for a group key of the store: a date key `m/d/yyyy` reads `yyyy-mm-dd`.
+
+    Every other key is shown as it is (the blank key is the empty text, as for the in-memory path).
+    """
+    if column_type == "date":
+        match = _DATE_KEY.match(key)
+        if match is not None:
+            month, day, year = (int(part) for part in match.groups())
+            return f"{year:04d}-{month:02d}-{day:02d}"
+    return key
+
+
+def _filter_columns(node: Any, found: set[tuple[str, str]]) -> None:
+    """The (table, column) pairs a parsed predicate refers to, case-folded."""
+    if isinstance(node, tuple):
+        if len(node) == 3 and node[0] == "reference" and node[1] != "":
+            found.add((str(node[1]).casefold(), str(node[2]).casefold()))
+        for part in node:
+            _filter_columns(part, found)
+    elif isinstance(node, (list, frozenset)):
+        for part in node:
+            _filter_columns(part, found)
+
+
+def _predicates_use_column(predicates: Sequence[str], table: str, column: str) -> bool:
+    wanted = (table.casefold(), column.casefold())
+    for text in predicates:
+        found: set[tuple[str, str]] = set()
+        try:
+            _filter_columns(parse_expression(text), found)
+        except Exception:
+            continue
+        if wanted in found:
+            return True
+    return False
+
+
+def route_grouped(
+    project: Mapping[str, Any],
+    measure_name_or_expression: str,
+    group_by: tuple[str, str],
+    *,
+    project_store: Any,
+    filter_context: tuple[str, ...] = (),
+    budget_s: float = DEFAULT_BUDGET_S,
+    deadline: float | None = None,
+    candidates: Mapping[str, Any] | None = None,
+    measures: Mapping[str, str] | None = None,
+    max_groups: int | None | str = "default",
+) -> StoreAnswer | RouteRefusal:
+    """One measure grouped by one text, date or yes/no column of the store table (kind "grouped").
+
+    Built on `route_measure` (same shape check, fresh inputs, timer interrupt, busy policy). The rows come back in
+    SQL order with the planner's keys; the app applies its own order and drops blank values afterwards. More than
+    `max_groups` rows is refused, because a chart that silently shows the first groups is a wrong chart.
+    """
+    if not (isinstance(group_by, tuple) and len(group_by) == 2 and all(isinstance(x, str) for x in group_by)):
+        raise TypeError("group_by must be a (table, column) tuple")
+    answer = route_measure(
+        project, measure_name_or_expression, project_store=project_store, filter_context=filter_context,
+        group_by=group_by, budget_s=budget_s, deadline=deadline, candidates=candidates, measures=measures,
+    )
+    if isinstance(answer, RouteRefusal):
+        return _grouped_refusal(answer, group_by, filter_context)
+    cap = MAX_GROUPS if max_groups == "default" else max_groups
+    if cap is not None and len(answer.rows) > cap:
+        return RouteRefusal(
+            f"{group_by[1]} has more than {cap:,} groups; choose a column with fewer groups or filter first.",
+            f"{len(answer.rows)} groups", CODE_TOO_MANY,
+        )
+    return answer
+
+
+def _grouped_refusal(
+    refusal: RouteRefusal, group_by: tuple[str, str], filter_context: tuple[str, ...]
+) -> RouteRefusal:
+    """The two refusals of a grouped answer that have their own sentence (grouping type, slicer on the grouping column)."""
+    reasons = _split_reasons(refusal.reason)
+    if _S.REASON_GROUP_BY_TYPE in reasons:
+        return RouteRefusal(GROUP_TYPE_MESSAGE, refusal.reason, CODE_PLAN)
+    if _W.REASON_SLICER_SAME_COLUMN in reasons and _predicates_use_column(filter_context, group_by[0], group_by[1]):
+        return RouteRefusal(
+            f"A slicer on {group_by[1]} cannot be used with a visual grouped by the same column on a large table yet.",
+            refusal.reason, CODE_PLAN,
+        )
+    return refusal
+
+
+_OPERATOR_LABELS = {
+    "equals": "is", "not_equals": "is not", "is_any_of": "is any of", "is_none_of": "is none of",
+    "relative_date": "relative date", "relative_time": "relative time", "top_n": "Top N", "contains": "contains",
+    "does_not_contain": "does not contain", "begins_with": "begins with", "does_not_begin_with": "does not begin with",
+    "ends_with": "ends with", "does_not_end_with": "does not end with", "report_month": "month is",
+    "greater_than": "is greater than", "greater_than_or_equal": "is greater than or equal to",
+    "less_than": "is less than", "less_than_or_equal": "is less than or equal to", "is_blank": "is blank",
+    "is_not_blank": "is not blank",
+}
+_NUMBER_OPERATORS = {
+    "equals": "=", "greater_than": ">", "greater_than_or_equal": ">=", "less_than": "<", "less_than_or_equal": "<=",
+}
+_TOKEN_PREFIX = "__npa_pqv1__:"
+
+
+def _operator_label(operator: str) -> str:
+    return _OPERATOR_LABELS.get(operator, operator.replace("_", " "))
+
+
+def _filter_refusal(column: str, label: str, sentence: str) -> RouteRefusal:
+    return RouteRefusal(
+        f"The filter on {column} ({label}) cannot be used on a large table yet: {sentence}.", sentence, CODE_FILTER
+    )
+
+
+def _decode_value(value: Any) -> tuple[str, str]:
+    """A filter value as the app stores it: (kind, text). kind is plain, number, blank, other or bad."""
+    if not isinstance(value, str):
+        return "bad", ""
+    if not value.startswith(_TOKEN_PREFIX):
+        return "plain", value
+    payload = value[len(_TOKEN_PREFIX):]
+    if payload in ("null", "empty"):
+        return "blank", ""
+    try:
+        if payload.startswith("text:"):
+            encoded = payload[5:]
+            text = base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)).decode("utf-8")
+            return "plain", text
+        if payload.startswith("value:"):
+            encoded = payload[6:]
+            decoded = json.loads(base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)))
+            if isinstance(decoded, list) and len(decoded) in (2, 3) and all(isinstance(p, str) for p in decoded):
+                kind = decoded[0]
+                if kind == "text":
+                    return "plain", decoded[1]
+                if kind == "number":
+                    return "number", decoded[1]
+                return "other", kind
+    except (ValueError, UnicodeDecodeError):
+        pass
+    return "bad", ""
+
+
+def _dax_name(table: str) -> str:
+    return "'" + table.replace("'", "''") + "'"
+
+
+def _dax_column(table: str, column: str) -> str:
+    return f"{_dax_name(table)}[{column.replace(']', ']]')}]"
+
+
+def _dax_text(text: str) -> str:
+    return '"' + text.replace('"', '""') + '"'
+
+
+def _selects_blank_cells(symbol: str, numbers: Sequence[Decimal]) -> bool:
+    """True when a blank cell (0 on a large table) passes `cell <symbol> number` for any of the numbers."""
+    compare = {"=": lambda a, b: a == b, ">": lambda a, b: a > b, ">=": lambda a, b: a >= b,
+               "<": lambda a, b: a < b, "<=": lambda a, b: a <= b}[symbol]
+    return any(compare(Decimal(0), number) for number in numbers)
+
+
+def _clause_predicates(
+    table: str, column: str, column_type: str, clause: Mapping[str, Any]
+) -> list[str] | RouteRefusal:
+    operator = str(clause.get("operator", ""))
+    label = _operator_label(operator)
+    col = _dax_column(table, column)
+    if column_type == "text":
+        if operator == "equals":
+            kinds_values = [_decode_value(clause.get("value"))]
+        elif operator == "is_any_of":
+            raw = clause.get("values")
+            if not isinstance(raw, list) or not raw:
+                return _filter_refusal(column, label, "no value is chosen")
+            kinds_values = [_decode_value(item) for item in raw]
+        else:
+            return _filter_refusal(column, label, "only 'is' and 'is any of' work on a text column")
+        texts: list[str] = []
+        for kind, text in kinds_values:
+            if kind == "blank" or (kind == "plain" and text == ""):
+                return _filter_refusal(column, label, "a blank value cannot be chosen")
+            if kind != "plain":
+                return _filter_refusal(column, label, "a chosen value is not plain text")
+            if text not in texts:
+                texts.append(text)
+        if len(texts) == 1:
+            return [f"{col} = {_dax_text(texts[0])}"]
+        return [f"{col} IN {{{', '.join(_dax_text(t) for t in texts)}}}"]
+    if column_type == "whole_number":
+        if operator in _NUMBER_OPERATORS:
+            raw_values = [clause.get("value")]
+        elif operator == "is_any_of":
+            raw_values = clause.get("values") if isinstance(clause.get("values"), list) else []
+            if not raw_values:
+                return _filter_refusal(column, label, "no value is chosen")
+        else:
+            return _filter_refusal(column, label, "this kind of filter does not work on a number column")
+        numbers: list[Decimal] = []
+        for item in raw_values:
+            kind, text = _decode_value(item)
+            if kind not in ("plain", "number"):
+                return _filter_refusal(column, label, "a chosen value is not a number")
+            try:
+                number = Decimal(text.strip())
+            except Exception:
+                return _filter_refusal(column, label, "a chosen value is not a number")
+            if not number.is_finite():
+                return _filter_refusal(column, label, "a chosen value is not a number")
+            numbers.append(number)
+        symbol = _NUMBER_OPERATORS.get(operator, "=")
+        if _selects_blank_cells(symbol, numbers):
+            # The app never selects a blank cell with a number filter; a large table counts a blank cell as 0.
+            return _filter_refusal(
+                column, label, "it would also select blank cells, which a large table counts as 0"
+            )
+        literals = [format(n, "f") if n != n.to_integral_value() else str(int(n)) for n in numbers]
+        return [" || ".join(f"{col} = {text}" for text in literals) if symbol == "=" else f"{col} {symbol} {literals[0]}"]
+    return _filter_refusal(column, label, f"a {_plain(column_type)} column cannot be filtered yet")
+
+
+def route_filter_context(
+    project: Mapping[str, Any],
+    filters: Sequence[Mapping[str, Any]],
+    *,
+    candidates: Mapping[str, Any] | None = None,
+) -> tuple[str, ...] | RouteRefusal:
+    """The predicate strings `plan_*` takes for the app's slicer, page, visual and report filters, or a refusal.
+
+    Each filter is `{"table_id", "column", "clauses": [{"operator", "value" | "values"}], "logic"}` (the saved
+    shape). Allowed: a text column "is" / "is any of"; a whole-number column "is", "is any of" and the four
+    comparisons, only when no blank cell would be selected; one or two conditions joined by AND. Everything else
+    (is not, is none of, contains, begins/ends with, blank checks, relative date or time, Top N, month, OR,
+    decimal, date and yes/no columns, another table) is refused with a sentence that names the field and the
+    filter type. Every predicate then passes `classify_filter_context`.
+    """
+    if not isinstance(project, Mapping):
+        raise TypeError("project must be a mapping")
+    shape = store_shape(project, candidates)
+    if not shape.ok:
+        return RouteRefusal(shape.reason, shape.reason, CODE_SHAPE)
+    info = _store_info_by_source(project, candidates)
+    model_table = next(t for t in _model(project)["tables"] if isinstance(t, Mapping))
+    table_name = str(model_table.get("name", ""))
+    own_ids = {str(model_table.get(key)) for key in ("id", "source_id") if model_table.get(key)}
+    column_types = {str(c): str(t) for c, t in dict(model_table.get("column_types", {})).items()}
+    kind = info[str(model_table.get("source_id") or model_table.get("id") or "")][1]
+    out: list[str] = []
+    for item in filters:
+        column = str(item.get("column", ""))
+        if str(item.get("table_id", "")) not in own_ids:
+            return _filter_refusal(column, "another table", "it belongs to another table, which large tables cannot combine yet")
+        actual = next((c for c in column_types if c.casefold() == column.casefold()), None)
+        if actual is None:
+            return RouteRefusal(
+                f"Column '{column}' was not found in table {table_name}.", f"unknown column '{column}'", CODE_FILTER
+            )
+        clauses = item.get("clauses")
+        if not isinstance(clauses, list) or not clauses or not all(isinstance(c, Mapping) for c in clauses):
+            return _filter_refusal(column, "filter", "the filter has no condition")
+        label = " and ".join(_operator_label(str(c.get("operator", ""))) for c in clauses)
+        if len(clauses) > 1 and str(item.get("logic", "and")) != "and":
+            return _filter_refusal(column, label, "two conditions joined by OR are not available")
+        predicates: list[str] = []
+        for clause in clauses:
+            built = _clause_predicates(table_name, actual, column_types[actual], clause)
+            if isinstance(built, RouteRefusal):
+                return built
+            predicates.extend(built)
+        decision = dax_whitelist.classify_filter_context(
+            predicates, home_table=table_name, tables={table_name: column_types}, source_kind=kind,
+        )
+        if not decision.allowed:
+            reason = "; ".join(decision.reasons)
+            return RouteRefusal(
+                message_for_reason(f"The filter on {column} ({label})", reason), reason, CODE_WHITELIST
+            )
+        out.extend(predicates)
+    return tuple(out)
+
+
+def route_distinct_values(
+    project: Mapping[str, Any],
+    table: str,
+    column: str,
+    *,
+    project_store: Any,
+    search: str = "",
+    limit: int = DISTINCT_LIMIT,
+    filter_context: tuple[str, ...] = (),
+    budget_s: float = DEFAULT_BUDGET_S,
+    deadline: float | None = None,
+    candidates: Mapping[str, Any] | None = None,
+) -> list[str] | RouteRefusal:
+    """The different values of a text, date or yes/no column, each once with its first spelling, in first-seen order.
+
+    This is the group list of `COUNTROWS(table)` grouped by the column, so the text fold, the blank key (the empty
+    text, listed where it first appears) and the date text are exactly those of a visual axis, and a filter
+    context keeps only the values that still have rows. `search` is matched in Python (case-insensitive, part of the
+    text); it never reaches the SQL. More than `limit` matching values is refused.
+    """
+    if not isinstance(search, str) or not isinstance(table, str) or not isinstance(column, str):
+        raise TypeError("table, column and search must be text")
+    answer = route_grouped(
+        project, f"COUNTROWS({_dax_name(table)})", (table, column), project_store=project_store,
+        filter_context=filter_context, budget_s=budget_s, deadline=deadline, candidates=candidates, max_groups=None,
+    )
+    if isinstance(answer, RouteRefusal):
+        if answer.message == GROUP_TYPE_MESSAGE:
+            return RouteRefusal(
+                "Large tables can only list the values of text, date or yes/no columns for now.", answer.reason, CODE_PLAN
+            )
+        return answer
+    model_table = next(t for t in _model(project)["tables"] if isinstance(t, Mapping))
+    column_types = {str(c).casefold(): str(t) for c, t in dict(model_table.get("column_types", {})).items()}
+    column_type = column_types.get(column.casefold(), "text")
+    labels = [label_for_key(key, column_type) for key, _ in answer.rows]
+    needle = search.strip().casefold()
+    if needle:
+        labels = [label for label in labels if needle in label.casefold()]
+    if len(labels) > limit:
+        return RouteRefusal(
+            f"{column} has more than {limit:,} different values; choose a column with fewer values.",
+            f"{len(labels)} values", CODE_TOO_MANY,
+        )
+    return labels
+
+
 def refresh_deadline(seconds: float = DEFAULT_REFRESH_BUDGET_S) -> float:
-    """The shared absolute deadline (time.monotonic) of one card refresh."""
+    """The shared absolute deadline (time.monotonic) of one card refresh, or of the visuals of one page (2 s)."""
     return time.monotonic() + seconds
 
 
