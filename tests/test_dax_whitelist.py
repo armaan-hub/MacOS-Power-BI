@@ -1375,3 +1375,117 @@ _SWEEP_WHITELIST_REASONS = [
     "SUM not supported on text column",
     "literal type number does not fit text column",
 ]
+
+
+# ---- C2a2: an alias hides a nested CALCULATE (B = [A], A = CALCULATE(..., filters)) ----------------------------
+_ALIAS_TABLES = {"t": {"qty": "whole_number", "region": "text", "amt": "decimal_number", "product": "text", "pay": "date"}}
+
+
+def _alias(expression: str, measures: dict[str, str]) -> WhitelistDecision:
+    return classify_measure(expression, home_table="t", tables=_ALIAS_TABLES, measures=measures)
+
+
+ALIAS_REFUSED = [
+    ("CALCULATE([B], t[qty] < 5)", {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "[A]"}),
+    ("CALCULATE([C], t[qty] < 5)", {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "[A]", "C": "[B]"}),
+    ("CALCULATE([B], t[region] = \"West\")", {"A": "CALCULATE(SUM(t[qty]), t[region] = \"East\")", "B": "[A]"}),
+    ("CALCULATE([B], t[qty] < 5)", {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "CALCULATE([A])"}),
+]
+ALIAS_ALLOWED = [
+    ("CALCULATE([B], t[qty] > 3)", {"A": "SUM(t[qty])", "B": "[A]"}),
+    ("CALCULATE([B], t[qty] > 3)", {"A": "CALCULATE(SUM(t[qty]), t[region] = \"East\")", "B": "[A]"}),
+    ("[B]", {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "[A]"}),
+    ("CALCULATE([B])", {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "[A]"}),
+]
+
+
+@pytest.mark.parametrize("expression, measures", ALIAS_REFUSED)
+def test_alias_chain_with_same_column_filter_is_refused(expression, measures):
+    decision = _alias(expression, measures)
+    assert not decision.allowed
+    assert decision.reasons == (REASON_NESTED_CALCULATE,)
+
+
+@pytest.mark.parametrize("expression, measures", ALIAS_ALLOWED)
+def test_alias_chain_on_other_columns_or_without_outer_filter_is_allowed(expression, measures):
+    decision = _alias(expression, measures)
+    assert decision.allowed, decision.reasons
+
+
+def test_alias_cycle_does_not_hang_the_chain_walk():
+    measures = {"A": "[B]", "B": "[A]"}
+    decision = _alias("CALCULATE([A], t[qty] > 1)", measures)
+    assert not decision.allowed
+
+
+def test_mutant_alias_chain_not_followed(monkeypatch):
+    from analytics_studio.store import dax_whitelist
+
+    expression, measures = ALIAS_REFUSED[0]
+    assert not _alias(expression, measures).allowed
+    monkeypatch.setattr(dax_whitelist, "_alias_chain_columns", lambda body, measures_norm: set())
+    assert _alias(expression, measures).allowed  # the mutant lets the silent wrong value through
+
+
+# ---- C2a3: the WHOLE chain counts (a deeper link), case, and partial overlap -------------------------------------
+_REGION_QTY_A = 'CALCULATE(SUM(t[qty]), t[region] = "East", t[qty] > 2)'
+CHAIN_REFUSED = [
+    # a deeper link filters the column the outer filter names (the first filtered link does not)
+    ("CALCULATE([D], t[region] = \"West\")", {
+        "A": 'CALCULATE(SUM(t[qty]), t[region] = "East")', "B": "[A]", "C": "CALCULATE([B], t[qty] > 3)", "D": "[C]"}),
+    ("CALCULATE([D], T[Region] = \"North\")", {
+        "A": 'CALCULATE(MAX(t[pay]), T[Region] IN {"East", "North"})', "B": "[A]",
+        "C": "CALCULATE([B], t[pay] < DATE(2025, 3, 1))", "D": "[C]"}),
+    ("CALCULATE([D], t[product] IN {\"P01\", \"P02\"})", {
+        "A": 'CALCULATE(SUM(t[amt]), t[product] = "P03")', "B": "[A]",
+        "C": "CALCULATE([B], T[QTY] = 3 || T[QTY] = 4)", "D": "[C]"}),
+    # case variants of a column and a table name
+    ("CALCULATE([B], t[Qty] < 5)", {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "[A]"}),
+    ("CALCULATE([B], T[QTY] < 5)", {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "[A]"}),
+    # partial overlap: the outer filter shares ONE column with the chain, in both directions
+    ("CALCULATE([B], t[region] = \"North\", t[qty] < 6)", {"A": _REGION_QTY_A, "B": "[A]"}),
+    ("CALCULATE([B], t[qty] < 6)", {"A": _REGION_QTY_A, "B": "[A]"}),
+    ("CALCULATE([B], t[region] = \"North\", t[qty] < 6, t[product] = \"P01\")", {"A": _REGION_QTY_A, "B": "[A]"}),
+    ("CALCULATE([B], t[region] = \"North\")", {"A": _REGION_QTY_A, "B": "[A]"}),
+]
+CHAIN_ALLOWED = [
+    ("CALCULATE([D], t[product] = \"P01\")", {
+        "A": 'CALCULATE(SUM(t[qty]), t[region] = "East")', "B": "[A]", "C": "CALCULATE([B], t[qty] > 3)", "D": "[C]"}),
+    ("CALCULATE([B], t[pay] > DATE(2024, 1, 1))", {"A": _REGION_QTY_A, "B": "[A]"}),
+]
+
+
+@pytest.mark.parametrize("expression, measures", CHAIN_REFUSED)
+def test_whole_alias_chain_is_compared_with_the_outer_filter(expression, measures):
+    decision = _alias(expression, measures)
+    assert not decision.allowed and decision.reasons == (REASON_NESTED_CALCULATE,), decision
+
+
+@pytest.mark.parametrize("expression, measures", CHAIN_ALLOWED)
+def test_whole_alias_chain_on_other_columns_is_allowed(expression, measures):
+    decision = _alias(expression, measures)
+    assert decision.allowed, decision.reasons
+
+
+def test_mutant_chain_columns_compared_case_sensitively(monkeypatch):
+    from analytics_studio.store import dax_whitelist
+
+    expression, measures = CHAIN_REFUSED[3]
+    assert not _alias(expression, measures).allowed
+    real = dax_whitelist._collect_references
+    monkeypatch.setattr(dax_whitelist, "_filter_columns", lambda nodes: {column for _, column in real(nodes)})
+    assert _alias(expression, measures).allowed  # the mutant: t[Qty] is not t[qty]
+
+
+def test_mutant_only_the_first_filtered_link_counts(monkeypatch):
+    from analytics_studio.store import dax_whitelist
+
+    expression, measures = CHAIN_REFUSED[0]
+    assert not _alias(expression, measures).allowed
+    real = dax_whitelist._alias_chain_columns
+
+    def first_link_only(body, measures_norm):
+        return real(body, {})  # the walk cannot follow a reference: only the first link is seen
+
+    monkeypatch.setattr(dax_whitelist, "_alias_chain_columns", first_link_only)
+    assert _alias(expression, measures).allowed

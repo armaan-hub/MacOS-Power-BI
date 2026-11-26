@@ -441,7 +441,9 @@ def test_refusals_hold_with_store_table_loaded(imported: dict[str, Any]) -> None
     assert ok is False
     assert controller._project.get("model", {}).get("measures", []) == measures_before
     assert controller._project.get("model", {}).get("relationships", []) == relationships_before
-    assert controller._status_message == controller._large_data_refusal("DAX measures")
+    assert controller._status_message.startswith(
+        "Could not create measure: M_big cannot be computed on a large table yet"
+    )
 
 
 def test_save_as_reopen_and_plain_save_300k(

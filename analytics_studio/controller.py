@@ -2214,6 +2214,85 @@ class StudioController(QObject):
             "column statistics and export. Other features arrive in a later release."
         )
 
+    @staticmethod
+    def _dax_route() -> Any:
+        """The large-table DAX route module, imported on first use (it loads the store stack)."""
+        from analytics_studio.store import dax_route
+
+        return dax_route
+
+    def _store_s1(self) -> bool:
+        """True when the loaded large tables are in the one shape the large-table DAX path answers (S1).
+
+        Callers have already seen a loaded large table; with no open project store the answer is no.
+        """
+        if self._project_store is None:
+            return False
+        return self._dax_route().store_shape(self._project, self._loaded_candidates).ok
+
+    def _store_refusal_note(self) -> str:
+        """A mixed model (a large table beside another table or a relationship) says why, after the standard refusal."""
+        if self._project_store is None:
+            return ""
+        reason = self._dax_route().store_shape(self._project, self._loaded_candidates).reason
+        return f" {reason}" if reason and reason == self._dax_route().MIXED_MODEL_REASON else ""
+
+    def _route_store_measure(
+        self,
+        name_or_expression: str,
+        *,
+        measures: dict[str, str] | None = None,
+        deadline: float | None = None,
+    ) -> Any:
+        """The ONE way a measure value is read from a large table (route_measure); never the in-memory engine."""
+        route = self._dax_route()
+        project_store = self._project_store
+        if project_store is None:
+            return route.RouteRefusal("The large table is not open.", "no project store", "closed")
+        try:
+            return route.route_measure(
+                self._project,
+                name_or_expression,
+                project_store=project_store,
+                candidates=self._loaded_candidates,
+                measures=measures,
+                deadline=deadline,
+            )
+        except Exception as exc:  # nothing from the large-table path may escape into a refresh, a save or a preview
+            return route.RouteRefusal(
+                f"{name_or_expression} could not be computed ({type(exc).__name__}).", repr(exc), "plan"
+            )
+
+    @staticmethod
+    def _store_answer_text(answer: Any) -> str:
+        return _format_report_number(answer.value) if answer.value is not None else "—"
+
+    def _refresh_store_cards(self) -> None:
+        """Card and KPI values of a large-table project (shape S1): one route_measure call per measure.
+
+        Runs on the window thread (interim, until large-table calculations run in the background); every call
+        shares one deadline, so a slow refresh stops early and says so instead of looping.
+        """
+        route = self._dax_route()
+        deadline = route.refresh_deadline()
+        for measure in self._project.get("model", {}).get("measures", []):
+            name = str(measure["name"])
+            answer = self._route_store_measure(name, deadline=deadline)
+            if isinstance(answer, route.RouteRefusal):
+                self._measure_errors[name] = answer.message
+            else:
+                text = self._store_answer_text(answer)
+                self._measure_values[name] = text
+                self._kpis[name] = text
+
+    def _validate_store_measures(self, candidate_measures: list[dict[str, Any]], names: list[str]) -> None:
+        """Raise MeasureError(message) when the large table cannot compute one of `names` (checked with the candidates)."""
+        by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
+        for name in names:
+            answer = self._route_store_measure(name, measures=by_name)
+            if isinstance(answer, self._dax_route().RouteRefusal):
+                raise MeasureError(answer.message)
+
     # QML-facing state. The dictionaries/lists are returned as fresh QVariant values.
     @Property(str, notify=stateChanged)
     def windowTitle(self) -> str:  # noqa: N802
@@ -10116,8 +10195,8 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def editMeasure(self, measure_name: str) -> bool:  # noqa: N802
         """Open the DAX editor with an existing measure's saved definition."""
-        if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
+        if self._store_tables_loaded() and not self._store_s1():
+            self._set_status(self._large_data_refusal("DAX measures") + self._store_refusal_note())
             return False
         if not self.sourceLoaded:
             self._set_status("Import a table before editing a measure.")
@@ -10184,8 +10263,8 @@ class StudioController(QObject):
     @Slot(str, result=bool)
     def deleteMeasure(self, measure_name: str) -> bool:  # noqa: N802
         """Confirm removal of a saved measure, then validate dependent formulas."""
-        if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
+        if self._store_tables_loaded() and not self._store_s1():
+            self._set_status(self._large_data_refusal("DAX measures") + self._store_refusal_note())
             return False
         answer = QMessageBox.question(
             None,
@@ -10391,8 +10470,8 @@ class StudioController(QObject):
         return ""
 
     def _measure_dialog(self, *, quick: bool) -> bool:
-        if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
+        if self._store_tables_loaded() and not self._store_s1():
+            self._set_status(self._large_data_refusal("DAX measures") + self._store_refusal_note())
             return False
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
@@ -10499,22 +10578,18 @@ class StudioController(QObject):
                 ))
         return references
 
-    def _build_preview_inputs(
+    def _preview_candidate(
         self,
         name: str,
         expression: str,
         *,
         editing_name: str | None = None,
         home_table_id: str | None = None,
-    ) -> dict[str, Any]:
-        """Validate a draft measure and gather what its evaluation needs.
+    ) -> tuple[dict[str, Any], list[dict[str, Any]], list[str] | None]:
+        """Validate a draft measure's name and text: (measure, the model's measures with it, names to evaluate).
 
-        Shared by the synchronous and the worker-thread preview. Project state
-        stays exactly as it was found.
+        Shared by the in-memory preview and the large-table preview. Reads no rows.
         """
-        if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
-            raise MeasureError(self._large_data_refusal("DAX measures"))
         measure = normalize_measure(
             name, expression, home_table_id=home_table_id
         )
@@ -10543,6 +10618,28 @@ class StudioController(QObject):
             candidate_measures = list(current)
             candidate_measures[existing_index] = measure
             evaluate_names = None
+        return measure, candidate_measures, evaluate_names
+
+    def _build_preview_inputs(
+        self,
+        name: str,
+        expression: str,
+        *,
+        editing_name: str | None = None,
+        home_table_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Validate a draft measure and gather what its evaluation needs.
+
+        Shared by the synchronous and the worker-thread preview. Project state
+        stays exactly as it was found.
+        """
+        if self._store_tables_loaded():
+            # A large table has no rows to hand over; its preview goes through _preview_store_measure.
+            self._set_status(self._large_data_refusal("DAX measures"))
+            raise MeasureError(self._large_data_refusal("DAX measures"))
+        measure, candidate_measures, evaluate_names = self._preview_candidate(
+            name, expression, editing_name=editing_name, home_table_id=home_table_id
+        )
 
         previous_region_column = self._region_column
         previous_filter_context_error = self._filter_context_error
@@ -10585,8 +10682,12 @@ class StudioController(QObject):
     ) -> str:
         """Validate and evaluate a draft measure without changing project state."""
         if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
-            return "—"
+            if not self._store_s1():
+                self._set_status(self._large_data_refusal("DAX measures") + self._store_refusal_note())
+                return "—"
+            return self._preview_store_measure(
+                name, expression, editing_name=editing_name, home_table_id=home_table_id
+            )
         inputs = self._build_preview_inputs(
             name, expression, editing_name=editing_name, home_table_id=home_table_id
         )
@@ -10606,6 +10707,27 @@ class StudioController(QObject):
             return "—"
         return _format_report_number(value)
 
+    def _preview_store_measure(
+        self,
+        name: str,
+        expression: str,
+        *,
+        editing_name: str | None = None,
+        home_table_id: str | None = None,
+    ) -> str:
+        """The preview value of a draft measure on a large table, from route_measure (window thread, 0.5 s budget).
+
+        A refusal is raised as MeasureError so the dialog shows it in red, like any other preview error.
+        """
+        measure, candidate_measures, _ = self._preview_candidate(
+            name, expression, editing_name=editing_name, home_table_id=home_table_id
+        )
+        by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
+        answer = self._route_store_measure(measure["name"], measures=by_name)
+        if isinstance(answer, self._dax_route().RouteRefusal):
+            raise MeasureError(answer.message)
+        return self._store_answer_text(answer)
+
     def _preview_measure_expression_async(
         self,
         name: str,
@@ -10622,7 +10744,17 @@ class StudioController(QObject):
         """
         # defence in depth: _build_preview_inputs refuses too
         if self._store_tables_loaded():
-            refusal = self._large_data_refusal("DAX measures")
+            if self._store_s1():
+                # The store is thread-locked: the large-table preview runs here, on the window thread (0.5 s budget).
+                try:
+                    text = self._preview_store_measure(
+                        name, expression, editing_name=editing_name, home_table_id=home_table_id
+                    )
+                except Exception as exc:
+                    text = str(exc)
+                on_done(text)
+                return
+            refusal = self._large_data_refusal("DAX measures") + self._store_refusal_note()
             self._set_status(refusal)
             on_done(refusal)
             return
@@ -10719,8 +10851,8 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate, evaluate, then transactionally add a local DAX measure."""
-        if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
+        if self._store_tables_loaded() and not self._store_s1():
+            self._set_status(self._large_data_refusal("DAX measures") + self._store_refusal_note())
             return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
@@ -10741,20 +10873,24 @@ class StudioController(QObject):
             if len(current) >= MAX_MEASURES:
                 raise MeasureError(f"A model can contain at most {MAX_MEASURES} measures.")
             candidate_measures = [*current, measure]
-            table_name = self._active_model_table_name()
-            filtered_rows_by_table, measure_table_context, filter_table_ids = (
-                self._report_filter_context()
-            )
-            active_table_id = self._active_model_table_id()
-            filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
-            evaluate_measures(
-                candidate_measures, filtered_rows, self._headers,
-                table_name, measure_names=[measure["name"]],
-                table_context=measure_table_context,
-                relationships=self._project.get("model", {}).get("relationships", []),
-                filter_table_ids=filter_table_ids,
-                active_table_id=active_table_id or None,
-            )
+            if self._store_tables_loaded():
+                # A large table: the store must be able to compute it, or the card would refuse for ever.
+                self._validate_store_measures(candidate_measures, [measure["name"]])
+            else:
+                table_name = self._active_model_table_name()
+                filtered_rows_by_table, measure_table_context, filter_table_ids = (
+                    self._report_filter_context()
+                )
+                active_table_id = self._active_model_table_id()
+                filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
+                evaluate_measures(
+                    candidate_measures, filtered_rows, self._headers,
+                    table_name, measure_names=[measure["name"]],
+                    table_context=measure_table_context,
+                    relationships=self._project.get("model", {}).get("relationships", []),
+                    filter_table_ids=filter_table_ids,
+                    active_table_id=active_table_id or None,
+                )
             next_project = deepcopy(self._project)
             next_project.setdefault("model", {}).setdefault("measures", []).append(measure)
             next_project = validate_project(next_project)
@@ -10782,8 +10918,8 @@ class StudioController(QObject):
         home_table_id: str | None = None,
     ) -> bool:
         """Validate and transactionally replace one saved local DAX measure."""
-        if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
+        if self._store_tables_loaded() and not self._store_s1():
+            self._set_status(self._large_data_refusal("DAX measures") + self._store_refusal_note())
             return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
@@ -10824,22 +10960,28 @@ class StudioController(QObject):
                 raise MeasureError(f"A measure named {measure['name']!r} already exists.")
             candidate_measures = list(current)
             candidate_measures[index] = measure
-            filtered_rows_by_table, measure_table_context, filter_table_ids = (
-                self._report_filter_context()
-            )
-            active_table_id = self._active_model_table_id()
-            filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
-            # Evaluate all measures so a rename cannot silently break dependents.
-            evaluate_measures(
-                candidate_measures,
-                filtered_rows,
-                self._headers,
-                self._active_model_table_name(),
-                table_context=measure_table_context,
-                relationships=self._project.get("model", {}).get("relationships", []),
-                filter_table_ids=filter_table_ids,
-                active_table_id=active_table_id or None,
-            )
+            if self._store_tables_loaded():
+                # A large table: the edited measure and every measure that uses it must be computable by the store.
+                by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
+                dependents = self._dax_route().measures_depending_on(by_name, {existing_name, measure["name"]})
+                self._validate_store_measures(candidate_measures, [measure["name"], *dependents])
+            else:
+                filtered_rows_by_table, measure_table_context, filter_table_ids = (
+                    self._report_filter_context()
+                )
+                active_table_id = self._active_model_table_id()
+                filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
+                # Evaluate all measures so a rename cannot silently break dependents.
+                evaluate_measures(
+                    candidate_measures,
+                    filtered_rows,
+                    self._headers,
+                    self._active_model_table_name(),
+                    table_context=measure_table_context,
+                    relationships=self._project.get("model", {}).get("relationships", []),
+                    filter_table_ids=filter_table_ids,
+                    active_table_id=active_table_id or None,
+                )
             next_project = deepcopy(self._project)
             next_project.setdefault("model", {})["measures"] = candidate_measures
             if measure["name"] != existing_name:
@@ -10872,8 +11014,8 @@ class StudioController(QObject):
 
     def remove_measure(self, name: str) -> bool:
         """Remove one measure only when the remaining model still evaluates."""
-        if self._store_tables_loaded():
-            self._set_status(self._large_data_refusal("DAX measures"))
+        if self._store_tables_loaded() and not self._store_s1():
+            self._set_status(self._large_data_refusal("DAX measures") + self._store_refusal_note())
             return False
         self._cancel_and_wait_worker()
         if not self.sourceLoaded:
@@ -10899,21 +11041,29 @@ class StudioController(QObject):
             if len(retained) == len(current):
                 self._set_status(f"Measure {name!r} no longer exists.")
                 return False
-            filtered_rows_by_table, measure_table_context, filter_table_ids = (
-                self._report_filter_context()
-            )
-            active_table_id = self._active_model_table_id()
-            filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
-            evaluate_measures(
-                retained,
-                filtered_rows,
-                self._headers,
-                self._active_model_table_name(),
-                table_context=measure_table_context,
-                relationships=self._project.get("model", {}).get("relationships", []),
-                filter_table_ids=filter_table_ids,
-                active_table_id=active_table_id or None,
-            )
+            if self._store_tables_loaded():
+                # A delete needs no rows: only the dependent-measure check, on the model's measure texts.
+                dependents = self._dax_route().measures_depending_on(
+                    {str(item["name"]): str(item["expression"]) for item in current}, {name}
+                )
+                if dependents:
+                    raise MeasureError(f"Measure {dependents[0]!r} uses {name!r}; change it before deleting.")
+            else:
+                filtered_rows_by_table, measure_table_context, filter_table_ids = (
+                    self._report_filter_context()
+                )
+                active_table_id = self._active_model_table_id()
+                filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
+                evaluate_measures(
+                    retained,
+                    filtered_rows,
+                    self._headers,
+                    self._active_model_table_name(),
+                    table_context=measure_table_context,
+                    relationships=self._project.get("model", {}).get("relationships", []),
+                    filter_table_ids=filter_table_ids,
+                    active_table_id=active_table_id or None,
+                )
             next_project = deepcopy(self._project)
             next_project.setdefault("model", {})["measures"] = retained
             next_project = validate_project(next_project)
@@ -16346,6 +16496,8 @@ class StudioController(QObject):
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
             self._notice_silent_refusal("Report view")
+            if self._store_s1():
+                self._refresh_store_cards()  # the cards only; visuals follow in a later release
             return
 
         if self._current_region is not None and self._current_region not in self.regions:
@@ -16561,6 +16713,8 @@ class StudioController(QObject):
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
             self._notice_silent_refusal("Report view")
+            if self._store_s1():
+                self._refresh_store_cards()  # on the window thread: the store is not touched from the worker
             self.stateChanged.emit()
             return
 

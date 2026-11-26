@@ -308,6 +308,20 @@ class DuckStore:
             self.close()
             raise StoreError(f"Failed to open DuckDB store at '{self.path}': {exc}") from exc
 
+    def interrupt(self) -> None:
+        """Stop the query that another thread is running on this store. Takes NO store lock.
+
+        The running query holds `_lock` (see `_thread_locked`: a second caller gets StoreBusyError at once, it
+        never waits), so taking the lock here would fail exactly when interrupt is needed. DuckDB's own
+        connection.interrupt() is safe to call from another thread, and does nothing on an idle connection.
+        """
+        conn = self._conn
+        if conn is not None:
+            try:
+                conn.interrupt()
+            except Exception:
+                pass
+
     @_thread_locked
     def close(self) -> None:
         if self._conn is not None:

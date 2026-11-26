@@ -687,6 +687,39 @@ def _collect_references(nodes: Any) -> list[tuple[str, str]]:
     return found
 
 
+def _alias_chain_columns(body: str, measures_norm: dict[str, str]) -> set[str]:
+    """The columns (case-folded) that ANY link of an alias chain filters.
+
+    The chain is followed through the whole way: a measure whose body is a bare [X], and a CALCULATE([X], filters)
+    link (its filters are collected and its first argument is followed). It ends at a measure that is not a
+    reference to another measure. A cycle ends the walk.
+    """
+    seen: set[str] = set()
+    columns: set[str] = set()
+    current = body
+    while True:
+        try:
+            node = parse_expression(current)
+        except Exception:
+            return columns
+        target: str | None = None
+        if node[0] == "reference" and not node[1]:
+            target = str(node[2]).casefold()
+        elif node[0] == "call" and node[1] == "CALCULATE" and node[2]:
+            columns |= _filter_columns(tuple(node[2][1:]))
+            first = node[2][0]
+            if isinstance(first, tuple) and first[0] == "reference" and not first[1]:
+                target = str(first[2]).casefold()
+        if target is None or target in seen or target not in measures_norm:
+            return columns
+        seen.add(target)
+        current = measures_norm[target]
+
+
+def _filter_columns(nodes: Any) -> set[str]:
+    return {column.casefold() for _, column in _collect_references(nodes)}
+
+
 def _source_reasons(
     base_node: Any,
     predicates: tuple[Any, ...],
@@ -913,6 +946,12 @@ def _classify_measure(
                 sub_ast = parse_expression(sub_expr)
                 if sub_ast[0] == "call" and sub_ast[1] == "CALCULATE" and len(sub_ast[2]) > 1:
                     return WhitelistDecision(False, None, None, (REASON_NESTED_CALCULATE,))
+                # An alias hides the same thing: B = [A], A = CALCULATE(..., filters). DAX replaces an inner filter
+                # on a column the outer filter also names (the engine keeps only the outer one), so refuse that;
+                # filters on different columns are ANDed, which the store does the same way.
+                if predicate_args:
+                    if _alias_chain_columns(sub_expr, measures_norm) & _filter_columns(tuple(predicate_args)):
+                        return WhitelistDecision(False, None, None, (REASON_NESTED_CALCULATE,))
 
                 if not predicate_args:
                     # No extra predicates
