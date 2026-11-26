@@ -13,12 +13,14 @@ engine.
 from __future__ import annotations
 
 import base64
+import copy
 import json
 import re
 import threading
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
+from types import MappingProxyType
 from typing import Any, Mapping, Sequence
 
 from analytics_studio import dax_dates
@@ -44,8 +46,21 @@ CODE_TIMEOUT = "timeout"
 CODE_CLOSED = "closed"
 CODE_FILTER = "filter"
 CODE_TOO_MANY = "too_many"
+CODE_CANCELED = "canceled"
 
+# Time caps. DEFAULT_BUDGET_S is what a caller that names no cap gets; every caller names its own:
+#   GUI_LIST_BUDGET_S    slicer, page-filter and region lists, which QML reads synchronously (cannot be asynchronous
+#                        without a QML change);
+#   VALIDATE_BUDGET_S    create / edit / delete measure validation: user-initiated, needs the answer before saving,
+#                        runs on the GUI thread through a reader, so it never blocks the data grid and is bounded;
+#   BACKGROUND_BUDGET_S  every background request: long enough for 1,000,000 rows with many groups, short enough that
+#                        a runaway query ends by itself (the user can cancel earlier).
+# The shared page deadlines (DEFAULT_REFRESH_BUDGET_S, DEFAULT_VISUAL_REFRESH_BUDGET_S) are for the synchronous
+# callers that still exist (lists); background requests pass deadline=None and each has its own cap.
 DEFAULT_BUDGET_S = 0.5
+GUI_LIST_BUDGET_S = 2.0
+VALIDATE_BUDGET_S = 5.0
+BACKGROUND_BUDGET_S = 30.0
 DEFAULT_REFRESH_BUDGET_S = 1.5
 DEFAULT_VISUAL_REFRESH_BUDGET_S = 2.0
 # Source kinds a store table can come from; the planner takes the first, and refuses the second on its own.
@@ -57,7 +72,10 @@ BUSY_MESSAGE = "The large table is busy with another operation; try again when i
 DEADLINE_MESSAGE = (
     "Not computed: the refresh took too long. Large-table calculations run in the background in a later release."
 )
+CANCELED_MESSAGE = "Canceled."
+CANCELED_REASON = "canceled by the user"
 _RE_REINTERRUPT_S = 0.05
+_CANCEL_POLL_S = 0.05  # how often a budget with a cancel event looks at it (an Event cannot be waited on together with another)
 MAX_GROUPS = 2000
 DISTINCT_LIMIT = 1000
 GROUP_TYPE_MESSAGE = "Large tables can only group by text, date or yes/no columns for now."
@@ -141,6 +159,7 @@ FRAGMENTS: dict[str, str] = {
     _S.REASON_GROUP_BY_SHAPE: "the grouping must be one column",
     _S.REASON_GROUP_OWN_FILTER: "it has a CALCULATE filter of its own, which large tables cannot combine with grouping yet",
     _S.REASON_GROUP_BY_TYPE: "results can only be grouped by a text, date or true/false column",
+    CANCELED_REASON: "the calculation was canceled",
 }
 
 _PLAIN_WORDS = {
@@ -371,6 +390,107 @@ def _model(project: Mapping[str, Any]) -> Mapping[str, Any]:
     return model if isinstance(model, Mapping) else {}
 
 
+# ---------------------------------------------------------------------------------------------------------
+# Plain data for a worker thread (Stage C3)
+# ---------------------------------------------------------------------------------------------------------
+@dataclass(frozen=True)
+class SnapshotTable:
+    """One model table as the route reads it: ids, name and column types, in the project's order."""
+
+    id: str | None
+    source_id: str | None
+    name: str
+    column_types: tuple[tuple[str, str], ...]
+    has_calculated_columns: bool
+
+
+@dataclass(frozen=True)
+class SnapshotSource:
+    """One store-backed source: the store table name and the source kind (what a StoreCandidate says)."""
+
+    source_id: str
+    store_table: str
+    kind: str
+    is_store_backed: bool = True
+
+
+@dataclass(frozen=True)
+class RouteSnapshot:
+    """A deep copy of exactly what `route_*` read from the project and the candidates, and nothing else.
+
+    A worker thread given a snapshot never reads the live project dict or a live StoreCandidate, so the GUI thread
+    may change them while the worker runs. Nothing in it is shared with the live objects: `measures` is a read-only
+    mapping of {name: expression}, the rest is tuples of frozen values.
+    """
+
+    tables: tuple[SnapshotTable, ...]
+    measures: Mapping[str, str]
+    relationships: tuple[Any, ...]
+    sources: tuple[SnapshotSource, ...]
+
+    def project_view(self) -> dict[str, Any]:
+        """A fresh plain project mapping with the same answers as the live project (new dicts on every call)."""
+        tables: list[dict[str, Any]] = []
+        for table in self.tables:
+            record: dict[str, Any] = {"name": table.name, "column_types": dict(table.column_types)}
+            if table.id is not None:
+                record["id"] = table.id
+            if table.source_id is not None:
+                record["source_id"] = table.source_id
+            if table.has_calculated_columns:
+                record["calculated_columns"] = [{"name": "calculated column"}]
+            tables.append(record)
+        return {
+            "model": {
+                "tables": tables,
+                "measures": [{"name": name, "expression": body} for name, body in self.measures.items()],
+                "relationships": copy.deepcopy(list(self.relationships)),
+            },
+        }
+
+    def candidate_view(self) -> dict[str, SnapshotSource]:
+        return {source.source_id: source for source in self.sources}
+
+
+def snapshot_for_route(project: Mapping[str, Any], candidates: Mapping[str, Any] | None = None) -> RouteSnapshot:
+    """Copy what `route_*` read from `project` (and `candidates`) into a `RouteSnapshot`. Call it on the GUI thread."""
+    if not isinstance(project, Mapping):
+        raise TypeError("project must be a mapping")
+    model = _model(project)
+    tables: list[SnapshotTable] = []
+    for table in model.get("tables", []):
+        if not isinstance(table, Mapping):
+            continue
+        ident, source_id = table.get("id"), table.get("source_id")
+        tables.append(SnapshotTable(
+            id=None if ident is None else str(ident),
+            source_id=None if source_id is None else str(source_id),
+            name=str(table.get("name", "")),
+            column_types=tuple((str(c), str(t)) for c, t in dict(table.get("column_types", {}) or {}).items()),
+            has_calculated_columns=bool(table.get("calculated_columns")),
+        ))
+    sources = tuple(
+        SnapshotSource(source_id, physical, kind) for source_id, (physical, kind) in _store_info_by_source(project, candidates).items()
+    )
+    return RouteSnapshot(
+        tables=tuple(tables),
+        measures=MappingProxyType(_measure_map(project, None)),
+        relationships=tuple(copy.deepcopy(list(model.get("relationships") or []))),
+        sources=sources,
+    )
+
+
+def _resolve_inputs(
+    project: Any, candidates: Mapping[str, Any] | None
+) -> tuple[Any, Mapping[str, Any] | None]:
+    """(project mapping, candidates) for the helpers: a RouteSnapshot becomes plain views, anything else is unchanged."""
+    if isinstance(project, RouteSnapshot):
+        if candidates is not None:
+            raise TypeError("candidates must be None when the project is a RouteSnapshot")
+        return project.project_view(), project.candidate_view()
+    return project, candidates
+
+
 def _store_info_by_source(project: Mapping[str, Any], candidates: Mapping[str, Any] | None) -> dict[str, tuple[str, str]]:
     """{source_id: (physical store table, source kind)} for every store-backed source.
 
@@ -397,6 +517,7 @@ def route_is_available(project: Mapping[str, Any], candidates: Mapping[str, Any]
 
     There is no third outcome: a project with a store table never reaches the in-memory engine.
     """
+    project, candidates = _resolve_inputs(project, candidates)
     return bool(_store_info_by_source(project, candidates))
 
 
@@ -410,6 +531,7 @@ def store_shape(project: Mapping[str, Any], candidates: Mapping[str, Any] | None
     (iv) the table's source kind is one the planner takes (csv, parquet).
     Anything else with a store table is refused whole.
     """
+    project, candidates = _resolve_inputs(project, candidates)
     store_info = _store_info_by_source(project, candidates)
     if not store_info:
         return StoreShape(False, "The project has no large table.")
@@ -487,53 +609,66 @@ def _decimal_meta(
 
 
 class _Budget:
-    """Interrupts the store when the budget runs out. Re-fires until cancelled: an interrupt that lands between two
-    queries of one execute would otherwise be lost."""
+    """Interrupts the reader when the budget runs out or when `cancel` is set. Re-fires until cancelled: an interrupt
+    that lands between two queries of one execute would otherwise be lost.
 
-    def __init__(self, store: Any, budget_s: float) -> None:
-        self._store = store
+    One watcher thread. Without a cancel event it sleeps on the internal done event until the budget ends, so it
+    never polls; with one it waits on the cancel event in short steps (an Event cannot be waited on together with
+    another one), so a cancel reaches the query within `_CANCEL_POLL_S`.
+    """
+
+    def __init__(self, interrupt: Any, budget_s: float, cancel: threading.Event | None = None) -> None:
+        self._interrupt = interrupt
         self._budget_s = max(0.0, budget_s)
+        self._cancel_event = cancel
         self._done = threading.Event()
-        self.fired = threading.Event()
-        self._timer: threading.Timer | None = None
+        self.fired = threading.Event()  # the time budget ran out
+        self.canceled = threading.Event()  # the cancel event was seen
+        self._thread: threading.Thread | None = None
         self._lock = threading.Lock()
 
     def start(self) -> None:
-        self._arm(self._budget_s)
+        self._thread = threading.Thread(target=self._watch, name="dax-route-budget", daemon=True)
+        self._thread.start()
 
-    def _arm(self, delay: float) -> None:
-        with self._lock:
-            if self._done.is_set():
-                return
-            self._timer = threading.Timer(delay, self._fire)
-            self._timer.daemon = True
-            self._timer.start()
-
-    def _fire(self) -> None:
-        # The lock is held while interrupting, so cancel() returns only when no interrupt can still arrive
-        # (a late interrupt must never hit the next query). DuckStore.interrupt takes no store lock.
-        with self._lock:
-            if self._done.is_set():
-                return
-            self.fired.set()
-            self._store.interrupt()
-            self._timer = threading.Timer(_RE_REINTERRUPT_S, self._fire)
-            self._timer.daemon = True
-            self._timer.start()
+    def _watch(self) -> None:
+        end = time.monotonic() + self._budget_s
+        cancel = self._cancel_event
+        while not self._done.is_set():
+            is_canceled = cancel is not None and cancel.is_set()
+            expired = time.monotonic() >= end
+            if is_canceled or expired:
+                # The lock is held while interrupting, so cancel() returns only when no interrupt can still arrive
+                # (a late interrupt must never hit the next query). StoreReader.interrupt takes no store lock.
+                with self._lock:
+                    if self._done.is_set():
+                        return
+                    (self.canceled if is_canceled else self.fired).set()
+                    self._interrupt()
+                self._done.wait(_RE_REINTERRUPT_S)
+                continue
+            remaining = end - time.monotonic()
+            if cancel is None:
+                self._done.wait(remaining)
+            else:
+                cancel.wait(min(remaining, _CANCEL_POLL_S))
 
     def cancel(self) -> None:
+        """End the budget: after this returns no interrupt can arrive any more."""
         with self._lock:
             self._done.set()
-            if self._timer is not None:
-                self._timer.cancel()
 
 
 def _is_interrupt(exc: BaseException) -> bool:
     return "interrupt" in str(exc).casefold()
 
 
+def _canceled_refusal() -> RouteRefusal:
+    return RouteRefusal(CANCELED_MESSAGE, CANCELED_REASON, CODE_CANCELED)
+
+
 def route_measure(
-    project: Mapping[str, Any],
+    project: Mapping[str, Any] | RouteSnapshot,
     measure_name_or_expression: str,
     *,
     project_store: Any,
@@ -543,25 +678,41 @@ def route_measure(
     deadline: float | None = None,
     candidates: Mapping[str, Any] | None = None,
     measures: Mapping[str, str] | None = None,
+    reader: Any = None,
+    cancel: threading.Event | None = None,
 ) -> StoreAnswer | RouteRefusal:
     """Answer one measure on the store, or refuse with a plain sentence. Never raises for a bad measure.
 
     `measure_name_or_expression` is a measure name of the project, or a DAX expression (a draft). `measures`
     (optional) replaces the project's measures {name: expression}, used to check a measure before it is saved.
     `deadline` is an absolute time.monotonic() value shared by a refresh: a measure started after it is not run.
-    `candidates` is the controller's loaded candidates (see `_store_info_by_source`).
+    `candidates` is the controller's loaded candidates (see `_store_info_by_source`). `project` is the live project
+    mapping (with `candidates`) or a `RouteSnapshot` (then `candidates` must be None).
+
+    Every query runs on a StoreReader, never on the main connection and never under the store's busy flag. With
+    `reader` (a StoreReader the caller leased) the route uses it and takes no lease of its own; without, it opens
+    `project_store.read_lease()` for the call. `cancel` (a threading.Event) set before or during the call gives a
+    RouteRefusal with code "canceled" and never a value. Refusals win in this order: canceled, timeout, stale.
     It raises only for programmer errors (wrong argument types).
     """
+    project, candidates = _resolve_inputs(project, candidates)
     if not isinstance(project, Mapping):
         raise TypeError("project must be a mapping")
     if not isinstance(measure_name_or_expression, str):
         raise TypeError("measure_name_or_expression must be text")
-    if project_store is None or not hasattr(project_store, "job"):
+    if project_store is None or not hasattr(project_store, "read_lease"):
         raise TypeError("project_store must be a ProjectStore")
+    if reader is not None and not (hasattr(reader, "execute") and hasattr(reader, "interrupt")):
+        raise TypeError("reader must be a StoreReader")
+    if cancel is not None and not isinstance(cancel, threading.Event):
+        raise TypeError("cancel must be a threading.Event")
     if not isinstance(filter_context, tuple):
         raise TypeError("filter_context must be a tuple of predicate texts")
     if group_by is not None and not (isinstance(group_by, tuple) and len(group_by) == 2):
         raise TypeError("group_by must be a (table, column) tuple or None")
+
+    if cancel is not None and cancel.is_set():
+        return _canceled_refusal()
 
     measure_map = _measure_map(project, measures)
     name = "This measure"
@@ -595,63 +746,96 @@ def route_measure(
         # The planner does not take Parquet tables yet: say it first, in its own sentence, before any other reason.
         return _refusal(name, dax_sql.PARQUET_PLAN_REASON)
 
+    def run(on: Any) -> StoreAnswer | RouteRefusal:
+        return _run_on_reader(
+            on, project_store, name, expression, effective, started, cancel,
+            table_name, physical, kind, column_types, tables, store_tables, text, measure_map, filter_context, group_by,
+        )
+
+    if reader is not None:
+        return run(reader)
     try:
-        with project_store.job():
-            store = project_store.store
-            # The budget covers everything that touches the store: the decimal metadata, the guards and the SELECT.
-            budget = _Budget(store, effective)
-            budget.start()
-            try:
-                try:
-                    column_meta = _decimal_meta(store, table_name, physical, column_types, text)
-                    kwargs: dict[str, Any] = dict(
-                        home_table=table_name,
-                        tables=tables,
-                        store_tables=store_tables,
-                        column_meta=column_meta,
-                        measures=measure_map,
-                        source_kind=kind,
-                        filter_context=filter_context,
-                    )
-                    if group_by is None:
-                        plan: Any = plan_measure(expression, **kwargs)
-                    else:
-                        plan = plan_group_by(expression, group_by=group_by, **kwargs)
-                    result = plan if isinstance(plan, Refusal) else plan.execute(store)
-                except StoreBusyError:
-                    return RouteRefusal(BUSY_MESSAGE, "store busy", CODE_BUSY)
-                except StoreError as exc:
-                    if budget.fired.is_set() and _is_interrupt(exc):
-                        return _timeout(name, effective)
-                    if project_store.closed or "closed" in str(exc).casefold():
-                        return RouteRefusal(
-                            f"{name} cannot be computed: the large table is closed.", str(exc), CODE_CLOSED
-                        )
-                    return RouteRefusal(
-                        f"{name} cannot be computed: the large table could not be read.", str(exc), CODE_PLAN
-                    )
-                except (MeasureError, LargeTableError) as exc:
-                    return RouteRefusal(f"{name} cannot be computed on a large table: {exc}", str(exc), CODE_PLAN)
-                except Exception as exc:  # nothing may escape into a card refresh, a save or a preview
-                    return RouteRefusal(
-                        f"{name} could not be computed ({type(exc).__name__}).", f"{type(exc).__name__}: {exc}", CODE_PLAN
-                    )
-                if isinstance(result, Refusal):
-                    # An interrupt that lands inside a guard query is swallowed there and comes back as a stale or
-                    # missing-metadata refusal: when the budget fired, the honest answer is the timeout.
-                    if budget.fired.is_set():
-                        return _timeout(name, effective)
-                    return _refusal(name, result.reason)
-            finally:
-                budget.cancel()
-            elapsed = time.monotonic() - started
-            if isinstance(plan, dax_sql.GroupByPlan):
-                return StoreAnswer("grouped", None, list(result), elapsed, table_name)
-            return StoreAnswer("scalar", result, [], elapsed, table_name)
+        with project_store.read_lease() as leased:
+            return run(leased)
     except StoreBusyError:
         return RouteRefusal(BUSY_MESSAGE, "store busy", CODE_BUSY)
     except StoreError as exc:
         return RouteRefusal(f"{name} cannot be computed: the large table is closed.", str(exc), CODE_CLOSED)
+
+
+def _run_on_reader(
+    reader: Any, project_store: Any, name: str, expression: str, effective: float, started: float,
+    cancel: threading.Event | None, table_name: str, physical: str, kind: str, column_types: dict[str, str],
+    tables: dict[str, dict[str, str]], store_tables: dict[str, str], text: str, measure_map: dict[str, str],
+    filter_context: tuple[str, ...], group_by: tuple[str, str] | None,
+) -> StoreAnswer | RouteRefusal:
+    """Plan and run one measure on `reader` under the time budget and the cancel event. Nothing escapes as an exception."""
+
+    def is_canceled() -> bool:
+        return cancel is not None and cancel.is_set()
+
+    # The budget covers everything that touches the store: the decimal metadata, the guards and the SELECT.
+    budget = _Budget(reader.interrupt, effective, cancel)
+    budget.start()
+    try:
+        try:
+            column_meta = _decimal_meta(reader, table_name, physical, column_types, text)
+            kwargs: dict[str, Any] = dict(
+                home_table=table_name,
+                tables=tables,
+                store_tables=store_tables,
+                column_meta=column_meta,
+                measures=measure_map,
+                source_kind=kind,
+                filter_context=filter_context,
+            )
+            if group_by is None:
+                plan: Any = plan_measure(expression, **kwargs)
+            else:
+                plan = plan_group_by(expression, group_by=group_by, **kwargs)
+            result = plan if isinstance(plan, Refusal) else plan.execute(reader)
+        except StoreBusyError:
+            if is_canceled():
+                return _canceled_refusal()
+            return RouteRefusal(BUSY_MESSAGE, "store busy", CODE_BUSY)
+        except StoreError as exc:
+            if is_canceled():
+                return _canceled_refusal()
+            if budget.fired.is_set() and _is_interrupt(exc):
+                return _timeout(name, effective)
+            if project_store.closed or "closed" in str(exc).casefold():
+                return RouteRefusal(
+                    f"{name} cannot be computed: the large table is closed.", str(exc), CODE_CLOSED
+                )
+            return RouteRefusal(
+                f"{name} cannot be computed: the large table could not be read.", str(exc), CODE_PLAN
+            )
+        except (MeasureError, LargeTableError) as exc:
+            if is_canceled():
+                return _canceled_refusal()
+            return RouteRefusal(f"{name} cannot be computed on a large table: {exc}", str(exc), CODE_PLAN)
+        except Exception as exc:  # nothing may escape into a card refresh, a save or a preview
+            if is_canceled():
+                return _canceled_refusal()
+            return RouteRefusal(
+                f"{name} could not be computed ({type(exc).__name__}).", f"{type(exc).__name__}: {exc}", CODE_PLAN
+            )
+        if is_canceled():
+            return _canceled_refusal()
+        if isinstance(result, Refusal):
+            # An interrupt that lands inside a guard query is swallowed there and comes back as a stale or
+            # missing-metadata refusal: when the budget fired, the honest answer is the timeout.
+            if budget.fired.is_set():
+                return _timeout(name, effective)
+            return _refusal(name, result.reason)
+    finally:
+        budget.cancel()
+    if is_canceled():
+        return _canceled_refusal()
+    elapsed = time.monotonic() - started
+    if isinstance(plan, dax_sql.GroupByPlan):
+        return StoreAnswer("grouped", None, list(result), elapsed, table_name)
+    return StoreAnswer("scalar", result, [], elapsed, table_name)
 
 
 # ---------------------------------------------------------------------------------------------------------
@@ -699,7 +883,7 @@ def _predicates_use_column(predicates: Sequence[str], table: str, column: str) -
 
 
 def route_grouped(
-    project: Mapping[str, Any],
+    project: Mapping[str, Any] | RouteSnapshot,
     measure_name_or_expression: str,
     group_by: tuple[str, str],
     *,
@@ -710,18 +894,23 @@ def route_grouped(
     candidates: Mapping[str, Any] | None = None,
     measures: Mapping[str, str] | None = None,
     max_groups: int | None | str = "default",
+    reader: Any = None,
+    cancel: threading.Event | None = None,
 ) -> StoreAnswer | RouteRefusal:
     """One measure grouped by one text, date or yes/no column of the store table (kind "grouped").
 
     Built on `route_measure` (same shape check, fresh inputs, timer interrupt, busy policy). The rows come back in
     SQL order with the planner's keys; the app applies its own order and drops blank values afterwards. More than
     `max_groups` rows is refused, because a chart that silently shows the first groups is a wrong chart.
+    `reader` and `cancel` are those of `route_measure`; `project` may be a `RouteSnapshot`.
     """
+    project, candidates = _resolve_inputs(project, candidates)
     if not (isinstance(group_by, tuple) and len(group_by) == 2 and all(isinstance(x, str) for x in group_by)):
         raise TypeError("group_by must be a (table, column) tuple")
     answer = route_measure(
         project, measure_name_or_expression, project_store=project_store, filter_context=filter_context,
         group_by=group_by, budget_s=budget_s, deadline=deadline, candidates=candidates, measures=measures,
+        reader=reader, cancel=cancel,
     )
     if isinstance(answer, RouteRefusal):
         return _grouped_refusal(answer, group_by, filter_context)
@@ -882,7 +1071,7 @@ def _clause_predicates(
 
 
 def route_filter_context(
-    project: Mapping[str, Any],
+    project: Mapping[str, Any] | RouteSnapshot,
     filters: Sequence[Mapping[str, Any]],
     *,
     candidates: Mapping[str, Any] | None = None,
@@ -894,8 +1083,9 @@ def route_filter_context(
     comparisons, only when no blank cell would be selected; one or two conditions joined by AND. Everything else
     (is not, is none of, contains, begins/ends with, blank checks, relative date or time, Top N, month, OR,
     decimal, date and yes/no columns, another table) is refused with a sentence that names the field and the
-    filter type. Every predicate then passes `classify_filter_context`.
+    filter type. Every predicate then passes `classify_filter_context`. `project` may be a `RouteSnapshot`.
     """
+    project, candidates = _resolve_inputs(project, candidates)
     if not isinstance(project, Mapping):
         raise TypeError("project must be a mapping")
     shape = store_shape(project, candidates)
@@ -942,7 +1132,7 @@ def route_filter_context(
 
 
 def route_distinct_values(
-    project: Mapping[str, Any],
+    project: Mapping[str, Any] | RouteSnapshot,
     table: str,
     column: str,
     *,
@@ -953,6 +1143,8 @@ def route_distinct_values(
     budget_s: float = DEFAULT_BUDGET_S,
     deadline: float | None = None,
     candidates: Mapping[str, Any] | None = None,
+    reader: Any = None,
+    cancel: threading.Event | None = None,
 ) -> list[str] | RouteRefusal:
     """The different values of a text, date or yes/no column, each once with its first spelling, in first-seen order.
 
@@ -960,12 +1152,15 @@ def route_distinct_values(
     text, listed where it first appears) and the date text are exactly those of a visual axis, and a filter
     context keeps only the values that still have rows. `search` is matched in Python (case-insensitive, part of the
     text); it never reaches the SQL. More than `limit` matching values is refused.
+    `reader` and `cancel` are those of `route_measure`; `project` may be a `RouteSnapshot`.
     """
+    project, candidates = _resolve_inputs(project, candidates)
     if not isinstance(search, str) or not isinstance(table, str) or not isinstance(column, str):
         raise TypeError("table, column and search must be text")
     answer = route_grouped(
         project, f"COUNTROWS({_dax_name(table)})", (table, column), project_store=project_store,
         filter_context=filter_context, budget_s=budget_s, deadline=deadline, candidates=candidates, max_groups=None,
+        reader=reader, cancel=cancel,
     )
     if isinstance(answer, RouteRefusal):
         if answer.message == GROUP_TYPE_MESSAGE:

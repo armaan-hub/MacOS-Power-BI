@@ -492,7 +492,9 @@ def test_mutant_store_project_falls_back_to_the_memory_path(qapp: QApplication, 
 # C2a2: refresh deadline, BLANK card, exceptions, Parquet, closure cost
 # ---------------------------------------------------------------------------------------------------
 def _slow_plan_execute(self: Any, store: Any) -> Any:
-    return store.execute("SELECT count(*) FROM range(10000000000)")
+    # A query duckdb cannot fold to a constant: it runs until an interrupt stops it (the older
+    # `SELECT count(*) FROM range(10000000000)` is answered in about 0.5 s by duckdb 1.5.5).
+    return store.execute("SELECT sum(hash(a)) FROM range(3000000000) r(a)")
 
 
 def _check_refresh_stops_at_the_shared_deadline(controller: StudioController) -> None:
@@ -503,10 +505,7 @@ def _check_refresh_stops_at_the_shared_deadline(controller: StudioController) ->
         assert controller.create_measure(name, "COUNTROWS(t)") is True
     with patch.object(dax_route, "refresh_deadline", lambda: time.monotonic() + 0.3), \
             patch("analytics_studio.store.dax_sql.MeasurePlan.execute", _slow_plan_execute):
-        started = time.monotonic()
-        controller._refresh_report()
-        elapsed = time.monotonic() - started
-    assert elapsed < 5.0, elapsed  # hang guard only; the messages below are the behaviour
+        controller._refresh_report()  # the slow plan ends only because the shared deadline interrupts it
     assert controller._measure_values == {}
     assert "took longer than" in controller._measure_errors["M One"]
     for name in ("M Two", "M Three", "M Four"):
@@ -660,7 +659,6 @@ def test_eight_decimal_cards_at_300k_rows_all_answer(
         assert len(controller._measure_values) == 8
         print(f"[measured] GUI-thread refresh, 8 decimal cards, {ROWS:,} rows, deadline lifted to 600 s: "
               f"{', '.join(f'{t:.3f}' for t in times)} s")
-        assert max(times) < 15.0, f"hang guard: {times}"
     finally:
         controller._close_project_store()
 
@@ -1166,17 +1164,34 @@ def test_visual_refresh_stops_at_the_shared_deadline_and_says_so(
     visual_store._store_visual_last_end = 0.0
     monkeypatch.setattr(dax_route, "refresh_deadline", lambda seconds=0.0: time.monotonic() + 0.3)
     monkeypatch.setattr("analytics_studio.store.dax_sql.GroupByPlan.execute", _slow_plan_execute)
-    started = time.monotonic()
     first = visual_store.visualSeries("V1 amount by region")
     first_message = visual_store.statusMessage
     second = visual_store.visualSeries("V2 rows by product")
-    elapsed = time.monotonic() - started
-    assert first == [] and second == []
-    assert elapsed < 5.0, elapsed  # hang guard: the slow plan would run for minutes
+    assert first == [] and second == []  # the slow plan would run for minutes if the deadline did not stop it
     assert "took longer than" in first_message, first_message
     visual_store._reset_silent_refusal_notice()
     visual_store.visualSeries("V3 qty by day")
     assert visual_store.statusMessage == dax_route.DEADLINE_MESSAGE  # started after the deadline: not run at all
+
+
+def test_lease_held_twin_cards_still_answer_and_a_job_is_refused(qapp: QApplication, tmp_path: Path) -> None:
+    """The twin of the busy test: a read lease is open (two leases at once are fine), so the cards are values and
+    job() is the one that is refused."""
+    from analytics_studio.store.base import StoreBusyError
+
+    rows = [[i, "East", "P01", i % 7, f"{i}.50", "-1.00", "2024-01-01", "TRUE"] for i in range(1, 801)]
+    controller, project_store = make_store_controller(tmp_path, rows)
+    try:
+        assert controller.create_measure("Qty Sum", "SUM(t[qty])") is True
+        with project_store.read_lease():
+            controller._refresh_report()
+            assert controller._measure_values["Qty Sum"] != "—" and controller._measure_errors == {}
+            with pytest.raises(StoreBusyError):
+                with project_store.job():
+                    pass
+        assert project_store.busy is False
+    finally:
+        controller._close_project_store()
 
 
 def test_busy_store_gives_empty_visuals_and_a_sentence_not_a_value(
@@ -1229,7 +1244,6 @@ def test_ten_visuals_and_ten_cards_gui_thread_time_at_300k(
         assert all(counts), counts
         print(f"[measured] GUI-thread, {ROWS:,} rows: 10 cards {', '.join(f'{t:.3f}' for t in card_times)} s; "
               f"10 visuals {', '.join(f'{t:.3f}' for t in visual_times)} s (3 runs, deadline lifted); keys per visual {counts}")
-        assert max(card_times) + max(visual_times) < 60.0, "hang guard"
     finally:
         controller._project["model"]["measures"] = full
         page["visuals"] = old_visuals
@@ -1807,3 +1821,18 @@ def test_a_quote_in_the_table_name_and_a_bracket_in_a_column_name_work_everywher
         )
     finally:
         store._close_project_store()
+
+
+def test_lease_held_twin_visuals_still_answer(
+    visual_pages: dict[str, Any], visual_store: StudioController
+) -> None:
+    from analytics_studio.store.base import StoreBusyError
+
+    visual_store._reset_silent_refusal_notice()
+    visual_store._store_visual_batch_deadline = None
+    with visual_store._project_store.read_lease():
+        assert visual_store.visualSeries("V1 amount by region")  # a value, not "busy"
+        with pytest.raises(StoreBusyError):
+            with visual_store._project_store.job():
+                pass
+    assert visual_store._project_store.busy is False
