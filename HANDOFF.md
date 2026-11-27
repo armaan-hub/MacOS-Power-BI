@@ -46,6 +46,49 @@ Module: `TRIM_CHARS_SQL`, `trim_sql`, `fold_sql`, `first_spelling_expr_sql`, `fi
 Review fixes: (1) edge strings added (U+0085, U+00A0, U+2028, U+2029, U+200B, U+3000, U+FEFF, U+00AD, full-width A and a, U+1F600, regional-indicator pair, 100,000-character strings, embedded NUL); mutants G1 (also trims U+00A0, U+0085, U+2028, U+200B in SQL and reference) and G2 (also folds full-width A) now fail, and both survive when the edge strings are removed from the data (checked). (2) Nested same-quote f-strings in the tool fixed; all three py files parse under Python 3.11. (3) Parquet group-by now uses `first_spelling_expr_sql` like the CSV side; seed 42 at 2000 rows `results` JSON identical to the original baseline (842 entries), seed 11 identical to HEAD a8bdbfc; both exit 0.
 Tests: `tests/test_store_text_rules.py` 13 passed in 0.78 s; with `tests/test_store_engine_diff_tool.py` 60 passed in 17.53 s and 17.16 s. pyflakes clean, path grep clean.
 
+**Stage D1a: Power Query step differential tool, slice 4: headers, transpose, unpivot, split to rows & positions, extract text, conditional column (2026-11-27, uncommitted, on branch d1a-pq-slice4)**
+Files: `tools/pq_store_diff.py`, NEW `tests/test_pq_store_diff_tool_d1a.py`, `HANDOFF.md`. Reference is real `transformations.apply_transformations`, SQL side is independent DuckStore mapping.
+1. Steps covered (10 operations across 6 categories):
+   - `promote_headers` (`_map_promote_headers`): first row values become column names via `normalize_promoted_headers`, `WHERE __rn > min_rn` drops the promoted header row from output rows. Refuses on empty table with exact engine text.
+   - `demote_headers` (`_map_demote_headers`): column names become first row (`_demote_rn = -1`), data rows kept (`_demote_rn = __rn`), output columns named `Column1`..`ColumnN`.
+   - `transpose_table` (`_map_transpose_table`): unpivots cells to (c_idx, r_idx, val) and aggregates across rows via `FIRST(val) FILTER (WHERE r_rn = N)`. Refuses on empty table or exceeding `MAX_COLUMNS` (512) or `MAX_CELLS` (500,000) with engine error text.
+   - `unpivot_columns` and `unpivot_other_columns` (`_map_unpivot_columns`): unpivots selected columns into attribute and value columns. Preserves source row order and selected column order (`ORDER BY __rn, _p_ord`), keeps blank cells (`""`), rejects missing columns or clashing output names with engine error text.
+   - `split_column_to_rows` (`_map_split_column_to_rows`): splits string into array of parts and unnests. Preserves source row order and split sub-element index order (`ORDER BY __rn ASC, _sub ASC` via `generate_subscripts(_parts, 1)`), keeps empty parts between delimiters.
+   - `split_column_by_positions` (`_map_split_column_by_positions`): segments column by 0-indexed position list via `substr(col, 1 + start, count)`. Validates strictly increasing positions starting at 0, rejects out-of-bounds, negative, duplicate positions, and name collisions (`col.1`..`col.N`).
+   - `extract_text_by_delimiter` (`_map_extract_text_by_delimiter`): extracts text before or after occurrence N of delimiter using `string_split` and `list_slice`. Pre-validates presence in table; missing occurrence produces exact engine refusal with zero-based occurrence index and 1-based row number.
+   - `extract_text_between_delimiters` (`_map_extract_text_between_delimiters`): extracts substring between start and end delimiter occurrences. Pre-validates start and end occurrences in table; missing occurrence produces exact engine refusal naming occurrence, row index, and column.
+   - `conditional_column` (`_map_conditional_column`): compiles clauses into SQL `CASE WHEN ... THEN ... ELSE ... END`. Preserves first-match-wins semantics, supports literal and column outputs, and uses exact decimal and string SQL comparison logic matching filter_rows.
+2. Steps remaining deferred:
+   - `convert_type`, `convert_type_using_locale`, `pivot_column`, `add_custom_column`, `remove_rows_with_errors`, `keep_rows_with_errors`, `remove_sparse_top_rows`, `remove_sparse_bottom_rows`, `m_sparse_boundary_helper`, `m_script`, `table_pass_through`.
+3. Mutants killed (13 of 13 by behaviour on hand-checked tables and generated data):
+   - `mutant_promote_keeps_first_row` (killed by `test_promote_and_demote_headers_hand_checked`)
+   - `mutant_demote_names_off_by_one` (killed by `test_promote_and_demote_headers_hand_checked`)
+   - `mutant_transpose_headers_dropped` (killed by `test_transpose_table_hand_checked`)
+   - `mutant_unpivot_order_per_column` (killed by `test_unpivot_columns_and_unpivot_other_hand_checked`)
+   - `mutant_unpivot_drops_blanks` (killed by `test_unpivot_columns_and_unpivot_other_hand_checked`)
+   - `mutant_split_to_rows_loses_empty_parts` (killed by `test_split_column_to_rows_and_by_positions_hand_checked`)
+   - `mutant_positions_off_by_one` (killed by `test_split_column_to_rows_and_by_positions_hand_checked`)
+   - `mutant_extract_side_swapped` (killed by `test_extract_text_by_delimiter_and_between_delimiters_hand_checked`)
+   - `mutant_occurrence_off_by_one` (killed by `test_extract_text_by_delimiter_and_between_delimiters_hand_checked`)
+   - `mutant_missing_delimiter_returns_blank` (killed by `test_extract_text_by_delimiter_and_between_delimiters_hand_checked`)
+   - `mutant_between_delimiters_inclusive` (killed by `test_extract_text_between_delimiters_hand_checked`)
+   - `mutant_conditional_last_clause_wins` (killed by `test_conditional_column_hand_checked`)
+   - `mutant_conditional_else_ignored` (killed by `test_conditional_column_hand_checked`)
+   - Generated data exit 1 verification: `test_d1a_mutants_exit_1_on_generated_data_and_clean_run_exits_0` at 50/42, 400/1, and 2000/7 rows exits 1 for all active mutants and exits 0 for clean runs.
+4. Test suites and timings (two runs across all 3 test files):
+   - Run 1: 177 passed in 20.83 s (`test_pq_store_diff_tool.py`: 109, `test_pq_store_diff_tool_d0h.py`: 56, `test_pq_store_diff_tool_d1a.py`: 12).
+   - Run 2: 177 passed in 21.40 s.
+   - Individual test files under 25 s target.
+5. Sweeps on generated data:
+   - 400 rows seeds 1..60: 60/60 passed exit 0 in 74.2 s.
+   - 2000 rows seeds 1..60: 60/60 passed exit 0 in 327.6 s.
+   - 20000 rows seeds 1..3: 3/3 passed exit 0 in 161.3 s.
+6. Code cleanliness:
+   - `pyflakes`: 0 warnings, clean.
+   - Python 3.11 AST parse: clean.
+   - Path grep (`/Users`, `pbi_scratch`, `/private/tmp`): 0 matches.
+   - Left uncommitted on branch `d1a-pq-slice4`.
+
 **Stage C0g fixes after the Team-Thinker review of C0f (2026-11-25, committed 371aad4)**
 
 **Stage D0i: fixes after the Team-Thinker review of D0h (2026-11-26, uncommitted, on top of bc54ab0)**

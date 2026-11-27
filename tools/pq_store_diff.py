@@ -33,7 +33,14 @@ from typing import Any
 from analytics_studio.file_import import MAX_CELLS, MAX_COLUMNS, ImportCandidate, parse_file
 from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
-from analytics_studio.transformations import TransformationError, apply_transformations
+from analytics_studio.transformations import (
+    MAX_CONDITIONAL_CLAUSES,
+    _CONDITIONAL_OPERATORS,
+    _CONDITIONAL_VALUE_KINDS,
+    TransformationError,
+    apply_transformations,
+    normalize_promoted_headers,
+)
 
 
 # The store's own load-order column (hidden); DuckStore.read_page orders by it, never by the physical rowid.
@@ -1588,6 +1595,590 @@ def _map_split_column(
     return (f"SELECT {', '.join(exprs)} FROM ({inner}) ORDER BY {_RN}", out_headers)
 
 
+def _map_promote_headers(
+    step: dict[str, Any], headers: list[str], t_q: str, store: DuckStore | None, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    if store is None:
+        return Refusal("DuckStore required to map promote_headers.")
+    col_list = ", ".join(f'"{h}"' for h in headers)
+    rows = store.execute(f"SELECT {_RN}, {col_list} FROM {t_q} ORDER BY {_RN} LIMIT 1")
+    if not rows:
+        message = "Cannot use the first row as headers because the table has no data rows."
+        return Refusal(message, expected_error=message)
+    min_rn = rows[0][0]
+    first_row_values = [normalize_cell(v) for v in rows[0][1:]]
+    promote_all = step.get("promote_all_scalars", True)
+    header_values = [
+        v if (promote_all or v is not None) else f"Column{i + 1}"
+        for i, v in enumerate(first_row_values)
+    ]
+    promoted = normalize_promoted_headers(header_values, len(headers))
+    for name in promoted:
+        unsafe = unsafe_header_reason(name)
+        if unsafe:
+            return Refusal(unsafe)
+    select_items = [f'"{old}" AS "{new}"' for old, new in zip(headers, promoted)]
+    col_select = ", ".join(select_items)
+    where_clause = "" if overrides.get("mutant_promote_keeps_first_row") else f"WHERE {_RN} > {min_rn}"
+    sql = f"SELECT {col_select} FROM {t_q} {where_clause} ORDER BY {_RN}"
+    return (sql, promoted)
+
+
+def _map_demote_headers(
+    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    n = len(headers)
+    offset = 1 if overrides.get("mutant_demote_names_off_by_one") else 0
+    demoted_names = [f"Column{i + 1 + offset}" for i in range(n)]
+    for name in demoted_names:
+        unsafe = unsafe_header_reason(name)
+        if unsafe:
+            return Refusal(unsafe)
+    header_vals = [sql_str(h) for h in headers]
+    for hv in header_vals:
+        if isinstance(hv, Refusal):
+            return hv
+    header_select = ", ".join(f'{val} AS "{name}"' for val, name in zip(header_vals, demoted_names))
+    data_select = ", ".join(f'"{old}" AS "{name}"' for old, name in zip(headers, demoted_names))
+    demoted_cols = ", ".join(f'"{name}"' for name in demoted_names)
+    sql = (
+        f"SELECT {demoted_cols} FROM ("
+        f"  SELECT -1 AS _demote_rn, {header_select} "
+        f"  UNION ALL "
+        f"  SELECT {_RN} AS _demote_rn, {data_select} FROM {t_q}"
+        f") ORDER BY _demote_rn"
+    )
+    return (sql, demoted_names)
+
+
+def _map_transpose_table(
+    step: dict[str, Any], headers: list[str], t_q: str, total_rows: int, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    if total_rows == 0:
+        message = "Cannot transpose a table with no data rows."
+        return Refusal(message, expected_error=message)
+    if total_rows > MAX_COLUMNS:
+        message = f"Transposing exceeds the {MAX_COLUMNS}-column import limit."
+        return Refusal(message, expected_error=message)
+    if len(headers) * total_rows > MAX_CELLS:
+        message = f"Transposing exceeds the {MAX_CELLS:,}-cell import limit."
+        return Refusal(message, expected_error=message)
+    out_headers = [f"Column{i + 1}" for i in range(total_rows)]
+    for name in out_headers:
+        unsafe = unsafe_header_reason(name)
+        if unsafe:
+            return Refusal(unsafe)
+    if overrides.get("mutant_transpose_headers_dropped"):
+        col_list = ", ".join(f'"{h}"' for h in out_headers)
+        null_cols = ", ".join(f'NULL AS "{h}"' for h in out_headers)
+        return (f"SELECT {col_list} FROM (SELECT {null_cols}) WHERE 1=0", out_headers)
+    branches = []
+    for c_idx, h in enumerate(headers):
+        branches.append(f'SELECT {c_idx} AS c_idx, {_RN} AS r_idx, "{h}" AS val FROM {t_q}')
+    unnested_sql = " UNION ALL ".join(branches)
+    agg_cols = [f'FIRST(val) FILTER (WHERE r_rn = {r_idx}) AS "{name}"' for r_idx, name in enumerate(out_headers)]
+    sql = (
+        f"WITH numbered AS ("
+        f"  SELECT c_idx, (row_number() OVER (PARTITION BY c_idx ORDER BY r_idx) - 1) AS r_rn, val "
+        f"  FROM ({unnested_sql})"
+        f") "
+        f"SELECT {', '.join(agg_cols)} FROM numbered GROUP BY c_idx ORDER BY c_idx"
+    )
+    return (sql, out_headers)
+
+
+def _map_unpivot_columns(
+    step: dict[str, Any], headers: list[str], t_q: str, unpivot_other: bool, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    columns = step.get("columns")
+    if not isinstance(columns, list) or not columns:
+        if not unpivot_other:
+            message = "Transformation step 1 needs one or more columns."
+            return Refusal(message, expected_error="needs one or more columns.")
+    attribute_name = step.get("attribute_name")
+    value_name = step.get("value_name")
+    if not isinstance(attribute_name, str) or not attribute_name.strip() or not isinstance(value_name, str) or not value_name.strip():
+        message = "Transformation step 1 needs both output column names."
+        return Refusal(message, expected_error="needs both output column names.")
+    attribute_name = attribute_name.strip()
+    value_name = value_name.strip()
+    if attribute_name == value_name:
+        message = "Transformation step 1 output column names must be different."
+        return Refusal(message, expected_error="output column names must be different.")
+    for c in (columns or []):
+        if not isinstance(c, str):
+            message = "Transformation step 1 needs one or more columns."
+            return Refusal(message, expected_error="needs one or more columns.")
+        if c not in headers:
+            message = f"Column {c!r} does not exist."
+            return Refusal(message, expected_error=message)
+    selected = set(columns or [])
+    if unpivot_other:
+        retained_headers = [h for h in headers if h in selected]
+        pivot_headers = [h for h in headers if h not in selected]
+    else:
+        pivot_headers = [h for h in headers if h in selected]
+        retained_headers = [h for h in headers if h not in selected]
+    if not pivot_headers:
+        message = "Select at least one column to unpivot."
+        return Refusal(message, expected_error=message)
+    for name in (attribute_name, value_name):
+        if name in retained_headers:
+            message = f"Cannot unpivot: output column {name!r} already exists."
+            return Refusal(message, expected_error=message)
+    out_headers = [*retained_headers, attribute_name, value_name]
+    for name in out_headers:
+        unsafe = unsafe_header_reason(name)
+        if unsafe:
+            return Refusal(unsafe)
+    retained_cols = ", ".join(f'"{h}"' for h in retained_headers)
+    prefix = f"{retained_cols}, " if retained_headers else ""
+    branches = []
+    for p_idx, col in enumerate(pivot_headers):
+        col_lit = sql_str(col)
+        if isinstance(col_lit, Refusal):
+            return col_lit
+        where_val = 'IS NOT NULL AND "' + col + '" != \'\'' if overrides.get("mutant_unpivot_drops_blanks") else 'IS NOT NULL'
+        branches.append(
+            f'SELECT {prefix}{_RN}, {p_idx} AS _p_ord, {col_lit} AS "{attribute_name}", "{col}" AS "{value_name}" '
+            f'FROM {t_q} WHERE "{col}" {where_val}'
+        )
+    union_sql = " UNION ALL ".join(branches)
+    order_clause = f"ORDER BY _p_ord, {_RN}" if overrides.get("mutant_unpivot_order_per_column") else f"ORDER BY {_RN}, _p_ord"
+    out_cols = ", ".join(f'"{h}"' for h in out_headers)
+    sql = f"SELECT {out_cols} FROM ({union_sql}) {order_clause}"
+    return (sql, out_headers)
+
+
+def _map_split_column_to_rows(
+    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    column = step.get("column")
+    delimiter = step.get("delimiter")
+    if not isinstance(column, str) or not isinstance(delimiter, str):
+        message = "Transformation step 1 values must be strings."
+        return Refusal(message, expected_error="values must be strings.")
+    if not delimiter:
+        message = "Transformation step 1 needs a non-empty delimiter."
+        return Refusal(message, expected_error="needs a non-empty delimiter.")
+    if column not in headers:
+        message = f"Column {column!r} does not exist."
+        return Refusal(message, expected_error=message)
+    delim_sql = sql_str(delimiter)
+    if isinstance(delim_sql, Refusal):
+        return delim_sql
+    c = f'"{column}"'
+    if overrides.get("mutant_split_to_rows_loses_empty_parts"):
+        split_expr = f"list_filter(string_split({c}, {delim_sql}), x -> x != '')"
+    else:
+        split_expr = f"string_split({c}, {delim_sql})"
+    parts_expr = f"CASE WHEN {c} IS NULL THEN [NULL] WHEN {c} = '' THEN [''] ELSE {split_expr} END"
+    select_items = [f'"{h}"' if h != column else f'_part AS "{column}"' for h in headers]
+    col_list = ", ".join(select_items)
+    order_clause = f"ORDER BY {_RN} DESC, _sub ASC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN} ASC, _sub ASC"
+    sql = (
+        f"WITH prep AS ("
+        f"  SELECT *, {parts_expr} AS _parts FROM {t_q}"
+        f"), "
+        f"expanded AS ("
+        f"  SELECT *, UNNEST(_parts) AS _part, generate_subscripts(_parts, 1) AS _sub FROM prep"
+        f") "
+        f"SELECT {col_list} FROM expanded {order_clause}"
+    )
+    return (sql, list(headers))
+
+
+def _map_split_column_by_positions(
+    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    column = step.get("column")
+    positions = step.get("positions")
+    if not isinstance(positions, list) or len(positions) < 2 or len(positions) > 512:
+        message = "Transformation step 1 needs 2 to 512 split positions."
+        return Refusal(message, expected_error="needs 2 to 512 split positions.")
+    for p in positions:
+        if not isinstance(p, int) or isinstance(p, bool) or p < 0 or p > 83886080:
+            message = "Transformation step 1 positions must be whole numbers from 0 to 83,886,080."
+            return Refusal(message, expected_error="positions must be whole numbers from 0 to 83,886,080.")
+    if positions[0] != 0:
+        message = "Transformation step 1 positions must start at 0."
+        return Refusal(message, expected_error="positions must start at 0.")
+    if any(b <= a for a, b in zip(positions, positions[1:])):
+        message = "Transformation step 1 positions must be in strictly increasing order."
+        return Refusal(message, expected_error="positions must be in strictly increasing order.")
+    if not isinstance(column, str):
+        message = "Transformation step 1 values must be strings."
+        return Refusal(message, expected_error="values must be strings.")
+    if column not in headers:
+        message = f"Column {column!r} does not exist."
+        return Refusal(message, expected_error=message)
+    out_names = [f"{column}.{i + 1}" for i in range(len(positions))]
+    remaining_headers = [h for h in headers if h != column]
+    collision = next((name for name in out_names if name in remaining_headers), None)
+    if collision is not None:
+        message = f"Cannot split {column!r}: output column {collision!r} already exists."
+        return Refusal(message, expected_error=message)
+    c_idx = headers.index(column)
+    out_headers = list(headers)
+    out_headers[c_idx:c_idx + 1] = out_names
+    if len(out_headers) > MAX_COLUMNS:
+        message = f"Splitting {column!r} exceeds the {MAX_COLUMNS}-column import limit."
+        return Refusal(message, expected_error=message)
+    for name in out_names:
+        unsafe = unsafe_header_reason(name)
+        if unsafe:
+            return Refusal(unsafe)
+    c = f'"{column}"'
+    pos_list = [p + 1 for p in positions] if overrides.get("mutant_positions_off_by_one") else positions
+    part_exprs = []
+    for start, end in zip(pos_list, pos_list[1:]):
+        count = end - start
+        part_exprs.append(f'CASE WHEN {c} IS NULL THEN NULL ELSE substr({c}, {1 + start}, {count}) END')
+    part_exprs.append(f'CASE WHEN {c} IS NULL THEN NULL ELSE substr({c}, {1 + pos_list[-1]}) END')
+    select_items: list[str] = []
+    for h in headers:
+        if h == column:
+            for name, expr in zip(out_names, part_exprs):
+                select_items.append(f'{expr} AS "{name}"')
+        else:
+            select_items.append(f'"{h}"')
+    col_list = ", ".join(select_items)
+    order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+    sql = f"SELECT {col_list} FROM {t_q} {order_clause}"
+    return (sql, out_headers)
+
+
+def _map_extract_text_by_delimiter(
+    step: dict[str, Any], headers: list[str], t_q: str, store: DuckStore | None, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    column = step.get("column")
+    delimiter = step.get("delimiter")
+    side = step.get("side")
+    occurrence = step.get("occurrence")
+    if not isinstance(delimiter, str) or not delimiter:
+        message = "Transformation step 1 needs a non-empty delimiter."
+        return Refusal(message, expected_error="needs a non-empty delimiter.")
+    if not isinstance(side, str) or side not in {"before", "after"}:
+        message = "Transformation step 1 must extract text before or after the delimiter."
+        return Refusal(message, expected_error="must extract text before or after the delimiter.")
+    if not isinstance(occurrence, int) or isinstance(occurrence, bool) or occurrence < 0 or occurrence > 100000:
+        message = "Transformation step 1 needs a zero-based delimiter occurrence from 0 to 100,000."
+        return Refusal(message, expected_error="needs a zero-based delimiter occurrence from 0 to 100,000.")
+    if not isinstance(column, str) or column not in headers:
+        message = f"Column {column!r} does not exist."
+        return Refusal(message, expected_error=message)
+    if store is None:
+        return Refusal("DuckStore required to map extract_text_by_delimiter.")
+    delim_sql = sql_str(delimiter)
+    if isinstance(delim_sql, Refusal):
+        return delim_sql
+    c = f'"{column}"'
+    occ = occurrence + 1 if overrides.get("mutant_occurrence_off_by_one") else occurrence
+    missing_check_sql = (
+        f'SELECT {_RN} FROM {t_q} '
+        f'WHERE {c} IS NOT NULL AND {c} != \'\' AND len(string_split({c}, {delim_sql})) <= {occ + 1} '
+        f'ORDER BY {_RN} LIMIT 1'
+    )
+    missing_rows = store.execute(missing_check_sql)
+    if missing_rows and not overrides.get("mutant_missing_delimiter_returns_blank"):
+        min_rn = missing_rows[0][0]
+        row_idx_rows = store.execute(
+            f'SELECT rn FROM (SELECT {_RN}, (row_number() OVER (ORDER BY {_RN})) AS rn FROM {t_q}) WHERE {_RN} = {min_rn}'
+        )
+        row_idx = row_idx_rows[0][0] if row_idx_rows else min_rn + 1
+        message = f"Could not find zero-based delimiter occurrence {occurrence} in row {row_idx} of column {column!r}."
+        return Refusal(message, expected_error=message)
+    effective_side = "after" if (side == "before" and overrides.get("mutant_extract_side_swapped")) else "before" if (side == "after" and overrides.get("mutant_extract_side_swapped")) else side
+    delim_len = f"length({delim_sql})"
+    prefix_len = f"length(list_aggregate(list_slice(string_split({c}, {delim_sql}), 1, {occ + 1}), 'string_agg', {delim_sql}))"
+    if effective_side == "before":
+        extract_expr = f"list_aggregate(list_slice(string_split({c}, {delim_sql}), 1, {occ + 1}), 'string_agg', {delim_sql})"
+    else:
+        extract_expr = f"substr({c}, {prefix_len} + {delim_len} + 1)"
+    final_expr = f"CASE WHEN {c} IS NULL THEN NULL WHEN {c} = '' THEN '' ELSE {extract_expr} END"
+    select_items = [f'{final_expr} AS "{h}"' if h == column else f'"{h}"' for h in headers]
+    col_list = ", ".join(select_items)
+    order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+    sql = f"SELECT {col_list} FROM {t_q} {order_clause}"
+    return (sql, list(headers))
+
+
+def _map_extract_text_between_delimiters(
+    step: dict[str, Any], headers: list[str], t_q: str, store: DuckStore | None, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    column = step.get("column")
+    start_delimiter = step.get("start_delimiter")
+    end_delimiter = step.get("end_delimiter")
+    start_occurrence = step.get("start_occurrence")
+    end_occurrence = step.get("end_occurrence")
+    if not isinstance(start_delimiter, str) or not start_delimiter:
+        message = "Transformation step 1 needs a non-empty start delimiter."
+        return Refusal(message, expected_error="needs a non-empty start delimiter.")
+    if not isinstance(end_delimiter, str) or not end_delimiter:
+        message = "Transformation step 1 needs a non-empty end delimiter."
+        return Refusal(message, expected_error="needs a non-empty end delimiter.")
+    if not isinstance(start_occurrence, int) or isinstance(start_occurrence, bool) or start_occurrence < 0 or start_occurrence > 100000:
+        message = "Transformation step 1 needs start occurrence from 0 to 100,000."
+        return Refusal(message, expected_error="needs start occurrence from 0 to 100,000.")
+    if not isinstance(end_occurrence, int) or isinstance(end_occurrence, bool) or end_occurrence < 0 or end_occurrence > 100000:
+        message = "Transformation step 1 needs end occurrence from 0 to 100,000."
+        return Refusal(message, expected_error="needs end occurrence from 0 to 100,000.")
+    if not isinstance(column, str) or column not in headers:
+        message = f"Column {column!r} does not exist."
+        return Refusal(message, expected_error=message)
+    if store is None:
+        return Refusal("DuckStore required to map extract_text_between_delimiters.")
+    start_sql = sql_str(start_delimiter)
+    end_sql = sql_str(end_delimiter)
+    if isinstance(start_sql, Refusal):
+        return start_sql
+    if isinstance(end_sql, Refusal):
+        return end_sql
+    c = f'"{column}"'
+    s_occ = start_occurrence
+    e_occ = end_occurrence
+    prefix_len = f"length(list_aggregate(list_slice(string_split({c}, {start_sql}), 1, {s_occ + 1}), 'string_agg', {start_sql}))"
+    start_len = f"length({start_sql})"
+    rem_expr = f"substr({c}, {prefix_len} + {start_len} + 1)"
+    check_query = (
+        f'SELECT {_RN}, '
+        f'CASE '
+        f'  WHEN {c} IS NOT NULL AND {c} != \'\' AND len(string_split({c}, {start_sql})) <= {s_occ + 1} THEN 1 '
+        f'  WHEN {c} IS NOT NULL AND {c} != \'\' AND len(string_split({rem_expr}, {end_sql})) <= {e_occ + 1} THEN 2 '
+        f'  ELSE 0 '
+        f'END AS err_type '
+        f'FROM {t_q} '
+        f'WHERE {c} IS NOT NULL AND {c} != \'\' '
+        f'ORDER BY {_RN}'
+    )
+    scanned = store.execute(check_query)
+    for rn_idx, (rn_val, err_type) in enumerate(scanned, 1):
+        if err_type == 1 and not overrides.get("mutant_missing_delimiter_returns_blank"):
+            row_idx_rows = store.execute(
+                f'SELECT rn FROM (SELECT {_RN}, (row_number() OVER (ORDER BY {_RN})) AS rn FROM {t_q}) WHERE {_RN} = {rn_val}'
+            )
+            row_idx = row_idx_rows[0][0] if row_idx_rows else rn_idx
+            message = f"Could not find start delimiter occurrence {start_occurrence} in row {row_idx} of column {column!r}."
+            return Refusal(message, expected_error=message)
+        elif err_type == 2 and not overrides.get("mutant_missing_delimiter_returns_blank"):
+            row_idx_rows = store.execute(
+                f'SELECT rn FROM (SELECT {_RN}, (row_number() OVER (ORDER BY {_RN})) AS rn FROM {t_q}) WHERE {_RN} = {rn_val}'
+            )
+            row_idx = row_idx_rows[0][0] if row_idx_rows else rn_idx
+            message = f"Could not find end delimiter occurrence {end_occurrence} after start delimiter occurrence {start_occurrence} in row {row_idx} of column {column!r}."
+            return Refusal(message, expected_error=message)
+    if overrides.get("mutant_between_delimiters_inclusive"):
+        between_expr = f"({start_sql} || list_aggregate(list_slice(string_split({rem_expr}, {end_sql}), 1, {e_occ + 1}), 'string_agg', {end_sql}) || {end_sql})"
+    else:
+        between_expr = f"list_aggregate(list_slice(string_split({rem_expr}, {end_sql}), 1, {e_occ + 1}), 'string_agg', {end_sql})"
+    final_expr = f"CASE WHEN {c} IS NULL THEN NULL WHEN {c} = '' THEN '' ELSE {between_expr} END"
+    select_items = [f'{final_expr} AS "{h}"' if h == column else f'"{h}"' for h in headers]
+    col_list = ", ".join(select_items)
+    order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+    sql = f"SELECT {col_list} FROM {t_q} {order_clause}"
+    return (sql, list(headers))
+
+
+def _map_conditional_column(
+    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+) -> tuple[str, list[str]] | Refusal:
+    name = step.get("name")
+    clauses = step.get("clauses")
+    else_value = step.get("else_value")
+    else_kind = step.get("else_kind")
+    if not isinstance(name, str) or not name.strip():
+        message = "Transformation step 1 needs a new column name."
+        return Refusal(message, expected_error="needs a new column name.")
+    name = name.strip()
+    if not isinstance(clauses, list) or not clauses:
+        message = "Transformation step 1 needs one or more conditional clauses."
+        return Refusal(message, expected_error="needs one or more conditional clauses.")
+    if len(clauses) > MAX_CONDITIONAL_CLAUSES:
+        message = f"A conditional column may contain at most {MAX_CONDITIONAL_CLAUSES} clauses."
+        return Refusal(message, expected_error="may contain at most")
+    clause_fields = {"column", "operator", "test_value", "test_value_kind", "output", "output_kind"}
+    for c_idx, cl in enumerate(clauses, 1):
+        if not isinstance(cl, dict) or set(cl) != clause_fields or any(not isinstance(v, str) for v in cl.values()):
+            message = f"Clause {c_idx} in step 1 has missing or invalid fields."
+            return Refusal(message, expected_error="has missing or invalid fields.")
+        c_col = cl["column"].strip()
+        op = cl["operator"].strip()
+        t_val = cl["test_value"]
+        t_kind = cl["test_value_kind"].strip()
+        out = cl["output"]
+        o_kind = cl["output_kind"].strip()
+        if not c_col:
+            message = f"Clause {c_idx} in step 1 needs a test column."
+            return Refusal(message, expected_error="needs a test column.")
+        if op not in _CONDITIONAL_OPERATORS:
+            message = f"Clause {c_idx} in step 1 has an unsupported operator."
+            return Refusal(message, expected_error="has an unsupported operator.")
+        if t_kind not in _CONDITIONAL_VALUE_KINDS:
+            message = f"Clause {c_idx} in step 1 has an invalid comparison-value type."
+            return Refusal(message, expected_error="has an invalid comparison-value type.")
+        if t_kind == "column" and not t_val.strip():
+            message = f"Clause {c_idx} in step 1 needs a comparison column."
+            return Refusal(message, expected_error="needs a comparison column.")
+        if t_kind == "null" and t_val:
+            message = f"Clause {c_idx} in step 1 must use an empty placeholder for a null comparison."
+            return Refusal(message, expected_error="must use an empty placeholder for a null comparison.")
+        if o_kind not in {"value", "column"}:
+            message = f"Clause {c_idx} in step 1 has an invalid output type."
+            return Refusal(message, expected_error="has an invalid output type.")
+        if o_kind == "column" and not out.strip():
+            message = f"Clause {c_idx} in step 1 needs an output column."
+            return Refusal(message, expected_error="needs an output column.")
+    if not isinstance(else_value, str) or not isinstance(else_kind, str):
+        message = "Transformation step 1 needs a valid final else value."
+        return Refusal(message, expected_error="needs a valid final else value.")
+    else_kind = else_kind.strip()
+    if else_kind not in {"value", "column"}:
+        message = "Transformation step 1 has an invalid final else type."
+        return Refusal(message, expected_error="has an invalid final else type.")
+    if else_kind == "column" and not else_value.strip():
+        message = "Transformation step 1 needs a final else column."
+        return Refusal(message, expected_error="needs a final else column.")
+    if name in headers:
+        message = f"Column {name!r} already exists."
+        return Refusal(message, expected_error=message)
+    if len(headers) >= MAX_COLUMNS:
+        message = f"Adding a conditional column exceeds the {MAX_COLUMNS}-column limit."
+        return Refusal(message, expected_error=message)
+    required_cols: set[str] = set()
+    for cl in clauses:
+        required_cols.add(cl["column"].strip())
+        if cl["test_value_kind"].strip() == "column":
+            required_cols.add(cl["test_value"].strip())
+        if cl["output_kind"].strip() == "column":
+            required_cols.add(cl["output"].strip())
+    if else_kind == "column":
+        required_cols.add(else_value.strip())
+    missing = sorted(required_cols - set(headers))
+    if missing:
+        message = f"Conditional column refers to missing column {missing[0]!r}."
+        return Refusal(message, expected_error=message)
+    unsafe = unsafe_header_reason(name)
+    if unsafe:
+        return Refusal(unsafe)
+    case_branches = []
+    active_clauses = list(reversed(clauses)) if overrides.get("mutant_conditional_last_clause_wins") else clauses
+    for cl in active_clauses:
+        c_col = cl["column"].strip()
+        op = cl["operator"].strip()
+        t_val = cl["test_value"].strip() if cl["test_value_kind"].strip() == "column" else cl["test_value"]
+        t_kind = cl["test_value_kind"].strip()
+        out = cl["output"].strip() if cl["output_kind"].strip() == "column" else cl["output"]
+        o_kind = cl["output_kind"].strip()
+        left_col = f'"{c_col}"'
+        if t_kind == "column":
+            right_val = f'"{t_val}"'
+            is_col = True
+        elif t_kind == "null":
+            right_val = "NULL"
+            is_col = False
+        else:
+            right_lit = sql_str(t_val)
+            if isinstance(right_lit, Refusal):
+                return right_lit
+            right_val = right_lit
+            is_col = False
+        if op in {"equals", "not_equals"}:
+            if t_kind == "null":
+                cond = f'({left_col} IS NULL)' if op == "equals" else f'({left_col} IS NOT NULL)'
+            elif is_col:
+                eq_expr = f'({left_col} = {right_val})'
+                cond = eq_expr if op == "equals" else f'(NOT {eq_expr})'
+            else:
+                eq_expr = f'({left_col} IS NOT NULL AND {left_col} = {right_val})'
+                cond = eq_expr if op == "equals" else f'(NOT {eq_expr})'
+        elif op in {"contains", "does_not_contain"}:
+            if t_kind == "null":
+                cond = "FALSE" if op == "contains" else "TRUE"
+            elif is_col:
+                cnt_expr = f'({left_col} IS NOT NULL AND {right_val} IS NOT NULL AND position({right_val} in {left_col}) > 0)'
+                cond = cnt_expr if op == "contains" else f'({left_col} IS NULL OR {right_val} IS NULL OR NOT {cnt_expr})'
+            else:
+                cnt_expr = f'({left_col} IS NOT NULL AND position({right_val} in {left_col}) > 0)'
+                cond = cnt_expr if op == "contains" else f'({left_col} IS NULL OR NOT {cnt_expr})'
+        elif op in {"begins_with", "does_not_begin_with"}:
+            if t_kind == "null":
+                cond = "FALSE" if op == "begins_with" else "TRUE"
+            elif is_col:
+                bg_expr = f'({left_col} IS NOT NULL AND {right_val} IS NOT NULL AND starts_with({left_col}, {right_val}))'
+                cond = bg_expr if op == "begins_with" else f'({left_col} IS NULL OR {right_val} IS NULL OR NOT {bg_expr})'
+            else:
+                bg_expr = f'({left_col} IS NOT NULL AND starts_with({left_col}, {right_val}))'
+                cond = bg_expr if op == "begins_with" else f'({left_col} IS NULL OR NOT {bg_expr})'
+        elif op in {"ends_with", "does_not_end_with"}:
+            if t_kind == "null":
+                cond = "FALSE" if op == "ends_with" else "TRUE"
+            elif is_col:
+                ed_expr = f'({left_col} IS NOT NULL AND {right_val} IS NOT NULL AND ends_with({left_col}, {right_val}))'
+                cond = ed_expr if op == "ends_with" else f'({left_col} IS NULL OR {right_val} IS NULL OR NOT {ed_expr})'
+            else:
+                ed_expr = f'({left_col} IS NOT NULL AND ends_with({left_col}, {right_val}))'
+                cond = ed_expr if op == "ends_with" else f'({left_col} IS NULL OR NOT {ed_expr})'
+        elif op in {"greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal"}:
+            op_sym = {
+                "greater_than": ">", "greater_than_or_equal": ">=",
+                "less_than": "<", "less_than_or_equal": "<="
+            }[op]
+            if t_kind == "null":
+                cond = "FALSE"
+            elif is_col:
+                n_left = f"TRY_CAST(replace(trim({left_col}), '_', '') AS DECIMAL(38,18))"
+                n_right = f"TRY_CAST(replace(trim({right_val}), '_', '') AS DECIMAL(38,18))"
+                cond = (
+                    f'({left_col} IS NOT NULL AND {right_val} IS NOT NULL AND ('
+                    f'  CASE WHEN {n_left} IS NOT NULL AND {n_right} IS NOT NULL THEN ({n_left} {op_sym} {n_right}) '
+                    f'  ELSE ({left_col} {op_sym} {right_val}) END'
+                    f'))'
+                )
+            else:
+                n_left = f"TRY_CAST(replace(trim({left_col}), '_', '') AS DECIMAL(38,18))"
+                num_lit = engine_number(t_val)
+                if num_lit is not None:
+                    dec_lit = decimal_literal(num_lit)
+                    if dec_lit is not None:
+                        n_right = f"CAST('{dec_lit}' AS {SQL_DECIMAL})"
+                    else:
+                        n_right = "NULL"
+                else:
+                    n_right = "NULL"
+                cond = (
+                    f'({left_col} IS NOT NULL AND ('
+                    f'  CASE WHEN {n_left} IS NOT NULL AND {n_right} IS NOT NULL THEN ({n_left} {op_sym} {n_right}) '
+                    f'  ELSE ({left_col} {op_sym} {right_val}) END'
+                    f'))'
+                )
+        else:
+            message = f"Unsupported conditional operator {op!r}."
+            return Refusal(message, expected_error=message)
+        if o_kind == "column":
+            out_expr = f'"{out}"'
+        else:
+            out_lit = sql_str(out)
+            if isinstance(out_lit, Refusal):
+                return out_lit
+            out_expr = out_lit
+        case_branches.append(f"WHEN {cond} THEN {out_expr}")
+    if overrides.get("mutant_conditional_else_ignored"):
+        else_expr = "NULL"
+    elif else_kind == "column":
+        else_expr = f'"{else_value.strip()}"'
+    else:
+        else_lit = sql_str(else_value)
+        if isinstance(else_lit, Refusal):
+            return else_lit
+        else_expr = else_lit
+    case_sql = f"(CASE {' '.join(case_branches)} ELSE {else_expr} END)"
+    out_headers = [*headers, name]
+    col_list = ", ".join(f'"{h}"' for h in headers) + f', {case_sql} AS "{name}"'
+    order_clause = f"ORDER BY {_RN} DESC" if overrides.get("mutant_reverse_order") else f"ORDER BY {_RN}"
+    sql = f"SELECT {col_list} FROM {t_q} {order_clause}"
+    return (sql, out_headers)
+
+
 def _map_replace_error_values(
     step: dict[str, Any], headers: list[str], t_q: str
 ) -> tuple[str, list[str]] | Refusal:
@@ -1613,11 +2204,22 @@ D0H_STEP_FIELDS: dict[str, set[str]] = {
     "replace_error_values": {"op", "replacements"},
     **{name: _TEXT_STEP_FIELDS for name in (
         "trim_text", "clean_text", "lowercase_text", "uppercase_text", "proper_case_text", "reverse_text")},
+    "promote_headers": {"op"},
+    "demote_headers": {"op"},
+    "transpose_table": {"op"},
+    "unpivot_columns": {"op", "columns", "attribute_name", "value_name"},
+    "unpivot_other_columns": {"op", "columns", "attribute_name", "value_name"},
+    "split_column_to_rows": {"op", "column", "delimiter"},
+    "split_column_by_positions": {"op", "column", "positions"},
+    "extract_text_by_delimiter": {"op", "column", "delimiter", "side", "occurrence"},
+    "extract_text_between_delimiters": {"op", "column", "start_delimiter", "end_delimiter", "start_occurrence", "end_occurrence"},
+    "conditional_column": {"op", "name", "clauses", "else_value", "else_kind"},
 }
 D0H_OPTIONAL_STEP_FIELDS: dict[str, set[str]] = {
     "replace_value": {"replacer"},
     "split_column": {"from_end", "missing_part"},
     "split_column_by_each_delimiter": {"from_end", "missing_part"},
+    "promote_headers": {"promote_all_scalars"},
 }
 
 
@@ -2276,6 +2878,26 @@ def _mapped_sql(
         return _map_split_column(step, headers, t_q, table_name, overrides, store)
     if op == "replace_error_values":
         return _map_replace_error_values(step, headers, t_q)
+
+    # D1a steps
+    if op == "promote_headers":
+        return _map_promote_headers(step, headers, t_q, store, overrides)
+    if op == "demote_headers":
+        return _map_demote_headers(step, headers, t_q, overrides)
+    if op == "transpose_table":
+        return _map_transpose_table(step, headers, t_q, total_rows, overrides)
+    if op in {"unpivot_columns", "unpivot_other_columns"}:
+        return _map_unpivot_columns(step, headers, t_q, unpivot_other=(op == "unpivot_other_columns"), overrides=overrides)
+    if op == "split_column_to_rows":
+        return _map_split_column_to_rows(step, headers, t_q, overrides)
+    if op == "split_column_by_positions":
+        return _map_split_column_by_positions(step, headers, t_q, overrides)
+    if op == "extract_text_by_delimiter":
+        return _map_extract_text_by_delimiter(step, headers, t_q, store, overrides)
+    if op == "extract_text_between_delimiters":
+        return _map_extract_text_between_delimiters(step, headers, t_q, store, overrides)
+    if op == "conditional_column":
+        return _map_conditional_column(step, headers, t_q, overrides)
 
     return Refusal(f"Unknown or unsupported step operation: {op}")
 
