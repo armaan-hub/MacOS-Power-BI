@@ -1,13 +1,17 @@
 """Stage D1d tests for the Power Query step differential tool (Part D and Part E follow-ups).
 
 Covers:
-- Part D1: 667-step malformed probe table and p_shape probe table to repo tests;
-  verifies shape mirrors, unpivot duplicate / 512-col / output names, split rows _parts / _sub / blank col,
-  column strip in positions / extract / between.
+- Part D1: hand-checked rule tests for the shape mirrors: promote_all_scalars must be boolean, unpivot duplicate /
+  blank / 512-column / output-name rules, split rows `_parts` / `_sub` / blank column, column strip in positions /
+  extract / between. (The 667-step malformed-parameter table and the 336-step shape table are in
+  test_pq_store_diff_tool_d1d_tables.py; the D1a table scaling is in test_pq_store_diff_tool_d1d_scale.py.)
 - Part D2: Whitespace class (tab, newline, U+0085, U+2028, U+00A0) in numeric comparisons for conditional columns.
 - Part D3: Sequence mode hand-checked tests (NULL kept as NULL in intermediate tables,
   column facts recomputed on derived tables, row counts recomputed on derived tables).
-- Part E: Limits decision (store path runs with raised limits, exceeds 500,000 cells / 100,000 rows x 6 cols).
+- Part E: Limits decision: the store path does not mirror the engine's import limits and the engine runs with raised
+  limits (`raised_engine_limits`): 100,000 rows x 6 columns for four steps, split by each delimiter above 500,000
+  cells, append above 500,000 cells and above 100,000 rows (query_engine limits), every limit constant raised and
+  restored on every exit, and 100,001 rows over 10 MiB (file_import row and byte limits).
 """
 
 from __future__ import annotations
@@ -252,3 +256,106 @@ def test_raised_limits_exceed_500000_cells() -> None:
         print(f"Timing for {name:12s} (600k cells): {dt:.2f}s")
         assert res["status"] == "same", f"{name} failed: {res}"
         assert res.get("refusal") is None, f"{name} was refused: {res.get('refusal')}"
+
+
+def test_each_delimiter_split_above_500000_cells_is_same() -> None:
+    """Part E: the store path does not mirror the engine's cell limit for split_column_by_each_delimiter.
+
+    100,000 rows x 3 columns, each k cell "a;b;c;d" split by ";" gives 5 output columns of 100,000 rows
+    (600,000 cells, over the 500,000-cell import limit): the store result must equal the engine result run with raised limits.
+    """
+    N = 100_000
+    rows = [[str(i), "a;b;c;d", "z"] for i in range(N)]
+    t = _tab(["id", "k", "z"], rows)
+    item = {"id": "each", "step": {"op": "split_column_by_each_delimiter", "column": "k", "delimiter": ";"}}
+    res = _by_id(_run_items(t, [item]), "each")
+    assert res["status"] == "same", res
+    assert res.get("refusal") is None, res.get("refusal")
+    assert N * (3 - 1 + 4) > 500_000
+
+
+def test_append_above_500000_cells_is_same() -> None:
+    """Part E: append_candidates (query_engine) limits are raised too: 90,000 + 100 rows x 6 columns is 540,600 cells."""
+    first = [[str(i), "x", "y", "1", "2", "3"] for i in range(90_000)]
+    second = [[str(i), "x", "y", "1", "2", "3"] for i in range(100)]
+    t = {"headers": list("abcdef"), "rows": first, "rows_2": second}
+    res = _by_id(_run_items(t, [{"id": "ap", "step": {"op": "append"}}]), "ap")
+    assert res["status"] == "same", res
+    assert res.get("refusal") is None, res.get("refusal")
+    assert (90_000 + 100) * 6 > 500_000
+
+
+def test_append_above_100000_rows_is_same() -> None:
+    """Part E: the engine's append row limit (query_engine.MAX_DATA_ROWS, 100,000) is raised too: 100,000 + 100 rows x 2 columns."""
+    first = [[str(i), "x"] for i in range(100_000)]
+    second = [[str(i), "y"] for i in range(100)]
+    t = {"headers": ["a", "b"], "rows": first, "rows_2": second}
+    res = _by_id(_run_items(t, [{"id": "ap_rows", "step": {"op": "append"}}]), "ap_rows")
+    assert res["status"] == "same", res
+    assert res.get("refusal") is None, res.get("refusal")
+
+
+def _limit_constants() -> dict[str, int]:
+    from analytics_studio import file_import, query_engine, transformations
+
+    return {
+        f"{mod.__name__}.{name}": getattr(mod, name)
+        for mod in (file_import, transformations, query_engine)
+        for name in ("MAX_CELLS", "MAX_DATA_ROWS", "MAX_SOURCE_BYTES")
+        if hasattr(mod, name)
+    }
+
+
+def test_raised_engine_limits_raises_every_copy_and_restores_all_on_every_exit() -> None:
+    """Part E: all limit constants are raised inside the context and restored after normal exit, error and KeyboardInterrupt."""
+    import pytest
+
+    from analytics_studio import query_engine
+    from tools.pq_store_diff import raised_engine_limits
+
+    before = _limit_constants()
+    assert before["analytics_studio.query_engine.MAX_CELLS"] == 500_000
+    with raised_engine_limits():
+        inside = _limit_constants()
+        assert inside["analytics_studio.query_engine.MAX_CELLS"] == 100_000_000
+        assert inside["analytics_studio.query_engine.MAX_DATA_ROWS"] == 1_000_000
+        assert query_engine.MAX_CELLS == 100_000_000
+        assert all(inside[k] > before[k] for k in before), (before, inside)
+    assert _limit_constants() == before
+    with pytest.raises(RuntimeError):
+        with raised_engine_limits():
+            raise RuntimeError("boom")
+    assert _limit_constants() == before
+    with pytest.raises(KeyboardInterrupt):
+        with raised_engine_limits():
+            raise KeyboardInterrupt
+    assert _limit_constants() == before
+    with raised_engine_limits():
+        with raised_engine_limits():
+            pass
+        assert query_engine.MAX_CELLS == 100_000_000
+    assert _limit_constants() == before
+
+
+def test_import_limits_crossed_by_100001_rows_and_over_10_mib() -> None:
+    """Part E: 100,001 rows of about 130 bytes cross file_import.MAX_DATA_ROWS (100,000) and MAX_SOURCE_BYTES (10 MiB)."""
+    from analytics_studio import file_import
+
+    pad = "x" * 120
+    rows = [[str(i), pad] for i in range(100_001)]
+    csv_bytes = sum(len(a) + len(b) + 2 for a, b in rows)
+    assert len(rows) > file_import.MAX_DATA_ROWS
+    assert csv_bytes > file_import.MAX_SOURCE_BYTES
+    t = _tab(["id", "pad"], rows)
+    item = {"id": "top", "step": {"op": "keep_top_rows", "count": 3}}
+    try:
+        data = _run_items(t, [item])
+    except Exception as exc:  # an import limit not raised makes the tool itself crash
+        raise AssertionError(f"the tool crashed on 100,001 rows: {exc!r}") from exc
+    res = _by_id(data, "top")
+    assert res["status"] == "same", res
+    assert res.get("refusal") is None, res.get("refusal")
+    from tools.pq_store_diff import raised_engine_limits
+
+    with raised_engine_limits():
+        assert _engine_rows(t, item) == [["0", pad], ["1", pad], ["2", pad]]

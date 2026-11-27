@@ -33,7 +33,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-from analytics_studio import file_import, transformations
+from analytics_studio import file_import, query_engine, transformations
 from analytics_studio.file_import import MAX_CELLS, MAX_COLUMNS, ImportCandidate, parse_file
 from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
@@ -50,6 +50,8 @@ from analytics_studio.transformations import (
     normalize_promoted_headers,
 )
 
+APP_MAX_CELLS = MAX_CELLS  # the engine's own import limit (500,000); `MAX_CELLS` below is a test seam that a test can lower
+
 
 @contextmanager
 def raised_engine_limits():
@@ -61,7 +63,9 @@ def raised_engine_limits():
          patch.object(file_import, "MAX_SOURCE_BYTES", 1024 * 1024 * 1024), \
          patch.object(file_import, "MAX_CELLS", 100_000_000), \
          patch.object(transformations, "MAX_DATA_ROWS", 1_000_000), \
-         patch.object(transformations, "MAX_CELLS", 100_000_000):
+         patch.object(transformations, "MAX_CELLS", 100_000_000), \
+         patch.object(query_engine, "MAX_DATA_ROWS", 1_000_000), \
+         patch.object(query_engine, "MAX_CELLS", 100_000_000):
         yield
 
 
@@ -426,11 +430,18 @@ def generate_pq_dataset(
 # Each D1a item names its table in "table" (default "main"); the table is built by `generate_d1a_csv`.
 D1A_HEADERS = ["d_key", "d_text", "d_num", "d_cat", "d_delim", "d_pos", "d_paren", "d_uni", "d_clean", "d_clean2", "d_blank"]
 D1A_ROWS = 40
-D1A_SHAPES = ("d1a", "d1a_empty", "d1a_one_row", "d1a_one_col", "d1a_blank")
+D1A_SCALE_MAX_ROWS = 90_000  # the all-column unpivot gives 11 rows per row: 90,000 x 11 stays under the raised 1,000,000-row limit
+D1A_SHAPES = ("d1a", "d1a_small", "d1a_empty", "d1a_one_row", "d1a_one_col", "d1a_blank")
 
 
-def generate_d1a_csv(csv_file: Path, seed: int, shape: str = "d1a") -> list[str]:
+def generate_d1a_csv(csv_file: Path, seed: int, shape: str = "d1a", scale_rows: int | None = None) -> list[str]:
     """Write one D1a table and return its CSV headers.
+
+    `scale_rows` (the `--rows` count) scales the "d1a" shape only: the table then holds `scale_rows` data rows in all
+    (the header-like row plus `scale_rows - 1` drawn rows, at most D1A_SCALE_MAX_ROWS rows in all); for `scale_rows` up to
+    D1A_ROWS + 1 (or None) it is the fixed table of D1A_ROWS drawn rows. The drawn rows are the same up to row D1A_ROWS (one draw order), so a larger
+    table only appends fresh draws. "d1a_small" is always the fixed table (the steps that transpose use it: a table
+    of more than 512 rows cannot be transposed within the 512-column limit).
 
     "d1a": a header-like first data row (promote_headers reads it: "Key", "Name", "Qty", a duplicate "Qty", a blank
     name), then D1A_ROWS rows with delimiter-bearing text (consecutive, leading, trailing and empty parts), positional
@@ -469,7 +480,10 @@ def generate_d1a_csv(csv_file: Path, seed: int, shape: str = "d1a") -> list[str]
             }
             planted_num = ["٣", "1e30", "1E+20", "-1e25", "0.1234567890123456789", "1e-20", "+7", "1_000", " 5"]
             body = [list(first)]
-            for n in range(1, D1A_ROWS + 1):
+            drawn_rows = D1A_ROWS
+            if shape == "d1a" and scale_rows is not None:
+                drawn_rows = max(D1A_ROWS, min(scale_rows, D1A_SCALE_MAX_ROWS) - 1)
+            for n in range(1, drawn_rows + 1):
                 row = [f"k{n:02d}"] + [rnd_d1a.choice(choices[k]) for k in range(1, 10)] + [""]
                 body.append(row)
             for offset, value in enumerate(planted_num):
@@ -941,6 +955,17 @@ def _map_error_rows(
             where = f"({' OR '.join(preds)})"
     col_list = ", ".join(f'"{h}"' for h in headers)
     return (f"SELECT {col_list} FROM {t_q} WHERE {where} ORDER BY {_RN}", list(headers))
+
+
+def _store_table_name(item: dict[str, Any]) -> str:
+    """The table an item runs on. A step that transposes (alone or inside a sequence) on "d1a" runs on the fixed
+    "d1a_small" table: the "d1a" table follows `--rows`, and a table of more than 512 rows cannot be transposed within
+    the 512-column limit."""
+    table = item.get("table", "main")
+    steps = item.get("sequence") or [item["step"]]
+    if table == "d1a" and any(step.get("op") == "transpose_table" for step in steps):
+        return "d1a_small"
+    return table
 
 
 def build_step_catalog(headers: list[str], d1a: bool = True) -> list[dict[str, Any]]:
@@ -2295,10 +2320,13 @@ def _map_split_column(
         if width > MAX_COLUMNS - len(headers) + 1:
             message = f"Splitting {column!r} exceeds the {MAX_COLUMNS}-column import limit."
             return Refusal(message, expected_error=message)
-        row_count = store.execute(f"SELECT COUNT(*) FROM {t_q}")[0][0]
-        if row_count * (len(headers) - 1 + width) > MAX_CELLS:
-            message = f"Splitting {column!r} exceeds the {MAX_CELLS:,}-cell import limit."
-            return Refusal(message, expected_error=message)
+        if MAX_CELLS < APP_MAX_CELLS:
+            # Only when a test has lowered the limit (the engine then runs without raised limits, see
+            # `raised_engine_limits`); at the app's limit the store path does not mirror the cell limit (Part E).
+            row_count = store.execute(f"SELECT COUNT(*) FROM {t_q}")[0][0]
+            if row_count * (len(headers) - 1 + width) > MAX_CELLS:
+                message = f"Splitting {column!r} exceeds the {MAX_CELLS:,}-cell import limit."
+                return Refusal(message, expected_error=message)
     else:
         width = 2
     out_names = [f"{column}.{k}" for k in range(1, width + 1)]
@@ -4319,7 +4347,7 @@ def run_pq_step_diff_many(
         total_store_rows = store.execute('SELECT COUNT(*) FROM "t_csv"')[0][0]
         col_meta = inspect_store_columns(store, "t_csv", headers)
         # Per item: (engine candidate, second candidate, headers, store table, row count, column meta).
-        # "main" is the generated table; the D1a tables are small fixed tables (see `generate_d1a_csv`).
+        # "main" is the generated table; the "d1a" table follows `rows`, the other D1a tables are small fixed tables (see `generate_d1a_csv`).
         table_ctx: dict[str, tuple[Any, Any, list[str], str, int, dict[str, dict[str, bool]]]] = {
             "main": (cand, cand_2, headers, "t_csv", total_store_rows, col_meta),
         }
@@ -4327,7 +4355,7 @@ def run_pq_step_diff_many(
         catalog = list(items) if items is not None else build_step_catalog(headers, d1a=dataset is None)
         if item_filter:
             catalog = [item for item in catalog if item["id"] in set(item_filter)]
-        needed_tables = {item.get("table", "main") for item in catalog}
+        needed_tables = {_store_table_name(item) for item in catalog}
         for shape in D1A_SHAPES + D1B_SHAPES + D1E_SHAPES:
             if shape not in needed_tables:
                 continue
@@ -4337,9 +4365,10 @@ def run_pq_step_diff_many(
             elif shape in D1B_SHAPES:
                 generate_d1b_csv(d1a_path, seed, shape)
             else:
-                generate_d1a_csv(d1a_path, seed, shape)
+                generate_d1a_csv(d1a_path, seed, shape, scale_rows=None if dataset is not None else rows)
             import_csv_to_store(store, f"t_{shape}", d1a_path, {})
-            d1a_cand = parse_file(d1a_path)
+            with raised_engine_limits():
+                d1a_cand = parse_file(d1a_path)
             d1a_headers = list(d1a_cand.headers)
             d1a_rows = store.execute(f'SELECT COUNT(*) FROM "t_{shape}"')[0][0]
             table_ctx[shape] = (
@@ -4354,7 +4383,7 @@ def run_pq_step_diff_many(
             step_op = item["step"]["op"]
 
             # 1. Reference side: step engine (on the item's own table)
-            t_cand, t_cand_2, t_headers, t_name, t_total, t_meta = table_ctx[item.get("table", "main")]
+            t_cand, t_cand_2, t_headers, t_name, t_total, t_meta = table_ctx[_store_table_name(item)]
             engine_res = execute_engine_step(item, t_cand, t_cand_2)
 
             for set_index, overrides in enumerate(override_sets):
@@ -4588,7 +4617,7 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         "Covered in slice 3 (D0h): `group_by`, `replace_value`, `replace_error_values`, `trim_text`, `clean_text`, `lowercase_text`, `uppercase_text`, `proper_case_text`, `reverse_text`, `merge_columns`, `split_column`, `split_column_by_each_delimiter`.",
         "Named refusals inside those steps: `lowercase_text`, `uppercase_text`, `proper_case_text` on a non-ASCII column; `group_by` min and max of non-numeric non-ASCII text; `group_by` average and median when the engine's precision rule needs more than 28 digits; numbers SQL does not read exactly; typed (bool, float) replacements.",
         "Covered in slice 4 (D1a): `promote_headers`, `demote_headers`, `transpose_table`, `unpivot_columns`, `unpivot_other_columns`, `split_column_to_rows`, `split_column_by_positions`, `extract_text_by_delimiter`, `extract_text_between_delimiters`, `conditional_column`.",
-        "D1a catalog: 119 items (114 single steps and 5 sequences, each sequence runs on the previous step's output) on five generated D1a tables (a header-like first row, delimiter-bearing text, positional and unicode text, numeric edge values, and the empty, one-row, one-column and all-blank shapes), plus the refusal rules of each engine step by name.",
+        "D1a catalog: 119 items (114 single steps and 5 sequences, each sequence runs on the previous step's output) on generated D1a tables (a header-like first row, delimiter-bearing text, positional and unicode text, numeric edge values: the \"d1a\" table follows `--rows` from 41 rows up, the transposing steps use the fixed 40-row \"d1a_small\" table, and the empty, one-row, one-column and all-blank shapes stay fixed), plus the refusal rules of each engine step by name.",
         "Power BI answers still to check (the engine's rule is the reference until a Power BI answer is saved): promote (duplicate names, blank, numeric and true/false headers, over-length names); transpose (headers dropped, Column1..N names, types); unpivot (row order, and null versus '' cells: Power BI drops null cells while the engine keeps '' as a row); split to rows (blank and null cells); split by positions (characters or UTF-16 units); extract (the engine raises an error on a missing delimiter while Power BI Text.BeforeDelimiter returns null); conditional (text versus number comparison, null, case, first match).",
         "The following operations in `transformations.py` remain deferred:",
         "- Type conversions: `convert_type`, `convert_type_using_locale`",
