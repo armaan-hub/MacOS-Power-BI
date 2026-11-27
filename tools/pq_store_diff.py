@@ -538,6 +538,352 @@ def generate_d1b_csv(csv_file: Path, seed: int, shape: str = "d1b") -> list[str]
     return headers
 
 
+# ------------------------------------------------------------------ D1e: pivot_column and the error-row steps
+D1E_HEADERS = ["e_key", "e_cat", "e_val", "e_txt"]
+D1E_ROWS = 40
+D1E_SHAPES = ("d1e", "d1e_empty", "d1e_one_row", "d1e_blank_cat", "d1e_nokey", "d1e_empty_nokey",
+              "d1e_clash", "d1e_wide", "d1e_prefix", "d1e_case")
+D1E_KEYS = ["k1", "k2", "K1", "k10", "", "k 3"]
+D1E_CATS = ["red", "Blue", "green", "x y", "Violet"]
+D1E_VALS = ["1", "2.5", "-3", "10", "0", ""]
+D1E_TXTS = ["alpha", "Beta", "", "gamma"]
+PIVOT_AGGREGATION_ORDER = ["none", "count_all", "count_non_blank", "sum", "average", "median", "min", "max"]
+PIVOT_DECIMAL_AGGS = {"sum", "average", "median", "min", "max"}
+PIVOT_AGGREGATIONS = set(PIVOT_AGGREGATION_ORDER)
+PIVOT_TOO_MANY = "Error: There were too many elements in the enumeration to complete the operation."
+ERROR_ROW_OPS = ("remove_rows_with_errors", "keep_rows_with_errors")
+
+
+def generate_d1e_csv(csv_file: Path, seed: int, shape: str = "d1e") -> list[str]:
+    """Write one D1e table (pivot_column and the error-row steps) and return its CSV headers.
+
+    Fixed sizes (not `--rows`). "d1e": D1E_ROWS rows drawn from D1E_KEYS (blank keys included), D1E_CATS (no blank
+    category), D1E_VALS (blank values included) and D1E_TXTS, so repeated key and category pairs occur.
+    "d1e_empty": header only. "d1e_one_row": the first drawn row. "d1e_blank_cat": 'd1e' with a blank category in
+    row 3. "d1e_nokey": columns e_cat and e_val, D1E_ROWS rows. "d1e_empty_nokey": columns e_cat and e_val, header
+    only. "d1e_clash": 'd1e' with the category 'e_key' (a key column name) in row 2. "d1e_wide": 520 distinct
+    categories c001..c520 in e_cat (no key column). "d1e_prefix": 'd1e' with the raw text 'Error: raw' in e_txt
+    in row 2 (a text cell, not an error cell). "d1e_case": 'd1e' with 'red' in row 1 and 'RED' in row 2 (names that
+    differ only by case).
+    """
+    rnd = random.Random(f"d1e-{seed}")
+    headers = ["e_cat", "e_val"] if shape in {"d1e_nokey", "d1e_empty_nokey", "d1e_wide"} else list(D1E_HEADERS)
+    body: list[list[str]] = []
+    if shape == "d1e_wide":
+        body = [[f"c{i:03d}", str(i)] for i in range(1, 521)]
+    elif shape not in {"d1e_empty", "d1e_empty_nokey"}:
+        for _ in range(D1E_ROWS):
+            drawn = {
+                "e_key": rnd.choice(D1E_KEYS), "e_cat": rnd.choice(D1E_CATS),
+                "e_val": rnd.choice(D1E_VALS), "e_txt": rnd.choice(D1E_TXTS),
+            }
+            body.append([drawn[h] for h in headers])
+        if shape == "d1e_one_row":
+            body = body[:1]
+        if shape == "d1e_blank_cat":
+            body[2][headers.index("e_cat")] = ""
+        if shape == "d1e_clash":
+            body[1][headers.index("e_cat")] = "e_key"
+        if shape == "d1e_prefix":
+            body[1][headers.index("e_txt")] = "Error: raw"
+        if shape == "d1e_case":
+            body[0][headers.index("e_cat")] = "red"
+            body[1][headers.index("e_cat")] = "RED"
+    csv_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(csv_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        writer.writerows(body)
+    return headers
+
+
+def _d1e_marked(prev_convert: dict[str, Any] | None, column: str) -> bool:
+    """True when the step directly before (a convert_type on `column`) made the error cells of `column`."""
+    return prev_convert is not None and prev_convert.get("column") == column
+
+
+def _d1e_catalog() -> list[dict[str, Any]]:
+    """D1e step items (pivot_column, remove/keep_rows_with_errors). Each names its table; items carry "d1e": True."""
+    items: list[dict[str, Any]] = []
+
+    def add(item_id: str, step: dict[str, Any], table: str = "d1e") -> None:
+        items.append({"id": item_id, "step": step, "table": table, "d1e": True})
+
+    def seq(item_id: str, steps: list[dict[str, Any]], table: str = "d1e") -> None:
+        items.append({"id": item_id, "step": {"op": "sequence"}, "sequence": steps, "table": table, "d1e": True})
+
+    def pv(attr: str, value: str, agg: str) -> dict[str, Any]:
+        return {"op": "pivot_column", "attribute_column": attr, "value_column": value, "aggregation": agg}
+
+    def conv(column: str, target: str) -> dict[str, Any]:
+        return {"op": "convert_type", "column": column, "type": target}
+
+    # --- pivot_column: every aggregation on a numeric value column (the decimal ones are named refusals)
+    for agg in PIVOT_AGGREGATION_ORDER:
+        add(f"d1e_pv_{agg}_num", pv("e_cat", "e_val", agg))
+    add("d1e_pv_none_text", pv("e_cat", "e_txt", "none"))
+    add("d1e_pv_count_all_text", pv("e_cat", "e_txt", "count_all"))
+    add("d1e_pv_count_non_blank_text", pv("e_cat", "e_txt", "count_non_blank"))
+    add("d1e_pv_blank_attr_txt", pv("e_txt", "e_val", "count_all"))
+    add("d1e_pv_case_dup_names", pv("e_cat", "e_val", "none"), "d1e_case")
+    seq("d1e_seq_pv_case_dup_names", [pv("e_cat", "e_val", "count_all"), {"op": "keep_rows_with_errors"}], "d1e_case")
+    add("d1e_pv_nokey_none", pv("e_cat", "e_val", "none"), "d1e_nokey")
+    add("d1e_pv_nokey_count_non_blank", pv("e_cat", "e_val", "count_non_blank"), "d1e_nokey")
+    add("d1e_pv_one_row", pv("e_cat", "e_val", "count_all"), "d1e_one_row")
+    add("d1e_pv_empty", pv("e_cat", "e_val", "count_all"), "d1e_empty")
+    add("d1e_pv_empty_nokey", pv("e_cat", "e_val", "count_all"), "d1e_empty_nokey")
+    add("d1e_pv_blank_cat", pv("e_cat", "e_val", "count_all"), "d1e_blank_cat")
+    add("d1e_pv_blank_cat_none", pv("e_cat", "e_val", "none"), "d1e_blank_cat")
+    add("d1e_pv_name_clash", pv("e_cat", "e_val", "count_all"), "d1e_clash")
+    add("d1e_pv_wide_limit", pv("e_cat", "e_val", "count_all"), "d1e_wide")
+    add("d1e_pv_prefix_attr", pv("e_txt", "e_val", "none"), "d1e_prefix")
+    add("d1e_pv_same_columns", pv("e_cat", "e_cat", "none"))
+    add("d1e_pv_missing_attr", pv("e_xx", "e_val", "none"))
+    add("d1e_pv_missing_value", pv("e_cat", "e_xx", "none"))
+    add("d1e_pv_bad_aggregation", pv("e_cat", "e_val", "bogus"))
+    add("d1e_pv_blank_aggregation", pv("e_cat", "e_val", "  "))
+    add("d1e_pv_padded_names", {"op": "pivot_column", "attribute_column": " e_cat ", "value_column": " e_val ",
+                                "aggregation": " count_all "})
+    add("d1e_pv_extra_field", {**pv("e_cat", "e_val", "none"), "culture": "en-US"})
+    seq("d1e_seq_conv_value_pv_none", [conv("e_val", "whole_number"), pv("e_cat", "e_val", "none")])
+    seq("d1e_seq_conv_value_pv_count_non_blank", [conv("e_val", "whole_number"), pv("e_cat", "e_val", "count_non_blank")])
+    seq("d1e_seq_conv_attr_error", [conv("e_cat", "boolean"), pv("e_cat", "e_val", "count_all")])
+    seq("d1e_seq_conv_key_error", [conv("e_key", "whole_number"), pv("e_cat", "e_val", "count_all")])
+    seq("d1e_seq_pv_then_remove", [pv("e_cat", "e_val", "none"), {"op": "remove_rows_with_errors"}])
+
+    # --- remove_rows_with_errors and keep_rows_with_errors: raw tables, shapes, refusals, sequences after convert_type
+    for step_op, short in ((ERROR_ROW_OPS[0], "rm"), (ERROR_ROW_OPS[1], "keep")):
+        add(f"d1e_{short}_raw_d1b", {"op": step_op}, "d1b")
+        add(f"d1e_{short}_raw_blank", {"op": step_op}, "d1b_blank")
+        add(f"d1e_{short}_raw_empty", {"op": step_op}, "d1b_empty")
+        add(f"d1e_{short}_raw_one_row", {"op": step_op}, "d1b_one_row")
+        add(f"d1e_{short}_raw_text_col", {"op": step_op, "columns": ["b_text"]}, "d1b")
+        add(f"d1e_{short}_raw_empty_list", {"op": step_op, "columns": []}, "d1b")
+        add(f"d1e_{short}_raw_missing", {"op": step_op, "columns": ["missing_xyz"]}, "d1b")
+        add(f"d1e_{short}_raw_blank_name", {"op": step_op, "columns": [" "]}, "d1b")
+        add(f"d1e_{short}_raw_not_list", {"op": step_op, "columns": "b_num"}, "d1b")
+        add(f"d1e_{short}_raw_extra_field", {"op": step_op, "culture": "en-US"}, "d1b")
+        add(f"d1e_{short}_raw_prefix", {"op": step_op, "columns": ["e_txt"]}, "d1e_prefix")
+        seq(f"d1e_seq_conv_{short}", [conv("b_num", "decimal_number"), {"op": step_op}], "d1b")
+        seq(f"d1e_seq_conv_{short}_own_col", [conv("b_num", "decimal_number"), {"op": step_op, "columns": ["b_num"]}], "d1b")
+        seq(f"d1e_seq_conv_{short}_other_col", [conv("b_num", "decimal_number"), {"op": step_op, "columns": ["b_text"]}], "d1b")
+        seq(f"d1e_seq_conv_{short}_empty_list", [conv("b_num", "decimal_number"), {"op": step_op, "columns": []}], "d1b")
+        seq(f"d1e_seq_conv_{short}_missing", [conv("b_num", "decimal_number"), {"op": step_op, "columns": ["missing_xyz"]}], "d1b")
+        seq(f"d1e_seq_conv_{short}_blank_table", [conv("b_num", "decimal_number"), {"op": step_op}], "d1b_blank")
+        seq(f"d1e_seq_conv_{short}_one_row", [conv("b_num", "decimal_number"), {"op": step_op}], "d1b_one_row")
+        seq(f"d1e_seq_conv_{short}_date", [conv("b_date", "date"), {"op": step_op}], "d1b")
+        seq(f"d1e_seq_pv_{short}", [pv("e_cat", "e_val", "none"), {"op": step_op}], "d1e")
+    return items
+
+
+def _map_pivot_column(
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    table_name: str,
+    overrides: dict[str, Any],
+    col_meta: dict[str, dict[str, Any]] | None,
+    store: DuckStore | None,
+    prev_convert: dict[str, Any] | None,
+) -> tuple[str, list[str]] | Refusal:
+    """pivot_column (`_pivot_column`, engine order). Rule table:
+      validation  three text choices, not blank; attribute and value differ after trimming; aggregation in the set.
+      columns     attribute, then value (exact "Column ... does not exist.").
+      rows        in row order, an attribute cell that is an error (only after convert_type on that column), then a
+                  blank attribute ("row N has a blank value"); an empty table without key columns is an error.
+      output      pivot values are the distinct attribute texts in first-seen order; a pivot value equal to a key name
+                  is an error; more than 512 output columns is an error; a key error cell (after convert_type) is an error.
+      cells       none: no member -> null, one member -> its value, more -> the engine's Expression.Error text;
+                  count_all: members (null when none); count_non_blank: members whose value is neither null nor ''.
+      order       key columns: the first key column decides: numeric (every non-blank value parses) ascending, else text
+                  case-folded ascending; blanks last; ties in first-seen order.
+      refused     sum, average, median, min, max (named: the Decimal rules are not mirrored here); text that looks like an
+                  error cell in an attribute or key column when the step does not come straight after convert_type.
+    """
+    if store is None:
+        return Refusal("pivot_column needs the store.")
+    if any(not isinstance(step.get(n), str) or not step[n].strip() for n in ("attribute_column", "value_column", "aggregation")):
+        message = "Transformation step 1 needs an attribute, value, and aggregation choice."
+        return Refusal(message, expected_error="needs an attribute, value, and aggregation choice.")
+    attr = step["attribute_column"].strip()
+    value = step["value_column"].strip()
+    aggregation = step["aggregation"].strip()
+    if attr == value:
+        message = "Transformation step 1 must use different attribute and value columns."
+        return Refusal(message, expected_error="must use different attribute and value columns.")
+    if aggregation not in PIVOT_AGGREGATIONS:
+        message = "Transformation step 1 has an unsupported pivot aggregation."
+        return Refusal(message, expected_error="has an unsupported pivot aggregation.")
+    for name in (attr, value):
+        if name not in headers:
+            message = f"Column {name!r} does not exist."
+            return Refusal(message, expected_error=message)
+    key_headers = [h for h in headers if h not in {attr, value}]
+    cols = [attr, value, *key_headers]
+    col_list = ", ".join(f'"{c}"' for c in cols)
+    scan = store.execute(f"SELECT {col_list} FROM {t_q} ORDER BY {_RN}")
+
+    def is_error_text(v: Any) -> bool:
+        return isinstance(v, str) and v.startswith(CONVERT_ERROR_PREFIX)
+
+    if _d1e_marked(prev_convert, attr) and prev_convert.get("type") == "boolean":
+        if any(rec[0] is not None and not is_error_text(rec[0]) for rec in scan):
+            return Refusal("Boolean text in the attribute column is written TRUE or FALSE by the engine, not True or False.")
+    for pos, rec in enumerate(scan, 1):
+        a = rec[0]
+        if _d1e_marked(prev_convert, attr) and is_error_text(a) and not overrides.get("mutant_pivot_no_attr_error_check"):
+            message = f"Cannot pivot: row {pos} of {attr!r} contains an error."
+            return Refusal(message, expected_error=message)
+        if (a is None or a.strip() == "") and not overrides.get("mutant_pivot_no_blank_check"):
+            message = f"Cannot pivot: row {pos} has a blank value in {attr!r}."
+            return Refusal(message, expected_error=message)
+    pivot_values = list(dict.fromkeys(rec[0] for rec in scan if rec[0] is not None))
+    if not pivot_values and not key_headers:
+        message = "Cannot pivot an empty table without remaining key columns."
+        return Refusal(message, expected_error=message)
+    collisions = [v for v in pivot_values if v in key_headers]
+    if collisions and not overrides.get("mutant_pivot_no_collision_check"):
+        message = f"Cannot pivot: output column {collisions[0]!r} conflicts with an existing key column."
+        return Refusal(message, expected_error=message)
+    if len(key_headers) + len(pivot_values) > MAX_COLUMNS:
+        message = f"Pivoting exceeds the {MAX_COLUMNS}-column import limit."
+        return Refusal(message, expected_error=message)
+    for pos, rec in enumerate(scan, 1):
+        for j, k in enumerate(key_headers):
+            if _d1e_marked(prev_convert, k) and is_error_text(rec[2 + j]):
+                message = f"Cannot pivot: row {pos} of key column {k!r} contains an error."
+                return Refusal(message, expected_error=message)
+    # Text that starts with the error prefix is an error cell only after convert_type on that column; anywhere else
+    # the engine reads it as plain text, which the store cannot tell from an error cell: a named refusal (after the
+    # engine's own errors above, which come first in the engine too).
+    for c_idx, c in enumerate(cols):
+        if c == value or _d1e_marked(prev_convert, c):
+            continue
+        if any(is_error_text(rec[c_idx]) for rec in scan):
+            return Refusal("A cell holds text that starts with the engine's error prefix; the store cannot tell it from an error cell.")
+    if aggregation in PIVOT_DECIMAL_AGGS:
+        return Refusal(f"pivot aggregation {aggregation!r} is not mirrored on the store path (the engine's Decimal aggregate rules).")
+    out_names = [*key_headers, *pivot_values]
+    if len({h.lower() for h in out_names}) != len(out_names):
+        return Refusal("Two output column names differ only by letter case; DuckDB names are case-insensitive and cannot hold both.")
+
+    order_terms = [f"MIN({_RN})"]
+    if key_headers and not overrides.get("mutant_pivot_order_first_seen"):
+        k0 = key_headers[0]
+        meta0 = (col_meta or {}).get(k0, {})
+        present = [rec[2] for rec in scan if rec[2] is not None and rec[2] != ""]
+        numeric = all(engine_number(v) is not None for v in present)
+        if numeric:
+            if not meta0.get("num_sql_exact", False):
+                return Refusal(f"Key column {k0!r} holds numeric text SQL does not read exactly like the engine.")
+            val_expr = sql_num_expr(k0)
+        else:
+            if not meta0.get("ascii_only", False):
+                return Refusal(f"Key column {k0!r} holds non-ASCII text; the engine case-folds with Python rules.")
+            val_expr = f'"{k0}"' if overrides.get("mutant_pivot_sort_case_sensitive") else f'lower("{k0}")'
+        blank_expr = f'CASE WHEN "{k0}" IS NULL OR "{k0}" = \'\' THEN 1 ELSE 0 END'
+        if overrides.get("mutant_pivot_blank_key_first"):
+            blank_expr = f'CASE WHEN "{k0}" IS NULL OR "{k0}" = \'\' THEN 0 ELSE 1 END'
+        order_terms = [f"{blank_expr} ASC", f"{val_expr} ASC", *order_terms]
+
+    val_q = f'"{value}"'
+    agg_items: list[tuple[str, str]] = []
+    for v in pivot_values:
+        reason = unsafe_header_reason(v)
+        if reason:
+            return Refusal(reason)
+        lit = sql_str(v)
+        if isinstance(lit, Refusal):
+            return lit
+        cond = f'"{attr}" = {lit}'
+        cnt = f"COUNT(*) FILTER (WHERE {cond})"
+        if aggregation == "none":
+            if overrides.get("mutant_pivot_none_first_member"):
+                expr = f"CASE WHEN {cnt} = 0 THEN NULL ELSE arg_min({val_q}, {_RN}) FILTER (WHERE {cond}) END"
+            else:
+                expr = (
+                    f"CASE WHEN {cnt} = 0 THEN NULL WHEN {cnt} = 1 THEN arg_min({val_q}, {_RN}) FILTER (WHERE {cond}) "
+                    f"ELSE {sql_str(PIVOT_TOO_MANY)} END"
+                )
+        elif aggregation == "count_all" or overrides.get("mutant_pivot_count_non_blank_counts_blank"):
+            if overrides.get("mutant_pivot_missing_is_zero"):
+                expr = f"CAST({cnt} AS VARCHAR)"
+            else:
+                expr = f"CASE WHEN {cnt} = 0 THEN NULL ELSE CAST({cnt} AS VARCHAR) END"
+        else:
+            non_blank = f"{cond} AND {val_q} IS NOT NULL AND {val_q} <> ''"
+            expr = f"CASE WHEN {cnt} = 0 THEN NULL ELSE CAST(COUNT(*) FILTER (WHERE {non_blank}) AS VARCHAR) END"
+        agg_items.append((v, f'{expr} AS "{v}"'))
+    if overrides.get("mutant_pivot_columns_alpha"):
+        agg_items.sort(key=lambda item: item[0])
+    out_headers = [*key_headers, *(v for v, _ in agg_items)]
+    select_parts = [f'"{k}"' for k in key_headers] + [sel for _, sel in agg_items]
+    if key_headers:
+        group_by = ", ".join(f'"{k}"' for k in key_headers)
+        sql = f"SELECT {', '.join(select_parts)} FROM {t_q} GROUP BY {group_by} ORDER BY {', '.join(order_terms)}"
+    else:
+        sql = f"SELECT {', '.join(select_parts)} FROM {t_q}"
+    return (sql, out_headers)
+
+
+def _map_error_rows(
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    op: str,
+    overrides: dict[str, Any],
+    store: DuckStore | None,
+    table_name: str,
+    prev_convert: dict[str, Any] | None,
+) -> tuple[str, list[str]] | Refusal:
+    """remove_rows_with_errors and keep_rows_with_errors (`columns` optional, default all columns).
+
+    Rule table: "columns" present must be a list of non-blank text (exact message); each named column must exist
+    (exact "Error-check column ... does not exist."); a row is an error row when one checked column holds an error cell.
+    After convert_type on a column, its error cells are the text "Error: ..." (the engine's str() of the cell): the
+    predicate is that prefix. Any other checked column holding text with that prefix is a named refusal (the store
+    cannot tell it from an error cell). An empty list checks no column: remove keeps every row, keep keeps none.
+    """
+    if "columns" in step:
+        columns = step["columns"]
+        if not isinstance(columns, list) or any(not isinstance(c, str) or not c.strip() for c in columns):
+            message = "Transformation step 1 needs a list of error-check column names."
+            return Refusal(message, expected_error="needs a list of error-check column names.")
+    else:
+        columns = list(headers)
+    missing = next((c for c in columns if c not in headers), None)
+    if missing is not None and not overrides.get("mutant_error_rows_missing_skipped"):
+        message = f"Error-check column {missing!r} does not exist."
+        return Refusal(message, expected_error=message)
+    if store is None:
+        return Refusal("remove and keep rows with errors need the store.")
+    preds: list[str] = []
+    for c in columns:
+        if c not in headers:
+            preds.append("FALSE")
+        elif _d1e_marked(prev_convert, c):
+            preds.append(f'COALESCE(left("{c}", 7) = {sql_str(CONVERT_ERROR_PREFIX)}, FALSE)')
+        else:
+            scan = store.execute(f'SELECT "{c}" FROM {t_q}')
+            if any(isinstance(rec[0], str) and rec[0].startswith(CONVERT_ERROR_PREFIX) for rec in scan):
+                return Refusal("A cell holds text that starts with the engine's error prefix; the store cannot tell it from an error cell.")
+            preds.append("FALSE")
+    if overrides.get("mutant_error_rows_first_column_only") and preds:
+        preds = preds[:1]
+    if op == "remove_rows_with_errors":
+        if not columns:
+            where = "FALSE" if overrides.get("mutant_error_rows_empty_list_inverted") else "TRUE"
+        else:
+            where = f"NOT ({' OR '.join(preds)})"
+    else:
+        if not columns:
+            where = "TRUE" if overrides.get("mutant_error_rows_empty_list_inverted") else "FALSE"
+        else:
+            where = f"({' OR '.join(preds)})"
+    col_list = ", ".join(f'"{h}"' for h in headers)
+    return (f"SELECT {col_list} FROM {t_q} WHERE {where} ORDER BY {_RN}", list(headers))
+
+
 def build_step_catalog(headers: list[str], d1a: bool = True) -> list[dict[str, Any]]:
     """Build catalog of parameter sets for Tier 1 Power Query steps (`d1a`: the D1a items on their own tables)."""
     catalog: list[dict[str, Any]] = []
@@ -998,6 +1344,7 @@ def build_step_catalog(headers: list[str], d1a: bool = True) -> list[dict[str, A
     if d1a:
         catalog.extend(_d1a_catalog())
         catalog.extend(_d1b_catalog())
+        catalog.extend(_d1e_catalog())
 
     return catalog
 
@@ -2703,8 +3050,9 @@ def _map_convert_type(
     if target == "boolean":
         if not facts["ascii"]:
             return Refusal("Boolean text with non-ASCII characters is not mirrored (Unicode case rules).")
-        lowered = f"lower({s})" if not overrides.get("mutant_convert_bool_case_sensitive") else s
-        ok = f"{lowered} IN ('true', 'false')"
+        base = raw if overrides.get("mutant_convert_bool_no_trim") else s
+        lowered = f"lower({base})" if not overrides.get("mutant_convert_bool_case_sensitive") else base
+        ok = "TRUE" if overrides.get("mutant_convert_bool_no_error") else f"{lowered} IN ('true', 'false')"
         value = f"CASE WHEN {lowered} = 'true' THEN 'True' ELSE 'False' END"
     elif target in {"decimal_number", "whole_number"}:
         if not col_meta[column]["ascii_only"] or not facts["ascii"]:
@@ -2746,13 +3094,15 @@ def _map_convert_type(
     elif target == "datetime":
         if not facts["datetime_strict"]:
             return Refusal("Datetimes other than yyyy-mm-dd[ T]hh:mm:ss: the engine takes minutes, offsets and fractions; SQL differs.")
-        stamp = f"replace({s}, 'T', ' ')"
-        ok = f"regexp_matches({s}, '{CONVERT_DATETIME_SQL}') AND TRY_CAST({stamp} AS TIMESTAMP) IS NOT NULL"
+        stamp = f"replace({s}, 'T', '#')" if overrides.get("mutant_convert_datetime_T_breaks") else f"replace({s}, 'T', ' ')"
+        valid = "" if overrides.get("mutant_convert_datetime_no_validity") else f" AND TRY_CAST({stamp} AS TIMESTAMP) IS NOT NULL"
+        ok = f"regexp_matches({s}, '{CONVERT_DATETIME_SQL}'){valid}"
         value = f"strftime(TRY_CAST({stamp} AS TIMESTAMP), '%Y-%m-%d %H:%M:%S')"
     elif target == "time":
         if not facts["time_strict"]:
             return Refusal("Times other than hh:mm:ss (00 to 23): the engine takes 24:00:00, minutes-only and fractions; SQL differs.")
-        ok = f"regexp_matches({s}, '{CONVERT_TIME_SQL}') AND TRY_CAST({s} AS TIME) IS NOT NULL"
+        time_regex = "" if overrides.get("mutant_convert_time_no_regex") else f"regexp_matches({s}, '{CONVERT_TIME_SQL}') AND "
+        ok = f"{time_regex}TRY_CAST({s} AS TIME) IS NOT NULL"
         value = s
     else:
         return Refusal(f"convert_type to {target} is not mapped.")
@@ -2769,10 +3119,11 @@ def _map_convert_type(
             sql_str(" of column '"), sql_str(column), sql_str(f"' to {target}."),
         ]
     err = " || ".join(f"CAST({p} AS VARCHAR)" if p == raw else p for p in message_parts)
+    fail = "NULL" if overrides.get("mutant_convert_error_cell_null") else err
     if overrides.get("mutant_convert_blank_is_null"):
-        converted = f"CASE WHEN {raw} IS NULL OR {raw} = '' THEN NULL WHEN {ok} THEN {value} ELSE {err} END"
+        converted = f"CASE WHEN {raw} IS NULL OR {raw} = '' THEN NULL WHEN {ok} THEN {value} ELSE {fail} END"
     else:
-        converted = f"CASE WHEN {raw} IS NULL THEN NULL WHEN {ok} THEN {value} ELSE {err} END"
+        converted = f"CASE WHEN {raw} IS NULL THEN NULL WHEN {ok} THEN {value} ELSE {fail} END"
     out_list = ", ".join(
         f'{converted} AS "{h}"' if h == column else f'"{h}"' for h in headers
     )
@@ -2850,7 +3201,8 @@ def _map_convert_type_using_locale(
     s = f"trim({raw}, {ws})"
     n = s if overrides.get("mutant_locale_keeps_commas") else f"replace({s}, ',', '')"
     number = f"TRY_CAST({n} AS {SQL_DECIMAL})"
-    ok = f"regexp_matches({s}, '{LOCALE_EN_US_NUMBER_SQL}') AND {number} IS NOT NULL"
+    ok = (f"{number} IS NOT NULL" if overrides.get("mutant_locale_no_grouping_regex")
+          else f"regexp_matches({s}, '{LOCALE_EN_US_NUMBER_SQL}') AND {number} IS NOT NULL")
     if step["type"] == "decimal_number":
         value = _convert_decimal_text_sql(n, overrides)
     else:
@@ -2891,8 +3243,10 @@ def _map_remove_sparse_rows(
     if any(isinstance(v, str) and v.startswith(CONVERT_ERROR_PREFIX) for row in cells for v in row):
         return Refusal("A cell holds text that starts with the engine's error prefix; the store cannot tell it from an error cell.")
     ws = sql_str(PY_WHITESPACE)
+    blank_test = (lambda h: f"\"{h}\" <> ''") if overrides.get("mutant_sparse_whitespace_meaningful") else (
+        lambda h: f"trim(\"{h}\", {ws}) <> ''")
     meaningful = " + ".join(
-        f'CASE WHEN "{h}" IS NOT NULL AND trim("{h}", {ws}) <> \'\' THEN 1 ELSE 0 END' for h in headers
+        f'CASE WHEN "{h}" IS NOT NULL AND {blank_test(h)} THEN 1 ELSE 0 END' for h in headers
     ) or "0"
     limit = 0 if overrides.get("mutant_sparse_at_most_zero") else 1
     inner = f"SELECT {plain_list}, ROW_NUMBER() OVER (ORDER BY {_RN}) AS _sp_rn, ({meaningful}) <= {limit} AS _sp_sparse FROM {t_q}"
@@ -2901,16 +3255,18 @@ def _map_remove_sparse_rows(
         keep = "_sp_first IS NOT NULL AND _sp_rn >= _sp_first" if not overrides.get("mutant_sparse_drops_first") else "_sp_first IS NOT NULL AND _sp_rn > _sp_first"
     else:
         mid = "MAX(CASE WHEN NOT _sp_sparse THEN _sp_rn END) OVER () AS _sp_last"
-        keep = "_sp_last IS NOT NULL AND _sp_rn <= _sp_last"
+        keep = "_sp_last IS NOT NULL AND _sp_rn < _sp_last" if overrides.get("mutant_sparse_bottom_drops_last") else "_sp_last IS NOT NULL AND _sp_rn <= _sp_last"
     return (
         f"SELECT {plain_list} FROM (SELECT *, {mid} FROM ({inner})) WHERE {keep} ORDER BY _sp_rn",
         list(headers),
     )
 
 
-def _map_table_pass_through(headers: list[str], t_q: str) -> tuple[str, list[str]]:
+def _map_table_pass_through(headers: list[str], t_q: str, overrides: dict[str, Any] | None = None) -> tuple[str, list[str]]:
     """table_pass_through: the engine copies the step and changes nothing (no field check)."""
     plain_list = ", ".join(f'"{h}"' for h in headers)
+    if overrides and overrides.get("mutant_pass_through_drops_last"):
+        return (f"SELECT {plain_list} FROM {t_q} WHERE {_RN} <> (SELECT MAX({_RN}) FROM {t_q}) ORDER BY {_RN}", list(headers))
     return (f"SELECT {plain_list} FROM {t_q} ORDER BY {_RN}", list(headers))
 
 
@@ -2961,8 +3317,13 @@ D0H_STEP_FIELDS: dict[str, set[str]] = {
     "extract_text_by_delimiter": {"op", "column", "delimiter", "side", "occurrence"},
     "extract_text_between_delimiters": {"op", "column", "start_delimiter", "end_delimiter", "start_occurrence", "end_occurrence"},
     "conditional_column": {"op", "name", "clauses", "else_value", "else_kind"},
+    "pivot_column": {"op", "attribute_column", "value_column", "aggregation"},
+    "remove_rows_with_errors": {"op"},
+    "keep_rows_with_errors": {"op"},
 }
 D0H_OPTIONAL_STEP_FIELDS: dict[str, set[str]] = {
+    "remove_rows_with_errors": {"columns"},
+    "keep_rows_with_errors": {"columns"},
     "replace_value": {"replacer"},
     "split_column": {"from_end", "missing_part"},
     "split_column_by_each_delimiter": {"from_end", "missing_part"},
@@ -3002,8 +3363,11 @@ def generate_sequence_sql(
     steps = item["sequence"]
     result: tuple[str, list[str]] | Refusal | str = Refusal("An empty step sequence cannot run.")
     for index, step in enumerate(steps):
+        # D1e: the step right after a convert_type sees that convert (its error cells are the "Error: " text).
+        prev_convert = steps[index - 1] if index and steps[index - 1].get("op") == "convert_type" else None
+        step_item = {"id": item["id"], "step": step, **({"prev_convert": prev_convert} if prev_convert else {})}
         result = generate_step_sql(
-            {"id": item["id"], "step": step}, current_headers, current_name, current_total,
+            step_item, current_headers, current_name, current_total,
             overrides=overrides, col_meta=current_meta, store=store,
         )
         if isinstance(result, Refusal) or index == len(steps) - 1:
@@ -3679,8 +4043,12 @@ def _mapped_sql(
         if set(step) != {"op"}:
             return Refusal("The step has missing or unsupported fields.", expected_error="has missing or unsupported fields.")
         return _map_remove_sparse_rows(headers, t_q, table_name, op == "remove_sparse_top_rows", overrides, store)
+    if op == "pivot_column":
+        return _map_pivot_column(step, headers, t_q, table_name, overrides, col_meta, store, item.get("prev_convert"))
+    if op in ERROR_ROW_OPS:
+        return _map_error_rows(step, headers, t_q, op, overrides, store, table_name, item.get("prev_convert"))
     if op == "table_pass_through":
-        return _map_table_pass_through(headers, t_q)
+        return _map_table_pass_through(headers, t_q, overrides)
     if op in NAMED_UNSUPPORTED_REASONS:
         return _map_named_unsupported(step)
 
@@ -3861,11 +4229,13 @@ def run_pq_step_diff_many(
         if item_filter:
             catalog = [item for item in catalog if item["id"] in set(item_filter)]
         needed_tables = {item.get("table", "main") for item in catalog}
-        for shape in D1A_SHAPES + D1B_SHAPES:
+        for shape in D1A_SHAPES + D1B_SHAPES + D1E_SHAPES:
             if shape not in needed_tables:
                 continue
             d1a_path = t_path / f"{shape}.csv"
-            if shape in D1B_SHAPES:
+            if shape in D1E_SHAPES:
+                generate_d1e_csv(d1a_path, seed, shape)
+            elif shape in D1B_SHAPES:
                 generate_d1b_csv(d1a_path, seed, shape)
             else:
                 generate_d1a_csv(d1a_path, seed, shape)

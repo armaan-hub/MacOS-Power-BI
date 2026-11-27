@@ -397,3 +397,32 @@ def test_d1b_sparse_tool_level_mutants_exit_1_on_generated_data(rows: int, seed:
     for mutant, data in zip(mutants, mutant_runs):
         code, _ = evaluate_exit_policy(data, {"classes": [], "refused": refusals})
         assert code == 1, f"{mutant} did not exit 1 at {rows}/{seed}"
+
+
+# ------------------------------------------------------------------ D1e: nine more D1b-step mutants (16 to 25 in total)
+@pytest.mark.parametrize("mutant,dataset,target", [
+    ("mutant_convert_error_cell_null", ERROR_NUMBERS, "decimal_number"),
+    ("mutant_convert_bool_no_trim", BOOLEAN_TEXT, "boolean"),
+    ("mutant_convert_bool_no_error", BOOLEAN_TEXT, "boolean"),
+    ("mutant_convert_datetime_T_breaks", DATETIME_TEXT, "datetime"),
+    ("mutant_convert_datetime_no_validity", DATETIME_TEXT, "datetime"),
+])
+def test_convert_extra_mutant_differs_and_exits_1(mutant: str, dataset: dict, target: str) -> None:
+    _assert_mutant_differs_and_exits_1(dataset, _convert("n", target), mutant)
+
+
+def test_locale_no_grouping_regex_mutant_differs_and_exits_1() -> None:
+    dataset = _col(["1,00", "1,000", "2"])
+    _assert_mutant_differs_and_exits_1(dataset, _locale("n", "decimal_number"), "mutant_locale_no_grouping_regex")
+
+
+def test_sparse_extra_mutants_differ_and_exit_1() -> None:
+    top = {"id": "top", "step": {"op": "remove_sparse_top_rows"}}
+    bottom = {"id": "bottom", "step": {"op": "remove_sparse_bottom_rows"}}
+    _assert_mutant_differs_and_exits_1(SPARSE_ROWS, top, "mutant_sparse_whitespace_meaningful")
+    _assert_mutant_differs_and_exits_1(SPARSE_ROWS, bottom, "mutant_sparse_bottom_drops_last")
+
+
+def test_pass_through_drops_last_mutant_differs_and_exits_1() -> None:
+    _assert_mutant_differs_and_exits_1(_col(["x", "y", "z"]), {"id": "pt", "step": {"op": "table_pass_through"}},
+                                       "mutant_pass_through_drops_last")
