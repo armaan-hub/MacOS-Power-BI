@@ -35,6 +35,8 @@ from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
 from analytics_studio.transformations import (
     MAX_CONDITIONAL_CLAUSES,
+    MAX_DELIMITER_OCCURRENCE,
+    MAX_SPLIT_POSITION,
     _CONDITIONAL_OPERATORS,
     _CONDITIONAL_VALUE_KINDS,
     TransformationError,
@@ -400,8 +402,69 @@ def generate_pq_dataset(
     return {"headers": headers, "rows": len(csv_rows)}
 
 
-def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
-    """Build catalog of parameter sets for Tier 1 Power Query steps."""
+# D1a tables: their own small generated tables, so the main table (and every older step's result) is unchanged.
+# Each D1a item names its table in "table" (default "main"); the table is built by `generate_d1a_csv`.
+D1A_HEADERS = ["d_key", "d_text", "d_num", "d_cat", "d_delim", "d_pos", "d_paren", "d_uni", "d_clean", "d_clean2", "d_blank"]
+D1A_ROWS = 40
+D1A_SHAPES = ("d1a", "d1a_empty", "d1a_one_row", "d1a_one_col", "d1a_blank")
+
+
+def generate_d1a_csv(csv_file: Path, seed: int, shape: str = "d1a") -> list[str]:
+    """Write one D1a table and return its CSV headers.
+
+    "d1a": a header-like first data row (promote_headers reads it: "Key", "Name", "Qty", a duplicate "Qty", a blank
+    name), then D1A_ROWS rows with delimiter-bearing text (consecutive, leading, trailing and empty parts), positional
+    text (unicode, an astral emoji, short cells), parenthesised text, unicode probes and planted numeric edge values
+    (Arabic-Indic digit, 1e30, 1E+20, -1e25, 19 fractional digits). Its own generator (`rnd_d1a`), seeded from `seed`.
+    "d1a_empty": header only. "d1a_one_row": the header-like row alone. "d1a_one_col": one text column, five rows.
+    "d1a_blank": three rows of blank cells.
+    """
+    rnd_d1a = random.Random(f"d1a-{seed}")
+    if shape == "d1a_one_col":
+        headers = ["d_one"]
+        body: list[list[str]] = [["a;b"], ["c"], [""], ["x;;y"], ["(z)"]]
+    else:
+        headers = list(D1A_HEADERS)
+        first = ["Key", "Name", "Qty", "Qty", "Parts;x", "Code", "(Note)", "Name", "Score", "Score", ""]
+        if shape == "d1a_blank":
+            body = [[""] * len(headers) for _ in range(3)]
+        elif shape == "d1a_empty":
+            body = []
+        elif shape == "d1a_one_row":
+            body = [list(first)]
+        else:
+            choices = {
+                1: ["red", "Red", "blue ", "", "green", "ünï", "a'b", 'x"y', "Red; blue"],
+                2: ["1", "2.5", "-3", "10", "", "007", "-0.50", "100"],
+                3: ["A", "B", "C", "a", "b", "", "A "],
+                4: ["a;b", "a;;b", ";a", "a;", "", ";", "x;y;z", "  ;  "],
+                5: ["abcdefghijkl", "hello world", "abc", "ünïcödé text", "", "0123456789ABCDEFGHIJ", "😀ab😀cd", "éé"],
+                6: ["(x)", "a(b)c", "(1)(2)", "(a)(b)", "()", "", "(m)"],
+                7: ["é", "ß", "٣", "😀a", "İ", "Σ", "", "ﬁ", "漢字"],
+                # clean numerics: every form the engine and DECIMAL(38,18) read the same (no edge values)
+                8: ["0", "1", "10", "50", "100", "2", "9", "-5", "-0.50", "12.5", "0.1000000000000001",
+                    "1e3", "+7", ".5", " 5", "10 ", "1_000", "007", "-0"],
+                9: ["0", "3", "20", "-7", "1.25", "", "1e2", "-0.1", "8", "1_0", "42"],
+            }
+            planted_num = ["٣", "1e30", "1E+20", "-1e25", "0.1234567890123456789", "1e-20", "+7", "1_000", " 5"]
+            body = [list(first)]
+            for n in range(1, D1A_ROWS + 1):
+                row = [f"k{n:02d}"] + [rnd_d1a.choice(choices[k]) for k in range(1, 10)] + [""]
+                body.append(row)
+            for offset, value in enumerate(planted_num):
+                body[1 + offset][2] = value  # d_num, rows k01..k09
+            for offset, value in enumerate(["a;;b", ";a", "a;", "x;y;z"]):
+                body[1 + offset][4] = value  # d_delim: consecutive, leading, trailing, three parts
+    csv_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(csv_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        writer.writerows(body)
+    return headers
+
+
+def build_step_catalog(headers: list[str], d1a: bool = True) -> list[dict[str, Any]]:
+    """Build catalog of parameter sets for Tier 1 Power Query steps (`d1a`: the D1a items on their own tables)."""
     catalog: list[dict[str, Any]] = []
     n_cols = len(headers)
 
@@ -857,6 +920,8 @@ def build_step_catalog(headers: list[str]) -> list[dict[str, Any]]:
     })
 
     catalog.extend(_d0h_catalog(headers))
+    if d1a:
+        catalog.extend(_d1a_catalog())
 
     return catalog
 
@@ -969,6 +1034,141 @@ def _d0h_catalog(headers: list[str]) -> list[dict[str, Any]]:
         add("split_column_empty_delimiter", {"op": "split_column", "column": "split_col", "delimiter": ""})
         add("split_column_missing_col", {"op": "split_column", "column": "missing_xyz", "delimiter": "|"})
 
+    return items
+
+
+def _d1a_catalog() -> list[dict[str, Any]]:
+    """D1a step items: headers, reshaping, split and extract, conditional column. Each names its D1a table."""
+    items: list[dict[str, Any]] = []
+
+    def add(item_id: str, step: dict[str, Any], table: str = "d1a") -> None:
+        items.append({"id": item_id, "step": step, "table": table, "d1a": True})
+
+    # --- promote and demote headers (the first data row is the header-like row)
+    add("d1a_promote_headers", {"op": "promote_headers"})
+    add("d1a_promote_headers_not_all_scalars", {"op": "promote_headers", "promote_all_scalars": False})
+    add("d1a_promote_headers_empty_table", {"op": "promote_headers"}, "d1a_empty")
+    add("d1a_promote_headers_one_row", {"op": "promote_headers"}, "d1a_one_row")
+    add("d1a_demote_headers", {"op": "demote_headers"})
+    add("d1a_demote_headers_one_col", {"op": "demote_headers"}, "d1a_one_col")
+
+    # --- transpose
+    add("d1a_transpose_table", {"op": "transpose_table"})
+    add("d1a_transpose_table_empty", {"op": "transpose_table"}, "d1a_empty")
+    add("d1a_transpose_table_one_row", {"op": "transpose_table"}, "d1a_one_row")
+
+    # --- unpivot (both kinds, the order of the listed columns, refusals by name)
+    add("d1a_unpivot_columns", {"op": "unpivot_columns", "columns": ["d_num", "d_cat"], "attribute_name": "attr", "value_name": "val"})
+    add("d1a_unpivot_columns_listed_order", {"op": "unpivot_columns", "columns": ["d_cat", "d_num"], "attribute_name": "a2", "value_name": "v2"})
+    add("d1a_unpivot_columns_all", {"op": "unpivot_columns", "columns": list(D1A_HEADERS), "attribute_name": "attr", "value_name": "val"})
+    add("d1a_unpivot_columns_missing_col", {"op": "unpivot_columns", "columns": ["missing_xyz"], "attribute_name": "attr", "value_name": "val"})
+    add("d1a_unpivot_columns_empty_list", {"op": "unpivot_columns", "columns": [], "attribute_name": "attr", "value_name": "val"})
+    add("d1a_unpivot_columns_clashing_name", {"op": "unpivot_columns", "columns": ["d_num"], "attribute_name": "d_key", "value_name": "val"})
+    add("d1a_unpivot_columns_same_names", {"op": "unpivot_columns", "columns": ["d_num"], "attribute_name": "x", "value_name": "x"})
+    add("d1a_unpivot_columns_one_row", {"op": "unpivot_columns", "columns": ["d_num"], "attribute_name": "attr", "value_name": "val"}, "d1a_one_row")
+    add("d1a_unpivot_columns_empty_table", {"op": "unpivot_columns", "columns": ["d_num"], "attribute_name": "attr", "value_name": "val"}, "d1a_empty")
+    add("d1a_unpivot_other_columns", {"op": "unpivot_other_columns", "columns": ["d_key"], "attribute_name": "attr", "value_name": "val"})
+    add("d1a_unpivot_other_columns_empty_list", {"op": "unpivot_other_columns", "columns": [], "attribute_name": "attr", "value_name": "val"})
+    add("d1a_unpivot_other_columns_all_listed", {"op": "unpivot_other_columns", "columns": list(D1A_HEADERS), "attribute_name": "attr", "value_name": "val"})
+
+    # --- split to rows (empty cells, delimiter-bearing text, empty delimiter, missing column, one column table)
+    add("d1a_split_column_to_rows", {"op": "split_column_to_rows", "column": "d_delim", "delimiter": ";"})
+    add("d1a_split_column_to_rows_multi_char", {"op": "split_column_to_rows", "column": "d_text", "delimiter": "; "})
+    add("d1a_split_column_to_rows_empty_delimiter", {"op": "split_column_to_rows", "column": "d_delim", "delimiter": ""})
+    add("d1a_split_column_to_rows_missing_col", {"op": "split_column_to_rows", "column": "missing_xyz", "delimiter": ";"})
+    add("d1a_split_column_to_rows_one_col", {"op": "split_column_to_rows", "column": "d_one", "delimiter": ";"}, "d1a_one_col")
+
+    # --- split by positions (characters, unicode, short cells, bounds, refusals by name)
+    add("d1a_split_by_positions", {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, 3, 7, 12]})
+    add("d1a_split_by_positions_two", {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, 5]})
+    add("d1a_split_by_positions_bound", {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, 83886080]})
+    add("d1a_split_by_positions_not_zero", {"op": "split_column_by_positions", "column": "d_pos", "positions": [1, 4]})
+    add("d1a_split_by_positions_decreasing", {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, 5, 3]})
+    add("d1a_split_by_positions_bool", {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, True]})
+    add("d1a_split_by_positions_over_bound", {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, 83886081]})
+    add("d1a_split_by_positions_one_position", {"op": "split_column_by_positions", "column": "d_pos", "positions": [0]})
+    add("d1a_split_by_positions_too_many", {"op": "split_column_by_positions", "column": "d_pos", "positions": list(range(513))})
+    add("d1a_split_by_positions_missing_col", {"op": "split_column_by_positions", "column": "missing_xyz", "positions": [0, 3]})
+
+    # --- extract text (before and after, occurrence, missing delimiter, side, empty delimiter, occurrence bound)
+    for side in ("before", "after"):
+        for occurrence in (0, 1):
+            add(f"d1a_extract_{side}_occurrence_{occurrence}", {
+                "op": "extract_text_by_delimiter", "column": "d_paren", "delimiter": "(", "side": side, "occurrence": occurrence})
+    add("d1a_extract_semicolon_after", {"op": "extract_text_by_delimiter", "column": "d_delim", "delimiter": ";", "side": "after", "occurrence": 0})
+    add("d1a_extract_missing_delimiter", {"op": "extract_text_by_delimiter", "column": "d_delim", "delimiter": "|", "side": "before", "occurrence": 0})
+    add("d1a_extract_bad_side", {"op": "extract_text_by_delimiter", "column": "d_paren", "delimiter": "(", "side": "middle", "occurrence": 0})
+    add("d1a_extract_empty_delimiter", {"op": "extract_text_by_delimiter", "column": "d_paren", "delimiter": "", "side": "before", "occurrence": 0})
+    add("d1a_extract_occurrence_bound", {"op": "extract_text_by_delimiter", "column": "d_paren", "delimiter": "(", "side": "before", "occurrence": 100001})
+    add("d1a_extract_missing_col", {"op": "extract_text_by_delimiter", "column": "missing_xyz", "delimiter": "(", "side": "before", "occurrence": 0})
+
+    # --- extract between delimiters
+    add("d1a_between", {"op": "extract_text_between_delimiters", "column": "d_paren", "start_delimiter": "(", "end_delimiter": ")", "start_occurrence": 0, "end_occurrence": 0})
+    add("d1a_between_occurrences", {"op": "extract_text_between_delimiters", "column": "d_paren", "start_delimiter": "(", "end_delimiter": ")", "start_occurrence": 1, "end_occurrence": 0})
+    add("d1a_between_missing_start", {"op": "extract_text_between_delimiters", "column": "d_delim", "start_delimiter": "|", "end_delimiter": ";", "start_occurrence": 0, "end_occurrence": 0})
+    add("d1a_between_missing_end", {"op": "extract_text_between_delimiters", "column": "d_paren", "start_delimiter": "(", "end_delimiter": "|", "start_occurrence": 0, "end_occurrence": 0})
+    add("d1a_between_empty_start", {"op": "extract_text_between_delimiters", "column": "d_paren", "start_delimiter": "", "end_delimiter": ")", "start_occurrence": 0, "end_occurrence": 0})
+
+    # --- conditional column: every operator with every comparison kind (literal, column, null), then the clause rules
+    text_ops = ["equals", "not_equals", "contains", "does_not_contain", "begins_with", "does_not_begin_with", "ends_with", "does_not_end_with"]
+    numeric_ops = ["greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal"]
+
+    def clause(column: str, op: str, value: str, kind: str, out: str = "hit", out_kind: str = "value") -> dict[str, str]:
+        return {"column": column, "operator": op, "test_value": value, "test_value_kind": kind, "output": out, "output_kind": out_kind}
+
+    def cond(clauses: list[dict[str, str]], name: str = "hit_col", else_value: str = "other", else_kind: str = "value") -> dict[str, Any]:
+        return {"op": "conditional_column", "name": name, "clauses": clauses, "else_value": else_value, "else_kind": else_kind}
+
+    for op in text_ops:
+        for kind, value in (("value", "e"), ("column", "d_cat"), ("null", "")):
+            add(f"d1a_cond_{op}_{kind}", cond([clause("d_text", op, value, kind)]))
+    for op in numeric_ops:
+        # d_clean holds only exact forms; d_clean2 is a second exact column; d_text is text (mixed compare)
+        for item_kind, kind, value in (
+            ("value", "value", "2"), ("column", "column", "d_clean2"),
+            ("column_mixed", "column", "d_text"), ("null", "null", ""),
+        ):
+            add(f"d1a_cond_{op}_{item_kind}", cond([clause("d_clean", op, value, kind)]))
+        # refused by name: a column or literal that SQL does not read like the engine (d_num holds 1e30, 1E+20, ...)
+        add(f"d1a_cond_{op}_dirty_column", cond([clause("d_num", op, "2", "value")]))
+        add(f"d1a_cond_{op}_dirty_column_right", cond([clause("d_clean", op, "d_num", "column")]))
+    add("d1a_cond_greater_than_big_literal", cond([clause("d_clean", "greater_than", "1e30", "value")]))
+    add("d1a_cond_greater_than_fraction_literal", cond([clause("d_clean", "greater_than", "0.1234567890123456789", "value")]))
+    add("d1a_cond_greater_than_text_literal", cond([clause("d_clean", "greater_than", "abc", "value")]))
+    add("d1a_cond_first_match", cond([clause("d_cat", "equals", "A", "value", "first"), clause("d_cat", "equals", "A", "value", "second")]))
+    add("d1a_cond_output_column_else_column", cond([clause("d_cat", "equals", "A", "value", "d_key", "column")], else_value="d_text", else_kind="column"))
+    add("d1a_cond_64_clauses", cond([clause("d_cat", "equals", c, "value") for c in [f"v{i}" for i in range(64)]]))
+    add("d1a_cond_65_clauses", cond([clause("d_cat", "equals", c, "value") for c in [f"v{i}" for i in range(65)]]))
+    add("d1a_cond_clashing_name", cond([clause("d_cat", "equals", "A", "value")], name="d_key"))
+    add("d1a_cond_missing_col", cond([clause("missing_xyz", "equals", "A", "value")]))
+    add("d1a_cond_bad_operator", cond([clause("d_cat", "bogus", "A", "value")]))
+    add("d1a_cond_bad_else_kind", cond([clause("d_cat", "equals", "A", "value")], else_kind="bogus"))
+    add("d1a_cond_empty_clauses", cond([]))
+    add("d1a_cond_blank_name", cond([clause("d_cat", "equals", "A", "value")], name=" "))
+    add("d1a_cond_one_row", cond([clause("d_cat", "equals", "A", "value")]), "d1a_one_row")
+    add("d1a_cond_empty_table", cond([clause("d_cat", "equals", "A", "value")]), "d1a_empty")
+
+    # --- sequences: each step runs on the previous step's output (materialised in the store)
+    def seq(item_id: str, steps: list[dict[str, Any]], table: str = "d1a") -> None:
+        items.append({"id": item_id, "step": {"op": "sequence"}, "sequence": steps, "table": table, "d1a": True})
+
+    seq("d1a_seq_split_then_unpivot", [
+        {"op": "split_column_to_rows", "column": "d_delim", "delimiter": ";"},
+        {"op": "unpivot_columns", "columns": ["d_clean"], "attribute_name": "attr", "value_name": "val"},
+    ])
+    seq("d1a_seq_unpivot_then_promote", [
+        {"op": "unpivot_columns", "columns": ["d_num", "d_cat"], "attribute_name": "attr", "value_name": "val"},
+        {"op": "promote_headers"},
+    ])
+    seq("d1a_seq_transpose_then_promote", [{"op": "transpose_table"}, {"op": "promote_headers"}])
+    seq("d1a_seq_extract_then_conditional", [
+        {"op": "extract_text_by_delimiter", "column": "d_paren", "delimiter": "(", "side": "before", "occurrence": 0},
+        cond([clause("d_paren", "equals", "", "value")], name="blank_paren"),
+    ])
+    seq("d1a_seq_positions_then_conditional", [
+        {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, 3]},
+        cond([clause("d_pos.1", "begins_with", "ab", "value")], name="ab_start"),
+    ])
     return items
 
 
@@ -1600,6 +1800,11 @@ def _map_promote_headers(
 ) -> tuple[str, list[str]] | Refusal:
     if store is None:
         return Refusal("DuckStore required to map promote_headers.")
+    # The engine's shape rule first (`_validate_step`), then its apply rule.
+    promote_all = step.get("promote_all_scalars", True)
+    if not isinstance(promote_all, bool):
+        message = "Transformation step 1 PromoteAllScalars setting must be Boolean."
+        return Refusal(message, expected_error=message)
     col_list = ", ".join(f'"{h}"' for h in headers)
     rows = store.execute(f"SELECT {_RN}, {col_list} FROM {t_q} ORDER BY {_RN} LIMIT 1")
     if not rows:
@@ -1607,11 +1812,14 @@ def _map_promote_headers(
         return Refusal(message, expected_error=message)
     min_rn = rows[0][0]
     first_row_values = [normalize_cell(v) for v in rows[0][1:]]
-    promote_all = step.get("promote_all_scalars", True)
-    header_values = [
-        v if (promote_all or v is not None) else f"Column{i + 1}"
-        for i, v in enumerate(first_row_values)
-    ]
+    # Engine (`_promote_headers`): with promote_all_scalars a NULL is cell_to_text(None) == '' (then 'Column N');
+    # without it a NULL is 'Column N' and text is kept.
+    header_values: list[str] = []
+    for i, v in enumerate(first_row_values):
+        if promote_all:
+            header_values.append("" if v is None else v)
+        else:
+            header_values.append(f"Column{i + 1}" if v is None else v)
     promoted = normalize_promoted_headers(header_values, len(headers))
     for name in promoted:
         unsafe = unsafe_header_reason(name)
@@ -1690,11 +1898,15 @@ def _map_transpose_table(
 def _map_unpivot_columns(
     step: dict[str, Any], headers: list[str], t_q: str, unpivot_other: bool, overrides: dict[str, Any]
 ) -> tuple[str, list[str]] | Refusal:
+    # Engine order (`_validate_step`, then `_unpivot_columns`): columns, duplicates, names, names differ,
+    # each column exists (in the order listed), at least one pivot column, output-name clash, column limit.
     columns = step.get("columns")
-    if not isinstance(columns, list) or not columns:
-        if not unpivot_other:
-            message = "Transformation step 1 needs one or more columns."
-            return Refusal(message, expected_error="needs one or more columns.")
+    if not isinstance(columns, list) or not columns or any(not isinstance(c, str) or not c.strip() for c in columns):
+        message = "Transformation step 1 needs one or more columns."
+        return Refusal(message, expected_error="needs one or more columns.")
+    if len(set(columns)) != len(columns):
+        message = "Transformation step 1 contains a duplicate column name."
+        return Refusal(message, expected_error="contains a duplicate column name.")
     attribute_name = step.get("attribute_name")
     value_name = step.get("value_name")
     if not isinstance(attribute_name, str) or not attribute_name.strip() or not isinstance(value_name, str) or not value_name.strip():
@@ -1705,14 +1917,11 @@ def _map_unpivot_columns(
     if attribute_name == value_name:
         message = "Transformation step 1 output column names must be different."
         return Refusal(message, expected_error="output column names must be different.")
-    for c in (columns or []):
-        if not isinstance(c, str):
-            message = "Transformation step 1 needs one or more columns."
-            return Refusal(message, expected_error="needs one or more columns.")
+    for c in columns:
         if c not in headers:
             message = f"Column {c!r} does not exist."
             return Refusal(message, expected_error=message)
-    selected = set(columns or [])
+    selected = set(columns)
     if unpivot_other:
         retained_headers = [h for h in headers if h in selected]
         pivot_headers = [h for h in headers if h not in selected]
@@ -1727,6 +1936,12 @@ def _map_unpivot_columns(
             message = f"Cannot unpivot: output column {name!r} already exists."
             return Refusal(message, expected_error=message)
     out_headers = [*retained_headers, attribute_name, value_name]
+    if len(out_headers) > MAX_COLUMNS:
+        message = f"Unpivoting exceeds the {MAX_COLUMNS}-column import limit."
+        return Refusal(message, expected_error=message)
+    reserved = [h for h in out_headers if h in {"__rn", "_p_ord"}]
+    if reserved:
+        return Refusal(f"Output column {reserved[0]!r} clashes with a name the store path uses; not on the store path.")
     for name in out_headers:
         unsafe = unsafe_header_reason(name)
         if unsafe:
@@ -1758,12 +1973,18 @@ def _map_split_column_to_rows(
     if not isinstance(column, str) or not isinstance(delimiter, str):
         message = "Transformation step 1 values must be strings."
         return Refusal(message, expected_error="values must be strings.")
+    if not column.strip():
+        message = "Transformation step 1 needs a column name."
+        return Refusal(message, expected_error="needs a column name.")
     if not delimiter:
         message = "Transformation step 1 needs a non-empty delimiter."
         return Refusal(message, expected_error="needs a non-empty delimiter.")
     if column not in headers:
         message = f"Column {column!r} does not exist."
         return Refusal(message, expected_error=message)
+    reserved = [h for h in headers if h in {"_part", "_parts", "_sub"}]
+    if reserved:
+        return Refusal(f"Column {reserved[0]!r} clashes with an alias the store path uses for split parts; not on the store path.")
     delim_sql = sql_str(delimiter)
     if isinstance(delim_sql, Refusal):
         return delim_sql
@@ -1789,15 +2010,20 @@ def _map_split_column_to_rows(
 
 
 def _map_split_column_by_positions(
-    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any], total_rows: int = 0
 ) -> tuple[str, list[str]] | Refusal:
+    # Engine order (`_validate_step`): column name (then stripped), 2 to 512 positions, whole numbers in range,
+    # start at 0, strictly increasing; then the apply rules (column exists, output-name clash, column limit).
     column = step.get("column")
     positions = step.get("positions")
-    if not isinstance(positions, list) or len(positions) < 2 or len(positions) > 512:
+    if not isinstance(column, str) or not column.strip():
+        message = "Transformation step 1 needs a column name."
+        return Refusal(message, expected_error="needs a column name.")
+    if not isinstance(positions, list) or not 2 <= len(positions) <= MAX_COLUMNS:
         message = "Transformation step 1 needs 2 to 512 split positions."
         return Refusal(message, expected_error="needs 2 to 512 split positions.")
     for p in positions:
-        if not isinstance(p, int) or isinstance(p, bool) or p < 0 or p > 83886080:
+        if not isinstance(p, int) or isinstance(p, bool) or p < 0 or p > MAX_SPLIT_POSITION:
             message = "Transformation step 1 positions must be whole numbers from 0 to 83,886,080."
             return Refusal(message, expected_error="positions must be whole numbers from 0 to 83,886,080.")
     if positions[0] != 0:
@@ -1806,9 +2032,7 @@ def _map_split_column_by_positions(
     if any(b <= a for a, b in zip(positions, positions[1:])):
         message = "Transformation step 1 positions must be in strictly increasing order."
         return Refusal(message, expected_error="positions must be in strictly increasing order.")
-    if not isinstance(column, str):
-        message = "Transformation step 1 values must be strings."
-        return Refusal(message, expected_error="values must be strings.")
+    column = column.strip()
     if column not in headers:
         message = f"Column {column!r} does not exist."
         return Refusal(message, expected_error=message)
@@ -1823,6 +2047,9 @@ def _map_split_column_by_positions(
     out_headers[c_idx:c_idx + 1] = out_names
     if len(out_headers) > MAX_COLUMNS:
         message = f"Splitting {column!r} exceeds the {MAX_COLUMNS}-column import limit."
+        return Refusal(message, expected_error=message)
+    if total_rows * len(out_headers) > MAX_CELLS:
+        message = f"Splitting {column!r} exceeds the {MAX_CELLS:,}-cell import limit."
         return Refusal(message, expected_error=message)
     for name in out_names:
         unsafe = unsafe_header_reason(name)
@@ -1855,16 +2082,21 @@ def _map_extract_text_by_delimiter(
     delimiter = step.get("delimiter")
     side = step.get("side")
     occurrence = step.get("occurrence")
-    if not isinstance(delimiter, str) or not delimiter:
-        message = "Transformation step 1 needs a non-empty delimiter."
-        return Refusal(message, expected_error="needs a non-empty delimiter.")
+    # Engine order (`_validate_step`): column name (then stripped), side, non-empty delimiter, occurrence bound.
+    if not isinstance(column, str) or not column.strip():
+        message = "Transformation step 1 needs a column name."
+        return Refusal(message, expected_error="needs a column name.")
     if not isinstance(side, str) or side not in {"before", "after"}:
         message = "Transformation step 1 must extract text before or after the delimiter."
         return Refusal(message, expected_error="must extract text before or after the delimiter.")
-    if not isinstance(occurrence, int) or isinstance(occurrence, bool) or occurrence < 0 or occurrence > 100000:
+    if not isinstance(delimiter, str) or not delimiter:
+        message = "Transformation step 1 needs a non-empty delimiter."
+        return Refusal(message, expected_error="needs a non-empty delimiter.")
+    if not isinstance(occurrence, int) or isinstance(occurrence, bool) or occurrence < 0 or occurrence > MAX_DELIMITER_OCCURRENCE:
         message = "Transformation step 1 needs a zero-based delimiter occurrence from 0 to 100,000."
         return Refusal(message, expected_error="needs a zero-based delimiter occurrence from 0 to 100,000.")
-    if not isinstance(column, str) or column not in headers:
+    column = column.strip()
+    if column not in headers:
         message = f"Column {column!r} does not exist."
         return Refusal(message, expected_error=message)
     if store is None:
@@ -1911,6 +2143,10 @@ def _map_extract_text_between_delimiters(
     end_delimiter = step.get("end_delimiter")
     start_occurrence = step.get("start_occurrence")
     end_occurrence = step.get("end_occurrence")
+    # Engine order (`_validate_step`): column name (then stripped), start and end delimiters, the two occurrences.
+    if not isinstance(column, str) or not column.strip():
+        message = "Transformation step 1 needs a column name."
+        return Refusal(message, expected_error="needs a column name.")
     if not isinstance(start_delimiter, str) or not start_delimiter:
         message = "Transformation step 1 needs a non-empty start delimiter."
         return Refusal(message, expected_error="needs a non-empty start delimiter.")
@@ -1923,7 +2159,8 @@ def _map_extract_text_between_delimiters(
     if not isinstance(end_occurrence, int) or isinstance(end_occurrence, bool) or end_occurrence < 0 or end_occurrence > 100000:
         message = "Transformation step 1 needs end occurrence from 0 to 100,000."
         return Refusal(message, expected_error="needs end occurrence from 0 to 100,000.")
-    if not isinstance(column, str) or column not in headers:
+    column = column.strip()
+    if column not in headers:
         message = f"Column {column!r} does not exist."
         return Refusal(message, expected_error=message)
     if store is None:
@@ -1980,7 +2217,12 @@ def _map_extract_text_between_delimiters(
 
 
 def _map_conditional_column(
-    step: dict[str, Any], headers: list[str], t_q: str, overrides: dict[str, Any]
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    overrides: dict[str, Any],
+    col_meta: dict[str, dict[str, Any]] | None = None,
+    total_rows: int = 0,
 ) -> tuple[str, list[str]] | Refusal:
     name = step.get("name")
     clauses = step.get("clauses")
@@ -2044,6 +2286,9 @@ def _map_conditional_column(
     if len(headers) >= MAX_COLUMNS:
         message = f"Adding a conditional column exceeds the {MAX_COLUMNS}-column limit."
         return Refusal(message, expected_error=message)
+    if total_rows * (len(headers) + 1) > MAX_CELLS:
+        message = f"Adding a conditional column exceeds the {MAX_CELLS:,}-cell limit."
+        return Refusal(message, expected_error=message)
     required_cols: set[str] = set()
     for cl in clauses:
         required_cols.add(cl["column"].strip())
@@ -2086,7 +2331,9 @@ def _map_conditional_column(
             if t_kind == "null":
                 cond = f'({left_col} IS NULL)' if op == "equals" else f'({left_col} IS NOT NULL)'
             elif is_col:
-                eq_expr = f'({left_col} = {right_val})'
+                # engine: equal only when both are NULL, or both present and equal; a NULL on one side is not equal
+                eq_expr = (f'(({left_col} IS NOT NULL AND {right_val} IS NOT NULL AND {left_col} = {right_val}) '
+                           f'OR ({left_col} IS NULL AND {right_val} IS NULL))')
                 cond = eq_expr if op == "equals" else f'(NOT {eq_expr})'
             else:
                 eq_expr = f'({left_col} IS NOT NULL AND {left_col} = {right_val})'
@@ -2125,26 +2372,33 @@ def _map_conditional_column(
             }[op]
             if t_kind == "null":
                 cond = "FALSE"
-            elif is_col:
-                n_left = f"TRY_CAST(replace(trim({left_col}), '_', '') AS DECIMAL(38,18))"
-                n_right = f"TRY_CAST(replace(trim({right_val}), '_', '') AS DECIMAL(38,18))"
-                cond = (
-                    f'({left_col} IS NOT NULL AND {right_val} IS NOT NULL AND ('
-                    f'  CASE WHEN {n_left} IS NOT NULL AND {n_right} IS NOT NULL THEN ({n_left} {op_sym} {n_right}) '
-                    f'  ELSE ({left_col} {op_sym} {right_val}) END'
-                    f'))'
-                )
             else:
-                n_left = f"TRY_CAST(replace(trim({left_col}), '_', '') AS DECIMAL(38,18))"
-                num_lit = engine_number(t_val)
-                if num_lit is not None:
-                    dec_lit = decimal_literal(num_lit)
-                    if dec_lit is not None:
-                        n_right = f"CAST('{dec_lit}' AS {SQL_DECIMAL})"
-                    else:
-                        n_right = "NULL"
+                # The engine (`_conditional_clause_matches`) compares Decimal values when both sides parse
+                # (Decimal(text.strip())), else the texts. The SQL side uses the same expression as the filter
+                # path (`sql_num_expr`), guarded by the column facts that filter_rows uses (`num_cast_agrees`:
+                # the SQL value is NULL exactly where the engine does not parse, and exact where it does).
+                # Whatever the facts cannot vouch for is refused by name, never compared as text.
+                for fact_column in [c_col] + ([t_val] if is_col else []):
+                    fact = (col_meta or {}).get(fact_column)
+                    if fact is None:
+                        return Refusal(f"No column facts for {fact_column!r}.")
+                    if not fact.get("num_cast_agrees", True):
+                        message = (
+                            f"Column {fact_column!r} holds numeric text SQL does not read like the engine "
+                            "(non-ASCII digits, a value of 10^20 or more, underscores in odd places, or more than 18 decimals)."
+                        )
+                        return Refusal(message)
+                n_left = sql_num_expr(c_col)
+                if is_col:
+                    n_right = sql_num_expr(t_val)
                 else:
-                    n_right = "NULL"
+                    num_lit = engine_number(t_val)
+                    dec_lit = decimal_literal(num_lit) if num_lit is not None else None
+                    if num_lit is not None and dec_lit is None:
+                        return Refusal(
+                            f"Clause {c_idx} in step 1 compares with {t_val!r}, outside the exact SQL decimal range."
+                        )
+                    n_right = f"CAST('{dec_lit}' AS {SQL_DECIMAL})" if dec_lit is not None else "NULL"
                 cond = (
                     f'({left_col} IS NOT NULL AND ('
                     f'  CASE WHEN {n_left} IS NOT NULL AND {n_right} IS NOT NULL THEN ({n_left} {op_sym} {n_right}) '
@@ -2232,6 +2486,49 @@ def _d0h_shape_refusal(step: dict[str, Any]) -> Refusal | None:
     if not required <= set(step) <= required | D0H_OPTIONAL_STEP_FIELDS.get(op, set()):
         return Refusal("The step has missing or unsupported fields.", expected_error="has missing or unsupported fields.")
     return None
+
+
+def generate_sequence_sql(
+    item: dict[str, Any],
+    headers: list[str],
+    table_name: str,
+    total_rows: int,
+    overrides: dict[str, Any] | None,
+    col_meta: dict[str, dict[str, Any]] | None,
+    store: DuckStore,
+) -> tuple[str, list[str]] | Refusal | str:
+    """SQL for a sequence item (`item["sequence"]`): each step runs on the previous step's output.
+
+    The output of every step but the last is materialised as a derived store table with a fresh hidden row-order
+    column `__rn`, numbered in that output's order (guess: DuckDB keeps the ORDER BY order of the step's SQL).
+    The last step's SQL is returned for the usual comparison against the engine's whole-sequence result.
+    """
+    overrides = overrides or {}
+    current_name, current_headers, current_total, current_meta = table_name, list(headers), total_rows, col_meta
+    steps = item["sequence"]
+    result: tuple[str, list[str]] | Refusal | str = Refusal("An empty step sequence cannot run.")
+    for index, step in enumerate(steps):
+        result = generate_step_sql(
+            {"id": item["id"], "step": step}, current_headers, current_name, current_total,
+            overrides=overrides, col_meta=current_meta, store=store,
+        )
+        if isinstance(result, Refusal) or index == len(steps) - 1:
+            return result
+        sql, out_headers = result
+        derived = f"{item['id']}_step{index + 1}"
+        try:
+            out_rows = store.execute(sql)
+            if store.has_table(derived):
+                store.drop_table(derived)
+            store.create_table(derived, [(h, "text") for h in out_headers])
+            store.append_rows(derived, [list(r) for r in out_rows])
+        except Exception as exc:
+            return str(exc)
+        current_name = derived
+        current_headers = list(out_headers)
+        current_total = store.execute(f'SELECT COUNT(*) FROM "{derived}"')[0][0]
+        current_meta = inspect_store_columns(store, derived, current_headers)
+    return result
 
 
 def generate_step_sql(
@@ -2891,13 +3188,13 @@ def _mapped_sql(
     if op == "split_column_to_rows":
         return _map_split_column_to_rows(step, headers, t_q, overrides)
     if op == "split_column_by_positions":
-        return _map_split_column_by_positions(step, headers, t_q, overrides)
+        return _map_split_column_by_positions(step, headers, t_q, overrides, total_rows)
     if op == "extract_text_by_delimiter":
         return _map_extract_text_by_delimiter(step, headers, t_q, store, overrides)
     if op == "extract_text_between_delimiters":
         return _map_extract_text_between_delimiters(step, headers, t_q, store, overrides)
     if op == "conditional_column":
-        return _map_conditional_column(step, headers, t_q, overrides)
+        return _map_conditional_column(step, headers, t_q, overrides, col_meta, total_rows)
 
     return Refusal(f"Unknown or unsupported step operation: {op}")
 
@@ -2931,7 +3228,10 @@ def execute_engine_step(
                     options=candidate.options,
                     notices=candidate.notices,
                 )
-            steps = [item["pre_step"], step] if item.get("pre_step") else [step]
+            if item.get("sequence"):
+                steps = list(item["sequence"])
+            else:
+                steps = [item["pre_step"], step] if item.get("pre_step") else [step]
             result = apply_transformations(cand_input, steps)
 
         out_headers = list(result.headers)
@@ -2956,6 +3256,8 @@ def execute_store_step(
     """
     if isinstance(sql_or_refusal, Refusal):
         return sql_or_refusal
+    if isinstance(sql_or_refusal, str):
+        return sql_or_refusal  # an SQL error met while a sequence materialised its earlier steps
 
     sql, _declared_headers = sql_or_refusal
     try:
@@ -3028,12 +3330,37 @@ def run_pq_step_diff_many(
 
         store = DuckStore(str(db_file))
         import_csv_to_store(store, "t_csv", csv_file, {})
+        # Test seam (dataset "nulls": [[row index, column], ...]): a NULL cell, which a CSV cannot hold.
+        # The engine side and the store side get the same NULL, so the comparison stays exact.
+        null_cells = (dataset or {}).get("nulls", [])
+        if null_cells:
+            for row_index, null_column in null_cells:
+                cand.rows[row_index][null_column] = None
+            store.drop_table("t_csv")
+            store.create_table("t_csv", [(h, "text") for h in headers])
+            store.append_rows("t_csv", [[row[h] for h in headers] for row in cand.rows])
         import_csv_to_store(store, "t_csv_2", csv_file_2, {})
 
         total_store_rows = store.execute('SELECT COUNT(*) FROM "t_csv"')[0][0]
         col_meta = inspect_store_columns(store, "t_csv", headers)
+        # Per item: (engine candidate, second candidate, headers, store table, row count, column meta).
+        # "main" is the generated table; the D1a tables are small fixed tables (see `generate_d1a_csv`).
+        table_ctx: dict[str, tuple[Any, Any, list[str], str, int, dict[str, dict[str, bool]]]] = {
+            "main": (cand, cand_2, headers, "t_csv", total_store_rows, col_meta),
+        }
+        for shape in D1A_SHAPES:
+            d1a_path = t_path / f"{shape}.csv"
+            generate_d1a_csv(d1a_path, seed, shape)
+            import_csv_to_store(store, f"t_{shape}", d1a_path, {})
+            d1a_cand = parse_file(d1a_path)
+            d1a_headers = list(d1a_cand.headers)
+            d1a_rows = store.execute(f'SELECT COUNT(*) FROM "t_{shape}"')[0][0]
+            table_ctx[shape] = (
+                d1a_cand, None, d1a_headers, f"t_{shape}", d1a_rows,
+                inspect_store_columns(store, f"t_{shape}", d1a_headers),
+            )
 
-        catalog = list(items) if items is not None else build_step_catalog(headers)
+        catalog = list(items) if items is not None else build_step_catalog(headers, d1a=dataset is None)
         if item_filter:
             catalog = [item for item in catalog if item["id"] in set(item_filter)]
 
@@ -3043,25 +3370,29 @@ def run_pq_step_diff_many(
             i_id = item["id"]
             step_op = item["step"]["op"]
 
-            # 1. Reference side: step engine
-            engine_res = execute_engine_step(item, cand, cand_2)
+            # 1. Reference side: step engine (on the item's own table)
+            t_cand, t_cand_2, t_headers, t_name, t_total, t_meta = table_ctx[item.get("table", "main")]
+            engine_res = execute_engine_step(item, t_cand, t_cand_2)
 
             for set_index, overrides in enumerate(override_sets):
                 # 2. SQL side: store
                 # The 'remove the last column' item runs on a one-column table: the engine side is
                 # cropped to one column, so the SQL side sees the same one-column header list and
                 # refuses because of that, not because of a flag.
-                sql_headers = headers
+                sql_headers = t_headers
                 if item.get("single_column_context"):
-                    sql_headers = headers[:1]
+                    sql_headers = t_headers[:1]
                 elif item.get("pre_step"):
                     kept = set(item["pre_step"]["columns"])
-                    sql_headers = [h for h in headers if h in kept]
+                    sql_headers = [h for h in t_headers if h in kept]
                 unsafe_reasons = [r for r in (unsafe_header_reason(h) for h in sql_headers) if r]
                 if unsafe_reasons:
                     sql_or_ref = Refusal(unsafe_reasons[0])
                 else:
-                    sql_or_ref = generate_step_sql(item, sql_headers, "t_csv", total_store_rows, overrides=overrides, col_meta=col_meta, store=store)
+                    if item.get("sequence"):
+                        sql_or_ref = generate_sequence_sql(item, sql_headers, t_name, t_total, overrides, t_meta, store)
+                    else:
+                        sql_or_ref = generate_step_sql(item, sql_headers, t_name, t_total, overrides=overrides, col_meta=t_meta, store=store)
                 store_res = execute_store_step(sql_or_ref, store)
 
                 # 3. Compare
@@ -3134,6 +3465,7 @@ def run_pq_step_diff_many(
                     "diff_class": diff_class,
                     "refusal": str(refusal_obj) if refusal_obj else None,
                     "refusal_reason": refusal_obj.reason if refusal_obj else None,
+                    **({"table": item["table"], "d1a": True} if item.get("d1a") else {}),
                 })
 
 
@@ -3271,12 +3603,14 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
         "",
         "Covered in slice 3 (D0h): `group_by`, `replace_value`, `replace_error_values`, `trim_text`, `clean_text`, `lowercase_text`, `uppercase_text`, `proper_case_text`, `reverse_text`, `merge_columns`, `split_column`, `split_column_by_each_delimiter`.",
         "Named refusals inside those steps: `lowercase_text`, `uppercase_text`, `proper_case_text` on a non-ASCII column; `group_by` min and max of non-numeric non-ASCII text; `group_by` average and median when the engine's precision rule needs more than 28 digits; numbers SQL does not read exactly; typed (bool, float) replacements.",
+        "Covered in slice 4 (D1a): `promote_headers`, `demote_headers`, `transpose_table`, `unpivot_columns`, `unpivot_other_columns`, `split_column_to_rows`, `split_column_by_positions`, `extract_text_by_delimiter`, `extract_text_between_delimiters`, `conditional_column`.",
+        "D1a catalog: 119 items (114 single steps and 5 sequences, each sequence runs on the previous step's output) on five generated D1a tables (a header-like first row, delimiter-bearing text, positional and unicode text, numeric edge values, and the empty, one-row, one-column and all-blank shapes), plus the refusal rules of each engine step by name.",
+        "Power BI answers still to check (the engine's rule is the reference until a Power BI answer is saved): promote (duplicate names, blank, numeric and true/false headers, over-length names); transpose (headers dropped, Column1..N names, types); unpivot (row order, and null versus '' cells: Power BI drops null cells while the engine keeps '' as a row); split to rows (blank and null cells); split by positions (characters or UTF-16 units); extract (the engine raises an error on a missing delimiter while Power BI Text.BeforeDelimiter returns null); conditional (text versus number comparison, null, case, first match).",
         "The following operations in `transformations.py` remain deferred:",
-        "- Column manipulation: `split_column_by_positions`, `split_column_to_rows`, `extract_text_by_delimiter`, `extract_text_between_delimiters`",
         "- Type conversions: `convert_type`, `convert_type_using_locale`",
-        "- Reshaping: `pivot_column`, `unpivot_columns`, `unpivot_other_columns`, `transpose_table`",
-        "- Header / Table structure: `promote_headers`, `demote_headers`, `table_pass_through`",
-        "- Scripting & Custom: `m_script`, `add_custom_column`, `conditional_column` (its own comparison function `_conditional_clause_matches`, not the filter operators: deferred), `m_sparse_boundary_helper`",
+        "- Reshaping: `pivot_column`",
+        "- Header / Table structure: `table_pass_through`",
+        "- Scripting & Custom: `m_script`, `add_custom_column`, `m_sparse_boundary_helper`",
         "- Error handling: `remove_rows_with_errors`, `keep_rows_with_errors`",
         "- Sparse row removal: `remove_sparse_top_rows`, `remove_sparse_bottom_rows`",
         "",
