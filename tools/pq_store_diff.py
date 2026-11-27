@@ -2914,12 +2914,35 @@ def _map_table_pass_through(headers: list[str], t_q: str) -> tuple[str, list[str
     return (f"SELECT {plain_list} FROM {t_q} ORDER BY {_RN}", list(headers))
 
 
+# ---------------------------------------------------------------- D1b/D1c: named refusals for three steps the store cannot run
+NAMED_UNSUPPORTED_REASONS = {
+    "add_custom_column": (
+        "add_custom_column: the store does not evaluate the custom-column expression language (M expressions); "
+        "not mirrored."
+    ),
+    "m_script": (
+        "m_script: the store does not run M scripts (a whole M program); not mirrored."
+    ),
+    "m_sparse_boundary_helper": (
+        "m_sparse_boundary_helper: the store does not bind the M helper that the sparse-row steps read; not mirrored."
+    ),
+}
+
+
+def _map_named_unsupported(step: dict[str, Any]) -> Refusal:
+    """One named refusal per step the engine accepts but the store does not run (a plain sentence each)."""
+    return Refusal(NAMED_UNSUPPORTED_REASONS[step["op"]])
+
+
 _TEXT_STEP_FIELDS = {"op", "column"}
 D0H_STEP_FIELDS: dict[str, set[str]] = {
     "convert_type": {"op", "column", "type"},
     "convert_type_using_locale": {"op", "column", "type", "culture"},
     "remove_sparse_top_rows": {"op"},
     "remove_sparse_bottom_rows": {"op"},
+    "add_custom_column": {"op", "name", "expression"},
+    "m_sparse_boundary_helper": {"op", "name"},
+    "m_script": {"op", "script", "source_binding"},
     "group_by": {"op", "columns", "aggregations"},
     "replace_value": {"op", "column", "value", "replacement"},
     "merge_columns": {"op", "columns", "separator", "new_name"},
@@ -2944,6 +2967,7 @@ D0H_OPTIONAL_STEP_FIELDS: dict[str, set[str]] = {
     "split_column": {"from_end", "missing_part"},
     "split_column_by_each_delimiter": {"from_end", "missing_part"},
     "promote_headers": {"promote_all_scalars"},
+    "add_custom_column": {"output_type"},
 }
 
 
@@ -3657,6 +3681,8 @@ def _mapped_sql(
         return _map_remove_sparse_rows(headers, t_q, table_name, op == "remove_sparse_top_rows", overrides, store)
     if op == "table_pass_through":
         return _map_table_pass_through(headers, t_q)
+    if op in NAMED_UNSUPPORTED_REASONS:
+        return _map_named_unsupported(step)
 
     # D1a steps
     if op == "promote_headers":
