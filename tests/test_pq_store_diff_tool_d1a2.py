@@ -177,17 +177,19 @@ def test_store_alias_names_are_refused_by_name() -> None:
 
 
 def test_positions_refuse_more_than_500000_cells() -> None:
-    """100,000 rows of one column (the importer's row limit) split into 6 columns: 600,000 cells."""
+    """Part E: the store path runs with limits raised and does not refuse at 500,000 cells."""
     big = _tab(["t"], [[str(i)] for i in range(100000)])
     item = {"id": "bigpos", "step": {"op": "split_column_by_positions", "column": "t", "positions": [0, 1, 2, 3, 4, 5]}}
-    _assert_hand_refusal(big, item, "Splitting 't' exceeds the 500,000-cell import limit.")
+    res = _by_id(_run_items(big, [item]), "bigpos")
+    assert res["status"] == "same" and res.get("refusal") is None
 
 
 def test_conditional_refuses_when_the_new_column_exceeds_500000_cells() -> None:
-    """100,000 rows of five columns (500,000 cells, the import limit) plus one conditional column."""
+    """Part E: the store path runs with limits raised and does not refuse at 500,000 cells."""
     big = _tab(["a", "b", "c", "d", "e"], [["x", "y", "z", "w", str(i)] for i in range(100000)])
     item = {"id": "bigcond", "step": _cond([_clause("a", "equals", "x", "value")])}
-    _assert_hand_refusal(big, item, "Adding a conditional column exceeds the 500,000-cell limit.")
+    res = _by_id(_run_items(big, [item]), "bigcond")
+    assert res["status"] == "same" and res.get("refusal") is None
 
 
 def test_sequence_transpose_then_promote_with_a_null_cell() -> None:

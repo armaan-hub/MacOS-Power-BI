@@ -26,11 +26,14 @@ import re
 import sys
 import tempfile
 import time
+from contextlib import contextmanager
 from datetime import date, datetime, time as dt_time
 from decimal import Decimal, localcontext
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
+from analytics_studio import file_import, transformations
 from analytics_studio.file_import import MAX_CELLS, MAX_COLUMNS, ImportCandidate, parse_file
 from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
@@ -46,6 +49,20 @@ from analytics_studio.transformations import (
     canonical_column_type,
     normalize_promoted_headers,
 )
+
+
+@contextmanager
+def raised_engine_limits():
+    """Run the real engine with import limits raised so the store path can exceed them."""
+    if transformations.MAX_CELLS < 500_000:
+        yield
+        return
+    with patch.object(file_import, "MAX_DATA_ROWS", 1_000_000), \
+         patch.object(file_import, "MAX_SOURCE_BYTES", 1024 * 1024 * 1024), \
+         patch.object(file_import, "MAX_CELLS", 100_000_000), \
+         patch.object(transformations, "MAX_DATA_ROWS", 1_000_000), \
+         patch.object(transformations, "MAX_CELLS", 100_000_000):
+        yield
 
 
 # The store's own load-order column (hidden); DuckStore.read_page orders by it, never by the physical rowid.
@@ -446,7 +463,8 @@ def generate_d1a_csv(csv_file: Path, seed: int, shape: str = "d1a") -> list[str]
                 7: ["é", "ß", "٣", "😀a", "İ", "Σ", "", "ﬁ", "漢字"],
                 # clean numerics: every form the engine and DECIMAL(38,18) read the same (no edge values)
                 8: ["0", "1", "10", "50", "100", "2", "9", "-5", "-0.50", "12.5", "0.1000000000000001",
-                    "1e3", "+7", ".5", " 5", "10 ", "1_000", "007", "-0"],
+                    "1e3", "+7", ".5", " 5", "10 ", "1_000", "007", "-0",
+                    "\t3", "2\n", "\u00857", "\u20285", "\u00a04"],
                 9: ["0", "3", "20", "-7", "1.25", "", "1e2", "-0.1", "8", "1_0", "42"],
             }
             planted_num = ["٣", "1e30", "1E+20", "-1e25", "0.1234567890123456789", "1e-20", "+7", "1_000", " 5"]
@@ -2351,9 +2369,6 @@ def _map_transpose_table(
     if total_rows > MAX_COLUMNS:
         message = f"Transposing exceeds the {MAX_COLUMNS}-column import limit."
         return Refusal(message, expected_error=message)
-    if len(headers) * total_rows > MAX_CELLS:
-        message = f"Transposing exceeds the {MAX_CELLS:,}-cell import limit."
-        return Refusal(message, expected_error=message)
     out_headers = [f"Column{i + 1}" for i in range(total_rows)]
     for name in out_headers:
         unsafe = unsafe_header_reason(name)
@@ -2530,9 +2545,6 @@ def _map_split_column_by_positions(
     out_headers[c_idx:c_idx + 1] = out_names
     if len(out_headers) > MAX_COLUMNS:
         message = f"Splitting {column!r} exceeds the {MAX_COLUMNS}-column import limit."
-        return Refusal(message, expected_error=message)
-    if total_rows * len(out_headers) > MAX_CELLS:
-        message = f"Splitting {column!r} exceeds the {MAX_CELLS:,}-cell import limit."
         return Refusal(message, expected_error=message)
     for name in out_names:
         unsafe = unsafe_header_reason(name)
@@ -2768,9 +2780,6 @@ def _map_conditional_column(
         return Refusal(message, expected_error=message)
     if len(headers) >= MAX_COLUMNS:
         message = f"Adding a conditional column exceeds the {MAX_COLUMNS}-column limit."
-        return Refusal(message, expected_error=message)
-    if total_rows * (len(headers) + 1) > MAX_CELLS:
-        message = f"Adding a conditional column exceeds the {MAX_CELLS:,}-cell limit."
         return Refusal(message, expected_error=message)
     required_cols: set[str] = set()
     for cl in clauses:
@@ -4088,27 +4097,28 @@ def execute_engine_step(
     op = step.get("op")
 
     try:
-        if op == "append":
-            if candidate_2 is None:
-                raise TransformationError("Append requires two tables.")
-            result = append_candidates([candidate, candidate_2])
-        else:
-            cand_input = candidate
-            if item.get("single_column_context") and len(candidate.headers) > 1:
-                # Candidate with only 1 column
-                single_header = candidate.headers[0]
-                cand_input = ImportCandidate(
-                    kind=candidate.kind,
-                    headers=[single_header],
-                    rows=[{single_header: r[single_header]} for r in candidate.rows],
-                    options=candidate.options,
-                    notices=candidate.notices,
-                )
-            if item.get("sequence"):
-                steps = list(item["sequence"])
+        with raised_engine_limits():
+            if op == "append":
+                if candidate_2 is None:
+                    raise TransformationError("Append requires two tables.")
+                result = append_candidates([candidate, candidate_2])
             else:
-                steps = [item["pre_step"], step] if item.get("pre_step") else [step]
-            result = apply_transformations(cand_input, steps)
+                cand_input = candidate
+                if item.get("single_column_context") and len(candidate.headers) > 1:
+                    # Candidate with only 1 column
+                    single_header = candidate.headers[0]
+                    cand_input = ImportCandidate(
+                        kind=candidate.kind,
+                        headers=[single_header],
+                        rows=[{single_header: r[single_header]} for r in candidate.rows],
+                        options=candidate.options,
+                        notices=candidate.notices,
+                    )
+                if item.get("sequence"):
+                    steps = list(item["sequence"])
+                else:
+                    steps = [item["pre_step"], step] if item.get("pre_step") else [step]
+                result = apply_transformations(cand_input, steps)
 
         out_headers = list(result.headers)
         out_rows: list[list[str | None]] = []
@@ -4184,24 +4194,25 @@ def run_pq_step_diff_many(
     t_path = Path(temp_dir)
 
     try:
-        csv_file = t_path / "t.csv"
-        csv_file_2 = t_path / "t2.csv"
-        db_file = t_path / "store.db"
+        with raised_engine_limits():
+            csv_file = t_path / "t.csv"
+            csv_file_2 = t_path / "t2.csv"
+            db_file = t_path / "store.db"
 
-        if dataset is None:
-            generate_pq_dataset(csv_file, rows=rows, seed=seed, include_blank_rows=True)
-            generate_pq_dataset(csv_file_2, rows=min(rows, 100), seed=seed + 1, include_blank_rows=True)
-        else:
-            rows = len(dataset["rows"])
-            rows_2 = dataset.get("rows_2", list(reversed(dataset["rows"])))
-            for path, body in ((csv_file, dataset["rows"]), (csv_file_2, rows_2)):
-                with open(path, "w", newline="", encoding="utf-8") as f:
-                    writer = csv.writer(f)
-                    writer.writerow(dataset["headers"])
-                    writer.writerows(body)
+            if dataset is None:
+                generate_pq_dataset(csv_file, rows=rows, seed=seed, include_blank_rows=True)
+                generate_pq_dataset(csv_file_2, rows=min(rows, 100), seed=seed + 1, include_blank_rows=True)
+            else:
+                rows = len(dataset["rows"])
+                rows_2 = dataset.get("rows_2", list(reversed(dataset["rows"])))
+                for path, body in ((csv_file, dataset["rows"]), (csv_file_2, rows_2)):
+                    with open(path, "w", newline="", encoding="utf-8") as f:
+                        writer = csv.writer(f)
+                        writer.writerow(dataset["headers"])
+                        writer.writerows(body)
 
-        cand = parse_file(csv_file)
-        cand_2 = parse_file(csv_file_2)
+            cand = parse_file(csv_file)
+            cand_2 = parse_file(csv_file_2)
         headers = list(cand.headers)
 
         store = DuckStore(str(db_file))
