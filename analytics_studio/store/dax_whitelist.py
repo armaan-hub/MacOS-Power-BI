@@ -18,6 +18,8 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Collection, Mapping, Sequence
 
 from analytics_studio.measures import MeasureError, Token, parse_expression, tokenize
+from analytics_studio.store import dax_arith
+from analytics_studio.store.dax_arith import is_arithmetic_node, parse_arith
 
 # Canonical column types the whitelist knows. The store has two vocabularies:
 # store/base.py COLUMN_TYPES (whole, decimal, fixed, datetime, text, boolean) and
@@ -150,6 +152,19 @@ REASON_IN_FOLD_EQ_MIX = (
     "is not on the store whitelist: the engine ignores the IN (measured by the C1b2 sweep)"
 )
 REASON_UNEXPECTED = "unexpected error while classifying"
+# Arithmetic over totals (Stage C4b): the texts live with the combiner (dax_arith) and are part of this reason table
+REASON_ARITH_LEAF = dax_arith.REASON_ARITH_LEAF
+REASON_ARITH_DATE = dax_arith.REASON_ARITH_DATE
+REASON_ARITH_LITERAL = dax_arith.REASON_ARITH_LITERAL
+REASON_ARITH_DIVIDE_ALT = dax_arith.REASON_ARITH_DIVIDE_ALT
+REASON_ARITH_CAP_LEAVES = dax_arith.REASON_ARITH_CAP_LEAVES
+REASON_ARITH_CAP_NODES = dax_arith.REASON_ARITH_CAP_NODES
+REASON_ARITH_CAP_DEPTH = dax_arith.REASON_ARITH_CAP_DEPTH
+REASON_ARITH_IN_CALCULATE = dax_arith.REASON_ARITH_IN_CALCULATE
+REASON_ARITH_WHOLE_BEYOND_64 = dax_arith.REASON_ARITH_WHOLE_BEYOND_64
+REASON_ARITH_DIVIDE_NON_FINITE = dax_arith.REASON_ARITH_DIVIDE_NON_FINITE
+REASON_ARITH_SIGNED_ZERO_DIVISOR = dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR
+REASON_ARITH_DIVIDE_SUBNORMAL = dax_arith.REASON_ARITH_DIVIDE_SUBNORMAL
 
 
 def _in_item_folds_differently(text: str) -> bool:
@@ -872,6 +887,15 @@ def _classify_measure(
 
     kind = ast[0]
 
+    # Arithmetic over totals (Stage C4b): every total is classified by this same function, the combiner is pure
+    if is_arithmetic_node(ast):
+        return _classify_arith(
+            ast, home_table=home_table, tables=tables, measures=measures, source_kind=source_kind,
+            max_digits=max_digits, depth=_depth, visited=frozenset(visited_set),
+            tables_norm=tables_norm, tables_orig=tables_orig, home_table_norm=home_table_norm,
+            measures_norm=measures_norm,
+        )
+
     # Check known node kinds
     if kind not in KNOWN_NODE_KINDS:
         return WhitelistDecision(
@@ -942,6 +966,8 @@ def _classify_measure(
                 )
                 if not sub_res.allowed:
                     return sub_res
+                if sub_res.shape == "ARITH" and predicate_args:
+                    return WhitelistDecision(False, None, None, (REASON_ARITH_IN_CALCULATE,))
                 # If the referenced measure already has filters (CALCULATE with predicates), refuse nested CALCULATE
                 sub_ast = parse_expression(sub_expr)
                 if sub_ast[0] == "call" and sub_ast[1] == "CALCULATE" and len(sub_ast[2]) > 1:
@@ -1059,6 +1085,105 @@ def _classify_measure(
         if src:
             return WhitelistDecision(False, None, None, tuple(src))
     return base_decision
+
+
+def _leaf_total_kind(
+    node: Any,
+    tables_norm: dict[str, dict[str, str]],
+    tables_orig: dict[str, str],
+    home_table_norm: str,
+    measures_norm: dict[str, str],
+) -> str | None:
+    """"int", "double" or "date" for the total an allowed leaf computes (None when it cannot be told).
+
+    COUNT-like totals and a whole-number SUM, MIN or MAX are Int64 ("int"), AVERAGE and a decimal total are Double,
+    MIN or MAX of a date column is a date. A leaf is followed through measure references and CALCULATE to its
+    base aggregate, as the planner's own flattening does.
+    """
+    for _ in range(40):
+        if not (isinstance(node, tuple) and node):
+            return None
+        if node[0] == "reference" and not node[1]:
+            body = measures_norm.get(str(node[2]).casefold())
+            if body is None:
+                return None
+            node = parse_expression(body)
+            continue
+        if node[0] == "call" and node[1] == "CALCULATE" and node[2]:
+            node = node[2][0]
+            continue
+        break
+    if not (isinstance(node, tuple) and node and node[0] == "call"):
+        return None
+    fn = node[1]
+    if fn in {"COUNTROWS", "COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT"}:
+        return "int"
+    if fn == "AVERAGE":
+        return "double"
+    if fn in {"SUM", "MIN", "MAX"} and node[2] and isinstance(node[2][0], tuple) and node[2][0][0] == "reference":
+        _, t_name, col_name = node[2][0]
+        _, col_type, err = _resolve_column(t_name, col_name, tables_norm, tables_orig, home_table_norm, measures_norm)
+        canonical, type_err = _canonical_type(col_type)
+        if err or type_err or canonical is None:
+            return None
+        return {"whole_number": "int", "decimal_number": "double", "date": "date"}.get(canonical)
+    return None
+
+
+def _classify_arith(
+    ast: tuple[Any, ...],
+    *,
+    home_table: str,
+    tables: Mapping[str, Mapping[str, str]],
+    measures: Mapping[str, str] | None,
+    source_kind: str,
+    max_digits: Mapping[str, int] | None,
+    depth: int,
+    visited: frozenset[str],
+    tables_norm: dict[str, dict[str, str]],
+    tables_orig: dict[str, str],
+    home_table_norm: str,
+    measures_norm: dict[str, str],
+) -> WhitelistDecision:
+    """An arithmetic measure: + - * / unary minus and DIVIDE over totals on one table (shape "ARITH").
+
+    Each distinct total (leaf) goes through this module's own classifier with the same table, measures, source kind and
+    digit caps, so every leaf rule, alias-chain rule, IN guard and cap is the one of a measure that is that total alone.
+    A leaf that is a date total is refused. The combiner itself (dax_arith) is the engine's own rules, proved by the
+    rules tool; nothing here is translated to SQL.
+    """
+    parsed = parse_arith(ast, measures, visited=visited, chain=depth)
+    if not parsed.ok:
+        return WhitelistDecision(False, None, None, parsed.reasons)
+    reasons: list[str] = []
+    found_tables: dict[str, str] = {}
+    for leaf in parsed.leaves:
+        if isinstance(leaf.node, tuple) and leaf.node and leaf.node[0] in {"call", "reference"}:
+            sub = classify_measure(
+                leaf.text, home_table=home_table, tables=tables, measures=measures,
+                **_source_kwargs(source_kind, max_digits), _depth=depth + 1, _visited=visited,
+            )
+        else:
+            sub = _classify_base_aggregate(leaf.node, tables_norm, tables_orig, home_table_norm, measures_norm)
+        if not sub.allowed:
+            reasons.extend(sub.reasons or (REASON_ARITH_LEAF,))
+            continue
+        if sub.shape == "ARITH":
+            reasons.append(REASON_ARITH_LEAF)
+            continue
+        if _leaf_total_kind(leaf.node, tables_norm, tables_orig, home_table_norm, measures_norm) == "date":
+            reasons.append(REASON_ARITH_DATE)
+            continue
+        if sub.table:
+            found_tables.setdefault(sub.table.casefold(), sub.table)
+    if not reasons and len(found_tables) > 1:
+        reasons.append(f"measure references multiple tables: {', '.join(sorted(found_tables.values()))}")
+    if not reasons and not found_tables:
+        reasons.append(REASON_NO_TABLES)
+    reasons = list(dict.fromkeys(reasons))
+    if reasons:
+        return WhitelistDecision(False, None, None, tuple(reasons))
+    return WhitelistDecision(True, next(iter(found_tables.values())), "ARITH", ())
 
 
 def _classify_base_aggregate(

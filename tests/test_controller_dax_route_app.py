@@ -69,6 +69,21 @@ CATALOG: list[tuple[str, str]] = [
     ("East Alias", "[East Qty]"),
     ("East Alias 2", "[East Alias]"),
     ("East Alias Big", "CALCULATE([East Alias 2], sales[qty] > 3)"),
+    # Arithmetic over totals (C4b): the combiner of dax_arith over the totals the store computes
+    ("Avg Ticket", "SUM(sales[amount]) / COUNTROWS(sales)"),
+    ("Net", "SUM(sales[amount]) - SUM(sales[qty]) * 2"),
+    ("Share East", "DIVIDE(CALCULATE(SUM(sales[amount]), sales[region] = \"East\"), SUM(sales[amount]))"),
+    ("Margin Pct", "DIVIDE([Total Amount] - [Total Qty], [Total Amount])"),
+    ("Neg Total", "-SUM(sales[amount])"),
+    ("Blank Safe", "DIVIDE(SUM(sales[amount]), 0, -1)"),
+    ("Zero Div", "SUM(sales[amount]) / 0"),
+    ("Rows Plus", "2 * COUNTROWS(sales) + 1"),
+    ("Qty Share", "[Total Qty] / [Row Count]"),
+    ("Chain", "[Same Total] / [Row Count] - 1"),
+    ("Avg Mix", "AVERAGE(sales[amount]) * 3 + MIN(sales[qty])"),
+    ("Overflow", "COUNTROWS(sales) * 4611686018427387904"),
+    ("Blank Left", "CALCULATE(SUM(sales[amount]), sales[region] = \"Nowhere\") + 5"),
+    ("Blank Mul", "CALCULATE(SUM(sales[amount]), sales[region] = \"Nowhere\") * 5"),
 ]
 REFUSED: list[tuple[str, str]] = [
     # Same column filtered inside the alias chain and outside: the engine replaces the inner filter, the store ANDs.
@@ -76,7 +91,8 @@ REFUSED: list[tuple[str, str]] = [
     ("Alias Same Column 2", "CALCULATE([East Alias 2], sales[region] = \"West\")"),
     ("Bad All", "CALCULATE(SUM(sales[amount]), ALL(sales))"),
     ("Bad Iterator", "SUMX(sales, sales[amount] * 2)"),
-    ("Bad Ratio", "SUM(sales[amount]) / SUM(sales[qty])"),
+    ("Bad Power", "SUM(sales[amount]) ^ 2"),  # (C4b) a ratio is allowed now; ^ is not on the whitelist
+    ("Bad Rounded", "ROUND(SUM(sales[amount]) / SUM(sales[qty]), 2)"),
 ]
 
 
@@ -268,7 +284,7 @@ def test_thirty_measures_match_the_in_memory_engine(
     # so the deadline is lifted here (the 10-card test below keeps the real one).
     monkeypatch.setattr(dax_route, "refresh_deadline", lambda: time.monotonic() + 120.0)
     controller = store_app["controller"]
-    assert len(CATALOG) == 34  # the 30 of the brief plus 4 alias measures
+    assert len(CATALOG) == 48  # the 30 of the brief, 4 alias measures and 14 arithmetic measures (C4b)
     created_started = time.monotonic()
     for name, expression in CATALOG:
         assert controller.create_measure(name, expression) is True, (name, controller.statusMessage)
@@ -294,7 +310,7 @@ def test_thirty_measures_match_the_in_memory_engine(
     identical = len(CATALOG) - len(differences)
     print(f"[measured] {identical} of {len(CATALOG)} card texts identical to the in-memory engine")
     print(f"[measured] 30 create_measure calls (each refreshes the cards): {create_s:.2f} s")
-    print(f"[measured] GUI-thread card refresh, 30 cards, {ROWS:,} rows: {store_s:.2f} s (in-memory twin {twin_s:.2f} s)")
+    print(f"[measured] GUI-thread card refresh, {len(CATALOG)} cards, {ROWS:,} rows: {store_s:.2f} s (in-memory twin {twin_s:.2f} s)")
     state_sample = {name: _measure_text(controller, name) for name, _ in CATALOG[:5]}
     print(f"[measured] sample values {state_sample}")
 
@@ -362,6 +378,79 @@ def test_update_and_remove_follow_the_store(store_app: dict[str, Any]) -> None:
     # A rename keeps the dependents computable only when they still resolve: a rename of a used measure is refused.
     assert controller.update_measure("Total Amount", "Total Amt Renamed", "SUM(sales[amount])") is False
     assert "Could not update measure" in controller.statusMessage
+
+
+def test_arithmetic_measures_are_created_edited_previewed_and_counted_at_300k(
+    store_app: dict[str, Any], memory_twin: StudioController, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Create, edit and preview of arithmetic measures on the 300,000-row store (the validation path), every value the
+    twin's; a measure with 8 different totals (the cap) validates and answers; one with 9 is refused by its sentence.
+    The queries of a card refresh are counted: none on the main connection."""
+    from analytics_studio.store import dax_route
+    from analytics_studio.store.duck_store import DuckStore, StoreReader
+
+    monkeypatch.setattr(dax_route, "refresh_deadline", lambda seconds=0.0: time.monotonic() + 120.0)
+    controller = store_app["controller"]
+    ensure_catalog_measures(controller)
+    twin_id = memory_twin._active_model_table_id()
+    twin_measures = [normalize_measure(n, e, home_table_id=twin_id) for n, e in CATALOG]
+    def balanced(items: list[str]) -> str:  # a left chain of 9 terms is 9 levels deep (cap 8); a balanced sum is not
+        if len(items) == 1:
+            return items[0]
+        middle = len(items) // 2
+        return f"({balanced(items[:middle])} + {balanced(items[middle:])})"
+
+    eight = balanced([f"CALCULATE(SUM(sales[amount]), sales[qty] > {n})" for n in range(7)])
+    nine = balanced([f"CALCULATE(SUM(sales[amount]), sales[qty] > {n})" for n in range(8)])  # plus COUNTROWS: 8 and 9 totals
+    started = time.monotonic()
+    assert controller.create_measure("Eight Totals", f"({eight}) / COUNTROWS(sales)") is True, controller.statusMessage
+    eight_s = time.monotonic() - started
+    assert controller.create_measure("Nine Totals", f"({nine}) / COUNTROWS(sales)") is False
+    assert "Nine Totals cannot be computed on a large table yet" in controller.statusMessage
+    assert "more than 8 different totals" in controller.statusMessage, controller.statusMessage
+    assert controller.create_measure("Power", "SUM(sales[amount]) ^ 2") is False
+    assert "arithmetic" in controller.statusMessage
+    # edit an arithmetic measure: the value follows, a refused edit changes nothing
+    assert controller.update_measure("Avg Ticket", "Avg Ticket", "SUM(sales[amount]) / COUNTROWS(sales) * 2") is True
+    edited = _measure_text(controller, "Avg Ticket")
+    assert controller.update_measure("Avg Ticket", "Avg Ticket", "SUM(sales[amount]) ^ 2") is False
+    assert _measure_text(controller, "Avg Ticket") == edited
+    # preview (the validation path) of arithmetic text answers the twin's value
+    twin_measures = [m for m in twin_measures if m["name"] != "Avg Ticket"] + [
+        normalize_measure("Eight Totals", f"({eight}) / COUNTROWS(sales)", home_table_id=twin_id),
+        normalize_measure("Avg Ticket", "SUM(sales[amount]) / COUNTROWS(sales) * 2", home_table_id=twin_id),
+    ]
+    memory_twin._project["model"]["measures"] = twin_measures
+    memory_twin._refresh_report()
+    for name in ("Eight Totals", "Avg Ticket", "Margin Pct", "Share East", "Zero Div", "Overflow", "Blank Mul"):
+        assert _measure_text(controller, name) == _measure_text(memory_twin, name), (name, memory_twin._measure_errors.get(name))
+    previewed = _preview_text(controller, "Preview", "DIVIDE(SUM(sales[amount]), SUM(sales[qty]), 0) * 100")
+    assert "cannot be computed" not in previewed, previewed
+    refused = _preview_text(controller, "Preview", "SUM(sales[amount]) & 1")
+    assert "Preview cannot be computed on a large table yet" in refused or "cannot be computed" in refused, refused
+    # card refresh: queries per card, none on the main connection
+    counts = {"reader": 0, "main": 0}
+    real_reader, real_main = StoreReader.execute, DuckStore.execute
+
+    def counting_reader(self: Any, sql: str, params: Any = ()) -> Any:
+        counts["reader"] += 1
+        return real_reader(self, sql, params)
+
+    def counting_main(self: Any, sql: str, params: Any = ()) -> Any:
+        counts["main"] += 1
+        return real_main(self, sql, params)
+
+    monkeypatch.setattr(StoreReader, "execute", counting_reader)
+    monkeypatch.setattr(DuckStore, "execute", counting_main)
+    refresh_started = time.monotonic()
+    controller._refresh_report()
+    refresh_s = time.monotonic() - refresh_started
+    cards = len(controller._project["model"]["measures"])
+    print(f"[measured] 8-total measure validated and created at {ROWS:,} rows: {eight_s:.2f} s")
+    print(f"[measured] card refresh of {cards} cards: {counts['reader']} reader queries "
+          f"({counts['reader'] / max(cards, 1):.1f} per card), {counts['main']} on the main connection, {refresh_s:.2f} s")
+    assert counts["main"] == 0, counts
+    assert counts["reader"] >= cards, counts
 
 
 def test_dialog_slots_open_for_a_store_table(store_app: dict[str, Any]) -> None:
@@ -774,8 +863,14 @@ VISUAL_MEASURES: list[tuple[str, str]] = [
     ("Row Count", "COUNTROWS(sales)"),
     ("Avg Amount", "AVERAGE(sales[amount])"),
     ("North Amount", "CALCULATE(SUM(sales[amount]), sales[region] = \"North\")"),
+    ("Ratio", "DIVIDE([Sum Amount], [Sum Qty])"),
+    ("Net", "SUM(sales[amount]) - SUM(sales[qty]) * 2"),
+    ("Share North", "DIVIDE(CALCULATE(SUM(sales[amount]), sales[region] = \"North\"), SUM(sales[amount]))"),
+    ("Zero Div", "SUM(sales[amount]) / 0"),
+    ("Nan Div", "SUM(sales[amount]) * 0 / 0"),
 ]
-RATIO = ("Ratio", "DIVIDE([Sum Amount], [Sum Qty])")  # DIVIDE is not on the large-table whitelist
+RATIO = ("Ratio", "DIVIDE([Sum Amount], [Sum Qty])")  # allowed since C4b (arithmetic over totals)
+REFUSED_MEASURE = ("Rounded", "ROUND([Sum Amount], 2)")  # ROUND is not on the large-table whitelist
 # (visual title, visual type, category column, measure)
 VISUALS: list[tuple[str, str, str, str]] = [
     ("V1 amount by region", "bar", "region", "Sum Amount"),
@@ -786,7 +881,15 @@ VISUALS: list[tuple[str, str, str, str]] = [
     ("V8 sliced by product", "bar", "product", "Sum Amount"),
     ("V9 filtered by region", "bar", "region", "Sum Amount"),
     ("V10 paged by region", "bar", "region", "Sum Amount"),
+    # arithmetic measures (C4b): the same bars as the in-memory twin
+    ("V5 ratio by region", "bar", "region", "Ratio"),
+    ("V7 ratio by product", "column", "product", "Ratio"),
+    ("V13 share by product", "bar", "product", "Share North"),
+    ("V14 net by day", "line", "order_date", "Net"),
+    ("V15 zero div by region", "bar", "region", "Zero Div"),
 ]
+NAN_VISUAL = ("V16 nan by region", "bar", "region", "Nan Div")  # NaN per group: drawn as the twin draws it (not in VISUALS:
+# a NaN is not equal to itself, so the list comparisons of the other tests cannot hold it)
 SLICER = "Region slicer"
 
 
@@ -842,27 +945,27 @@ def visual_pages(visual_store: StudioController, visual_twin: StudioController) 
     with patch.object(dax_route, "refresh_deadline", lambda seconds=0.0: time.monotonic() + 600.0):
         for name, expression in VISUAL_MEASURES:
             assert visual_store.create_measure(name, expression) is True, (name, visual_store.statusMessage)
-        refused = visual_store.create_measure(*RATIO)
+        refused = visual_store.create_measure(*REFUSED_MEASURE)
         state["ratio_created"] = refused
         state["ratio_status"] = visual_store.statusMessage
         twin_id = visual_twin._active_model_table_id()
         visual_twin._project["model"]["measures"] = [
-            normalize_measure(name, expression, home_table_id=twin_id) for name, expression in [*VISUAL_MEASURES, RATIO]
+            normalize_measure(name, expression, home_table_id=twin_id) for name, expression in VISUAL_MEASURES
         ]
         with _quiet(visual_twin):
             for controller in (visual_twin,):
-                for title, vtype, column, measure in VISUALS:
+                for title, vtype, column, measure in [*VISUALS, NAN_VISUAL]:
                     _build_visual(controller, vtype, title, column, measure)
                 controller.add_visual("slicer", SLICER, 0, 0, 300, 200)
                 controller.add_field_to_well("Fields", "region")
-                for title, *_ in VISUALS:
+                for title, *_ in [*VISUALS, NAN_VISUAL]:
                     if title != "V8 sliced by product":
                         controller.set_visual_interaction(SLICER, title, "None")
-        for title, vtype, column, measure in VISUALS:
+        for title, vtype, column, measure in [*VISUALS, NAN_VISUAL]:
             _build_visual(visual_store, vtype, title, column, measure)
         visual_store.add_visual("slicer", SLICER, 0, 0, 300, 200)
         visual_store.add_field_to_well("Fields", "region")
-        for title, *_ in VISUALS:
+        for title, *_ in [*VISUALS, NAN_VISUAL]:
             if title != "V8 sliced by product":
                 visual_store.set_visual_interaction(SLICER, title, "None")
     return state
@@ -925,33 +1028,50 @@ def _set_page_filter(controller: StudioController, column: str, values: list[str
 
 
 def test_ratio_measure_is_refused_with_a_plain_sentence(visual_pages: dict[str, Any], visual_store: StudioController) -> None:
+    """A measure the store cannot compute (ROUND) gets its sentence everywhere; the ratio itself is allowed now."""
     assert visual_pages["ratio_created"] is False
-    assert "Ratio cannot be computed on a large table yet" in visual_pages["ratio_status"]
-    assert "DIVIDE" in visual_pages["ratio_status"]
+    assert "Rounded cannot be computed on a large table yet" in visual_pages["ratio_status"]
+    assert "ROUND" in visual_pages["ratio_status"]
     # A visual cannot be given the refused measure either: the well stays empty and the sentence says why.
     visual_store._project["model"]["measures"].append(
-        {"name": RATIO[0], "expression": RATIO[1], "home_table_id": ""}
+        {"name": REFUSED_MEASURE[0], "expression": REFUSED_MEASURE[1], "home_table_id": ""}
     )
+    visual = None
     try:
-        visual_store.add_visual("bar", "V5 ratio by region", 0, 0, 300, 200)
+        visual_store.add_visual("bar", "V99 refused by region", 0, 0, 300, 200)
         visual_store.add_field_to_well("X-axis", "region")
-        visual_store.add_field_to_well("Y-axis", "__dax_measure__:Ratio")
-        assert "DIVIDE" in visual_store.statusMessage and "Ratio cannot be computed" in visual_store.statusMessage
-        visual = next(v for v in visual_store._active_page()["visuals"] if v["title"] == "V5 ratio by region")
+        visual_store.add_field_to_well("Y-axis", f"__dax_measure__:{REFUSED_MEASURE[0]}")
+        assert "ROUND" in visual_store.statusMessage and "Rounded cannot be computed" in visual_store.statusMessage
+        visual = next(v for v in visual_store._active_page()["visuals"] if v["title"] == "V99 refused by region")
         assert not visual["fields"].get("Y-axis")
         # A project that already holds the visual (opened from a file) shows the same sentence and no bars.
-        visual["fields"]["Y-axis"] = ["__dax_measure__:Ratio"]
+        visual["fields"]["Y-axis"] = [f"__dax_measure__:{REFUSED_MEASURE[0]}"]
         visual_store._reset_silent_refusal_notice()
-        assert visual_store.visualSeries("V5 ratio by region") == []
-        assert "Ratio cannot be computed on a large table yet" in visual_store.statusMessage
+        assert visual_store.visualSeries("V99 refused by region") == []
+        assert "Rounded cannot be computed on a large table yet" in visual_store.statusMessage
     finally:
         visual_store._project["model"]["measures"] = [
-            m for m in visual_store._project["model"]["measures"] if m["name"] != RATIO[0]
+            m for m in visual_store._project["model"]["measures"] if m["name"] != REFUSED_MEASURE[0]
         ]
-        visual_store.remove_visual(visual["id"])
+        if visual is not None:
+            visual_store.remove_visual(visual["id"])
 
 
-def test_eight_visuals_are_identical_to_the_in_memory_twin(
+def test_ratio_measure_is_computed_and_matches_the_in_memory_twin(
+    visual_pages: dict[str, Any], visual_store: StudioController, visual_twin: StudioController
+) -> None:
+    from analytics_studio.store import dax_route
+
+    names = [name for name, _ in VISUAL_MEASURES]
+    assert RATIO[0] in names and RATIO[0] in [str(m["name"]) for m in visual_store._project["model"]["measures"]]
+    for title in ("V5 ratio by region", "V7 ratio by product"):
+        with _quiet(visual_twin), patch.object(dax_route, "refresh_deadline", lambda seconds=0.0: time.monotonic() + 600.0):
+            got, want = _read(visual_store, title), _read(visual_twin, title)
+        assert got and got == want, (title, got[:3], want[:3])
+    assert not visual_store._measure_errors.get(RATIO[0]), visual_store._measure_errors
+
+
+def test_fourteen_visuals_are_identical_to_the_in_memory_twin(
     visual_pages: dict[str, Any], visual_store: StudioController, visual_twin: StudioController
 ) -> None:
     from analytics_studio.controller import _encode_report_filter_value
@@ -963,8 +1083,9 @@ def test_eight_visuals_are_identical_to_the_in_memory_twin(
 
     def check(title: str) -> None:
         got, want = _read(visual_store, title), _read(visual_twin, title)
-        results.append((title, got == want and bool(got), len(got)))
-        if got != want or not got:
+        same = repr(got) == repr(want)  # repr: a NaN is not equal to itself, its text is
+        results.append((title, same and bool(got), len(got)))
+        if not same or not got:
             differences.append((title, got[:3], want[:3]))
 
     with _quiet(visual_twin):
@@ -995,10 +1116,12 @@ def test_eight_visuals_are_identical_to_the_in_memory_twin(
         check("V10 paged by region")
         for controller in (visual_store, visual_twin):
             assert controller._remove_filter("page", 0)
+        for title, *_ in [*VISUALS[8:], NAN_VISUAL]:  # the arithmetic visuals (C4b)
+            check(title)
     print(f"[measured] {sum(1 for _, ok, _n in results if ok)} of {len(results)} visuals identical: "
           + ", ".join(f"{t.split()[0]}={n} keys" for t, _ok, n in results))
     assert not differences, differences
-    assert len(results) == 8 and all(ok for _, ok, _ in results)
+    assert len(results) == 14 and all(ok for _, ok, _ in results)
     assert _encode_report_filter_value("P001")
 
 
@@ -1561,14 +1684,14 @@ def test_a_saved_filter_the_table_cannot_apply_shows_on_cards_and_visuals_not_as
         visual_store._refresh_report()
         assert visual_store._measure_values == {}
         assert all("The filter on region (is not) cannot be used on a large table yet" in m
-                   for m in visual_store._measure_errors.values()) and len(visual_store._measure_errors) == 5
+                   for m in visual_store._measure_errors.values()) and len(visual_store._measure_errors) == len(VISUAL_MEASURES)
         visual_store._reset_silent_refusal_notice()
         assert _read(visual_store, "V2 rows by product") == []
         assert "The filter on region (is not)" in visual_store.statusMessage
     finally:
         visual_store._project["report"]["filters"].remove(saved)
         visual_store._refresh_report()
-    assert visual_store._measure_errors == {} and len(visual_store._measure_values) == 5
+    assert visual_store._measure_errors == {} and len(visual_store._measure_values) == len(VISUAL_MEASURES)
 
 
 def test_a_refused_visual_says_so_once_per_epoch_and_again_after_a_reset(
@@ -1830,20 +1953,22 @@ def test_clearing_a_selection_is_never_refused_and_a_visual_is_not_filtered_by_i
 def test_a_measure_for_the_wrong_well_gets_the_ordinary_sentence_not_the_large_table_one(
     visual_pages: dict[str, Any], visual_store: StudioController
 ) -> None:
-    visual_store._project["model"]["measures"].append({"name": RATIO[0], "expression": RATIO[1], "home_table_id": ""})
+    visual_store._project["model"]["measures"].append(
+        {"name": REFUSED_MEASURE[0], "expression": REFUSED_MEASURE[1], "home_table_id": ""}
+    )
     visual_store.add_visual("bar", "M well", 0, 0, 300, 200)
     try:
-        visual_store.add_field_to_well("X-axis", "__dax_measure__:Ratio")
+        visual_store.add_field_to_well("X-axis", f"__dax_measure__:{REFUSED_MEASURE[0]}")
         assert visual_store.statusMessage.startswith("Add DAX measures to a visual value well"), visual_store.statusMessage
-        assert "DIVIDE" not in visual_store.statusMessage
-        visual_store.add_field_to_well("Y-axis", "__dax_measure__:Ratio")  # the right well: the large-table reason
-        assert "DIVIDE" in visual_store.statusMessage
+        assert "ROUND" not in visual_store.statusMessage
+        visual_store.add_field_to_well("Y-axis", f"__dax_measure__:{REFUSED_MEASURE[0]}")  # the right well: the large-table reason
+        assert "ROUND" in visual_store.statusMessage
         visual_store.add_field_to_well("Y-axis", "__dax_measure__:Sum Qty")
         assert _visual_of(visual_store, "M well")["fields"]["Y-axis"] == ["__dax_measure__:Sum Qty"]
     finally:
         visual_store.remove_visual(_visual_of(visual_store, "M well")["id"])
         visual_store._project["model"]["measures"] = [
-            m for m in visual_store._project["model"]["measures"] if m["name"] != RATIO[0]
+            m for m in visual_store._project["model"]["measures"] if m["name"] != REFUSED_MEASURE[0]
         ]
 
 
@@ -1865,7 +1990,7 @@ def test_the_controllers_loaded_candidates_reach_every_route_call(
         assert visual_store.pageFilterValues(visual_store._active_model_table_id(), "region")
         assert _read(visual_store, SLICER)
         visual_store._refresh_report()
-        assert len(visual_store._measure_values) == 5 and visual_store._measure_errors == {}
+        assert len(visual_store._measure_values) == len(VISUAL_MEASURES) and visual_store._measure_errors == {}
     finally:
         for source, original in zip(sources, saved):
             source.clear()

@@ -25,7 +25,7 @@ from analytics_studio import dax_dates
 from analytics_studio.controller import StudioController, _format_report_number
 from analytics_studio.file_import import parse_file
 from analytics_studio.measures import evaluate_measures, normalize_measure
-from analytics_studio.store import DuckStore, import_csv_to_store, import_parquet_to_store
+from analytics_studio.store import DuckStore, dax_arith, import_csv_to_store, import_parquet_to_store
 from analytics_studio.store.base import StoreError
 from analytics_studio.store.dax_sql import (
     PARQUET_COUNTA_REFUSAL_REASON,
@@ -112,6 +112,22 @@ def exact_values_agree(val_a: Any, val_b: Any, rel_tol: Decimal | None = None) -
     if max_val == 0:
         return diff == 0
     return (diff / max_val) <= rel_tol
+
+
+def values_identical(plan_val: Any, engine_val: Any) -> bool:
+    """Exact identity of two values (the arithmetic rows): the same Python class, the same value with tolerance 0, the
+    same sign of a zero, the same sign of a NaN and the same report text. A NaN is not equal to itself, so it is
+    compared by its sign instead."""
+    if type(plan_val) is not type(engine_val):
+        return False
+    if isinstance(plan_val, Decimal):
+        if plan_val.is_nan() or engine_val.is_nan():
+            same = plan_val.is_nan() and engine_val.is_nan() and plan_val.is_signed() == engine_val.is_signed()
+        else:
+            same = plan_val == engine_val and (not plan_val.is_zero() or plan_val.is_signed() == engine_val.is_signed())
+    else:
+        same = plan_val == engine_val
+    return same and format_report_value(plan_val) == format_report_value(engine_val)
 
 
 def group_values_agree(pairs_a: list[tuple[str, Any]] | None, pairs_b: list[tuple[str, Any]] | None) -> bool:
@@ -495,10 +511,10 @@ def build_formula_catalog(headers: list[str]) -> list[dict[str, Any]]:
 
     # 4. Arithmetic combos and iterators
     arith_defs = [
-        ("arith_sum_w_plus", "SUM(t[w]) + 0.1", "SUM", "w", "plus_scalar"),
-        ("arith_sum_d_div_count", "SUM(t[d]) / COUNT(t[d])", "RATIO", "d", "ratio"),
-        ("arith_divide_zero", "DIVIDE(SUM(t[w]), 0)", "DIVIDE", "w", "divide_zero"),
-        ("arith_sum_d_plus_sum_w", "SUM(t[w]) + SUM(t[d])", "SUM", "w_d", "combo_sum"),
+        ("arith_sum_w_plus", "SUM(t[w]) + 0.1", "ARITH", "w", "plus_scalar"),
+        ("arith_sum_d_div_count", "SUM(t[d]) / COUNT(t[d])", "ARITH", "d", "ratio"),
+        ("arith_divide_zero", "DIVIDE(SUM(t[w]), 0)", "ARITH", "w", "divide_zero"),
+        ("arith_sum_d_plus_sum_w", "SUM(t[w]) + SUM(t[d])", "ARITH", "w_d", "combo_sum"),
         ("arith_avg_minus_min", "AVERAGE(t[w]) - MIN(t[w])", "ARITH", "w", "combo_sub"),
         ("arith_sumx_divide_zero", "SUMX(t, DIVIDE(t[w], 0))", "SUMX", "w", "sumx_divide_zero"),
         ("arith_sumx_slash_zero", "SUMX(t, t[w] / 0)", "SUMX", "w", "sumx_slash_zero"),
@@ -693,11 +709,7 @@ def evaluate_plan_row(
     if engine_err:
         base["plan_status"] = "plan-differs"
         base["plan_error"] = "engine raised an error but the plan returned a value"
-    elif (
-        type(plan_val) is type(engine_val)
-        and plan_val == engine_val
-        and format_report_value(plan_val) == format_report_value(engine_val)
-    ):
+    elif values_identical(plan_val, engine_val):
         base["plan_status"] = "plan-same"
     else:
         base["plan_status"] = "plan-differs"
@@ -773,7 +785,7 @@ def _evaluate_plan_group_row(
             (
                 (k, pv, ev)
                 for (k, pv), (_, ev) in zip(pairs, engine_kv_exact)
-                if not (type(pv) is type(ev) and pv == ev and format_report_value(pv) == format_report_value(ev))
+                if not values_identical(pv, ev)
             ),
             None,
         )
@@ -1460,6 +1472,7 @@ SWEEP_WHOLE_BIG = ["9223372036854775807", "-9223372036854775808", "9223372036854
 SWEEP_DECIMAL = [
     "0", "0.0", "0.00", "-0.5", "0.5", "0.25", "12.345", "0.000001", "-0.0000005", "1.5", "-2.25", "100.123456",
     "123456789012345678.123456", "1234567890.1234567", "0.1", "0.2", "0.3", "-0.000001", "7", "-7.5", "3.14159",
+    "-0", "-0.00",  # minus zeros: MIN and MAX of a column can return a signed zero (the store does not keep it)
 ]
 SWEEP_DECIMAL_BIG = ["123456789012345678901234567890", "-123456789012345678901234567890.5", "0.1"]
 SWEEP_DATES = [
@@ -1535,9 +1548,48 @@ def with_filter_context(dax: str, predicates: tuple[str, ...]) -> str:
     if not predicates:
         return dax
     text = dax.strip()
-    if text.startswith("CALCULATE(") and text.endswith(")"):
+    if _is_one_call(text, "CALCULATE"):
         return text[:-1] + ", " + ", ".join(predicates) + ")"
     return f"CALCULATE({text}, " + ", ".join(predicates) + ")"
+
+
+def _is_one_call(text: str, name: str) -> bool:
+    """Is the whole text ONE call `name(...)`: the bracket opened after the name closes at the very last character?
+
+    `CALCULATE(a) / CALCULATE(b)` starts and ends like one call but is a quotient: adding a filter to its last
+    bracket would filter only the second total. Text in double quotes and column names in square brackets are skipped.
+    """
+    if not text.startswith(name + "(") or not text.endswith(")"):
+        return False
+    depth = 0
+    in_text = in_name = False
+    index = len(name)
+    while index < len(text):
+        char = text[index]
+        if in_text:
+            if char == '"':
+                if text[index + 1:index + 2] == '"':
+                    index += 1
+                else:
+                    in_text = False
+        elif in_name:
+            if char == "]":
+                if text[index + 1:index + 2] == "]":
+                    index += 1
+                else:
+                    in_name = False
+        elif char == '"':
+            in_text = True
+        elif char == "[":
+            in_name = True
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                return index == len(text) - 1
+        index += 1
+    return False
 
 
 SWEEP_VALUE_AGG = {
@@ -1625,20 +1677,182 @@ SWEEP_EMPTY_AGGS = [
 ]
 
 
-def _sweep_row(family: str, dax: str, ctx: tuple[str, ...] = (), group: str | None = None) -> dict[str, Any]:
+def _sweep_row(
+    family: str, dax: str, ctx: tuple[str, ...] = (), group: str | None = None,
+    measures: dict[str, str] | None = None,
+) -> dict[str, Any]:
     row_id = f"{family}: {dax}"
+    if measures:
+        row_id += " | measures " + " ; ".join(f"{name} = {body}" for name, body in measures.items())
     if ctx:
         row_id += " | ctx " + " ; ".join(ctx)
     if group:
         row_id += f" | by {group}"
-    return {
+    row = {
         "id": row_id, "category": "sweep", "shape": family, "dax": dax, "filter_context": tuple(ctx),
         "group_by": ("t", group) if group else None,
     }
+    if measures:
+        row["measures"] = dict(measures)
+    return row
 
 
-def build_sweep_catalog(headers: list[str] | None = None) -> list[dict[str, Any]]:
-    """Deterministic literal-sweep rows (ids are built from the content, never from a seed or a counter)."""
+# ---- Arithmetic over totals (Stage C4b): the families of the rules tool for dax_arith -------------------------------
+ARITH_BLANK_LEAF = 'CALCULATE(SUM(t[sd]), t[scat] = "ZZZ")'  # a Double total that is blank
+ARITH_BLANK_INT_LEAF = 'CALCULATE(SUM(t[sw]), t[scat] = "ZZZ")'  # an Int64 total that is blank
+ARITH_LEAVES = [
+    "SUM(t[sw])", "SUM(t[sd])", "AVERAGE(t[sw])", "AVERAGE(t[sd])", "MIN(t[sw])", "MAX(t[sd])", "COUNTROWS(t)",
+    "COUNT(t[sd])", "COUNTA(t[st])", "DISTINCTCOUNT(t[st])", ARITH_BLANK_LEAF, "CALCULATE(SUM(t[sd]), t[sw] > 5)",
+]
+ARITH_OPS = ["+", "-", "*", "/"]
+ARITH_LITERALS = ["0", "1", "2", "-1", "0.5", "0.1", "3", "1000000007", "4611686018427387904", "9223372036854775807"]
+ARITH_FEW_LEAVES = ["SUM(t[sw])", "AVERAGE(t[sd])", "COUNTROWS(t)", ARITH_BLANK_LEAF]
+ARITH_TRIPLE_LEAVES = ["SUM(t[sw])", "AVERAGE(t[sd])", ARITH_BLANK_LEAF]
+ARITH_FORMS = [
+    "{a} + {b} * {c}", "({a} + {b}) * {c}", "{a} - {b} - {c}", "{a} / {b} / {c}", "{a} / {b} * {c}",
+    "{a} * {b} / {c}", "{a} - ({b} - {c})", "-{a} * {b} - {c}", "({a} + {b}) / ({c} - {a})",
+    "(({a} - {b}) * {c} + {a}) / {b}", "DIVIDE({a} - {b}, {c}) * {a}", "-(({a} + {b}) * ({b} - {c}))",
+]
+ARITH_GROUP_SHAPES = [
+    "SUM(t[sd]) / COUNTROWS(t)", "SUM(t[sw]) - COUNTROWS(t) * 2", "DIVIDE(SUM(t[sd]), SUM(t[sw]))", "-SUM(t[sd])",
+    "AVERAGE(t[sd]) * 3 + MIN(t[sw])", "SUM(t[sd]) / 0", "DIVIDE(CALCULATE(SUM(t[sd]), t[sw] > 5), SUM(t[sd]))",
+    ARITH_BLANK_LEAF + " + 5", "COUNTROWS(t) * 4611686018427387904", "SUM(t[sw]) * SUM(t[sw])",
+]
+ARITH_MEASURE_ROWS: list[tuple[dict[str, str], list[str]]] = [
+    ({"M1": "SUM(t[sd])", "M2": "[M1] / COUNTROWS(t)", "M3": "[M2] * 100 - 1"},
+     ["[M3]", "[M2]", "[M1] + [M2]", "DIVIDE([M3], [M1])", "[M3] - [M3]", "-[M3]"]),
+    ({"A1": "SUM(t[sw])", "A2": "[A1]", "A3": "[A2]"}, ["[A3] * 2", "[A3] - [A2]", "[A3] / [A1]"]),
+    ({"F1": "CALCULATE(SUM(t[sd]), t[sw] > 5)", "F2": "[F1] / SUM(t[sd])"},
+     ["[F2]", "[F1] + 1", "DIVIDE([F1], [F2])", "[F1] / COUNTROWS(t)"]),
+    ({"B1": ARITH_BLANK_LEAF, "B2": "[B1] + 5", "B3": "[B1] * 5"}, ["[B2]", "[B3]", "[B2] - [B3]", "DIVIDE([B1], [B2], 3)"]),
+    ({"X": "SUM(t[sd]) / COUNTROWS(t)"}, ["CALCULATE([X], t[sw] > 5)", "CALCULATE([X])", "[X] + CALCULATE([X])"]),
+    ({"F1": "CALCULATE(SUM(t[sd]), t[sw] > 5)"}, ["CALCULATE([F1], t[sw] < 15) + 1", "CALCULATE([F1], t[sd] > 0) / 2"]),
+    ({"C1": "[C2] + 1", "C2": "[C1] * 2"}, ["[C1]"]),
+    ({"R": "SUM(t[sd]) / COUNTROWS(t)"}, ["[Nope] + 1", "[R] ^ 2", "[R] & 1"]),
+]
+ARITH_INT_BEYOND_53 = [
+    "SUM(t[sw]) * SUM(t[sw])", "SUM(t[sw]) * 1000003 * 1000003", "SUM(t[sw]) + 9223372036854775807",
+    "SUM(t[sw]) - 9223372036854775807 - 9223372036854775807", "COUNTROWS(t) * 4611686018427387904",
+    "COUNTROWS(t) * 9223372036854775807", "(SUM(t[sw]) + 4611686018427387904) * 2", "SUM(t[sw]) * 4611686018427387904",
+    "SUM(t[sw]) * 9223372036854775807 + 1", "MIN(t[sw]) * -9223372036854775807",
+    "(-9223372036854775807 - 1) * SUM(t[sw])", "-(-9223372036854775807 - 1) - SUM(t[sw])",
+    "SUM(t[sd]) * 9007199254740993", "SUM(t[sw]) + 9007199254740993", "SUM(t[sw]) * 9007199254740993",
+    "COUNTROWS(t) + 9007199254740993 - 9007199254740993",
+]
+# a divisor that reads MIN or MAX of a column (checked at execute time: a zero divisor is refused, a non-zero one is computed)
+ARITH_MIN_MAX_MEASURES = {"MinM": "MIN(t[sw])", "MaxD": "MAX(t[sd])", "MM": "[MinM]"}
+ARITH_MIN_MAX_DIVISORS = [
+    "MIN(t[sw])", "MAX(t[sw])", "MIN(t[sd])", "MAX(t[sd])", "-MIN(t[sw])", "-MAX(t[sd])", "(MIN(t[sw]) * 2)", "(1 + MIN(t[sw]))",
+    "(MIN(t[sw]) - MIN(t[sw]))", "(1 / MIN(t[sw]))", "(MAX(t[sd]) * 0)", 'CALCULATE(MIN(t[sw]), t[scat] = "A")',
+    "CALCULATE(MAX(t[sd]), t[sw] <= 0)", "CALCULATE(MIN(t[sw]), t[sw] = 0)", "CALCULATE(MAX(t[sd]), t[sw] = 0)",
+]
+ARITH_MIN_MAX_MEASURE_DIVISORS = [
+    "[MinM]", "[MM]", "[MaxD]", 'CALCULATE([MinM], t[scat] = "A")', "CALCULATE([MaxD], t[sw] <= 0)", "CALCULATE([MM], t[sw] <= 0)",
+    "CALCULATE([MinM], t[sw] = 0)",
+]
+ARITH_MIN_MAX_GROUPS = ["MIN(t[sw])", "MAX(t[sd])", "-MIN(t[sw])", "(1 + MIN(t[sw]))", "(MIN(t[sw]) - MIN(t[sw]))"]
+# numbers smaller than the smallest normal double (2.2250738585072014E-308) anywhere in the arithmetic are refused by name
+ARITH_SUBNORMAL_SHAPES = [
+    "DIVIDE(COUNT(t[sd]), 1E-310, 1E3)", "DIVIDE(COUNT(t[sd]), 1E-310 * 1, 5)", "DIVIDE(COUNT(t[sd]), 1E-310 + 0, 5)",
+    "DIVIDE(1E-310, COUNTROWS(t))", "DIVIDE(COUNTROWS(t), 0, 1E-310)", "COUNTROWS(t) / 1E-310", "COUNTROWS(t) / -1E-310",
+    "COUNTROWS(t) * 1E-310", "COUNTROWS(t) + 1E-310", "DIVIDE(COUNT(t[sd]), 2.2250738585072013E-308, 5)",
+    "DIVIDE(COUNT(t[sd]), 2.2250738585072014E-308, 5)", "DIVIDE(COUNT(t[sd]), 1E-324, 5)", "DIVIDE(COUNT(t[sd]), 1E-300 * 1E-10, 5)",
+    "COUNTROWS(t) / 2.2250738585072014E-308", "COUNTROWS(t) * 2.2250738585072014E-308",
+]
+ARITH_REFUSED_SHAPES = [
+    "SUM(t[sw]) ^ 2", "SUM(t[sw]) & 1", "+SUM(t[sw])", "ROUND(SUM(t[sd]), 2) + 1", "SUM(t[sw]) + SUMX(t, t[sw])",
+    "MAX(t[sdt]) - MIN(t[sdt])", "MIN(t[sdt]) + 1", "SUM(t[sw]) + 9223372036854775808", "SUM(t[sw]) + 1e400",
+    "DIVIDE(SUM(t[sw]), 0, SUM(t[sd]))", "DIVIDE(SUM(t[sw]), 0, BLANK())", "1 + 2", "-(1)",
+    "IF(SUM(t[sw]) > 1, 1, 2) + 1", "SUM(t[sw]) + SUM(t[swb])", "SUM(t[sw]) + COUNTROWS(u)",
+]
+
+
+def _arith_rows() -> list[dict[str, Any]]:
+    """The arithmetic families (ids built from the content). A: leaf pairs x operators; B: leaf x literal; C: DIVIDE;
+    D: unary, brackets and precedence; E: measure references; F: filter context; G: grouped; H: integers beyond 53
+    bits; I: a blank Int64 total; J: refused shapes; K: a divisor that reads MIN or MAX; L: a subnormal number."""
+    rows: list[dict[str, Any]] = []
+    for left in ARITH_LEAVES:
+        for right in ARITH_LEAVES:
+            for op in ARITH_OPS:
+                rows.append(_sweep_row("arith_pairs", f"{left} {op} {right}"))
+    for leaf in ARITH_LEAVES:
+        for literal in ARITH_LITERALS:
+            shown = f"({literal})" if literal.startswith("-") else literal
+            for op in ARITH_OPS:
+                rows.append(_sweep_row("arith_literal", f"{leaf} {op} {shown}"))
+                rows.append(_sweep_row("arith_literal", f"{shown} {op} {leaf}"))
+    for left in ARITH_LEAVES:
+        for right in ARITH_LEAVES:
+            rows.append(_sweep_row("arith_divide", f"DIVIDE({left}, {right})"))
+    for top in ARITH_LEAVES:
+        for bottom in ("0", ARITH_BLANK_LEAF, "SUM(t[sw])", "COUNTROWS(t)"):
+            for alt in ("-1", "0", "7", "0.5"):
+                rows.append(_sweep_row("arith_divide_alt", f"DIVIDE({top}, {bottom}, {alt})"))
+            rows.append(_sweep_row("arith_divide_alt", f"DIVIDE({top}, {bottom})"))
+    for leaf in ARITH_LEAVES:
+        rows.append(_sweep_row("arith_divide_alt", f"DIVIDE({ARITH_BLANK_LEAF}, {leaf}, 5)"))
+    for leaf in ARITH_LEAVES:
+        rows.append(_sweep_row("arith_unary", f"-{leaf}"))
+        rows.append(_sweep_row("arith_unary", f"-({leaf})"))
+    for left in ARITH_FEW_LEAVES:
+        for right in ARITH_FEW_LEAVES:
+            for op in ARITH_OPS:
+                rows.append(_sweep_row("arith_unary", f"-({left} {op} {right})"))
+    for form in ARITH_FORMS:
+        for a in ARITH_TRIPLE_LEAVES:
+            for b in ARITH_TRIPLE_LEAVES:
+                for c in ARITH_TRIPLE_LEAVES:
+                    rows.append(_sweep_row("arith_precedence", form.format(a=a, b=b, c=c)))
+    for measures, expressions in ARITH_MEASURE_ROWS:
+        for expression in expressions:
+            rows.append(_sweep_row("arith_reference", expression, measures=measures))
+    for left in ARITH_LEAVES:
+        for right in ARITH_LEAVES:
+            for op in ("+", "/"):
+                for ctx in (('t[scat] IN {"A", "B"}',), ("t[sw] < 15",)):
+                    rows.append(_sweep_row("arith_context", f"{left} {op} {right}", ctx))
+    for shape in ARITH_GROUP_SHAPES:
+        for g_col in SWEEP_GROUP_COLUMNS:
+            for ctx in ((), ("t[sw] > 5",)):
+                rows.append(_sweep_row("arith_group", shape, ctx, g_col))
+    for g_col, preds in SWEEP_OWN_ON_GROUP.items():
+        for pred in preds:
+            rows.append(_sweep_row("arith_group_own_column", f"DIVIDE(CALCULATE(SUM(t[sd]), {pred}), SUM(t[sd]))", (), g_col))
+    for g_col in ("scat", "sb"):
+        rows.append(_sweep_row("arith_group_context", "SUM(t[sd]) / COUNTROWS(t)", (f't[{g_col}] = "A"',), g_col))
+    for expression in ARITH_INT_BEYOND_53:
+        rows.append(_sweep_row("arith_int_beyond_53", expression))
+    for leaf in ARITH_LEAVES:
+        for op in ARITH_OPS:
+            rows.append(_sweep_row("arith_blank_int", f"{ARITH_BLANK_INT_LEAF} {op} {leaf}"))
+            rows.append(_sweep_row("arith_blank_int", f"{leaf} {op} {ARITH_BLANK_INT_LEAF}"))
+    for divisor in ARITH_MIN_MAX_DIVISORS:
+        rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}"))
+        rows.append(_sweep_row("arith_min_max", f"SUM(t[sd]) / {divisor}"))
+        rows.append(_sweep_row("arith_min_max", f"DIVIDE(COUNTROWS(t), {divisor}, 7)"))
+        rows.append(_sweep_row("arith_min_max", f"DIVIDE(COUNTROWS(t), {divisor})"))
+        rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}", ('t[scat] IN {"A", "B"}',)))
+    for divisor in ARITH_MIN_MAX_MEASURE_DIVISORS:
+        rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}", measures=ARITH_MIN_MAX_MEASURES))
+        rows.append(_sweep_row("arith_min_max", f"DIVIDE(COUNTROWS(t), {divisor}, 7)", measures=ARITH_MIN_MAX_MEASURES))
+    rows.append(_sweep_row("arith_min_max", "MIN(t[sw]) / COUNTROWS(t)"))
+    rows.append(_sweep_row("arith_min_max", "MAX(t[sd]) / (COUNTROWS(t) + 1)"))
+    for divisor in ARITH_MIN_MAX_GROUPS:
+        for g_col in ("scat", "sb"):  # (a group of few rows may hold a zero MIN: the sweep's own columns keep the pins seed free)
+            rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}", (), g_col))
+    for expression in ARITH_SUBNORMAL_SHAPES:
+        rows.append(_sweep_row("arith_subnormal", expression))
+    for expression in ARITH_REFUSED_SHAPES:
+        rows.append(_sweep_row("arith_refused", expression))
+    return rows
+
+
+def build_sweep_catalog(headers: list[str] | None = None, arithmetic: bool = False) -> list[dict[str, Any]]:
+    """Deterministic literal-sweep rows (ids are built from the content, never from a seed or a counter).
+
+    `arithmetic=True` adds the arithmetic families (Stage C4b, shapes `arith_*`); the command line sweep always does.
+    """
     rows: list[dict[str, Any]] = []
 
     def both(family: str, predicate_texts: list[str], value_col: str) -> None:
@@ -1725,6 +1939,8 @@ def build_sweep_catalog(headers: list[str] | None = None) -> list[dict[str, Any]
     rows.append(_sweep_row("date_old", "SUM(t[sw])", (), "sdt_old"))
     rows.append(_sweep_row("date_old", "COUNTROWS(t)", (), "scat"))  # a plain group-by on another column stays same
     rows.append(_sweep_row("group", "SUM(t[sw])", ('t[scat] = "A"',), "scat"))  # same-column slicer: refused
+    if arithmetic:
+        rows.extend(_arith_rows())
     seen: set[str] = set()
     for row in rows:
         if row["id"] in seen:
@@ -1779,11 +1995,7 @@ def _engine_key_filter(g_col: str, g_type: str, key: str) -> str:
 
 
 def _sweep_same(plan_val: Any, engine_val: Any) -> bool:
-    return (
-        type(plan_val) is type(engine_val)
-        and plan_val == engine_val
-        and format_report_value(plan_val) == format_report_value(engine_val)
-    )
+    return values_identical(plan_val, engine_val)
 
 
 def _sweep_text(value: Any) -> str:
@@ -1797,12 +2009,14 @@ def run_sweep(
     seed: int = 1,
     overrides: dict[str, Any] | None = None,
     row_filter: Any = None,
+    arithmetic: bool = False,
 ) -> dict[str, Any]:
     """Literal sweep: every row of build_sweep_catalog against the engine, through plan_measure / plan_group_by.
 
     Own StudioController and DuckStore on a fresh seeded sweep table. A row is `same` (value, or key list in
     order and every value, equal to the engine's with the same Python class), or a refusal (whitelist, planner,
     guard), or a failure (differs, sql-error, crash). row_filter(row) -> bool limits the rows (tests).
+    `arithmetic=True` adds the arithmetic families (shapes `arith_*`), compared with exact identity.
     """
     overrides = overrides or {}
     temp_dir = tempfile.mkdtemp()
@@ -1825,15 +2039,17 @@ def run_sweep(
     model_types = controller._project["model"]["tables"][0]["column_types"]
     tables = {"t": model_types}
 
-    def engine(dax: str) -> Any:
+    def engine(dax: str, extra: dict[str, str] | None = None) -> Any:
         measure = normalize_measure("M", dax, home_table_id=aid)
+        named = [normalize_measure(name, body, home_table_id=aid) for name, body in (extra or {}).items()]
         return evaluate_measures(
-            [measure], cand_rows, cand_headers, tname, measure_names=["M"], table_context=ctx_model,
+            [*named, measure], cand_rows, cand_headers, tname, measure_names=["M"], table_context=ctx_model,
             relationships=[], filter_table_ids=[], active_table_id=aid,
         )["M"]
 
     def engine_groups(
-        dax: str, g_col: str, g_type: str, ctx: tuple[str, ...], own: tuple[str, ...] = ()
+        dax: str, g_col: str, g_type: str, ctx: tuple[str, ...], own: tuple[str, ...] = (),
+        extra: dict[str, str] | None = None,
     ) -> list[tuple[str, Any]]:
         keys_dax = f"VALUES(t[{g_col}])"
         if ctx:
@@ -1853,16 +2069,17 @@ def run_sweep(
                 if not engine(with_filter_context("COUNTROWS(t)", (*own, key_filter, *ctx))):
                     continue
             flat = with_filter_context(dax, (key_filter, *ctx))
-            pairs.append((key, engine(flat)))
+            pairs.append((key, engine(flat, extra)))
         return pairs
 
     max_digits = {col: m.digits for (_, col), m in plan_meta.items()}
     results: list[dict[str, Any]] = []
-    for item in build_sweep_catalog(SWEEP_HEADERS):
+    for item in build_sweep_catalog(SWEEP_HEADERS, arithmetic=arithmetic):
         if row_filter is not None and not row_filter(item):
             continue
         ctx = tuple(item["filter_context"])
         group = item["group_by"]
+        extra_measures = item.get("measures") or None
         record: dict[str, Any] = {
             "id": item["id"], "shape": item["shape"], "dax": item["dax"], "filter_context": list(ctx),
             "group_by": group[1] if group else None, "status": "crash", "engine_text": "", "plan_text": "",
@@ -1876,14 +2093,16 @@ def run_sweep(
                 if group:
                     g_type = SWEEP_COLUMN_TYPES.get(group[1], "")
                     engine_val = engine_groups(
-                        item["dax"], group[1], g_type, ctx, tuple(item.get("own_predicates", ()))
+                        item["dax"], group[1], g_type, ctx, tuple(item.get("own_predicates", ())), extra_measures
                     )
                 else:
-                    engine_val = engine(with_filter_context(item["dax"], ctx))
+                    engine_val = engine(with_filter_context(item["dax"], ctx), extra_measures)
             except Exception as exc:
                 engine_err = str(exc)
             record["engine_text"] = f"ERR:{engine_err[:60]}" if engine_err else _sweep_text(engine_val)
-            decision = classify_measure(item["dax"], home_table="t", tables=tables, max_digits=max_digits or None)
+            decision = classify_measure(
+                item["dax"], home_table="t", tables=tables, max_digits=max_digits or None, measures=extra_measures
+            )
             whitelist_ok = decision.allowed
             if whitelist_ok and ctx:
                 whitelist_ok = classify_filter_context(
@@ -1891,7 +2110,7 @@ def run_sweep(
                 ).allowed
             kwargs: dict[str, Any] = dict(
                 home_table="t", tables=tables, store_tables={"t": "t_csv"}, column_meta=plan_meta,
-                overrides=overrides, filter_context=ctx,
+                overrides=overrides, filter_context=ctx, measures=extra_measures,
             )
             plan = (
                 plan_group_by(item["dax"], group_by=group, **kwargs) if group else plan_measure(item["dax"], **kwargs)
@@ -1949,9 +2168,14 @@ def run_sweep(
             record["error"] = f"{type(exc).__name__}: {exc}"
     store.close()
     counts = {status: sum(1 for r in results if r["status"] == status) for status in SWEEP_STATUSES}
+    families: dict[str, dict[str, int]] = {}
+    for r in results:
+        if r["shape"].startswith("arith_"):
+            bucket = families.setdefault(r["shape"], {status: 0 for status in SWEEP_STATUSES})
+            bucket[r["status"]] += 1
     return {
         "rows": rows, "seed": seed, "wall_sec": time.time() - t0, "results": [], "sweep_results": results,
-        "sweep_counts": counts, "sweep_only": True,
+        "sweep_counts": counts, "sweep_only": True, "arith_families": families,
     }
 
 
@@ -2314,6 +2538,14 @@ def generate_sweep_markdown(data: dict[str, Any]) -> str:
     lines.append(f"- Rows: {len(sweep)} (table rows {data.get('rows')}, seed {data.get('seed')})")
     for status in SWEEP_STATUSES:
         lines.append(f"- {status}: {sum(1 for r in sweep if r['status'] == status)}")
+    families = data.get("arith_families") or {}
+    if families:
+        lines.append("")
+        lines.append("### Arithmetic families")
+        lines.append("")
+        for family, by_status in sorted(families.items()):
+            shown = ", ".join(f"{k}={v}" for k, v in by_status.items() if v)
+            lines.append(f"- {family}: {sum(by_status.values())} rows ({shown})")
     reasons: dict[str, int] = {}
     for r in sweep:
         if r["status"].startswith("refused"):
@@ -2554,17 +2786,62 @@ def generate_markdown_report(data: dict[str, Any]) -> str:
 # SECTION: EXIT POLICY, MAIN CLI & BASELINE
 # ==============================================================================
 
-def evaluate_sweep_policy(sweep_results: list[dict[str, Any]], baseline: dict[str, Any]) -> tuple[int, list[str]]:
+def arith_family_counts(catalog: list[dict[str, Any]] | None = None) -> dict[str, int]:
+    """Rows per arithmetic family of the sweep catalog (shapes `arith_*`), in name order."""
+    rows = build_sweep_catalog(SWEEP_HEADERS, arithmetic=True) if catalog is None else catalog
+    counts: dict[str, int] = {}
+    for row in rows:
+        if row["shape"].startswith("arith_"):
+            counts[row["shape"]] = counts.get(row["shape"], 0) + 1
+    return dict(sorted(counts.items()))
+
+
+SWEEP_EXACT_MIN_ROWS = 150  # from this row count on the static refused set of the sweep is pinned exactly
+
+
+def evaluate_sweep_policy(
+    sweep_results: list[dict[str, Any]], baseline: dict[str, Any], rows: int = 300
+) -> tuple[int, list[str]]:
     """Exit policy of the literal sweep: any difference, SQL error or crash exits 1, and the set of refused rows
-    (whitelist, planner or guard) must equal the baseline list `sweep_refused` (row ids are built from content,
-    never from a seed)."""
+    (whitelist, planner or guard), except the zero MIN or MAX divisor refusals (allowed at any size and seed), must equal the
+    baseline set of its row count (row ids are built from content, never from a seed); below SWEEP_EXACT_MIN_ROWS rows it
+    must be a subset of the 300-row set. Every other row must be "same"."""
     failures = [r for r in sweep_results if r["status"] in SWEEP_FAILURE_STATUSES]
     if failures:
         by_status = {st: sum(1 for r in failures if r["status"] == st) for st in SWEEP_FAILURE_STATUSES}
         first = [f"{r['id']}: {r.get('error')}" for r in failures[:5]]
         return 1, [f"FAILURE: sweep failures {by_status}: {first}"]
-    expected = set(baseline.get("sweep_refused", []))
-    actual = {r["id"] for r in sweep_results if r["status"].startswith("refused")}
+    expected_families = baseline.get("arith_family_counts")
+    if expected_families is not None:
+        seen: dict[str, int] = {}
+        for r in sweep_results:
+            if str(r.get("shape", "")).startswith("arith_"):
+                seen[r["shape"]] = seen.get(r["shape"], 0) + 1
+        if dict(sorted(seen.items())) != dict(sorted(expected_families.items())):
+            return 1, [f"FAILURE: arithmetic family row counts changed vs baseline: {seen} != {expected_families}"]
+    # A refusal for a zero MIN or MAX divisor is found at execute time from the values, so which rows hit it depends on the
+    # generated data (row count and seed): it is allowed at every size and seed (named, loud; "differs 0" stays the check)
+    # and it is NOT part of the pinned sets. The pinned sets hold the other refusals (caps, literals, type and planner
+    # refusals, the data guards). The data guards (a non-ASCII space, an accented letter, a date before 1900 in a column)
+    # fire only when the generated cells hold one, so below SWEEP_EXACT_MIN_ROWS rows the policy is a subset rule that holds
+    # for any seed: a refused row is in the 300-row set (a guard that did not fire leaves the row "same", compared with
+    # the engine). From SWEEP_EXACT_MIN_ROWS rows on, each row count has its own measured set (`sweep_refused_by_rows`; a
+    # count without one is checked against the 300-row set `sweep_refused`). Every other row is "same".
+    by_rows = baseline.get("sweep_refused_by_rows", {})
+    zero_guard = {
+        r["id"] for r in sweep_results
+        if r["status"] == "refused-guard" and dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR in str(r.get("reason") or "")
+    }
+    actual = {r["id"] for r in sweep_results if r["status"].startswith("refused")} - zero_guard
+    other = [r["id"] for r in sweep_results if r["status"] != "same" and not r["status"].startswith("refused")]
+    if other:
+        return 1, [f"FAILURE: rows neither same nor refused at {rows} rows ({len(other)} rows): {other[:5]}"]
+    if rows < SWEEP_EXACT_MIN_ROWS:
+        outside = sorted(actual - set(by_rows.get("300", baseline.get("sweep_refused", []))))
+        if outside:
+            return 1, [f"FAILURE: refused rows outside the 300-row baseline set at {rows} rows ({len(outside)} rows): {outside[:5]}"]
+        return 0, []
+    expected = set(by_rows.get(str(rows), baseline.get("sweep_refused", [])))
     if actual != expected:
         changed = sorted(actual.symmetric_difference(expected))
         return 1, [f"FAILURE: sweep refused set changed vs baseline ({len(changed)} rows): {changed[:5]}"]
@@ -2581,7 +2858,7 @@ def evaluate_exit_policy(data: dict[str, Any], baseline: dict[str, Any]) -> tupl
     results = data["results"]
 
     if "sweep_results" in data:
-        sweep_code, sweep_messages = evaluate_sweep_policy(data["sweep_results"], baseline)
+        sweep_code, sweep_messages = evaluate_sweep_policy(data["sweep_results"], baseline, data.get("rows", 300))
         if sweep_code or data.get("sweep_only"):
             return sweep_code, sweep_messages
 
@@ -2652,7 +2929,7 @@ def main() -> None:
 
     try:
         if args.sweep:
-            data = run_sweep(rows=args.rows or 300, seed=args.seed)
+            data = run_sweep(rows=args.rows or 300, seed=args.seed, arithmetic=True)
         else:
             data = run_comparison(rows=args.rows or 2000, seed=args.seed, perf_rows=args.perf_rows, use_plan=args.plan)
     except Exception as exc:

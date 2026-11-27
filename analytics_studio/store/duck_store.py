@@ -3,6 +3,7 @@
 import datetime
 import decimal
 import fcntl
+import contextlib
 import functools
 import math
 import os
@@ -286,6 +287,14 @@ class StoreReader:
     def closed(self) -> bool:
         return self._closed
 
+    def table_version(self, name: str) -> int:
+        """The owner store's change token for a table (the same stamp as DuckStore.table_version; takes no lock)."""
+        return self._owner.table_version(name)
+
+    def table_writing(self, name: str) -> bool:
+        """True while an append to the table is committing (DuckStore.table_writing; takes no lock)."""
+        return self._owner.table_writing(name)
+
     def execute(self, sql: str, params: Sequence[Any] = ()) -> List[Tuple[Any, ...]]:
         """Run a single read query (SELECT only) and return list of tuples (same rules as DuckStore.execute)."""
         with self._state:
@@ -376,6 +385,7 @@ class DuckStore:
         self._conn: Optional[duckdb.DuckDBPyConnection] = None
         # In-memory change counters per table (lower-cased name); never persisted.
         self._versions: dict[str, int] = {}
+        self._writing: dict[str, int] = {}  # tables with an append between its last insert and the end of its bumps
         # True while append_rows or create_table_from_arrow holds an open transaction.
         self._txn_open = False
         # Open StoreReaders. A plain set under its own small lock (never `_lock`), so any thread can interrupt them.
@@ -543,11 +553,40 @@ class DuckStore:
         key = _ascii_lower(name)
         self._versions[key] = self._versions.get(key, 0) + 1
 
+    def _set_writing(self, name: str, on: bool) -> None:
+        key = _ascii_lower(name)
+        count = self._writing.get(key, 0) + (1 if on else -1)
+        if count > 0:
+            self._writing[key] = count
+        else:
+            self._writing.pop(key, None)
+
+    @contextlib.contextmanager
+    def _flagged(self, name: str) -> Iterator[None]:
+        """Flag the table as being written for the body (cleared on any exit, an error included)."""
+        self._set_writing(name, True)
+        try:
+            yield
+        finally:
+            self._set_writing(name, False)
+
+    def table_writing(self, name: str) -> bool:
+        """True while a change to this table is committing (append_rows, create_table, drop_table, create_table_from_arrow):
+        from just before its COMMIT (or DDL statement) until its token bumps are done.
+
+        Like table_version it takes no lock. A reader that compares table_version before and after several statements
+        also refuses when this is True at its start: rows may become visible between two statements while the token
+        has not yet moved.
+        """
+        return isinstance(name, str) and self._writing.get(_ascii_lower(name), 0) > 0
+
     def table_version(self, name: str) -> int:
         """Return an in-memory change token for a table.
 
-        The token goes up by one after every successful create_table, append_rows,
-        drop_table and create_table_from_arrow for that table name. It starts at 0 for
+        The token goes up by one after every successful create_table,
+        drop_table and create_table_from_arrow for that table name, and by two for
+        every successful append_rows (once just before its COMMIT, once after; a failed
+        COMMIT may leave the first one). It starts at 0 for
         a name this store object has never changed, it is never saved to disk, and it
         does not take the store lock, so it can be read while an import runs.
         Models use it to know that cached facts about a table are out of date.
@@ -638,11 +677,12 @@ class DuckStore:
         col_defs.append('"__rn" BIGINT')
         quoted_name = _quote_identifier(name)
         create_sql = f"CREATE TABLE {quoted_name} ({', '.join(col_defs)})"
-        try:
-            conn.execute(create_sql)
-        except Exception as exc:
-            raise StoreError(f"Failed to create table '{name}': {exc}") from exc
-        self._bump_version(name)
+        with self._flagged(name):  # flagged from just before the statement until the bump is done (see table_writing)
+            try:
+                conn.execute(create_sql)
+            except Exception as exc:
+                raise StoreError(f"Failed to create table '{name}': {exc}") from exc
+            self._bump_version(name)
 
     @_thread_locked
     def has_table(self, name: str) -> bool:
@@ -703,11 +743,12 @@ class DuckStore:
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
         quoted_name = _quote_identifier(resolved_name)
-        try:
-            conn.execute(f"DROP TABLE {quoted_name}")
-        except Exception as exc:
-            raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
-        self._bump_version(resolved_name)
+        with self._flagged(resolved_name):
+            try:
+                conn.execute(f"DROP TABLE {quoted_name}")
+            except Exception as exc:
+                raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
+            self._bump_version(resolved_name)
 
     @_thread_locked
     @_refuse_while_read
@@ -758,6 +799,7 @@ class DuckStore:
             raise StoreError(f"Failed to begin transaction: {exc}") from exc
 
         self._txn_open = True
+        writing = False
         try:
             for row in rows:
                 if isinstance(row, (str, bytes, bytearray)) or not isinstance(row, _AbcSequence):
@@ -793,11 +835,20 @@ class DuckStore:
                 current_rn += len(current_batch)
                 current_batch = []
 
+            # From here to the end of the call the table is "being written": the rows become visible at the COMMIT and
+            # the token goes up before it and after it, but no single token read can tell a reader that the rows
+            # landed between two of its statements (a lagging second bump). A reader that finds the flag set at the
+            # start of its statements, or a changed token at the end, refuses (see table_writing).
+            self._set_writing(resolved_name, True)
+            writing = True
+            self._bump_version(resolved_name)
             conn.execute("COMMIT")
             self._txn_open = False
         except BaseException as exc:
             # BaseException on purpose: an interrupt must not leave the transaction open.
             self._txn_open = False
+            if writing:
+                self._set_writing(resolved_name, False)
             try:
                 conn.execute("ROLLBACK")
             except Exception:
@@ -808,7 +859,10 @@ class DuckStore:
                 f"Failed to append rows to '{resolved_name}' at row {overall_row_idx}: {exc}"
             ) from exc
 
-        self._bump_version(resolved_name)
+        try:
+            self._bump_version(resolved_name)
+        finally:
+            self._set_writing(resolved_name, False)
         return total_appended
 
     def _insert_batch(
@@ -1290,9 +1344,10 @@ class DuckStore:
                 if bad_count and bad_count[0] > 0:
                     raise StoreError("Store contains datetime values outside year 1 to 9999 or non-finite timestamps.")
 
-            conn.execute("COMMIT")
-            self._txn_open = False
-            self._bump_version(name)
+            with self._flagged(name):  # flagged from just before the COMMIT until the bump is done
+                conn.execute("COMMIT")
+                self._txn_open = False
+                self._bump_version(name)
             return total_rows
         except BaseException as exc:
             self._txn_open = False
