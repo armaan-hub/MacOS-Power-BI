@@ -20,7 +20,7 @@
     - `E13` (every column marked as having error cells): killed by `test_f3_mutant_e13_killed_by_unmarked_column_check`
     - `C03` (generator pin: blank keys missing in `D1E_KEYS`): killed by `test_generator_pin_c03_blank_keys_present`
     - `C04` (generator pin: blank values missing in `D1E_VALS`): killed by `test_generator_pin_c04_blank_vals_present`
-  - **F9 (test file duration under 25s):** `tests/test_pq_store_diff_tool.py` optimized by removing redundant 100-row duplicate run from test fixtures; execution time dropped to 23.98s / 25.66s.
+  - **F9 (test file coverage restored and duration measured):** Restored the (400, 1) mutant case on `test_nine_mutants_exit_1_on_generated_data` and the 100-row fixture on `test_tool_runs_end_to_end_and_has_unique_ids` in `tests/test_pq_store_diff_tool.py`, restoring coverage to 109 items (all 410 pq tests passing). Measured execution time across three runs: 30.39s, 28.17s, 27.56s; all pq tests under xdist passed in 32.08s.
   - **F10 (Honesty & Power BI answer checks to verify):**
     - Pivot output row order: sorted by first key, numeric vs text, case-insensitive, blanks last, or first-seen.
     - Pivot none on repeated key/category pair: `"There were too many elements"`.
@@ -54,8 +54,8 @@
     - `tests/test_pq_store_diff_tool_d1d.py`: 9 passed in 1.48s / 1.45s
     - `tests/test_pq_store_diff_tool_d1e.py`: 42 passed in 2.63s / 2.76s
     - `tests/test_pq_store_diff_tool_d1g.py`: 29 passed in 2.09s / 1.96s
-    - `tests/test_pq_store_diff_tool.py`: 100 passed in 25.66s / 23.98s
-    - Total: 401 tests across all test suites, all passing.
+    - `tests/test_pq_store_diff_tool.py`: 109 passed in 30.39s / 28.17s / 27.56s
+    - Total: 410 tests across all test suites, all passing.
   - Test independence:
     - All 29 d1g tests passed alone by node id.
     - All 29 d1g tests passed under `pytest -n 4 --dist worksteal` in 3.10s.
