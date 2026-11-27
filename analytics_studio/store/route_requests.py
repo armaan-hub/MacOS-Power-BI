@@ -35,7 +35,8 @@ _CLOSE_WAIT_SECOND_MS = 5000
 # The sentences of the states a card or a visual shows while it has no value. Refusals, timeouts and busy keep the
 # route's own sentences (dax_route.FRAGMENTS, DEADLINE/BUSY_MESSAGE, "took longer than 30 seconds").
 CALCULATING_TEXT = "Calculating..."
-CANCELED_TEXT = "Canceled. Change a filter or press Refresh to calculate again."
+CANCELED_TEXT = "Canceled. Change a filter or press Calculate again."
+JOB_RUNNING_TEXT = "A large-table import, reload or save is running; values will be calculated when it finishes."
 PREVIEW_SLOT = ("preview",)
 
 
@@ -201,8 +202,12 @@ class StoreRequestManager(QObject):
         return self._project_store
 
     def pending(self) -> int:
-        """Requests queued or running whose answer has not been delivered yet."""
+        """Requests queued or running whose answer has not been delivered yet (a forgotten one counts until it ends)."""
         return len(self._tasks)
+
+    def live(self) -> int:
+        """Requests a user is waiting for: the newest request of each slot that has not been delivered yet."""
+        return len(self._by_slot)
 
     def has(self, slot: Hashable) -> bool:
         return slot in self._by_slot
@@ -254,6 +259,8 @@ class StoreRequestManager(QObject):
         deliver=True reports each as canceled; deliver=False forgets them (for a data change: the controller recomputes).
         Requests of the slots in `keep` are left alone. With wait=True the call returns when the worker thread is
         free (the leases are released); wait with `keep` slots would wait for those too, so do not combine them.
+        wait=True can block up to 2 s + 5 s, and only when a query ignores the interrupt (an interrupted query ends in
+        milliseconds).
         """
         for request_id, task in list(self._tasks.items()):
             if task.slot in keep:

@@ -7,6 +7,7 @@ and the event-loop waits are hang guards (a fixed number of loop turns) that fai
 
 from __future__ import annotations
 
+import contextlib
 import os
 import random
 import threading
@@ -19,7 +20,7 @@ from PySide6.QtCore import QCoreApplication, QEventLoop, QObject, Slot
 from PySide6.QtWidgets import QApplication
 
 from analytics_studio.store import ProjectStore
-from analytics_studio.store import dax_route
+from analytics_studio.store import dax_route, route_requests
 from analytics_studio.store.base import StoreError
 from analytics_studio.store.route_requests import (
     CALCULATING_TEXT,
@@ -29,9 +30,6 @@ from analytics_studio.store.route_requests import (
 )
 from tests.test_store_reader import COLUMNS, GUARD_S, Probe, make_batches, wait_or_fail
 
-GUARD_TURNS = int(GUARD_S / 0.001)  # hang guard of the event-loop waits: this many turns of 1 ms sleep
-
-
 @pytest.fixture(scope="module")
 def qapp() -> QApplication:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -40,12 +38,11 @@ def qapp() -> QApplication:
 
 def pump(predicate: Callable[[], bool], what: str) -> None:
     """Run the Qt event loop of this (the GUI) thread until predicate() holds; fail by assertion at the hang guard."""
-    for _ in range(GUARD_TURNS):
-        if predicate():
-            return
+    deadline = time.monotonic() + GUARD_S
+    while not predicate() and time.monotonic() < deadline:
         QCoreApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, 20)
         time.sleep(0.001)
-    assert predicate(), f"{what} did not happen within the hang guard"
+    assert predicate(), f"{what} did not happen within the {GUARD_S:g} s hang guard"
 
 
 class Receiver(QObject):
@@ -433,9 +430,65 @@ def test_lease_count_returns_to_zero_after_a_random_mix_of_paths(manager: StoreR
 
 def test_the_sentences_of_the_user_visible_states_are_plain() -> None:
     assert CALCULATING_TEXT == "Calculating..."
-    assert CANCELED_TEXT == "Canceled. Change a filter or press Refresh to calculate again."
+    assert CANCELED_TEXT == "Canceled. Change a filter or press Calculate again."
     assert canceled_answer().code == dax_route.CODE_CANCELED
     # the timeout and busy sentences come from the route: the timeout names its 30 seconds
     timeout = dax_route._timeout("Total", dax_route.BACKGROUND_BUDGET_S)
     assert "30 seconds" in timeout.message and timeout.code == dax_route.CODE_TIMEOUT
     assert dax_route.BUSY_MESSAGE.endswith("try again when it finishes.")
+
+
+def test_a_cancel_that_lands_before_the_reader_is_published_still_interrupts_it(
+    qapp: QApplication, ps: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """cancel() sees no reader before the task publishes it; the task must interrupt the reader itself then."""
+    mgr = StoreRequestManager(ps)
+    receiver = Receiver(mgr)
+    interrupts: list[int] = []
+    ran: list[Any] = []
+    real_lease = ps.read_lease
+
+    class CountingReader:
+        def __init__(self, reader: Any) -> None:
+            self._reader = reader
+
+        def interrupt(self) -> None:
+            interrupts.append(1)
+            self._reader.interrupt()
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(self._reader, name)
+
+    @contextlib.contextmanager
+    def lease() -> Any:
+        with real_lease() as reader:
+            mgr._cancel_all_hook()  # the cancel lands now: the lease is open, the reader is not published yet
+            yield CountingReader(reader)
+
+    monkeypatch.setattr(ps, "read_lease", lease)
+    try:
+        mgr.submit(("card", "A"), "k", value_work("never", ran))
+        idle(mgr)
+        assert interrupts == [1], "the late cancel must interrupt the reader that was just published"
+        assert ran == [] and receiver.answers()[0].code == dax_route.CODE_CANCELED
+        assert lease_count(ps) == 0
+    finally:
+        mgr.close(wait=True)
+
+
+def test_close_waits_a_second_time_for_a_query_that_ignores_the_interrupt(
+    qapp: QApplication, ps: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(route_requests, "_CLOSE_WAIT_FIRST_MS", 1)  # the first wait gives up at once
+    mgr = StoreRequestManager(ps)
+    blocker = Blocker()
+    mgr.submit(("card", "A"), "k", blocker.work)
+    wait_or_fail(blocker.started, "the blocking request")
+    timer = threading.Timer(0.3, blocker.release.set)  # frees the query while close() is in its second wait
+    timer.start()
+    try:
+        mgr.close(wait=True)
+        assert lease_count(ps) == 0, "close(wait=True) returned while the query still held its lease"
+    finally:
+        blocker.release.set()
+        timer.cancel()

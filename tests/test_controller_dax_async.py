@@ -26,7 +26,7 @@ from analytics_studio.measures import normalize_measure
 from analytics_studio.store import dax_sql
 from analytics_studio.store.base import StoreError
 from analytics_studio.store.duck_store import DuckStore, StoreReader
-from analytics_studio.store.route_requests import CALCULATING_TEXT, CANCELED_TEXT
+from analytics_studio.store.route_requests import CALCULATING_TEXT, CANCELED_TEXT, JOB_RUNNING_TEXT
 from tests import test_controller_dax_route_app as c2
 from tests.test_controller_dax_route_app import (
     CATALOG,
@@ -42,9 +42,7 @@ from tests.test_controller_dax_route_app import (
 )
 from tests.test_store_reader import GUARD_S, Probe, wait_or_fail
 
-# Fixtures of the C2 app tests, used here by name (the 40,000-row CSV, its in-memory twin, the 300,000-row CSV).
-visual_csv = c2.visual_csv
-visual_twin = c2.visual_twin
+# Fixture of the C2 app tests, used here by name (the 300,000-row CSV).
 big_csv = c2.big_csv
 
 GUARD_MS = int(GUARD_S * 1000)
@@ -485,13 +483,80 @@ def test_a_visual_shows_calculating_then_its_series_and_follows_a_filter(app: St
 
 
 # ---------------------------------------------------------------------------------------------------
-# l: identity with the in-memory engine
+# l: identity with the in-memory engine, and random sequences of user actions: async against sync
 # ---------------------------------------------------------------------------------------------------
+WORLD_ROWS = 600
+FUZZ_SEEDS = list(range(20261127, 20261127 + 40))  # 40 sequences of 10 actions, a fixed list
+
+
+class World:
+    """One built world per module: A (store, async), B (store, sync reader path), C (the same rows in memory), the same
+    measures and the same 8 visuals plus a region slicer on all three. `reset` puts all of it back exactly as built."""
+
+    def __init__(self, a: StudioController, b: StudioController, c: StudioController) -> None:
+        self.a, self.b, self.c = a, b, c
+        self.titles = [item[0] for item in VISUALS] + [SLICER]
+        self.saved = [c2._capture_visual_state(ctl) for ctl in (a, b, c)]
+
+    def reset(self) -> None:
+        for ctl, state in zip((self.a, self.b, self.c), self.saved):
+            c2._restore_visual_state(ctl, state)
+            ctl._reset_silent_refusal_notice()
+        self.a._store_async, self.b._store_async = True, False
+        self.a._refresh_report()
+        self.b._refresh_report()
+        wait_store_idle(self.a)
+
+
 @pytest.fixture(scope="module")
-def async_visual_store(qapp: QApplication, visual_csv: Path, tmp_path_factory: pytest.TempPathFactory) -> Any:
-    controller, _ = import_store_controller(visual_csv, tmp_path_factory.mktemp("async_visual_store"), async_mode=True)
-    yield controller
-    controller._close_project_store()
+def built_world(qapp: QApplication, tmp_path_factory: pytest.TempPathFactory) -> Any:
+    from unittest.mock import patch
+
+    from PySide6.QtWidgets import QMessageBox
+
+    from analytics_studio.file_import import parse_file
+
+    base = tmp_path_factory.mktemp("async_world")
+    csv_path = c2.generate_visual_csv(base / "sales.csv", rows=WORLD_ROWS)
+    dirs = [base / name for name in ("a", "b", "c")]
+    for directory in dirs:
+        directory.mkdir()
+    a, _ = import_store_controller(csv_path, dirs[0], async_mode=True)
+    b, _ = import_store_controller(csv_path, dirs[1], async_mode=False)
+    c = StudioController()
+    c._effective_app_data_dir = lambda: str(dirs[2])  # type: ignore[method-assign]
+    errors: list[str] = []
+    with patch.object(QMessageBox, "critical", lambda *args: errors.append(str(args[2]))):
+        assert c._commit_import(csv_path, parse_file(csv_path)), errors
+    for ctl in (a, b):
+        for name, expression in VISUAL_MEASURES:
+            assert ctl.create_measure(name, expression) is True, ctl.statusMessage
+    home = c._active_model_table_id()
+    c._project["model"]["measures"] = [normalize_measure(n, e, home_table_id=home) for n, e in VISUAL_MEASURES]
+    with _quiet(c):
+        for ctl in (a, b, c):
+            for title, vtype, column, measure in VISUALS:
+                _build_visual(ctl, vtype, title, column, measure)
+            ctl.add_visual("slicer", SLICER, 0, 0, 300, 200)
+            ctl.add_field_to_well("Fields", "region")
+            for title, *_ in VISUALS:
+                if title != "V8 sliced by product":
+                    ctl.set_visual_interaction(SLICER, title, "None")
+    world = World(a, b, c)
+    yield world
+    a._close_project_store()
+    b._close_project_store()
+
+
+@pytest.fixture
+def world(built_world: World, lifted_budgets: None) -> Any:
+    """The shared world with every test's changes undone before and after; the synchronous side runs with lifted budgets."""
+    built_world.reset()
+    yield built_world
+    built_world.reset()
+
+
+lifted_budgets = c2.lifted_budgets
 
 
 def read_async(controller: StudioController, title: str) -> list[dict[str, object]]:
@@ -501,10 +566,23 @@ def read_async(controller: StudioController, title: str) -> list[dict[str, objec
     return controller.visualSeries(title) if not first else first
 
 
-def test_async_results_equal_the_sync_results(
-    async_visual_store: StudioController, visual_twin: StudioController
-) -> None:
-    store, twin = async_visual_store, visual_twin
+def settle(controller: StudioController, titles: list[str]) -> None:
+    """Ask for every visual until nothing is pending any more (a request answered after another one started is asked
+    again), with a bounded number of rounds."""
+    for _ in range(12):
+        for title in titles:
+            controller.visualSeries(title)
+        wait_store_idle(controller)
+        manager = controller._store_requests
+        if (manager is None or manager.pending() == 0) and not any(
+            status == "pending" for _key, status, _payload in controller._store_state.values()
+        ):
+            return
+    raise AssertionError("the large-table requests did not settle within 12 rounds")
+
+
+def test_async_results_equal_the_in_memory_engine(world: World) -> None:
+    store, twin = world.a, world.c
     # cards: the 34 measures of the C2 catalog against the in-memory engine
     set_measures(store, [*CATALOG], refresh=True)
     wait_store_idle(store)
@@ -520,20 +598,9 @@ def test_async_results_equal_the_sync_results(
     # visuals: the 8 comparable ones and the slicer
     set_measures(store, VISUAL_MEASURES)
     wait_store_idle(store)
-    twin._project["model"]["measures"] = [
-        normalize_measure(n, e, home_table_id=twin_home) for n, e in VISUAL_MEASURES
-    ]
+    twin._project["model"]["measures"] = [normalize_measure(n, e, home_table_id=twin_home) for n, e in VISUAL_MEASURES]
+    results: list[tuple[str, bool, int]] = []
     with _quiet(twin):
-        for title, vtype, column, measure in VISUALS:
-            _build_visual(store, vtype, title, column, measure)
-            _build_visual(twin, vtype, title, column, measure)
-        for controller in (store, twin):
-            controller.add_visual("slicer", SLICER, 0, 0, 300, 200)
-            controller.add_field_to_well("Fields", "region")
-            for title, *_ in VISUALS:
-                if title != "V8 sliced by product":
-                    controller.set_visual_interaction(SLICER, title, "None")
-        results: list[tuple[str, bool, int]] = []
         for title, *_ in VISUALS[:5]:
             got, want = read_async(store, title), _read(twin, title)
             results.append((title, got == want and bool(got), len(got)))
@@ -578,6 +645,111 @@ def test_async_results_equal_the_sync_results(
     for column in ("region", "product", "is_paid"):
         store_id, twin_id = store._active_model_table_id(), twin._active_model_table_id()
         assert store.pageFilterValues(store_id, column) == twin.pageFilterValues(twin_id, column), column
+
+
+def run_sequence(world: World, seed: int) -> None:
+    """Ten random user actions on the async controller A and the synchronous controller B (same rows, same report),
+    then a refresh and a settle: cards and every visual must be identical. Even seeds use the interactive entry points
+    (the ones QML calls: they refresh through `_refresh_report_async`)."""
+    import random
+
+    from analytics_studio.controller import _encode_report_filter_value
+
+    a, b = world.a, world.b
+    interactive = seed % 2 == 0
+    rnd = random.Random(seed)
+    regions = [r for r in a.regions if r != "All regions"]
+    products = [f"P{i:03d}" for i in range(0, 200, 7)]
+    tids = {id(a): a._active_model_table_id(), id(b): b._active_model_table_id()}
+
+    def both(fn: Any) -> None:
+        for ctl in (a, b):
+            fn(ctl, interactive and ctl is a)
+
+    kinds = (
+        ["region"] * 3 + ["cross"] * 2
+        + ["pagef", "pagef_rm", "reportf", "reportf_rm", "visf", "visf_rm", "measure_edit", "measure_add", "measure_rm"]
+        + ["page", "page_back"] + ["read"] * 3 + ["reads", "pump", "pump", "cancel_recalc"]
+    )
+    sequence = [rnd.choice(kinds) for _ in range(10)]
+    for kind in sequence:
+        if kind == "region":
+            region = rnd.choice([*regions, "All regions"])
+            both(lambda c, fast: (c.setRegionFilterInteractive if fast else c.setRegionFilter)(region))
+        elif kind == "cross":
+            label = rnd.choice(regions)
+            both(lambda c, fast: c.toggle_cross_filter(SLICER, label))
+        elif kind == "pagef":
+            values = [_encode_report_filter_value(v) for v in rnd.sample(products, 3)]
+            both(lambda c, fast: c._add_report_filter(
+                table_id=tids[id(c)], column="product", operator="is_any_of", value="", multi_values=values,
+                async_refresh=fast))
+        elif kind == "pagef_rm":
+            both(lambda c, fast: c._remove_filter("page", 0, async_refresh=fast))
+        elif kind == "reportf":
+            values = [_encode_report_filter_value(v) for v in rnd.sample(regions, 2)]
+            both(lambda c, fast: c._add_report_filter(
+                table_id=tids[id(c)], column="region", operator="is_any_of", value="", multi_values=values,
+                report_scope=True, async_refresh=fast))
+        elif kind == "reportf_rm":
+            both(lambda c, fast: c._remove_filter("report", 0, async_refresh=fast))
+        elif kind == "visf":
+            title, product = rnd.choice([v[0] for v in VISUALS]), rnd.choice(products)
+            both(lambda c, fast: c.addVisualFilter(title, tids[id(c)], "product", product))
+        elif kind == "visf_rm":
+            title = rnd.choice([v[0] for v in VISUALS])
+
+            def drop_visual_filter(c: StudioController, fast: bool) -> None:
+                c._selected_visual = title
+                c._remove_filter("visual", 0)
+
+            both(drop_visual_filter)
+        elif kind == "measure_edit":
+            expression = rnd.choice(["SUM(sales[amount])", "SUM(sales[qty])", "COUNTROWS(sales)"])
+            both(lambda c, fast: c.update_measure("Sum Amount", "Sum Amount", expression))
+        elif kind == "measure_add":
+            both(lambda c, fast: c.create_measure("Extra", "SUM(sales[qty])"))
+        elif kind == "measure_rm":
+            both(lambda c, fast: c.remove_measure("Extra"))
+        elif kind == "page":
+            def add_page(c: StudioController, fast: bool) -> None:
+                if len(c._project["report"]["pages"]) < 2:
+                    c.add_page()
+                c.setActivePage(1)
+
+            both(add_page)
+        elif kind == "page_back":
+            both(lambda c, fast: c.setActivePage(0))
+        elif kind == "read":
+            a.visualSeries(rnd.choice(world.titles))
+        elif kind == "reads":
+            for title in world.titles:
+                a.visualSeries(title)
+        elif kind == "pump":
+            for _ in range(rnd.randint(1, 4)):
+                QApplication.processEvents()
+        elif kind == "cancel_recalc":
+            a.cancelStoreCalculations()
+            QApplication.processEvents()
+            a.recalculateStore()
+    both(lambda c, fast: c.setActivePage(0))
+    a._refresh_report()
+    b._refresh_report()
+    settle(a, world.titles)
+    where = f"seed {seed}, actions {sequence}"
+    assert a._measure_values == b._measure_values and a._measure_errors == b._measure_errors, where
+    assert not any("Calculating" in text for text in [*a._measure_values.values(), *a._measure_errors.values()]), where
+    for title in world.titles:
+        got, want = a.visualSeries(title), b.visualSeries(title)
+        assert got == want, f"{where}: visual {title}"
+        assert a.visualErrorMessage(title) != CALCULATING_TEXT, f"{where}: visual {title} is stuck calculating"
+
+
+@pytest.mark.parametrize("chunk", range(4))
+def test_random_action_sequences_give_the_same_answers_async_and_sync(world: World, chunk: int) -> None:
+    for seed in FUZZ_SEEDS[chunk * 10:(chunk + 1) * 10]:
+        run_sequence(world, seed)
+        world.reset()
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -938,6 +1110,440 @@ def test_a_getter_that_starts_a_request_tells_qml_through_state_changed(app: Stu
     assert emitted and emitted[0] == 1, "the bar must learn that a calculation started"
     gate.release.set()
     wait_store_idle(app)
+
+
+# ---------------------------------------------------------------------------------------------------
+# F1: a store job (import, reload, save) while requests are in flight
+# ---------------------------------------------------------------------------------------------------
+def test_a_store_job_replaces_calculating_by_one_plain_sentence_and_the_end_of_the_job_recalculates(
+    app: StudioController, probe: PlanProbe
+) -> None:
+    title = make_bar(app)
+    wait_store_idle(app)
+    gate = probe.stoppable("qty")  # inside its query until the interrupt of the job stops it
+    app._refresh_report()
+    wait_or_fail(gate.started, "a card inside its query")
+    assert app.visualSeries(title) == []
+    assert app.storeCalculating == len(CARDS) + 1
+    done: list[str] = []
+    app._preview_measure_expression_async("Draft", "SUM(t[qty])", done.append)
+    app._cancel_store_requests_for_job()  # what an import, a reload and a save-as do first
+    for name, _ in CARDS:
+        assert app._measure_errors[name] == JOB_RUNNING_TEXT, "the card must say what is going on"
+        assert name not in app._measure_values
+        assert app._kpis.get(name) != CALCULATING_TEXT
+    assert [m["value"] for m in app.modelMeasures] == ["—"] * len(CARDS)
+    assert app.visualErrorMessage(title) == JOB_RUNNING_TEXT and app.visualSeries(title) == []
+    assert done == [JOB_RUNNING_TEXT] and app._preview_busy_request_id is None, "the open preview is told too"
+    assert app.storeCalculating == 0, "nothing is calculating for the user: no bar, no Cancel"
+    assert app.storeCanRecalculate is False
+    wait_store_idle(app)  # the forgotten answers arrive and are swallowed
+    assert app._measure_errors[CARDS[0][0]] == JOB_RUNNING_TEXT and app.storeCalculating == 0
+    app._refresh_store_after_job()  # the `done` signal of the job
+    assert [app._measure_values.get(name) for name, _ in CARDS[:2]] == [CALCULATING_TEXT] * 2
+    wait_store_idle(app)
+    assert app._measure_values["Qty Sum"] == text_of(qty_sum()) and app._measure_errors == {}
+    assert len(app.visualSeries(title)) == 0
+    wait_store_idle(app)
+    assert len(app.visualSeries(title)) == 2
+
+
+# ---------------------------------------------------------------------------------------------------
+# F2: state that changes under a request in flight, without any refresh (every part of the key)
+# ---------------------------------------------------------------------------------------------------
+def drift_and_compare_with_sync(app: StudioController, probe: PlanProbe, mutate: Any) -> tuple[Any, Any, int]:
+    """A card is inside its query; the project changes under it with no refresh; the answer arrives. Returns what the
+    async path shows, what the synchronous path shows for the same state, and how many results were dropped."""
+    gate = probe.gate("qty")
+    app._refresh_report()
+    wait_or_fail(gate.started, "a card inside its query")
+    dropped0 = app._store_dropped
+    mutate(app)
+    gate.release.set()
+    wait_store_idle(app)
+    shown = (dict(app._measure_values), dict(app._measure_errors))
+    dropped = app._store_dropped - dropped0
+    app._store_async = False
+    try:
+        app._refresh_report()
+        expected = (dict(app._measure_values), dict(app._measure_errors))
+    finally:
+        app._store_async = True
+    return shown, expected, dropped
+
+
+def first_table(controller: StudioController) -> dict[str, Any]:
+    return controller._project["model"]["tables"][0]
+
+
+def test_a_table_renamed_under_a_running_card_never_shows_the_old_value(app: StudioController, probe: PlanProbe) -> None:
+    shown, expected, dropped = drift_and_compare_with_sync(app, probe, lambda c: first_table(c).__setitem__("name", "t2"))
+    assert dropped >= 1 and shown == expected
+    assert shown[0].get("Qty Sum") != text_of(qty_sum()) and "Qty Sum" in shown[1]
+
+
+def test_a_column_renamed_under_a_running_card_never_shows_the_old_value(app: StudioController, probe: PlanProbe) -> None:
+    def rename(c: StudioController) -> None:
+        types = first_table(c)["column_types"]
+        types["qty2"] = types.pop("qty")
+
+    shown, expected, dropped = drift_and_compare_with_sync(app, probe, rename)
+    assert dropped >= 1 and shown == expected
+    assert shown[0].get("Qty Sum") != text_of(qty_sum()) and "Qty Sum" in shown[1]
+
+
+def test_a_column_type_changed_under_a_running_card_never_shows_the_old_value(app: StudioController, probe: PlanProbe) -> None:
+    shown, expected, dropped = drift_and_compare_with_sync(
+        app, probe, lambda c: first_table(c)["column_types"].__setitem__("qty", "text")
+    )
+    assert dropped >= 1 and shown == expected
+    assert shown[0].get("Qty Sum") != text_of(qty_sum()) and "Qty Sum" in shown[1]
+
+
+def test_a_measure_edited_under_a_running_card_never_shows_the_old_value(app: StudioController, probe: PlanProbe) -> None:
+    shown, expected, dropped = drift_and_compare_with_sync(
+        app, probe, lambda c: c._project["model"]["measures"][0].__setitem__("expression", "COUNTROWS(t)")
+    )
+    assert dropped >= 1 and shown == expected and shown[0]["Qty Sum"] != text_of(qty_sum())
+
+
+def test_the_key_changes_with_the_physical_table_name_alone(app: StudioController, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(DuckStore, "table_version", lambda self, name: 3)  # the versions cannot tell the tables apart
+    base = card_key(app)
+    candidate = app._active_store_candidate
+    physical = candidate.store_table
+    candidate.store_table = physical + "_g2"
+    try:
+        assert card_key(app) != base
+    finally:
+        candidate.store_table = physical
+    assert card_key(app) == base
+
+
+def test_a_filter_added_under_a_running_visual_is_never_shown_as_the_old_series(
+    app: StudioController, probe: PlanProbe
+) -> None:
+    import copy
+
+    title = make_bar(app)
+    wait_store_idle(app)
+    assert app._add_report_filter(
+        table_id=app._active_model_table_id(), column="product", operator="is_any_of", value="",
+        multi_values=["P01"], report_scope=True,
+    ), app.statusMessage
+    saved_filter = copy.deepcopy(app._project["report"]["filters"][0])
+    assert app._remove_filter("report", 0)
+    wait_store_idle(app)
+    unfiltered = read_visual_when_ready(app, title)
+    gate = probe.gate("GROUP BY")
+    app._refresh_report()
+    wait_store_idle(app)
+    assert app.visualSeries(title) == []
+    wait_or_fail(gate.started, "the visual inside its query")
+    dropped0 = app._store_dropped
+    app._project["report"]["filters"].append(saved_filter)  # no refresh: only the key can tell
+    gate.release.set()
+    wait_store_idle(app)
+    assert app._store_dropped > dropped0
+    shown = read_visual_when_ready(app, title)
+    app._store_async = False
+    try:
+        expected = app.visualSeries(title)
+    finally:
+        app._store_async = True
+    assert shown == expected and shown != unfiltered
+
+
+def test_a_model_change_under_a_running_preview_asks_again(app: StudioController, probe: PlanProbe) -> None:
+    gate = probe.gate("qty")
+    done: list[str] = []
+    app._preview_measure_expression_async("Draft", "SUM(t[qty])", done.append)
+    wait_or_fail(gate.started, "the preview inside its query")
+    home = app._active_model_table_id()
+    app._project["model"]["measures"].append(normalize_measure("Zed", "COUNTROWS(t)", home_table_id=home))  # no refresh
+    gate.release.set()
+    wait_store_idle(app)
+    assert probe.count(match="qty") == 2, "the answer for the old model is dropped and the preview runs again"
+    assert done == [text_of(qty_sum())] and app._preview_busy_request_id is None
+
+
+def test_a_rebind_changes_the_identity_and_an_answer_queued_before_it_is_dropped(
+    app: StudioController, probe: PlanProbe, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(DuckStore, "table_version", lambda self, name: 5)  # the identity alone must tell the stores apart
+    project_store = app._project_store
+    before_key, before_ident = card_key(app), app._store_ident()
+    finished0 = len(probe.finished)
+    app._refresh_report()
+    for _ in range(10_000):  # the worker answers; nothing is delivered because this thread runs no event loop
+        if len(probe.finished) >= finished0 + len(CARDS) and lease_count(app) == 0:
+            break
+        time.sleep(0.001)
+    assert len(probe.finished) >= finished0 + len(CARDS) and lease_count(app) == 0, "the worker did not finish"
+    project_store.checkpoint()
+    copy_path = tmp_path / "copy.npa.data"
+    project_store.copy_to(str(copy_path))
+    project_store.rebind(str(copy_path), delete_old=False)  # another DuckStore under the same session object
+    assert app._store_ident() != before_ident and card_key(app) != before_key
+    dropped0, applied0 = app._store_dropped, app._store_applied
+    wait_store_idle(app)  # the three answers from before the rebind arrive now
+    assert app._store_dropped - dropped0 == len(CARDS), "answers computed on the old store must be dropped"
+    assert app._store_applied - applied0 == len(CARDS), "and asked again on the new one"
+    assert app._measure_values["Qty Sum"] == text_of(qty_sum()) and lease_count(app) == 0
+
+
+def test_save_as_bumps_the_store_identity(
+    app: StudioController, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    no_dialogs(monkeypatch)
+    bumps: list[int] = []
+    original = StudioController._bump_store_identity
+    monkeypatch.setattr(StudioController, "_bump_store_identity", lambda self: (bumps.append(1), original(self))[1])
+    assert app._save_to(tmp_path / "saved2.npa") is True, app.statusMessage
+    assert bumps, "the session moved to another data file: the identity must change at once"
+    wait_store_idle(app)
+
+
+# ---------------------------------------------------------------------------------------------------
+# F3: card tiles, timeouts, the preview id, the interactive refresh, threads
+# ---------------------------------------------------------------------------------------------------
+def test_a_card_result_writes_the_kpi_tile_too(app: StudioController) -> None:
+    for name, _ in CARDS:
+        assert app._kpis[name] == app._measure_values[name] != CALCULATING_TEXT
+    assert app._kpis["Qty Sum"] == text_of(qty_sum())
+
+
+def test_a_timeout_offers_calculate_again_and_stops_sticking_once_the_cause_is_gone(
+    app: StudioController, probe: PlanProbe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from analytics_studio.store import dax_route
+
+    monkeypatch.setattr(dax_route, "BACKGROUND_BUDGET_S", 0.3)  # the stoppable query never ends by itself
+    stuck = probe.stoppable("qty")
+    app._refresh_report()
+    wait_store_idle(app)
+    assert len(probe.interrupted) == 1
+    assert "took longer than 0.3 seconds" in app._measure_errors["Qty Sum"]
+    assert app._measure_values["Row Count"] == text_of(SMALL_ROWS), "the other cards are fine"
+    assert app.storeCanRecalculate is True, "Calculate again is offered after a timeout"
+    calls0 = probe.count()
+    for _ in range(3):  # the timeout sticks per key: a read starts nothing
+        app.modelMeasures
+        app.visualSeries("nothing")
+    wait_store_idle(app)
+    assert probe.count() == calls0 and "took longer" in app._measure_errors["Qty Sum"]
+    assert stuck.hits == 1
+    app.recalculateStore()  # the cause is gone (the rule was used once)
+    wait_store_idle(app)
+    assert app._measure_values["Qty Sum"] == text_of(qty_sum()) and app._measure_errors == {}
+    assert app.storeCanRecalculate is False
+
+
+def test_a_canceled_visual_of_another_page_does_not_keep_the_banner(app: StudioController, probe: PlanProbe) -> None:
+    first_page = app._active_page_id
+    app.add_page()
+    second_page = next(p["id"] for p in app._project["report"]["pages"] if p["id"] != first_page)
+    app._active_page_id = first_page
+    title = make_bar(app)
+    wait_store_idle(app)
+    gate = probe.gate("GROUP BY")
+    assert app.visualSeries(title) == []
+    wait_or_fail(gate.started, "the visual inside its query")
+    app.cancelStoreCalculations()
+    gate.release.set()
+    wait_store_idle(app)
+    assert app.visualErrorMessage(title) == CANCELED_TEXT
+    assert app.storeCanRecalculate is True
+    app._active_page_id = second_page  # the visual is not on screen now (no refresh: its state is still there)
+    assert app.storeCanRecalculate is False
+    app._active_page_id = first_page
+    assert app.storeCanRecalculate is True
+    app.recalculateStore()
+    assert app.storeCanRecalculate is False
+    assert app.visualSeries(title) == []
+    wait_store_idle(app)
+    assert len(app.visualSeries(title)) == 2
+
+
+def test_the_canceled_sentence_names_the_button(app: StudioController) -> None:
+    from pathlib import Path as _Path
+
+    qml = (_Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml").read_text(encoding="utf-8")
+    assert 'text: "Calculate again"' in qml and CANCELED_TEXT.endswith("press Calculate again.")
+
+
+@pytest.mark.parametrize("entry", ["region", "report filter", "cross filter"])
+def test_the_interactive_refresh_stops_the_running_visual_request_and_clears_results(
+    app: StudioController, probe: PlanProbe, entry: str
+) -> None:
+    """QML refreshes through `_refresh_report_async`: it must reset the requests like `_refresh_report` does."""
+    title = make_bar(app, "V1 qty by product", "product")
+    app.add_visual("slicer", "Region slicer", 0, 0, 300, 200)
+    app.add_field_to_well("Fields", "region")
+    wait_store_idle(app)
+    stuck = probe.stoppable("GROUP BY")
+    assert app.visualSeries(title) == []
+    wait_or_fail(stuck.started, "the visual inside its query")
+    if entry == "region":
+        app.setRegionFilterInteractive("East")
+    elif entry == "report filter":
+        assert app._add_report_filter(
+            table_id=app._active_model_table_id(), column="region", operator="is_any_of", value="",
+            multi_values=["East"], report_scope=True, async_refresh=True,
+        ), app.statusMessage
+    else:
+        app.toggle_cross_filter("Region slicer", "East")
+    # nothing read the visual again: only the refresh itself can have stopped its query
+    for _ in range(int(GUARD_S / 0.001)):
+        if probe.interrupted:
+            break
+        QApplication.processEvents()
+        time.sleep(0.001)
+    assert len(probe.interrupted) == 1, "the refresh must stop the visual query"
+    assert not any(slot[0] == "visual" for slot in app._store_state), "results of the old state are not kept"
+    wait_store_idle(app)
+    assert app._measure_values["Qty Sum"] == text_of(qty_sum(parity=0)), "the cards follow the filter"
+
+
+def test_a_preview_answer_for_a_superseded_request_id_is_not_delivered_and_the_preview_restarts(
+    app: StudioController, probe: PlanProbe
+) -> None:
+    gate = probe.gate("qty")
+    done: list[str] = []
+    app._preview_measure_expression_async("Draft", "SUM(t[qty])", done.append)
+    wait_or_fail(gate.started, "the preview inside its query")
+    gate.release.set()
+    for _ in range(10_000):  # the answer is on its way to this thread, not delivered yet
+        if probe.finished and lease_count(app) == 0:
+            break
+        time.sleep(0.001)
+    app._cancel_and_wait_preview()  # an engine call: the id moves on and the job restarts after the call
+    wait_store_idle(app)
+    for _ in range(50):
+        QApplication.processEvents()
+        if probe.count(match="qty") >= 2:
+            break
+    wait_store_idle(app)
+    assert probe.count(match="qty") == 2, "the preview must run again after the engine call"
+    assert done == [text_of(qty_sum())], done
+
+
+class ThreadCheckedDict(dict):
+    """A dict that records every write made from a thread other than the GUI thread."""
+
+    def __init__(self, name: str, violations: list[tuple[str, str, str]], gui: int, *args: Any) -> None:
+        super().__init__(*args)
+        self._name, self._violations, self._gui = name, violations, gui
+
+    def _check(self, op: str) -> None:
+        if threading.get_ident() != self._gui:
+            self._violations.append((self._name, op, threading.current_thread().name))
+
+    def __setitem__(self, key: Any, value: Any) -> None:
+        self._check("set")
+        super().__setitem__(key, value)
+
+    def __delitem__(self, key: Any) -> None:
+        self._check("del")
+        super().__delitem__(key)
+
+    def pop(self, *args: Any) -> Any:
+        self._check("pop")
+        return super().pop(*args)
+
+    def clear(self) -> None:
+        self._check("clear")
+        super().clear()
+
+    def update(self, *args: Any, **kwargs: Any) -> None:
+        self._check("update")
+        super().update(*args, **kwargs)
+
+    def setdefault(self, *args: Any) -> Any:
+        self._check("setdefault")
+        return super().setdefault(*args)
+
+
+
+def test_no_controller_state_is_written_off_the_gui_thread_and_the_compute_functions_run_on_the_worker(
+    app: StudioController, probe: PlanProbe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    gui = threading.get_ident()
+    violations: list[tuple[str, str, str]] = []
+    tracked = ("_measure_values", "_kpis", "_measure_errors", "_store_state", "_store_preview_params")
+    original_setattr = StudioController.__setattr__
+
+    def tracking_setattr(self: Any, name: str, value: Any) -> None:
+        if threading.get_ident() != gui:
+            violations.append(("attribute", name, threading.current_thread().name))
+        if name in tracked and isinstance(value, dict) and not isinstance(value, ThreadCheckedDict):
+            value = ThreadCheckedDict(name, violations, gui, value)
+        original_setattr(self, name, value)
+
+    monkeypatch.setattr(StudioController, "__setattr__", tracking_setattr)
+    for name in tracked:
+        setattr(app, name, getattr(app, name) or {})
+    gui_only = (
+        "_store_ordered_rows", "_store_visual_spec", "_store_slot_key", "_store_snapshot", "_apply_store_result",
+        "_apply_store_card", "_apply_store_visual", "_store_filter_context", "_notice_silent_message", "_set_status",
+        "_refresh_report", "_store_key_base", "_store_closure", "_on_store_result", "_store_after_drop",
+    )
+
+    def guard(name: str) -> None:
+        method = getattr(StudioController, name)
+
+        def checked(*args: Any, **kwargs: Any) -> Any:
+            if threading.get_ident() != gui:
+                violations.append(("method", name, threading.current_thread().name))
+            return method(*args, **kwargs)
+
+        monkeypatch.setattr(StudioController, name, checked)
+
+    for name in gui_only:
+        guard(name)
+    ran: list[tuple[str, bool]] = []
+
+    def watch(name: str) -> None:
+        function = getattr(StudioController, name)
+
+        def computing(*args: Any, **kwargs: Any) -> Any:
+            ran.append((name, threading.get_ident() != gui))
+            return function(*args, **kwargs)
+
+        monkeypatch.setattr(StudioController, name, staticmethod(computing))
+
+    for name in ("_store_card_compute", "_store_visual_compute", "_store_preview_compute"):
+        watch(name)
+    emits_off_thread: list[int] = []
+    app.stateChanged.connect(lambda: emits_off_thread.append(0) if threading.get_ident() != gui else None)
+
+    make_bar(app, "V1 qty by region")
+    make_bar(app, "V2 qty by product", "product")
+    wait_store_idle(app)
+    violations.clear()
+    ran.clear()
+    for step in range(3):
+        app._refresh_report()
+        for title in ("V1 qty by region", "V2 qty by product"):
+            app.visualSeries(title)
+        wait_store_idle(app)
+        for title in ("V1 qty by region", "V2 qty by product"):
+            app.visualSeries(title)
+        app.setRegionFilter(["East", "West", "All regions"][step])
+        wait_store_idle(app)
+    done: list[str] = []
+    app._preview_measure_expression_async("Draft", "SUM(t[qty])", done.append)
+    wait_store_idle(app)
+    assert app.create_measure("Extra", "SUM(t[qty])") is True
+    wait_store_idle(app)
+    assert app.remove_measure("Extra") is True
+    wait_store_idle(app)
+    assert violations == [], f"controller state written off the GUI thread: {violations[:5]}"
+    assert emits_off_thread == [], "stateChanged emitted off the GUI thread"
+    kinds = {name for name, _ in ran}
+    assert kinds == {"_store_card_compute", "_store_visual_compute", "_store_preview_compute"}, kinds
+    assert all(on_worker for _name, on_worker in ran), "a compute function ran on the GUI thread"
+    assert done == [text_of(qty_sum())], done
 
 
 # ---------------------------------------------------------------------------------------------------

@@ -2876,7 +2876,15 @@ class StudioController(QObject):
             params = self._store_preview_params
             if params is None:
                 return None
-            return self._store_slot_key("preview", params["measure_name"], by_name=params["by_name"])
+            try:  # the draft measures of NOW: a model change under a running preview makes its answer out of date
+                measure, candidate_measures, _ = self._preview_candidate(
+                    params["name"], params["expression"],
+                    editing_name=params["editing_name"], home_table_id=params["home_table_id"],
+                )
+            except Exception:
+                return None
+            by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
+            return self._store_slot_key("preview", str(measure["name"]), by_name=by_name)
         return None
 
     def _store_snapshot(self) -> Any:
@@ -2921,6 +2929,28 @@ class StudioController(QObject):
         if manager is not None:
             self._store_refresh_after_job = True
             manager.cancel_all(wait=True, deliver=False)
+            self._store_show_job_text()
+
+    def _store_show_job_text(self) -> None:
+        """Requests forgotten for a store job say so: the cards, KPIs, visuals and preview show one plain sentence
+        instead of "Calculating..." (nothing is calculating, so no Cancel). The refresh at the job's end recalculates."""
+        route = self._dax_route()
+        text = self._route_requests().JOB_RUNNING_TEXT
+        refusal = route.RouteRefusal(text, "a store job is running", route.CODE_BUSY)
+        for slot, (key, status, _payload) in list(self._store_state.items()):
+            if status != "pending":
+                continue
+            if slot[0] == "card":
+                payload: dict[str, Any] = self._apply_store_card(str(slot[1]), refusal)
+            elif slot[0] == "visual":
+                payload = {"series": [], "text": text, "code": route.CODE_BUSY}
+            elif slot[0] == "preview":
+                self._apply_store_preview(refusal)
+                payload = {"code": ""}
+            else:
+                continue
+            self._store_state[slot] = (key, "done", payload)
+        self._schedule_store_state_emit()
 
     def _reset_store_requests(self) -> None:
         """Forget every result and stop every request except the preview: the next refresh asks again."""
@@ -3185,12 +3215,16 @@ class StudioController(QObject):
                 name, expression, editing_name=editing_name, home_table_id=home_table_id
             )
         except Exception as exc:
+            self._preview_job = None
+            self._set_preview_busy_for(None)
             on_done(str(exc))
             return
         by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
         measure_name = str(measure["name"])
         project_store = self._project_store
         if project_store is None or project_store.closed:
+            self._preview_job = None
+            self._set_preview_busy_for(None)
             on_done("The large table is not open.")
             return
         if request_id is None:
@@ -3215,13 +3249,19 @@ class StudioController(QObject):
     def storeCalculating(self) -> int:  # noqa: N802
         """How many large-table requests are queued or running."""
         manager = self._store_requests
-        return manager.pending() if manager is not None else 0
+        return manager.live() if manager is not None else 0
 
     @Property(bool, notify=stateChanged)
     def storeCanRecalculate(self) -> bool:  # noqa: N802
         """True when a card or a visual of a large table shows the canceled or timeout text (QML offers Calculate again)."""
-        route = self._dax_route() if self._store_state else None
-        for _key, status, payload in self._store_state.values():
+        if not self._store_state:
+            return False
+        route = self._dax_route()
+        page = self._active_page()
+        shown = {item.get("title") for item in (page.get("visuals", []) if page else []) if isinstance(item, dict)}
+        for slot, (_key, status, payload) in self._store_state.items():
+            if slot[0] == "visual" and slot[1] not in shown:
+                continue  # a visual of another page is not on screen: it must not keep the banner
             if status == "done" and isinstance(payload, dict) and payload.get("code") in (route.CODE_CANCELED, route.CODE_TIMEOUT):
                 return True
         return False
