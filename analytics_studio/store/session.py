@@ -7,10 +7,12 @@ Qt-free: contains no PySide imports.
 from __future__ import annotations
 
 import fcntl
+import logging
 import os
 import shutil
 import tempfile
 import threading
+import time
 import uuid
 from contextlib import contextmanager
 from typing import (
@@ -25,7 +27,7 @@ from typing import (
 import duckdb
 
 from .base import StoreBusyError, StoreError, StoreLockedError
-from .duck_store import DuckStore
+from .duck_store import DuckStore, StoreReader
 
 try:
     from .csv_import import ImportCancelledError
@@ -35,6 +37,9 @@ except ImportError:
         pass
 
 T = TypeVar("T")
+
+_log = logging.getLogger(__name__)
+_SHUTDOWN_REINTERRUPT_S = 0.05  # an interrupt that lands before a reader's query starts is lost; send it again
 
 _COPY_CHUNK = 8 * 1024 * 1024  # 8 MiB chunks for copy_to
 
@@ -110,6 +115,8 @@ class ProjectStore:
         self._busy = False
         self._shutting_down = False
         self._shutdown_waiters = 0  # shutdown() calls currently in progress
+        self._readers = 0  # read leases open (read_lease); exclusive operations are refused while > 0
+        self._cancel_hooks: list[Callable[[], None]] = []
         self._lock = threading.Condition(threading.Lock())
         self._closed = False
 
@@ -396,7 +403,7 @@ class ProjectStore:
                 raise StoreError("The store is closed.")
             if self._shutting_down:
                 raise StoreError("The store is shutting down.")
-            if self._busy:
+            if self._busy or self._readers > 0:
                 raise StoreBusyError("The store is busy with another operation.")
             self._busy = True
             # A cancel left over from an earlier job must not stop this operation
@@ -422,7 +429,7 @@ class ProjectStore:
                 raise StoreError("The store is closed.")
             if self._shutting_down:
                 raise StoreError("The store is shutting down.")
-            if self._busy:
+            if self._busy or self._readers > 0:
                 raise StoreBusyError("The store is busy with another operation.")
             self._busy = True
             if not self._shutting_down:
@@ -434,6 +441,64 @@ class ProjectStore:
             with self._lock:
                 self._busy = False
                 self._lock.notify_all()
+
+    @contextmanager
+    def read_lease(self) -> Iterator[StoreReader]:
+        """A read lease: yields a new StoreReader (its own connection) and holds off every exclusive operation.
+
+        While a lease is open, job(), every exclusive operation (import, drop, rebind, copy_to, drop_unreferenced,
+        validate_table) and close() raise StoreBusyError, and shutdown() interrupts the reader and waits for the
+        lease to end. Any number of leases may be open at once. A lease does not set the busy flag (so the data
+        grid keeps working) and does not clear the cancel event. It is refused while the store is closed, shutting
+        down, or busy with a job.
+        """
+        with self._lock:
+            if self._closed or self._store is None:
+                raise StoreError("The store is closed.")
+            if self._shutting_down:
+                raise StoreError("The store is shutting down.")
+            if self._busy:
+                raise StoreBusyError("The store is busy with another operation.")
+            reader = self._store.reader()
+            self._readers += 1
+        try:
+            yield reader
+        finally:
+            try:
+                reader.close()
+            finally:
+                with self._lock:
+                    self._readers -= 1
+                    self._lock.notify_all()
+
+    def add_cancel_hook(self, fn: Callable[[], None]) -> None:
+        """Register fn to be called (outside the store lock) by request_cancel_readers() and shutdown()."""
+        with self._lock:
+            self._cancel_hooks.append(fn)
+
+    def remove_cancel_hook(self, fn: Callable[[], None]) -> None:
+        with self._lock:
+            try:
+                self._cancel_hooks.remove(fn)
+            except ValueError:
+                pass
+
+    def _run_cancel_hooks(self) -> None:
+        with self._lock:
+            hooks = list(self._cancel_hooks)
+        for hook in hooks:
+            try:
+                hook()
+            except Exception:
+                _log.exception("A store cancel hook raised")
+
+    def request_cancel_readers(self) -> None:
+        """Interrupt the query of every open read lease and call the cancel hooks. Does not touch the job cancel event."""
+        with self._lock:
+            store = self._store
+        if store is not None:
+            store.interrupt_all_readers()
+        self._run_cancel_hooks()
 
     def call(self, fn: Callable[[DuckStore], T]) -> T:
         """Call fn(self.store) on UI thread; raises busy StoreBusyError if busy."""
@@ -794,9 +859,10 @@ class ProjectStore:
                 pass
 
     def shutdown(self, timeout: float = 15.0) -> bool:
-        """App quit: request cancel, wait up to timeout for job to end, close and remove spill dir.
+        """App quit: request cancel, wait up to timeout for job and read leases to end, close and remove spill dir.
 
-        Returns True when the store is closed. Returns False when the running job did not end
+        Every open read lease is interrupted (again every 50 ms while it lasts) and the cancel hooks are called.
+        Returns True when the store is closed. Returns False when the running job or a read lease did not end
         within timeout; the store then stays open and usable again (the "shutting down" state
         is reset, so the caller may abandon the quit and keep working). Nothing else is undone:
         the cancel request already sent stays set until the next job() clears it.
@@ -805,18 +871,25 @@ class ProjectStore:
             self._shutting_down = True
             self._shutdown_waiters += 1
         self.request_cancel()
+        self.request_cancel_readers()
+        deadline = time.monotonic() + timeout
         with self._lock:
-            if self._closed:
-                self._shutdown_waiters -= 1
-                return True
-            if self._busy:
-                ended = self._lock.wait_for(lambda: not self._busy, timeout=timeout)
-                if not ended or self._busy:
+            while True:
+                if self._closed:
+                    self._shutdown_waiters -= 1
+                    return True
+                if not self._busy and self._readers == 0:
+                    break
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
                     self._shutdown_waiters -= 1
                     # Reopen only when no other shutdown() call is still waiting.
                     if self._shutdown_waiters == 0:
                         self._shutting_down = False
                     return False
+                self._lock.wait(min(_SHUTDOWN_REINTERRUPT_S, remaining))
+                if self._readers > 0 and self._store is not None:
+                    self._store.interrupt_all_readers()
 
             self._shutdown_waiters -= 1
 
@@ -839,7 +912,7 @@ class ProjectStore:
         with self._lock:
             if self._closed:
                 return
-            if self._busy:
+            if self._busy or self._readers > 0:
                 raise StoreBusyError("The store is busy with another operation.")
             self._closed = True
             store = self._store

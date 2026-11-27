@@ -11,6 +11,7 @@ import csv
 import os
 import random
 import re
+import threading
 import time
 from decimal import Decimal
 from pathlib import Path
@@ -22,7 +23,8 @@ from analytics_studio import dax_dates
 from analytics_studio.file_import import parse_file
 from analytics_studio.measures import evaluate_measures, normalize_measure
 from analytics_studio.store import DuckStore, ProjectStore, dax_route, dax_sql, dax_whitelist, import_csv_to_store
-from analytics_studio.store.base import StoreError
+from analytics_studio.store.base import StoreBusyError, StoreError
+from analytics_studio.store.duck_store import StoreReader
 from analytics_studio.store.dax_route import (
     GENERIC_SENTENCE,
     RouteRefusal,
@@ -492,18 +494,41 @@ def test_dropped_table_is_a_refusal_not_an_exception(fresh: Env) -> None:
 # ---------------------------------------------------------------------------------------------------
 # (f) timeout
 # ---------------------------------------------------------------------------------------------------
+# A query duckdb cannot fold to a constant: it runs for 10 s or more until an interrupt stops it
+# (the older `SELECT count(*) FROM range(10000000000)` is answered in about 0.5 s by duckdb 1.5.5).
+SLOW_SQL = "SELECT sum(hash(a)) FROM range(3000000000) r(a)"
+
+
+# The same kind of query with an end of its own (about 1 s), for a mutant that switches the budget off.
+BOUNDED_SLOW_SQL = "SELECT sum(hash(a)) FROM range(200000000) r(a)"
+
+
 def _slow_execute(self: Any, store: Any) -> Any:
-    return store.execute("SELECT count(*) FROM range(10000000000)")
+    return store.execute(SLOW_SQL)
+
+
+def _bounded_slow_execute(self: Any, store: Any) -> Any:
+    return store.execute(BOUNDED_SLOW_SQL)
+
+
+def record_interrupts(monkeypatch: pytest.MonkeyPatch) -> threading.Event:
+    """An event that is set when any StoreReader gets an interrupt (the budget has fired)."""
+    seen = threading.Event()
+    real = StoreReader.interrupt
+
+    def spy(self: Any) -> None:
+        seen.set()
+        real(self)
+
+    monkeypatch.setattr(StoreReader, "interrupt", spy)
+    return seen
 
 
 def test_slow_plan_times_out_and_store_still_works(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     with monkeypatch.context() as patch:
         patch.setattr(dax_sql.MeasurePlan, "execute", _slow_execute)
-        started = time.monotonic()
         out = fresh.route("COUNTROWS(t)", budget_s=0.2)
-        elapsed = time.monotonic() - started
-    assert isinstance(out, RouteRefusal) and out.code == "timeout", out
-    assert elapsed < 5.0, elapsed  # hang guard only: the refusal text below is the behaviour
+    assert isinstance(out, RouteRefusal) and out.code == "timeout", out  # a plan that finished would be an answer
     assert out.message == "This measure took longer than 0.2 seconds on this large table and was stopped."
     assert fresh.ps.busy is False
     again = fresh.route("COUNTROWS(t)")
@@ -532,11 +557,10 @@ def test_expired_deadline_does_not_run_the_measure(fresh: Env, monkeypatch: pyte
 
 def test_shared_deadline_caps_the_budget(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(dax_sql.MeasurePlan, "execute", _slow_execute)
-    started = time.monotonic()
-    out = fresh.route("COUNTROWS(t)", budget_s=30.0, deadline=time.monotonic() + 0.3)
+    out = fresh.route("COUNTROWS(t)", budget_s=30.0, deadline=time.monotonic() + 3.0)
     assert isinstance(out, RouteRefusal) and out.code == "timeout"
-    assert out.message.startswith("This measure took longer than 0."), out.message  # the capped budget, not 30 s
-    assert time.monotonic() - started < 5.0  # hang guard only
+    match = re.match(r"This measure took longer than ([0-9.]+) seconds", out.message)
+    assert match is not None and 0.0 < float(match.group(1)) <= 3.0, out.message  # the capped budget, not 30 s
 
 
 def test_duckstore_interrupt_then_normal_query(tmp_path: Path) -> None:
@@ -547,7 +571,7 @@ def test_duckstore_interrupt_then_normal_query(tmp_path: Path) -> None:
         timer = threading.Timer(0.2, store.interrupt)
         timer.start()
         with pytest.raises(StoreError, match="(?i)interrupt"):
-            store.execute("SELECT count(*) FROM range(10000000000)")
+            store.execute(SLOW_SQL)
         timer.join()
         assert store.execute("SELECT 41 + 1") == [(42,)]
         store.interrupt()  # idle interrupt does nothing
@@ -733,35 +757,36 @@ def check_busy_policy(fresh: Env) -> None:
 
 
 def test_mutant_job_not_taken(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The busy policy is now the lease's: a lease that does not look at the busy flag is the mutant."""
     import contextlib
 
     check_busy_policy(fresh)
 
     @contextlib.contextmanager
-    def no_job(self: Any) -> Any:
-        yield None
+    def no_busy_check(self: Any) -> Any:
+        with self.store.reader() as reader:
+            yield reader
 
-    # The route runs without marking the store busy: the check sees a value, not the refusal.
+    # The route runs although a job is open: the check sees a value, not the refusal.
     outer = fresh.ps.job
     with outer():
-        monkeypatch.setattr(ProjectStore, "job", no_job)
+        monkeypatch.setattr(ProjectStore, "read_lease", no_busy_check)
         with pytest.raises(AssertionError):
             out = fresh.route("COUNTROWS(t)")
             assert isinstance(out, RouteRefusal) and out.code == "busy"
 
 
 def check_timeout(fresh: Env) -> None:
-    started = time.monotonic()
     out = fresh.route("COUNTROWS(t)", budget_s=0.2)
     assert isinstance(out, RouteRefusal) and out.code == "timeout", out
     assert out.message.startswith("This measure took longer than 0.2 seconds"), out.message
-    assert time.monotonic() - started < 5.0  # hang guard only
 
 
 def test_mutant_budget_never_fires(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(dax_sql.MeasurePlan, "execute", _slow_execute)
     check_timeout(fresh)
-    # (the slow query is about 0.5 s when nothing stops it, so the mutant run ends by itself)
+    # (the mutant run uses a slow query that ends by itself, because nothing stops it)
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", _bounded_slow_execute)
     monkeypatch.setattr(dax_route._Budget, "start", lambda self: None)
     with pytest.raises(AssertionError):
         check_timeout(fresh)
@@ -942,13 +967,21 @@ def _columns_read_by_stamp_queries(ps: ProjectStore, project: dict[str, Any], me
     seen: set[str] = set()
     real = DuckStore.execute
 
+    real_reader = StoreReader.execute
+
     def spy(self: Any, sql: str, params: Any = ()) -> Any:
         if "regexp_extract" in sql or "regexp_replace" in sql:
             seen.update(re.findall(r'"(d[1-8])"', sql))
         return real(self, sql, params)
 
+    def spy_reader(self: Any, sql: str, params: Any = ()) -> Any:
+        if "regexp_extract" in sql or "regexp_replace" in sql:
+            seen.update(re.findall(r'"(d[1-8])"', sql))
+        return real_reader(self, sql, params)
+
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(DuckStore, "execute", spy)
+        patch.setattr(StoreReader, "execute", spy_reader)  # the route runs on a reader since C3a
         out = route_measure(project, measure, project_store=ps)
     assert isinstance(out, StoreAnswer), out
     return seen
@@ -987,46 +1020,72 @@ def test_tiny_budget_never_shows_the_stale_or_metadata_text(fresh: Env) -> None:
         out = fresh.route("SUM(t[amt])", budget_s=0.0003)
         kind = "answer" if isinstance(out, StoreAnswer) else out.code
         outcomes[kind] = outcomes.get(kind, 0) + 1
-        assert kind in ("answer", "timeout"), (kind, out)
-    assert outcomes.get("timeout", 0) > 0, outcomes
+        assert kind in ("answer", "timeout"), (kind, out)  # which of the two depends on speed; nothing else may show
     assert fresh.ps.busy is False
     assert isinstance(fresh.route("SUM(t[amt])"), StoreAnswer)
 
 
+def test_an_interrupt_inside_a_guard_query_is_a_timeout_not_a_stale_or_metadata_refusal(
+    fresh: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Speed-independent twin: the first statement of the call fails with an interrupt AFTER the budget has fired,
+    as an interrupt landing inside a guard query does; the guard swallows it into a refusal, the route says timeout."""
+    interrupted = record_interrupts(monkeypatch)
+    real = StoreReader.execute
+    state = {"failed": False}
+
+    def execute(self: Any, sql: str, params: Any = ()) -> Any:
+        if not state["failed"]:
+            state["failed"] = True
+            assert interrupted.wait(GUARD_S), "the budget never fired"
+            raise StoreError("Query execution failed: INTERRUPT Error: Interrupted!")
+        return real(self, sql, params)
+
+    monkeypatch.setattr(StoreReader, "execute", execute)
+    out = fresh.route("SUM(t[amt])", budget_s=0.05)
+    assert isinstance(out, RouteRefusal) and out.code == "timeout", out
+    assert state["failed"] is True
+
+
 def test_decimal_metadata_work_runs_inside_the_budget(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     def slow_meta(store: Any, table: str, columns: list[str]) -> Any:
-        store.execute("SELECT count(*) FROM range(10000000000)")  # about 0.5 s when nothing stops it
+        store.execute(SLOW_SQL)  # runs until the budget stops it
         return {}
 
     monkeypatch.setattr(dax_route, "column_decimal_meta", slow_meta)
-    started = time.monotonic()
     out = fresh.route("SUM(t[amt])", budget_s=0.15)
     assert isinstance(out, RouteRefusal) and out.code == "timeout", out
     assert out.message.startswith("This measure took longer than 0.15 seconds"), out.message
-    assert time.monotonic() - started < 5.0  # hang guard only
 
 
 def test_interrupt_between_two_queries_still_stops_the_next_one(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    interrupted = record_interrupts(monkeypatch)
+
     def two_steps(self: Any, store: Any) -> Any:
         store.execute("SELECT 1")
-        time.sleep(0.2)  # the budget fires here, with no query running: that interrupt stops nothing
-        return store.execute("SELECT count(*) FROM range(10000000000)")
+        # The budget fires here, with no query running: that first interrupt stops nothing. Wait for it (an event,
+        # not a sleep); the budget re-fires and the next one lands in the slow query.
+        assert interrupted.wait(30.0), "the budget never fired"
+        return store.execute(SLOW_SQL)
 
     monkeypatch.setattr(dax_sql.MeasurePlan, "execute", two_steps)
-    started = time.monotonic()
     out = fresh.route("COUNTROWS(t)", budget_s=0.05)
     assert isinstance(out, RouteRefusal) and out.code == "timeout", out
     assert out.message.startswith("This measure took longer than 0.05 seconds"), out.message
-    assert time.monotonic() - started < 5.0  # hang guard only
 
 
 def test_unrelated_store_error_is_not_called_a_timeout(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    interrupted = record_interrupts(monkeypatch)
+
     def unrelated(self: Any, store: Any) -> Any:
-        time.sleep(0.15)  # the budget (0.05 s) has fired by now
+        if store is not None and getattr(unrelated, "wait_for_budget", False):
+            assert interrupted.wait(30.0), "the budget never fired"  # the budget (0.05 s) has fired by now
         raise StoreError("Query execution failed: Catalog Error: Table with name x does not exist")
 
     monkeypatch.setattr(dax_sql.MeasurePlan, "execute", unrelated)
+    unrelated.wait_for_budget = True  # type: ignore[attr-defined]
     fired = fresh.route("COUNTROWS(t)", budget_s=0.05)
+    unrelated.wait_for_budget = False  # type: ignore[attr-defined]
     quick = fresh.route("COUNTROWS(t)", budget_s=5.0)
     for out in (fired, quick):
         assert isinstance(out, RouteRefusal) and out.code == "plan", out
@@ -1814,3 +1873,623 @@ def test_slicer_message_finds_the_group_column_whatever_its_case(env: Env) -> No
     )
     assert isinstance(out, RouteRefusal)
     assert out.message == "A slicer on REGION cannot be used with a visual grouped by the same column on a large table yet."
+
+
+# ===================================================================================================
+# Stage C3a: the route runs on a read cursor under a read lease, can be canceled, and takes plain data
+# ===================================================================================================
+GUARD_S = 30.0  # hang guard for Event.wait / Thread.join only; an elapsed time is never asserted
+
+
+def run_in_thread(fn: Any) -> tuple[threading.Thread, dict[str, Any]]:
+    box: dict[str, Any] = {}
+
+    def work() -> None:
+        try:
+            box["result"] = fn()
+        except BaseException as exc:  # noqa: BLE001 - the test reads it
+            box["error"] = exc
+
+    thread = threading.Thread(target=work, daemon=True)
+    thread.start()
+    return thread, box
+
+
+def finish(thread: threading.Thread, box: dict[str, Any]) -> Any:
+    thread.join(GUARD_S)
+    assert not thread.is_alive(), "the route call did not end"
+    assert "error" not in box, box.get("error")
+    return box["result"]
+
+
+def make_slow_plan() -> tuple[Any, threading.Event, list[bool]]:
+    """A MeasurePlan.execute that signals `started`, then runs a query that only an interrupt ends."""
+    started = threading.Event()
+    finished: list[bool] = []
+
+    def execute(self: Any, store: Any) -> Any:
+        started.set()
+        out = store.execute(SLOW_SQL)
+        finished.append(True)  # reached only when nothing stopped the query
+        return out
+
+    return execute, started, finished
+
+
+def test_route_runs_on_a_reader_under_a_lease_and_never_sets_busy(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: dict[str, Any] = {}
+
+    def spy(self: Any, store: Any) -> Any:
+        seen["is_reader"] = isinstance(store, StoreReader)
+        seen["readers"] = fresh.ps._readers
+        seen["busy"] = fresh.ps.busy
+        seen["open_readers"] = len(fresh.ps.store._readers)
+        return store.execute("SELECT count(*) FROM t_csv")
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", spy)
+    out = fresh.route("COUNTROWS(t)")
+    assert isinstance(out, StoreAnswer)
+    assert seen == {"is_reader": True, "readers": 1, "busy": False, "open_readers": 1}
+    assert fresh.ps._readers == 0 and fresh.ps.store._readers == set()  # lease and cursor are closed again
+
+
+def test_route_never_touches_the_main_connection(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    def forbidden(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("the route used the main connection")
+
+    monkeypatch.setattr(DuckStore, "execute", forbidden)
+    monkeypatch.setattr(ProjectStore, "job", forbidden)
+    monkeypatch.setattr(ProjectStore, "store", property(forbidden))
+    for expression in ("COUNTROWS(t)", "SUM(t[qty])", "CALCULATE(SUM(t[amt]), t[region] = \"East\")"):
+        assert isinstance(fresh.route(expression), StoreAnswer)
+    assert isinstance(dax_route.route_grouped(fresh.project, "COUNTROWS(t)", ("t", "region"), project_store=fresh.ps), StoreAnswer)
+    assert isinstance(dax_route.route_distinct_values(fresh.project, "t", "region", project_store=fresh.ps), list)
+
+
+def test_the_grid_connection_is_free_while_the_route_runs(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A route query on a reader and a data-grid call on the main connection run at the same time."""
+    slow, started, finished = make_slow_plan()
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", slow)
+    thread, box = run_in_thread(lambda: fresh.route("COUNTROWS(t)", budget_s=GUARD_S))
+    try:
+        assert started.wait(GUARD_S)
+        assert fresh.ps.store.execute("SELECT count(*) FROM t_csv") == [(len(fresh.rows),)]  # no "store is busy"
+        assert len(fresh.ps.store.read_page("t_csv", 0, 5)) == 5
+    finally:
+        for _ in range(int(GUARD_S / 0.05)):  # the shutdown path's interrupt ends the slow query (sent again: one may be early)
+            fresh.ps.request_cancel_readers()
+            thread.join(0.05)
+            if not thread.is_alive():
+                break
+    out = finish(thread, box)
+    assert finished == []
+    assert isinstance(out, RouteRefusal) and out.code not in ("timeout", "canceled"), out
+
+
+def test_lease_held_twin_job_is_refused_and_the_route_still_answers(fresh: Env) -> None:
+    with fresh.ps.read_lease():
+        with pytest.raises(StoreBusyError):
+            with fresh.ps.job():
+                pass
+        out = fresh.route("COUNTROWS(t)")  # two leases at once are allowed
+        assert isinstance(out, StoreAnswer) and out.value == Decimal(len(fresh.rows))
+        assert fresh.ps.busy is False
+    assert fresh.ps._readers == 0
+    with fresh.ps.job():
+        pass
+
+
+def test_route_with_a_reader_takes_no_lease_and_no_job(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    def forbidden(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("the route took its own lease or job")
+
+    with fresh.ps.read_lease() as reader:
+        monkeypatch.setattr(ProjectStore, "read_lease", forbidden)
+        monkeypatch.setattr(ProjectStore, "job", forbidden)
+        out = fresh.route("SUM(t[qty])", reader=reader)
+        grouped = dax_route.route_grouped(
+            fresh.project, "COUNTROWS(t)", ("t", "region"), project_store=fresh.ps, reader=reader
+        )
+        values = dax_route.route_distinct_values(fresh.project, "t", "region", project_store=fresh.ps, reader=reader)
+        assert isinstance(out, StoreAnswer) and isinstance(grouped, StoreAnswer) and isinstance(values, list)
+        assert not reader.closed  # the lease is the caller's: the route does not close the reader
+        assert fresh.ps._readers == 1
+
+
+def test_route_with_a_reader_works_while_a_job_is_busy_is_the_callers_lease_policy(fresh: Env) -> None:
+    """With a reader the route does not look at the busy flag: the caller leased it, a job cannot start under it."""
+    with fresh.ps.read_lease() as reader:
+        with pytest.raises(StoreBusyError):
+            with fresh.ps.job():
+                pass
+        assert isinstance(fresh.route("COUNTROWS(t)", reader=reader), StoreAnswer)
+
+
+def test_route_rejects_wrong_reader_and_cancel_types(env: Env) -> None:
+    with pytest.raises(TypeError):
+        route_measure(env.project, "COUNTROWS(t)", project_store=env.ps, reader=object())
+    with pytest.raises(TypeError):
+        route_measure(env.project, "COUNTROWS(t)", project_store=env.ps, cancel=object())  # type: ignore[arg-type]
+    with pytest.raises(TypeError):
+        route_measure(env.project, "COUNTROWS(t)", project_store=object())
+
+
+# --- cancel ---------------------------------------------------------------------------------------------
+def check_canceled(out: Any) -> None:
+    assert isinstance(out, RouteRefusal), out
+    assert out.code == dax_route.CODE_CANCELED == "canceled"
+    assert out.message == "Canceled." and out.reason == "canceled by the user"
+
+
+def test_cancel_set_before_the_call_gives_canceled_and_runs_nothing(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    ran: list[bool] = []
+
+    def never(self: Any, store: Any) -> Any:
+        ran.append(True)  # (an error raised here would be swallowed by the route: record it instead)
+        raise AssertionError("must not run after cancel")
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", never)
+    monkeypatch.setattr(dax_sql.GroupByPlan, "execute", never)
+    cancel = threading.Event()
+    cancel.set()
+    check_canceled(fresh.route("COUNTROWS(t)", cancel=cancel))
+    assert ran == []
+    check_canceled(dax_route.route_grouped(
+        fresh.project, "COUNTROWS(t)", ("t", "region"), project_store=fresh.ps, cancel=cancel))
+    check_canceled(dax_route.route_distinct_values(fresh.project, "t", "region", project_store=fresh.ps, cancel=cancel))
+    assert ran == []
+    assert fresh.ps._readers == 0 and fresh.ps.busy is False
+
+
+def test_cancel_during_a_slow_query_stops_it_and_gives_canceled(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    slow, started, finished = make_slow_plan()
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", slow)
+    cancel = threading.Event()
+    thread, box = run_in_thread(lambda: fresh.route("COUNTROWS(t)", budget_s=GUARD_S, cancel=cancel))
+    assert started.wait(GUARD_S)
+    cancel.set()
+    check_canceled(finish(thread, box))
+    assert finished == []  # the query did not end by itself
+    assert fresh.ps._readers == 0 and fresh.ps.busy is False
+    monkeypatch.undo()  # the store is usable again
+    assert fresh.route("COUNTROWS(t)").value == Decimal(len(fresh.rows))
+
+
+def test_cancel_during_a_grouped_query_with_a_leased_reader(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    started = threading.Event()
+    finished: list[bool] = []
+
+    def slow(self: Any, store: Any) -> Any:
+        started.set()
+        out = store.execute(SLOW_SQL)
+        finished.append(True)
+        return out
+
+    monkeypatch.setattr(dax_sql.GroupByPlan, "execute", slow)
+    cancel = threading.Event()
+    with fresh.ps.read_lease() as reader:
+        thread, box = run_in_thread(lambda: dax_route.route_grouped(
+            fresh.project, "COUNTROWS(t)", ("t", "region"), project_store=fresh.ps, budget_s=GUARD_S, cancel=cancel,
+            reader=reader))
+        assert started.wait(GUARD_S)
+        cancel.set()
+        check_canceled(finish(thread, box))
+        assert finished == []
+        assert reader.execute("SELECT 5") == [(5,)]  # the leased reader is still usable after the interrupt
+
+
+def test_canceled_beats_timeout(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Budget and cancel both fired: the answer is the cancel."""
+    interrupted = record_interrupts(monkeypatch)
+    cancel = threading.Event()
+
+    def both(self: Any, store: Any) -> Any:
+        assert interrupted.wait(GUARD_S), "the budget never fired"  # the budget (0.05 s) has fired
+        cancel.set()
+        return store.execute(SLOW_SQL)  # stopped by the re-fired interrupt: a timeout AND a cancel
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", both)
+    out = fresh.route("COUNTROWS(t)", budget_s=0.05, cancel=cancel)
+    check_canceled(out)
+
+
+def test_timeout_still_wins_when_no_cancel_is_set(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", _slow_execute)
+    cancel = threading.Event()
+    out = fresh.route("COUNTROWS(t)", budget_s=0.1, cancel=cancel)
+    assert isinstance(out, RouteRefusal) and out.code == "timeout", out
+    assert not cancel.is_set()
+
+
+def test_canceled_beats_stale(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    cancel = threading.Event()
+
+    def stale(self: Any, store: Any) -> Any:
+        cancel.set()
+        return dax_sql.Refusal(dax_sql.REASON_PLAN_STALE)
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", stale)
+    check_canceled(fresh.route("COUNTROWS(t)", cancel=cancel))
+
+    def stale_alone(self: Any, store: Any) -> Any:
+        return dax_sql.Refusal(dax_sql.REASON_PLAN_STALE)
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", stale_alone)
+    out = fresh.route("COUNTROWS(t)", cancel=threading.Event())  # no cancel: the stale reason still shows
+    assert isinstance(out, RouteRefusal) and out.code == "stale"
+
+
+def test_cancel_set_after_the_answer_was_computed_never_returns_a_value(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    cancel = threading.Event()
+    real = dax_sql.MeasurePlan.execute
+
+    def late(self: Any, store: Any) -> Any:
+        value = real(self, store)
+        cancel.set()  # the user cancels just as the answer is ready
+        return value
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", late)
+    check_canceled(fresh.route("COUNTROWS(t)", cancel=cancel))
+
+
+def test_cancel_set_while_the_budget_is_closing_never_returns_a_value(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The cancel arrives after the answer was checked and before the route returns (inside the budget's own close)."""
+    cancel = threading.Event()
+    real_cancel = dax_route._Budget.cancel
+
+    def cancel_then_close(self: Any) -> None:
+        cancel.set()
+        real_cancel(self)
+
+    monkeypatch.setattr(dax_route._Budget, "cancel", cancel_then_close)
+    check_canceled(fresh.route("COUNTROWS(t)", cancel=cancel))
+
+
+def test_cancel_with_an_error_inside_the_plan_is_still_canceled(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    cancel = threading.Event()
+
+    def boom(self: Any, store: Any) -> Any:
+        cancel.set()
+        raise StoreError("Query execution failed: INTERRUPT Error: Interrupted!")
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", boom)
+    check_canceled(fresh.route("COUNTROWS(t)", cancel=cancel))
+
+
+def test_an_interrupt_from_another_source_is_not_a_cancel_and_not_a_timeout(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    def other(self: Any, store: Any) -> Any:
+        stop = threading.Event()
+
+        def pump() -> None:  # e.g. a shutdown: neither the budget nor the cancel event interrupts
+            while not stop.wait(0.05):
+                store.interrupt()
+
+        pumper = threading.Thread(target=pump, daemon=True)
+        pumper.start()
+        try:
+            return store.execute(SLOW_SQL)
+        finally:
+            stop.set()
+            pumper.join(GUARD_S)
+
+    monkeypatch.setattr(dax_sql.MeasurePlan, "execute", other)
+    cancel = threading.Event()
+    out = fresh.route("COUNTROWS(t)", budget_s=GUARD_S, cancel=cancel)
+    assert isinstance(out, RouteRefusal) and out.code not in ("timeout", "canceled"), out
+    assert "interrupt" in out.reason.casefold()
+
+
+def test_the_battery_with_an_unset_cancel_event_changes_nothing_and_a_set_one_is_always_canceled(env_small: Env) -> None:
+    battery = _battery()[:60]
+    unset, is_set = threading.Event(), threading.Event()
+    is_set.set()
+    for expression, measures in battery:
+        plain = env_small.route(expression, measures=measures)
+        guarded = env_small.route(expression, measures=measures, cancel=unset)
+        assert type(plain) is type(guarded)
+        if isinstance(plain, RouteRefusal):
+            assert (plain.code, plain.reason, plain.message) == (guarded.code, guarded.reason, guarded.message)
+        else:
+            assert plain.value == guarded.value
+        canceled = env_small.route(expression, measures=measures, cancel=is_set)
+        check_canceled(canceled)
+        assert dax_route.reason_is_mapped(canceled.reason)  # the reason has its plain sentence in the reason map
+
+
+# --- the budget -----------------------------------------------------------------------------------------
+def test_budget_fires_at_the_budget_and_refires_until_cancelled() -> None:
+    calls = threading.Semaphore(0)
+    count = [0]
+
+    def interrupt() -> None:
+        count[0] += 1
+        calls.release()
+
+    budget = dax_route._Budget(interrupt, 0.01)
+    budget.start()
+    assert calls.acquire(timeout=GUARD_S) and calls.acquire(timeout=GUARD_S) and calls.acquire(timeout=GUARD_S)
+    assert budget.fired.is_set() and not budget.canceled.is_set()
+    budget.cancel()
+    after = count[0]
+    budget._thread.join(GUARD_S)  # type: ignore[union-attr]
+    assert not budget._thread.is_alive()  # type: ignore[union-attr]
+    assert count[0] == after  # nothing arrives after cancel() returned
+
+
+def test_budget_without_cancel_event_does_not_fire_before_its_budget_and_ends_with_cancel() -> None:
+    fired: list[int] = []
+    budget = dax_route._Budget(lambda: fired.append(1), 3600.0)
+    budget.start()
+    budget.cancel()
+    budget._thread.join(GUARD_S)  # type: ignore[union-attr]
+    assert not budget._thread.is_alive()  # a budget of an hour ended at once: it waits on an event, not on a clock
+    assert fired == [] and not budget.fired.is_set()
+
+
+def test_budget_fires_when_the_cancel_event_is_set_long_before_the_budget() -> None:
+    cancel = threading.Event()
+    hit = threading.Event()
+    budget = dax_route._Budget(hit.set, 3600.0, cancel)
+    budget.start()
+    cancel.set()
+    assert hit.wait(GUARD_S)
+    budget.cancel()
+    assert budget.canceled.is_set() and not budget.fired.is_set()
+    budget._thread.join(GUARD_S)  # type: ignore[union-attr]
+    assert not budget._thread.is_alive()
+
+
+def test_time_caps_are_the_planners_numbers() -> None:
+    assert dax_route.DEFAULT_BUDGET_S == 0.5
+    assert dax_route.GUI_LIST_BUDGET_S == 2.0
+    assert dax_route.VALIDATE_BUDGET_S == 5.0
+    assert dax_route.BACKGROUND_BUDGET_S == 30.0
+    assert dax_route.DEFAULT_REFRESH_BUDGET_S == 1.5 and dax_route.DEFAULT_VISUAL_REFRESH_BUDGET_S == 2.0
+    assert dax_route.MAX_GROUPS == 2000 and dax_route.DISTINCT_LIMIT == 1000
+
+
+# --- reader twins of the two main-connection interrupt tests ----------------------------------------------
+def test_reader_interrupt_then_normal_query(tmp_path: Path) -> None:
+    store = DuckStore(str(tmp_path / "ri.db"))
+    try:
+        with store.reader() as reader:
+            done = threading.Event()
+            errors: list[BaseException] = []
+
+            def run() -> None:
+                try:
+                    reader.execute(SLOW_SQL)
+                except BaseException as exc:  # noqa: BLE001
+                    errors.append(exc)
+                finally:
+                    done.set()
+
+            worker = threading.Thread(target=run, daemon=True)
+            worker.start()
+            while not done.wait(0.05):  # an interrupt before the query starts is lost: send it again
+                reader.interrupt()
+            worker.join(GUARD_S)
+            assert len(errors) == 1 and isinstance(errors[0], StoreError) and "interrupt" in str(errors[0]).casefold()
+            assert reader.execute("SELECT 41 + 1") == [(42,)]
+            reader.interrupt()  # idle interrupt does nothing
+            assert reader.execute("SELECT 7") == [(7,)]
+    finally:
+        store.close()
+
+
+def test_reader_interrupt_does_not_take_the_store_lock(tmp_path: Path) -> None:
+    store = DuckStore(str(tmp_path / "rl.db"))
+    try:
+        with store.reader() as reader:
+            with store._lock:  # another thread holds the lock, as a running main-connection query does
+                done = threading.Event()
+                worker = threading.Thread(target=lambda: (reader.interrupt(), store.interrupt_all_readers(), done.set()))
+                worker.start()
+                assert done.wait(GUARD_S), "reader.interrupt() waited for the store lock"
+                worker.join()
+    finally:
+        store.close()
+
+
+# --- snapshots ------------------------------------------------------------------------------------------
+SNAPSHOT_EXPRESSIONS = ["COUNTROWS(t)", "SUM(t[qty])", "CALCULATE(SUM(t[amt]), t[region] = \"East\")", "[Base]", "[EastBase]"]
+
+
+def snapshot_project(env: Env) -> dict[str, Any]:
+    return make_project(types=env.types, measures=[
+        {"name": "Base", "expression": "SUM(t[amt])"}, {"name": "EastBase", "expression": "CALCULATE([Base], t[region] = \"East\")"},
+    ])
+
+
+def answers(env: Env, project: Any, candidates: Any = None) -> list[Any]:
+    out: list[Any] = []
+    for expression in SNAPSHOT_EXPRESSIONS:
+        a = route_measure(project, expression, project_store=env.ps, candidates=candidates)
+        out.append((a.value if isinstance(a, StoreAnswer) else (a.code, a.reason)))
+    g = dax_route.route_grouped(project, "SUM(t[qty])", ("t", "region"), project_store=env.ps, candidates=candidates)
+    out.append(g.rows if isinstance(g, StoreAnswer) else (g.code, g.reason))
+    d = dax_route.route_distinct_values(project, "t", "region", project_store=env.ps, candidates=candidates)
+    out.append(d if isinstance(d, list) else (d.code, d.reason))
+    f = dax_route.route_filter_context(project, [_flt("region", "equals", "East")], candidates=candidates)
+    out.append(f if isinstance(f, tuple) else (f.code, f.reason))
+    return out
+
+
+def test_snapshot_gives_the_same_answers_as_the_live_project(env: Env) -> None:
+    project = snapshot_project(env)
+    live = answers(env, project)
+    assert all(not (isinstance(item, tuple) and item and item[0] in ("shape", "plan", "closed")) for item in live[:5]), live
+    snapshot = dax_route.snapshot_for_route(project)
+    assert answers(env, snapshot) == live
+    assert dax_route.store_shape(snapshot) == dax_route.store_shape(project)
+    assert dax_route.route_is_available(snapshot) is True
+
+
+def test_snapshot_with_candidates_gives_the_same_answers(env: Env) -> None:
+    project = snapshot_project(env)
+    project["data_sources"] = [{"id": "s1", "kind": "csv"}]  # only the candidates say it is a store table
+    candidates = {"s1": _Candidate()}
+    live = answers(env, project, candidates)
+    assert isinstance(live[0], Decimal)
+    snapshot = dax_route.snapshot_for_route(project, candidates)
+    assert answers(env, snapshot) == live
+    with pytest.raises(TypeError):
+        route_measure(snapshot, "COUNTROWS(t)", project_store=env.ps, candidates=candidates)
+    with pytest.raises(TypeError):
+        dax_route.route_filter_context(snapshot, [], candidates=candidates)
+
+
+def deep_modify(project: dict[str, Any]) -> None:
+    model = project["model"]
+    model["tables"][0]["name"] = "renamed"
+    model["tables"][0]["column_types"].clear()
+    model["tables"][0]["calculated_columns"] = [{"name": "x", "expression": "1"}]
+    model["tables"].append({"id": "s2", "source_id": "s2", "name": "u", "column_types": {}})
+    model["measures"].clear()
+    model["relationships"].append({"id": "r"})
+    project["data_sources"][0]["kind"] = "parquet"
+    project["data_sources"][0]["store"]["table"] = "gone"
+
+
+def test_deep_modifying_the_live_project_after_the_snapshot_does_not_change_the_answer(env: Env) -> None:
+    project = snapshot_project(env)
+    live = answers(env, project)
+    snapshot = dax_route.snapshot_for_route(project)
+    deep_modify(project)
+    assert answers(env, project) != live  # the live project really changed
+    assert answers(env, snapshot) == live
+
+
+def walk_ids(node: Any, found: set[int]) -> None:
+    if isinstance(node, (dict, list)):
+        found.add(id(node))
+        for part in (node.values() if isinstance(node, dict) else node):
+            walk_ids(part, found)
+
+
+def check_snapshot_isolated(project: dict[str, Any], snapshot: Any) -> None:
+    before = dict(snapshot.measures)
+    project["model"]["measures"][0]["expression"] = "changed"
+    project["model"]["measures"].append({"name": "Extra", "expression": "COUNTROWS(t)"})
+    assert dict(snapshot.measures) == before
+    assert "Extra" not in snapshot.measures
+    live_ids: set[int] = set()
+    walk_ids(project, live_ids)
+    view_ids: set[int] = set()
+    walk_ids(snapshot.project_view(), view_ids)
+    assert not (live_ids & view_ids)  # no dict or list of the live project is reachable from the snapshot
+
+
+def test_snapshot_shares_nothing_with_the_live_project(env: Env) -> None:
+    project = snapshot_project(env)
+    project["model"]["relationships"] = []
+    snapshot = dax_route.snapshot_for_route(project)
+    check_snapshot_isolated(project, snapshot)
+    with pytest.raises(TypeError):
+        snapshot.measures["New"] = "COUNTROWS(t)"  # type: ignore[index]
+    with pytest.raises(Exception):
+        snapshot.tables = ()  # type: ignore[misc]
+    first, second = snapshot.project_view(), snapshot.project_view()
+    first["model"]["measures"].clear()
+    first["model"]["tables"][0]["column_types"].clear()
+    assert second["model"]["measures"] and second["model"]["tables"][0]["column_types"]  # a view is a fresh copy
+    assert snapshot.project_view()["model"]["measures"]
+
+
+def test_mutant_snapshot_shares_the_live_measures(env: Env, monkeypatch: pytest.MonkeyPatch) -> None:
+    project = snapshot_project(env)
+    live = {m["name"]: m["expression"] for m in project["model"]["measures"]}
+    check_snapshot_isolated(project, dax_route.snapshot_for_route(project))
+    project = snapshot_project(env)
+    live = project["model"]
+    monkeypatch.setattr(dax_route, "_measure_map", lambda p, o: live.setdefault("map", {"Base": "SUM(t[amt])"}))
+    snapshot = dax_route.snapshot_for_route(project)
+    live["map"]["Base"] = "changed"
+    assert snapshot.measures["Base"] == "changed"  # the shared mutant is visible to the isolation check
+    with pytest.raises(AssertionError):
+        project["model"]["measures"][0]["expression"] = "x"
+        assert snapshot.measures["Base"] != "changed"
+
+
+def test_route_snapshot_is_what_a_worker_thread_gets(env: Env) -> None:
+    project = snapshot_project(env)
+    snapshot = dax_route.snapshot_for_route(project)
+    expected = env.route("SUM(t[qty])")
+    deep_modify(project)  # the GUI thread keeps changing the live project while the worker runs
+    thread, box = run_in_thread(lambda: route_measure(snapshot, "SUM(t[qty])", project_store=env.ps))
+    out = finish(thread, box)
+    assert isinstance(out, StoreAnswer) and out.value == expected.value
+
+
+# --- F2: a table cannot be reloaded under a route that reads it ------------------------------------------
+class _PausingReader:
+    """Wraps a reader; the first statement that contains `marker` waits (the route is paused between statements)."""
+
+    def __init__(self, reader: Any, marker: str, hit: threading.Event, go: threading.Event) -> None:
+        self._reader, self._marker, self.hit, self.go = reader, marker, hit, go
+
+    def execute(self, sql: str, params: Any = ()) -> Any:
+        if self._marker in sql and not self.hit.is_set():
+            self.hit.set()
+            assert self.go.wait(GUARD_S), "the test never released the route"
+        return self._reader.execute(sql, params)
+
+    def interrupt(self) -> None:
+        self._reader.interrupt()
+
+
+def test_a_reload_under_a_running_route_is_refused_and_the_route_returns_the_old_correct_answer(fresh: Env) -> None:
+    baseline = fresh.route("SUM(t[amt])")
+    assert isinstance(baseline, StoreAnswer)
+    rows2 = [list(r) for r in fresh.rows]
+    for r in rows2:
+        if r[4]:
+            r[4] = f"{float(r[4]) + 0.000123:.6f}"
+    csv2 = write_csv(fresh.base / "t2.csv", rows2)
+    hit, go = threading.Event(), threading.Event()
+    refused: list[BaseException] = []
+
+    def reload_table(store: Any) -> None:
+        store.drop_table("t_csv")
+        import_csv_to_store(store, "t_csv", csv2, {})
+
+    with fresh.ps.read_lease() as reader:
+        paused = _PausingReader(reader, "SUM(TRY_CAST", hit, go)
+        thread, box = run_in_thread(lambda: route_measure(
+            fresh.project, "SUM(t[amt])", project_store=fresh.ps, reader=paused, budget_s=GUARD_S))
+        try:
+            assert hit.wait(GUARD_S), "the route never reached its main SUM"
+            try:
+                fresh.ps.call(reload_table)
+            except StoreBusyError as exc:
+                refused.append(exc)
+        finally:
+            go.set()
+        out = finish(thread, box)
+    assert len(refused) == 1  # the reload was refused
+    assert isinstance(out, StoreAnswer) and out.value == baseline.value  # the OLD, correct answer
+    assert fresh.ps.store.has_table("t_csv")
+    reload_table(fresh.ps.store)  # no reader now: the reload goes through, and a fresh route sees the new data
+    after = fresh.route("SUM(t[amt])")
+    assert isinstance(after, StoreAnswer) and after.value != baseline.value
+
+
+def test_a_refused_orphan_drop_leaves_the_table_and_does_not_raise(fresh: Env) -> None:
+    from analytics_studio.controller import StudioController
+
+    with fresh.ps.read_lease():
+        StudioController._drop_orphan_table(None, fresh.ps, "t_csv")  # type: ignore[arg-type]
+        assert fresh.ps.store.has_table("t_csv")  # left for the next cleanup, nothing lost
+    StudioController._drop_orphan_table(None, fresh.ps, "t_csv")  # type: ignore[arg-type]
+    assert not fresh.ps.store.has_table("t_csv")
+
+
+def test_snapshot_keeps_calculated_columns_so_the_route_refuses_like_the_live_project(env: Env) -> None:
+    project = make_project(types=env.types, calculated=True)
+    live = route_measure(project, "COUNTROWS(t)", project_store=env.ps)
+    assert isinstance(live, RouteRefusal) and live.code == "shape"
+    snapshot = dax_route.snapshot_for_route(project)
+    assert snapshot.tables[0].has_calculated_columns is True
+    again = route_measure(snapshot, "COUNTROWS(t)", project_store=env.ps)
+    assert isinstance(again, RouteRefusal) and (again.code, again.message) == (live.code, live.message)
+    assert dax_route.store_shape(snapshot) == dax_route.store_shape(project)

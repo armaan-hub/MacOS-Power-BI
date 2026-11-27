@@ -7,6 +7,7 @@ import functools
 import math
 import os
 import threading
+import time
 import uuid
 from collections.abc import Sequence as _AbcSequence
 from typing import Any, Callable, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar, cast
@@ -215,6 +216,137 @@ def _thread_locked(func: _F) -> _F:
     return cast(_F, wrapper)
 
 
+def _refuse_while_read(func: _F) -> _F:
+    """Decorator for the methods that change table content or the table catalog (create, drop, append, load).
+
+    A StoreReader sees each statement as of the moment it starts, so a table that is dropped, reloaded or appended
+    to between two statements of one answer would give a value that fits neither the old nor the new data. While
+    a reader is open these methods raise StoreBusyError, whoever calls them. (Temporary grid views and checkpoints
+    are not refused: they change nothing a reader sees.)
+    """
+    @functools.wraps(func)
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        lock = getattr(self, "_readers_lock", None)
+        if lock is not None:
+            with lock:
+                reading = bool(self._readers)
+            if reading:
+                raise StoreBusyError("The store is being read; try again when the read has finished.")
+        return func(self, *args, **kwargs)
+    return cast(_F, wrapper)
+
+
+def _validate_select(conn: duckdb.DuckDBPyConnection, sql: Any) -> None:
+    """Raise StoreError unless `sql` is exactly one SELECT statement. Shared by DuckStore.execute and StoreReader.execute."""
+    if not isinstance(sql, str) or not sql.strip():
+        raise StoreError("Query must be a non-empty string.")
+
+    try:
+        stmts = conn.extract_statements(sql)
+    except Exception as exc:
+        raise StoreError(f"Invalid SQL: {exc}") from exc
+
+    if len(stmts) != 1:
+        raise StoreError(
+            f"Only a single statement is allowed; found {len(stmts)} statements."
+        )
+
+    stmt = stmts[0]
+    if stmt.type != duckdb.StatementType.SELECT:
+        raise StoreError(
+            f"Only SELECT queries are allowed; received statement type {stmt.type}."
+        )
+
+
+_READER_CLOSE_WAIT_S = 10.0
+_READER_REINTERRUPT_S = 0.05
+
+
+class StoreReader:
+    """A read-only handle on a DuckStore with its OWN DuckDB connection (a cursor of the store's connection).
+
+    Made by `DuckStore.reader()`. It runs the same single-SELECT queries as `DuckStore.execute` with the same
+    checks and error text, but it never takes `DuckStore._lock`: a reader on a background thread and the data grid
+    on the GUI thread (which uses the main connection) run at the same time and never see "store is busy" from
+    each other. Each statement sees the data committed when it starts (measured on duckdb 1.5.5: a statement that
+    is already running keeps its snapshot, the next statement sees a later commit of the main connection).
+
+    `interrupt()` stops only this reader's own running query. `close()` is safe to call from any thread: it stops a
+    running query and the cursor is closed as soon as that query has ended.
+    """
+
+    def __init__(self, owner: "DuckStore", cursor: duckdb.DuckDBPyConnection) -> None:
+        self._owner = owner
+        self._cursor: Optional[duckdb.DuckDBPyConnection] = cursor
+        self._state = threading.Condition(threading.Lock())
+        self._closed = False
+        self._active = 0
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def execute(self, sql: str, params: Sequence[Any] = ()) -> List[Tuple[Any, ...]]:
+        """Run a single read query (SELECT only) and return list of tuples (same rules as DuckStore.execute)."""
+        with self._state:
+            cursor = self._cursor
+            if self._closed or cursor is None:
+                raise StoreError("Store is closed.")
+            self._active += 1
+        try:
+            _validate_select(cursor, sql)
+            try:
+                return cursor.execute(sql, params).fetchall()
+            except Exception as exc:
+                raise StoreError(f"Query execution failed: {exc}") from exc
+        finally:
+            with self._state:
+                self._active -= 1
+                if self._active == 0:
+                    if self._closed:
+                        self._close_cursor_locked()
+                    self._state.notify_all()
+
+    def interrupt(self) -> None:
+        """Stop the query this reader is running (and no other reader's, and not the main connection). Never raises."""
+        cursor = self._cursor
+        if cursor is not None:
+            try:
+                cursor.interrupt()
+            except Exception:
+                pass
+
+    def _close_cursor_locked(self) -> None:
+        cursor, self._cursor = self._cursor, None
+        if cursor is not None:
+            try:
+                cursor.close()
+            except Exception:
+                pass
+
+    def close(self) -> None:
+        """Close the reader. Idempotent, never raises. A running query is interrupted and the cursor is closed
+        when it ends (waiting at most `_READER_CLOSE_WAIT_S`, then left to the thread that runs the query)."""
+        with self._state:
+            self._closed = True
+        self._owner._forget_reader(self)
+        deadline = time.monotonic() + _READER_CLOSE_WAIT_S
+        with self._state:
+            while self._active > 0:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    return
+                self.interrupt()
+                self._state.wait(min(_READER_REINTERRUPT_S, remaining))
+            self._close_cursor_locked()
+
+    def __enter__(self) -> "StoreReader":
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self.close()
+
+
 class DuckStore:
     """DuckDB implementation of Store interface.
 
@@ -246,6 +378,10 @@ class DuckStore:
         self._versions: dict[str, int] = {}
         # True while append_rows or create_table_from_arrow holds an open transaction.
         self._txn_open = False
+        # Open StoreReaders. A plain set under its own small lock (never `_lock`), so any thread can interrupt them.
+        self._readers_lock = threading.Lock()
+        self._readers: set[StoreReader] = set()
+        self._readers_closing = False
 
         try:
             os.makedirs(os.path.dirname(self.path), exist_ok=True)
@@ -309,7 +445,10 @@ class DuckStore:
             raise StoreError(f"Failed to open DuckDB store at '{self.path}': {exc}") from exc
 
     def interrupt(self) -> None:
-        """Stop the query that another thread is running on this store. Takes NO store lock.
+        """Stop the query that another thread is running on the MAIN connection of this store. Takes NO store lock.
+
+        It does not stop a query that runs on a `StoreReader` (a reader has its own connection): use
+        `StoreReader.interrupt()` for one reader or `interrupt_all_readers()` for all of them.
 
         The running query holds `_lock` (see `_thread_locked`: a second caller gets StoreBusyError at once, it
         never waits), so taking the lock here would fail exactly when interrupt is needed. DuckDB's own
@@ -322,8 +461,54 @@ class DuckStore:
             except Exception:
                 pass
 
+    def reader(self) -> StoreReader:
+        """A new `StoreReader` (its own connection) for read queries on another thread. Takes NO store lock.
+
+        Raises StoreError when the store is closed and StoreBusyError while an append or a table creation holds
+        an open transaction on the main connection. Close the reader (or use it as a context manager) when done.
+        """
+        with self._readers_lock:
+            conn = self._conn
+            if conn is None or self._readers_closing:
+                raise StoreError("Store is closed.")
+            if self._txn_open:
+                raise StoreBusyError("The store is busy with another operation.")
+            try:
+                cursor = conn.cursor()
+            except Exception as exc:
+                raise StoreError(f"Could not open a reader: {exc}") from exc
+            reader = StoreReader(self, cursor)
+            self._readers.add(reader)
+            return reader
+
+    def _forget_reader(self, reader: StoreReader) -> None:
+        with self._readers_lock:
+            self._readers.discard(reader)
+
+    def interrupt_all_readers(self) -> None:
+        """Stop the query of every open reader. Takes NO store lock; safe from any thread and when none is open."""
+        with self._readers_lock:
+            readers = list(self._readers)
+        for reader in readers:
+            reader.interrupt()
+
     @_thread_locked
     def close(self) -> None:
+        """Close the store: every reader is interrupted and closed first (a reader gives up waiting after 10 s).
+
+        `_conn.close()` itself blocks until a query that cannot be interrupted has ended.
+        """
+        # Every reader first: a cursor query keeps running after its main connection is closed (measured on
+        # duckdb 1.5.5, it ended 15.9 s later with "No open result set"), so each one is interrupted and has
+        # ended before `_conn` closes.
+        lock = getattr(self, "_readers_lock", None)
+        if lock is not None:
+            with lock:
+                self._readers_closing = True
+                readers = list(self._readers)
+            self.interrupt_all_readers()
+            for reader in readers:
+                reader.close()
         if self._conn is not None:
             try:
                 self._conn.close()
@@ -405,6 +590,7 @@ class DuckStore:
         return self._resolve_table_name(name, conn)
 
     @_thread_locked
+    @_refuse_while_read
     def create_table(self, name: str, columns: Sequence[Tuple[str, str]]) -> None:
         conn = self._check_open()
         _validate_identifier(name, kind="Table name")
@@ -512,6 +698,7 @@ class DuckStore:
             raise StoreError(f"Failed to get row count for '{resolved_name}': {exc}") from exc
 
     @_thread_locked
+    @_refuse_while_read
     def drop_table(self, name: str) -> None:
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
@@ -523,6 +710,7 @@ class DuckStore:
         self._bump_version(resolved_name)
 
     @_thread_locked
+    @_refuse_while_read
     def append_rows(self, name: str, rows: Iterable[Sequence[Any]]) -> int:
         """Append rows in one transaction; return the number of rows added.
 
@@ -717,24 +905,7 @@ class DuckStore:
         because files inside the store's own folder stay readable through DuckDB's external-access rule.
         """
         conn = self._check_open()
-        if not isinstance(sql, str) or not sql.strip():
-            raise StoreError("Query must be a non-empty string.")
-
-        try:
-            stmts = conn.extract_statements(sql)
-        except Exception as exc:
-            raise StoreError(f"Invalid SQL: {exc}") from exc
-
-        if len(stmts) != 1:
-            raise StoreError(
-                f"Only a single statement is allowed; found {len(stmts)} statements."
-            )
-
-        stmt = stmts[0]
-        if stmt.type != duckdb.StatementType.SELECT:
-            raise StoreError(
-                f"Only SELECT queries are allowed; received statement type {stmt.type}."
-            )
+        _validate_select(conn, sql)
 
         try:
             return conn.execute(sql, params).fetchall()
@@ -976,6 +1147,7 @@ class DuckStore:
             raise StoreError(f"Failed to drop view '{name}': {exc}") from exc
 
     @_thread_locked
+    @_refuse_while_read
     def create_table_from_arrow(
         self,
         name: str,
