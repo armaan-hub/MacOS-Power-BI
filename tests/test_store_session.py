@@ -2039,3 +2039,38 @@ def test_store_busy_error_subclass_raised_and_caught(tmp_path):
                 pass
 
     ps.close()
+
+
+def test_shutdown_requests_the_cancel_and_waits_for_a_held_job(tmp_path):
+    """shutdown() itself asks the running job to cancel, and does not return True while the job is still held."""
+    ps = ProjectStore.open(str(tmp_path / "held_job.npa.data"))
+    started = threading.Event()
+    release = threading.Event()
+    saw_cancel = []
+    job_ended = threading.Event()
+    results = []
+
+    def held_job():
+        with ps.job() as cancel_ev:
+            started.set()
+            saw_cancel.append(cancel_ev.wait(10.0))  # the job ends when it sees the cancel (10 s is a hang guard)
+            release.wait(10.0)  # and is then held until the test lets it go
+        job_ended.set()
+
+    job_thread = threading.Thread(target=held_job, daemon=True)
+    job_thread.start()
+    assert started.wait(10.0), "the job never started"
+    shutdown_thread = threading.Thread(target=lambda: results.append((ps.shutdown(timeout=10.0), job_ended.is_set())), daemon=True)
+    shutdown_thread.start()
+    try:
+        assert ps.cancel_event.wait(10.0), "shutdown() did not request the cancel"
+        shutdown_thread.join(0.5)
+        assert shutdown_thread.is_alive(), "shutdown() returned while the job was still held (it did not wait)"
+        assert results == []
+    finally:
+        release.set()
+    shutdown_thread.join(10.0)
+    job_thread.join(10.0)
+    assert not shutdown_thread.is_alive() and not job_thread.is_alive(), "shutdown or the job did not end"
+    assert saw_cancel == [True]
+    assert results == [(True, True)], results

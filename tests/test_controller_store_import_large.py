@@ -712,16 +712,22 @@ def test_failure_cancel_commit_failure_snapshot_and_lifetime(qapp: QApplication,
 
 
 def test_shutdown_store_while_job_running(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test item 3: shutdown_store() while an import job is running cancels it,
-    returns True/False without crash or half-state, done handler does not touch dead objects.
+    """shutdown_store() while an import job is running cancels it, WAITS for it, and only then says True.
+
+    The job is held on `release_event` after it saw the cancel. shutdown_store runs in a thread; while the job is held
+    the thread must still be alive (a shutdown that does not wait would have returned), and once the job is released it
+    must have ended BEFORE shutdown returned. No assertion depends on a clock: the 10 s waits are hang guards only,
+    the 0.5 s join is a negative check (a shutdown that waits can never finish while the job is held).
     """
     csv_file = _generate_csv(tmp_path / "slow.csv", rows=2000)
     controller = StudioController()
     monkeypatch.setattr(controller, "_effective_app_data_dir", lambda: str(tmp_path / "appdata"))
 
     started_event = threading.Event()
-    continue_event = threading.Event()
+    woken_by_cancel = threading.Event()  # set inside request_cancel: shutdown really asked the job to cancel
+    release_event = threading.Event()  # the test lets the held job go on
     job_ended_event = threading.Event()
+    job_saw_cancel: list[bool] = []
 
     from analytics_studio.store import large_import as li_mod
     from analytics_studio.store.session import ProjectStore
@@ -730,19 +736,20 @@ def test_shutdown_store_while_job_running(qapp: QApplication, tmp_path: Path, mo
 
     def slow_run(*args, **kwargs):
         started_event.set()
-        # The job continues when it is told to cancel; the 10 s wait is only a hang guard.
-        continue_event.wait(10.0)
+        # The job waits for the cancel (hang guard 10 s), then is held until the test releases it (hang guard 10 s).
+        job_saw_cancel.append(woken_by_cancel.wait(10.0))
+        release_event.wait(10.0)
         try:
             return orig_run(*args, **kwargs)
         finally:
             job_ended_event.set()
 
-    def cancel_then_continue(self: Any) -> None:
+    def cancel_then_note(self: Any) -> None:
         orig_request_cancel(self)
-        continue_event.set()
+        woken_by_cancel.set()
 
     monkeypatch.setattr(li_mod, "run_large_import", slow_run)
-    monkeypatch.setattr(ProjectStore, "request_cancel", cancel_then_continue)
+    monkeypatch.setattr(ProjectStore, "request_cancel", cancel_then_note)
 
     with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
         with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
@@ -755,19 +762,30 @@ def test_shutdown_store_while_job_running(qapp: QApplication, tmp_path: Path, mo
         qapp.processEvents()
         time.sleep(0.01)
     assert started_event.wait(10.0), "the import job never started"
-
     assert controller._large_import_job is not None
 
-    # shutdown_store cancels the job; the cancel wakes the job, so the job ends by itself.
-    closed = controller.shutdown_store(timeout=10.0)
-    job_ended_when_closed = job_ended_event.is_set()
-    continue_event.set()
+    results: list[tuple[bool, bool]] = []
+
+    def run_shutdown() -> None:
+        closed_now = controller.shutdown_store(timeout=10.0)
+        results.append((closed_now, job_ended_event.is_set()))
+
+    thread = threading.Thread(target=run_shutdown, daemon=True)
+    thread.start()
+    try:
+        assert woken_by_cancel.wait(10.0), "shutdown_store never asked the store to cancel the job"
+        thread.join(0.5)
+        assert thread.is_alive(), "shutdown_store returned while the import job was still held (it did not wait)"
+        assert not job_ended_event.is_set()
+    finally:
+        release_event.set()  # whatever happened above, let the job go on
+    thread.join(10.0)
+    assert not thread.is_alive(), "shutdown_store did not return after the job was released"
+    assert job_saw_cancel == [True], "the job was not woken by the cancel"
+    assert results == [(True, True)], f"shutdown_store must say True and only after the job ended: {results}"
 
     # Wait for job to finish done handler
     _wait_for_large_job(controller)
-
-    assert closed is True
-    assert job_ended_when_closed is True, "shutdown_store said True while the import job was still running"
     assert controller._project_store is None
     assert controller.sourceLoaded is False
 

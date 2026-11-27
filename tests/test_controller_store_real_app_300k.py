@@ -59,8 +59,10 @@ EXPECTED_TYPES = {
     "description": "text",
 }
 SPOT_OFFSETS = (0, 150_000, 299_900)
-OP_LIMIT_SECONDS = 5.0
-PAGE_LIMIT_SECONDS = 1.0
+# Coarse hang guards, NOT speed claims: about 10 times the slowest value measured on the last run (sort 0.20 s, filter
+# 0.04 s, page 5 ms), rounded up, so a loaded machine never trips them but a stuck or quadratic operation does.
+OP_LIMIT_SECONDS = 50.0
+PAGE_LIMIT_SECONDS = 10.0
 IMPORT_LIMIT_SECONDS = 240.0
 MEMORY_TARGET_BYTES = 400 * 1024 * 1024  # brief target, reported only
 MEMORY_BOUND_BYTES = 1024 * 1024 * 1024  # generous assertion bound
@@ -299,6 +301,7 @@ def test_grid_pages_at_first_middle_last_offsets(imported: dict[str, Any], expec
         started = time.monotonic()
         assert model._set_page(page_index) is True
         elapsed = time.monotonic() - started
+        assert elapsed < PAGE_LIMIT_SECONDS, f"page read at offset {offset} took {elapsed:.3f} s (hang guard {PAGE_LIMIT_SECONDS} s)"
         source_row = expected["rows"][offset]
         local = offset - page_index * PAGE
         for column, name in enumerate(HEADERS):
@@ -376,24 +379,28 @@ def test_sort_and_filter_on_300k_rows(imported: dict[str, Any], expected: dict[s
     model.sortByColumn(column_of["amount"])
     model._set_page(0)
     timings["sort_amount_asc_seconds"] = time.monotonic() - started
+    assert timings["sort_amount_asc_seconds"] < OP_LIMIT_SECONDS, f"sort_amount_asc_seconds took {timings['sort_amount_asc_seconds']:.3f} s (hang guard {OP_LIMIT_SECONDS} s)"
     assert _cell(model, 0, column_of["amount"]) == expected["amount_min"][1]
 
     started = time.monotonic()
     model.sortByColumn(column_of["amount"])
     model._set_page(0)
     timings["sort_amount_desc_seconds"] = time.monotonic() - started
+    assert timings["sort_amount_desc_seconds"] < OP_LIMIT_SECONDS, f"sort_amount_desc_seconds took {timings['sort_amount_desc_seconds']:.3f} s (hang guard {OP_LIMIT_SECONDS} s)"
     assert _cell(model, 0, column_of["amount"]) == expected["amount_max"][1]
 
     started = time.monotonic()
     model.sortByColumn(column_of["code"])
     model._set_page(0)
     timings["sort_code_asc_seconds"] = time.monotonic() - started
+    assert timings["sort_code_asc_seconds"] < OP_LIMIT_SECONDS, f"sort_code_asc_seconds took {timings['sort_code_asc_seconds']:.3f} s (hang guard {OP_LIMIT_SECONDS} s)"
     assert _cell(model, 0, column_of["code"]) == expected["code_min"]
 
     started = time.monotonic()
     model.setColumnFilter("category", "equals", "cat_07")
     model._set_page(0)
     timings["filter_category_seconds"] = time.monotonic() - started
+    assert timings["filter_category_seconds"] < OP_LIMIT_SECONDS, f"filter_category_seconds took {timings['filter_category_seconds']:.3f} s (hang guard {OP_LIMIT_SECONDS} s)"
     assert model._filtered_rows == expected["cat07_count"]
     assert _cell(model, 0, column_of["id"]) == expected["cat07_first"]
     model._set_page(model.pageCount - 1)
@@ -417,6 +424,7 @@ def test_filter_id_range_on_300k_rows(imported: dict[str, Any], expected: dict[s
     model._set_page(0)
     elapsed = time.monotonic() - started
     print(f"[measured] filter_id_range_seconds={elapsed:.3f}")
+    assert elapsed < OP_LIMIT_SECONDS, f"filter on id took {elapsed:.3f} s (hang guard {OP_LIMIT_SECONDS} s)"
     assert model._filtered_rows == expected_count
     assert _cell(model, 0, column_of["id"]) == expected["id_text_gt_299000_first"]
     model._set_page(model.pageCount - 1)

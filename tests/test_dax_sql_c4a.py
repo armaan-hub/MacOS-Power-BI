@@ -581,3 +581,62 @@ def test_sweep_date_before_1900_and_own_filter_on_the_group_column_are_refused_b
     planner = [r for r in column if r["status"] == "refused-planner"]
     assert planner and all(REASON_GROUP_OWN_FILTER in r["reason"] for r in planner)
     assert not [r for r in column if r["status"] == "refused-whitelist" and "group-by column" in (r["reason"] or "")]
+
+
+# ---------------------------------------------------------------------------------------------------------
+# Review gaps: table-name case, a second own column, the digits half of the stamp, distinct sentences
+# ---------------------------------------------------------------------------------------------------------
+
+def test_own_filter_on_the_group_column_is_matched_when_the_table_name_has_capitals(tmp_path: Path) -> None:
+    case = Case(tmp_path, ["n", "cat"], [["1", "A"], ["2", "B"], ["3", "A"]])
+    try:
+        meta = {("Sales", col): m for (_, col), m in case.meta.items()}
+        kw: dict[str, Any] = dict(home_table="Sales", tables={"Sales": case.types}, store_tables={"Sales": "t_csv"}, column_meta=meta)
+        for expression in ('CALCULATE(SUM(Sales[n]), Sales[cat] = "A")', 'CALCULATE(SUM(sales[n]), SALES[CAT] = "A")'):
+            out = plan_group_by(expression, group_by=("Sales", "cat"), **kw)
+            assert isinstance(out, Refusal) and out.reason == REASON_GROUP_OWN_FILTER, (expression, out)
+            assert isinstance(plan_group_by(expression, group_by=("sales", "Cat"), **kw), Refusal)
+        ok = plan_group_by("CALCULATE(COUNTROWS(Sales), Sales[n] > 1)", group_by=("Sales", "cat"), **kw)
+        assert isinstance(ok, GroupByPlan) and ok.execute(case.store) == [("A", Decimal(1)), ("B", Decimal(1))]
+    finally:
+        case.close()
+
+
+def test_own_filter_on_the_group_column_is_refused_whichever_own_column_it_is(case: Case) -> None:
+    expression = 'CALCULATE(SUM(t[n]), t[cat] = "A", t[g] = "x")'
+    for group in ("g", "cat"):
+        out = case.run_group(expression, group)
+        assert isinstance(out, Refusal) and out.reason == REASON_GROUP_OWN_FILTER, (group, out)
+    # the same measure grouped by a column that neither predicate touches is an answer
+    ok = case.run_group(expression, "flag")
+    assert isinstance(ok, list) and ok, ok
+    found = own_predicate_columns(
+        (parse_expression('t[cat] = "A"'), parse_expression('t[g] = "x"')), dax_sql._Planner("t", {"t": case.types}, case.meta, {})
+    )
+    assert sorted(found) == [("t", "cat"), ("t", "g")], found
+
+
+def test_stamp_notices_a_digits_only_change_at_equal_scale(tmp_path: Path) -> None:
+    case = Case(tmp_path, ["n", "d"], [["1", "1.5"], ["2", "2.25"]])
+    try:
+        assert case.meta[("t", "d")] == ColumnMeta(4, 3)
+        plan = case.plan("SUM(t[d])")
+        assert isinstance(plan, MeasurePlan) and plan.execute(case.store) == Decimal("3.75")
+        case.store.append_rows("t_csv", [["3", "123.45"]])  # more digits, the scale stays at its floor of 4
+        now = column_decimal_meta(case.store, "t_csv", ["d"])["d"]
+        assert now == ColumnMeta(4, 5), now
+        out = plan.execute(case.store)
+        assert isinstance(out, Refusal) and out.reason == REASON_PLAN_STALE, out
+    finally:
+        case.close()
+
+
+def test_the_old_date_and_the_unreadable_date_refusals_have_their_own_sentences() -> None:
+    assert REASON_DATE_BEFORE_1900 != REASON_DATE_UNREADABLE
+    old_fragment = dax_route.fragment_for_reason(REASON_DATE_BEFORE_1900)
+    unreadable_fragment = dax_route.fragment_for_reason(REASON_DATE_UNREADABLE)
+    assert old_fragment and unreadable_fragment and old_fragment != unreadable_fragment
+    assert "1900" in old_fragment and "1900" not in unreadable_fragment
+    old_message = dax_route.message_for_reason("Birth date", REASON_DATE_BEFORE_1900)
+    unreadable_message = dax_route.message_for_reason("Birth date", REASON_DATE_UNREADABLE)
+    assert old_message != unreadable_message and "1900" in old_message and "1900" not in unreadable_message
