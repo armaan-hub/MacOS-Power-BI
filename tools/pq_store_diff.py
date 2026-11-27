@@ -22,6 +22,7 @@ import argparse
 import csv
 import json
 import random
+import re
 import sys
 import tempfile
 import time
@@ -34,6 +35,7 @@ from analytics_studio.file_import import MAX_CELLS, MAX_COLUMNS, ImportCandidate
 from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
 from analytics_studio.transformations import (
+    _canonical_culture,
     MAX_CONDITIONAL_CLAUSES,
     MAX_DELIMITER_OCCURRENCE,
     MAX_SPLIT_POSITION,
@@ -41,6 +43,7 @@ from analytics_studio.transformations import (
     _CONDITIONAL_VALUE_KINDS,
     TransformationError,
     apply_transformations,
+    canonical_column_type,
     normalize_promoted_headers,
 )
 
@@ -455,6 +458,78 @@ def generate_d1a_csv(csv_file: Path, seed: int, shape: str = "d1a") -> list[str]
                 body[1 + offset][2] = value  # d_num, rows k01..k09
             for offset, value in enumerate(["a;;b", ";a", "a;", "x;y;z"]):
                 body[1 + offset][4] = value  # d_delim: consecutive, leading, trailing, three parts
+    csv_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(csv_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        writer.writerows(body)
+    return headers
+
+
+# ---------------------------------------------------------------- D1b: its own generated table (`generate_d1b_csv`)
+# Each column holds one kind of text; the convert_type items name a column. Its own random source (seeded from
+# `seed`), so the main table and the D1a tables keep their draws.
+D1B_HEADERS = ["b_num", "b_exp", "b_long", "b_tiny", "b_arab", "b_round", "b_bool", "b_date", "b_date_mixed", "b_dt", "b_time", "b_text", "b_grp"]
+D1B_ROWS = 40
+D1B_SHAPES = ("d1b", "d1b_empty", "d1b_one_row", "d1b_blank", "d1b_sparse")
+D1B_CHOICES: dict[str, list[str]] = {
+    "b_num": [" 12 ", "1_000", "+5", "007", "-0", "-0.0", "1.", ".5", "1.50", "2.5", "-2.5", "0.5", "1.5", "",
+              "1,000", "NaN", "Infinity", "12abc", "0x1F", "-", "--1", "10 ", "1__0", "-0.50", "00.10"],
+    "b_exp": ["1e3", "1E+3", "2.5e-1", "7", "", "-4E2"],
+    "b_long": ["123456789012345678901234567890", "5", "", "-42", "1.25", "9999999999999999999"],
+    "b_tiny": ["0.0000001", "5", "", "-0.25", "0.5", "0.000000"],
+    "b_arab": ["\u0663", "5", "", "7", "12"],
+    "b_round": ["2.5", "3.5", "-2.5", "-0.5", "0.5", "1.5", "-1.5", "2", "", "9223372036854775807",
+                "9223372036854775808", "-9223372036854775808"],
+    "b_bool": ["true", "FALSE", " True ", "yes", "1", "", "TRUE", "false "],
+    "b_date": ["2024-02-29", "2024-02-30", "2023-02-28", "0001-01-01", "9999-12-31", "", "2024-13-01", "2024-02-29"],
+    "b_date_mixed": ["2024-02-29", "20240229", "2024-02-29T10:00:00", "2023-01-01", ""],
+    "b_dt": ["2024-02-29 10:00:00", "2024-02-29T23:59:59", "2024-02-29", "2024-02-30 10:00:00", "",
+             "0001-01-01 00:00:00", "2024-02-29 25:00:00"],
+    "b_time": ["10:30:15", "00:00:00", "23:59:59", "", "12:00:00", "09:05:01"],
+    "b_text": ["a'b", "x", "", "Error fake", " pad ", "\u00fcn\u00ef"],
+    # thousands-grouped text (en-US), drawn from its own random source so the other columns keep their draws
+    "b_grp": ["1,000", "12,345.50", "-1,234,567", "1,000,000.25", "0", "", "1,00", "1.5", "+1,000", "5", "007",
+              "1.", ".5", "-0", "1,0000", "12abc", "100,000", "1,234.5", "9,223,372,036,854,775,807"],
+}
+
+
+D1B_PLANTED = [
+    ("b_num", "1_000"), ("b_exp", "1e3"), ("b_long", "123456789012345678901234567890"), ("b_tiny", "0.0000001"),
+    ("b_arab", "\u0663"), ("b_date_mixed", "20240229"), ("b_dt", "2024-02-29T23:59:59"), ("b_text", "a'b"),
+]
+
+
+def generate_d1b_csv(csv_file: Path, seed: int, shape: str = "d1b") -> list[str]:
+    """Write one D1b table and return its CSV headers.
+
+    "d1b": D1B_ROWS rows drawn from D1B_CHOICES (padded, underscored, signed, exponent, long, tiny, Arabic-Indic,
+    rounding, boolean, date, datetime and time texts, blanks, error words). "d1b_empty": header only.
+    "d1b_one_row": the first drawn row. "d1b_blank": three rows of blank cells.
+    """
+    rnd_d1b = random.Random(f"d1b-{seed}")
+    headers = list(D1B_HEADERS)
+    if shape == "d1b_empty":
+        body: list[list[str]] = []
+    elif shape == "d1b_blank":
+        body = [[""] * len(headers) for _ in range(3)]
+    elif shape == "d1b_sparse":
+        # sparse rows (one value or whitespace only) at the top, inside and at the bottom; full rows between them
+        def one(value: str) -> list[str]:
+            return [""] * (len(headers) - 1) + [value]
+        full = [rnd_d1b.choice(D1B_CHOICES[h]) for h in headers]
+        body = [one("x"), [" "] + [""] * (len(headers) - 1), full, one("y"),
+                [rnd_d1b.choice(D1B_CHOICES[h]) for h in headers], [" ", ""] + [""] * (len(headers) - 3) + ["z"], one("w")]
+    else:
+        rnd_grp = random.Random(f"d1b-grp-{seed}")
+        body = [[rnd_d1b.choice(D1B_CHOICES[h]) for h in headers[:-1]] + [rnd_grp.choice(D1B_CHOICES["b_grp"])]
+                for _ in range(D1B_ROWS)]
+        # Planted cells in rows 1 to 8 (after the draws, so the draws stay the same): each named refusal's trigger is
+        # in every generated table, so the refused set of a run does not depend on the seed.
+        for row_index, (column, value) in enumerate(D1B_PLANTED):
+            body[row_index][headers.index(column)] = value
+        if shape == "d1b_one_row":
+            body = body[:1]
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     with open(csv_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -922,6 +997,7 @@ def build_step_catalog(headers: list[str], d1a: bool = True) -> list[dict[str, A
     catalog.extend(_d0h_catalog(headers))
     if d1a:
         catalog.extend(_d1a_catalog())
+        catalog.extend(_d1b_catalog())
 
     return catalog
 
@@ -1168,6 +1244,66 @@ def _d1a_catalog() -> list[dict[str, Any]]:
     seq("d1a_seq_positions_then_conditional", [
         {"op": "split_column_by_positions", "column": "d_pos", "positions": [0, 3]},
         cond([clause("d_pos.1", "begins_with", "ab", "value")], name="ab_start"),
+    ])
+    return items
+
+
+CONVERT_TARGET_TYPES = ["decimal_number", "whole_number", "number", "boolean", "date", "datetime", "time", "text", "any"]
+
+
+def _d1b_catalog() -> list[dict[str, Any]]:
+    """D1b step items (slice 5). Each names its D1b table (`generate_d1b_csv`); items carry "d1b": True."""
+    items: list[dict[str, Any]] = []
+
+    def add(item_id: str, step: dict[str, Any], table: str = "d1b", **extra: Any) -> None:
+        items.append({"id": item_id, "step": step, "table": table, "d1b": True, **extra})
+
+    # --- convert_type: every column to every type the engine accepts
+    for column in D1B_HEADERS:
+        for target in CONVERT_TARGET_TYPES:
+            add(f"d1b_conv_{column}_{target}", {"op": "convert_type", "column": column, "type": target})
+    add("d1b_conv_missing_col", {"op": "convert_type", "column": "missing_xyz", "type": "whole_number"})
+    add("d1b_conv_bad_type", {"op": "convert_type", "column": "b_num", "type": "bogus"})
+    add("d1b_conv_extra_field", {"op": "convert_type", "column": "b_num", "type": "whole_number", "culture": "en-US"})
+    add("d1b_conv_empty_table", {"op": "convert_type", "column": "b_num", "type": "decimal_number"}, "d1b_empty")
+    add("d1b_conv_one_row", {"op": "convert_type", "column": "b_round", "type": "whole_number"}, "d1b_one_row")
+    add("d1b_conv_blank_cells_number", {"op": "convert_type", "column": "b_num", "type": "decimal_number"}, "d1b_blank")
+    add("d1b_conv_blank_cells_date", {"op": "convert_type", "column": "b_date", "type": "date"}, "d1b_blank")
+
+    # --- convert_type_using_locale: en-US numbers and dates (other cultures are named refusals)
+    for column in ["b_num", "b_exp", "b_long", "b_tiny", "b_round", "b_date", "b_dt", "b_grp"]:
+        for target in ["decimal_number", "whole_number", "date", "datetime", "time"]:
+            add(f"d1b_loc_{column}_{target}", {"op": "convert_type_using_locale", "column": column, "type": target, "culture": "en-US"})
+    add("d1b_loc_culture_underscore", {"op": "convert_type_using_locale", "column": "b_num", "type": "decimal_number", "culture": "en_us"})
+    add("d1b_loc_culture_de", {"op": "convert_type_using_locale", "column": "b_num", "type": "decimal_number", "culture": "de-DE"})
+    add("d1b_loc_culture_bogus", {"op": "convert_type_using_locale", "column": "b_num", "type": "decimal_number", "culture": "bogus"})
+    add("d1b_loc_padded_column", {"op": "convert_type_using_locale", "column": " b_round ", "type": "whole_number", "culture": "en-US"})
+    add("d1b_loc_missing_col", {"op": "convert_type_using_locale", "column": "missing_xyz", "type": "whole_number", "culture": "en-US"})
+    add("d1b_loc_bad_type", {"op": "convert_type_using_locale", "column": "b_num", "type": "text", "culture": "en-US"})
+    add("d1b_loc_empty_table", {"op": "convert_type_using_locale", "column": "b_num", "type": "decimal_number", "culture": "en-US"}, "d1b_empty")
+    add("d1b_loc_blank_cells", {"op": "convert_type_using_locale", "column": "b_num", "type": "decimal_number", "culture": "en-US"}, "d1b_blank")
+
+    def seq(item_id: str, steps: list[dict[str, Any]], table: str = "d1b") -> None:
+        items.append({"id": item_id, "step": {"op": "sequence"}, "sequence": steps, "table": table, "d1b": True})
+
+    # --- sparse rows (Part A step 5) and table pass-through (step 6)
+    add("d1b_sparse_top_generated", {"op": "remove_sparse_top_rows"}, "d1b_sparse")
+    add("d1b_sparse_bottom_generated", {"op": "remove_sparse_bottom_rows"}, "d1b_sparse")
+    add("d1b_sparse_top_blank", {"op": "remove_sparse_top_rows"}, "d1b_blank")
+    add("d1b_sparse_bottom_blank", {"op": "remove_sparse_bottom_rows"}, "d1b_blank")
+    add("d1b_sparse_top_one_row", {"op": "remove_sparse_top_rows"}, "d1b_one_row")
+    add("d1b_sparse_bottom_empty", {"op": "remove_sparse_bottom_rows"}, "d1b_empty")
+    add("d1b_sparse_top_extra_field", {"op": "remove_sparse_top_rows", "column": "b_num"})
+    add("d1b_pass_through", {"op": "table_pass_through"})
+    add("d1b_pass_through_empty", {"op": "table_pass_through"}, "d1b_empty")
+
+    seq("d1b_seq_keep_then_convert", [
+        {"op": "keep_columns", "columns": ["b_round", "b_num"]},
+        {"op": "convert_type", "column": "b_round", "type": "whole_number"},
+    ])
+    seq("d1b_seq_convert_then_trim", [
+        {"op": "convert_type", "column": "b_num", "type": "decimal_number"},
+        {"op": "trim_text", "column": "b_num"},
     ])
     return items
 
@@ -2448,8 +2584,342 @@ def _map_replace_error_values(
     return (f"SELECT {col_list} FROM {t_q} ORDER BY {_RN}", list(headers))
 
 
+# ---------------------------------------------------------------- D1b: convert_type (slice 5, Part A step 1)
+# Engine: `_convert_column` -> `_convert_value` (per cell; a failed cell becomes a PowerQueryCellError whose
+# str() is "Error: " + the engine message). Store side: the text of the converted cell, or the same error text.
+CONVERT_STORE_TYPES = {"text", "any", "boolean", "whole_number", "decimal_number", "number", "date", "datetime", "time"}
+CONVERT_ERROR_PREFIX = "Error: "
+CONVERT_DIAG_CHARS = 120  # transformations.MAX_CONVERSION_DIAGNOSTIC_VALUE_CHARS
+CONVERT_YEAR_RX = r"([1-9][0-9]{3}|0[1-9][0-9]{2}|00[1-9][0-9]|000[1-9])"  # years 0001..9999
+# Strict forms the SQL mirrors (anything else non-blank is a named refusal: the engine's Python parser takes more).
+CONVERT_DATE_PY = CONVERT_YEAR_RX + r"-[0-9]{2}-[0-9]{2}"
+CONVERT_DATETIME_PY = CONVERT_DATE_PY + r"([ T][0-9]{2}:[0-9]{2}:[0-9]{2})?"
+CONVERT_TIME_PY = r"([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
+CONVERT_DATE_SQL = "^" + CONVERT_DATE_PY + "$"
+CONVERT_DATETIME_SQL = "^" + CONVERT_DATETIME_PY + "$"
+CONVERT_TIME_SQL = "^" + CONVERT_TIME_PY + "$"
+CONVERT_DECIMAL_MIN_ADJUSTED = -6  # below this Decimal's str() switches to exponent form (1E-7)
+CONVERT_DECIMAL_MAX_ADJUSTED = 300  # float(Decimal) overflows near 10**309 (the engine's finite check)
+
+
+def _convert_plain_repr(text: str) -> bool:
+    """The engine prints a value as repr(text) in its error message: only plain printable ASCII is mirrored."""
+    return len(text) <= CONVERT_DIAG_CHARS and all(32 <= ord(ch) <= 126 and ch not in "'\\" for ch in text)
+
+
+def _convert_column_facts(store: DuckStore, table_name: str, column: str) -> dict[str, Any]:
+    """Facts about one column's cells that decide the convert_type mapping (read from the store, load order)."""
+    values = [r[0] for r in store.execute(f'SELECT "{column}" FROM "{table_name}" ORDER BY {_RN}')]
+    nonblank = [v for v in values if v not in (None, "")]
+    numbers = [engine_number(v) for v in nonblank]
+    nonzero = [n for n in numbers if n is not None and n != 0]
+    return {
+        "blank": any(v == "" for v in values),
+        "repr_plain": _convert_plain_repr(column) and all(_convert_plain_repr(v) for v in nonblank),
+        "ascii": all(v.isascii() for v in nonblank),
+        "exponent": any("e" in v or "E" in v for v in nonblank),
+        "error_prefix": any(v.startswith(CONVERT_ERROR_PREFIX) for v in nonblank),
+        "date_strict": all(re.fullmatch(CONVERT_DATE_PY, v.strip()) for v in nonblank),
+        "datetime_strict": all(re.fullmatch(CONVERT_DATETIME_PY, v.strip()) for v in nonblank),
+        "time_strict": all(re.fullmatch(CONVERT_TIME_PY, v.strip()) for v in nonblank),
+        "min_adjusted": min((n.adjusted() for n in nonzero), default=None),
+        "max_adjusted": max((n.adjusted() for n in nonzero), default=None),
+    }
+
+
+def _convert_decimal_text_sql(n: str, overrides: dict[str, Any]) -> str:
+    """str(Decimal(text)) for a plain number text n (sign, digits, optional fraction; no exponent).
+
+    The engine's `_decimal_number_text` gives "0" or "-0" for every zero (signed zero keeps its sign), keeps the
+    fraction digits exactly, and drops leading zeros of the integer part ("007.50" -> "7.50", ".5" -> "0.5", "1." -> "1").
+    """
+    sign = f"CASE WHEN left({n}, 1) = '-' THEN '-' ELSE '' END"
+    body = f"ltrim({n}, '+-')"
+    integer = f"split_part({body}, '.', 1)"
+    fraction = f"split_part({body}, '.', 2)"
+    if overrides.get("mutant_convert_keep_leading_zeros"):
+        int_text = integer
+    else:
+        int_text = f"CASE WHEN ltrim({integer}, '0') = '' THEN '0' ELSE ltrim({integer}, '0') END"
+    if overrides.get("mutant_convert_strip_fraction_zeros"):
+        fraction = f"rtrim({fraction}, '0')"
+    zero = f"(TRY_CAST({n} AS {SQL_DECIMAL}) = 0)"
+    zero_text = "'0'" if overrides.get("mutant_convert_zero_unsigned") else f"{sign} || '0'"
+    return (
+        f"CASE WHEN {zero} THEN {zero_text} ELSE {sign} || {int_text} "
+        f"|| CASE WHEN {fraction} <> '' THEN '.' || {fraction} ELSE '' END END"
+    )
+
+
+def _map_convert_type(
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    table_name: str,
+    overrides: dict[str, Any],
+    col_meta: dict[str, dict[str, Any]] | None,
+    store: DuckStore | None,
+) -> tuple[str, list[str]] | Refusal:
+    """convert_type (`_convert_column`): one column to one of the engine's types; a failed cell is an error cell.
+
+    Mapped: blank and unconvertible cells (error text, row number, the engine's repr of the value), text and any
+    (identity), boolean (true/false in any case, padded), whole_number and decimal_number (plain numbers: padded,
+    underscores, sign, leading zeros, "1.", ".5", "-0"; whole_number rounds half to even and checks the 64-bit range),
+    date, datetime and time (strict ISO forms only). Refused by name: exponent text, non-ASCII text, a value the
+    DECIMAL(38,18) cast holds inexactly, a decimal below 1E-6 or above 1E300, non-strict dates, earlier-step error text,
+    and a value or column name the engine's repr prints differently (quote, backslash, non-ASCII, over 120 characters).
+    """
+    # The engine's order (`validate_steps`, then apply): every value must be text, the column name not blank,
+    # the type supported; then the column must exist. (The field set was checked by `_d0h_shape_refusal`.)
+    if any(not isinstance(value, str) for value in step.values()):
+        message = "Transformation step 1 values must be strings."
+        return Refusal(message, expected_error="values must be strings.")
+    column = step.get("column")
+    if not column.strip():
+        message = "Transformation step 1 needs a column name."
+        return Refusal(message, expected_error="needs a column name.")
+    target = canonical_column_type(step.get("type"))
+    if target not in CONVERT_STORE_TYPES:
+        message = "Transformation step 1 has an unsupported column type."
+        return Refusal(message, expected_error="has an unsupported column type.")
+    if column not in headers:
+        message = f"Column {column!r} does not exist."
+        return Refusal(message, expected_error=message)
+    if target in {"text", "any"}:
+        col_list = ", ".join(f'"{h}"' for h in headers)
+        return (f"SELECT {col_list} FROM {t_q} ORDER BY {_RN}", list(headers))
+    if store is None or col_meta is None or column not in col_meta:
+        return Refusal("convert_type needs the column facts of the store.")
+    if "_cv_rn" in headers:
+        return Refusal("A column named _cv_rn clashes with the row number used for the error text.")
+    facts = _convert_column_facts(store, table_name, column)
+    if facts["error_prefix"]:
+        return Refusal("A cell holds text that starts with the engine's error prefix; the store cannot tell it from an error cell.")
+    if not facts["repr_plain"]:
+        return Refusal("A value or column name is not plain printable ASCII; the engine's error text quotes it differently.")
+    ws = sql_str(PY_WHITESPACE)
+    raw = f'"{column}"'
+    s = raw if overrides.get("mutant_convert_no_trim") else f"trim({raw}, {ws})"
+    if target == "boolean":
+        if not facts["ascii"]:
+            return Refusal("Boolean text with non-ASCII characters is not mirrored (Unicode case rules).")
+        lowered = f"lower({s})" if not overrides.get("mutant_convert_bool_case_sensitive") else s
+        ok = f"{lowered} IN ('true', 'false')"
+        value = f"CASE WHEN {lowered} = 'true' THEN 'True' ELSE 'False' END"
+    elif target in {"decimal_number", "whole_number"}:
+        if not col_meta[column]["ascii_only"] or not facts["ascii"]:
+            return Refusal("Number text with non-ASCII digits or spaces is not mirrored (the engine reads Unicode digits).")
+        if facts["exponent"]:
+            return Refusal("Exponent number text (1e3): the engine keeps the Decimal exponent form (1E+3); not mirrored.")
+        if not col_meta[column]["num_cast_agrees"]:
+            return Refusal("A value does not fit DECIMAL(38,18) exactly (engine precision); not mirrored.")
+        n = s if overrides.get("mutant_convert_no_underscore") else f"replace({s}, '_', '')"
+        number = f"TRY_CAST({n} AS {SQL_DECIMAL})"
+        if target == "decimal_number":
+            if facts["min_adjusted"] is not None and facts["min_adjusted"] < CONVERT_DECIMAL_MIN_ADJUSTED:
+                return Refusal("A decimal below 1E-6 prints in exponent form (1E-7) in the engine; not mirrored.")
+            if facts["max_adjusted"] is not None and facts["max_adjusted"] >= CONVERT_DECIMAL_MAX_ADJUSTED:
+                return Refusal("A decimal of 300 or more integer digits overflows the engine's float check; not mirrored.")
+            ok = f"{number} IS NOT NULL"
+            value = _convert_decimal_text_sql(n, overrides)
+        else:
+            # round_even() returns DOUBLE for DECIMAL input (it loses 19-digit integers), so the half-to-even step
+            # is written on DECIMAL: round() is half away from zero; at an exact .5 an odd result steps back to even.
+            away = f"round({number}, 0)"
+            if overrides.get("mutant_convert_whole_half_up"):
+                rounded = away
+            else:
+                rounded = (
+                    f"CASE WHEN abs({number} - trunc({number})) = 0.5 AND ({away}) % 2 <> 0 "
+                    f"THEN ({away}) - sign({number}) ELSE ({away}) END"
+                )
+            big = f"CAST({rounded} AS VARCHAR)" if overrides.get("mutant_convert_whole_no_range") else f"CAST(TRY_CAST({rounded} AS BIGINT) AS VARCHAR)"
+            ok = f"{big} IS NOT NULL"
+            value = big
+    elif target == "date":
+        if not facts["date_strict"]:
+            return Refusal("Dates other than yyyy-mm-dd: the engine also takes times, Z and compact forms; SQL differs.")
+        ok = f"regexp_matches({s}, '{CONVERT_DATE_SQL}')"
+        if not overrides.get("mutant_convert_date_no_validity"):
+            ok += f" AND TRY_CAST({s} AS DATE) IS NOT NULL"
+        value = f"CAST(TRY_CAST({s} AS DATE) AS VARCHAR)" if not overrides.get("mutant_convert_date_no_validity") else s
+    elif target == "datetime":
+        if not facts["datetime_strict"]:
+            return Refusal("Datetimes other than yyyy-mm-dd[ T]hh:mm:ss: the engine takes minutes, offsets and fractions; SQL differs.")
+        stamp = f"replace({s}, 'T', ' ')"
+        ok = f"regexp_matches({s}, '{CONVERT_DATETIME_SQL}') AND TRY_CAST({stamp} AS TIMESTAMP) IS NOT NULL"
+        value = f"strftime(TRY_CAST({stamp} AS TIMESTAMP), '%Y-%m-%d %H:%M:%S')"
+    elif target == "time":
+        if not facts["time_strict"]:
+            return Refusal("Times other than hh:mm:ss (00 to 23): the engine takes 24:00:00, minutes-only and fractions; SQL differs.")
+        ok = f"regexp_matches({s}, '{CONVERT_TIME_SQL}') AND TRY_CAST({s} AS TIME) IS NOT NULL"
+        value = s
+    else:
+        return Refusal(f"convert_type to {target} is not mapped.")
+    # The engine's message: Cannot convert value <repr> in row <n> of column <repr> to <type>.
+    row_text = "CAST(_cv_rn AS VARCHAR)" if not overrides.get("mutant_convert_error_row_plus_one") else "CAST(_cv_rn + 1 AS VARCHAR)"
+    if overrides.get("mutant_convert_error_column_unquoted"):
+        message_parts = [
+            sql_str(f"{CONVERT_ERROR_PREFIX}Cannot convert value '"), raw, sql_str("' in row "), row_text,
+            sql_str(" of column "), sql_str(column), sql_str(f" to {target}."),
+        ]
+    else:
+        message_parts = [
+            sql_str(f"{CONVERT_ERROR_PREFIX}Cannot convert value '"), raw, sql_str("' in row "), row_text,
+            sql_str(" of column '"), sql_str(column), sql_str(f"' to {target}."),
+        ]
+    err = " || ".join(f"CAST({p} AS VARCHAR)" if p == raw else p for p in message_parts)
+    if overrides.get("mutant_convert_blank_is_null"):
+        converted = f"CASE WHEN {raw} IS NULL OR {raw} = '' THEN NULL WHEN {ok} THEN {value} ELSE {err} END"
+    else:
+        converted = f"CASE WHEN {raw} IS NULL THEN NULL WHEN {ok} THEN {value} ELSE {err} END"
+    out_list = ", ".join(
+        f'{converted} AS "{h}"' if h == column else f'"{h}"' for h in headers
+    )
+    plain_list = ", ".join(f'"{h}"' for h in headers)
+    inner = f"SELECT {plain_list}, ROW_NUMBER() OVER (ORDER BY {_RN}) AS _cv_rn FROM {t_q}"
+    return (f"SELECT {out_list} FROM ({inner}) ORDER BY _cv_rn", list(headers))
+
+
+# ---------------------------------------------------------------- D1b: convert_type_using_locale (Part A step 2)
+# Engine: `_convert_column_using_locale` -> `_convert_value_using_locale`: Babel parse_decimal(strict=True) for
+# en-US. Measured (brute force, 960,799 strings over 0 1 , . - + 5 up to 7 characters): the grammar below is the
+# same as Babel's for en-US; the value and the error text are otherwise the convert_type ones plus " using culture en-US.".
+# Only en-US (canonical) and decimal_number / whole_number are mapped; other cultures and types are named refusals.
+LOCALE_EN_US_NUMBER_PY = r"-?[1-9][0-9]{0,2}(,[0-9]{3})+(\.[0-9]+)?|[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)"
+LOCALE_EN_US_NUMBER_SQL = "^(" + LOCALE_EN_US_NUMBER_PY + ")$"
+LOCALE_TYPES = {"whole_number", "decimal_number", "date", "datetime", "time"}
+
+
+def _map_convert_type_using_locale(
+    step: dict[str, Any],
+    headers: list[str],
+    t_q: str,
+    table_name: str,
+    overrides: dict[str, Any],
+    col_meta: dict[str, dict[str, Any]] | None,
+    store: DuckStore | None,
+) -> tuple[str, list[str]] | Refusal:
+    """convert_type_using_locale (en-US numbers only). The engine's order: values are text, the column name is not
+    blank (the engine strips it), the type is a locale type, the culture is valid (canonicalised), then the column.
+    """
+    if any(not isinstance(value, str) for value in step.values()):
+        message = "Transformation step 1 values must be strings."
+        return Refusal(message, expected_error="values must be strings.")
+    if not step["column"].strip():
+        message = "Transformation step 1 needs a column name."
+        return Refusal(message, expected_error="needs a column name.")
+    if step["type"] not in LOCALE_TYPES:
+        message = "Transformation step 1 has an unsupported locale-aware column type."
+        return Refusal(message, expected_error="has an unsupported locale-aware column type.")
+    try:
+        culture = _canonical_culture(step["culture"])
+    except TransformationError as exc:
+        return Refusal(f"Transformation step 1: {exc}", expected_error="is not recognized.")
+    column = step["column"].strip()
+    if column not in headers:
+        message = f"Column {column!r} does not exist."
+        return Refusal(message, expected_error=message)
+    if culture != "en-US":
+        return Refusal(f"convert_type_using_locale with culture {culture} is not mapped (en-US only).")
+    if step["type"] not in {"whole_number", "decimal_number"}:
+        return Refusal(f"convert_type_using_locale to {step['type']} with en-US is not mapped (numbers only).")
+    if store is None or col_meta is None or column not in col_meta or "_cv_rn" in headers:
+        return Refusal("convert_type_using_locale needs the column facts of the store.")
+    facts = _convert_column_facts(store, table_name, column)
+    if facts["error_prefix"]:
+        return Refusal("A cell holds text that starts with the engine's error prefix; the store cannot tell it from an error cell.")
+    if not facts["repr_plain"]:
+        return Refusal("A value or column name is not plain printable ASCII; the engine's error text quotes it differently.")
+    if not facts["ascii"] or not col_meta[column]["ascii_only"]:
+        return Refusal("Number text with non-ASCII characters is not mirrored (Babel reads other digits).")
+    values = [r[0] for r in store.execute(f'SELECT "{column}" FROM "{table_name}" ORDER BY {_RN}')]
+    nonblank = [v for v in values if v not in (None, "")]
+    if any("e" in v or "E" in v or "_" in v for v in nonblank):
+        return Refusal("Exponent or underscore number text: Babel reads it (1E+3, 1_000); the SQL grammar does not.")
+    accepted = [Decimal(v.strip().replace(",", "")) for v in nonblank if re.fullmatch(LOCALE_EN_US_NUMBER_PY, v.strip())]
+    if any(decimal_literal(number) is None for number in accepted):
+        return Refusal("A value does not fit DECIMAL(38,18) exactly (engine precision); not mirrored.")
+    nonzero = [n for n in accepted if n != 0]
+    if nonzero and min(n.adjusted() for n in nonzero) < CONVERT_DECIMAL_MIN_ADJUSTED:
+        return Refusal("A decimal below 1E-6 prints in exponent form (1E-7) in the engine; not mirrored.")
+    if nonzero and max(n.adjusted() for n in nonzero) >= CONVERT_DECIMAL_MAX_ADJUSTED:
+        return Refusal("A decimal of 300 or more integer digits overflows the engine's float check; not mirrored.")
+    ws = sql_str(PY_WHITESPACE)
+    raw = f'"{column}"'
+    s = f"trim({raw}, {ws})"
+    n = s if overrides.get("mutant_locale_keeps_commas") else f"replace({s}, ',', '')"
+    number = f"TRY_CAST({n} AS {SQL_DECIMAL})"
+    ok = f"regexp_matches({s}, '{LOCALE_EN_US_NUMBER_SQL}') AND {number} IS NOT NULL"
+    if step["type"] == "decimal_number":
+        value = _convert_decimal_text_sql(n, overrides)
+    else:
+        away = f"round({number}, 0)"
+        rounded = away if overrides.get("mutant_convert_whole_half_up") else (
+            f"CASE WHEN abs({number} - trunc({number})) = 0.5 AND ({away}) % 2 <> 0 "
+            f"THEN ({away}) - sign({number}) ELSE ({away}) END"
+        )
+        value = f"CAST(TRY_CAST({rounded} AS BIGINT) AS VARCHAR)"
+        ok = f"{ok} AND {value} IS NOT NULL"
+    tail = f"' to {step['type']}." if overrides.get("mutant_locale_message_no_culture") else f"' to {step['type']} using culture {culture}."
+    err_parts = [
+        sql_str(f"{CONVERT_ERROR_PREFIX}Cannot convert value '"), raw, sql_str("' in row "),
+        "CAST(_cv_rn AS VARCHAR)", sql_str(" of column '"), sql_str(column),
+        sql_str(tail),
+    ]
+    err = " || ".join(f"CAST({p} AS VARCHAR)" if p == raw else p for p in err_parts)
+    converted = f"CASE WHEN {raw} IS NULL THEN NULL WHEN {ok} THEN {value} ELSE {err} END"
+    out_list = ", ".join(f'{converted} AS "{h}"' if h == column else f'"{h}"' for h in headers)
+    plain_list = ", ".join(f'"{h}"' for h in headers)
+    inner = f"SELECT {plain_list}, ROW_NUMBER() OVER (ORDER BY {_RN}) AS _cv_rn FROM {t_q}"
+    return (f"SELECT {out_list} FROM ({inner}) ORDER BY _cv_rn", list(headers))
+
+
+# ---------------------------------------------------------------- D1b: sparse rows and table pass-through (Part A steps 5, 6)
+# Engine: `_is_sparse_boundary_row`: a row is sparse when it has at most one meaningful cell (a cell that is not None
+# and not whitespace-only) and no error cell. `remove_sparse_top_rows` drops leading sparse rows, the bottom step
+# trailing ones; an all-sparse table ends empty. Store side: the same count in SQL with window functions.
+def _map_remove_sparse_rows(
+    headers: list[str], t_q: str, table_name: str, top: bool, overrides: dict[str, Any], store: DuckStore | None
+) -> tuple[str, list[str]] | Refusal:
+    if store is None:
+        return Refusal("A sparse-row step needs the store.")
+    if "_sp_rn" in headers or "_sp_sparse" in headers or "_sp_first" in headers or "_sp_last" in headers:
+        return Refusal("A column named _sp_* clashes with the sparse-row work columns.")
+    plain_list = ", ".join(f'"{h}"' for h in headers)
+    cells = store.execute(f"SELECT {plain_list} FROM {t_q}") if headers else []
+    if any(isinstance(v, str) and v.startswith(CONVERT_ERROR_PREFIX) for row in cells for v in row):
+        return Refusal("A cell holds text that starts with the engine's error prefix; the store cannot tell it from an error cell.")
+    ws = sql_str(PY_WHITESPACE)
+    meaningful = " + ".join(
+        f'CASE WHEN "{h}" IS NOT NULL AND trim("{h}", {ws}) <> \'\' THEN 1 ELSE 0 END' for h in headers
+    ) or "0"
+    limit = 0 if overrides.get("mutant_sparse_at_most_zero") else 1
+    inner = f"SELECT {plain_list}, ROW_NUMBER() OVER (ORDER BY {_RN}) AS _sp_rn, ({meaningful}) <= {limit} AS _sp_sparse FROM {t_q}"
+    if top:
+        mid = "MIN(CASE WHEN NOT _sp_sparse THEN _sp_rn END) OVER () AS _sp_first"
+        keep = "_sp_first IS NOT NULL AND _sp_rn >= _sp_first" if not overrides.get("mutant_sparse_drops_first") else "_sp_first IS NOT NULL AND _sp_rn > _sp_first"
+    else:
+        mid = "MAX(CASE WHEN NOT _sp_sparse THEN _sp_rn END) OVER () AS _sp_last"
+        keep = "_sp_last IS NOT NULL AND _sp_rn <= _sp_last"
+    return (
+        f"SELECT {plain_list} FROM (SELECT *, {mid} FROM ({inner})) WHERE {keep} ORDER BY _sp_rn",
+        list(headers),
+    )
+
+
+def _map_table_pass_through(headers: list[str], t_q: str) -> tuple[str, list[str]]:
+    """table_pass_through: the engine copies the step and changes nothing (no field check)."""
+    plain_list = ", ".join(f'"{h}"' for h in headers)
+    return (f"SELECT {plain_list} FROM {t_q} ORDER BY {_RN}", list(headers))
+
+
 _TEXT_STEP_FIELDS = {"op", "column"}
 D0H_STEP_FIELDS: dict[str, set[str]] = {
+    "convert_type": {"op", "column", "type"},
+    "convert_type_using_locale": {"op", "column", "type", "culture"},
+    "remove_sparse_top_rows": {"op"},
+    "remove_sparse_bottom_rows": {"op"},
     "group_by": {"op", "columns", "aggregations"},
     "replace_value": {"op", "column", "value", "replacement"},
     "merge_columns": {"op", "columns", "separator", "new_name"},
@@ -3176,6 +3646,18 @@ def _mapped_sql(
     if op == "replace_error_values":
         return _map_replace_error_values(step, headers, t_q)
 
+    # D1b steps
+    if op == "convert_type":
+        return _map_convert_type(step, headers, t_q, table_name, overrides, col_meta, store)
+    if op == "convert_type_using_locale":
+        return _map_convert_type_using_locale(step, headers, t_q, table_name, overrides, col_meta, store)
+    if op in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}:
+        if set(step) != {"op"}:
+            return Refusal("The step has missing or unsupported fields.", expected_error="has missing or unsupported fields.")
+        return _map_remove_sparse_rows(headers, t_q, table_name, op == "remove_sparse_top_rows", overrides, store)
+    if op == "table_pass_through":
+        return _map_table_pass_through(headers, t_q)
+
     # D1a steps
     if op == "promote_headers":
         return _map_promote_headers(step, headers, t_q, store, overrides)
@@ -3348,9 +3830,19 @@ def run_pq_step_diff_many(
         table_ctx: dict[str, tuple[Any, Any, list[str], str, int, dict[str, dict[str, bool]]]] = {
             "main": (cand, cand_2, headers, "t_csv", total_store_rows, col_meta),
         }
-        for shape in D1A_SHAPES:
+        # Only the small tables the catalog names are generated and imported (same tables, same draws).
+        catalog = list(items) if items is not None else build_step_catalog(headers, d1a=dataset is None)
+        if item_filter:
+            catalog = [item for item in catalog if item["id"] in set(item_filter)]
+        needed_tables = {item.get("table", "main") for item in catalog}
+        for shape in D1A_SHAPES + D1B_SHAPES:
+            if shape not in needed_tables:
+                continue
             d1a_path = t_path / f"{shape}.csv"
-            generate_d1a_csv(d1a_path, seed, shape)
+            if shape in D1B_SHAPES:
+                generate_d1b_csv(d1a_path, seed, shape)
+            else:
+                generate_d1a_csv(d1a_path, seed, shape)
             import_csv_to_store(store, f"t_{shape}", d1a_path, {})
             d1a_cand = parse_file(d1a_path)
             d1a_headers = list(d1a_cand.headers)
@@ -3359,10 +3851,6 @@ def run_pq_step_diff_many(
                 d1a_cand, None, d1a_headers, f"t_{shape}", d1a_rows,
                 inspect_store_columns(store, f"t_{shape}", d1a_headers),
             )
-
-        catalog = list(items) if items is not None else build_step_catalog(headers, d1a=dataset is None)
-        if item_filter:
-            catalog = [item for item in catalog if item["id"] in set(item_filter)]
 
         results_sets: list[list[dict[str, Any]]] = [[] for _ in override_sets]
 
@@ -3466,6 +3954,7 @@ def run_pq_step_diff_many(
                     "refusal": str(refusal_obj) if refusal_obj else None,
                     "refusal_reason": refusal_obj.reason if refusal_obj else None,
                     **({"table": item["table"], "d1a": True} if item.get("d1a") else {}),
+                    **({"table": item["table"], "d1b": True} if item.get("d1b") else {}),
                 })
 
 
