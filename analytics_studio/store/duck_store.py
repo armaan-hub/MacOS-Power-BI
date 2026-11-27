@@ -3,6 +3,7 @@
 import datetime
 import decimal
 import fcntl
+import contextlib
 import functools
 import math
 import os
@@ -560,8 +561,18 @@ class DuckStore:
         else:
             self._writing.pop(key, None)
 
+    @contextlib.contextmanager
+    def _flagged(self, name: str) -> Iterator[None]:
+        """Flag the table as being written for the body (cleared on any exit, an error included)."""
+        self._set_writing(name, True)
+        try:
+            yield
+        finally:
+            self._set_writing(name, False)
+
     def table_writing(self, name: str) -> bool:
-        """True while an append to this table is committing (from just before its COMMIT until its token bumps are done).
+        """True while a change to this table is committing (append_rows, create_table, drop_table, create_table_from_arrow):
+        from just before its COMMIT (or DDL statement) until its token bumps are done.
 
         Like table_version it takes no lock. A reader that compares table_version before and after several statements
         also refuses when this is True at its start: rows may become visible between two statements while the token
@@ -666,11 +677,12 @@ class DuckStore:
         col_defs.append('"__rn" BIGINT')
         quoted_name = _quote_identifier(name)
         create_sql = f"CREATE TABLE {quoted_name} ({', '.join(col_defs)})"
-        try:
-            conn.execute(create_sql)
-        except Exception as exc:
-            raise StoreError(f"Failed to create table '{name}': {exc}") from exc
-        self._bump_version(name)
+        with self._flagged(name):  # flagged from just before the statement until the bump is done (see table_writing)
+            try:
+                conn.execute(create_sql)
+            except Exception as exc:
+                raise StoreError(f"Failed to create table '{name}': {exc}") from exc
+            self._bump_version(name)
 
     @_thread_locked
     def has_table(self, name: str) -> bool:
@@ -731,11 +743,12 @@ class DuckStore:
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
         quoted_name = _quote_identifier(resolved_name)
-        try:
-            conn.execute(f"DROP TABLE {quoted_name}")
-        except Exception as exc:
-            raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
-        self._bump_version(resolved_name)
+        with self._flagged(resolved_name):
+            try:
+                conn.execute(f"DROP TABLE {quoted_name}")
+            except Exception as exc:
+                raise StoreError(f"Failed to drop table '{resolved_name}': {exc}") from exc
+            self._bump_version(resolved_name)
 
     @_thread_locked
     @_refuse_while_read
@@ -1331,9 +1344,10 @@ class DuckStore:
                 if bad_count and bad_count[0] > 0:
                     raise StoreError("Store contains datetime values outside year 1 to 9999 or non-finite timestamps.")
 
-            conn.execute("COMMIT")
-            self._txn_open = False
-            self._bump_version(name)
+            with self._flagged(name):  # flagged from just before the COMMIT until the bump is done
+                conn.execute("COMMIT")
+                self._txn_open = False
+                self._bump_version(name)
             return total_rows
         except BaseException as exc:
             self._txn_open = False

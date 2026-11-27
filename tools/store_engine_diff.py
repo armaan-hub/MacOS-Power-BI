@@ -2796,15 +2796,16 @@ def arith_family_counts(catalog: list[dict[str, Any]] | None = None) -> dict[str
     return dict(sorted(counts.items()))
 
 
-SWEEP_EXACT_MIN_ROWS = 40  # from this row count on the refused set of the sweep is pinned exactly
+SWEEP_EXACT_MIN_ROWS = 150  # from this row count on the static refused set of the sweep is pinned exactly
 
 
 def evaluate_sweep_policy(
     sweep_results: list[dict[str, Any]], baseline: dict[str, Any], rows: int = 300
 ) -> tuple[int, list[str]]:
     """Exit policy of the literal sweep: any difference, SQL error or crash exits 1, and the set of refused rows
-    (whitelist, planner or guard) must equal the baseline set of its row count (row ids are built from content, never
-    from a seed); below SWEEP_EXACT_MIN_ROWS rows it must be a subset of the 300-row set and the rest must be "same"."""
+    (whitelist, planner or guard), except the zero MIN or MAX divisor refusals (allowed at any size and seed), must equal the
+    baseline set of its row count (row ids are built from content, never from a seed); below SWEEP_EXACT_MIN_ROWS rows it
+    must be a subset of the 300-row set. Every other row must be "same"."""
     failures = [r for r in sweep_results if r["status"] in SWEEP_FAILURE_STATUSES]
     if failures:
         by_status = {st: sum(1 for r in failures if r["status"] == st) for st in SWEEP_FAILURE_STATUSES}
@@ -2818,26 +2819,27 @@ def evaluate_sweep_policy(
                 seen[r["shape"]] = seen.get(r["shape"], 0) + 1
         if dict(sorted(seen.items())) != dict(sorted(expected_families.items())):
             return 1, [f"FAILURE: arithmetic family row counts changed vs baseline: {seen} != {expected_families}"]
-    # The guard refusals depend on the generated rows. From SWEEP_EXACT_MIN_ROWS rows on, each row count has its own measured
-    # set (`sweep_refused_by_rows`; a count without one is checked against the 300-row set `sweep_refused`). Below that (a
-    # small table has few distinct cells, so the set varies from seed to seed) the policy holds for any seed: a refused row
-    # is in the 300-row set or is refused because a MIN or MAX divisor is zero in that table (a guard of the values, which
-    # a small table reaches more often), and every other row is "same".
+    # A refusal for a zero MIN or MAX divisor is found at execute time from the values, so which rows hit it depends on the
+    # generated data (row count and seed): it is allowed at every size and seed (named, loud; "differs 0" stays the check)
+    # and it is NOT part of the pinned sets. The pinned sets hold the other refusals (caps, literals, type and planner
+    # refusals, the data guards). The data guards (a non-ASCII space, an accented letter, a date before 1900 in a column)
+    # fire only when the generated cells hold one, so below SWEEP_EXACT_MIN_ROWS rows the policy is a subset rule that holds
+    # for any seed: a refused row is in the 300-row set (a guard that did not fire leaves the row "same", compared with
+    # the engine). From SWEEP_EXACT_MIN_ROWS rows on, each row count has its own measured set (`sweep_refused_by_rows`; a
+    # count without one is checked against the 300-row set `sweep_refused`). Every other row is "same".
     by_rows = baseline.get("sweep_refused_by_rows", {})
-    actual = {r["id"] for r in sweep_results if r["status"].startswith("refused")}
+    zero_guard = {
+        r["id"] for r in sweep_results
+        if r["status"] == "refused-guard" and dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR in str(r.get("reason") or "")
+    }
+    actual = {r["id"] for r in sweep_results if r["status"].startswith("refused")} - zero_guard
+    other = [r["id"] for r in sweep_results if r["status"] != "same" and not r["status"].startswith("refused")]
+    if other:
+        return 1, [f"FAILURE: rows neither same nor refused at {rows} rows ({len(other)} rows): {other[:5]}"]
     if rows < SWEEP_EXACT_MIN_ROWS:
-        allowed = set(by_rows.get("300", baseline.get("sweep_refused", [])))
-
-        zero_guard = {
-            r["id"] for r in sweep_results
-            if r["status"] == "refused-guard" and dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR in str(r.get("reason") or "")
-        }
-        outside = sorted(actual - allowed - zero_guard)
+        outside = sorted(actual - set(by_rows.get("300", baseline.get("sweep_refused", []))))
         if outside:
             return 1, [f"FAILURE: refused rows outside the 300-row baseline set at {rows} rows ({len(outside)} rows): {outside[:5]}"]
-        other = [r["id"] for r in sweep_results if r["status"] != "same" and not r["status"].startswith("refused")]
-        if other:
-            return 1, [f"FAILURE: rows neither same nor refused at {rows} rows ({len(other)} rows): {other[:5]}"]
         return 0, []
     expected = set(by_rows.get(str(rows), baseline.get("sweep_refused", [])))
     if actual != expected:

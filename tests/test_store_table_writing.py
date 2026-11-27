@@ -100,3 +100,49 @@ def test_the_reader_reports_the_store_flag_and_token(store: Any) -> None:
         assert reader.table_version("t") == store.table_version("t")
     finally:
         reader.close()
+
+
+# ---------------------------------------------------------------------------------------------------
+# the other changes that commit and then bump: create_table, drop_table, create_table_from_arrow
+# ---------------------------------------------------------------------------------------------------
+def _flags_at_bumps(monkeypatch: pytest.MonkeyPatch, name: str) -> list[bool]:
+    original = DuckStore._bump_version
+    seen: list[bool] = []
+
+    def spy(self: Any, table: str) -> None:
+        seen.append(self.table_writing(name))
+        original(self, table)
+
+    monkeypatch.setattr(DuckStore, "_bump_version", spy)
+    return seen
+
+
+def test_create_table_is_flagged_until_its_bump_is_done(store: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    seen = _flags_at_bumps(monkeypatch, "n")
+    store.create_table("n", [("a", "text")])
+    assert seen == [True] and store.table_writing("n") is False
+    with pytest.raises(StoreError):  # a duplicate: the flag must not stay set
+        store.create_table("n", [("a", "text")])
+    assert store.table_writing("n") is False
+
+
+def test_drop_table_is_flagged_until_its_bump_is_done(store: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    seen = _flags_at_bumps(monkeypatch, "t")
+    store.drop_table("t")
+    assert seen == [True] and store.table_writing("t") is False
+    with pytest.raises(StoreError):  # a missing table: the flag must not stay set
+        store.drop_table("t")
+    assert store.table_writing("t") is False
+
+
+def test_create_table_from_arrow_is_flagged_until_its_bump_is_done(store: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    import pyarrow as pa
+
+    seen = _flags_at_bumps(monkeypatch, "arr")
+    batch = pa.record_batch([pa.array(["p", "q"], type=pa.string())], names=["a"])
+    store.create_table_from_arrow("arr", [("a", "text")], iter([batch]))
+    assert seen == [True] and store.table_writing("arr") is False
+    bad = pa.record_batch([pa.array(["p"], type=pa.string())], names=["b"])
+    with pytest.raises(StoreError):  # a failed import: no bump, the flag is clear
+        store.create_table_from_arrow("arr2", [("b", "text"), ("c", "text")], iter([bad]))
+    assert store.table_writing("arr2") is False

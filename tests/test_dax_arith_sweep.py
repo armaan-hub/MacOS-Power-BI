@@ -31,6 +31,15 @@ FAMILIES = (
 )
 
 
+def static_refused(results: list[dict[str, Any]]) -> set[str]:
+    """The refused rows that the baseline pins: every refusal except the zero MIN or MAX divisor guard (data dependent)."""
+    zero = dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR
+    return {
+        r["id"] for r in results
+        if r["status"].startswith("refused") and not (r["status"] == "refused-guard" and zero in str(r["reason"] or ""))
+    }
+
+
 def arith_only(row: dict[str, Any]) -> bool:
     return row["shape"].startswith("arith_")
 
@@ -136,7 +145,7 @@ def test_every_arithmetic_row_is_same_or_a_baselined_refusal(seed: int) -> None:
     assert len(results) >= 200, len(results)
     failures = [(r["id"], r["status"], r["error"]) for r in results if r["status"] in tool.SWEEP_FAILURE_STATUSES]
     assert not failures, failures
-    refused = {r["id"] for r in results if r["status"].startswith("refused")}
+    refused = static_refused(results)
     assert refused <= set(BASELINE["sweep_refused"]), sorted(refused - set(BASELINE["sweep_refused"]))
     assert sum(1 for r in results if r["status"] == "same") >= 100
 
@@ -149,13 +158,17 @@ def test_each_family_has_no_difference_at_seed_one(family: str) -> None:
     failures = [(r["id"], r["status"], r["error"]) for r in results if r["status"] in tool.SWEEP_FAILURE_STATUSES]
     assert not failures, failures
     assert data["arith_families"][family]["differs"] == 0
-    refused = {r["id"] for r in results if r["status"].startswith("refused")}
+    refused = static_refused(results)
     assert refused <= set(BASELINE["sweep_refused"])
-    # exact: at seed 1 and 300 rows a row is "same" or it is one of the baselined refusals of its own family, with its reason
-    # (the baseline pin of the 300-row set covers it; no row may be refused that the pin does not list, none may go missing)
+    # exact: at seed 1 and 300 rows a row is "same", or a zero MIN or MAX divisor refusal (named, not pinned), or one of the
+    # pinned static refusals of its own family (no row may be refused that the pin does not list, none may go missing)
     pinned = {i for i in BASELINE["sweep_refused_by_rows"]["300"] if i.startswith(family + ": ")}
     assert refused == pinned, sorted(refused ^ pinned)[:3]
-    odd = [(r["id"], r["status"]) for r in results if r["status"] != "same" and not (r["id"] in pinned and r["reason"])]
+    odd = [
+        (r["id"], r["status"]) for r in results
+        if r["status"] != "same" and r["id"] not in pinned
+        and not (r["status"] == "refused-guard" and dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR in str(r["reason"] or ""))
+    ]
     assert not odd, odd[:3]
     if family == "arith_refused":
         assert all(r["status"] == "refused-whitelist" and r["reason"] for r in results)
@@ -280,8 +293,8 @@ def row(row_id: str, status: str, reason: str | None = None) -> dict[str, Any]:
     return {"id": row_id, "shape": "arith_pairs", "status": status, "reason": reason, "error": None}
 
 
-@pytest.mark.parametrize("size", [1, 5, 12, 20, 39])
-def test_below_40_rows_a_refusal_is_in_the_300_row_set_or_a_zero_divisor_guard(size: int) -> None:
+@pytest.mark.parametrize("size", [1, 5, 12, 20, 39, 40, 41, 149])
+def test_below_150_rows_a_refusal_is_in_the_300_row_set_or_a_zero_divisor_guard(size: int) -> None:
     assert small([row("arith_pairs: pinned", "refused-whitelist", "r"), row("arith_pairs: a", "same")], size) == (0, [])
     assert small([row("arith_pairs: pinned", "same")], size) == (0, [])  # fewer refusals than the 300-row set is fine
     guard = row("arith_pairs: z", "refused-guard", ZERO_TEXT)
@@ -294,13 +307,43 @@ def test_below_40_rows_a_refusal_is_in_the_300_row_set_or_a_zero_divisor_guard(s
     assert code == 1 and "neither same nor refused" in messages[0]
 
 
-def test_from_40_rows_the_refused_set_is_exact() -> None:
-    exact = {**SMALL_BASE, "sweep_refused_by_rows": {"300": ["arith_pairs: pinned"], "40": ["arith_pairs: pinned", "arith_pairs: z"]}}
-    pinned_row, zero = row("arith_pairs: pinned", "refused-whitelist", "r"), row("arith_pairs: z", "refused-guard", ZERO_TEXT)
-    assert evaluate_sweep_policy([pinned_row, zero], exact, 40) == (0, [])
-    assert evaluate_sweep_policy([pinned_row], exact, 40)[0] == 1  # a pinned refusal went missing
-    assert evaluate_sweep_policy([pinned_row, zero, row("arith_pairs: w", "refused-guard", ZERO_TEXT)], exact, 40)[0] == 1
-    assert evaluate_sweep_policy([pinned_row, zero], exact, 300)[0] == 1  # another size: its own set (here the 300-row one)
+def test_from_150_rows_the_static_refused_set_is_exact_and_zero_guards_are_free() -> None:
+    exact = {**SMALL_BASE, "sweep_refused_by_rows": {"300": ["arith_pairs: pinned"], "150": ["arith_pairs: pinned", "arith_pairs: q"]}}
+    pinned_row, other_pin = row("arith_pairs: pinned", "refused-whitelist", "r"), row("arith_pairs: q", "refused-planner", "r")
+    zero = row("arith_pairs: z", "refused-guard", ZERO_TEXT)
+    assert evaluate_sweep_policy([pinned_row, other_pin], exact, 150) == (0, [])
+    assert evaluate_sweep_policy([pinned_row, other_pin, zero], exact, 150) == (0, [])  # a zero guard is allowed, any number
+    assert evaluate_sweep_policy([pinned_row, other_pin, zero, row("arith_pairs: z2", "refused-guard", ZERO_TEXT)], exact, 150) == (0, [])
+    assert evaluate_sweep_policy([pinned_row, zero], exact, 150)[0] == 1  # a pinned static refusal went missing
+    new_static = row("arith_pairs: w", "refused-guard", "REFUSED: the group-by column holds a non-ASCII whitespace cell")
+    code, messages = evaluate_sweep_policy([pinned_row, other_pin, new_static], exact, 150)
+    assert code == 1 and "refused set changed" in messages[0]  # another reason, not pinned: fails
+    assert evaluate_sweep_policy([pinned_row, other_pin], exact, 300)[0] == 1  # another size: its own set (here the 300-row one)
+    assert evaluate_sweep_policy([pinned_row], exact, 149) == (0, [])  # below 150 a pinned refusal that did not fire is fine (row is same)
+
+
+@pytest.mark.parametrize("size", [40, 41, 60, 149, 300])
+def test_a_differs_exits_1_at_every_size(size: int) -> None:
+    results = [row("arith_pairs: a", "same"), {**row("arith_pairs: b", "differs"), "error": "engine 1 vs plan 2"}]
+    code, messages = evaluate_sweep_policy(results, SMALL_BASE, size)
+    assert code == 1 and "sweep failures" in messages[0]
+
+
+@pytest.mark.parametrize("size", [5, 39, 40, 41, 150])
+def test_an_unexpected_refusal_with_another_reason_exits_1_at_every_size(size: int) -> None:
+    base = {**SMALL_BASE, "sweep_refused_by_rows": {"300": ["arith_pairs: pinned"], "150": ["arith_pairs: pinned"]}}
+    results = [row("arith_pairs: pinned", "refused-whitelist", "r"), row("arith_pairs: new", "refused-guard", "REFUSED: some other guard")]
+    assert evaluate_sweep_policy(results, base, size)[0] == 1
+    results[1] = row("arith_pairs: new", "refused-guard", ZERO_TEXT)  # the same row refused by the zero-divisor guard: allowed
+    assert evaluate_sweep_policy(results, base, size) == (0, [])
+
+
+@pytest.mark.parametrize("size,seed", [(40, 3), (41, 5), (60, 1)])
+def test_the_sweep_has_no_difference_and_the_policy_passes_where_the_zero_guard_moves(size: int, seed: int) -> None:
+    # these sizes and seeds broke the old exact pin (data dependent zero MIN or MAX refusals in grouped rows)
+    data = run_sweep(rows=size, seed=seed, arithmetic=True)
+    assert data["sweep_counts"]["differs"] == 0 and data["sweep_counts"]["sql-error"] == 0 and data["sweep_counts"]["crash"] == 0
+    assert tool.evaluate_exit_policy(data, BASELINE) == (0, [])
 
 
 def test_the_policy_has_no_seed_input() -> None:
