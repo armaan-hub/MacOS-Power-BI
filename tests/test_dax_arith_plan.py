@@ -576,29 +576,146 @@ def test_a_date_value_is_never_an_arithmetic_leaf(world: World) -> None:
 # ---------------------------------------------------------------------------------------------------
 # C4b fix 1: minus zeros, the table version between two statements, underflow, overflow, grouped signs
 # ---------------------------------------------------------------------------------------------------
-MINUS_ZERO_CSV = "n,w,d\n1,-0,-0.00\n2,-0,-0.00\n3,-0,-0.00\n"  # three rows whose MIN and MAX are minus zeros
-MINUS_ZERO_TYPES = {"n": "whole_number", "w": "whole_number", "d": "decimal_number"}
+MINUS_ZERO_CSV = "n,w,d,g\n1,-0,-0.00,a\n2,-0,-0.00,a\n3,-0,-0.00,b\n"  # three rows whose MIN and MAX are minus zeros
+MINUS_ZERO_TYPES = {"n": "whole_number", "w": "whole_number", "d": "decimal_number", "g": "text"}
+# a table whose MIN and MAX are not zero: w 4, -2, 8 (MIN -2, MAX 8); d 4.00, -0.50, 1.00 (MIN -0.5, MAX 4); groups a (2 rows), b (1)
+MIN_MAX_CSV = "n,w,d,g\n1,4,4.00,a\n2,-2,-0.50,a\n3,8,1.00,b\n"
+# one group (a) whose MIN is a minus zero and one (b) whose MIN is not
+MIXED_ZERO_CSV = "n,w,d,g\n1,-0,-0.00,a\n2,4,1.00,a\n3,2,2.00,b\n4,8,4.00,b\n"
+ZERO_REASON = dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR
+
+
+def _table(tmp_path: Path, text: str) -> Any:
+    path = tmp_path / "z.csv"
+    path.write_text(text, encoding="utf-8")
+    store = DuckStore(str(tmp_path / "z.db"))
+    import_csv_to_store(store, "z_csv", path, {})
+    meta = {("z", c): m for c, m in column_decimal_meta(store, "z_csv", list(MINUS_ZERO_TYPES)).items()}
+    return store, dict(home_table="z", tables={"z": MINUS_ZERO_TYPES}, store_tables={"z": "z_csv"}, column_meta=meta)
 
 
 @pytest.fixture()
 def minus_zero(tmp_path: Path) -> Any:
-    path = tmp_path / "z.csv"
-    path.write_text(MINUS_ZERO_CSV, encoding="utf-8")
-    store = DuckStore(str(tmp_path / "z.db"))
-    import_csv_to_store(store, "z_csv", path, {})
-    meta = {("z", c): m for c, m in column_decimal_meta(store, "z_csv", list(MINUS_ZERO_TYPES)).items()}
-    yield store, dict(home_table="z", tables={"z": MINUS_ZERO_TYPES}, store_tables={"z": "z_csv"}, column_meta=meta)
+    store, kwargs = _table(tmp_path, MINUS_ZERO_CSV)
+    yield store, kwargs
     store.close()
 
 
-@pytest.mark.parametrize("expression", [
-    "COUNTROWS(z) / MIN(z[w])", "COUNTROWS(z) / MAX(z[w])", "COUNTROWS(z) / MIN(z[d])", "COUNTROWS(z) / MAX(z[d])",
-    "DIVIDE(COUNTROWS(z), MIN(z[d]))", "-1 / (MIN(z[w]) * 1)", "1 / (MIN(z[d]) + 0)",
-])
-def test_division_by_min_or_max_of_a_column_is_refused_by_name(minus_zero: Any, expression: str) -> None:
+@pytest.fixture()
+def min_max_table(tmp_path: Path) -> Any:
+    store, kwargs = _table(tmp_path, MIN_MAX_CSV)
+    yield store, kwargs
+    store.close()
+
+
+@pytest.fixture()
+def mixed_zero(tmp_path: Path) -> Any:
+    store, kwargs = _table(tmp_path, MIXED_ZERO_CSV)
+    yield store, kwargs
+    store.close()
+
+
+ZERO_MEASURES = {"MinM": "MIN(z[w])", "MM": "[MinM]"}
+# every form, with the value on the table whose MIN is -2 and MAX is 8 (COUNTROWS = 3), None = refused on a zero MIN
+MIN_MAX_FORMS: list[tuple[str, Any, Any]] = [
+    ("COUNTROWS(z) / MIN(z[w])", D("-1.5"), ZERO_REASON),
+    ("COUNTROWS(z) / MAX(z[w])", D("0.375"), ZERO_REASON),
+    ("COUNTROWS(z) / MIN(z[d])", D(-6), ZERO_REASON),
+    ("COUNTROWS(z) / MAX(z[d])", D("0.75"), ZERO_REASON),
+    ("COUNTROWS(z) / -MIN(z[w])", D("1.5"), ZERO_REASON),
+    ("COUNTROWS(z) / [MinM]", D("-1.5"), ZERO_REASON),
+    ("COUNTROWS(z) / [MM]", D("-1.5"), ZERO_REASON),
+    ("COUNTROWS(z) / CALCULATE([MinM], z[n] < 3)", D("-1.5"), ZERO_REASON),
+    ("COUNTROWS(z) / CALCULATE(MIN(z[w]), z[n] < 3)", D("-1.5"), ZERO_REASON),
+    ("COUNTROWS(z) / (MIN(z[w]) * 2)", D("-0.75"), ZERO_REASON),
+    ("COUNTROWS(z) / (MIN(z[w]) - MIN(z[w]))", ZERO_REASON, ZERO_REASON),  # zero on every table
+    ("COUNTROWS(z) / (1 / MIN(z[w]))", D(-6), ZERO_REASON),
+    ("COUNTROWS(z) / (1 + MIN(z[w]))", D(-3), D(3)),  # on a zero MIN the divisor is 1: no refusal, the value
+    ("MIN(z[w]) / (COUNTROWS(z) + 1)", D("-0.5"), D(0)),  # a MIN numerator is never refused (a minus zero shows as 0)
+]
+
+
+@pytest.mark.parametrize("expression,expected,_zero", MIN_MAX_FORMS, ids=[f[0] for f in MIN_MAX_FORMS])
+def test_a_min_or_max_divisor_that_is_not_zero_gives_its_value(min_max_table: Any, expression: str, expected: Any, _zero: Any) -> None:
+    store, kwargs = min_max_table
+    plan = plan_measure(expression, **kwargs, measures=ZERO_MEASURES)
+    assert isinstance(plan, ArithPlan), (expression, plan)  # planned: nothing is refused before the values are known
+    out = plan.execute(store)
+    if expected == ZERO_REASON:  # (MIN - MIN) is zero on any table
+        assert isinstance(out, Refusal) and out.reason == ZERO_REASON, (expression, out)
+    else:
+        same(out, expected)
+
+
+@pytest.mark.parametrize("expression,_value,expected", MIN_MAX_FORMS, ids=[f[0] for f in MIN_MAX_FORMS])
+def test_a_min_or_max_divisor_that_is_zero_is_refused_by_name_never_a_value(minus_zero: Any, expression: str, _value: Any, expected: Any) -> None:
     store, kwargs = minus_zero
-    out = plan_measure(expression, **kwargs)
-    assert isinstance(out, Refusal) and out.reason == dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR, (expression, out)
+    plan = plan_measure(expression, **kwargs, measures=ZERO_MEASURES)
+    assert isinstance(plan, ArithPlan), (expression, plan)
+    out = plan.execute(store)
+    if expected == ZERO_REASON:
+        assert isinstance(out, Refusal) and out.reason == ZERO_REASON, (expression, out)
+    else:
+        same(out, expected)
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("DIVIDE(COUNTROWS(z), MIN(z[w]), 7)", D(7)), ("DIVIDE(COUNTROWS(z), MIN(z[w]))", None),
+    ("DIVIDE(COUNTROWS(z), MAX(z[d]), 7)", D(7)), ("DIVIDE(COUNTROWS(z), MIN(z[w]) * 2, 7)", D(7)),
+    ("DIVIDE(COUNTROWS(z), MIN(z[w]) - MIN(z[w]), 7)", D(7)),
+])
+def test_divide_by_a_zero_min_or_max_gives_the_alternate_whatever_the_sign(minus_zero: Any, expression: str, expected: Any) -> None:
+    # DIVIDE answers a zero divisor of either sign with the alternate (or blank), so the sign of the zero never reaches it
+    store, kwargs = minus_zero
+    plan = plan_measure(expression, **kwargs)
+    assert isinstance(plan, ArithPlan), (expression, plan)
+    same(plan.execute(store), expected)
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("DIVIDE(COUNTROWS(z), MIN(z[w]))", D("-1.5")), ("DIVIDE(COUNTROWS(z), MAX(z[w]), 7)", D("0.375")),
+    ("DIVIDE(COUNTROWS(z), -MIN(z[w]))", D("1.5")),
+])
+def test_divide_by_a_non_zero_min_or_max_gives_the_quotient(min_max_table: Any, expression: str, expected: Any) -> None:
+    store, kwargs = min_max_table
+    same(plan_measure(expression, **kwargs).execute(store), expected)
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("COUNTROWS(z) / MIN(z[w])", {"a": D(-1), "b": D("0.125")}),
+    ("COUNTROWS(z) / MAX(z[d])", {"a": D("0.5"), "b": D(1)}),
+    ("COUNTROWS(z) / -MIN(z[w])", {"a": D(1), "b": D("-0.125")}),
+])
+def test_grouped_non_zero_min_or_max_divisors_give_their_values(min_max_table: Any, expression: str, expected: Any) -> None:
+    store, kwargs = min_max_table
+    plan = plan_group_by(expression, group_by=("z", "g"), **kwargs)
+    assert isinstance(plan, GroupedArithPlan), (expression, plan)
+    out = plan.execute(store)
+    assert isinstance(out, list) and {k: v for k, v in out} == expected, out
+    for _, value in out:
+        same(value, expected[_])
+
+
+def test_a_zero_min_in_any_group_refuses_the_whole_grouped_measure(mixed_zero: Any) -> None:
+    # group a holds a minus zero MIN, group b MIN 2: one named refusal for the measure, never a value for b alone
+    store, kwargs = mixed_zero
+    plan = plan_group_by("COUNTROWS(z) / MIN(z[w])", group_by=("z", "g"), **kwargs)
+    assert isinstance(plan, GroupedArithPlan), plan
+    out = plan.execute(store)
+    assert isinstance(out, Refusal) and out.reason == ZERO_REASON, out
+    ok = plan_group_by("COUNTROWS(z) / MAX(z[w])", group_by=("z", "g"), **kwargs)  # MAX is 4 and 8: no zero anywhere
+    assert isinstance(ok, GroupedArithPlan)
+    result = ok.execute(store)
+    assert isinstance(result, list) and dict(result) == {"a": D("0.5"), "b": D("0.25")}, result
+
+
+def test_grouped_zero_min_over_a_minus_zero_table_is_refused(minus_zero: Any) -> None:
+    store, kwargs = minus_zero
+    for expression in ("COUNTROWS(z) / MIN(z[w])", "COUNTROWS(z) / MAX(z[d])", "COUNTROWS(z) / -MIN(z[d])"):
+        plan = plan_group_by(expression, group_by=("z", "g"), **kwargs)
+        assert isinstance(plan, GroupedArithPlan), (expression, plan)
+        out = plan.execute(store)
+        assert isinstance(out, Refusal) and out.reason == ZERO_REASON, (expression, out)
 
 
 def test_division_by_sum_and_by_a_literal_zero_still_plan_and_give_the_engine_value(minus_zero: Any) -> None:
@@ -637,6 +754,85 @@ def test_a_change_between_two_grouped_queries_is_stale(fresh: World, monkeypatch
     monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", _append_row(fresh))
     out = plan.execute(fresh.store)
     assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_PLAN_STALE, out
+
+
+def test_a_change_between_two_leaf_queries_is_stale_through_the_real_store_reader(fresh: World, monkeypatch: pytest.MonkeyPatch) -> None:
+    # the route runs plans on a StoreReader, not on the store: its table_version must be the store's own, not a stub
+    plan = fresh.plan("SUM(s[q]) / COUNTROWS(s)")
+    assert isinstance(plan, ArithPlan)
+    reader = fresh.store.reader()
+    try:
+        assert reader.table_version("s_csv") == fresh.store.table_version("s_csv")
+        monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", lambda: fresh.store._bump_version("s_csv"))
+        out = plan.execute(reader)
+        assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_PLAN_STALE, out
+        monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", None)
+        same(plan.execute(reader), D(90) / D(12))  # no change during the run: the value
+        grouped = fresh.group_plan("SUM(s[q]) / COUNTROWS(s)", "r")
+        assert isinstance(grouped, GroupedArithPlan)
+        monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", lambda: fresh.store._bump_version("s_csv"))
+        out = grouped.execute(reader)
+        assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_PLAN_STALE, out
+    finally:
+        reader.close()
+
+
+def test_rows_that_land_while_the_second_token_bump_waits_are_stale_not_a_torn_value(fresh: World, monkeypatch: pytest.MonkeyPatch) -> None:
+    """An append is between its COMMIT and its second token bump (the bump lags): the plan must not return 90/12 mixed with 91/13.
+
+    The reader is opened first and the append is run without the store's "refuse while a reader is open" guard: that
+    is the window where an append that passed its guard just before the reader opened commits under the reader.
+    """
+    import inspect
+    import threading
+    original = DuckStore._bump_version
+    at_first, go_first, at_second, go_second = (threading.Event() for _ in range(4))
+    calls: list[int] = []
+
+    def gated(self: Any, name: str) -> None:
+        calls.append(1)
+        if len(calls) == 1:  # before the COMMIT: the bump is done, then the append waits
+            original(self, name)
+            at_first.set()
+            go_first.wait(10)
+        else:  # after the COMMIT: the rows are visible, the bump has not happened yet
+            at_second.set()
+            go_second.wait(10)
+            original(self, name)
+
+    monkeypatch.setattr(DuckStore, "_bump_version", gated)
+    raw_append = inspect.unwrap(DuckStore.append_rows)
+    errors: list[BaseException] = []
+
+    def appender() -> None:
+        try:
+            raw_append(fresh.store, "s_csv", [["13", "1", "1.123456789", "East", "x", "2024-01-09"]])
+        except BaseException as exc:  # noqa: BLE001
+            errors.append(exc)
+
+    plan = fresh.plan("SUM(s[q]) / COUNTROWS(s)")
+    assert isinstance(plan, ArithPlan)
+    reader = fresh.store.reader()
+    thread = threading.Thread(target=appender, daemon=True)
+    outcome: Any = None
+    try:
+        thread.start()
+        assert at_first.wait(10), "the append never reached its first bump"
+
+        def land_the_rows() -> None:
+            go_first.set()  # the COMMIT happens now ...
+            assert at_second.wait(10), "the append never reached its second bump"  # ... and the second bump is not done
+
+        monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", land_the_rows)
+        outcome = plan.execute(reader)
+    finally:
+        monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", None)
+        go_first.set()
+        go_second.set()
+        thread.join(10)
+        reader.close()
+    assert not errors, errors
+    assert isinstance(outcome, Refusal) and outcome.reason == dax_sql.REASON_PLAN_STALE, outcome  # never 90/13 or 91/12
 
 
 def test_the_seam_is_inert_by_default(fresh: World) -> None:

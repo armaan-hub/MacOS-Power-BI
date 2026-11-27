@@ -133,8 +133,8 @@ FRAGMENTS: dict[str, str] = {
     _W.REASON_ARITH_IN_CALCULATE: "it puts CALCULATE filters around a measure that does arithmetic",
     _W.REASON_ARITH_WHOLE_BEYOND_64: "a whole-number total is too large for the arithmetic of large tables",
     _W.REASON_ARITH_DIVIDE_NON_FINITE: "DIVIDE meets a number that is infinite or not a number",
-    _W.REASON_ARITH_SIGNED_ZERO_DIVISOR: "it divides by MIN or MAX of a column, which large tables may return as a minus zero",
-    _W.REASON_ARITH_DIVIDE_SUBNORMAL: "DIVIDE uses a denominator too small to be a normal number",
+    _W.REASON_ARITH_SIGNED_ZERO_DIVISOR: "it divides by a minimum or maximum that is zero, and the sign of that zero may differ from Power BI",
+    _W.REASON_ARITH_DIVIDE_SUBNORMAL: "it uses a number too small to be a normal number",
     _W.REASON_LET: "it uses VAR and RETURN",
     _W.REASON_TWO_COLUMNS: "it compares one column with another column",
     _W.REASON_BLANK_COMPARISON: "it compares a value with BLANK()",
@@ -284,6 +284,7 @@ _PLAN_CODE_REASONS = frozenset({
     _W.REASON_IN_FOLD_EQ_MIX,
     _W.REASON_ARITH_WHOLE_BEYOND_64,
     _W.REASON_ARITH_DIVIDE_NON_FINITE,
+    _W.REASON_ARITH_SIGNED_ZERO_DIVISOR,  # found at execute, from the values
 })
 _PLAN_CODE_PATTERNS = (
     re.compile(r"^no decimal metadata for column"),

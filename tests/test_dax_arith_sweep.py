@@ -27,7 +27,7 @@ D = Decimal
 FAMILIES = (
     "arith_pairs", "arith_literal", "arith_divide", "arith_divide_alt", "arith_unary", "arith_precedence",
     "arith_reference", "arith_context", "arith_group", "arith_group_own_column", "arith_group_context",
-    "arith_int_beyond_53", "arith_blank_int", "arith_refused",
+    "arith_int_beyond_53", "arith_blank_int", "arith_refused", "arith_min_max", "arith_subnormal",
 )
 
 
@@ -151,11 +151,12 @@ def test_each_family_has_no_difference_at_seed_one(family: str) -> None:
     assert data["arith_families"][family]["differs"] == 0
     refused = {r["id"] for r in results if r["status"].startswith("refused")}
     assert refused <= set(BASELINE["sweep_refused"])
-    if family in ("arith_pairs", "arith_literal", "arith_divide", "arith_unary", "arith_precedence", "arith_blank_int",
-                  "arith_int_beyond_53"):
-        # a row is the same as the engine, or a named refusal (a division by MIN or MAX of a column is refused)
-        odd = [(r["id"], r["status"]) for r in results if r["status"] != "same" and not (r["status"].startswith("refused") and r["reason"])]
-        assert not odd, odd[:3]
+    # exact: at seed 1 and 300 rows a row is "same" or it is one of the baselined refusals of its own family, with its reason
+    # (the baseline pin of the 300-row set covers it; no row may be refused that the pin does not list, none may go missing)
+    pinned = {i for i in BASELINE["sweep_refused_by_rows"]["300"] if i.startswith(family + ": ")}
+    assert refused == pinned, sorted(refused ^ pinned)[:3]
+    odd = [(r["id"], r["status"]) for r in results if r["status"] != "same" and not (r["id"] in pinned and r["reason"])]
+    assert not odd, odd[:3]
     if family == "arith_refused":
         assert all(r["status"] == "refused-whitelist" and r["reason"] for r in results)
 
@@ -262,3 +263,64 @@ def test_the_baseline_lists_every_arithmetic_refusal_of_the_catalog_rules() -> N
     names = [i for i in refused if i.startswith("arith_refused: ")]
     assert len(names) == len(tool.ARITH_REFUSED_SHAPES)  # one id per shape that must stay refused
     assert any(i.startswith("arith_group_own_column: ") for i in refused)
+
+
+# ---------------------------------------------------------------------------------------------------
+# C4b fix 2: the policy of small tables, and the divisors that read MIN or MAX
+# ---------------------------------------------------------------------------------------------------
+ZERO_TEXT = "REFUSED: " + dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR
+SMALL_BASE = {"sweep_refused": ["arith_pairs: pinned"], "sweep_refused_by_rows": {"300": ["arith_pairs: pinned"]}}
+
+
+def small(rows_: list[dict[str, Any]], size: int) -> tuple[int, list[str]]:
+    return evaluate_sweep_policy(rows_, SMALL_BASE, size)
+
+
+def row(row_id: str, status: str, reason: str | None = None) -> dict[str, Any]:
+    return {"id": row_id, "shape": "arith_pairs", "status": status, "reason": reason, "error": None}
+
+
+@pytest.mark.parametrize("size", [1, 5, 12, 20, 39])
+def test_below_40_rows_a_refusal_is_in_the_300_row_set_or_a_zero_divisor_guard(size: int) -> None:
+    assert small([row("arith_pairs: pinned", "refused-whitelist", "r"), row("arith_pairs: a", "same")], size) == (0, [])
+    assert small([row("arith_pairs: pinned", "same")], size) == (0, [])  # fewer refusals than the 300-row set is fine
+    guard = row("arith_pairs: z", "refused-guard", ZERO_TEXT)
+    assert small([guard, row("arith_pairs: a", "same")], size) == (0, [])
+    code, messages = small([row("arith_pairs: new", "refused-guard", "REFUSED: the group-by column holds a non-ASCII whitespace cell")], size)
+    assert code == 1 and "outside the 300-row baseline set" in messages[0]
+    code, _ = small([row("arith_pairs: new", "refused-planner", ZERO_TEXT)], size)  # the zero reason counts only as a guard refusal
+    assert code == 1
+    code, messages = small([row("arith_pairs: odd", "weird")], size)
+    assert code == 1 and "neither same nor refused" in messages[0]
+
+
+def test_from_40_rows_the_refused_set_is_exact() -> None:
+    exact = {**SMALL_BASE, "sweep_refused_by_rows": {"300": ["arith_pairs: pinned"], "40": ["arith_pairs: pinned", "arith_pairs: z"]}}
+    pinned_row, zero = row("arith_pairs: pinned", "refused-whitelist", "r"), row("arith_pairs: z", "refused-guard", ZERO_TEXT)
+    assert evaluate_sweep_policy([pinned_row, zero], exact, 40) == (0, [])
+    assert evaluate_sweep_policy([pinned_row], exact, 40)[0] == 1  # a pinned refusal went missing
+    assert evaluate_sweep_policy([pinned_row, zero, row("arith_pairs: w", "refused-guard", ZERO_TEXT)], exact, 40)[0] == 1
+    assert evaluate_sweep_policy([pinned_row, zero], exact, 300)[0] == 1  # another size: its own set (here the 300-row one)
+
+
+def test_the_policy_has_no_seed_input() -> None:
+    import inspect
+    assert "seed" not in inspect.signature(evaluate_sweep_policy).parameters
+
+
+@pytest.mark.parametrize("size,seed", [(5, 2), (5, 5), (12, 1), (12, 2), (12, 7), (20, 3)])
+def test_the_min_max_rows_pass_the_small_table_policy(size: int, seed: int) -> None:
+    wanted = lambda r: r["shape"] in ("arith_min_max", "arith_subnormal")  # noqa: E731
+    results = run_sweep(rows=size, seed=seed, arithmetic=True, row_filter=wanted)["sweep_results"]
+    assert len(results) == BASELINE["arith_family_counts"]["arith_min_max"] + BASELINE["arith_family_counts"]["arith_subnormal"]
+    policy = {k: v for k, v in BASELINE.items() if k != "arith_family_counts"}
+    assert evaluate_sweep_policy(results, policy, size) == (0, [])
+    assert all(r["status"] != "differs" for r in results)
+
+
+def test_a_zero_min_divisor_is_refused_not_counted_as_same_and_a_non_zero_one_is_same() -> None:
+    zero = run_sweep(rows=300, seed=1, arithmetic=True, row_filter=lambda r: r["id"] == "arith_min_max: COUNTROWS(t) / CALCULATE(MIN(t[sw]), t[sw] = 0)")
+    assert [r["status"] for r in zero["sweep_results"]] == ["refused-guard"]
+    assert dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR in zero["sweep_results"][0]["reason"]
+    plain = run_sweep(rows=300, seed=1, arithmetic=True, row_filter=lambda r: r["id"] == "arith_min_max: COUNTROWS(t) / MIN(t[sw])")
+    assert [r["status"] for r in plain["sweep_results"]] == ["same"]  # the over-blocking text rule refused this row

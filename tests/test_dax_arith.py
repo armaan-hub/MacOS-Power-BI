@@ -510,34 +510,158 @@ def test_evaluate_uses_the_leaf_values_by_index() -> None:
 
 
 # ---------------------------------------------------------------------------------------------------
-# C4b fix 1: the parser refuses a divisor that can be a minus zero, and a DIVIDE by a subnormal literal
+# C4b fix 2: a divisor that reads MIN or MAX of a column is checked at EXECUTE time (a zero value), not by its text
 # ---------------------------------------------------------------------------------------------------
-@pytest.mark.parametrize("text", [
+MIN_MAX_DIVISORS = [
     "COUNT(t[sd]) / MIN(t[sw])", "COUNT(t[sd]) / MAX(t[sd])", "COUNT(t[sd]) / (MIN(t[sw]) * 2)",
-    "DIVIDE(COUNT(t[sd]), MIN(t[sw]))", "DIVIDE(COUNT(t[sd]), 1 + MAX(t[sw]) - 1)",
+    "DIVIDE(COUNT(t[sd]), MIN(t[sw]))", "DIVIDE(COUNT(t[sd]), 1 + MAX(t[sw]) - 1)", "COUNT(t[sd]) / -MIN(t[sw])",
+]
+
+
+@pytest.mark.parametrize("text", MIN_MAX_DIVISORS)
+def test_a_min_or_max_divisor_is_not_refused_by_the_parser(text: str) -> None:
+    # the old text rule refused every such division and so over-blocked the non-zero ones
+    assert parse_arith(parse_expression(text), None).ok, text
+
+
+def flags_of(text: str, measures: dict[str, str] | None = None) -> list[tuple[str, bool]]:
+    parsed = parse_arith(parse_expression(text), measures)
+    assert parsed.ok, (text, parsed.reasons)
+    return [(leaf.text, leaf.min_max) for leaf in parsed.leaves]
+
+
+def test_a_leaf_is_marked_min_max_by_its_tree_not_its_text() -> None:
+    assert flags_of("COUNT(t[sd]) / MIN(t[sw])") == [("COUNT(t[sd])", False), ("MIN(t[sw])", True)]
+    assert flags_of("COUNT(t[sd]) / MAX(t[sd])")[1] == ("MAX(t[sd])", True)
+    assert flags_of("SUM(t[sw]) / CALCULATE(MIN(t[sw]), t[sd] > 1)")[1][1] is True
+    assert flags_of("SUM(t[sw]) / CALCULATE(SUM(t[sw]), t[sd] > 1)")[1][1] is False
+    # a measure behind CALCULATE, and a measure behind a measure
+    measures = {"MinM": "MIN(t[sw])", "MM": "[MinM]", "SumM": "SUM(t[sw])", "Hmm": "[SumM]"}
+    assert flags_of("COUNT(t[sd]) / CALCULATE([MinM], t[sd] > 1)", measures)[1][1] is True
+    assert flags_of("COUNT(t[sd]) / CALCULATE([MM], t[sd] > 1)", measures)[1][1] is True
+    assert flags_of("COUNT(t[sd]) / CALCULATE([SumM], t[sd] > 1)", measures)[1][1] is False
+    assert flags_of("COUNT(t[sd]) / CALCULATE([Hmm], t[sd] > 1)", measures)[1][1] is False
+    assert flags_of("COUNT(t[sd]) / [MM]", measures)[1][1] is True
+    # a column or a measure that only has MIN in its name is not a MIN
+    assert flags_of("SUM(t[sw]) / SUM(t[MIN(x)])")[1][1] is False
+
+
+def run(text: str, values: list[Num], measures: dict[str, str] | None = None) -> Num | str:
+    """The value of the expression for the leaf values (leaf order = first appearance), or the reason it refuses."""
+    parsed = parse_arith(parse_expression(text), measures)
+    assert parsed.ok, (text, parsed.reasons)
+    marked = [Num(v.kind, v.value, leaf.min_max) for v, leaf in zip(values, parsed.leaves)]
+    try:
+        return evaluate(parsed.tree, marked)
+    except ArithUnsupported as exc:
+        return exc.reason
+
+
+ZERO_REASON = dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR
+
+
+@pytest.mark.parametrize("text", [
+    "COUNT(t[sd]) / MIN(t[sw])", "COUNT(t[sd]) / MAX(t[sw])", "COUNT(t[sd]) / -MIN(t[sw])",
+    "COUNT(t[sd]) / (MIN(t[sw]) * 2)", "COUNT(t[sd]) / (MIN(t[sw]) - MIN(t[sw]))", "COUNT(t[sd]) / (1 / MIN(t[sw]))",
+    "COUNT(t[sd]) / DIVIDE(MIN(t[sw]), 3)",
 ])
-def test_a_divisor_with_min_or_max_of_a_column_is_refused_by_name(text: str) -> None:
+@pytest.mark.parametrize("zero", ["0", "-0"])
+def test_a_zero_divisor_that_reads_min_or_max_is_refused_by_name(text: str, zero: str) -> None:
+    # the first leaf is COUNT = 3; the MIN or MAX total is zero of either sign (the store gives 0, the engine may hold -0)
+    assert run(text, [i(3), i(zero)]) == ZERO_REASON, (text, zero)
+
+
+@pytest.mark.parametrize("text", [
+    "COUNT(t[sd]) / (SUM(t[sw]) + MIN(t[sw]))",  # MIN is the right operand only
+    "COUNT(t[sd]) / (MIN(t[sw]) + SUM(t[sw]))",  # MIN is the left operand only
+    "COUNT(t[sd]) / DIVIDE(SUM(t[sw]), MIN(t[sw]), 0)",  # MIN is the DIVIDE denominator only (the alternate 0 is the divisor)
+    "COUNT(t[sd]) / DIVIDE(MIN(t[sw]), SUM(t[sw]), 0)",  # MIN is the DIVIDE numerator only (0 / 0 gives the alternate 0)
+])
+def test_a_zero_divisor_is_refused_whichever_operand_reads_min(text: str) -> None:
     parsed = parse_arith(parse_expression(text), None)
-    assert parsed.reasons == (dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR,), (text, parsed.reasons)
+    order = [leaf.text for leaf in parsed.leaves]
+    values = [i(3) if t.startswith("COUNT") else i(0) for t in order]  # every total but the COUNT is zero
+    assert run(text, values) == ZERO_REASON, (text, order)
 
 
-def test_a_minus_zero_rule_keeps_the_other_divisors_and_the_numerator() -> None:
-    # the numerator may be MIN: its sign does not reach a division by a sum; a literal 0 divisor stays allowed
-    assert parse_arith(parse_expression("MIN(t[sw]) / SUM(t[sw])"), None).ok
-    assert parse_arith(parse_expression("DIVIDE(MIN(t[sw]), SUM(t[sw]), 7)"), None).ok
-    assert parse_arith(parse_expression("COUNT(t[sd]) / 0"), None).ok
-    assert parse_arith(parse_expression("DIVIDE(COUNT(t[sd]), 0)"), None).ok
+def test_a_zero_divisor_behind_a_measure_reference_or_calculate_of_a_measure_is_refused() -> None:
+    measures = {"MinM": "MIN(t[sw])", "MM": "[MinM]"}
+    assert run("COUNT(t[sd]) / [MinM]", [i(3), i(0)], measures) == ZERO_REASON
+    assert run("COUNT(t[sd]) / [MM]", [i(3), i(0)], measures) == ZERO_REASON
+    assert run("COUNT(t[sd]) / CALCULATE([MinM], t[sd] > 1)", [i(3), i(0)], measures) == ZERO_REASON
+    assert run("COUNT(t[sd]) / (CALCULATE([MM], t[sd] > 1) + 0)", [i(3), i(0)], measures) == ZERO_REASON
 
 
-@pytest.mark.parametrize("text", ["DIVIDE(COUNT(t[sd]), 1E-310, 1E3)", "DIVIDE(COUNT(t[sd]), 1E-308)", "DIVIDE(COUNT(t[sd]), -1E-310)"])
-def test_divide_by_a_subnormal_literal_is_refused_by_name(text: str) -> None:
+@pytest.mark.parametrize("text,values,expected", [
+    ("COUNT(t[sd]) / MIN(t[sw])", [i(3), i(-2)], Num("double", D("-1.5"))),
+    ("COUNT(t[sd]) / MAX(t[sw])", [i(3), i(8)], Num("double", D("0.375"))),
+    ("COUNT(t[sd]) / -MIN(t[sw])", [i(3), i(-2)], Num("double", D("1.5"))),
+    ("COUNT(t[sd]) / (MIN(t[sw]) * 2)", [i(3), i(-2)], Num("double", D("-0.75"))),
+    ("COUNT(t[sd]) / (1 + MIN(t[sw]))", [i(3), i(-2)], Num("double", D(-3))),
+    ("COUNT(t[sd]) / (1 / MIN(t[sw]))", [i(3), i(4)], Num("double", D(12))),
+    ("DIVIDE(COUNT(t[sd]), MIN(t[sw]))", [i(3), i(-2)], Num("double", D("-1.5"))),
+])
+def test_a_non_zero_divisor_that_reads_min_or_max_is_computed(text: str, values: list[Num], expected: Num) -> None:
+    assert run(text, values) == expected, text
+
+
+def test_a_divisor_that_is_not_zero_is_computed_even_when_the_min_is_zero() -> None:
+    # 1 + (-0) = 1 in the engine and in the combiner: the sign of the zero cannot reach the quotient
+    assert run("COUNT(t[sd]) / (1 + MIN(t[sw]))", [i(3), i("-0")]) == Num("double", D(3))
+    assert run("COUNT(t[sd]) / (1 + MIN(t[sw]))", [i(3), i(0)]) == Num("double", D(3))
+
+
+@pytest.mark.parametrize("zero", ["0", "-0"])
+def test_divide_keeps_its_alternate_for_a_zero_min_divisor_whatever_the_sign(zero: str) -> None:
+    # DIVIDE by a zero of either sign gives the alternate (or blank): the sign never reaches the result
+    assert run("DIVIDE(COUNT(t[sd]), MIN(t[sw]), 7)", [i(3), i(zero)]) == Num("double", D(7))
+    assert run("DIVIDE(COUNT(t[sd]), MIN(t[sw]))", [i(3), i(zero)]) == Num("double", None)
+
+
+def test_a_zero_divisor_that_does_not_read_min_or_max_keeps_its_value() -> None:
+    assert run("COUNT(t[sd]) / SUM(t[sw])", [i(3), i(0)]) == Num("double", D("Infinity"))
+    assert run("COUNT(t[sd]) / 0", [i(3)]) == Num("double", D("Infinity"))
+    assert run("MIN(t[sw]) / COUNT(t[sd])", [i(0), i(3)]) == Num("double", D(0))  # a MIN numerator is not a divisor
+    assert run("COUNT(t[sd]) / SUM(t[sw])", [i(3), i(0)]) == Num("double", D("Infinity"))
+
+
+def test_a_blank_min_divisor_is_not_a_zero() -> None:
+    assert run("COUNT(t[sd]) / MIN(t[sw])", [i(3), INT_BLANK]) == Num("double", D("Infinity"))
+
+
+# ---------------------------------------------------------------------------------------------------
+# C4b fix 2: a number smaller than the smallest normal double is refused ANYWHERE in the arithmetic
+# ---------------------------------------------------------------------------------------------------
+SUBNORMAL_REASON = dax_arith.REASON_ARITH_DIVIDE_SUBNORMAL
+
+
+@pytest.mark.parametrize("text", [
+    "DIVIDE(COUNT(t[sd]), 1E-310, 1E3)", "DIVIDE(COUNT(t[sd]), 1E-308)", "DIVIDE(COUNT(t[sd]), -1E-310)",
+    "DIVIDE(COUNT(t[sd]), 1E-310 * 1, 5)", "DIVIDE(COUNT(t[sd]), 1E-310 + 0, 5)", "DIVIDE(1E-310, COUNT(t[sd]))",
+    "COUNT(t[sd]) / 1E-310", "COUNT(t[sd]) / -1E-310", "COUNT(t[sd]) / 1e-310", "COUNT(t[sd]) * 1E-310",
+    "1E-310 + COUNT(t[sd])", "COUNT(t[sd]) - (1E-310)", "-1E-310 * COUNT(t[sd])", "DIVIDE(COUNT(t[sd]), 0, 1E-310)",
+    "DIVIDE(COUNT(t[sd]), 5, -1E-310)", "COUNT(t[sd]) / (COUNT(t[sd]) * 1E-310)",
+    "COUNT(t[sd]) + 0." + "0" * 309 + "1",
+    "COUNT(t[sd]) / 2.2250738585072013E-308",  # one digit below the smallest normal double
+])
+def test_a_subnormal_literal_is_refused_by_name_wherever_it_stands(text: str) -> None:
     parsed = parse_arith(parse_expression(text), None)
-    assert parsed.reasons == (dax_arith.REASON_ARITH_DIVIDE_SUBNORMAL,), (text, parsed.reasons)
+    assert parsed.reasons == (SUBNORMAL_REASON,), (text, parsed.reasons)
 
 
-def test_divide_by_a_normal_small_literal_is_not_refused() -> None:
-    # 1E-300 is above the smallest normal double (about 2.2E-308): a normal denominator, planned as the engine does
-    assert parse_arith(parse_expression("DIVIDE(COUNT(t[sd]), 1E-300)"), None).ok
+def test_a_subnormal_literal_inside_a_measure_is_refused_by_name() -> None:
+    parsed = parse_arith(parse_expression("COUNT(t[sd]) / [Tiny]"), {"Tiny": "1E-310 + COUNT(t[sd]) * 0"})
+    assert parsed.reasons == (SUBNORMAL_REASON,), parsed.reasons
+
+
+@pytest.mark.parametrize("text", [
+    "DIVIDE(COUNT(t[sd]), 1E-300)", "COUNT(t[sd]) / 1E-300", "COUNT(t[sd]) * 1E-300 * 1E-10",
+    "COUNT(t[sd]) / 2.2250738585072014E-308",  # the smallest normal double itself
+    "DIVIDE(COUNT(t[sd]), 1E-324, 5)",  # a number that is already zero as a double (the engine reads it as 0)
+    "COUNT(t[sd]) + 0.0", "COUNT(t[sd]) / 0",
+])
+def test_the_smallest_normal_double_and_normal_numbers_are_not_refused(text: str) -> None:
+    assert parse_arith(parse_expression(text), None).ok, text
 
 
 def test_the_depth_sentence_names_both_limits() -> None:

@@ -38,7 +38,7 @@ inline. Nothing in this module reads a store.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Mapping, Sequence
 
@@ -74,10 +74,10 @@ REASON_ARITH_IN_CALCULATE = "CALCULATE over an arithmetic measure is not on the 
 REASON_ARITH_WHOLE_BEYOND_64 = "a whole-number total is beyond the 64-bit range, which arithmetic on large tables does not handle"
 REASON_ARITH_DIVIDE_NON_FINITE = "DIVIDE of a number that is infinite or not a number is not on the store whitelist"
 REASON_ARITH_SIGNED_ZERO_DIVISOR = (
-    "a division by MIN or MAX of a column is not on the store whitelist, because a minus zero in the column changes the sign"
+    "dividing by a minimum or maximum that is zero: the sign of that zero may differ from Power BI"
 )
 REASON_ARITH_DIVIDE_SUBNORMAL = (
-    "DIVIDE by a number smaller than the smallest normal double is not on the store whitelist"
+    "a number smaller than the smallest normal double in the arithmetic is not on the store whitelist"
 )
 MEASURE_CHAIN_TOO_DEEP = "measure reference chain too deep"  # the same text as dax_whitelist.REASON_MAX_DEPTH_EXCEEDED
 REASON_ARITH_OPERATOR = "arithmetic is not on the store whitelist"  # the same text as dax_whitelist.REASON_ARITHMETIC
@@ -97,6 +97,8 @@ class Num:
 
     kind: str
     value: Decimal | None
+    # set by the plan on the Num of a total that is a MIN or MAX of a column (not part of the value: not compared)
+    min_max: bool = field(default=False, compare=False)
 
 
 # ----------------------------------------------------------------------------------------------------------
@@ -251,8 +253,32 @@ def divide(numerator: Num, denominator: Num, alternate: Num | None = None) -> Nu
 ArithTree = tuple[Any, ...]
 
 
+def reads_min_max(tree: ArithTree, leaf_values: Sequence[Num]) -> bool:
+    """Does this subtree hold a leaf that is a MIN or MAX of a column (the `min_max` mark of its Num)?
+
+    The tree is read, not its text: a measure reference ("ref"), a unary minus, a nested operator and a DIVIDE are
+    followed; a leaf that is CALCULATE of a measure is marked by the parser (it follows the measure).
+    """
+    kind = tree[0]
+    if kind == "leaf":
+        return tree[1] < len(leaf_values) and leaf_values[tree[1]].min_max
+    if kind in {"neg", "ref"}:
+        return reads_min_max(tree[1], leaf_values)
+    if kind == "bin":
+        return reads_min_max(tree[2], leaf_values) or reads_min_max(tree[3], leaf_values)
+    if kind == "divide":
+        return reads_min_max(tree[1], leaf_values) or reads_min_max(tree[2], leaf_values)
+    return False
+
+
 def evaluate(tree: ArithTree, leaf_values: Sequence[Num]) -> Num:
-    """The value of a parsed tree for the given leaf values (index in `leaf_values` = leaf index)."""
+    """The value of a parsed tree for the given leaf values (index in `leaf_values` = leaf index).
+
+    A total that is a MIN or MAX of a column has `min_max` set on its Num. The store returns an unsigned zero for it
+    where the engine can hold a minus zero, and `x / -0` is -Infinity: a `/` whose divisor reads such a total and is
+    zero (of either sign) raises ArithUnsupported(REASON_ARITH_SIGNED_ZERO_DIVISOR) instead of giving a value. A
+    non-zero divisor, and DIVIDE (a zero divisor of either sign gives the alternate), are exact.
+    """
     kind = tree[0]
     if kind == "leaf":
         return leaf_values[tree[1]]
@@ -263,7 +289,11 @@ def evaluate(tree: ArithTree, leaf_values: Sequence[Num]) -> Num:
     if kind == "neg":
         return negate(evaluate(tree[1], leaf_values))
     if kind == "bin":
-        return combine(tree[1], evaluate(tree[2], leaf_values), evaluate(tree[3], leaf_values))
+        left = evaluate(tree[2], leaf_values)
+        right = evaluate(tree[3], leaf_values)
+        if tree[1] == "/" and right.value is not None and right.value == 0 and reads_min_max(tree[3], leaf_values):
+            raise ArithUnsupported(REASON_ARITH_SIGNED_ZERO_DIVISOR)
+        return combine(tree[1], left, right)
     if kind == "divide":
         return divide(evaluate(tree[1], leaf_values), evaluate(tree[2], leaf_values), tree[3])
     raise ValueError(f"unknown tree node {kind!r}")
@@ -295,6 +325,7 @@ class ArithLeaf:
     text: str
     node: tuple[Any, ...]
     unknown: bool = False  # CALCULATE([measure], ...): the engine gives it no static type
+    min_max: bool = False  # the total is a MIN or MAX of a column (also through CALCULATE and measure references)
 
 
 @dataclass(frozen=True)
@@ -376,6 +407,8 @@ def _literal(node: tuple[Any, ...]) -> Num | str:
     value = node[1]
     if not isinstance(value, Decimal) or not value.is_finite():
         return REASON_ARITH_LITERAL
+    if 0 < abs(value) < _DBL_MIN:
+        return REASON_ARITH_DIVIDE_SUBNORMAL  # a subnormal literal anywhere (the engine's subnormal rules are not modelled)
     if "." in text or "e" in text.lower():
         return Num("double", value) if abs(value) <= _DOUBLE_MAX else REASON_ARITH_LITERAL
     try:
@@ -419,8 +452,6 @@ class _Walker:
             self.count()
             left = self.walk(node[2], depth + 1, path, chain)
             right = self.walk(node[3], depth + 1, path, chain)
-            if node[1] == "/" and _may_be_signed_zero(right, self.leaves):
-                raise _Stop(REASON_ARITH_SIGNED_ZERO_DIVISOR)
             return ("bin", node[1], left, right)
         if kind == "unary":
             if node[1] != "-":
@@ -443,11 +474,7 @@ class _Walker:
                 alternate = self.alternate(arguments[2])
                 self.count()
             top = self.walk(arguments[0], depth + 1, path, chain)
-            if _is_subnormal_literal(arguments[1]):
-                raise _Stop(REASON_ARITH_DIVIDE_SUBNORMAL)
             bottom = self.walk(arguments[1], depth + 1, path, chain)
-            if _may_be_signed_zero(bottom, self.leaves):
-                raise _Stop(REASON_ARITH_SIGNED_ZERO_DIVISOR)
             return ("divide", top, bottom, alternate)
         if kind == "reference" and not node[1]:
             name = str(node[2])
@@ -503,8 +530,26 @@ class _Walker:
                 raise _Stop(REASON_ARITH_CAP_LEAVES)
             position = len(self.leaves)
             self.index[text] = position
-            self.leaves.append(ArithLeaf(text, node, _calculates_a_measure(node)))
+            self.leaves.append(ArithLeaf(text, node, _calculates_a_measure(node), self._is_min_max(node, frozenset(), 0)))
         return ("leaf", position)
+
+    def _is_min_max(self, node: Any, seen: frozenset[str], depth: int) -> bool:
+        """Is the value of this leaf a MIN or MAX of a column? CALCULATE gives its first argument's value; a measure is followed."""
+        if depth > MAX_REFERENCE_DEPTH or not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and node[1] in {"MIN", "MAX", "MINX", "MAXX"}:
+            return True
+        if node[0] == "call" and node[1] == "CALCULATE" and node[2]:
+            return self._is_min_max(node[2][0], seen, depth + 1)
+        if node[0] == "reference" and not node[1]:
+            target = str(node[2]).casefold()
+            if target in seen or target not in self.measures:
+                return False
+            try:
+                return self._is_min_max(parse_expression(self.measures[target]), seen | {target}, depth + 1)
+            except MeasureError:
+                return False
+        return False
 
     def _is_arithmetic(self, node: Any, seen: frozenset[str], depth: int) -> bool:
         """Does this expression, followed through bare measure references, start with arithmetic?"""
@@ -527,35 +572,6 @@ class _Walker:
             return self._is_arithmetic(parse_expression(self.measures[target]), seen | {target}, depth + 1)
         except MeasureError:
             return False
-
-
-_MIN_MAX_CALL = re.compile(r"\b(?:MIN|MAX)\s*\(", re.IGNORECASE)
-
-
-def _may_be_signed_zero(tree: ArithTree, leaves: Sequence[ArithLeaf]) -> bool:
-    """Can this subtree hold a minus zero? A MIN or MAX of a column can (the store returns an unsigned 0)."""
-    kind = tree[0]
-    if kind == "leaf":
-        return _MIN_MAX_CALL.search(leaves[tree[1]].text) is not None
-    if kind in {"neg", "ref"}:
-        return _may_be_signed_zero(tree[1], leaves)
-    if kind == "bin":
-        return _may_be_signed_zero(tree[2], leaves) or _may_be_signed_zero(tree[3], leaves)
-    if kind == "divide":
-        return _may_be_signed_zero(tree[1], leaves) or _may_be_signed_zero(tree[2], leaves)
-    return False
-
-
-def _is_subnormal_literal(node: Any) -> bool:
-    """A DIVIDE denominator that is a number literal (optionally negated) with 0 < |value| < the smallest normal double."""
-    if isinstance(node, tuple) and node and node[0] == "unary" and node[1] == "-":
-        node = node[2]
-    if not (isinstance(node, tuple) and node and node[0] == "number"):
-        return False
-    literal = _literal(node)
-    if isinstance(literal, str) or literal.value is None:
-        return False
-    return 0 < abs(literal.value) < _DBL_MIN
 
 
 def _calculates_a_measure(node: tuple[Any, ...]) -> bool:

@@ -222,7 +222,6 @@ REFUSED_BEFORE_ANY_QUERY: list[tuple[str, str]] = [
     ("1 + 2", dax_whitelist.REASON_NO_TABLES),
     ("DIVIDE(SUM(t[amt]), 0, BLANK())", dax_whitelist.REASON_ARITH_DIVIDE_ALT),
     ("SUM(t[amt]) + 9223372036854775808", dax_whitelist.REASON_ARITH_LITERAL),
-    ("COUNTROWS(t) / MIN(t[qty])", dax_whitelist.REASON_ARITH_SIGNED_ZERO_DIVISOR),
     ("DIVIDE(COUNTROWS(t), 1E-310)", dax_whitelist.REASON_ARITH_DIVIDE_SUBNORMAL),
 ]
 
@@ -262,3 +261,30 @@ def test_the_depth_refusal_sentence_reaches_the_user(env: Any) -> None:
     out = env.route("+".join(["1"] * 9) + " + SUM(t[amt])", measures=MEASURES)
     assert isinstance(out, RouteRefusal) and out.reason == dax_whitelist.REASON_ARITH_CAP_DEPTH, out
     assert "more than 8 terms in a row" in out.message, out.message
+
+
+# ---------------------------------------------------------------------------------------------------
+# C4b fix 2: a zero divisor that reads MIN or MAX is refused when the values are known (not by the text)
+# ---------------------------------------------------------------------------------------------------
+@pytest.mark.parametrize("expression", [
+    "COUNTROWS(t) / MIN(t[qty])", "COUNTROWS(t) / MAX(t[amt])", "SUM(t[amt]) / -MIN(t[qty])", "COUNTROWS(t) / (MIN(t[qty]) * 2)",
+    "DIVIDE(COUNTROWS(t), MIN(t[qty]))", "COUNTROWS(t) / [Min Qty]",
+])
+def test_a_min_or_max_divisor_that_is_not_zero_equals_the_engine(env: Any, expression: str) -> None:
+    measures = {**MEASURES, "Min Qty": "MIN(t[qty])"}
+    out = env.route(expression, measures=measures, budget_s=30.0)
+    assert isinstance(out, StoreAnswer), (expression, out)
+    assert values_identical(out.value, env.engine(expression, measures)), (expression, out.value)
+
+
+def test_a_zero_min_divisor_is_a_plan_refusal_with_its_sentence(env: Any) -> None:
+    out = env.route("COUNTROWS(t) / (MIN(t[qty]) - MIN(t[qty]))", measures=MEASURES, budget_s=30.0)
+    assert isinstance(out, RouteRefusal), out
+    assert out.reason == dax_whitelist.REASON_ARITH_SIGNED_ZERO_DIVISOR
+    assert out.code == dax_route.CODE_PLAN, out.code  # found from the values, so a plan reason, not a whitelist one
+    assert "minimum or maximum that is zero" in out.message and out.message.endswith("."), out.message
+    grouped = route_grouped(
+        env.project, "COUNTROWS(t) / (MIN(t[qty]) - MIN(t[qty]))", ("t", "product"), project_store=env.ps,
+        measures=MEASURES, budget_s=30.0, max_groups=None,
+    )
+    assert isinstance(grouped, RouteRefusal) and grouped.reason == dax_whitelist.REASON_ARITH_SIGNED_ZERO_DIVISOR, grouped

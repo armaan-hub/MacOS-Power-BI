@@ -1269,6 +1269,7 @@ def plan_measure(
         return ArithPlan(
             tree=arith.tree, leaf_plans=tuple(built), table=built[0].table,
             untyped=tuple(leaf.unknown for leaf in arith.leaves),
+            min_max=tuple(leaf.min_max for leaf in arith.leaves),
             read_tables=_physical_read_tables(tuple(plan.table for plan in built), store_tables),
         )
     parts = _plan_parts(
@@ -1357,9 +1358,16 @@ def _physical_read_tables(logical: tuple[str, ...], store_tables: Mapping[str, s
     return tuple(sorted(physical))
 
 
-def _arith_table_versions(store: Any, read_tables: tuple[str, ...]) -> tuple[tuple[str, int], ...]:
-    """The change token (store.table_version, the same stamp the request manager uses) of every table a plan reads."""
-    return tuple((name, store.table_version(name)) for name in read_tables)
+def _arith_table_versions(store: Any, read_tables: tuple[str, ...]) -> tuple[tuple[str, int, bool], ...]:
+    """The change token (store.table_version, the same stamp the request manager uses) of every table a plan reads, and
+    whether an append to it is committing right now (store.table_writing; a store without it counts as not writing)."""
+    writing = getattr(store, "table_writing", None)
+    return tuple((name, store.table_version(name), bool(writing(name)) if writing is not None else False) for name in read_tables)
+
+
+def _arith_tables_changed(before: tuple[tuple[str, int, bool], ...], after: tuple[tuple[str, int, bool], ...]) -> bool:
+    """True when a table moved between the two reads, or was being written at the first one (rows can land unnoticed)."""
+    return after != before or any(writing for _, _, writing in before)
 
 
 @dataclass(frozen=True)
@@ -1377,6 +1385,7 @@ class ArithPlan:
     table: str
     shape: str = "ARITH"
     untyped: tuple[bool, ...] = ()  # per total: CALCULATE([measure], ...), which has no static type in the engine
+    min_max: tuple[bool, ...] = ()  # per total: a MIN or MAX of a column (a zero divisor of that kind is refused at execute)
     read_tables: tuple[str, ...] = ()  # physical store tables the totals read: their change tokens are checked per execute
 
     grouped = False
@@ -1391,8 +1400,9 @@ class ArithPlan:
             if index == 0 and ARITH_BETWEEN_LEAF_QUERIES is not None:
                 ARITH_BETWEEN_LEAF_QUERIES()
             untyped = index < len(self.untyped) and self.untyped[index]
-            values.append(dax_arith.Num("unknown" if untyped else plan.num_kind, result))  # type: ignore[arg-type]
-        if _arith_table_versions(store, self.read_tables) != before:
+            flagged = index < len(self.min_max) and self.min_max[index]
+            values.append(dax_arith.Num("unknown" if untyped else plan.num_kind, result, flagged))  # type: ignore[arg-type]
+        if _arith_tables_changed(before, _arith_table_versions(store, self.read_tables)):
             return Refusal(REASON_PLAN_STALE)  # a table changed between the statements: the totals are not one time
         if not all(dax_arith.leaf_value_in_range(value) for value in values):
             return Refusal(dax_arith.REASON_ARITH_WHOLE_BEYOND_64)
@@ -1650,6 +1660,7 @@ class GroupedArithPlan:
     group_type: str
     shape: str = "ARITH"
     untyped: tuple[bool, ...] = ()
+    min_max: tuple[bool, ...] = ()  # per total: a MIN or MAX of a column; a zero divisor of that kind refuses the whole measure
     read_tables: tuple[str, ...] = ()  # physical store tables of the universe and of every total
 
     grouped = True
@@ -1676,13 +1687,14 @@ class GroupedArithPlan:
                     return Refusal(REASON_PLAN_STALE)
                 by_key[key] = value
             per_total.append(by_key)
-        if _arith_table_versions(store, self.read_tables) != before:
+        if _arith_tables_changed(before, _arith_table_versions(store, self.read_tables)):
             return Refusal(REASON_PLAN_STALE)  # a table changed between the statements: the totals are not one time
         out: list[tuple[str, Decimal | None]] = []
         for key in keys:
             values = [
                 dax_arith.Num(
-                    "unknown" if index < len(self.untyped) and self.untyped[index] else plan.num_kind, by_key.get(key)
+                    "unknown" if index < len(self.untyped) and self.untyped[index] else plan.num_kind, by_key.get(key),
+                    index < len(self.min_max) and self.min_max[index],
                 )
                 for index, (plan, by_key) in enumerate(zip(self.leaf_plans, per_total))
             ]
@@ -1734,5 +1746,6 @@ def _plan_group_by_arith(
         tree=arith.tree, universe=universe, leaf_plans=tuple(built), table=table,
         group_column=built[0].group_column, group_type=built[0].group_type,
         untyped=tuple(leaf.unknown for leaf in arith.leaves),
+        min_max=tuple(leaf.min_max for leaf in arith.leaves),
         read_tables=_physical_read_tables((table,), store_tables),
     )

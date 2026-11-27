@@ -25,7 +25,7 @@ from analytics_studio import dax_dates
 from analytics_studio.controller import StudioController, _format_report_number
 from analytics_studio.file_import import parse_file
 from analytics_studio.measures import evaluate_measures, normalize_measure
-from analytics_studio.store import DuckStore, import_csv_to_store, import_parquet_to_store
+from analytics_studio.store import DuckStore, dax_arith, import_csv_to_store, import_parquet_to_store
 from analytics_studio.store.base import StoreError
 from analytics_studio.store.dax_sql import (
     PARQUET_COUNTA_REFUSAL_REASON,
@@ -1739,6 +1739,26 @@ ARITH_INT_BEYOND_53 = [
     "SUM(t[sd]) * 9007199254740993", "SUM(t[sw]) + 9007199254740993", "SUM(t[sw]) * 9007199254740993",
     "COUNTROWS(t) + 9007199254740993 - 9007199254740993",
 ]
+# a divisor that reads MIN or MAX of a column (checked at execute time: a zero divisor is refused, a non-zero one is computed)
+ARITH_MIN_MAX_MEASURES = {"MinM": "MIN(t[sw])", "MaxD": "MAX(t[sd])", "MM": "[MinM]"}
+ARITH_MIN_MAX_DIVISORS = [
+    "MIN(t[sw])", "MAX(t[sw])", "MIN(t[sd])", "MAX(t[sd])", "-MIN(t[sw])", "-MAX(t[sd])", "(MIN(t[sw]) * 2)", "(1 + MIN(t[sw]))",
+    "(MIN(t[sw]) - MIN(t[sw]))", "(1 / MIN(t[sw]))", "(MAX(t[sd]) * 0)", 'CALCULATE(MIN(t[sw]), t[scat] = "A")',
+    "CALCULATE(MAX(t[sd]), t[sw] <= 0)", "CALCULATE(MIN(t[sw]), t[sw] = 0)", "CALCULATE(MAX(t[sd]), t[sw] = 0)",
+]
+ARITH_MIN_MAX_MEASURE_DIVISORS = [
+    "[MinM]", "[MM]", "[MaxD]", 'CALCULATE([MinM], t[scat] = "A")', "CALCULATE([MaxD], t[sw] <= 0)", "CALCULATE([MM], t[sw] <= 0)",
+    "CALCULATE([MinM], t[sw] = 0)",
+]
+ARITH_MIN_MAX_GROUPS = ["MIN(t[sw])", "MAX(t[sd])", "-MIN(t[sw])", "(1 + MIN(t[sw]))", "(MIN(t[sw]) - MIN(t[sw]))"]
+# numbers smaller than the smallest normal double (2.2250738585072014E-308) anywhere in the arithmetic are refused by name
+ARITH_SUBNORMAL_SHAPES = [
+    "DIVIDE(COUNT(t[sd]), 1E-310, 1E3)", "DIVIDE(COUNT(t[sd]), 1E-310 * 1, 5)", "DIVIDE(COUNT(t[sd]), 1E-310 + 0, 5)",
+    "DIVIDE(1E-310, COUNTROWS(t))", "DIVIDE(COUNTROWS(t), 0, 1E-310)", "COUNTROWS(t) / 1E-310", "COUNTROWS(t) / -1E-310",
+    "COUNTROWS(t) * 1E-310", "COUNTROWS(t) + 1E-310", "DIVIDE(COUNT(t[sd]), 2.2250738585072013E-308, 5)",
+    "DIVIDE(COUNT(t[sd]), 2.2250738585072014E-308, 5)", "DIVIDE(COUNT(t[sd]), 1E-324, 5)", "DIVIDE(COUNT(t[sd]), 1E-300 * 1E-10, 5)",
+    "COUNTROWS(t) / 2.2250738585072014E-308", "COUNTROWS(t) * 2.2250738585072014E-308",
+]
 ARITH_REFUSED_SHAPES = [
     "SUM(t[sw]) ^ 2", "SUM(t[sw]) & 1", "+SUM(t[sw])", "ROUND(SUM(t[sd]), 2) + 1", "SUM(t[sw]) + SUMX(t, t[sw])",
     "MAX(t[sdt]) - MIN(t[sdt])", "MIN(t[sdt]) + 1", "SUM(t[sw]) + 9223372036854775808", "SUM(t[sw]) + 1e400",
@@ -1750,7 +1770,7 @@ ARITH_REFUSED_SHAPES = [
 def _arith_rows() -> list[dict[str, Any]]:
     """The arithmetic families (ids built from the content). A: leaf pairs x operators; B: leaf x literal; C: DIVIDE;
     D: unary, brackets and precedence; E: measure references; F: filter context; G: grouped; H: integers beyond 53
-    bits; I: a blank Int64 total; J: refused shapes."""
+    bits; I: a blank Int64 total; J: refused shapes; K: a divisor that reads MIN or MAX; L: a subnormal number."""
     rows: list[dict[str, Any]] = []
     for left in ARITH_LEAVES:
         for right in ARITH_LEAVES:
@@ -1807,6 +1827,22 @@ def _arith_rows() -> list[dict[str, Any]]:
         for op in ARITH_OPS:
             rows.append(_sweep_row("arith_blank_int", f"{ARITH_BLANK_INT_LEAF} {op} {leaf}"))
             rows.append(_sweep_row("arith_blank_int", f"{leaf} {op} {ARITH_BLANK_INT_LEAF}"))
+    for divisor in ARITH_MIN_MAX_DIVISORS:
+        rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}"))
+        rows.append(_sweep_row("arith_min_max", f"SUM(t[sd]) / {divisor}"))
+        rows.append(_sweep_row("arith_min_max", f"DIVIDE(COUNTROWS(t), {divisor}, 7)"))
+        rows.append(_sweep_row("arith_min_max", f"DIVIDE(COUNTROWS(t), {divisor})"))
+        rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}", ('t[scat] IN {"A", "B"}',)))
+    for divisor in ARITH_MIN_MAX_MEASURE_DIVISORS:
+        rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}", measures=ARITH_MIN_MAX_MEASURES))
+        rows.append(_sweep_row("arith_min_max", f"DIVIDE(COUNTROWS(t), {divisor}, 7)", measures=ARITH_MIN_MAX_MEASURES))
+    rows.append(_sweep_row("arith_min_max", "MIN(t[sw]) / COUNTROWS(t)"))
+    rows.append(_sweep_row("arith_min_max", "MAX(t[sd]) / (COUNTROWS(t) + 1)"))
+    for divisor in ARITH_MIN_MAX_GROUPS:
+        for g_col in ("scat", "sb"):  # (a group of few rows may hold a zero MIN: the sweep's own columns keep the pins seed free)
+            rows.append(_sweep_row("arith_min_max", f"COUNTROWS(t) / {divisor}", (), g_col))
+    for expression in ARITH_SUBNORMAL_SHAPES:
+        rows.append(_sweep_row("arith_subnormal", expression))
     for expression in ARITH_REFUSED_SHAPES:
         rows.append(_sweep_row("arith_refused", expression))
     return rows
@@ -2760,12 +2796,15 @@ def arith_family_counts(catalog: list[dict[str, Any]] | None = None) -> dict[str
     return dict(sorted(counts.items()))
 
 
+SWEEP_EXACT_MIN_ROWS = 40  # from this row count on the refused set of the sweep is pinned exactly
+
+
 def evaluate_sweep_policy(
     sweep_results: list[dict[str, Any]], baseline: dict[str, Any], rows: int = 300
 ) -> tuple[int, list[str]]:
     """Exit policy of the literal sweep: any difference, SQL error or crash exits 1, and the set of refused rows
-    (whitelist, planner or guard) must equal the baseline list `sweep_refused` (row ids are built from content,
-    never from a seed)."""
+    (whitelist, planner or guard) must equal the baseline set of its row count (row ids are built from content, never
+    from a seed); below SWEEP_EXACT_MIN_ROWS rows it must be a subset of the 300-row set and the rest must be "same"."""
     failures = [r for r in sweep_results if r["status"] in SWEEP_FAILURE_STATUSES]
     if failures:
         by_status = {st: sum(1 for r in failures if r["status"] == st) for st in SWEEP_FAILURE_STATUSES}
@@ -2779,11 +2818,28 @@ def evaluate_sweep_policy(
                 seen[r["shape"]] = seen.get(r["shape"], 0) + 1
         if dict(sorted(seen.items())) != dict(sorted(expected_families.items())):
             return 1, [f"FAILURE: arithmetic family row counts changed vs baseline: {seen} != {expected_families}"]
-    # The guard refusals depend on the generated rows, so each row count has its own measured set (`sweep_refused_by_rows`);
-    # a row count without one is checked against the 300-row set `sweep_refused`.
+    # The guard refusals depend on the generated rows. From SWEEP_EXACT_MIN_ROWS rows on, each row count has its own measured
+    # set (`sweep_refused_by_rows`; a count without one is checked against the 300-row set `sweep_refused`). Below that (a
+    # small table has few distinct cells, so the set varies from seed to seed) the policy holds for any seed: a refused row
+    # is in the 300-row set or is refused because a MIN or MAX divisor is zero in that table (a guard of the values, which
+    # a small table reaches more often), and every other row is "same".
     by_rows = baseline.get("sweep_refused_by_rows", {})
-    expected = set(by_rows.get(str(rows), baseline.get("sweep_refused", [])))
     actual = {r["id"] for r in sweep_results if r["status"].startswith("refused")}
+    if rows < SWEEP_EXACT_MIN_ROWS:
+        allowed = set(by_rows.get("300", baseline.get("sweep_refused", [])))
+
+        zero_guard = {
+            r["id"] for r in sweep_results
+            if r["status"] == "refused-guard" and dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR in str(r.get("reason") or "")
+        }
+        outside = sorted(actual - allowed - zero_guard)
+        if outside:
+            return 1, [f"FAILURE: refused rows outside the 300-row baseline set at {rows} rows ({len(outside)} rows): {outside[:5]}"]
+        other = [r["id"] for r in sweep_results if r["status"] != "same" and not r["status"].startswith("refused")]
+        if other:
+            return 1, [f"FAILURE: rows neither same nor refused at {rows} rows ({len(other)} rows): {other[:5]}"]
+        return 0, []
+    expected = set(by_rows.get(str(rows), baseline.get("sweep_refused", [])))
     if actual != expected:
         changed = sorted(actual.symmetric_difference(expected))
         return 1, [f"FAILURE: sweep refused set changed vs baseline ({len(changed)} rows): {changed[:5]}"]
