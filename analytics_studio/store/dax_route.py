@@ -123,6 +123,16 @@ FRAGMENTS: dict[str, str] = {
     _W.REASON_DISTINCTCOUNTNOBLANK: "it uses DISTINCTCOUNTNOBLANK",
     _W.REASON_LOGICAL_AND: "it combines filters with &&",
     _W.REASON_ARITHMETIC: "it does arithmetic that large tables do not support yet",
+    _W.REASON_ARITH_LEAF: "one part of its arithmetic is not a total, count or number that large tables can compute",
+    _W.REASON_ARITH_DATE: "it does arithmetic on a date total, which large tables do not support yet",
+    _W.REASON_ARITH_LITERAL: "it uses a number that is too large for the arithmetic of large tables",
+    _W.REASON_ARITH_DIVIDE_ALT: "the third argument of DIVIDE must be a plain number",
+    _W.REASON_ARITH_CAP_LEAVES: "its arithmetic combines more than 8 different totals",
+    _W.REASON_ARITH_CAP_NODES: "its arithmetic has more than 24 parts",
+    _W.REASON_ARITH_CAP_DEPTH: "its arithmetic is nested more than 8 levels deep",
+    _W.REASON_ARITH_IN_CALCULATE: "it puts CALCULATE filters around a measure that does arithmetic",
+    _W.REASON_ARITH_WHOLE_BEYOND_64: "a whole-number total is too large for the arithmetic of large tables",
+    _W.REASON_ARITH_DIVIDE_NON_FINITE: "DIVIDE meets a number that is infinite or not a number",
     _W.REASON_LET: "it uses VAR and RETURN",
     _W.REASON_TWO_COLUMNS: "it compares one column with another column",
     _W.REASON_BLANK_COMPARISON: "it compares a value with BLANK()",
@@ -194,6 +204,8 @@ _PROBLEMS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"^NOT needs one logical expression\.?$"), "NOT needs exactly one condition."),
     (re.compile(r"^Unsupported character at position (\d+)\.?$"), "The formula has a character that is not allowed (position {0})."),
     (re.compile(r"^an empty table constructor \{\} is not accepted\.?$"), "IN needs at least one value; an empty list is not allowed."),
+    (re.compile(r"^DIVIDE needs a numerator, denominator, and optional alternate result\.?$"), "DIVIDE needs two or three arguments: DIVIDE(numerator, denominator, alternate)."),
+    (re.compile(r"^DIVIDE alternate result must be a constant numeric value or BLANK\(\)\.?$"), "The third argument of DIVIDE must be a plain number, such as -1 or 0."),
 ]
 
 # Reasons that carry a name or a number: (pattern, fragment template). First match wins.
@@ -268,6 +280,8 @@ _PLAN_CODE_REASONS = frozenset({
     _S.REASON_GROUP_OWN_FILTER,
     _S.REASON_GROUP_BY_TYPE,
     _W.REASON_IN_FOLD_EQ_MIX,
+    _W.REASON_ARITH_WHOLE_BEYOND_64,
+    _W.REASON_ARITH_DIVIDE_NON_FINITE,
 })
 _PLAN_CODE_PATTERNS = (
     re.compile(r"^no decimal metadata for column"),
@@ -835,7 +849,7 @@ def _run_on_reader(
     if is_canceled():
         return _canceled_refusal()
     elapsed = time.monotonic() - started
-    if isinstance(plan, dax_sql.GroupByPlan):
+    if plan.grouped:  # a GroupByPlan or a GroupedArithPlan
         return StoreAnswer("grouped", None, list(result), elapsed, table_name)
     return StoreAnswer("scalar", result, [], elapsed, table_name)
 

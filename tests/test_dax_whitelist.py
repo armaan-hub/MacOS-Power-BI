@@ -21,6 +21,10 @@ import pytest
 from analytics_studio.store import DuckStore
 from analytics_studio.store.dax_whitelist import (
     REASON_ARITHMETIC,
+    REASON_ARITH_DATE,
+    REASON_ARITH_DIVIDE_ALT,
+    REASON_ARITH_IN_CALCULATE,
+    REASON_ARITH_LITERAL,
     REASON_BLANK_COMPARISON,
     REASON_BOOLEAN_LITERAL,
     REASON_DISTINCTCOUNTNOBLANK,
@@ -109,14 +113,13 @@ def test_differential_catalog_rules(dataset_and_catalog, rules_runs):
 
     # Assert catalog numbers
     assert skipped_count == 29
-    assert allowed_count == 570
-    assert refused_count == 244
+    assert allowed_count == 575  # (C4b) the five arithmetic formulas over totals are allowed now (570 before)
+    assert refused_count == 239
     assert len(catalog) == 843
 
     # Rule B counts: formulas the mapped store can do that whitelist refuses. The 61 DISTINCTCOUNT
-    # ones are refused on purpose (numeric DISTINCTCOUNT differs from the engine); 7 are arithmetic and SUMX.
-    expected_rule_b = {"SUM": 2, "RATIO": 1, "DIVIDE": 1, "ARITH": 1, "SUMX": 2,
-                       "DISTINCTCOUNT": 3, "DISTINCTCOUNT_filtered": 58}
+    # ones are refused on purpose (numeric DISTINCTCOUNT differs from the engine); the SUMX iterators stay refused.
+    expected_rule_b = {"SUMX": 2, "DISTINCTCOUNT": 3, "DISTINCTCOUNT_filtered": 58}
     assert rule_b_by_shape == expected_rule_b
 
 
@@ -125,12 +128,26 @@ def test_differential_catalog_rules(dataset_and_catalog, rules_runs):
 # ---------------------------------------------------------------------------
 
 NEGATIVE_CASES = [
-    # 1. Arithmetic binary '+'
-    ("SUM(t[w]) + 1", "t", REASON_ARITHMETIC),
-    # 2. Arithmetic binary '-'
-    ("AVERAGE(t[w]) - MIN(t[w])", "t", REASON_ARITHMETIC),
-    # 3. Arithmetic binary '/'
-    ("SUM(t[d]) / COUNT(t[d])", "t", REASON_ARITHMETIC),
+    # 1-3. (C4b) + - / over totals are allowed now (POSITIVE_CASES); these are the arithmetic forms still refused
+    ("SUM(t[w]) ^ 2", "t", REASON_ARITHMETIC),
+    ("SUM(t[w]) & 1", "t", "node kind concat is not on the store whitelist"),
+    ("+SUM(t[w])", "t", REASON_ARITHMETIC),
+    ("MAX(t[dt]) - MIN(t[dt])", "t", REASON_ARITH_DATE),
+    ("MIN(t[dt]) + 1", "t", REASON_ARITH_DATE),
+    ("ROUND(SUM(t[w]), 2) + 1", "t", "function ROUND is not on the store whitelist"),
+    ("SUM(t[w]) + SUMX(t, t[w])", "t", "function SUMX is not on the store whitelist"),
+    ("SUM(t[w]) + 9223372036854775808", "t", REASON_ARITH_LITERAL),
+    ("SUM(t[w]) * 1e400", "t", REASON_ARITH_LITERAL),
+    ("DIVIDE(SUM(t[w]), 0, BLANK())", "t", REASON_ARITH_DIVIDE_ALT),
+    ("DIVIDE(SUM(t[w]), 0, SUM(t[d]))", "t", "DIVIDE alternate result must be a constant numeric value or BLANK()"),
+    ("SUM(t[w]) + SUM(t[cat])", "t", "SUM not supported on text column"),
+    ("SUM(t[w]) + COUNTROWS(s)", "t", "multiple tables"),
+    ("1 + 2", "t", "measure references no tables"),
+    ("IF(SUM(t[w]) > 1, 1, 2) + 1", "t", "function IF is not on the store whitelist"),
+    ('CALCULATE(SUM(t[w]) + 1, t[cat] = "A")', "t", REASON_ARITHMETIC),
+    ("CALCULATE([ArithM], t[cat] = \"A\") + 1", "t", REASON_ARITH_IN_CALCULATE),
+    ("[ArithM] + [CycleA]", "t", "cycle detected in measure reference"),
+    ("[ArithM] + [NoSuchMeasure]", "t", "unknown column or measure 'NoSuchMeasure'"),
     # 4. SUMX iterator
     ("SUMX(t, t[w])", "t", "function SUMX is not on the store whitelist"),
     # 5. FILTER iterator
@@ -141,8 +158,8 @@ NEGATIVE_CASES = [
     ("CALCULATE(SUM(t[w]), ALLEXCEPT(t, t[cat]))", "t", "function ALLEXCEPT is not on the store whitelist"),
     # 8. VAR / RETURN ('let')
     ("VAR x = 1 RETURN SUM(t[w])", "t", REASON_LET),
-    # 9. DIVIDE function
-    ("DIVIDE(SUM(t[w]), 2)", "t", "function DIVIDE is not on the store whitelist"),
+    # 9. (C4b) DIVIDE over totals is allowed now (POSITIVE_CASES); a computed alternate is a parse error
+    ("DIVIDE(SUM(t[w]), 2, SUM(t[d]) + 1)", "t", "DIVIDE alternate result must be a constant numeric value or BLANK()"),
     # 10. Logical && in predicate
     ('CALCULATE(COUNTROWS(t), t[w] > 5 && t[cat] = "A")', "t", REASON_LOGICAL_AND),
     # 11. Numeric IN predicate
@@ -245,6 +262,7 @@ def test_negative_expressions(dax, home_table, expected_reason):
         "cyclea": "[CycleB]",
         "cycleb": "[CycleA]",
         "filteredmeasure": 'CALCULATE(SUM(t[w]), t[cat] = "A")',
+        "arithm": "SUM(t[w]) / COUNTROWS(t)",
     }
 
     decision = classify_measure(dax, home_table=home_table, tables=tables, measures=measures)
@@ -314,6 +332,17 @@ POSITIVE_CASES = [
     ('CALCULATE([BaseSum], t[cat] = "A")', "t", "SUM_filtered", "t"),
     # 26. Unqualified column in home table inside AGG
     ("SUM([w])", "t", "SUM", "t"),
+    # 27-35. (C4b) arithmetic over totals: shape ARITH on the table of the totals
+    ("SUM(t[w]) + 1", "t", "ARITH", "t"),
+    ("AVERAGE(t[w]) - MIN(t[w])", "t", "ARITH", "t"),
+    ("SUM(t[d]) / COUNT(t[d])", "t", "ARITH", "t"),
+    ("DIVIDE(SUM(t[w]), 2)", "t", "ARITH", "t"),
+    ("DIVIDE(SUM(t[w]), COUNTROWS(t), -1)", "t", "ARITH", "t"),
+    ("-SUM(t[d])", "t", "ARITH", "t"),
+    ("(SUM(t[w]) + 1) * 2 - COUNTROWS(t) / 3", "t", "ARITH", "t"),
+    ('DIVIDE(CALCULATE(SUM(t[d]), t[cat] = "A"), SUM(t[d]))', "t", "ARITH", "t"),
+    ("[BaseSum] / COUNTROWS(t)", "t", "ARITH", "t"),
+    ("CALCULATE([BaseSum], t[cat] = \"A\") - [BaseSum]", "t", "ARITH", "t"),
 ]
 
 
@@ -636,7 +665,7 @@ def test_rule_a_allowed_means_mapped_status_same(dataset_and_catalog, rules_runs
     col_types, catalog, _ = dataset_and_catalog
     tables = {"t": col_types}
     # Formulas the store can do but the whitelist refuses (Rule B). Numeric DISTINCTCOUNT is
-    # refused on purpose (it differs in some seeds); arithmetic is a later stage.
+    # refused on purpose (it differs in some seeds); (C4b) arithmetic over totals is allowed, the SUMX iterators are not.
     expected_gap_shapes = {"DISTINCTCOUNT", "DISTINCTCOUNT_filtered"}
     for key, by_id in rules_runs.items():
         allowed = refused = skipped = 0
@@ -659,9 +688,9 @@ def test_rule_a_allowed_means_mapped_status_same(dataset_and_catalog, rules_runs
                 if r["mapped_status"] == "same" and r["mapped_refusal"] is None:
                     gaps[f["shape"] if f["category"] != "arithmetic" else "arithmetic"] += 1
         assert violations == [], f"Rule A violated at {key}: {violations}"
-        assert (allowed, refused, skipped, len(catalog)) == (570, 244, 29, 843), key
+        assert (allowed, refused, skipped, len(catalog)) == (575, 239, 29, 843), key
         assert set(gaps) <= expected_gap_shapes | {"arithmetic"}, f"unexpected Rule B gaps at {key}: {gaps}"
-        assert gaps["arithmetic"] == 7, key
+        assert gaps["arithmetic"] == 2, key  # (C4b) only the two SUMX iterators (7 before)
 
 
 def test_rule_a_source_parquet_counta(dataset_and_catalog):
@@ -888,7 +917,7 @@ C1A2_ROWS: list[tuple[str, str | None]] = [
     ("CALCULATE([BaseSum], t[w] > 1)", None),
     ("CALCULATE([Filt], t[w] > 1)", REASON_NESTED_CALCULATE),
     ("[CycA]", "cycle detected"),
-    ("[Arith]", REASON_ARITHMETIC),
+    ("[Arith]", None),  # (C4b) SUM(t[w]) + 1 is allowed now
     ("[TextSum]", "SUM not supported on text column"),
     ("[NoSuch]", "unknown column or measure"),
     ("CALCULATE(SUM(t[w]), s[val] = 1)", "multiple tables"),
@@ -897,7 +926,7 @@ C1A2_ROWS: list[tuple[str, str | None]] = [
     ("SUM(nosuch[w])", "unknown table 'nosuch'"),
     ("SUM(t[w]) // trailing comment", None),
     ("SUMX(t, t[w])", "function SUMX"),
-    ("DIVIDE(SUM(t[w]), 2)", "function DIVIDE"),
+    ("DIVIDE(SUM(t[w]), 2)", None),  # (C4b) DIVIDE over totals is allowed now
     ("CALCULATE(SUM(t[w]), ALL(t))", "function ALL"),
     ("CALCULATE(SUM(t[w]), KEEPFILTERS(t[cat] = \"A\"))", "is not on the store whitelist"),
     ("VAR x = 1 RETURN SUM(t[w])", REASON_LET),
@@ -1111,7 +1140,7 @@ def test_unqualified_reference_rule_is_pinned():
 # ---- the rules the reviewer's 258-expression sweep found; typed in by hand ------------------
 
 SWEEP_REFUSED = [
-    "SUM(t[w]) + 1", "1 + SUM(t[w])", "-SUM(t[w])", "SUM(t[w]) = 1",
+    "SUM(t[w]) ^ 1", "1 ^ SUM(t[w])", "SUM(t[w]) & 1", "SUM(t[w]) = 1",  # (C4b) + - * / and unary minus are allowed now
     "SUM()", "SUM(t[w], t[w])", "SUM(t)", "SUM(1)", '"x"', "1", "BLANK()", "TRUE()", "{1, 2}",
     "CALCULATE()", "CALCULATE(SUM(t[w]), )", "SUM(t[w]", "SUM(t[w]]",
     "SUM(t[w ])", "SUM(t[ w])", "SUM(t[ｗ])",
@@ -1157,6 +1186,9 @@ SWEEP_ALLOWED = [
     ("CALCULATE(SUM(t[w]), t[w] > 5, t[w] < 15)", "SUM_filtered"),
     ("CALCULATE(COUNTROWS(t), t[dt] >= DATE(2026, 6, 1))", "COUNTROWS_filtered"),
     ("[m2]", "SUM"),
+    # (C4b) arithmetic over totals
+    ("SUM(t[w]) + 1", "ARITH"), ("1 + SUM(t[w])", "ARITH"), ("-SUM(t[w])", "ARITH"), ("[Arith]", "ARITH"),
+    ("sum(t[w]) /* c */ * 2", "ARITH"), ("DIVIDE(sum(t[w]), 0, -1)", "ARITH"),
 ]
 
 

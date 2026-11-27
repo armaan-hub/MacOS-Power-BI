@@ -304,7 +304,7 @@ def test_refusals_return_refusal_and_run_no_query(env: Env) -> None:
     spy = SpyStore(env.store)
     cases = [
         "SUM(s[c])",                                  # text column
-        "SUM(s[x]) + 1",                              # arithmetic
+        "SUM(s[x]) ^ 2",                              # arithmetic that is not on the whitelist (^)
         "DISTINCTCOUNT(s[x])",                        # numeric DISTINCTCOUNT
         'CALCULATE(SUM(s[x]), s[c] > "a")',           # text ordering
         "CALCULATE(SUM(s[x]), s[x] IN {1, 2})",       # numeric IN
@@ -592,10 +592,10 @@ def full_runs() -> dict[tuple[int, int], dict[str, Any]]:
 def test_rule_a_plus_full_catalog(full_runs: dict[tuple[int, int], dict[str, Any]]) -> None:
     for key, data in full_runs.items():
         counts = plan_counts(data["results"])
-        assert counts["allowed"] == 570, (key, counts)
-        assert counts["plan-same"] == 570, (key, counts)
+        assert counts["allowed"] == 575, (key, counts)  # (C4b) 570 before: the five arithmetic formulas over totals
+        assert counts["plan-same"] == 575, (key, counts)
         assert counts["plan-differs"] == counts["plan-sql-error"] == counts["plan-crash"] == 0, (key, counts)
-        assert counts["plan-refused"] == counts["refused"] == 244, (key, counts)
+        assert counts["plan-refused"] == counts["refused"] == 239, (key, counts)
         assert counts["plan-refused-allowed"] == 0, (key, counts)
         for r in data["results"]:
             if r["plan_allowed"]:

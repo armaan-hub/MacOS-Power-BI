@@ -583,7 +583,7 @@ def settle(controller: StudioController, titles: list[str]) -> None:
 
 def test_async_results_equal_the_in_memory_engine(world: World) -> None:
     store, twin = world.a, world.c
-    # cards: the 34 measures of the C2 catalog against the in-memory engine
+    # cards: the 48 measures of the C2 catalog (34) and the arithmetic measures (14, C4b) against the in-memory engine
     set_measures(store, [*CATALOG], refresh=True)
     wait_store_idle(store)
     twin_home = twin._active_model_table_id()
@@ -628,9 +628,13 @@ def test_async_results_equal_the_in_memory_engine(world: World) -> None:
             _build_visual(controller, "bar", "V11 north by product", "product", "North Amount")
         got, want = read_async(store, "V11 north by product"), _read(twin, "V11 north by product")
         results.append(("V11 north by product", got == want and bool(got), len(got)))
+        # arithmetic measures (C4b): a ratio, a share with an own filter, a net over days
+        for title in ("V5 ratio by region", "V13 share by product", "V14 net by day"):
+            got, want = read_async(store, title), _read(twin, title)
+            results.append((title, got == want and bool(got), len(got)))
     print(f"[measured] {sum(1 for _, ok, _n in results if ok)} of {len(results)} async visuals identical to the in-memory twin")
     assert all(ok for _, ok, _ in results), results
-    assert len(results) == 9
+    assert len(results) == 12
     # cards follow a report filter like the in-memory twin; the synchronous lists (regions, page-filter values) too
     plain = [name for name, _ in VISUAL_MEASURES if name != "North Amount"]
     unfiltered = dict(store._measure_values)
@@ -918,6 +922,20 @@ def test_the_key_changes_for_each_input_and_only_then(app: StudioController) -> 
     qty["expression"] = "SUM(t[amt])"
     assert card_key(app, "Alias") != alias_key, "the key holds the closure of measures the card uses"
     qty["expression"] = old
+    measures.pop()
+    # an arithmetic card (C4b): the key holds the closure text of EVERY measure it references
+    count_old = row_count["expression"]
+    measures.append(normalize_measure("Qty Share", "[Qty Sum] / [Row Count]", home_table_id=tid))
+    share_key = card_key(app, "Qty Share")
+    assert card_key(app, "Qty Share") == share_key
+    qty["expression"] = "SUM(t[amt])"
+    assert card_key(app, "Qty Share") != share_key, "the first measure of the quotient changed"
+    qty["expression"] = old
+    assert card_key(app, "Qty Share") == share_key
+    row_count["expression"] = "COUNTROWS(t) + 1"
+    assert card_key(app, "Qty Share") != share_key, "the second measure of the quotient changed"
+    row_count["expression"] = count_old
+    assert card_key(app, "Qty Share") == share_key
     measures.pop()
     # a filter
     add_region_filter(app, ["East"])

@@ -27,6 +27,7 @@ from typing import Any, Mapping
 
 from analytics_studio import dax_dates
 from analytics_studio.measures import MeasureError, parse_expression
+from analytics_studio.store import dax_arith
 from analytics_studio.store.base import StoreError
 from analytics_studio.store.dax_whitelist import (
     MAX_PREDICATES,
@@ -686,6 +687,9 @@ class MeasurePlan:
     in_guards: tuple[tuple[str, str], ...] = ()
     date_guards: tuple[tuple[str, str], ...] = ()
     decimal_stamps: tuple[tuple[str, str, int, int], ...] = ()
+    num_kind: str = "double"  # "int" (Int64) or "double": the static type the arithmetic combiner needs
+
+    grouped = False
 
     def _in_column_has_non_ascii(self, store: Any, guard: tuple[str, str]) -> bool:
         """One cheap query per (table, column) on EVERY execute: does any cell hold a non-ASCII character?
@@ -1070,6 +1074,16 @@ class _PlanParts:
     physical: str = ""
     date_guards: tuple[tuple[str, str], ...] = ()
     decimal_stamps: tuple[tuple[str, str, int, int], ...] = ()
+    num_kind: str = "double"
+
+
+def _number_kind(agg: str, c_type: str | None) -> str:
+    """The engine's static type of a total: COUNT-like totals and a whole-number SUM, MIN, MAX are Int64, the rest Double."""
+    if agg in ("COUNTROWS", "COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT"):
+        return "int"
+    if agg in ("SUM", "MIN", "MAX") and c_type == "whole_number":
+        return "int"
+    return "double"
 
 
 def _plan_parts(
@@ -1208,6 +1222,7 @@ def _plan_parts(
         physical=physical,
         date_guards=tuple(date_guards),
         decimal_stamps=tuple(decimal_stamps),
+        num_kind=_number_kind(agg, c_type),
     )
 
 
@@ -1230,7 +1245,31 @@ def plan_measure(
     refuses is a Refusal with the reasons joined; no SQL is built for it. `filter_context` is a tuple of DAX
     predicate strings (slicers): the value is that of CALCULATE(<measure>, <own predicates>, <context>), all ANDed;
     a context column that the measure itself filters is refused.
+
+    An arithmetic measure (+ - * / unary minus, DIVIDE over totals) gives an ArithPlan: one plan per distinct total,
+    combined by dax_arith (the engine's own rules).
     """
+    arith = _arith_parse(expression, home_table, tables, column_meta, measures, source_kind)
+    if arith is not None:
+        if isinstance(arith, Refusal):
+            return arith
+        built: list[MeasurePlan] = []
+        for leaf in arith.leaves:
+            leaf_plan = plan_measure(
+                leaf.text, home_table=home_table, tables=tables, store_tables=store_tables, column_meta=column_meta,
+                measures=measures, source_kind=source_kind, overrides=overrides, filter_context=filter_context,
+            )
+            if isinstance(leaf_plan, Refusal):
+                return leaf_plan
+            if not isinstance(leaf_plan, MeasurePlan):
+                return Refusal(dax_arith.REASON_ARITH_LEAF)
+            if leaf_plan.value_type == "date":
+                return Refusal(dax_arith.REASON_ARITH_DATE)
+            built.append(leaf_plan)
+        return ArithPlan(
+            tree=arith.tree, leaf_plans=tuple(built), table=built[0].table,
+            untyped=tuple(leaf.unknown for leaf in arith.leaves),
+        )
     parts = _plan_parts(
         expression,
         filter_context=tuple(filter_context),
@@ -1268,7 +1307,73 @@ def plan_measure(
         in_guards=parts.in_guards,
         date_guards=parts.date_guards,
         decimal_stamps=parts.decimal_stamps,
+        num_kind=parts.num_kind,
     )
+
+
+def _arith_parse(
+    expression: str,
+    home_table: str,
+    tables: Mapping[str, Mapping[str, str]],
+    column_meta: Mapping[tuple[str, str], ColumnMeta],
+    measures: Mapping[str, str] | None,
+    source_kind: str,
+) -> dax_arith.ArithParse | Refusal | None:
+    """None when the expression is not an arithmetic measure; the parse when it is; a Refusal when it must not be planned.
+
+    The whitelist decides (shape "ARITH"); a refused expression falls through to the ordinary path, which reports
+    the same reasons.
+    """
+    max_digits = {col: meta.digits for (_, col), meta in column_meta.items()}
+    decision = classify_measure(
+        expression, home_table=home_table, tables=tables, measures=measures, source_kind=source_kind,
+        max_digits=max_digits or None,
+    )
+    if not (decision.allowed and decision.shape == "ARITH"):
+        return None
+    try:
+        parsed = dax_arith.parse_arith(parse_expression(expression), measures)
+    except MeasureError as exc:
+        return Refusal(str(exc))
+    if not parsed.ok or not parsed.leaves:
+        return Refusal("; ".join(parsed.reasons) or dax_arith.REASON_ARITH_LEAF)
+    if source_kind == "parquet":
+        return Refusal(PARQUET_PLAN_REASON)
+    return parsed
+
+
+@dataclass(frozen=True)
+class ArithPlan:
+    """An arithmetic measure: one MeasurePlan per distinct total and the tree that combines them (dax_arith).
+
+    Every total runs its own plan (its own guards, stamps and refusals, unchanged; the first Refusal wins), is turned
+    into a Num of the kind its plan carries, and the tree is evaluated by the engine's own rules. Nothing is cached
+    between executes. A whole-number total outside the signed 64 bit range is refused: the combiner is the engine's
+    only inside that range.
+    """
+
+    tree: tuple[Any, ...]
+    leaf_plans: tuple[MeasurePlan, ...]
+    table: str
+    shape: str = "ARITH"
+    untyped: tuple[bool, ...] = ()  # per total: CALCULATE([measure], ...), which has no static type in the engine
+
+    grouped = False
+
+    def execute(self, store: Any) -> Decimal | Refusal | None:
+        values: list[dax_arith.Num] = []
+        for index, plan in enumerate(self.leaf_plans):
+            result = plan.execute(store)
+            if isinstance(result, Refusal):
+                return result
+            untyped = index < len(self.untyped) and self.untyped[index]
+            values.append(dax_arith.Num("unknown" if untyped else plan.num_kind, result))  # type: ignore[arg-type]
+        if not all(dax_arith.leaf_value_in_range(value) for value in values):
+            return Refusal(dax_arith.REASON_ARITH_WHOLE_BEYOND_64)
+        try:
+            return dax_arith.bare_result(dax_arith.evaluate(self.tree, values).value)
+        except dax_arith.ArithUnsupported as exc:
+            return Refusal(exc.reason)
 
 
 # ==============================================================================
@@ -1308,6 +1413,9 @@ class GroupByPlan:
     refuse_fold_keys: bool = False
     date_guards: tuple[tuple[str, str], ...] = ()
     decimal_stamps: tuple[tuple[str, str, int, int], ...] = ()
+    num_kind: str = "double"
+
+    grouped = True
 
     def execute(self, store: Any) -> list[tuple[str, Decimal | dax_dates.DaxDateTime | None]] | Refusal:
         """Run the guard queries on every execute, then the GROUP BY.
@@ -1411,6 +1519,15 @@ def plan_group_by(
         return resolved_group
     if resolved_group.col_type not in ("text", "date", "boolean"):
         return Refusal(REASON_GROUP_BY_TYPE)
+    arith = _arith_parse(expression, home_table, tables, column_meta, measures, source_kind)
+    if arith is not None:
+        if isinstance(arith, Refusal):
+            return arith
+        return _plan_group_by_arith(
+            arith, group_by=group_by, filter_context=filter_context, home_table=home_table, tables=tables,
+            store_tables=store_tables, column_meta=column_meta, measures=measures, source_kind=source_kind,
+            overrides=overrides,
+        )
     parts = _plan_parts(
         expression,
         filter_context=tuple(filter_context),
@@ -1484,4 +1601,105 @@ def plan_group_by(
         refuse_fold_keys=parts.has_in and resolved_group.col_type == "text",
         date_guards=tuple(date_guards),
         decimal_stamps=parts.decimal_stamps,
+        num_kind=parts.num_kind,
+    )
+
+
+@dataclass(frozen=True)
+class GroupedArithPlan:
+    """An arithmetic measure grouped by one column: the group keys, and one GroupByPlan per distinct total.
+
+    `universe` is the plan of COUNTROWS of the table with the same group column and filter context: it gives the keys
+    and their order exactly as the engine shows VALUES() of the column (a group that has no row for a total's own
+    filter is missing from that total's rows, the engine value of that total is blank there). The value of a key is the
+    tree over the totals of that key; a key a total does not return is blank for that total. A key that a total
+    returns and the universe does not, or a key twice, means the table changed between the queries: the plan is stale.
+    """
+
+    tree: tuple[Any, ...]
+    universe: GroupByPlan
+    leaf_plans: tuple[GroupByPlan, ...]
+    table: str
+    group_column: str
+    group_type: str
+    shape: str = "ARITH"
+    untyped: tuple[bool, ...] = ()
+
+    grouped = True
+
+    def execute(self, store: Any) -> list[tuple[str, Decimal | None]] | Refusal:
+        base = self.universe.execute(store)
+        if isinstance(base, Refusal):
+            return base
+        keys = [key for key, _ in base]
+        known = set(keys)
+        if len(known) != len(keys):
+            return Refusal(REASON_PLAN_STALE)
+        per_total: list[dict[str, Any]] = []
+        for plan in self.leaf_plans:
+            rows = plan.execute(store)
+            if isinstance(rows, Refusal):
+                return rows
+            by_key: dict[str, Any] = {}
+            for key, value in rows:
+                if key in by_key or key not in known:
+                    return Refusal(REASON_PLAN_STALE)
+                by_key[key] = value
+            per_total.append(by_key)
+        out: list[tuple[str, Decimal | None]] = []
+        for key in keys:
+            values = [
+                dax_arith.Num(
+                    "unknown" if index < len(self.untyped) and self.untyped[index] else plan.num_kind, by_key.get(key)
+                )
+                for index, (plan, by_key) in enumerate(zip(self.leaf_plans, per_total))
+            ]
+            if not all(dax_arith.leaf_value_in_range(value) for value in values):
+                return Refusal(dax_arith.REASON_ARITH_WHOLE_BEYOND_64)
+            try:
+                value = dax_arith.bare_result(dax_arith.evaluate(self.tree, values).value)
+            except dax_arith.ArithUnsupported as exc:
+                return Refusal(exc.reason)
+            out.append((key, value))
+        return out
+
+
+def _plan_group_by_arith(
+    arith: dax_arith.ArithParse,
+    *,
+    group_by: tuple[str, str],
+    filter_context: tuple[str, ...],
+    home_table: str,
+    tables: Mapping[str, Mapping[str, str]],
+    store_tables: Mapping[str, str],
+    column_meta: Mapping[tuple[str, str], ColumnMeta],
+    measures: Mapping[str, str] | None,
+    source_kind: str,
+    overrides: Mapping[str, Any],
+) -> GroupedArithPlan | Refusal:
+    kwargs: dict[str, Any] = dict(
+        group_by=group_by, filter_context=filter_context, home_table=home_table, tables=tables,
+        store_tables=store_tables, column_meta=column_meta, measures=measures, source_kind=source_kind,
+        overrides=overrides,
+    )
+    built: list[GroupByPlan] = []
+    for leaf in arith.leaves:
+        leaf_plan = plan_group_by(leaf.text, **kwargs)
+        if isinstance(leaf_plan, Refusal):
+            return leaf_plan
+        if not isinstance(leaf_plan, GroupByPlan):
+            return Refusal(dax_arith.REASON_ARITH_LEAF)
+        if leaf_plan.value_type == "date":
+            return Refusal(dax_arith.REASON_ARITH_DATE)
+        built.append(leaf_plan)
+    table = built[0].table
+    universe = plan_group_by(f"COUNTROWS({dax_arith.quote_table(table)})", **{**kwargs, "measures": None})
+    if isinstance(universe, Refusal):
+        return universe
+    if not isinstance(universe, GroupByPlan):
+        return Refusal(dax_arith.REASON_ARITH_LEAF)
+    return GroupedArithPlan(
+        tree=arith.tree, universe=universe, leaf_plans=tuple(built), table=table,
+        group_column=built[0].group_column, group_type=built[0].group_type,
+        untyped=tuple(leaf.unknown for leaf in arith.leaves),
     )

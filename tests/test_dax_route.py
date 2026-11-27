@@ -239,7 +239,7 @@ REFUSED: list[tuple[str, dict[str, str] | None]] = [
     ("SUM(u[x])", None),
     ("MAX(t[region])", None),
     ("DIVIDE(SUM(t[amt]), [Bad])", {"Bad": "SUMX(t, t[amt])"}),
-    ("SUM(t[amt]) / SUM(t[qty])", None),
+    ("SUM(t[amt]) ^ 2", None),
     ("CALCULATE(SUM(t[amt]), t[region] > \"E\")", None),
 ]
 
@@ -1213,6 +1213,19 @@ def _battery() -> list[tuple[str, dict[str, str] | None]]:
         ("CONCATENATEX(t, t[region])", None), ("FORMAT(SUM(t[qty]), \"0\")", None), ("SWITCH(1, 1, 2)", None),
         ("ISBLANK(SUM(t[qty]))", None), ("COUNTROWS(FILTER(t, t[qty] > 1))", None), ("CALCULATE(COUNTROWS(t), t)", None),
         ("MAX(t[region])", None), ("MIN(t[paid])", None), ("MAX(t[qty], t[amt])", None), ("MAX(1, 2)", None),
+        # arithmetic (C4b): the forms that stay refused, each with its own sentence
+        ("SUM(t[qty]) ^ 2", None), ("SUM(t[qty]) & 1", None), ("+SUM(t[qty])", None), ("MAX(t[pay]) - MIN(t[pay])", None),
+        ("MIN(t[pay]) + 1", None), ("ROUND(SUM(t[amt]), 2) + 1", None), ("SUM(t[qty]) + SUMX(t, t[qty])", None),
+        ("SUM(t[qty]) + 9223372036854775808", None), ("SUM(t[qty]) * 1e400", None), ("1 + 2", None), ("-(1)", None),
+        ("DIVIDE(SUM(t[qty]), 0, BLANK())", None), ("DIVIDE(SUM(t[qty]), 0, SUM(t[amt]))", None),
+        ("DIVIDE(SUM(t[qty]), 0, \"x\")", None), ("SUM(t[qty]) + SUM(t[region])", None), ("SUM(t[qty]) + COUNTROWS(u)", None),
+        ("CALCULATE(SUM(t[qty]) + 1, t[qty] > 2)", None), ("IF(SUM(t[qty]) > 1, 1, 2) + 1", None),
+        ("SUM(t[qty]) + SUM(u[x])", None), ("SUM(t[qty]) + [Nope]", None), ("DIVIDE(SUM(t[qty]), 2, 3, 4)", None),
+        ("SUM(t[qty]) / CALCULATE(SUM(t[qty]), t[qty] = 1 && t[amt] > 2)", None),
+        ("SUM(t[qty]) / CALCULATE(SUM(t[amt]), t[region] IN {\"a\"}, t[qty] > 1)", None),
+        ("+".join(f"CALCULATE(SUM(t[qty]), t[qty] > {n})" for n in range(9)), None),  # nine different totals
+        ("+".join(["1"] * 9), None), ("+".join(["(1+1)"] * 14), None),  # nine levels deep, more than 24 parts
+        ("SUM(t[qty]) + COUNTROWS(t) * (1 + (2 + (3 + (4 + (5 + (6 + (7 + (8 + 9)))))))", None),
     ]
     chains: list[dict[str, str]] = [
         {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "[A]", "C": "[B]"},
@@ -1220,6 +1233,9 @@ def _battery() -> list[tuple[str, dict[str, str] | None]]:
         {"A": "SUM(u[x])", "B": "[A]"}, {"A": "CALCULATE(SUM(t[qty]), t[qty] > 2)", "B": "CALCULATE([A], t[qty] < 5)"},
         {"A": "CALCULATE(SUM(t[qty]), t[region] = \"East\")", "B": "[A]", "C": "CALCULATE([B], t[qty] > 3)", "D": "[C]"},
         {"A": "SUM(t[nope])", "B": "[A]"}, {"A": "SUM(t[qty]", "B": "[A]"},
+        {"A": "SUM(t[qty]) / COUNTROWS(t)", "B": "CALCULATE([A], t[qty] > 2)"},
+        {"A": "SUM(t[qty]) / COUNTROWS(t)", "B": "[A] * 2", "C": "CALCULATE([B], t[region] = \"East\")"},
+        {"A": "[B] + 1", "B": "[A] * 2"}, {"A": "SUMX(t, t[qty])", "B": "[A] + 1"}, {"A": "SUM(t[qty])", "B": "[A] + [Nope]"},
     ]
     for chain in chains:
         last = list(chain)[-1]
