@@ -216,6 +216,26 @@ def _thread_locked(func: _F) -> _F:
     return cast(_F, wrapper)
 
 
+def _refuse_while_read(func: _F) -> _F:
+    """Decorator for the methods that change table content or the table catalog (create, drop, append, load).
+
+    A StoreReader sees each statement as of the moment it starts, so a table that is dropped, reloaded or appended
+    to between two statements of one answer would give a value that fits neither the old nor the new data. While
+    a reader is open these methods raise StoreBusyError, whoever calls them. (Temporary grid views and checkpoints
+    are not refused: they change nothing a reader sees.)
+    """
+    @functools.wraps(func)
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        lock = getattr(self, "_readers_lock", None)
+        if lock is not None:
+            with lock:
+                reading = bool(self._readers)
+            if reading:
+                raise StoreBusyError("The store is being read; try again when the read has finished.")
+        return func(self, *args, **kwargs)
+    return cast(_F, wrapper)
+
+
 def _validate_select(conn: duckdb.DuckDBPyConnection, sql: Any) -> None:
     """Raise StoreError unless `sql` is exactly one SELECT statement. Shared by DuckStore.execute and StoreReader.execute."""
     if not isinstance(sql, str) or not sql.strip():
@@ -474,6 +494,10 @@ class DuckStore:
 
     @_thread_locked
     def close(self) -> None:
+        """Close the store: every reader is interrupted and closed first (a reader gives up waiting after 10 s).
+
+        `_conn.close()` itself blocks until a query that cannot be interrupted has ended.
+        """
         # Every reader first: a cursor query keeps running after its main connection is closed (measured on
         # duckdb 1.5.5, it ended 15.9 s later with "No open result set"), so each one is interrupted and has
         # ended before `_conn` closes.
@@ -566,6 +590,7 @@ class DuckStore:
         return self._resolve_table_name(name, conn)
 
     @_thread_locked
+    @_refuse_while_read
     def create_table(self, name: str, columns: Sequence[Tuple[str, str]]) -> None:
         conn = self._check_open()
         _validate_identifier(name, kind="Table name")
@@ -673,6 +698,7 @@ class DuckStore:
             raise StoreError(f"Failed to get row count for '{resolved_name}': {exc}") from exc
 
     @_thread_locked
+    @_refuse_while_read
     def drop_table(self, name: str) -> None:
         conn = self._check_open()
         resolved_name = self._resolve_table_name(name, conn)
@@ -684,6 +710,7 @@ class DuckStore:
         self._bump_version(resolved_name)
 
     @_thread_locked
+    @_refuse_while_read
     def append_rows(self, name: str, rows: Iterable[Sequence[Any]]) -> int:
         """Append rows in one transaction; return the number of rows added.
 
@@ -1120,6 +1147,7 @@ class DuckStore:
             raise StoreError(f"Failed to drop view '{name}': {exc}") from exc
 
     @_thread_locked
+    @_refuse_while_read
     def create_table_from_arrow(
         self,
         name: str,

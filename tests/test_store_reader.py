@@ -25,7 +25,7 @@ from analytics_studio.store import DuckStore, ProjectStore
 from analytics_studio.store.base import StoreBusyError, StoreError
 from analytics_studio.store.duck_store import StoreReader
 
-GUARD_S = 30.0  # hang guard only
+GUARD_S = 10.0  # hang guard only: a wrong implementation fails by assertion after this long
 COLUMNS = [("id", "whole"), ("grp", "text"), ("val", "decimal")]
 ROWS = 5000
 
@@ -34,6 +34,7 @@ ROWS = 5000
 # database catalog, so every Probe / Gate has its own function name.
 _LONG_QUERY = "SELECT sum(hash(a)) FROM range(3000000000) r(a) WHERE {name}(a)"
 _names = itertools.count(1)
+PROBE_CAP_CHUNKS = 40_000  # about 4 s of scanning here; a test interrupts after a handful of chunks
 
 
 def make_batches(rows: int = ROWS, seed: int = 11) -> list[pa.RecordBatch]:
@@ -47,6 +48,16 @@ def make_batches(rows: int = ROWS, seed: int = 11) -> list[pa.RecordBatch]:
         ],
         schema=schema,
     )]
+
+
+def join_or_fail(thread: threading.Thread, what: str = "thread") -> None:
+    """Join with the hang guard and fail with a message (an assertion, not a hang) when it did not end."""
+    thread.join(GUARD_S)
+    assert not thread.is_alive(), f"{what} did not end within the {GUARD_S:g} s hang guard"
+
+
+def wait_or_fail(event: threading.Event, what: str) -> None:
+    assert event.wait(GUARD_S), f"{what} did not happen within the {GUARD_S:g} s hang guard"
 
 
 @pytest.fixture
@@ -78,6 +89,9 @@ class Probe:
         with self._cond:
             self.calls += 1
             self._cond.notify_all()
+            over = self.calls > PROBE_CAP_CHUNKS
+        if over:  # a wrong implementation that never interrupts must not leave a query of minutes behind
+            raise RuntimeError("the probe query ran past its cap of scanned chunks")
         return pa.array([True] * len(arr))
 
     def install(self, reader: StoreReader) -> "Probe":
@@ -101,7 +115,8 @@ class Gate:
 
     def _fn(self, x: int) -> int:
         self.started.set()
-        self.release.wait(GUARD_S)
+        if not self.release.wait(GUARD_S):
+            self.release.set()  # a test that failed before releasing the gate must not hold every later row for 10 s
         return x
 
     def install(self, reader: StoreReader) -> "Gate":
@@ -184,7 +199,7 @@ def test_reader_never_takes_the_store_lock(store: DuckStore) -> None:
         with store._lock:  # the main connection is "busy": a store call from another thread is refused at once
             worker = threading.Thread(target=work)
             worker.start()
-            worker.join(GUARD_S)
+            join_or_fail(worker, "worker")
             assert not worker.is_alive()
             assert errors == [] and results == [[(ROWS,)]]
             blocked: list[BaseException] = []
@@ -197,7 +212,7 @@ def test_reader_never_takes_the_store_lock(store: DuckStore) -> None:
 
             other = threading.Thread(target=main_call)
             other.start()
-            other.join(GUARD_S)
+            join_or_fail(other, "other")
             assert len(blocked) == 1 and isinstance(blocked[0], StoreBusyError)
 
 
@@ -389,7 +404,9 @@ def test_append_after_reader_opened_is_not_seen_by_a_running_statement_but_by_th
     run = Runner(reader, f"SELECT count(*) FROM t WHERE {gate.name}(id) > 0")
     try:
         assert gate.started.wait(GUARD_S)
-        store.append_rows("t", [(ROWS + 1, "z", 1.0)])  # committed on the main connection while the statement runs
+        # The store refuses append_rows while a reader is open (see test_table_changes_are_refused_while_a_reader_is_open),
+        # so the duckdb fact is measured with a raw commit on the main connection.
+        store._conn.execute("INSERT INTO t VALUES (?, 'z', 1.0, ?)", [ROWS + 1, ROWS + 1])
         assert store.execute("SELECT count(*) FROM t") == [(ROWS + 1,)]
     finally:
         gate.release.set()
@@ -406,7 +423,7 @@ def test_drop_on_the_main_connection_while_a_reader_reads_lets_the_read_finish(s
     run = Runner(reader, f"SELECT count(*) FROM t WHERE {gate.name}(id) > 0")
     try:
         assert gate.started.wait(GUARD_S)
-        store.drop_table("t")
+        store._conn.execute("DROP TABLE t")  # raw: drop_table is refused while a reader is open
     finally:
         gate.release.set()
     run.join()
@@ -557,7 +574,7 @@ def test_shutdown_with_a_lease_held_interrupts_the_query_waits_and_returns_true(
         assert reader._state.wait_for(lambda: reader._active == 1, timeout=GUARD_S)
     assert ps.shutdown(timeout=GUARD_S) is True
     assert done.wait(GUARD_S)
-    thread.join(GUARD_S)
+    join_or_fail(thread, "thread")
     assert "interrupt" in str(outcome["error"]).casefold()
     assert ps.closed and ps._readers == 0
 
@@ -591,7 +608,7 @@ def test_shutdown_timeout_with_a_gate_that_ignores_interrupts_returns_false_and_
     assert ps.store.execute("SELECT count(*) FROM t") == [(ROWS,)]  # the store stays usable
     gate.release.set()
     assert finished.wait(GUARD_S)
-    thread.join(GUARD_S)
+    join_or_fail(thread, "thread")
     assert ps._readers == 0
     assert ps.shutdown(timeout=GUARD_S) is True
     assert ps.closed
@@ -612,7 +629,7 @@ def test_shutdown_still_waits_for_a_job_as_before(ps: ProjectStore) -> None:
     assert started.wait(GUARD_S)
     assert ps.shutdown(timeout=0.2) is False
     release.set()
-    thread.join(GUARD_S)
+    join_or_fail(thread, "thread")
     assert ps.shutdown(timeout=GUARD_S) is True
 
 
@@ -688,3 +705,320 @@ def test_shutdown_calls_the_cancel_hooks(ps: ProjectStore) -> None:
     ps.add_cancel_hook(lambda: calls.append(1))
     assert ps.shutdown(timeout=GUARD_S) is True
     assert calls == [1]
+
+
+# ---------------------------------------------------------------------------------------------------------
+# F2: table changes are refused at the DuckStore layer while a reader is open
+# ---------------------------------------------------------------------------------------------------------
+def _do_create(store: DuckStore) -> None:
+    store.create_table("fresh", [("a", "whole")])
+
+
+def _do_drop(store: DuckStore) -> None:
+    store.drop_table("t")
+
+
+def _do_append(store: DuckStore) -> None:
+    store.append_rows("t", [(ROWS + 1, "z", 1.0)])
+
+
+def _do_arrow(store: DuckStore) -> None:
+    store.create_table_from_arrow("fresh2", COLUMNS, make_batches(5))
+
+
+GUARDED = [("create_table", _do_create), ("drop_table", _do_drop), ("append_rows", _do_append),
+           ("create_table_from_arrow", _do_arrow)]
+
+
+@pytest.mark.parametrize("name,change", GUARDED, ids=[g[0] for g in GUARDED])
+def test_table_changes_are_refused_while_a_reader_is_open_and_allowed_after(
+    store: DuckStore, name: str, change: Callable[[DuckStore], None]
+) -> None:
+    names_before = sorted(store.table_names())
+    version_before = store.table_version("t")
+    reader = store.reader()
+    with pytest.raises(StoreBusyError, match="being read"):
+        change(store)
+    assert sorted(store.table_names()) == names_before and store.table_version("t") == version_before
+    assert store.execute("SELECT count(*) FROM t") == [(ROWS,)]  # nothing changed
+    assert reader.execute("SELECT count(*) FROM t") == [(ROWS,)]
+    reader.close()
+    change(store)  # allowed once the reader is closed
+    assert sorted(store.table_names()) != names_before or store.table_version("t") != version_before
+
+
+@pytest.mark.parametrize("name,change", GUARDED, ids=[g[0] for g in GUARDED])
+def test_table_changes_without_a_reader_are_unchanged(store: DuckStore, name: str, change: Callable[[DuckStore], None]) -> None:
+    with store.reader():  # a reader that came and went leaves no trace
+        pass
+    change(store)
+
+
+def test_the_grid_views_and_checkpoint_are_still_allowed_while_a_reader_is_open(store: DuckStore) -> None:
+    with store.reader() as reader:
+        store.create_view_ids("__stm_v_reader", 'SELECT "__rn" FROM "t" ORDER BY "id" DESC')
+        assert store.execute('SELECT count(*) FROM "__stm_v_reader"') == [(ROWS,)]
+        store.drop_view("__stm_v_reader")
+        store.checkpoint()  # measured harmless: the reader answers before and after it
+        assert reader.execute("SELECT count(*) FROM t") == [(ROWS,)]
+
+
+def test_call_cannot_change_a_table_under_a_lease(ps: ProjectStore) -> None:
+    """ProjectStore.call() hands the raw DuckStore to its function: the guard sits one layer lower."""
+    with ps.read_lease() as reader:
+        with pytest.raises(StoreBusyError):
+            ps.call(lambda s: s.drop_table("t"))
+        with pytest.raises(StoreBusyError):
+            ps.call(lambda s: s.append_rows("t", [(1, "a", 1.0)]))
+        with pytest.raises(StoreBusyError):
+            ps.store.drop_table("t")
+        assert reader.execute("SELECT count(*) FROM t") == [(ROWS,)]
+    ps.call(lambda s: s.drop_table("t"))
+    assert ps.store.has_table("t") is False
+
+
+# ---------------------------------------------------------------------------------------------------------
+# F3: pins for rules the first review found unpinned
+# ---------------------------------------------------------------------------------------------------------
+def spy_interrupts(reader: StoreReader) -> threading.Event:
+    """An event that is set the first time `reader.interrupt()` is called."""
+    seen = threading.Event()
+    real = reader.interrupt
+
+    def spy() -> None:
+        seen.set()
+        real()
+
+    reader.interrupt = spy  # type: ignore[method-assign]
+    return seen
+
+
+def test_closing_one_reader_does_not_interrupt_another_that_is_running(store: DuckStore) -> None:
+    a, b = store.reader(), store.reader()
+    gate_a, gate_b = Gate().install(a), Gate().install(b)
+    run_a = Runner(a, f"SELECT sum({gate_a.name}(id)) FROM t")
+    run_b = Runner(b, f"SELECT sum({gate_b.name}(id)) FROM t")
+    wait_or_fail(gate_a.started, "query A start")
+    wait_or_fail(gate_b.started, "query B start")
+    a_interrupted = spy_interrupts(a)
+    closer = threading.Thread(target=a.close, daemon=True)
+    closer.start()
+    try:
+        wait_or_fail(a_interrupted, "the interrupt of reader A by its own close")
+    finally:
+        gate_a.release.set()
+    join_or_fail(closer, "A.close()")
+    gate_b.release.set()
+    run_a.join()
+    run_b.join()
+    assert isinstance(run_a.error, StoreError) and "interrupt" in str(run_a.error).casefold()
+    assert run_b.error is None and run_b.result == store.execute("SELECT sum(id) FROM t")  # B was left alone
+    b.close()
+
+
+def test_interrupt_all_readers_interrupts_every_reader(store: DuckStore) -> None:
+    readers = [store.reader() for _ in range(3)]
+    gates = [Gate().install(r) for r in readers]
+    runs = [Runner(r, f"SELECT sum({g.name}(id)) FROM t") for r, g in zip(readers, gates)]
+    for index, gate in enumerate(gates):
+        wait_or_fail(gate.started, f"query {index} start")
+    store.interrupt_all_readers()  # once: every query is inside its gate now, so none of the three can miss it
+    for gate in gates:
+        gate.release.set()
+    for run in runs:
+        run.join()
+    assert [isinstance(run.error, StoreError) and "interrupt" in str(run.error).casefold() for run in runs] == [True] * 3
+    for reader in readers:
+        reader.close()
+
+
+def test_shutdown_stops_a_query_that_starts_after_its_first_interrupt(tmp_path: Path) -> None:
+    """An interrupt that lands before a query starts is lost; shutdown sends it again until the lease ends."""
+    ps = ProjectStore.open(str(tmp_path / "late.npa.data"))
+    ps.store.create_table_from_arrow("t", COLUMNS, make_batches(50))
+    first_interrupt_done = threading.Event()
+    go = threading.Event()
+    leased = threading.Event()
+    outcome: dict[str, Any] = {}
+
+    def holder() -> None:
+        with ps.read_lease() as reader:
+            probe = Probe().install(reader)
+            leased.set()
+            go.wait(GUARD_S)
+            try:
+                reader.execute(probe.query)
+            except StoreError as exc:
+                outcome["error"] = exc
+
+    ps.add_cancel_hook(first_interrupt_done.set)  # called by shutdown right after its first interrupt
+    holder_thread = threading.Thread(target=holder, daemon=True)
+    holder_thread.start()
+    wait_or_fail(leased, "the lease")
+    shutter, box = run_in_thread_result(lambda: ps.shutdown(timeout=GUARD_S))
+    try:
+        wait_or_fail(first_interrupt_done, "the first interrupt of shutdown")
+        go.set()  # only now does the long query start: the first interrupt is already lost
+        join_or_fail(shutter, "shutdown")
+        assert box.get("result") is True, box
+    finally:
+        go.set()
+        for _ in range(int(GUARD_S / 0.05)):  # cleanup if shutdown did not stop the query
+            if not holder_thread.is_alive():
+                break
+            ps.request_cancel_readers()
+            holder_thread.join(0.05)
+    join_or_fail(holder_thread, "the lease holder")
+    assert "interrupt" in str(outcome["error"]).casefold()
+    assert ps.closed
+
+
+def run_in_thread_result(fn: Callable[[], Any]) -> tuple[threading.Thread, dict[str, Any]]:
+    box: dict[str, Any] = {}
+
+    def work() -> None:
+        try:
+            box["result"] = fn()
+        except BaseException as exc:  # noqa: BLE001
+            box["error"] = exc
+
+    thread = threading.Thread(target=work, daemon=True)
+    thread.start()
+    return thread, box
+
+
+def test_reader_cursor_is_closed_on_lease_exit_and_on_store_close(tmp_path: Path) -> None:
+    ps = ProjectStore.open(str(tmp_path / "cur.npa.data"))
+    ps.store.create_table_from_arrow("t", COLUMNS, make_batches(20))
+    with ps.read_lease() as reader:
+        cursor = reader._cursor
+        assert cursor.execute("SELECT 1").fetchall() == [(1,)]
+    assert reader._cursor is None
+    with pytest.raises(Exception):
+        cursor.execute("SELECT 1")  # the cursor itself is closed, not only marked
+    leftover = ps.store.reader()
+    leftover_cursor = leftover._cursor
+    ps.store.close()  # the store closes the readers that are still open
+    assert leftover.closed and leftover._cursor is None
+    with pytest.raises(Exception):
+        leftover_cursor.execute("SELECT 1")
+    assert ps.shutdown(timeout=GUARD_S) is True
+
+
+def test_reader_close_gives_up_waiting_and_the_cursor_closes_when_its_query_ends(
+    store: DuckStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from analytics_studio.store import duck_store
+
+    monkeypatch.setattr(duck_store, "_READER_CLOSE_WAIT_S", 0.2)
+    reader = store.reader()
+    cursor = reader._cursor
+    gate = Gate().install(reader)
+    run = Runner(reader, f"SELECT sum({gate.name}(id)) FROM t")
+    wait_or_fail(gate.started, "the query")
+    reader.close()  # gives up after the short wait: the query ignores interrupts while it sits in the gate
+    assert reader.closed and reader._cursor is not None  # the cursor is still in use by the running query
+    gate.release.set()
+    run.join()
+    assert isinstance(run.error, StoreError) and "interrupt" in str(run.error).casefold()
+    assert reader._cursor is None  # the thread that ran the query closed it
+    with pytest.raises(Exception):
+        cursor.execute("SELECT 1")
+
+
+def test_reader_close_interrupts_the_running_query_and_waits_for_it(store: DuckStore) -> None:
+    reader = store.reader()
+    gate = Gate().install(reader)
+    run = Runner(reader, f"SELECT sum({gate.name}(id)) FROM t")
+    wait_or_fail(gate.started, "the query")
+    interrupted = spy_interrupts(reader)
+    closer = threading.Thread(target=reader.close, daemon=True)
+    closer.start()
+    try:
+        wait_or_fail(interrupted, "the interrupt by close()")
+        assert closer.is_alive()  # close() waits for the query: it is still sitting in the gate
+        assert reader._cursor is not None
+    finally:
+        gate.release.set()
+    join_or_fail(closer, "close()")
+    assert reader._cursor is None  # closed only after the query had ended
+    run.join()
+    assert isinstance(run.error, StoreError) and "interrupt" in str(run.error).casefold()
+
+
+def test_a_reader_is_refused_while_the_store_is_closing(tmp_path: Path) -> None:
+    store = DuckStore(str(tmp_path / "closing.db"))
+    store.create_table_from_arrow("t", COLUMNS, make_batches(20))
+    reader = store.reader()
+    gate = Gate().install(reader)
+    run = Runner(reader, f"SELECT sum({gate.name}(id)) FROM t")
+    wait_or_fail(gate.started, "the query")
+    interrupted = spy_interrupts(reader)
+    closer = threading.Thread(target=store.close, daemon=True)
+    closer.start()
+    try:
+        wait_or_fail(interrupted, "the interrupt by store.close()")  # close() is inside, waiting for the reader
+        with pytest.raises(StoreError, match="closed"):
+            store.reader()
+    finally:
+        gate.release.set()
+    join_or_fail(closer, "store.close()")
+    run.join()
+    assert store._readers == set()
+
+
+# --- the budget (dax_route) ----------------------------------------------------------------------------
+def test_budget_cancel_waits_for_an_interrupt_in_flight_and_nothing_arrives_after_it() -> None:
+    from analytics_studio.store import dax_route
+
+    entered, release = threading.Event(), threading.Event()
+    calls: list[int] = []
+
+    def slow_interrupt() -> None:
+        calls.append(1)
+        entered.set()
+        release.wait(GUARD_S)
+
+    budget = dax_route._Budget(slow_interrupt, 0.0)
+    budget.start()
+    wait_or_fail(entered, "the first interrupt")
+    returned = threading.Event()
+    canceller = threading.Thread(target=lambda: (budget.cancel(), returned.set()), daemon=True)
+    canceller.start()
+    assert not returned.wait(0.3)  # cancel() must not return while an interrupt is still running
+    release.set()
+    wait_or_fail(returned, "cancel() returning")
+    join_or_fail(canceller, "canceller")
+    seen = len(calls)
+    join_or_fail(budget._thread, "the budget watcher")  # type: ignore[arg-type]
+    assert len(calls) == seen  # no interrupt arrives after cancel() returned
+
+
+def test_budget_does_not_fire_after_cancel_even_when_the_watcher_was_already_deciding() -> None:
+    from analytics_studio.store import dax_route
+
+    class SlowCancel:
+        """A cancel event that is 'set', but whose first is_set() call is held until released."""
+
+        def __init__(self) -> None:
+            self.entered, self.release, self.first = threading.Event(), threading.Event(), True
+
+        def is_set(self) -> bool:
+            if self.first:
+                self.first = False
+                self.entered.set()
+                self.release.wait(GUARD_S)
+            return True
+
+        def wait(self, timeout: float | None = None) -> bool:
+            return True
+
+    fired: list[int] = []
+    cancel = SlowCancel()
+    budget = dax_route._Budget(lambda: fired.append(1), 3600.0, cancel)  # type: ignore[arg-type]
+    budget.start()
+    wait_or_fail(cancel.entered, "the watcher reading the cancel event")
+    budget.cancel()  # the watcher has seen "canceled" but has not fired yet
+    cancel.release.set()
+    join_or_fail(budget._thread, "the budget watcher")  # type: ignore[arg-type]
+    assert fired == [] and not budget.canceled.is_set()

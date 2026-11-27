@@ -2421,7 +2421,7 @@ class StudioController(QObject):
         by_key = {cell_key(label): value for label, value in rows}
         order = self._active_model_column_sort_order(model_table_id, column, row_context_table_id, values)
         keys = self._ordered_category_keys(
-            set(values), order,
+            list(values), order,
             lambda key: (_report_cell_text(values[key]).casefold(), _report_cell_text(values[key]), repr(key)),
         )
         return [

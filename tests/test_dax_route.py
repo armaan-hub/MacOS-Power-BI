@@ -557,10 +557,10 @@ def test_expired_deadline_does_not_run_the_measure(fresh: Env, monkeypatch: pyte
 
 def test_shared_deadline_caps_the_budget(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(dax_sql.MeasurePlan, "execute", _slow_execute)
-    out = fresh.route("COUNTROWS(t)", budget_s=30.0, deadline=time.monotonic() + 1.0)
+    out = fresh.route("COUNTROWS(t)", budget_s=30.0, deadline=time.monotonic() + 3.0)
     assert isinstance(out, RouteRefusal) and out.code == "timeout"
     match = re.match(r"This measure took longer than ([0-9.]+) seconds", out.message)
-    assert match is not None and 0.0 < float(match.group(1)) <= 1.0, out.message  # the capped budget, not 30 s
+    assert match is not None and 0.0 < float(match.group(1)) <= 3.0, out.message  # the capped budget, not 30 s
 
 
 def test_duckstore_interrupt_then_normal_query(tmp_path: Path) -> None:
@@ -1020,10 +1020,31 @@ def test_tiny_budget_never_shows_the_stale_or_metadata_text(fresh: Env) -> None:
         out = fresh.route("SUM(t[amt])", budget_s=0.0003)
         kind = "answer" if isinstance(out, StoreAnswer) else out.code
         outcomes[kind] = outcomes.get(kind, 0) + 1
-        assert kind in ("answer", "timeout"), (kind, out)
-    assert outcomes.get("timeout", 0) > 0, outcomes
+        assert kind in ("answer", "timeout"), (kind, out)  # which of the two depends on speed; nothing else may show
     assert fresh.ps.busy is False
     assert isinstance(fresh.route("SUM(t[amt])"), StoreAnswer)
+
+
+def test_an_interrupt_inside_a_guard_query_is_a_timeout_not_a_stale_or_metadata_refusal(
+    fresh: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Speed-independent twin: the first statement of the call fails with an interrupt AFTER the budget has fired,
+    as an interrupt landing inside a guard query does; the guard swallows it into a refusal, the route says timeout."""
+    interrupted = record_interrupts(monkeypatch)
+    real = StoreReader.execute
+    state = {"failed": False}
+
+    def execute(self: Any, sql: str, params: Any = ()) -> Any:
+        if not state["failed"]:
+            state["failed"] = True
+            assert interrupted.wait(GUARD_S), "the budget never fired"
+            raise StoreError("Query execution failed: INTERRUPT Error: Interrupted!")
+        return real(self, sql, params)
+
+    monkeypatch.setattr(StoreReader, "execute", execute)
+    out = fresh.route("SUM(t[amt])", budget_s=0.05)
+    assert isinstance(out, RouteRefusal) and out.code == "timeout", out
+    assert state["failed"] is True
 
 
 def test_decimal_metadata_work_runs_inside_the_budget(fresh: Env, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -2398,3 +2419,77 @@ def test_route_snapshot_is_what_a_worker_thread_gets(env: Env) -> None:
     thread, box = run_in_thread(lambda: route_measure(snapshot, "SUM(t[qty])", project_store=env.ps))
     out = finish(thread, box)
     assert isinstance(out, StoreAnswer) and out.value == expected.value
+
+
+# --- F2: a table cannot be reloaded under a route that reads it ------------------------------------------
+class _PausingReader:
+    """Wraps a reader; the first statement that contains `marker` waits (the route is paused between statements)."""
+
+    def __init__(self, reader: Any, marker: str, hit: threading.Event, go: threading.Event) -> None:
+        self._reader, self._marker, self.hit, self.go = reader, marker, hit, go
+
+    def execute(self, sql: str, params: Any = ()) -> Any:
+        if self._marker in sql and not self.hit.is_set():
+            self.hit.set()
+            assert self.go.wait(GUARD_S), "the test never released the route"
+        return self._reader.execute(sql, params)
+
+    def interrupt(self) -> None:
+        self._reader.interrupt()
+
+
+def test_a_reload_under_a_running_route_is_refused_and_the_route_returns_the_old_correct_answer(fresh: Env) -> None:
+    baseline = fresh.route("SUM(t[amt])")
+    assert isinstance(baseline, StoreAnswer)
+    rows2 = [list(r) for r in fresh.rows]
+    for r in rows2:
+        if r[4]:
+            r[4] = f"{float(r[4]) + 0.000123:.6f}"
+    csv2 = write_csv(fresh.base / "t2.csv", rows2)
+    hit, go = threading.Event(), threading.Event()
+    refused: list[BaseException] = []
+
+    def reload_table(store: Any) -> None:
+        store.drop_table("t_csv")
+        import_csv_to_store(store, "t_csv", csv2, {})
+
+    with fresh.ps.read_lease() as reader:
+        paused = _PausingReader(reader, "SUM(TRY_CAST", hit, go)
+        thread, box = run_in_thread(lambda: route_measure(
+            fresh.project, "SUM(t[amt])", project_store=fresh.ps, reader=paused, budget_s=GUARD_S))
+        try:
+            assert hit.wait(GUARD_S), "the route never reached its main SUM"
+            try:
+                fresh.ps.call(reload_table)
+            except StoreBusyError as exc:
+                refused.append(exc)
+        finally:
+            go.set()
+        out = finish(thread, box)
+    assert len(refused) == 1  # the reload was refused
+    assert isinstance(out, StoreAnswer) and out.value == baseline.value  # the OLD, correct answer
+    assert fresh.ps.store.has_table("t_csv")
+    reload_table(fresh.ps.store)  # no reader now: the reload goes through, and a fresh route sees the new data
+    after = fresh.route("SUM(t[amt])")
+    assert isinstance(after, StoreAnswer) and after.value != baseline.value
+
+
+def test_a_refused_orphan_drop_leaves_the_table_and_does_not_raise(fresh: Env) -> None:
+    from analytics_studio.controller import StudioController
+
+    with fresh.ps.read_lease():
+        StudioController._drop_orphan_table(None, fresh.ps, "t_csv")  # type: ignore[arg-type]
+        assert fresh.ps.store.has_table("t_csv")  # left for the next cleanup, nothing lost
+    StudioController._drop_orphan_table(None, fresh.ps, "t_csv")  # type: ignore[arg-type]
+    assert not fresh.ps.store.has_table("t_csv")
+
+
+def test_snapshot_keeps_calculated_columns_so_the_route_refuses_like_the_live_project(env: Env) -> None:
+    project = make_project(types=env.types, calculated=True)
+    live = route_measure(project, "COUNTROWS(t)", project_store=env.ps)
+    assert isinstance(live, RouteRefusal) and live.code == "shape"
+    snapshot = dax_route.snapshot_for_route(project)
+    assert snapshot.tables[0].has_calculated_columns is True
+    again = route_measure(snapshot, "COUNTROWS(t)", project_store=env.ps)
+    assert isinstance(again, RouteRefusal) and (again.code, again.message) == (live.code, live.message)
+    assert dax_route.store_shape(snapshot) == dax_route.store_shape(project)

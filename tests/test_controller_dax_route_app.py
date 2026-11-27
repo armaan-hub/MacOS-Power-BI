@@ -7,6 +7,7 @@ every card text must be identical. Only the file dialogs and the confirmation bo
 
 from __future__ import annotations
 
+import copy
 import csv
 import datetime
 import os
@@ -122,6 +123,15 @@ def _real_call_budgets(monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setitem(route.__kwdefaults__, "budget_s", dax_route.DEFAULT_BUDGET_S)
 
 
+def _call_budget_above_the_deadline(monkeypatch: pytest.MonkeyPatch) -> None:
+    """For the shared-deadline tests: the call budget (5 s) is above their deadline (2 s), so the deadline is what
+    stops the first measure, whatever the speed of the machine."""
+    from analytics_studio.store import dax_route
+
+    for route in (dax_route.route_measure, dax_route.route_grouped, dax_route.route_distinct_values):
+        monkeypatch.setitem(route.__kwdefaults__, "budget_s", 5.0)
+
+
 @pytest.fixture(scope="module")
 def qapp() -> QApplication:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -166,13 +176,50 @@ def big_csv(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture(scope="module")
-def store_app(qapp: QApplication, big_csv: Path, tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any]:
+def _store_app_import(qapp: QApplication, big_csv: Path, tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any]:
+    """The expensive part, shared by the tests of one process: the 300,000-row store. No test uses it directly."""
     started = time.monotonic()
     controller, project_store = import_store_controller(big_csv, tmp_path_factory.mktemp("dax_route_store"))
     state: dict[str, Any] = {"controller": controller, "import_s": time.monotonic() - started}
     state["table"] = str(controller._project["model"]["tables"][0]["name"])
     yield state
     controller._close_project_store()
+
+
+@pytest.fixture
+def store_app(_store_app_import: dict[str, Any]) -> Any:
+    """The shared 300,000-row store with a clean report for THIS test: no measures when it starts, and the model's
+    measures and the page (visuals, filters, selections) put back exactly as found when it ends. A test that needs the
+    catalog measures calls `ensure_catalog_measures`; no test may rely on what another test left behind, so any test
+    can run alone, in any order and on any xdist worker."""
+    controller = _store_app_import["controller"]
+    model = controller._project["model"]
+    page = controller._active_page()
+    saved_measures = copy.deepcopy(model.get("measures", []))
+    saved_page = copy.deepcopy(page)
+    model["measures"] = []
+    controller._refresh_report()
+    try:
+        yield _store_app_import
+    finally:
+        controller._project["model"]["measures"] = saved_measures
+        page.clear()
+        page.update(saved_page)
+        controller._refresh_report()
+
+
+def ensure_catalog_measures(controller: StudioController) -> None:
+    """Idempotent: add the catalog measures that are missing, as `create_measure` stores them (normalize_measure on the
+    active table), in one step and one refresh. (30 `create_measure` calls refresh the cards each time and take about
+    20 s; the one test about `create_measure` itself still makes those calls.)"""
+    measures = list(controller._project["model"].get("measures", []))
+    have = {str(m["name"]).casefold() for m in measures}
+    aid = controller._active_model_table_id()
+    for name, expression in CATALOG:
+        if name.casefold() not in have:
+            measures.append(normalize_measure(name, expression, home_table_id=aid))
+    controller._project["model"]["measures"] = measures
+    controller._refresh_report()
 
 
 @pytest.fixture(scope="module")
@@ -250,6 +297,7 @@ def test_thirty_measures_match_the_in_memory_engine(
 
 def test_ten_cards_gui_thread_time(store_app: dict[str, Any]) -> None:
     controller = store_app["controller"]
+    ensure_catalog_measures(controller)
     full = list(controller._project["model"]["measures"])
     assert len(full) >= 10
     controller._project["model"]["measures"] = full[:10]
@@ -274,6 +322,7 @@ def test_ten_cards_gui_thread_time(store_app: dict[str, Any]) -> None:
 
 def test_refused_measures_name_the_measure_and_a_reason(store_app: dict[str, Any]) -> None:
     controller = store_app["controller"]
+    ensure_catalog_measures(controller)
     before = [str(m["name"]) for m in controller._project["model"]["measures"]]
     for name, expression in REFUSED:
         assert controller.create_measure(name, expression) is False
@@ -286,7 +335,7 @@ def test_refused_measures_name_the_measure_and_a_reason(store_app: dict[str, Any
 
 def test_update_and_remove_follow_the_store(store_app: dict[str, Any]) -> None:
     controller = store_app["controller"]
-    controller._refresh_report()
+    ensure_catalog_measures(controller)
     old_total = _measure_text(controller, "Total Qty")
     assert controller.update_measure("Total Qty", "Total Qty", "SUM(sales[qty]) ", description="x") is True
     assert _measure_text(controller, "Total Qty") == old_total
@@ -315,6 +364,7 @@ def test_dialog_slots_open_for_a_store_table(store_app: dict[str, Any]) -> None:
     from analytics_studio import controller as controller_module
 
     controller = store_app["controller"]
+    ensure_catalog_measures(controller)
     shown: list[dict[str, Any]] = []
 
     class FakeDialog:
@@ -503,7 +553,7 @@ def _check_refresh_stops_at_the_shared_deadline(controller: StudioController) ->
     assert controller.create_measure("M One", "SUM(t[qty])") is True
     for name in ("M Two", "M Three", "M Four"):
         assert controller.create_measure(name, "COUNTROWS(t)") is True
-    with patch.object(dax_route, "refresh_deadline", lambda: time.monotonic() + 0.3), \
+    with patch.object(dax_route, "refresh_deadline", lambda: time.monotonic() + 2.0), \
             patch("analytics_studio.store.dax_sql.MeasurePlan.execute", _slow_plan_execute):
         controller._refresh_report()  # the slow plan ends only because the shared deadline interrupts it
     assert controller._measure_values == {}
@@ -515,7 +565,7 @@ def _check_refresh_stops_at_the_shared_deadline(controller: StudioController) ->
 def test_card_refresh_stops_at_the_shared_deadline(
     qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _real_call_budgets(monkeypatch)
+    _call_budget_above_the_deadline(monkeypatch)
     controller, _ = make_store_controller(tmp_path, _small_rows())
     try:
         _check_refresh_stops_at_the_shared_deadline(controller)
@@ -524,7 +574,7 @@ def test_card_refresh_stops_at_the_shared_deadline(
 
 
 def test_mutant_card_refresh_passes_no_deadline(qapp: QApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    _real_call_budgets(monkeypatch)
+    _call_budget_above_the_deadline(monkeypatch)
     real = StudioController._route_store_measure
 
     controller, _ = make_store_controller(tmp_path, _small_rows())
@@ -812,6 +862,53 @@ def visual_pages(visual_store: StudioController, visual_twin: StudioController) 
             if title != "V8 sliced by product":
                 visual_store.set_visual_interaction(SLICER, title, "None")
     return state
+
+
+def _capture_visual_state(controller: StudioController) -> dict[str, Any]:
+    return {
+        "report": copy.deepcopy(controller._project["report"]),
+        "measures": copy.deepcopy(controller._project["model"].get("measures", [])),
+        "cross_filters": copy.deepcopy(controller._cross_filters),
+        "region": controller._current_region,
+        "selected": controller._selected_visual,
+        "page": controller._active_page_id,
+    }
+
+
+def _restore_visual_state(controller: StudioController, saved: dict[str, Any]) -> None:
+    report = controller._project["report"]
+    report.clear()
+    report.update(copy.deepcopy(saved["report"]))
+    controller._project["model"]["measures"] = copy.deepcopy(saved["measures"])
+    controller._cross_filters.clear()
+    controller._cross_filters.update(copy.deepcopy(saved["cross_filters"]))
+    controller._current_region = saved["region"]
+    controller._selected_visual = saved["selected"]
+    controller._active_page_id = saved["page"]
+    controller._report_filter_context_cache.clear()
+    controller._store_visual_batch_deadline = None
+    controller._store_visual_last_end = 0.0
+
+
+@pytest.fixture(autouse=True)
+def _visual_state_guard(request: pytest.FixtureRequest) -> Any:
+    """A test that uses the shared visual page gets it back exactly as the fixture built it: the report (pages, visuals,
+    filters, selections), the measures, cross filters, region, selected visual and the batch deadline of both
+    controllers are restored after the test, and the refusal notice is reset before it. No test depends on what
+    another test left behind."""
+    if "visual_pages" not in request.fixturenames:
+        yield
+        return
+    request.getfixturevalue("visual_pages")
+    controllers = [request.getfixturevalue("visual_store"), request.getfixturevalue("visual_twin")]
+    saved = [_capture_visual_state(c) for c in controllers]
+    controllers[0]._reset_silent_refusal_notice()
+    try:
+        yield
+    finally:
+        for controller, state in zip(controllers, saved):
+            _restore_visual_state(controller, state)
+        controllers[0]._reset_silent_refusal_notice()
 
 
 def _set_page_filter(controller: StudioController, column: str, values: list[str]) -> bool:
@@ -1155,14 +1252,14 @@ def test_store_visuals_never_read_candidate_rows_or_the_in_memory_engine(
 def test_visual_refresh_stops_at_the_shared_deadline_and_says_so(
     visual_pages: dict[str, Any], visual_store: StudioController, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A slow plan is patched in; the batch deadline is 0.3 s. The first visual times out, the later ones are not run."""
+    """A slow plan is patched in; the batch deadline is 2 s. The first visual times out, the later ones are not run."""
     from analytics_studio.store import dax_route
 
-    _real_call_budgets(monkeypatch)
+    _call_budget_above_the_deadline(monkeypatch)
     visual_store._reset_silent_refusal_notice()
     visual_store._store_visual_batch_deadline = None
     visual_store._store_visual_last_end = 0.0
-    monkeypatch.setattr(dax_route, "refresh_deadline", lambda seconds=0.0: time.monotonic() + 0.3)
+    monkeypatch.setattr(dax_route, "refresh_deadline", lambda seconds=0.0: time.monotonic() + 2.0)
     monkeypatch.setattr("analytics_studio.store.dax_sql.GroupByPlan.execute", _slow_plan_execute)
     first = visual_store.visualSeries("V1 amount by region")
     first_message = visual_store.statusMessage
@@ -1213,6 +1310,7 @@ def test_ten_visuals_and_ten_cards_gui_thread_time_at_300k(
     from analytics_studio.store import dax_route
 
     controller = store_app["controller"]
+    ensure_catalog_measures(controller)
     full = list(controller._project["model"]["measures"])
     names = ["Total Amount", "Row Count", "Max Amount", "Avg Amount"]  # plain measures: no CALCULATE of their own
     chosen = [m for m in full if m["name"] in names]
