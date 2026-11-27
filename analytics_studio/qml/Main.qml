@@ -1649,6 +1649,42 @@ ApplicationWindow {
                     Layout.fillHeight: true
                     color: "#e7e8ea"
                     clip: true
+                    Rectangle {
+                        id: storeCalculatingBar
+                        objectName: "storeCalculatingBar"
+                        z: 10
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.margins: 8
+                        width: storeCalculatingRow.implicitWidth + 16
+                        height: storeCalculatingRow.implicitHeight + 8
+                        radius: 4
+                        color: "#fff8e1"
+                        border.color: "#e0c97a"
+                        visible: mainWindow.studioController.storeCalculating > 0 || mainWindow.studioController.storeCanRecalculate
+                        Row {
+                            id: storeCalculatingRow
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: "#425466"
+                                text: mainWindow.studioController.storeCalculating > 0 ? "Calculating..." : "A calculation was stopped."
+                            }
+                            Button {
+                                objectName: "storeCancelButton"
+                                visible: mainWindow.studioController.storeCalculating > 0
+                                text: "Cancel"
+                                onClicked: mainWindow.studioController.cancelStoreCalculations()
+                            }
+                            Button {
+                                objectName: "storeCalculateAgainButton"
+                                visible: mainWindow.studioController.storeCalculating === 0 && mainWindow.studioController.storeCanRecalculate
+                                text: "Calculate again"
+                                onClicked: mainWindow.studioController.recalculateStore()
+                            }
+                        }
+                    }
                     Flickable {
                         id: reportViewport
                         anchors.fill: parent

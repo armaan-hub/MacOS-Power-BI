@@ -2000,6 +2000,11 @@ class StudioController(QObject):
     fieldQueryChanged = Signal(str)
     activeSourceReady = Signal()
     reportBusyChanged = Signal(bool)
+    storeRequestsIdle = Signal()  # large-table requests: the last pending one was delivered (tests, QML)
+
+    # Large-table cards, visuals and the preview calculate on a background thread (Stage C3b). False keeps the
+    # synchronous reader path (the one lists and validation still use); only tests switch it.
+    _store_async = True
 
     def __init__(
         self,
@@ -2035,6 +2040,15 @@ class StudioController(QObject):
         self._silent_refusal_notice_shown = False
         self._store_visual_batch_deadline: float | None = None
         self._store_visual_last_end = 0.0
+        self._store_requests: Any = None  # StoreRequestManager, created on the first background request of an S1 project
+        self._store_state: dict[Any, tuple[Any, str, Any]] = {}  # slot -> (key, "pending" | "done", payload)
+        self._store_identity_n = 0
+        self._store_identity_obj: tuple[Any, Any] | None = None
+        self._store_state_emit_scheduled = False
+        self._store_applied = 0  # results applied to the screen state (tests count them)
+        self._store_dropped = 0  # results dropped because their key no longer matched
+        self._store_preview_params: dict[str, Any] | None = None
+        self._store_refresh_after_job = False  # requests were forgotten for a store job (or refused as busy): refresh at its end
         self._table_expanded: dict[str, bool] = {}
         self._field_tree_cache: list[dict[str, Any]] | None = None
         self._field_tree_flat_cache: list[dict[str, Any]] | None = None
@@ -2155,6 +2169,7 @@ class StudioController(QObject):
         return self._project_store
 
     def _close_project_store(self) -> None:
+        self._close_store_requests()  # first: no query may run while the store closes
         if self._project_store is not None:
             store = self._project_store
             try:
@@ -2175,11 +2190,21 @@ class StudioController(QObject):
             except Exception:
                 pass
         if self._project_store is None:
+            self._close_store_requests()
             return True
         store = self._project_store
+        had_requests = self._store_requests is not None
+        if had_requests:
+            # Stop what runs and what is queued, without waiting here: store.shutdown() waits up to `timeout` for the
+            # leases to end and says False when a query cannot be stopped (the controller then stays usable).
+            self._store_requests.cancel_all(deliver=False)
         closed = store.shutdown(timeout=timeout)
         if closed:
+            self._close_store_requests()
             self._project_store = None
+        elif had_requests:
+            self._refresh_report()  # the requests were dropped by the shutdown attempt: ask again
+            self.stateChanged.emit()
         return closed
 
     def _store_tables_loaded(self) -> bool:
@@ -2254,12 +2279,19 @@ class StudioController(QObject):
         measures: dict[str, str] | None = None,
         deadline: float | None = None,
         filter_context: tuple[str, ...] = (),
+        budget_s: float | None = None,
     ) -> Any:
-        """The ONE way a measure value is read from a large table (route_measure); never the in-memory engine."""
+        """A measure value read from a large table ON THE WINDOW THREAD (route_measure, on its own reader).
+
+        Only the synchronous callers use it (measure validation, the field-well check, the preview of the synchronous
+        mode): they pass VALIDATE_BUDGET_S. Cards, visuals and the preview of the app run on the background
+        request manager instead. Never the in-memory engine.
+        """
         route = self._dax_route()
         project_store = self._project_store
         if project_store is None:
             return route.RouteRefusal("The large table is not open.", "no project store", "closed")
+        extra: dict[str, Any] = {} if budget_s is None else {"budget_s": budget_s}
         try:
             return route.route_measure(
                 self._project,
@@ -2269,6 +2301,7 @@ class StudioController(QObject):
                 measures=measures,
                 deadline=deadline,
                 filter_context=filter_context,
+                **extra,
             )
         except Exception as exc:  # nothing from the large-table path may escape into a refresh, a save or a preview
             return route.RouteRefusal(
@@ -2280,11 +2313,15 @@ class StudioController(QObject):
         return _format_report_number(answer.value) if answer.value is not None else "—"
 
     def _refresh_store_cards(self) -> None:
-        """Card and KPI values of a large-table project (shape S1): one route_measure call per measure.
+        """Card and KPI values of a large-table project (shape S1).
 
-        Runs on the window thread (interim, until large-table calculations run in the background); every call
-        shares one deadline, so a slow refresh stops early and says so instead of looping.
+        In the app (`_store_async`) every card shows "Calculating..." at once and its request goes to the background
+        request manager; the answers are applied by `_on_store_result`. Without it (tests of the synchronous reader
+        path) one route_measure call per measure runs here, all under one shared deadline.
         """
+        if self._store_async:
+            self._refresh_store_cards_async()
+            return
         route = self._dax_route()
         deadline = route.refresh_deadline()
         filter_context, filter_refusal = self._store_filter_context(None)
@@ -2429,13 +2466,75 @@ class StudioController(QObject):
             for key in keys if by_key[key] is not None
         ]
 
+    def _store_visual_spec(
+        self, visual_name: str, *, include_highlights: bool, value_well: str | None
+    ) -> tuple[dict[str, Any] | None, str]:
+        """GUI thread, no store query: what one visual asks of the store, or why it asks nothing.
+
+        Returns (spec, notice). spec is None when there is nothing to ask (notice is the sentence to show once per
+        store epoch, or empty for a silent empty visual). The spec holds plain values only.
+        """
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None:
+            return None, ""
+        vtype = str(visual.get("type", ""))
+        if vtype not in self._STORE_VISUAL_TYPES:
+            return None, f"{visual_name} cannot show a large table yet."
+        fields = visual.get("fields", {})
+        if value_well is None:
+            value_well = "Column Y-axis" if vtype == "lineClusteredColumn" else "Y-axis"
+        x_axis = fields.get("Fields", []) if vtype == "slicer" and not fields.get("X-axis") else fields.get("X-axis", [])
+        y_axis = fields.get(value_well, [])
+        if vtype == "lineClusteredColumn" and not y_axis:
+            return None, ""
+        if not x_axis and not y_axis:
+            return None, ""
+        grouping = list(x_axis) if isinstance(x_axis, list) else []
+        grouping += [item for well in self._STORE_LEGEND_WELLS for item in (fields.get(well) or [])]
+        if len(grouping) > 1:
+            return None, f"{visual_name} uses more than one grouping field, which large tables do not support yet."
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        x_binding = _visual_well_binding(x_axis, bound_table_id)
+        if x_binding is None or _visual_measure_name(x_binding[1]) is not None:
+            return None, ""
+        if include_highlights:
+            return None, "Highlight interactions are not available on a large table yet."
+        table = self._store_table()
+        table_name = str(table.get("name", "")) if table else ""
+        if table is None or x_binding[0] != str(table.get("id") or table.get("source_id") or "") or not table_name:
+            return None, f"{visual_name} refers to a table that large tables cannot show yet."
+        if self._project_store is None:
+            return None, ""
+        context, refusal = self._store_filter_context(visual_name, include_highlights=include_highlights)
+        if refusal:
+            return None, refusal
+        column = x_binding[1]
+        measure_name = None
+        if vtype != "slicer":
+            measure_name = _visual_measure_name(_visual_field_column(y_axis[0])) if y_axis else None
+            if measure_name is None:
+                return None, f"{visual_name} needs a DAX measure in its value well on a large table."
+        return {
+            "visual_name": visual_name, "vtype": vtype, "value_well": value_well, "table_name": table_name,
+            "column": column, "x_table_id": x_binding[0], "bound_table_id": bound_table_id, "context": context,
+            "measure_name": measure_name, "include_highlights": include_highlights,
+            "column_type": str(table.get("column_types", {}).get(column, "text")),
+        }, ""
+
     def _store_visual_series(
         self, visual_name: str, *, include_highlights: bool = False, value_well: str | None = None
     ) -> list[dict[str, object]]:
         """The series of one bar, column, line, pie or slicer visual of a large table, from the store.
 
-        Never raises. A refusal returns [] and sets one status line (once per store epoch).
+        Never raises. A refusal returns [] and sets one status line (once per store epoch). In the app the series
+        comes from the background request of this visual: the getter returns [] while it is calculating.
         """
+        if self._store_async:
+            return self._store_visual_series_async(visual_name, include_highlights, value_well)
         started = _monotonic()
         try:
             return self._store_visual_series_inner(
@@ -2450,78 +2549,75 @@ class StudioController(QObject):
     def _store_visual_series_inner(
         self, visual_name: str, *, include_highlights: bool, value_well: str | None
     ) -> list[dict[str, object]]:
+        """The synchronous reader path (window thread, shared page deadline): used when `_store_async` is off."""
         route = self._dax_route()
-        page = self._active_page()
-        visual = next((
-            item for item in (page.get("visuals", []) if page else [])
-            if isinstance(item, dict) and item.get("title") == visual_name
-        ), None)
-        if visual is None:
-            return []
-        vtype = str(visual.get("type", ""))
-        if vtype not in self._STORE_VISUAL_TYPES:
-            self._notice_silent_message(f"{visual_name} cannot show a large table yet.")
-            return []
-        fields = visual.get("fields", {})
-        if value_well is None:
-            value_well = "Column Y-axis" if vtype == "lineClusteredColumn" else "Y-axis"
-        x_axis = fields.get("Fields", []) if vtype == "slicer" and not fields.get("X-axis") else fields.get("X-axis", [])
-        y_axis = fields.get(value_well, [])
-        if vtype == "lineClusteredColumn" and not y_axis:
-            return []
-        if not x_axis and not y_axis:
-            return []
-        grouping = list(x_axis) if isinstance(x_axis, list) else []
-        grouping += [item for well in self._STORE_LEGEND_WELLS for item in (fields.get(well) or [])]
-        if len(grouping) > 1:
-            self._notice_silent_message(
-                f"{visual_name} uses more than one grouping field, which large tables do not support yet."
-            )
-            return []
-        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
-        x_binding = _visual_well_binding(x_axis, bound_table_id)
-        if x_binding is None or _visual_measure_name(x_binding[1]) is not None:
-            return []
-        if include_highlights:
-            self._notice_silent_message("Highlight interactions are not available on a large table yet.")
-            return []
-        table = self._store_table()
-        table_name = str(table.get("name", "")) if table else ""
-        if table is None or x_binding[0] != str(table.get("id") or table.get("source_id") or "") or not table_name:
-            self._notice_silent_message(f"{visual_name} refers to a table that large tables cannot show yet.")
+        spec, notice = self._store_visual_spec(visual_name, include_highlights=include_highlights, value_well=value_well)
+        if spec is None:
+            if notice:
+                self._notice_silent_message(notice)
             return []
         project_store = self._project_store
-        if project_store is None:
-            return []
-        context, refusal = self._store_filter_context(visual_name, include_highlights=include_highlights)
-        if refusal:
-            self._notice_silent_message(refusal)
-            return []
         deadline = self._store_visual_deadline()
-        column = x_binding[1]
-        if vtype == "slicer":
+        column = spec["column"]
+        if spec["vtype"] == "slicer":
             labels = route.route_distinct_values(
-                self._project, table_name, column, project_store=project_store, filter_context=context,
-                deadline=deadline, candidates=self._loaded_candidates,
+                self._project, spec["table_name"], column, project_store=project_store,
+                filter_context=spec["context"], deadline=deadline, candidates=self._loaded_candidates,
             )
             if isinstance(labels, route.RouteRefusal):
                 self._notice_silent_message(labels.message)
                 return []
-            return self._store_ordered_rows([(label, Decimal(1)) for label in labels], x_binding[0], column, bound_table_id)
-        measure_name = _visual_measure_name(_visual_field_column(y_axis[0])) if y_axis else None
-        if measure_name is None:
-            self._notice_silent_message(f"{visual_name} needs a DAX measure in its value well on a large table.")
-            return []
+            return self._store_ordered_rows(
+                [(label, Decimal(1)) for label in labels], spec["x_table_id"], column, spec["bound_table_id"]
+            )
         answer = route.route_grouped(
-            self._project, measure_name, (table_name, column), project_store=project_store,
-            filter_context=context, deadline=deadline, candidates=self._loaded_candidates,
+            self._project, spec["measure_name"], (spec["table_name"], column), project_store=project_store,
+            filter_context=spec["context"], deadline=deadline, candidates=self._loaded_candidates,
         )
         if isinstance(answer, route.RouteRefusal):
             self._notice_silent_message(answer.message)
             return []
-        column_type = str(table.get("column_types", {}).get(column, "text"))
-        rows = [(route.label_for_key(key, column_type), value) for key, value in answer.rows]
-        return self._store_ordered_rows(rows, x_binding[0], column, bound_table_id)
+        rows = [(route.label_for_key(key, spec["column_type"]), value) for key, value in answer.rows]
+        return self._store_ordered_rows(rows, spec["x_table_id"], column, spec["bound_table_id"])
+
+    @staticmethod
+    def _store_visual_compute(
+        snapshot: Any, project_store: Any, vtype: str, table_name: str, column: str, measure_name: str | None,
+        context: tuple[str, ...], reader: Any, cancel: Any,
+    ) -> Any:
+        """The worker function of a visual: plain arguments only, never the controller. Runs on the request thread."""
+        route = StudioController._dax_route()
+        if vtype == "slicer":
+            return route.route_distinct_values(
+                snapshot, table_name, column, project_store=project_store, filter_context=context,
+                budget_s=route.BACKGROUND_BUDGET_S, deadline=None, reader=reader, cancel=cancel,
+            )
+        return route.route_grouped(
+            snapshot, str(measure_name), (table_name, column), project_store=project_store, filter_context=context,
+            budget_s=route.BACKGROUND_BUDGET_S, deadline=None, reader=reader, cancel=cancel,
+        )
+
+    @staticmethod
+    def _store_card_compute(
+        snapshot: Any, project_store: Any, name: str, context: tuple[str, ...], reader: Any, cancel: Any
+    ) -> Any:
+        """The worker function of a card: plain arguments only."""
+        route = StudioController._dax_route()
+        return route.route_measure(
+            snapshot, name, project_store=project_store, filter_context=context,
+            budget_s=route.BACKGROUND_BUDGET_S, deadline=None, reader=reader, cancel=cancel,
+        )
+
+    @staticmethod
+    def _store_preview_compute(
+        snapshot: Any, project_store: Any, name: str, by_name: dict[str, str], reader: Any, cancel: Any
+    ) -> Any:
+        """The worker function of the measure preview: plain arguments only."""
+        route = StudioController._dax_route()
+        return route.route_measure(
+            snapshot, name, project_store=project_store, measures=by_name,
+            budget_s=route.BACKGROUND_BUDGET_S, deadline=None, reader=reader, cancel=cancel,
+        )
 
     def _store_distinct_values(self, table_id: str, column: str, *, search: str = "") -> list[str] | None:
         """The values of one column of the store table for a slicer or filter list, or None after a refusal (status set)."""
@@ -2533,7 +2629,8 @@ class StudioController(QObject):
         try:
             values = route.route_distinct_values(
                 self._project, str(table.get("name", "")), column, project_store=self._project_store, search=search,
-                deadline=route.refresh_deadline(route.DEFAULT_VISUAL_REFRESH_BUDGET_S), candidates=self._loaded_candidates,
+                budget_s=route.GUI_LIST_BUDGET_S,
+                deadline=route.refresh_deadline(route.GUI_LIST_BUDGET_S), candidates=self._loaded_candidates,
             )
         except Exception as exc:
             self._notice_silent_message(f"The values could not be listed ({type(exc).__name__}).")
@@ -2596,7 +2693,7 @@ class StudioController(QObject):
             if well_name not in self._STORE_VALUE_WELLS:
                 return ""  # the ordinary rules say where a measure may go
             route = self._dax_route()
-            answer = self._route_store_measure(measure_name)
+            answer = self._route_store_measure(measure_name, budget_s=route.VALIDATE_BUDGET_S)
             return answer.message if isinstance(answer, route.RouteRefusal) else ""
         if well_name in self._STORE_VALUE_WELLS:
             return "A visual of a large table needs a DAX measure in its value well, not a column."
@@ -2644,10 +2741,506 @@ class StudioController(QObject):
     def _validate_store_measures(self, candidate_measures: list[dict[str, Any]], names: list[str]) -> None:
         """Raise MeasureError(message) when the large table cannot compute one of `names` (checked with the candidates)."""
         by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
+        route = self._dax_route()
         for name in names:
-            answer = self._route_store_measure(name, measures=by_name)
-            if isinstance(answer, self._dax_route().RouteRefusal):
+            answer = self._route_store_measure(name, measures=by_name, budget_s=route.VALIDATE_BUDGET_S)
+            if isinstance(answer, route.RouteRefusal):
                 raise MeasureError(answer.message)
+
+    # --- Background requests of a large table (Stage C3b). ---
+    # Cards, visuals and the measure preview of a project in shape S1 are calculated on one worker thread. A request
+    # has a SLOT (what is calculated) and a KEY (everything that decides the answer, computed here without a store
+    # query). A result is applied only if the key recomputed from the CURRENT state still equals the key it was
+    # computed for; every other result is dropped. The worker reads a RouteSnapshot, its own reader and plain tuples,
+    # never the controller; all writes to controller state happen in `_on_store_result` on the window thread.
+    _STORE_KPI_DEFAULTS = frozenset({"Revenue", "Cost", "Margin", "Units", "Orders"})
+
+    @staticmethod
+    def _route_requests() -> Any:
+        """The background request module, imported on first use (it loads the store stack)."""
+        from analytics_studio.store import route_requests
+
+        return route_requests
+
+    def _store_ident(self) -> int:
+        """The store identity: a counter that changes whenever the project store, or the DuckStore inside it, is replaced."""
+        project_store = self._project_store
+        inner = None
+        if project_store is not None:
+            try:
+                inner = project_store.store
+            except Exception:
+                inner = None
+        current = self._store_identity_obj
+        if current is None or current[0] is not project_store or current[1] is not inner:
+            self._store_identity_n += 1
+            self._store_identity_obj = (project_store, inner)
+        return self._store_identity_n
+
+    def _bump_store_identity(self) -> None:
+        self._store_identity_n += 1
+        self._store_identity_obj = None
+
+    def _store_key_base(self) -> tuple[Any, ...]:
+        """Store identity, physical table names, their versions, the model table and its column types. No store query."""
+        table = self._store_table()
+        physical = tuple(sorted(
+            (str(source_id), str(getattr(candidate, "store_table", "")))
+            for source_id, candidate in self._loaded_candidates.items()
+            if getattr(candidate, "is_store_backed", False)
+        ))
+        try:
+            inner = self._project_store.store if self._project_store is not None else None
+            versions: Any = tuple(inner.table_version(name) for _, name in physical) if inner is not None else None
+        except Exception:
+            versions = None
+        column_types = tuple(sorted((str(c), str(t)) for c, t in dict(table.get("column_types", {})).items())) if table else ()
+        return (self._store_ident(), physical, versions, str(table.get("name", "")) if table else "", column_types)
+
+    def _store_closure(self, name_or_expression: str, measures: dict[str, str]) -> tuple[str, ...]:
+        """The expression and the text of every measure it uses (through other measures too), case kept."""
+        route = self._dax_route()
+        folded = {key.casefold(): body for key, body in measures.items()}
+        expression = folded.get(name_or_expression.strip().casefold(), name_or_expression)
+        texts = [expression]
+        seen: set[str] = set()
+        pending = [expression]
+        while pending:
+            found: set[str] = set()
+            try:
+                route._referenced_measure_names(route.parse_expression(pending.pop()), found)
+            except Exception:
+                continue
+            for reference in sorted(found):
+                if reference in folded and reference not in seen:
+                    seen.add(reference)
+                    texts.append(folded[reference])
+                    pending.append(folded[reference])
+        return tuple(texts)
+
+    def _store_measure_map(self) -> dict[str, str]:
+        return {
+            str(item["name"]): str(item["expression"])
+            for item in self._project.get("model", {}).get("measures", [])
+            if isinstance(item, dict) and "name" in item and "expression" in item
+        }
+
+    def _store_slot_key(
+        self,
+        kind: str,
+        name: str,
+        *,
+        value_well: str | None = None,
+        include_highlights: bool = False,
+        filter_context: tuple[tuple[str, ...], str] | None = None,
+        by_name: dict[str, str] | None = None,
+    ) -> tuple[Any, ...] | None:
+        """The key of one request (None when the slot cannot be asked any more). Pure: reads state, queries nothing.
+
+        card: the measure, the measures it uses, the card filters; visual: type, wells, filters, the value measure;
+        preview: the draft measure and the model's measures. All three start with the store identity, the physical
+        table names and their versions.
+        """
+        base = self._store_key_base()
+        if kind == "card":
+            measures = self._store_measure_map()
+            if not any(key.casefold() == name.casefold() for key in measures):
+                return None
+            context, refusal = filter_context if filter_context is not None else self._store_filter_context(None)
+            return ("card", base, name, self._store_closure(name, measures), context, refusal)
+        if kind == "visual":
+            spec, notice = self._store_visual_spec(name, include_highlights=include_highlights, value_well=value_well)
+            if spec is None:
+                return None
+            measures = self._store_measure_map()
+            closure = self._store_closure(spec["measure_name"], measures) if spec["measure_name"] else ()
+            return (
+                "visual", base, spec["visual_name"], spec["vtype"], spec["value_well"], spec["table_name"],
+                spec["column"], spec["column_type"], spec["x_table_id"], spec["bound_table_id"], spec["context"],
+                spec["measure_name"], closure, bool(spec["include_highlights"]),
+            )
+        if kind == "preview":
+            by_name = by_name or {}
+            return ("preview", base, name, self._store_closure(name, by_name), tuple(sorted(by_name.items())))
+        raise ValueError(f"unknown request kind {kind!r}")
+
+    def _store_key_for_slot(self, slot: tuple[Any, ...]) -> tuple[Any, ...] | None:
+        kind = slot[0]
+        if kind == "card":
+            return self._store_slot_key("card", str(slot[1]))
+        if kind == "visual":
+            return self._store_slot_key(
+                "visual", str(slot[1]), value_well=slot[2], include_highlights=bool(slot[3])
+            )
+        if kind == "preview":
+            params = self._store_preview_params
+            if params is None:
+                return None
+            return self._store_slot_key("preview", params["measure_name"], by_name=params["by_name"])
+        return None
+
+    def _store_snapshot(self) -> Any:
+        """A deep copy of what the route reads from the project and the candidates (for a worker thread)."""
+        return self._dax_route().snapshot_for_route(self._project, self._loaded_candidates)
+
+    def _ensure_store_requests(self) -> Any:
+        """The request manager of the open project store (created on first use), or None when no store is open."""
+        project_store = self._project_store
+        if project_store is None or project_store.closed:
+            return None
+        manager = self._store_requests
+        if manager is not None and manager.project_store is project_store:
+            return manager
+        if manager is not None:
+            self._close_store_requests()
+        manager = self._route_requests().StoreRequestManager(project_store, self)
+        manager.finished.connect(self._on_store_result)
+        manager.idle.connect(self._on_store_idle)
+        self._store_requests = manager
+        return manager
+
+    def _close_store_requests(self) -> None:
+        """Cancel every request, wait for the worker and forget all results. Safe to call at any time."""
+        manager = self._store_requests
+        self._store_requests = None
+        self._store_state.clear()
+        self._store_preview_params = None
+        if manager is not None:
+            try:
+                manager.close(wait=True)
+            except Exception:
+                logger.exception("Closing the large-table request manager failed")
+        self._bump_store_identity()
+
+    def _cancel_store_requests_for_job(self) -> None:
+        """Before an import, append, reload, Save As or any other exclusive store job: end every read lease.
+
+        The requests are forgotten (their answers never arrive); the report is refreshed when the job ends.
+        """
+        manager = self._store_requests
+        if manager is not None:
+            self._store_refresh_after_job = True
+            manager.cancel_all(wait=True, deliver=False)
+
+    def _reset_store_requests(self) -> None:
+        """Forget every result and stop every request except the preview: the next refresh asks again."""
+        manager = self._store_requests
+        if manager is not None:
+            manager.cancel_all(deliver=False, keep=(self._route_requests().PREVIEW_SLOT,))
+        keep = self._route_requests().PREVIEW_SLOT
+        for slot in [slot for slot in self._store_state if slot != keep]:
+            del self._store_state[slot]
+
+    def _schedule_store_state_emit(self) -> None:
+        """At most one stateChanged per event-loop turn for the results of the background requests."""
+        if self._store_state_emit_scheduled:
+            return
+        self._store_state_emit_scheduled = True
+        QTimer.singleShot(0, self._flush_store_state_emit)
+
+    def _flush_store_state_emit(self) -> None:
+        if not self._store_state_emit_scheduled:
+            return
+        self._store_state_emit_scheduled = False
+        self.stateChanged.emit()
+
+    def _on_store_idle(self) -> None:
+        self._flush_store_state_emit()
+        self.stateChanged.emit()  # storeCalculating is 0 now
+        self.storeRequestsIdle.emit()
+
+    def _store_submit(
+        self, slot: tuple[Any, ...], key: tuple[Any, ...], work: Any
+    ) -> bool:
+        """Queue one request for `slot` (replacing an older one) and mark the slot pending. False: no store is open."""
+        manager = self._ensure_store_requests()
+        if manager is None:
+            return False
+        self._store_state[slot] = (key, "pending", None)
+        manager.submit(slot, key, work)
+        self._schedule_store_state_emit()  # storeCalculating changed (not from inside a QML binding: next loop turn)
+        return True
+
+    def _refresh_store_cards_async(self) -> None:
+        rr = self._route_requests()
+        filter_context = self._store_filter_context(None)
+        context, filter_refusal = filter_context
+        measures = [str(m["name"]) for m in self._project.get("model", {}).get("measures", [])]
+        if filter_refusal:
+            for name in measures:
+                self._measure_errors[name] = filter_refusal
+            return
+        project_store = self._project_store
+        if project_store is None or project_store.closed:
+            for name in measures:
+                self._measure_errors[name] = "The large table is not open."
+            return
+        snapshot = self._store_snapshot()
+        compute = self._store_card_compute
+        for name in measures:
+            key = self._store_slot_key("card", name, filter_context=filter_context)
+            if key is None:
+                continue
+            self._measure_values[name] = rr.CALCULATING_TEXT
+            self._kpis[name] = rr.CALCULATING_TEXT
+            self._store_submit(
+                ("card", name), key,
+                lambda reader, cancel, name=name: compute(snapshot, project_store, name, context, reader, cancel),
+            )
+
+    def _store_visual_series_async(
+        self, visual_name: str, include_highlights: bool, value_well: str | None
+    ) -> list[dict[str, object]]:
+        """Window thread: the series of a visual if its request has finished for the current key; else ask and return []."""
+        try:
+            spec, notice = self._store_visual_spec(
+                visual_name, include_highlights=include_highlights, value_well=value_well
+            )
+            if spec is None:
+                if notice:
+                    self._notice_silent_message(notice)
+                return []
+            slot = ("visual", visual_name, spec["value_well"], bool(include_highlights))
+            key = self._store_slot_key(
+                "visual", visual_name, value_well=spec["value_well"], include_highlights=include_highlights
+            )
+            if key is None:
+                return []
+            state = self._store_state.get(slot)
+            if state is not None and state[0] == key:
+                if state[1] == "done":
+                    return [dict(item) for item in state[2].get("series", [])]
+                return []  # still calculating: the same key never starts a second request
+            project_store = self._project_store
+            if project_store is None or project_store.closed:
+                return []
+            snapshot = self._store_snapshot()
+            compute = self._store_visual_compute
+            vtype, table_name, column = spec["vtype"], spec["table_name"], spec["column"]
+            measure_name, context = spec["measure_name"], spec["context"]
+            self._store_submit(
+                slot, key,
+                lambda reader, cancel: compute(
+                    snapshot, project_store, vtype, table_name, column, measure_name, context, reader, cancel
+                ),
+            )
+            return []
+        except Exception as exc:
+            self._notice_silent_message(f"{visual_name} could not be computed ({type(exc).__name__}).")
+            return []
+
+    def _store_visual_message(self, visual_name: str) -> str:
+        """The text a visual of a large table shows instead of data: Calculating..., canceled, timeout, busy or the refusal."""
+        rr = self._route_requests()
+        for slot in [slot for slot in self._store_state if slot[0] == "visual" and slot[1] == visual_name]:
+            key, status, payload = self._store_state[slot]
+            if key != self._store_key_for_slot(slot):
+                continue
+            if status == "pending":
+                return rr.CALCULATING_TEXT
+            if payload.get("text"):
+                return str(payload["text"])
+        return ""
+
+    def _apply_store_card(self, name: str, answer: Any) -> dict[str, Any]:
+        route = self._dax_route()
+        rr = self._route_requests()
+        self._measure_values.pop(name, None)
+        if isinstance(answer, route.RouteRefusal):
+            if self._kpis.get(name) == rr.CALCULATING_TEXT:
+                if name in self._STORE_KPI_DEFAULTS:
+                    self._kpis[name] = "—"
+                else:
+                    self._kpis.pop(name, None)
+            text = rr.CANCELED_TEXT if answer.code == route.CODE_CANCELED else answer.message
+            self._measure_errors[name] = text
+            return {"text": text, "code": answer.code}
+        text = self._store_answer_text(answer)
+        self._measure_errors.pop(name, None)
+        self._measure_values[name] = text
+        self._kpis[name] = text
+        return {"text": "", "code": ""}
+
+    def _apply_store_visual(self, slot: tuple[Any, ...], answer: Any) -> dict[str, Any]:
+        route = self._dax_route()
+        rr = self._route_requests()
+        spec, _notice = self._store_visual_spec(
+            str(slot[1]), include_highlights=bool(slot[3]), value_well=slot[2]
+        )
+        if isinstance(answer, route.RouteRefusal):
+            if answer.code == route.CODE_CANCELED:
+                return {"series": [], "text": rr.CANCELED_TEXT, "code": answer.code}
+            self._notice_silent_message(answer.message)
+            return {"series": [], "text": answer.message, "code": answer.code}
+        if spec is None:
+            return {"series": [], "text": "", "code": ""}
+        column = spec["column"]
+        if spec["vtype"] == "slicer":
+            rows = [(label, Decimal(1)) for label in answer]
+        else:
+            rows = [(route.label_for_key(key, spec["column_type"]), value) for key, value in answer.rows]
+        series = self._store_ordered_rows(rows, spec["x_table_id"], column, spec["bound_table_id"])  # app key order: here, never on the worker
+        return {"series": series, "text": "", "code": ""}
+
+    def _apply_store_preview(self, answer: Any) -> None:
+        route = self._dax_route()
+        params = self._store_preview_params
+        if params is None:
+            return
+        if params["request_id"] != self._preview_request_id:
+            return  # a newer preview, a cancel or an engine call replaced this one
+        self._store_preview_params = None
+        self._preview_job = None
+        self._set_preview_busy_for(None)
+        if isinstance(answer, route.RouteRefusal):
+            text = "Cancelled" if answer.code == route.CODE_CANCELED else answer.message
+        else:
+            text = self._store_answer_text(answer)
+        params["on_done"](text)
+
+    def _on_store_result(self, slot: Any, key: Any, answer: Any, request_id: int) -> None:
+        """Window thread: apply a finished background request if its key still matches the current state."""
+        try:
+            self._apply_store_result(slot, key, answer)
+        except Exception:
+            logger.exception("Applying a large-table result failed")
+            try:
+                state = self._store_state.get(slot)
+                if state is not None and state[0] == key and state[1] == "pending":
+                    text = "This result could not be shown."
+                    self._store_state[slot] = (key, "done", {"series": [], "text": text, "code": "plan"})
+                    if slot[0] == "card":  # never leave "Calculating..." on a card for a result that was lost
+                        name = str(slot[1])
+                        self._measure_values.pop(name, None)
+                        if name in self._STORE_KPI_DEFAULTS:
+                            self._kpis[name] = "—"
+                        else:
+                            self._kpis.pop(name, None)
+                        self._measure_errors[name] = text
+                    self._schedule_store_state_emit()
+            except Exception:
+                pass
+
+    def _apply_store_result(self, slot: Any, key: Any, answer: Any) -> None:
+        state = self._store_state.get(slot)
+        if state is None or state[0] != key or state[1] != "pending":
+            self._store_dropped += 1  # cleared by a refresh, or replaced by a request for another key
+            return
+        if self._store_key_for_slot(slot) != key:
+            # The data, a filter, the measure or the visual changed while this was calculating: it is out of date.
+            self._store_dropped += 1
+            del self._store_state[slot]
+            self._store_after_drop(slot)
+            return
+        kind = slot[0]
+        if kind == "card":
+            payload = self._apply_store_card(str(slot[1]), answer)
+        elif kind == "visual":
+            payload = self._apply_store_visual(slot, answer)
+        else:
+            payload = {"code": ""}
+        self._store_state[slot] = (key, "done", payload)
+        if payload.get("code") == self._dax_route().CODE_BUSY:
+            self._store_refresh_after_job = True  # an import or save is running: recompute when it ends
+        if kind == "preview":
+            self._apply_store_preview(answer)
+        self._store_applied += 1
+        self._schedule_store_state_emit()
+
+    def _store_after_drop(self, slot: tuple[Any, ...]) -> None:
+        """A result was out of date: ask again for the current key (cards, preview) or let the next read ask (visuals)."""
+        kind = slot[0]
+        if kind == "card":
+            if self._store_s1():
+                filter_context = self._store_filter_context(None)
+                context, refusal = filter_context
+                name = str(slot[1])
+                key = self._store_slot_key("card", name, filter_context=filter_context)
+                project_store = self._project_store
+                if key is not None and not refusal and project_store is not None and not project_store.closed:
+                    snapshot = self._store_snapshot()
+                    compute = self._store_card_compute
+                    self._measure_values[name] = self._route_requests().CALCULATING_TEXT
+                    self._store_submit(
+                        slot, key,
+                        lambda reader, cancel: compute(snapshot, project_store, name, context, reader, cancel),
+                    )
+        elif kind == "preview":
+            params = self._store_preview_params
+            if params is not None and params["request_id"] == self._preview_request_id:
+                self._store_preview_params = None
+                self._submit_store_preview(
+                    params["name"], params["expression"], params["on_done"],
+                    params["editing_name"], params["home_table_id"], params["request_id"],
+                )
+        self._schedule_store_state_emit()
+
+    def _submit_store_preview(
+        self, name: str, expression: str, on_done: Any, editing_name: str | None,
+        home_table_id: str | None, request_id: int | None = None,
+    ) -> None:
+        """The measure preview of a large table, on the background request manager (slot "preview")."""
+        try:
+            measure, candidate_measures, _ = self._preview_candidate(
+                name, expression, editing_name=editing_name, home_table_id=home_table_id
+            )
+        except Exception as exc:
+            on_done(str(exc))
+            return
+        by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
+        measure_name = str(measure["name"])
+        project_store = self._project_store
+        if project_store is None or project_store.closed:
+            on_done("The large table is not open.")
+            return
+        if request_id is None:
+            self._preview_request_id += 1
+            request_id = self._preview_request_id
+        self._preview_job = (name, expression, on_done, editing_name, home_table_id)
+        self._set_preview_busy_for(request_id)
+        self._store_preview_params = {
+            "request_id": request_id, "name": name, "expression": expression, "on_done": on_done,
+            "editing_name": editing_name, "home_table_id": home_table_id, "measure_name": measure_name,
+            "by_name": by_name,
+        }
+        key = self._store_slot_key("preview", measure_name, by_name=by_name)
+        snapshot = self._store_snapshot()
+        compute = self._store_preview_compute
+        self._store_submit(
+            self._route_requests().PREVIEW_SLOT, key,
+            lambda reader, cancel: compute(snapshot, project_store, measure_name, by_name, reader, cancel),
+        )
+
+    @Property(int, notify=stateChanged)
+    def storeCalculating(self) -> int:  # noqa: N802
+        """How many large-table requests are queued or running."""
+        manager = self._store_requests
+        return manager.pending() if manager is not None else 0
+
+    @Property(bool, notify=stateChanged)
+    def storeCanRecalculate(self) -> bool:  # noqa: N802
+        """True when a card or a visual of a large table shows the canceled or timeout text (QML offers Calculate again)."""
+        route = self._dax_route() if self._store_state else None
+        for _key, status, payload in self._store_state.values():
+            if status == "done" and isinstance(payload, dict) and payload.get("code") in (route.CODE_CANCELED, route.CODE_TIMEOUT):
+                return True
+        return False
+
+    @Slot()
+    def cancelStoreCalculations(self) -> None:  # noqa: N802
+        """Cancel every running or queued large-table request; their cards and visuals say so (Calculate again restarts)."""
+        manager = self._store_requests
+        if manager is not None:
+            manager.cancel_all()
+
+    @Slot()
+    def recalculateStore(self) -> None:  # noqa: N802
+        """Forget every large-table result (also the canceled ones) and ask again."""
+        if not (self._store_async and self._store_requests is not None and self._store_s1()):
+            return
+        self._reset_store_requests()
+        self._refresh_store_cards()
+        self.stateChanged.emit()
 
     # QML-facing state. The dictionaries/lists are returned as fresh QVariant values.
     @Property(str, notify=stateChanged)
@@ -3753,6 +4346,10 @@ class StudioController(QObject):
 
     @Slot(str, result=str)
     def visualErrorMessage(self, visual_name: str) -> str:  # noqa: N802
+        if self._store_async and self._store_requests is not None and self._store_s1():
+            message = self._store_visual_message(visual_name)
+            if message:
+                return message
         page = self._active_page()
         visual = next((
             item for item in (page.get("visuals", []) if page else [])
@@ -8038,6 +8635,7 @@ class StudioController(QObject):
         active_parser_options = dict(linked_source.get("parser_options", {})) if linked_source else {}
 
         # Swap store state
+        self._close_store_requests()  # the requests belong to the store this window is leaving
         if opened_store is not None:
             if old_store_to_close is not None:
                 try:
@@ -8952,6 +9550,7 @@ class StudioController(QObject):
         job.signals.canceled.connect(self._on_large_import_canceled)
         job.signals.done.connect(self._on_large_import_done)
 
+        self._cancel_store_requests_for_job()  # a read lease would make job() refuse; the report is refreshed when the job ends
         try:
             job.start(QThreadPool.globalInstance())
         except StoreError as exc:
@@ -8964,6 +9563,7 @@ class StudioController(QObject):
                 self._close_project_store()
             self._large_import_created_store = False
             self._set_status(str(exc))
+            self._refresh_store_after_job()
             return False
 
         return True
@@ -9003,6 +9603,16 @@ class StudioController(QObject):
             dialog.deleteLater()
         if created_store and not self._store_tables_loaded():
             self._close_project_store()
+        self._refresh_store_after_job()
+
+    def _refresh_store_after_job(self) -> None:
+        """A store job ended (or never started): cards and visuals that were refused as busy, or forgotten, ask again."""
+        if not self._store_refresh_after_job:
+            return
+        self._store_refresh_after_job = False
+        if self._store_async and self._store_s1():
+            self._refresh_report()
+            self.stateChanged.emit()
 
     def _drop_orphan_table(
         self,
@@ -9361,6 +9971,7 @@ class StudioController(QObject):
         job.signals.canceled.connect(self._on_large_import_canceled)
         job.signals.done.connect(self._on_large_import_done)
 
+        self._cancel_store_requests_for_job()  # a read lease would make job() refuse; the report is refreshed when the job ends
         try:
             job.start(QThreadPool.globalInstance())
         except StoreError as exc:
@@ -9371,6 +9982,7 @@ class StudioController(QObject):
             self._large_import_project_store = None
             self._large_import_is_reload = False
             self._set_status(str(exc))
+            self._refresh_store_after_job()
             return False
 
         return True
@@ -11099,8 +11711,9 @@ class StudioController(QObject):
             name, expression, editing_name=editing_name, home_table_id=home_table_id
         )
         by_name = {str(item["name"]): str(item["expression"]) for item in candidate_measures}
-        answer = self._route_store_measure(measure["name"], measures=by_name)
-        if isinstance(answer, self._dax_route().RouteRefusal):
+        route = self._dax_route()
+        answer = self._route_store_measure(measure["name"], measures=by_name, budget_s=route.VALIDATE_BUDGET_S)
+        if isinstance(answer, route.RouteRefusal):
             raise MeasureError(answer.message)
         return self._store_answer_text(answer)
 
@@ -11121,7 +11734,10 @@ class StudioController(QObject):
         # defence in depth: _build_preview_inputs refuses too
         if self._store_tables_loaded():
             if self._store_s1():
-                # The store is thread-locked: the large-table preview runs here, on the window thread (0.5 s budget).
+                if self._store_async:
+                    self._submit_store_preview(name, expression, on_done, editing_name, home_table_id)
+                    return
+                # The synchronous mode: the preview runs here, on the window thread, on its own reader.
                 try:
                     text = self._preview_store_measure(
                         name, expression, editing_name=editing_name, home_table_id=home_table_id
@@ -11278,6 +11894,9 @@ class StudioController(QObject):
         self._dirty = True
         self._refresh_report()
         self.stateChanged.emit()
+        if self._store_tables_loaded():
+            self._set_status(f"Created measure {measure['name']}")  # its value arrives from the background request
+            return True
         value = self._measure_values.get(measure["name"], "—")
         self._set_status(f"Created measure {measure['name']} = {value}")
         return True
@@ -11384,6 +12003,9 @@ class StudioController(QObject):
         self._dirty = True
         self._refresh_report()
         self.stateChanged.emit()
+        if self._store_tables_loaded():
+            self._set_status(f"Updated measure {measure['name']}")  # its value arrives from the background request
+            return True
         value = self._measure_values.get(measure["name"], "—")
         self._set_status(f"Updated measure {measure['name']} = {value}")
         return True
@@ -16246,6 +16868,12 @@ class StudioController(QObject):
         return True
 
     def _save_to(self, path: Path) -> bool:
+        try:
+            return self._save_to_inner(path)
+        finally:
+            self._refresh_store_after_job()  # the save forgot the large-table requests (a read lease blocks copy and rebind)
+
+    def _save_to_inner(self, path: Path) -> bool:
         import shutil
         from PySide6.QtWidgets import QApplication, QMessageBox, QProgressDialog
         from analytics_studio.store.base import StoreError
@@ -16265,8 +16893,10 @@ class StudioController(QObject):
         target_existed = False
 
         if old_store is not None:
+            self._cancel_store_requests_for_job()  # copy_to and rebind are refused while a read lease is open
             if old_store.busy:
                 self._set_status("The large-data store is busy. Try again in a moment.")
+                self._refresh_store_after_job()
                 return False
 
             old_store_file = os.path.realpath(old_store.path)
@@ -16404,6 +17034,7 @@ class StudioController(QObject):
                 except StoreError as exc:
                     QMessageBox.critical(None, "Could not save project", str(exc))
                     return False
+                self._bump_store_identity()  # the DuckStore inside the session was replaced
                 if self._store_table_model is not None and hasattr(self._store_table_model, "set_store"):
                     self._store_table_model.set_store(old_store.store)
 
@@ -16828,6 +17459,9 @@ class StudioController(QObject):
         """Cancel any running preview worker task cooperatively (user cancel)."""
         self._preview_request_id += 1
         self._preview_job = None
+        self._store_preview_params = None
+        if self._store_requests is not None:
+            self._store_requests.cancel(self._route_requests().PREVIEW_SLOT, deliver=False)
         if self._preview_cancel_event is not None:
             self._preview_cancel_event.set()
         self._set_preview_busy_for(None)
@@ -16877,6 +17511,7 @@ class StudioController(QObject):
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
             if self._store_s1():
+                self._reset_store_requests()  # earlier results and requests belong to the old state: never kept
                 self._refresh_store_cards()  # the cards; the visuals ask the store when they are drawn
             else:
                 self._notice_silent_refusal("Report view")
@@ -17095,7 +17730,8 @@ class StudioController(QObject):
             self._monthly_chart_message = self._large_data_refusal("Report view")
             self._region_chart_message = self._large_data_refusal("Report view")
             if self._store_s1():
-                self._refresh_store_cards()  # on the window thread: the store is not touched from the worker
+                self._reset_store_requests()
+                self._refresh_store_cards()  # background requests (or, with _store_async off, the window thread)
             else:
                 self._notice_silent_refusal("Report view")
             self.stateChanged.emit()

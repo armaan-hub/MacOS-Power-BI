@@ -144,6 +144,7 @@ def make_store_controller(
     *,
     headers: tuple[str, ...] = ("id", "region", "product", "qty", "amt", "neg", "pay", "paid"),
     stem: str = "t",
+    async_mode: bool = False,
 ) -> tuple[StudioController, Any]:
     """A real controller whose table (file `<stem>.csv`) went through the real large-import path."""
     path = tmp_path / f"{stem}.csv"
@@ -151,11 +152,14 @@ def make_store_controller(
         writer = csv.writer(handle)
         writer.writerow(headers)
         writer.writerows(rows)
-    return import_store_controller(path, tmp_path)
+    return import_store_controller(path, tmp_path, async_mode=async_mode)
 
 
-def import_store_controller(path: Path, appdata_parent: Path) -> tuple[StudioController, Any]:
+def import_store_controller(path: Path, appdata_parent: Path, *, async_mode: bool = False) -> tuple[StudioController, Any]:
+    """The C2 tests read cards, visuals and previews right after the call that changes them, so they run on the
+    synchronous reader path (`_store_async` off); tests/test_controller_dax_async.py runs the background path."""
     controller = StudioController()
+    controller._store_async = async_mode
     appdata = appdata_parent / "appdata_store"
     appdata.mkdir(exist_ok=True)
     controller._effective_app_data_dir = lambda: str(appdata)  # type: ignore[method-assign]
