@@ -146,3 +146,34 @@ def test_create_table_from_arrow_is_flagged_until_its_bump_is_done(store: Any, m
     with pytest.raises(StoreError):  # a failed import: no bump, the flag is clear
         store.create_table_from_arrow("arr2", [("b", "text"), ("c", "text")], iter([bad]))
     assert store.table_writing("arr2") is False
+
+
+@pytest.mark.parametrize("change", ["create_table", "drop_table", "create_table_from_arrow"])
+def test_the_flag_is_cleared_when_the_bump_fails_inside_the_flagged_body(store: Any, monkeypatch: pytest.MonkeyPatch, change: str) -> None:
+    # the error comes from inside the flagged body (the bump), not from the checks before it
+    import pyarrow as pa
+
+    def boom(self: Any, name: str) -> None:
+        raise RuntimeError("bump failed")
+
+    seen: list[bool] = []
+    original_set = DuckStore._set_writing
+
+    def spy(self: Any, name: str, on: bool) -> None:
+        original_set(self, name, on)
+        seen.append(on)
+
+    monkeypatch.setattr(DuckStore, "_bump_version", boom)
+    monkeypatch.setattr(DuckStore, "_set_writing", spy)
+    name = {"create_table": "n", "drop_table": "t", "create_table_from_arrow": "arr"}[change]
+    with pytest.raises(Exception) as caught:
+        if change == "create_table":
+            store.create_table("n", [("a", "text")])
+        elif change == "drop_table":
+            store.drop_table("t")
+        else:
+            batch = pa.record_batch([pa.array(["p"], type=pa.string())], names=["a"])
+            store.create_table_from_arrow("arr", [("a", "text")], iter([batch]))
+    assert "bump failed" in str(caught.value) or "bump failed" in str(caught.value.__cause__), caught.value
+    assert seen[:1] == [True], seen  # the flag went up inside the body, so the error came from the body
+    assert store.table_writing(name) is False, change
