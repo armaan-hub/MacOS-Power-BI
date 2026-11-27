@@ -1021,17 +1021,35 @@ def _visual_of(controller: StudioController, title: str) -> dict[str, Any]:
     return next(v for v in controller._active_page()["visuals"] if v["title"] == title)
 
 
-def test_visual_with_its_own_calculate_filter_is_refused_with_its_sentence(
+def test_visual_with_its_own_calculate_filter_on_the_group_column_is_refused_with_its_sentence(
     visual_pages: dict[str, Any], visual_store: StudioController
 ) -> None:
-    """V7: the planner cannot group a measure that carries its own CALCULATE filter, whatever the column."""
-    _build_visual(visual_store, "bar", "V7 north by product", "product", "North Amount")
+    """V12: a measure whose own CALCULATE filter is on the column the visual groups by is refused (DAX replaces the
+    group filter there); the same measure grouped by another column is V11 below."""
+    _build_visual(visual_store, "bar", "V12 north by region", "region", "North Amount")
     visual_store._reset_silent_refusal_notice()
-    assert _read(visual_store, "V7 north by product") == []
+    assert _read(visual_store, "V12 north by region") == []
     assert "North Amount cannot be computed on a large table yet" in visual_store.statusMessage
-    assert "CALCULATE filter of its own" in visual_store.statusMessage
-    assert "same column" not in visual_store.statusMessage
-    visual_store.remove_visual(_visual_of(visual_store, "V7 north by product")["id"])
+    assert "CALCULATE filter of its own on the column the results are grouped by" in visual_store.statusMessage
+    assert "slicer" not in visual_store.statusMessage
+    visual_store.remove_visual(_visual_of(visual_store, "V12 north by region")["id"])
+
+
+def test_visual_with_its_own_calculate_filter_on_another_column_is_identical_to_the_twin(
+    visual_pages: dict[str, Any], visual_store: StudioController, visual_twin: StudioController
+) -> None:
+    """V11: North Amount by product (the own filter is on region, the visual groups by product)."""
+    with _quiet(visual_twin):
+        _build_visual(visual_twin, "bar", "V11 north by product", "product", "North Amount")
+        want = _read(visual_twin, "V11 north by product")
+    _build_visual(visual_store, "bar", "V11 north by product", "product", "North Amount")
+    visual_store._reset_silent_refusal_notice()
+    got = _read(visual_store, "V11 north by product")
+    assert got and got == want, (got[:3], want[:3])
+    totals = {row["label"]: row["value"] for row in _read(visual_store, "V8 sliced by product")}
+    assert all(0 < row["value"] < totals[row["label"]] for row in got), "North is part of the total of every product"
+    assert "cannot be computed" not in visual_store.statusMessage, visual_store.statusMessage
+    visual_store.remove_visual(_visual_of(visual_store, "V11 north by product")["id"])
 
 
 def test_slicer_on_the_group_by_column_is_refused_and_the_visual_is_unchanged(

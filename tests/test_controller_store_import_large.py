@@ -721,38 +721,53 @@ def test_shutdown_store_while_job_running(qapp: QApplication, tmp_path: Path, mo
 
     started_event = threading.Event()
     continue_event = threading.Event()
+    job_ended_event = threading.Event()
 
     from analytics_studio.store import large_import as li_mod
+    from analytics_studio.store.session import ProjectStore
     orig_run = li_mod.run_large_import
+    orig_request_cancel = ProjectStore.request_cancel
 
     def slow_run(*args, **kwargs):
         started_event.set()
-        # Wait until test tells us or until timeout
-        continue_event.wait(timeout=5.0)
-        return orig_run(*args, **kwargs)
+        # The job continues when it is told to cancel; the 10 s wait is only a hang guard.
+        continue_event.wait(10.0)
+        try:
+            return orig_run(*args, **kwargs)
+        finally:
+            job_ended_event.set()
+
+    def cancel_then_continue(self: Any) -> None:
+        orig_request_cancel(self)
+        continue_event.set()
 
     monkeypatch.setattr(li_mod, "run_large_import", slow_run)
+    monkeypatch.setattr(ProjectStore, "request_cancel", cancel_then_continue)
 
     with patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog", new=_FakeLargeDialog):
         with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
             controller._import_file_path(csv_file)
 
-    # Wait until job has started running in background
-    deadline = time.monotonic() + 10.0
-    while not started_event.is_set() and time.monotonic() < deadline:
+    # Wait until job has started running in background (bounded number of event-loop turns).
+    for _ in range(1000):
+        if started_event.is_set():
+            break
         qapp.processEvents()
         time.sleep(0.01)
+    assert started_event.wait(10.0), "the import job never started"
 
     assert controller._large_import_job is not None
 
-    # Call shutdown_store while running
-    closed = controller.shutdown_store(timeout=5.0)
+    # shutdown_store cancels the job; the cancel wakes the job, so the job ends by itself.
+    closed = controller.shutdown_store(timeout=10.0)
+    job_ended_when_closed = job_ended_event.is_set()
     continue_event.set()
 
     # Wait for job to finish done handler
     _wait_for_large_job(controller)
 
     assert closed is True
+    assert job_ended_when_closed is True, "shutdown_store said True while the import job was still running"
     assert controller._project_store is None
     assert controller.sourceLoaded is False
 
@@ -798,11 +813,12 @@ def test_cancel_progress_dialog_cancels_job_and_cleans_up(qapp: QApplication, tm
         assert dialog.minimumDuration() == 0
 
         # Wait until importer has started and sent progress
-        deadline = time.monotonic() + 5.0
-        while not started_event.is_set() and time.monotonic() < deadline:
+        for _ in range(1000):
+            if started_event.is_set():
+                break
             qapp.processEvents()
             time.sleep(0.01)
-        assert started_event.is_set()
+        assert started_event.wait(10.0), "the import job never started"
 
         # Let progress events dispatch
         for _ in range(5):

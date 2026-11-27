@@ -1116,6 +1116,7 @@ def test_column_decimal_meta_quotes_a_table_name_with_a_quote_and_a_space(tmp_pa
 from analytics_studio.store.dax_sql import (  # noqa: E402
     REASON_GROUP_BY_TYPE,
     REASON_GROUP_NON_ASCII_SPACE,
+    REASON_GROUP_OWN_FILTER,
     GroupByPlan,
     plan_group_by,
 )
@@ -1241,13 +1242,14 @@ def test_group_by_refusals_have_stable_reasons(gb_case: EngineCase) -> None:
     case = gb_case
     kinds = {
         "numeric key": gb(case, "SUM(t[v])", "n"),
-        "own filter": gb(case, "CALCULATE(SUM(t[v]), t[n] > 2)", "cat"),
+        "own filter on the group column": gb(case, 'CALCULATE(SUM(t[v]), t[cat] = "B")', "cat"),
         "numeric distinct": gb(case, "DISTINCTCOUNT(t[n])", "cat"),
         "unknown column": gb(case, "SUM(t[v])", "nope"),
     }
     assert all(isinstance(r, Refusal) for r in kinds.values()), kinds
     assert kinds["numeric key"].reason == REASON_GROUP_BY_TYPE
-    assert "also filtered" in kinds["own filter"].reason or "own" in kinds["own filter"].reason
+    assert kinds["own filter on the group column"].reason == REASON_GROUP_OWN_FILTER
+    assert "also filtered" in kinds["own filter on the group column"].reason
     for bad in (("t",), ("t", "cat", "dt"), "cat", None):
         out = plan_group_by(
             "SUM(t[v])", group_by=bad, home_table="t", tables={"t": case.types}, store_tables={"t": "t_csv"},
@@ -1260,6 +1262,16 @@ def test_group_by_refusals_have_stable_reasons(gb_case: EngineCase) -> None:
     )
     assert isinstance(other, Refusal)
     assert gb(case, "SUM(t[v])", "cat", ctx=('t[cat] = "A"',)).reason == REASON_SLICER_SAME_COLUMN
+
+
+def test_group_by_own_filter_on_another_column_is_the_engine_value_per_group(gb_case: EngineCase) -> None:
+    """The former refusal case: CALCULATE(SUM(v), n > 2) by cat is the per-group sum over the rows with n > 2."""
+    got = gb(gb_case, "CALCULATE(SUM(t[v]), t[n] > 2)", "cat")
+    # hand sums over rows 3..12 per folded cat key: Ab {5: 3, 9: 0.5}, B {3: blank, 7: 1, 11: 0}, blank {4: 2, 6: blank, 10: 4}, C {8: 0, 12: 1.25}
+    assert got == list(zip(TEXT_KEYS, D("3.5", 1, 6, "1.25")))
+    for (key, value), predicate in zip(got, ['t[cat] = "Ab"', 't[cat] = "B"', 't[cat] = ""', 't[cat] = "C"']):
+        want = gb_case.engine(f"CALCULATE(SUM(t[v]), t[n] > 2, {predicate})")
+        assert type(value) is type(want) and value == want, (key, value, want)
 
 
 def test_group_by_a_text_column_with_a_non_ascii_space_cell_refuses_on_every_execute(tmp_path: Path) -> None:

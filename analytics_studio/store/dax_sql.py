@@ -12,7 +12,9 @@ The second part is the planner (plan_measure).
 A plan is a snapshot: it keeps the decimal scale and digit counts read from the store when it was built (and
 re-reads them on every execute). After a reload or `append_rows` that changes those, `execute` returns a
 Refusal ("plan is stale; rebuild it"): REBUILD the plan after any reload or append. Guards (non-ASCII text,
-unreadable dates, stale decimal metadata) run as cheap queries on every execute and are never cached.
+unreadable dates, dates before 1900, stale decimal metadata) run as cheap queries on every execute and are never
+cached. A plan does not see a column that changes TYPE (a whole column that gains decimals) without a rebuild; the
+route builds a new plan on every call and its cache key holds the table version, so no plan outlives a data change.
 """
 
 from __future__ import annotations
@@ -25,6 +27,7 @@ from typing import Any, Mapping
 
 from analytics_studio import dax_dates
 from analytics_studio.measures import MeasureError, parse_expression
+from analytics_studio.store.base import StoreError
 from analytics_studio.store.dax_whitelist import (
     MAX_PREDICATES,
     REASON_CAP_PREDICATES,
@@ -586,6 +589,7 @@ REASON_IN_NON_ASCII_COLUMN = (
 )
 REASON_DATE_UNREADABLE = "date column holds text the store cannot read the way the engine does"
 REASON_PLAN_STALE = "plan is stale; rebuild it"
+REASON_DATE_BEFORE_1900 = "date column holds a date before 1900, which the engine shows differently"
 REASON_DECIMAL_LITERAL_FIT = "literal does not fit the column's decimal precision"
 MAX_DECIMAL_TOTAL = 38
 
@@ -598,6 +602,16 @@ _SQL_OPERATORS: dict[str, str] = {"=": "=", "<>": "<>", "<": "<", "<=": "<=", ">
 _OR_JOIN = " OR "
 _AND_JOIN = " AND "
 _ASCII_LOWER = str.maketrans(string.ascii_uppercase, string.ascii_lowercase)
+
+
+def is_missing_table_error(exc: BaseException) -> bool:
+    """Does this store error say that a table (or catalog entry) the plan reads is gone?
+
+    Only that case means "the plan is stale". Any other store error (an interrupt, a closed store, a bad column)
+    is NOT stale and must reach the caller: the route turns an interrupt into a timeout or a cancel.
+    """
+    message = str(exc)
+    return "does not exist" in message or "Catalog Error" in message
 
 
 def in_column_has_non_ascii(store: Any, guard: tuple[str, str]) -> bool:
@@ -616,8 +630,23 @@ def run_plan_guards(
 ) -> Refusal | None:
     """The cheap per-execute guard queries shared by every plan kind: a Refusal on the first failure, else None.
 
-    Never cached: the store can change between two executes of one plan.
+    Never cached: the store can change between two executes of one plan. A table that was dropped after the plan was
+    built is a stale plan (Refusal), never a StoreError; every other store error propagates.
     """
+    try:
+        return _run_plan_guards(store, in_guards, date_guards, decimal_stamps)
+    except StoreError as exc:
+        if is_missing_table_error(exc):
+            return Refusal(REASON_PLAN_STALE)
+        raise
+
+
+def _run_plan_guards(
+    store: Any,
+    in_guards: tuple[tuple[str, str], ...],
+    date_guards: tuple[tuple[str, str], ...],
+    decimal_stamps: tuple[tuple[str, str, int, int], ...],
+) -> Refusal | None:
     for physical, column, scale, digits in decimal_stamps:
         now = column_decimal_meta(store, physical, [column]).get(column)
         if now is None or now.scale != scale or now.digits != digits:
@@ -627,12 +656,16 @@ def run_plan_guards(
             return Refusal(REASON_IN_NON_ASCII_COLUMN)
     for physical, column in date_guards:
         t_q, c_q = quote_identifier(physical), quote_identifier(column)
+        # One scan: any cell the store cannot cast, and the earliest readable cell (before 1900-01-01 the engine
+        # shows other key text, other values or raises).
         rows = store.execute(
-            f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE {c_q} IS NOT NULL AND trim({c_q}) <> '' "
-            f"AND TRY_CAST({c_q} AS DATE) IS NULL)"
+            f"SELECT COALESCE(BOOL_OR({c_q} IS NOT NULL AND trim({c_q}) <> '' AND TRY_CAST({c_q} AS DATE) IS NULL), FALSE), "
+            f"COALESCE(MIN(TRY_CAST({c_q} AS DATE)) < DATE '1900-01-01', FALSE) FROM {t_q}"
         )
         if rows and rows[0][0]:
             return Refusal(REASON_DATE_UNREADABLE)
+        if rows and rows[0][1]:
+            return Refusal(REASON_DATE_BEFORE_1900)
     return None
 
 
@@ -669,14 +702,20 @@ class MeasurePlan:
         execute (the engine casefolds and trims those differently from the store's ASCII-only rules). A date
         column the plan reads must hold only text the store can cast; a decimal column must still have the scale
         and digits the plan was built with. If a guard fails the answer is a Refusal and the aggregate query is
-        not run.
+        not run. A table dropped after planning makes a guard query fail: that is a stale plan (Refusal); any
+        other store error propagates (the route turns an interrupt into a timeout or a cancel).
         """
         refused = run_plan_guards(store, decimal_stamps=self.decimal_stamps)
         if refused is not None:
             return refused
-        for guard in self.in_guards:
-            if self._in_column_has_non_ascii(store, guard):
-                return Refusal(REASON_IN_NON_ASCII_COLUMN)
+        try:
+            for guard in self.in_guards:
+                if self._in_column_has_non_ascii(store, guard):
+                    return Refusal(REASON_IN_NON_ASCII_COLUMN)
+        except StoreError as exc:
+            if is_missing_table_error(exc):
+                return Refusal(REASON_PLAN_STALE)
+            raise
         refused = run_plan_guards(store, date_guards=self.date_guards)
         if refused is not None:
             return refused
@@ -998,6 +1037,19 @@ def _flatten_measure(
     return node, []
 
 
+def own_predicate_columns(predicates: tuple[Any, ...], planner: Any) -> list[tuple[str, str]]:
+    """(table, column) case-folded of EVERY column the measure's own predicates touch, at any depth (NOT, ||, IN).
+
+    A reference that does not resolve is left out: the planner refuses the predicate itself a moment later.
+    """
+    found: list[tuple[str, str]] = []
+    for t_name, c_name in _collect_references(tuple(predicates)):
+        resolved = planner.resolve(("reference", t_name, c_name))
+        if not isinstance(resolved, Refusal):
+            found.append((resolved.table.casefold(), resolved.column.casefold()))
+    return found
+
+
 @dataclass(frozen=True)
 class _PlanParts:
     """What plan_measure and plan_group_by share: the checked measure, its WHERE clause and its guards."""
@@ -1013,7 +1065,7 @@ class _PlanParts:
     in_guards: tuple[tuple[str, str], ...]
     value_type: str
     overrides: dict[str, Any]
-    own_predicates: int = 0
+    own_columns: tuple[tuple[str, str], ...] = ()  # (table, column) case-folded, every column an own predicate touches
     has_in: bool = False
     physical: str = ""
     date_guards: tuple[tuple[str, str], ...] = ()
@@ -1060,11 +1112,7 @@ def _plan_parts(
         base, predicates = flat
         planner = _Planner(home_table, tables, column_meta, overrides)
         predicate_nodes = list(predicates)
-        own_columns: list[tuple[str, str]] = []
-        for t_name, c_name in _collect_references(tuple(predicates)):
-            resolved_own = planner.resolve(("reference", t_name, c_name))
-            if not isinstance(resolved_own, Refusal):
-                own_columns.append((resolved_own.table.casefold(), resolved_own.column.casefold()))
+        own_columns = own_predicate_columns(tuple(predicates), planner)
         if filter_context:
             f_decision = classify_filter_context(
                 filter_context,
@@ -1155,7 +1203,7 @@ def _plan_parts(
         in_guards=tuple(in_guards),
         value_type="date" if agg in ("MIN", "MAX") and c_type == "date" else "number",
         overrides=overrides,
-        own_predicates=len(predicates),
+        own_columns=tuple(dict.fromkeys(own_columns)),
         has_in=planner.has_in,
         physical=physical,
         date_guards=tuple(date_guards),
@@ -1266,14 +1314,21 @@ class GroupByPlan:
 
         Keys are the strings the engine shows for VALUES(). A text group column holding a non-ASCII whitespace
         cell is refused: the engine's key filter `col = ""` also selects those cells, the store keeps them apart.
+        A table dropped after planning makes a guard query fail: that is a stale plan (Refusal); any other store
+        error propagates.
         """
-        for guard in self.space_guards:
-            t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
-            rows = store.execute(
-                f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE regexp_matches({c_q}, '[{NON_ASCII_SPACE_CLASS}]'))"
-            )
-            if rows and rows[0][0]:
-                return Refusal(REASON_GROUP_NON_ASCII_SPACE)
+        try:
+            for guard in self.space_guards:
+                t_q, c_q = quote_identifier(guard[0]), quote_identifier(guard[1])
+                rows = store.execute(
+                    f"SELECT EXISTS (SELECT 1 FROM {t_q} WHERE regexp_matches({c_q}, '[{NON_ASCII_SPACE_CLASS}]'))"
+                )
+                if rows and rows[0][0]:
+                    return Refusal(REASON_GROUP_NON_ASCII_SPACE)
+        except StoreError as exc:
+            if is_missing_table_error(exc):
+                return Refusal(REASON_PLAN_STALE)
+            raise
         refused = run_plan_guards(
             store, in_guards=self.in_guards, date_guards=self.date_guards, decimal_stamps=self.decimal_stamps
         )
@@ -1372,7 +1427,10 @@ def plan_group_by(
         return parts
     if resolved_group.table.casefold() != parts.table.casefold():
         return Refusal(f"the group-by column is on table '{resolved_group.table}', the measure on '{parts.table}'")
-    if parts.own_predicates:
+    group_key = (resolved_group.table.casefold(), resolved_group.column.casefold())
+    if group_key in parts.own_columns:
+        # DAX replaces the group filter when the measure filters the group column itself (nested in NOT, || or IN too:
+        # own_columns holds every column below the predicates). An own filter on ANOTHER column goes into the WHERE.
         return Refusal(REASON_GROUP_OWN_FILTER)
     in_guards = list(parts.in_guards)
     date_guards = list(parts.date_guards)

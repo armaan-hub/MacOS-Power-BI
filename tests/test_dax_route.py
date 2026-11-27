@@ -1469,7 +1469,7 @@ def test_route_grouped_own_sentences_and_no_type_names(env: Env) -> None:
         "A slicer on region cannot be used with a visual grouped by the same column on a large table yet."
     )
     own = dax_route.route_grouped(
-        env.project, 'CALCULATE(SUM(t[qty]), t[region] = "East")', ("t", "product"), project_store=env.ps
+        env.project, 'CALCULATE(SUM(t[qty]), t[region] = "East")', ("t", "region"), project_store=env.ps
     )
     assert isinstance(own, RouteRefusal) and "CALCULATE filter of its own" in own.message
     for refusal in (by_number, slicer, own):
@@ -1665,12 +1665,21 @@ def test_filter_context_with_an_alias_chain_equals_the_engine_or_is_refused(env:
     replaced = env.engine('CALCULATE([B], t[region] = "West")', chain)
     anded = env.route("Plain", measures=chain, filter_context=('t[region] = "East"', 't[region] = "West"'))
     assert not same(replaced, anded.value if isinstance(anded, StoreAnswer) else None)
-    # The same alias chain grouped: refused whatever the column (its CALCULATE filter is its own)
-    for column in ("region", "pay"):
-        grouped = dax_route.route_grouped(
-            env.project, "C", ("t", column), project_store=env.ps, measures=chain, filter_context=other_column
-        )
-        assert isinstance(grouped, RouteRefusal) and "CALCULATE filter of its own" in grouped.message
+    # The same alias chain grouped by the column its CALCULATE filter is on: refused (DAX replaces the group filter)
+    grouped = dax_route.route_grouped(
+        env.project, "C", ("t", "region"), project_store=env.ps, measures=chain, filter_context=other_column
+    )
+    assert isinstance(grouped, RouteRefusal) and "CALCULATE filter of its own" in grouped.message
+    # Grouped by ANOTHER column the chain's filter is simply ANDed: equal to the engine group by group.
+    by_pay = dax_route.route_grouped(
+        env.project, "C", ("t", "pay"), project_store=env.ps, measures=chain, filter_context=other_column
+    )
+    assert isinstance(by_pay, StoreAnswer) and by_pay.rows
+    for key, value in by_pay.rows:
+        month, day, year = key.split("/") if key else ("", "", "")
+        key_filter = f"t[pay] = DATE({year}, {int(month)}, {int(day)})" if key else "t[pay] = BLANK()"  # pay is a date
+        want = env.engine(f"CALCULATE([C], t[product] = \"P01\", {key_filter})", chain)
+        assert same(value, want), (key, value, want)
     # A plain measure, grouped, with a slicer on another column equals the engine group by group.
     plain = dax_route.route_grouped(
         env.project, "Plain", ("t", "region"), project_store=env.ps, measures=chain, filter_context=other_column
@@ -2493,3 +2502,35 @@ def test_snapshot_keeps_calculated_columns_so_the_route_refuses_like_the_live_pr
     again = route_measure(snapshot, "COUNTROWS(t)", project_store=env.ps)
     assert isinstance(again, RouteRefusal) and (again.code, again.message) == (live.code, live.message)
     assert dax_route.store_shape(snapshot) == dax_route.store_shape(project)
+
+
+# ---------------------------------------------------------------------------------------------------
+# C4a: the runtime sentences of the two new refusals (a date before 1900, an own filter on the group column)
+# ---------------------------------------------------------------------------------------------------
+def test_runtime_old_date_and_own_group_filter_reasons_have_plain_sentences(tmp_path: Path) -> None:
+    rows = make_rows(300, seed=5)
+    pay_index = HEADERS.index("pay")
+    rows[3][pay_index] = "1899-12-30"
+    e = Env(tmp_path, rows)
+    try:
+        assert e.types["pay"] == "date", e.types
+        answers = [
+            e.route("MIN(t[pay])"),
+            e.route('CALCULATE(COUNTROWS(t), t[pay] >= DATE(2024,1,1))'),
+            dax_route.route_grouped(e.project, "COUNTROWS(t)", ("t", "pay"), project_store=e.ps),
+        ]
+        for out in answers:
+            assert isinstance(out, RouteRefusal) and out.code == "plan", out
+            assert "date before the year 1900" in out.message and dax_route.reason_is_mapped(out.reason), out
+            assert not re.search(r"plan|guard|fold|duckdb", out.message, re.I), out.message
+        own = dax_route.route_grouped(
+            e.project, 'CALCULATE(SUM(t[qty]), t[region] = "East")', ("t", "region"), project_store=e.ps
+        )
+        assert isinstance(own, RouteRefusal) and own.code == "plan" and dax_route.reason_is_mapped(own.reason), own
+        assert "on the column the results are grouped by" in own.message
+        other = dax_route.route_grouped(
+            e.project, 'CALCULATE(SUM(t[qty]), t[region] = "East")', ("t", "product"), project_store=e.ps
+        )
+        assert isinstance(other, StoreAnswer) and other.rows, other
+    finally:
+        e.close()

@@ -595,7 +595,7 @@ def test_async_results_equal_the_in_memory_engine(world: World) -> None:
     ]
     assert store._measure_errors == {} and not differences, differences
     print(f"[measured] {len(CATALOG) - len(differences)} of {len(CATALOG)} async card texts identical to the in-memory engine")
-    # visuals: the 8 comparable ones and the slicer
+    # visuals: the 8 comparable ones, the slicer and V11
     set_measures(store, VISUAL_MEASURES)
     wait_store_idle(store)
     twin._project["model"]["measures"] = [normalize_measure(n, e, home_table_id=twin_home) for n, e in VISUAL_MEASURES]
@@ -623,9 +623,14 @@ def test_async_results_equal_the_in_memory_engine(world: World) -> None:
             assert controller._remove_filter("report", 0)
         got, want = read_async(store, SLICER), _read(twin, SLICER)
         results.append((SLICER, got == want and bool(got), len(got)))
+        # V11: a measure with its own CALCULATE filter on another column than the one the visual groups by
+        for controller in (store, twin):
+            _build_visual(controller, "bar", "V11 north by product", "product", "North Amount")
+        got, want = read_async(store, "V11 north by product"), _read(twin, "V11 north by product")
+        results.append(("V11 north by product", got == want and bool(got), len(got)))
     print(f"[measured] {sum(1 for _, ok, _n in results if ok)} of {len(results)} async visuals identical to the in-memory twin")
     assert all(ok for _, ok, _ in results), results
-    assert len(results) == 8
+    assert len(results) == 9
     # cards follow a report filter like the in-memory twin; the synchronous lists (regions, page-filter values) too
     plain = [name for name, _ in VISUAL_MEASURES if name != "North Amount"]
     unfiltered = dict(store._measure_values)

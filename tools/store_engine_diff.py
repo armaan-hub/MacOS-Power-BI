@@ -1441,11 +1441,15 @@ def run_comparison(
 # SECTION: LITERAL SWEEP (Stage C1b2): literals, filter contexts and group-by against the engine
 # ==============================================================================
 
-SWEEP_HEADERS = ["sid", "sw", "sd", "sdt", "st", "sf", "scat", "swb", "sdb", "sg", "sb"]
+SWEEP_HEADERS = ["sid", "sw", "sd", "sdt", "st", "sf", "scat", "swb", "sdb", "sg", "sb", "sdt_old"]
 SWEEP_COLUMN_TYPES = {
     "sid": "text", "sw": "whole_number", "sd": "decimal_number", "sdt": "date", "st": "text", "sf": "boolean",
-    "scat": "text", "swb": "text", "sdb": "text", "sg": "text", "sb": "text",
+    "scat": "text", "swb": "text", "sdb": "text", "sg": "text", "sb": "text", "sdt_old": "date",
 }
+# A date column with cells before 1900-01-01 (the engine shows other key text, other values, or raises): the store
+# refuses every plan that reads it. The first rows hold these cells, the rest are ordinary dates and blanks.
+SWEEP_OLD_DATES = ["1899-12-30", "1900-01-01", "0001-01-01", "0100-05-05"]
+SWEEP_OLD_DATE_FILLER = ["", "2020-01-05", "2026-03-04", "2025-12-31"]
 # The model infers text for a whole number of 16 or more digits and for a 30-digit decimal (measured with the
 # controller import), so 2^63-1, -2^63 and the 30-digit decimal live in the text columns swb and sdb.
 SWEEP_WHOLE = [
@@ -1480,6 +1484,7 @@ def generate_sweep_dataset(csv_file: Path, rows: int = 300, seed: int = 1) -> di
     """Seeded sweep table: edge literals planted by row number (so every row count above ~60 holds all of
     them) plus random picks and a planted share of blank cells. Column types: SWEEP_COLUMN_TYPES."""
     rnd = random.Random(seed)
+    rnd_old = random.Random(seed * 7919 + 13)  # own stream: the older columns keep their values
 
     def pick(values: list[str], i: int, blank_share: float) -> str:
         if i <= len(values):
@@ -1511,6 +1516,7 @@ def generate_sweep_dataset(csv_file: Path, rows: int = 300, seed: int = 1) -> di
             SWEEP_ASCII_TEXT[(i - 1) % len(SWEEP_ASCII_TEXT)] if i <= len(SWEEP_ASCII_TEXT) else (
                 SWEEP_ASCII_TEXT[rnd.randint(0, len(SWEEP_ASCII_TEXT) - 1)]
             ),
+            SWEEP_OLD_DATES[i - 1] if i <= len(SWEEP_OLD_DATES) else rnd_old.choice(SWEEP_OLD_DATE_FILLER),
         ])
     with open(csv_file, "w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
@@ -1568,6 +1574,39 @@ SWEEP_GROUP_COLUMNS = ["scat", "sg", "sb", "st", "sdt", "sf"]
 SWEEP_GROUP_CONTEXTS: list[tuple[str, ...]] = [
     (), ("t[sw] > 5",), ("t[sdt] >= DATE(2026,1,1)",), ('t[scat] IN {"A", "B"}',),
 ]
+# Group-by measures with their own CALCULATE filter (Stage C4a): every aggregate the group plan supports, every
+# own filter on a column OTHER than the group column. The engine value of a group with no matching row is blank and
+# the app drops it, the plan joins only the groups that have a matching row.
+SWEEP_OWN_AGGS = [
+    "COUNTROWS(t)", "SUM(t[sw])", "AVERAGE(t[sd])", "MIN(t[sdt])", "MAX(t[sdt])", "COUNT(t[sw])", "COUNTA(t[st])",
+    "DISTINCTCOUNT(t[st])",
+]
+SWEEP_OWN_FILTERS: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = [
+    ("whole_eq", ("t[sw] = 5",), ("sw",)),
+    ("whole_lt", ("t[sw] < 15",), ("sw",)),
+    ("whole_ge", ("t[sw] >= 0",), ("sw",)),
+    ("whole_ne", ("t[sw] <> 0",), ("sw",)),
+    ("decimal_ge", ("t[sd] >= 0",), ("sd",)),
+    ("decimal_lt", ("t[sd] < 12.345",), ("sd",)),
+    ("date_ge", ("t[sdt] >= DATE(2026,1,1)",), ("sdt",)),
+    ("date_lt", ("t[sdt] < DATE(2000,2,29)",), ("sdt",)),
+    ("text_eq", ('t[sb] = "A"',), ("sb",)),
+    ("text_in", ('t[scat] IN {"A", "B"}',), ("scat",)),
+    ("two_columns", ("t[sw] > 5", "t[sd] >= 0"), ("sw", "sd")),
+    ("whole_or", ("t[sw] = 0 || t[sw] = 1",), ("sw",)),
+    ("no_row", ('t[scat] = "ZZZ"',), ("scat",)),
+    ("some_groups", ("t[sw] = 99",), ("sw",)),
+]
+# An own filter on the group column itself: DAX replaces the group filter, refused by name (REASON_GROUP_OWN_FILTER).
+# NOT and || are only on the whitelist over whole-number columns, and a group column is text, date or boolean, so a
+# group-column filter inside NOT or || is refused by the whitelist before the planner: the planner's own walk over
+# NOT, || and IN is tested on parsed expressions (tests/test_dax_sql_c4a.py).
+SWEEP_OWN_ON_GROUP: dict[str, tuple[str, ...]] = {
+    "scat": ('t[scat] = "A"', 't[scat] IN {"A", "B"}'),
+    "sb": ('t[sb] = "A"',),
+    "sdt": ("t[sdt] >= DATE(2026,1,1)",),
+    "sf": ("t[sf] = TRUE()",),
+}
 SWEEP_SCALAR_BASES = [
     "COUNTROWS(t)", "SUM(t[sw])", "SUM(t[sd])", "AVERAGE(t[sd])", "MIN(t[sdt])", "DISTINCTCOUNT(t[st])",
     "COUNTBLANK(t[sf])", "CALCULATE(SUM(t[sw]), t[sd] >= 0)", "CALCULATE(COUNTROWS(t), t[sw] > 5)",
@@ -1658,7 +1697,33 @@ def build_sweep_catalog(headers: list[str] | None = None) -> list[dict[str, Any]
         for agg in ("COUNTROWS(t)", "SUM(t[sw])", "AVERAGE(t[sd])"):
             rows.append(_sweep_row("group_empty", agg, ('t[scat] = "ZZZ"',), g_col))
     rows.append(_sweep_row("group", "SUM(t[sw])", (), "sw"))  # numeric group key: refused
-    rows.append(_sweep_row("group", "CALCULATE(SUM(t[sw]), t[sd] >= 0)", (), "scat"))  # own filter: refused
+    for g_col in SWEEP_GROUP_COLUMNS:  # a measure with its own CALCULATE filter on ANOTHER column (Stage C4a)
+        for agg in SWEEP_OWN_AGGS:
+            for _name, preds, columns in SWEEP_OWN_FILTERS:
+                if g_col in columns:
+                    continue
+                own_row = _sweep_row("group_own", f"CALCULATE({agg}, {', '.join(preds)})", (), g_col)
+                own_row["own_predicates"] = tuple(preds)
+                rows.append(own_row)
+    for g_col, preds_list in SWEEP_OWN_ON_GROUP.items():  # the same column as the group: refused
+        for pred in preds_list:
+            for agg in ("COUNTROWS(t)", "SUM(t[sw])"):
+                rows.append(_sweep_row("group_own_column", f"CALCULATE({agg}, {pred})", (), g_col))
+    for g_col in ("scat", "sb"):  # an own filter and a slicer on different columns, and on the same column
+        for own_dax, own_pred, slicer in (
+            ("CALCULATE(SUM(t[sw]), t[sd] >= 0)", "t[sd] >= 0", "t[sw] > 5"),
+            ("CALCULATE(COUNTROWS(t), t[sw] > 5)", "t[sw] > 5", "t[sw] < 15"),
+        ):
+            ctx_row = _sweep_row("group_own_context", own_dax, (slicer,), g_col)
+            ctx_row["own_predicates"] = (own_pred,)
+            rows.append(ctx_row)
+    for old_agg in ("MIN(t[sdt_old])", "MAX(t[sdt_old])", "COUNT(t[sdt_old])", "COUNTA(t[sdt_old])"):
+        rows.append(_sweep_row("date_old", old_agg))  # a date column with cells before 1900: refused by name
+    rows.append(_sweep_row("date_old", "CALCULATE(COUNTROWS(t), t[sdt_old] >= DATE(2000,1,1))"))
+    rows.append(_sweep_row("date_old", "CALCULATE(SUM(t[sw]), t[sdt_old] < DATE(2026,1,1))"))
+    rows.append(_sweep_row("date_old", "COUNTROWS(t)", (), "sdt_old"))
+    rows.append(_sweep_row("date_old", "SUM(t[sw])", (), "sdt_old"))
+    rows.append(_sweep_row("date_old", "COUNTROWS(t)", (), "scat"))  # a plain group-by on another column stays same
     rows.append(_sweep_row("group", "SUM(t[sw])", ('t[scat] = "A"',), "scat"))  # same-column slicer: refused
     seen: set[str] = set()
     for row in rows:
@@ -1767,7 +1832,9 @@ def run_sweep(
             relationships=[], filter_table_ids=[], active_table_id=aid,
         )["M"]
 
-    def engine_groups(dax: str, g_col: str, g_type: str, ctx: tuple[str, ...]) -> list[tuple[str, Any]]:
+    def engine_groups(
+        dax: str, g_col: str, g_type: str, ctx: tuple[str, ...], own: tuple[str, ...] = ()
+    ) -> list[tuple[str, Any]]:
         keys_dax = f"VALUES(t[{g_col}])"
         if ctx:
             keys_dax = f"CALCULATETABLE({keys_dax}, " + ", ".join(ctx) + ")"
@@ -1780,7 +1847,12 @@ def run_sweep(
         keys = _parse_engine_keys(keys_text, row_count)
         pairs: list[tuple[str, Any]] = []
         for key in keys:
-            flat = with_filter_context(dax, (_engine_key_filter(g_col, g_type, key), *ctx))
+            key_filter = _engine_key_filter(g_col, g_type, key)
+            if own:
+                # the engine shows a blank value for a group with no row under the own filter; the app drops it
+                if not engine(with_filter_context("COUNTROWS(t)", (*own, key_filter, *ctx))):
+                    continue
+            flat = with_filter_context(dax, (key_filter, *ctx))
             pairs.append((key, engine(flat)))
         return pairs
 
@@ -1803,7 +1875,9 @@ def run_sweep(
             try:
                 if group:
                     g_type = SWEEP_COLUMN_TYPES.get(group[1], "")
-                    engine_val = engine_groups(item["dax"], group[1], g_type, ctx)
+                    engine_val = engine_groups(
+                        item["dax"], group[1], g_type, ctx, tuple(item.get("own_predicates", ()))
+                    )
                 else:
                     engine_val = engine(with_filter_context(item["dax"], ctx))
             except Exception as exc:

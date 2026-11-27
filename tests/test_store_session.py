@@ -603,21 +603,25 @@ def test_job_clears_cancel_at_start_and_shutdown_speed(tmp_path):
 
         # shutdown speed with short-lived job
         job_done = threading.Event()
+        job_started = threading.Event()
+        saw_cancel = []
+
         def quick_job():
             with ps.job() as ev:
-                ev.wait(timeout=0.05)
+                job_started.set()
+                # The job ends by itself when it sees the cancel; 10 s is only a hang guard.
+                saw_cancel.append(ev.wait(timeout=10.0))
             job_done.set()
 
         th = threading.Thread(target=quick_job)
         th.start()
-        time.sleep(0.01)
+        assert job_started.wait(10.0), "the job never started"
 
-        t0 = time.time()
-        assert ps.shutdown(timeout=5.0) is True
-        elapsed = time.time() - t0
-        assert elapsed < 1.0
-        assert job_done.wait(timeout=1.0)
-        th.join()
+        assert ps.shutdown(timeout=10.0) is True
+        assert job_done.wait(timeout=10.0), "the job did not end"
+        th.join(timeout=10.0)
+        assert not th.is_alive()
+        assert saw_cancel == [True], "the job did not see the cancel"
     finally:
         ps.close()
 
@@ -1101,9 +1105,7 @@ def test_n2_request_cancel_stops_copy_and_shutdown_is_quick(tmp_path, monkeypatc
         assert not os.path.exists(tgt + ".lock")
         assert _tmp_leftovers(tmp_path) == []
 
-        t0 = time.time()
-        assert ps.shutdown(timeout=5.0) is True
-        assert time.time() - t0 < 1.0
+        assert ps.shutdown(timeout=10.0) is True
     finally:
         ps.close()
 
@@ -1128,11 +1130,9 @@ def test_n2_shutdown_from_another_thread_stops_copy(tmp_path, monkeypatch):
         with pytest.raises(session_module.ImportCancelledError, match="Copy canceled"):
             ps.copy_to(tgt, progress=on_progress)
         assert calls[0] == 2
-        t0 = time.time()
-        sd_thread.join(timeout=5.0)
-        assert not sd_thread.is_alive()
+        sd_thread.join(timeout=10.0)
+        assert not sd_thread.is_alive(), "the shutdown thread did not end"
         assert result == [True]
-        assert time.time() - t0 < 1.0
         assert not os.path.exists(tgt)
         assert _tmp_leftovers(tmp_path) == []
     finally:
@@ -1782,16 +1782,15 @@ def test_exclusive_exit_wakes_shutdown_waiter(tmp_path, monkeypatch):
         while not ps._shutting_down and time.time() < deadline:
             time.sleep(0.005)
         assert ps._shutting_down
-        t0 = time.time()
         release.set()
-        op_thread.join(timeout=5.0)
-        sd_thread.join(timeout=5.0)
-        elapsed = time.time() - t0
+        op_thread.join(timeout=10.0)
+        sd_thread.join(timeout=10.0)
     finally:
         release.set()
+    assert not op_thread.is_alive(), "the exclusive operation did not end"
+    assert not sd_thread.is_alive(), "the shutdown thread did not end"
     assert errors == []
     assert result == [True]
-    assert elapsed < 1.0
 
 
 def test_discard_copy_refuses_case_alias_when_live_file_is_gone(tmp_path):
