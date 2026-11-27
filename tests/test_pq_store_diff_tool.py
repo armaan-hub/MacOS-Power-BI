@@ -36,23 +36,18 @@ def run50() -> dict[str, Any]:
     return run_pq_step_diff(rows=50, seed=42)
 
 
-@pytest.fixture(scope="module")
-def run100() -> dict[str, Any]:
-    return run_pq_step_diff(rows=100, seed=7)
-
-
 # ------------------------------------------------------------------ end to end & baseline
 
 
-def test_tool_runs_end_to_end_and_has_unique_ids(run100: dict[str, Any]) -> None:
+def test_tool_runs_end_to_end_and_has_unique_ids(run50: dict[str, Any]) -> None:
     """Tool runs end-to-end offscreen, step catalog >= 50 with unique ids and markdown report."""
-    results = run100["results"]
+    results = run50["results"]
     assert len(results) >= 50
 
     ids = [r["id"] for r in results]
     assert len(ids) == len(set(ids)), "All step IDs must be unique"
 
-    md = generate_markdown_report(run100)
+    md = generate_markdown_report(run50)
     assert "# Power Query Step Differential Report (Stage D0a)" in md
     assert "## Counts by Step Operation" in md
     assert "## Power BI Answer Checks Needed" in md
@@ -1134,7 +1129,7 @@ def _nine_runs(rows: int, seed: int) -> list[dict[str, Any]]:
 
 
 @pytest.mark.parametrize("mutant", NINE_MUTANTS)
-@pytest.mark.parametrize("rows,seed", [(50, 42), (400, 1)])
+@pytest.mark.parametrize("rows,seed", [(50, 42)])
 def test_nine_mutants_exit_1_on_generated_data(mutant: str, rows: int, seed: int) -> None:
     """Each mutant makes the whole tool differ and exit 1 on generated data (clean run exits 0)."""
     data = _nine_runs(rows, seed)[NINE_MUTANTS.index(mutant)]

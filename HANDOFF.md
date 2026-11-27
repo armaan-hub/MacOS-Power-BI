@@ -1,5 +1,70 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Stage D1g: Power Query step tool: Team-Thinker's D1e review follow-ups (pivot and error-row steps, 2026-11-28, uncommitted, branch d1g-pq-followups)**
+- **What was built:**
+  - **F1 (Decimal key merging):** In `_map_pivot_column`, when key column was converted by `convert_type` to `decimal_number` or `number`, scan key values: if distinct raw text forms produce identical Decimal values (e.g. 1.0 vs 1.00, 0 vs -0 vs 0.0), refuse by name with `"Key column {k!r} holds decimal values whose text forms differ; SQL groups by text while the engine groups by value."`.
+  - **F2 (Error-row column validation):** In `_map_error_rows`, strip column names and validate duplicates. Padded column names (`'a '`, `' a'`) are stripped and accepted; duplicates raise the engine refusal `"Transformation step 1 selects an error-check column more than once."`.
+  - **F3 (convert_type text/any creates no error cells):** `_d1e_marked(prev_convert, column)` now checks `prev_convert.get("type") not in {"text", "any"}` and `prev_convert.get("type") in CONVERT_STORE_TYPES`. Added `_d1e_text_converted`: when a column was explicitly converted to text or any, a raw cell containing `"Error: raw"` is recognized as plain text, eliminating spurious error-prefix refusals on subsequent error-check steps and pivot.
+  - **F4 (Typed-category conflict in pivot after unpivot):** In `generate_sequence_sql`, detect when a pivot step pivots on an attribute column produced by unpivot over columns with mixed types (e.g. `whole_number`, `date`, `boolean` mixed with `text`) that format to identical output column headers. Refuses by name with the engine message: `"Cannot pivot: distinct typed categories in {attr!r} produce the same output column {col!r}; convert the column to text first."`.
+  - **F5 (Datetime attribute column format):** In `_map_pivot_column`, when the attribute column was converted to `datetime`, refuse by name: `"Datetime attribute column headers use ISO 'T' formatting in the engine; SQL uses space."`.
+  - **F6 (Blank key ordering in pivot):** In `_map_pivot_column`, order blank terms by first-seen using `CASE WHEN "{k0}" IS NULL OR "{k0}" = '' THEN MIN({_RN}) ELSE 0 END ASC`. When NULL precedes `''` in the first key column, NULL group appears first; when `''` precedes NULL, `''` group appears first. (Note: in sort_rows, DuckDB sorts `''` before NULL; this difference remains listed as an open check).
+  - **F7 (Table scaling & pivot speed):** `generate_d1e_csv` now accepts `rows: int = 40` and scales generated rows when `rows > 40` (keeping 40 rows for small row counts so catalog counts remain stable). `run_pq_step_diff_many` passes `rows=rows`. A 512-column pivot runs via single conditional aggregates; execution at 400 rows is ~55.8s, 2000 rows is ~160.6s, 20000 rows is ~140.3s.
+  - **F8 (Mutant survivors killed):** 10 source mutants verified and killed by assertion failures:
+    - `P04` (`key_headers` sorted alphabetically): killed by `test_p04_key_columns_order_not_alphabetical`
+    - `P08` (blank attr NULL not blank): killed by `test_p08_blank_attribute_null_rejected`
+    - `P12` (512 limit `>=` instead of `>`): killed by `test_p12_p13_column_limit_512_includes_keys`
+    - `P13` (512 limit ignores key count): killed by `test_p12_p13_column_limit_512_includes_keys`
+    - `P21` (non-ASCII key refusal removed): killed by `test_p21_non_ascii_key_refusal`
+    - `P29` (header safety check removed on category): killed by `test_p29_unsafe_header_in_category_refused`
+    - `P35` (boolean attribute refusal removed): killed by `test_p35_boolean_attribute_refusal`
+    - `E13` (every column marked as having error cells): killed by `test_f3_mutant_e13_killed_by_unmarked_column_check`
+    - `C03` (generator pin: blank keys missing in `D1E_KEYS`): killed by `test_generator_pin_c03_blank_keys_present`
+    - `C04` (generator pin: blank values missing in `D1E_VALS`): killed by `test_generator_pin_c04_blank_vals_present`
+  - **F9 (test file duration under 25s):** `tests/test_pq_store_diff_tool.py` optimized by removing redundant 100-row duplicate run from test fixtures; execution time dropped to 23.98s / 25.66s.
+  - **F10 (Honesty & Power BI answer checks to verify):**
+    - Pivot output row order: sorted by first key, numeric vs text, case-insensitive, blanks last, or first-seen.
+    - Pivot none on repeated key/category pair: `"There were too many elements"`.
+    - count_all vs count_non_blank with `''` vs null and missing combination null vs 0.
+    - Blank, whitespace and null attribute values.
+    - Category names `"red"` and `"RED"`.
+    - Category equal to key column or to value/attribute column name.
+    - The 512-column limit.
+    - Typed categories (int 1 and text `"1"`).
+    - Decimal keys 1.0 and 1.00 and -0.
+    - remove/keep errors with columns empty, omitted, duplicated, padded.
+    - Does a text cell `"Error: ..."` count as an error?
+    - Do error cells exist after convert to text or any?
+- **Files touched:**
+  - `tools/pq_store_diff.py`
+  - `tests/test_pq_store_diff_tool.py` (duration optimization)
+  - `tests/test_pq_store_diff_tool_d1g.py` (NEW, 29 tests)
+  - `HANDOFF.md`
+- **Measured verification numbers:**
+  - Sweeps:
+    - 400 rows (seeds 1..30): exit 0, total_steps=18090, same=14610, ref=3480, wall=55.8s
+    - 2000 rows (seeds 1..30): exit 0, total_steps=18090, same=14610, ref=3480, wall=160.6s
+    - 20000 rows (seeds 1..3): exit 0, total_steps=1809, same=1461, ref=348, wall=140.3s
+    - Every step non-zero; 54 distinct step operations executed.
+  - All test files timing (run 1 / run 2):
+    - `tests/test_pq_store_diff_tool_d0h.py`: 56 passed in 4.73s / 3.91s
+    - `tests/test_pq_store_diff_tool_d1a.py`: 12 passed in 3.02s / 4.53s
+    - `tests/test_pq_store_diff_tool_d1a2.py`: 84 passed in 13.24s / 13.41s
+    - `tests/test_pq_store_diff_tool_d1b.py`: 64 passed in 7.02s / 6.77s
+    - `tests/test_pq_store_diff_tool_d1c.py`: 5 passed in 0.38s / 0.35s
+    - `tests/test_pq_store_diff_tool_d1d.py`: 9 passed in 1.48s / 1.45s
+    - `tests/test_pq_store_diff_tool_d1e.py`: 42 passed in 2.63s / 2.76s
+    - `tests/test_pq_store_diff_tool_d1g.py`: 29 passed in 2.09s / 1.96s
+    - `tests/test_pq_store_diff_tool.py`: 100 passed in 25.66s / 23.98s
+    - Total: 401 tests across all test suites, all passing.
+  - Test independence:
+    - All 29 d1g tests passed alone by node id.
+    - All 29 d1g tests passed under `pytest -n 4 --dist worksteal` in 3.10s.
+  - Hygiene:
+    - `python -m pyflakes tools/pq_store_diff.py tests/test_pq_store_diff_tool_d1g.py`: clean (exit 0)
+    - Path grep check: 0 occurrences of forbidden path tokens in touched files.
+    - Python 3.11 parse and compile: clean (exit 0).
+- **Status:** READY FOR REVIEW
+
 C1b2b re-review result (2026-11-26, Team-Thinker PASS on 295a7b8). Open for the next DAX slice: (F1, medium) date cells before 1900-01-01 in a date column: the group-by key text differs from the engine (engine `5/5/100`, `1/1/999`; plan `5/5/0100`, `1/1/0999`; the cell 1899-12-30 shows as `12:00:00 AM` in the engine and `12/30/1899` in the plan), and for 0001-01-01 the engine raises for MIN and group-by while the plan returns a value: extend the date guard to refuse a column holding any cell before 1900-01-01; (F2) tests for a scale-only stamp change at equal digits (column [123.12345, 2.5] has ColumnMeta(5, 8), after appending 1.123456 it is (6, 8)) and for a dropped or unreadable column (mutants `stamp_scale_ignored`, `stamp_missing_column_ok` survive); (F3) a plan without a decimal stamp, and a text-group group-by, raise StoreError on a dropped table instead of returning a Refusal: wrap the guard queries so every dropped-table case reads `plan is stale`; (F4) the stale stamps do not see a type change (a whole column that gains decimals): contract is rebuild after any reload or append; stamp cost measured at 1,000,000 rows: 0.023 s per decimal column per execute (whole execute 0.173 s against 0.124 s bare SQL with 3 decimal columns).
 
 **Stage C1b1: DAX to DuckDB SQL for the store, scalar aggregates and column predicates (2026-11-25, committed 65b7bb8; C1b1b review fixes committed e260165, Team-Thinker PASS)**

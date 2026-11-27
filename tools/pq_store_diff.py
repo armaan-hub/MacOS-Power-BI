@@ -572,10 +572,10 @@ PIVOT_TOO_MANY = "Error: There were too many elements in the enumeration to comp
 ERROR_ROW_OPS = ("remove_rows_with_errors", "keep_rows_with_errors")
 
 
-def generate_d1e_csv(csv_file: Path, seed: int, shape: str = "d1e") -> list[str]:
+def generate_d1e_csv(csv_file: Path, seed: int, shape: str = "d1e", rows: int = 40) -> list[str]:
     """Write one D1e table (pivot_column and the error-row steps) and return its CSV headers.
 
-    Fixed sizes (not `--rows`). "d1e": D1E_ROWS rows drawn from D1E_KEYS (blank keys included), D1E_CATS (no blank
+    "d1e": D1E_ROWS (or rows if > 40) rows drawn from D1E_KEYS (blank keys included), D1E_CATS (no blank
     category), D1E_VALS (blank values included) and D1E_TXTS, so repeated key and category pairs occur.
     "d1e_empty": header only. "d1e_one_row": the first drawn row. "d1e_blank_cat": 'd1e' with a blank category in
     row 3. "d1e_nokey": columns e_cat and e_val, D1E_ROWS rows. "d1e_empty_nokey": columns e_cat and e_val, header
@@ -590,7 +590,8 @@ def generate_d1e_csv(csv_file: Path, seed: int, shape: str = "d1e") -> list[str]
     if shape == "d1e_wide":
         body = [[f"c{i:03d}", str(i)] for i in range(1, 521)]
     elif shape not in {"d1e_empty", "d1e_empty_nokey"}:
-        for _ in range(D1E_ROWS):
+        d1e_rows = max(D1E_ROWS, rows)
+        for _ in range(d1e_rows):
             drawn = {
                 "e_key": rnd.choice(D1E_KEYS), "e_cat": rnd.choice(D1E_CATS),
                 "e_val": rnd.choice(D1E_VALS), "e_txt": rnd.choice(D1E_TXTS),
@@ -617,7 +618,21 @@ def generate_d1e_csv(csv_file: Path, seed: int, shape: str = "d1e") -> list[str]
 
 def _d1e_marked(prev_convert: dict[str, Any] | None, column: str) -> bool:
     """True when the step directly before (a convert_type on `column`) made the error cells of `column`."""
-    return prev_convert is not None and prev_convert.get("column") == column
+    return (
+        prev_convert is not None
+        and prev_convert.get("column") == column
+        and prev_convert.get("type") not in {"text", "any"}
+        and prev_convert.get("type") in CONVERT_STORE_TYPES
+    )
+
+
+def _d1e_text_converted(prev_convert: dict[str, Any] | None, column: str) -> bool:
+    """True when the step directly before converted `column` to text or any (creating no error cells)."""
+    return (
+        prev_convert is not None
+        and prev_convert.get("column") == column
+        and prev_convert.get("type") in {"text", "any"}
+    )
 
 
 def _d1e_catalog() -> list[dict[str, Any]]:
@@ -747,6 +762,25 @@ def _map_pivot_column(
     if _d1e_marked(prev_convert, attr) and prev_convert.get("type") == "boolean":
         if any(rec[0] is not None and not is_error_text(rec[0]) for rec in scan):
             return Refusal("Boolean text in the attribute column is written TRUE or FALSE by the engine, not True or False.")
+    if _d1e_marked(prev_convert, attr) and prev_convert.get("type") == "datetime":
+        return Refusal("Datetime attribute column headers use ISO 'T' formatting in the engine; SQL uses space.")
+    # F1: Decimal key merging check
+    if prev_convert is not None and prev_convert.get("type") in {"decimal_number", "number"}:
+        for j, k in enumerate(key_headers):
+            if prev_convert.get("column") == k:
+                k_cells = [rec[2 + j] for rec in scan if rec[2 + j] is not None and rec[2 + j] != ""]
+                non_err = [c for c in k_cells if not is_error_text(c)]
+                def _d_norm(v: str) -> str:
+                    s = v.strip()
+                    try:
+                        d = Decimal(s)
+                        return "0" if d == 0 else str(d.normalize())
+                    except Exception:
+                        return s
+                if len(set(non_err)) != len({_d_norm(c) for c in non_err}):
+                    return Refusal(
+                        f"Key column {k!r} holds decimal values whose text forms differ; SQL groups by text while the engine groups by value."
+                    )
     for pos, rec in enumerate(scan, 1):
         a = rec[0]
         if _d1e_marked(prev_convert, attr) and is_error_text(a) and not overrides.get("mutant_pivot_no_attr_error_check"):
@@ -775,7 +809,7 @@ def _map_pivot_column(
     # the engine reads it as plain text, which the store cannot tell from an error cell: a named refusal (after the
     # engine's own errors above, which come first in the engine too).
     for c_idx, c in enumerate(cols):
-        if c == value or _d1e_marked(prev_convert, c):
+        if c == value or _d1e_marked(prev_convert, c) or _d1e_text_converted(prev_convert, c):
             continue
         if any(is_error_text(rec[c_idx]) for rec in scan):
             return Refusal("A cell holds text that starts with the engine's error prefix; the store cannot tell it from an error cell.")
@@ -800,9 +834,10 @@ def _map_pivot_column(
                 return Refusal(f"Key column {k0!r} holds non-ASCII text; the engine case-folds with Python rules.")
             val_expr = f'"{k0}"' if overrides.get("mutant_pivot_sort_case_sensitive") else f'lower("{k0}")'
         blank_expr = f'CASE WHEN "{k0}" IS NULL OR "{k0}" = \'\' THEN 1 ELSE 0 END'
+        blank_order = f'CASE WHEN "{k0}" IS NULL OR "{k0}" = \'\' THEN MIN({_RN}) ELSE 0 END ASC'
         if overrides.get("mutant_pivot_blank_key_first"):
             blank_expr = f'CASE WHEN "{k0}" IS NULL OR "{k0}" = \'\' THEN 0 ELSE 1 END'
-        order_terms = [f"{blank_expr} ASC", f"{val_expr} ASC", *order_terms]
+        order_terms = [f"{blank_expr} ASC", blank_order, f"{val_expr} ASC", *order_terms]
 
     val_q = f'"{value}"'
     agg_items: list[tuple[str, str]] = []
@@ -863,10 +898,14 @@ def _map_error_rows(
     cannot tell it from an error cell). An empty list checks no column: remove keeps every row, keep keeps none.
     """
     if "columns" in step:
-        columns = step["columns"]
-        if not isinstance(columns, list) or any(not isinstance(c, str) or not c.strip() for c in columns):
+        raw_cols = step["columns"]
+        if not isinstance(raw_cols, list) or any(not isinstance(c, str) or not c.strip() for c in raw_cols):
             message = "Transformation step 1 needs a list of error-check column names."
             return Refusal(message, expected_error="needs a list of error-check column names.")
+        columns = [c.strip() for c in raw_cols]
+        if len(set(columns)) != len(columns):
+            message = "Transformation step 1 selects an error-check column more than once."
+            return Refusal(message, expected_error="selects an error-check column more than once.")
     else:
         columns = list(headers)
     missing = next((c for c in columns if c not in headers), None)
@@ -881,6 +920,8 @@ def _map_error_rows(
             preds.append("FALSE")
         elif _d1e_marked(prev_convert, c):
             preds.append(f'COALESCE(left("{c}", 7) = {sql_str(CONVERT_ERROR_PREFIX)}, FALSE)')
+        elif _d1e_text_converted(prev_convert, c):
+            preds.append("FALSE")
         else:
             scan = store.execute(f'SELECT "{c}" FROM {t_q}')
             if any(isinstance(rec[0], str) and rec[0].startswith(CONVERT_ERROR_PREFIX) for rec in scan):
@@ -3375,6 +3416,53 @@ def generate_sequence_sql(
         # D1e: the step right after a convert_type sees that convert (its error cells are the "Error: " text).
         prev_convert = steps[index - 1] if index and steps[index - 1].get("op") == "convert_type" else None
         step_item = {"id": item["id"], "step": step, **({"prev_convert": prev_convert} if prev_convert else {})}
+        # F4: Typed-category conflict check in sequence mode
+        if index and step.get("op") == "pivot_column":
+            col_types: dict[str, str] = {}
+            last_unpivot: dict[str, Any] | None = None
+            for s in steps[:index]:
+                if s.get("op") == "convert_type":
+                    col_types[s["column"]] = s["type"]
+                elif s.get("op") in {"unpivot_columns", "unpivot_other_columns"}:
+                    last_unpivot = s
+            if last_unpivot is not None:
+                at_col = last_unpivot.get("attribute_name", "Attribute")
+                val_col = last_unpivot.get("value_name", "Value")
+                pivot_attr = step.get("attribute_column")
+                if pivot_attr == val_col and store.has_table(current_name):
+                    try:
+                        u_rows = store.execute(f'SELECT "{at_col}", "{val_col}" FROM "{current_name}" ORDER BY {_RN}')
+                        from analytics_studio.power_query_values import cell_key, cell_to_text, is_cell_error
+                        from analytics_studio.transformations import _convert_value
+                        seen_piv: dict[str, Any] = {}
+                        for r_idx, (orig_c, raw_v) in enumerate(u_rows, 1):
+                            if raw_v is None:
+                                continue
+                            t = col_types.get(orig_c, "text")
+                            if t in ("text", "any"):
+                                cv = raw_v
+                            else:
+                                try:
+                                    cv = _convert_value(raw_v, t, r_idx, orig_c)
+                                except Exception:
+                                    cv = raw_v
+                            if is_cell_error(cv):
+                                continue
+                            v_txt = cell_to_text(cv)
+                            if not v_txt.strip():
+                                continue
+                            v_k = cell_key(cv)
+                            prev_k = seen_piv.get(v_txt)
+                            if prev_k is not None and prev_k != v_k:
+                                msg = (
+                                    f"Cannot pivot: distinct typed categories in {pivot_attr!r} "
+                                    f"produce the same output column {v_txt!r}; convert the column to text first."
+                                )
+                                return Refusal(msg, expected_error=msg)
+                            if prev_k is None:
+                                seen_piv[v_txt] = v_k
+                    except Exception:
+                        pass
         result = generate_step_sql(
             step_item, current_headers, current_name, current_total,
             overrides=overrides, col_meta=current_meta, store=store,
@@ -4245,7 +4333,7 @@ def run_pq_step_diff_many(
                 continue
             d1a_path = t_path / f"{shape}.csv"
             if shape in D1E_SHAPES:
-                generate_d1e_csv(d1a_path, seed, shape)
+                generate_d1e_csv(d1a_path, seed, shape, rows=rows)
             elif shape in D1B_SHAPES:
                 generate_d1b_csv(d1a_path, seed, shape)
             else:
