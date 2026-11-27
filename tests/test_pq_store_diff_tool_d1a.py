@@ -18,6 +18,7 @@ from tests.test_pq_store_diff_tool import (
     _engine_rows,
     _run_items,
 )
+from tools import pq_store_diff
 from tools.pq_store_diff import evaluate_exit_policy, run_pq_step_diff_many
 
 # ------------------------------------------------------------------ D1a Step Items for Hand-Checked Tests
@@ -319,6 +320,15 @@ def test_edge_case_parameters_and_errors() -> None:
     for name, table, item in cases:
         res = _by_id(_run_items(table, [item]), "x")
         assert res["status"] == "same", f"Failed on {name}: {res}"
+        eng_err = pq_store_diff.execute_engine_step(
+            item,
+            ImportCandidate("csv", table["headers"], [dict(zip(table["headers"], r)) for r in table["rows"]], {}, []),
+            None,
+        )
+        if isinstance(eng_err, str):
+            ref = res.get("refusal")
+            assert ref is not None and ref.startswith("REFUSED: "), f"Expected refusal on {name}: {res}"
+            assert eng_err in ref, f"Refusal text mismatch on {name}: expected {eng_err!r} in {ref!r}"
 
 
 # ------------------------------------------------------------------ Chained Structural Steps
