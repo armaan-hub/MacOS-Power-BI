@@ -1472,6 +1472,7 @@ SWEEP_WHOLE_BIG = ["9223372036854775807", "-9223372036854775808", "9223372036854
 SWEEP_DECIMAL = [
     "0", "0.0", "0.00", "-0.5", "0.5", "0.25", "12.345", "0.000001", "-0.0000005", "1.5", "-2.25", "100.123456",
     "123456789012345678.123456", "1234567890.1234567", "0.1", "0.2", "0.3", "-0.000001", "7", "-7.5", "3.14159",
+    "-0", "-0.00",  # minus zeros: MIN and MAX of a column can return a signed zero (the store does not keep it)
 ]
 SWEEP_DECIMAL_BIG = ["123456789012345678901234567890", "-123456789012345678901234567890.5", "0.1"]
 SWEEP_DATES = [
@@ -2759,7 +2760,9 @@ def arith_family_counts(catalog: list[dict[str, Any]] | None = None) -> dict[str
     return dict(sorted(counts.items()))
 
 
-def evaluate_sweep_policy(sweep_results: list[dict[str, Any]], baseline: dict[str, Any]) -> tuple[int, list[str]]:
+def evaluate_sweep_policy(
+    sweep_results: list[dict[str, Any]], baseline: dict[str, Any], rows: int = 300
+) -> tuple[int, list[str]]:
     """Exit policy of the literal sweep: any difference, SQL error or crash exits 1, and the set of refused rows
     (whitelist, planner or guard) must equal the baseline list `sweep_refused` (row ids are built from content,
     never from a seed)."""
@@ -2776,7 +2779,10 @@ def evaluate_sweep_policy(sweep_results: list[dict[str, Any]], baseline: dict[st
                 seen[r["shape"]] = seen.get(r["shape"], 0) + 1
         if dict(sorted(seen.items())) != dict(sorted(expected_families.items())):
             return 1, [f"FAILURE: arithmetic family row counts changed vs baseline: {seen} != {expected_families}"]
-    expected = set(baseline.get("sweep_refused", []))
+    # The guard refusals depend on the generated rows, so each row count has its own measured set (`sweep_refused_by_rows`);
+    # a row count without one is checked against the 300-row set `sweep_refused`.
+    by_rows = baseline.get("sweep_refused_by_rows", {})
+    expected = set(by_rows.get(str(rows), baseline.get("sweep_refused", [])))
     actual = {r["id"] for r in sweep_results if r["status"].startswith("refused")}
     if actual != expected:
         changed = sorted(actual.symmetric_difference(expected))
@@ -2794,7 +2800,7 @@ def evaluate_exit_policy(data: dict[str, Any], baseline: dict[str, Any]) -> tupl
     results = data["results"]
 
     if "sweep_results" in data:
-        sweep_code, sweep_messages = evaluate_sweep_policy(data["sweep_results"], baseline)
+        sweep_code, sweep_messages = evaluate_sweep_policy(data["sweep_results"], baseline, data.get("rows", 300))
         if sweep_code or data.get("sweep_only"):
             return sweep_code, sweep_messages
 

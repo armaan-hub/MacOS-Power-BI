@@ -153,7 +153,9 @@ def test_each_family_has_no_difference_at_seed_one(family: str) -> None:
     assert refused <= set(BASELINE["sweep_refused"])
     if family in ("arith_pairs", "arith_literal", "arith_divide", "arith_unary", "arith_precedence", "arith_blank_int",
                   "arith_int_beyond_53"):
-        assert all(r["status"] == "same" for r in results), [(r["id"], r["status"]) for r in results if r["status"] != "same"][:3]
+        # a row is the same as the engine, or a named refusal (a division by MIN or MAX of a column is refused)
+        odd = [(r["id"], r["status"]) for r in results if r["status"] != "same" and not (r["status"].startswith("refused") and r["reason"])]
+        assert not odd, odd[:3]
     if family == "arith_refused":
         assert all(r["status"] == "refused-whitelist" and r["reason"] for r in results)
 

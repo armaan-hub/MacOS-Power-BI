@@ -283,17 +283,10 @@ REFUSALS: list[tuple[str, str]] = [
 
 
 @pytest.mark.parametrize("expression,reason", REFUSALS, ids=[e[:60] for e, _ in REFUSALS])
-def test_refused_with_a_named_reason_and_no_query(world: World, expression: str, reason: str) -> None:
-    class Spy:
-        calls: list[str] = []
-
-        def execute(self, sql: str, params: Any = ()) -> Any:
-            self.calls.append(sql)
-            return world.store.execute(sql, params)
-
+def test_refused_with_a_named_reason_at_plan_time(world: World, expression: str, reason: str) -> None:
+    # the planner builds no query (the route test runs the same expressions with a spy reader that records any call)
     out = world.plan(expression)
     assert isinstance(out, Refusal) and reason in out.reason, (expression, out)
-    assert Spy.calls == []  # nothing ran: a plan is only built
 
 
 def test_every_new_reason_has_a_sentence_in_the_route() -> None:
@@ -358,21 +351,27 @@ def test_a_dropped_table_is_a_stale_plan_not_an_error(fresh: World) -> None:
     assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_PLAN_STALE, out
 
 
-def test_the_first_refusal_wins_and_later_totals_do_not_run(fresh: World) -> None:
-    plan = fresh.plan("COUNTROWS(s) + SUM(s[a]) + SUM(s[q])")
+class RecordingLeaf:
+    """A leaf plan that answers with a fixed value or Refusal and records its name when it runs."""
+
+    def __init__(self, answer: Any, ran: list[str], name: str) -> None:
+        self.answer, self.ran, self.name, self.num_kind = answer, ran, name, "double"
+
+    def execute(self, store: Any) -> Any:
+        self.ran.append(self.name)
+        return self.answer
+
+
+def test_the_first_refusal_wins_and_later_totals_do_not_run(world: World) -> None:
+    plan = world.plan("SUM(s[q]) + COUNTROWS(s)")
     assert isinstance(plan, ArithPlan)
-    fresh.store.append_rows("s_csv", [["13", "1", "1.123456789", "East", "x", "2024-01-09"]])
-    calls: list[str] = []
-
-    class Spy:
-        def execute(self, sql: str, params: Any = ()) -> Any:
-            calls.append(sql)
-            return fresh.store.execute(sql, params)
-
-    out = plan.execute(Spy())
-    assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_PLAN_STALE
-    ran_sum_q = any('"q"' in sql and "SUM" in sql.upper() and "FROM" in sql.upper() and '"a"' not in sql for sql in calls)
-    assert not ran_sum_q, calls  # the Refusal of the decimal total stopped the plan before the whole-number total
+    ran: list[str] = []
+    first, second = Refusal("the first total said no"), Refusal("the second total said no")
+    broken = dataclasses.replace(
+        plan, leaf_plans=(RecordingLeaf(first, ran, "first"), RecordingLeaf(second, ran, "second")),
+    )
+    assert broken.execute(world.store) is first  # the first Refusal is the answer
+    assert ran == ["first"]  # the second total never runs
 
 
 class StubPlan:
@@ -572,3 +571,96 @@ def test_a_date_value_is_never_an_arithmetic_leaf(world: World) -> None:
     assert isinstance(out, Refusal) and dax_arith.REASON_ARITH_DATE in out.reason
     today = dax_dates.from_datetime(dt.datetime(2024, 1, 1))
     assert today is not None  # (a DaxDateTime is never combined: the whitelist refuses before)
+
+
+# ---------------------------------------------------------------------------------------------------
+# C4b fix 1: minus zeros, the table version between two statements, underflow, overflow, grouped signs
+# ---------------------------------------------------------------------------------------------------
+MINUS_ZERO_CSV = "n,w,d\n1,-0,-0.00\n2,-0,-0.00\n3,-0,-0.00\n"  # three rows whose MIN and MAX are minus zeros
+MINUS_ZERO_TYPES = {"n": "whole_number", "w": "whole_number", "d": "decimal_number"}
+
+
+@pytest.fixture()
+def minus_zero(tmp_path: Path) -> Any:
+    path = tmp_path / "z.csv"
+    path.write_text(MINUS_ZERO_CSV, encoding="utf-8")
+    store = DuckStore(str(tmp_path / "z.db"))
+    import_csv_to_store(store, "z_csv", path, {})
+    meta = {("z", c): m for c, m in column_decimal_meta(store, "z_csv", list(MINUS_ZERO_TYPES)).items()}
+    yield store, dict(home_table="z", tables={"z": MINUS_ZERO_TYPES}, store_tables={"z": "z_csv"}, column_meta=meta)
+    store.close()
+
+
+@pytest.mark.parametrize("expression", [
+    "COUNTROWS(z) / MIN(z[w])", "COUNTROWS(z) / MAX(z[w])", "COUNTROWS(z) / MIN(z[d])", "COUNTROWS(z) / MAX(z[d])",
+    "DIVIDE(COUNTROWS(z), MIN(z[d]))", "-1 / (MIN(z[w]) * 1)", "1 / (MIN(z[d]) + 0)",
+])
+def test_division_by_min_or_max_of_a_column_is_refused_by_name(minus_zero: Any, expression: str) -> None:
+    store, kwargs = minus_zero
+    out = plan_measure(expression, **kwargs)
+    assert isinstance(out, Refusal) and out.reason == dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR, (expression, out)
+
+
+def test_division_by_sum_and_by_a_literal_zero_still_plan_and_give_the_engine_value(minus_zero: Any) -> None:
+    # hand values on 3 rows: COUNTROWS = 3; SUM of the minus zeros is +0; a literal 0 is +0
+    store, kwargs = minus_zero
+    for expression in ("COUNTROWS(z) / SUM(z[w])", "COUNTROWS(z) / SUM(z[d])", "COUNTROWS(z) / 0"):
+        plan = plan_measure(expression, **kwargs)
+        assert isinstance(plan, ArithPlan), (expression, plan)
+        same(plan.execute(store), D("Infinity"))
+    same(plan_measure("DIVIDE(COUNTROWS(z), 0)", **kwargs).execute(store), None)  # no alternate: blank
+    same(plan_measure("DIVIDE(COUNTROWS(z), 0, 7)", **kwargs).execute(store), D(7))
+    # a minus zero that is not a divisor shows as 0
+    same(plan_measure("MIN(z[w]) - 0", **kwargs).execute(store), D(0))
+
+
+# -- a table that changes between two statements of one arithmetic measure ------------------------
+def _append_row(world: World) -> Any:
+    def append() -> None:
+        world.store.append_rows("s_csv", [["13", "1", "1.123456789", "East", "x", "2024-01-09"]])
+    return append
+
+
+def test_a_change_between_two_leaf_queries_is_stale_not_a_mixed_value(fresh: World, monkeypatch: pytest.MonkeyPatch) -> None:
+    plan = fresh.plan("SUM(s[q]) / COUNTROWS(s)")
+    assert isinstance(plan, ArithPlan)
+    monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", _append_row(fresh))
+    out = plan.execute(fresh.store)
+    assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_PLAN_STALE, out  # never 90/12 or 91/13 mixed
+    monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", None)
+    same(plan.execute(fresh.store), D(7))  # the plan runs again on the table as it is now: 91 / 13
+
+
+def test_a_change_between_two_grouped_queries_is_stale(fresh: World, monkeypatch: pytest.MonkeyPatch) -> None:
+    plan = fresh.group_plan("SUM(s[q]) / COUNTROWS(s)", "r")
+    assert isinstance(plan, GroupedArithPlan)
+    monkeypatch.setattr(dax_sql, "ARITH_BETWEEN_LEAF_QUERIES", _append_row(fresh))
+    out = plan.execute(fresh.store)
+    assert isinstance(out, Refusal) and out.reason == dax_sql.REASON_PLAN_STALE, out
+
+
+def test_the_seam_is_inert_by_default(fresh: World) -> None:
+    assert dax_sql.ARITH_BETWEEN_LEAF_QUERIES is None
+    plan = fresh.plan("SUM(s[q]) / COUNTROWS(s)")
+    same(plan.execute(fresh.store), D(90) / D(12))
+
+
+# -- the exact Decimal path of a measure reference: underflow, overflow, DIVIDE overflow ----------
+def test_a_measure_reference_product_that_underflows_is_zero(world: World) -> None:
+    same(world.value("[B] * 1E-200 * 1E-200", measures={"B": "SUM(s[a])"}), D(0))  # 19.75 * 1e-400
+
+
+def test_a_measure_reference_product_that_overflows_is_infinity(world: World) -> None:
+    same(world.value("[B] * 1E300 * 1E300", measures={"B": "SUM(s[a])"}), D("Infinity"))  # 19.75 * 1e600
+
+
+def test_divide_whose_quotient_overflows_is_infinity(world: World) -> None:
+    same(world.value("DIVIDE(COUNTROWS(s) * 1E300, 1E-100)"), D("Infinity"))  # 12e300 / 1e-100
+
+
+def test_grouped_values_go_through_bare_result(world: World) -> None:
+    # -(SUM * 0) is a minus zero inside the engine; a group shows 0 (unsigned), never -0
+    rows = dict(world.groups("-(SUM(s[a]) * 0)", "r"))
+    assert sorted(rows) == ["East", "North", "West"], rows
+    for value in rows.values():
+        same(value, D(0))

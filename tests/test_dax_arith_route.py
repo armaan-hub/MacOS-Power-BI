@@ -191,3 +191,74 @@ def test_a_reason_without_a_sentence_is_caught() -> None:
     assert unmapped.startswith("M cannot be computed on a large table yet - ")
     assert dax_route.reason_is_mapped(dax_arith.REASON_ARITH_DIVIDE_NON_FINITE)
     assert dax_route.reason_is_mapped(dax_sql.REASON_PLAN_STALE)
+
+
+# ---------------------------------------------------------------------------------------------------
+# C4b fix 1: refusals run no query, the plan-coded reasons, the depth sentence
+# ---------------------------------------------------------------------------------------------------
+class SpyReader:
+    """A reader that records the SQL the route sends it after the plan is built (the planned value's query).
+
+    `planned` is set by the plan builders the test wraps (see the refusal test): a call made while `planned` is set
+    would mean the route ran a query for a plan it had already refused or built.
+    """
+
+    def __init__(self, inner: Any) -> None:
+        self.inner = inner
+        self.planned = False
+        self.calls: list[str] = []
+
+    def execute(self, sql: str, params: Any = ()) -> Any:
+        if self.planned:
+            self.calls.append(sql)
+        return self.inner.execute(sql, params)
+
+    def interrupt(self) -> None:
+        self.inner.interrupt()
+
+
+REFUSED_BEFORE_ANY_QUERY: list[tuple[str, str]] = [
+    ("SUM(t[amt]) ^ 2", dax_whitelist.REASON_ARITHMETIC),
+    ("1 + 2", dax_whitelist.REASON_NO_TABLES),
+    ("DIVIDE(SUM(t[amt]), 0, BLANK())", dax_whitelist.REASON_ARITH_DIVIDE_ALT),
+    ("SUM(t[amt]) + 9223372036854775808", dax_whitelist.REASON_ARITH_LITERAL),
+    ("COUNTROWS(t) / MIN(t[qty])", dax_whitelist.REASON_ARITH_SIGNED_ZERO_DIVISOR),
+    ("DIVIDE(COUNTROWS(t), 1E-310)", dax_whitelist.REASON_ARITH_DIVIDE_SUBNORMAL),
+]
+
+
+@pytest.mark.parametrize("expression,reason", REFUSED_BEFORE_ANY_QUERY, ids=[e[:50] for e, _ in REFUSED_BEFORE_ANY_QUERY])
+def test_refused_with_a_named_reason_and_no_query(env: Any, expression: str, reason: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    reader = env.ps.store.reader()
+    spy = SpyReader(reader)
+    real_plan_measure, real_plan_group_by = dax_route.plan_measure, dax_route.plan_group_by
+
+    def planned_measure(*args: Any, **kwargs: Any) -> Any:
+        out = real_plan_measure(*args, **kwargs)
+        spy.planned = True  # from here on, the route may only run the value of a plan it did not refuse
+        return out
+
+    monkeypatch.setattr(dax_route, "plan_measure", planned_measure)
+    monkeypatch.setattr(dax_route, "plan_group_by", real_plan_group_by)
+    try:
+        out = env.route(expression, measures=MEASURES, reader=spy)
+    finally:
+        reader.close()
+    assert isinstance(out, RouteRefusal) and out.reason == reason, (expression, out)
+    assert spy.calls == [], spy.calls  # refused by the plan: no query of a value was sent to the store
+
+
+def test_a_whole_total_beyond_64_bit_is_a_plan_refusal_with_its_sentence(env: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    # a seam: every whole-number total is judged beyond the 64-bit range (no table here holds one that large)
+    monkeypatch.setattr(dax_arith, "leaf_value_in_range", lambda num: False)
+    out = env.route("SUM(t[qty]) + COUNTROWS(t)", measures=MEASURES)
+    assert isinstance(out, RouteRefusal), out
+    assert out.reason == dax_whitelist.REASON_ARITH_WHOLE_BEYOND_64
+    assert out.code == dax_route.CODE_PLAN, out.code  # a plan reason, not a whitelist one
+    assert "too large for the arithmetic of large tables" in out.message and out.message.endswith("."), out.message
+
+
+def test_the_depth_refusal_sentence_reaches_the_user(env: Any) -> None:
+    out = env.route("+".join(["1"] * 9) + " + SUM(t[amt])", measures=MEASURES)
+    assert isinstance(out, RouteRefusal) and out.reason == dax_whitelist.REASON_ARITH_CAP_DEPTH, out
+    assert "more than 8 terms in a row" in out.message, out.message

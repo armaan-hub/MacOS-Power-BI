@@ -23,7 +23,7 @@ import datetime as _dt
 import string
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from analytics_studio import dax_dates
 from analytics_studio.measures import MeasureError, parse_expression
@@ -1269,6 +1269,7 @@ def plan_measure(
         return ArithPlan(
             tree=arith.tree, leaf_plans=tuple(built), table=built[0].table,
             untyped=tuple(leaf.unknown for leaf in arith.leaves),
+            read_tables=_physical_read_tables(tuple(plan.table for plan in built), store_tables),
         )
     parts = _plan_parts(
         expression,
@@ -1342,6 +1343,25 @@ def _arith_parse(
     return parsed
 
 
+# Test seam (inert by default): called once, between the first and the second leaf query of an arithmetic plan.
+# A test appends rows here to show that a change between two statements is refused as stale (never a mixed value).
+ARITH_BETWEEN_LEAF_QUERIES: Callable[[], None] | None = None
+
+
+def _physical_read_tables(logical: tuple[str, ...], store_tables: Mapping[str, str]) -> tuple[str, ...]:
+    """The physical store table names (store_tables maps a model table to its store table) of the plans' tables."""
+    physical: set[str] = set()
+    for name in logical:
+        match = next((p for t, p in store_tables.items() if t.casefold() == name.casefold()), None)
+        physical.add(match if match is not None else name)
+    return tuple(sorted(physical))
+
+
+def _arith_table_versions(store: Any, read_tables: tuple[str, ...]) -> tuple[tuple[str, int], ...]:
+    """The change token (store.table_version, the same stamp the request manager uses) of every table a plan reads."""
+    return tuple((name, store.table_version(name)) for name in read_tables)
+
+
 @dataclass(frozen=True)
 class ArithPlan:
     """An arithmetic measure: one MeasurePlan per distinct total and the tree that combines them (dax_arith).
@@ -1357,17 +1377,23 @@ class ArithPlan:
     table: str
     shape: str = "ARITH"
     untyped: tuple[bool, ...] = ()  # per total: CALCULATE([measure], ...), which has no static type in the engine
+    read_tables: tuple[str, ...] = ()  # physical store tables the totals read: their change tokens are checked per execute
 
     grouped = False
 
     def execute(self, store: Any) -> Decimal | Refusal | None:
         values: list[dax_arith.Num] = []
+        before = _arith_table_versions(store, self.read_tables)
         for index, plan in enumerate(self.leaf_plans):
             result = plan.execute(store)
             if isinstance(result, Refusal):
                 return result
+            if index == 0 and ARITH_BETWEEN_LEAF_QUERIES is not None:
+                ARITH_BETWEEN_LEAF_QUERIES()
             untyped = index < len(self.untyped) and self.untyped[index]
             values.append(dax_arith.Num("unknown" if untyped else plan.num_kind, result))  # type: ignore[arg-type]
+        if _arith_table_versions(store, self.read_tables) != before:
+            return Refusal(REASON_PLAN_STALE)  # a table changed between the statements: the totals are not one time
         if not all(dax_arith.leaf_value_in_range(value) for value in values):
             return Refusal(dax_arith.REASON_ARITH_WHOLE_BEYOND_64)
         try:
@@ -1624,10 +1650,12 @@ class GroupedArithPlan:
     group_type: str
     shape: str = "ARITH"
     untyped: tuple[bool, ...] = ()
+    read_tables: tuple[str, ...] = ()  # physical store tables of the universe and of every total
 
     grouped = True
 
     def execute(self, store: Any) -> list[tuple[str, Decimal | None]] | Refusal:
+        before = _arith_table_versions(store, self.read_tables)
         base = self.universe.execute(store)
         if isinstance(base, Refusal):
             return base
@@ -1636,16 +1664,20 @@ class GroupedArithPlan:
         if len(known) != len(keys):
             return Refusal(REASON_PLAN_STALE)
         per_total: list[dict[str, Any]] = []
-        for plan in self.leaf_plans:
+        for index, plan in enumerate(self.leaf_plans):
             rows = plan.execute(store)
             if isinstance(rows, Refusal):
                 return rows
+            if index == 0 and ARITH_BETWEEN_LEAF_QUERIES is not None:
+                ARITH_BETWEEN_LEAF_QUERIES()
             by_key: dict[str, Any] = {}
             for key, value in rows:
                 if key in by_key or key not in known:
                     return Refusal(REASON_PLAN_STALE)
                 by_key[key] = value
             per_total.append(by_key)
+        if _arith_table_versions(store, self.read_tables) != before:
+            return Refusal(REASON_PLAN_STALE)  # a table changed between the statements: the totals are not one time
         out: list[tuple[str, Decimal | None]] = []
         for key in keys:
             values = [
@@ -1702,4 +1734,5 @@ def _plan_group_by_arith(
         tree=arith.tree, universe=universe, leaf_plans=tuple(built), table=table,
         group_column=built[0].group_column, group_type=built[0].group_type,
         untyped=tuple(leaf.unknown for leaf in arith.leaves),
+        read_tables=_physical_read_tables((table,), store_tables),
     )

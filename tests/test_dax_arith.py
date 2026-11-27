@@ -507,3 +507,41 @@ def test_evaluate_uses_the_leaf_values_by_index() -> None:
     # the kind of a blank is the kind of its total: a blank double minus an int is a double, a blank int an int
     assert evaluate(parsed.tree, [DOUBLE_BLANK, i(7)]) == Num("double", D(-14))
     assert evaluate(parsed.tree, [INT_BLANK, i(7)]) == Num("int", D(-14))
+
+
+# ---------------------------------------------------------------------------------------------------
+# C4b fix 1: the parser refuses a divisor that can be a minus zero, and a DIVIDE by a subnormal literal
+# ---------------------------------------------------------------------------------------------------
+@pytest.mark.parametrize("text", [
+    "COUNT(t[sd]) / MIN(t[sw])", "COUNT(t[sd]) / MAX(t[sd])", "COUNT(t[sd]) / (MIN(t[sw]) * 2)",
+    "DIVIDE(COUNT(t[sd]), MIN(t[sw]))", "DIVIDE(COUNT(t[sd]), 1 + MAX(t[sw]) - 1)",
+])
+def test_a_divisor_with_min_or_max_of_a_column_is_refused_by_name(text: str) -> None:
+    parsed = parse_arith(parse_expression(text), None)
+    assert parsed.reasons == (dax_arith.REASON_ARITH_SIGNED_ZERO_DIVISOR,), (text, parsed.reasons)
+
+
+def test_a_minus_zero_rule_keeps_the_other_divisors_and_the_numerator() -> None:
+    # the numerator may be MIN: its sign does not reach a division by a sum; a literal 0 divisor stays allowed
+    assert parse_arith(parse_expression("MIN(t[sw]) / SUM(t[sw])"), None).ok
+    assert parse_arith(parse_expression("DIVIDE(MIN(t[sw]), SUM(t[sw]), 7)"), None).ok
+    assert parse_arith(parse_expression("COUNT(t[sd]) / 0"), None).ok
+    assert parse_arith(parse_expression("DIVIDE(COUNT(t[sd]), 0)"), None).ok
+
+
+@pytest.mark.parametrize("text", ["DIVIDE(COUNT(t[sd]), 1E-310, 1E3)", "DIVIDE(COUNT(t[sd]), 1E-308)", "DIVIDE(COUNT(t[sd]), -1E-310)"])
+def test_divide_by_a_subnormal_literal_is_refused_by_name(text: str) -> None:
+    parsed = parse_arith(parse_expression(text), None)
+    assert parsed.reasons == (dax_arith.REASON_ARITH_DIVIDE_SUBNORMAL,), (text, parsed.reasons)
+
+
+def test_divide_by_a_normal_small_literal_is_not_refused() -> None:
+    # 1E-300 is above the smallest normal double (about 2.2E-308): a normal denominator, planned as the engine does
+    assert parse_arith(parse_expression("DIVIDE(COUNT(t[sd]), 1E-300)"), None).ok
+
+
+def test_the_depth_sentence_names_both_limits() -> None:
+    sentence = dax_arith.REASON_ARITH_CAP_DEPTH
+    assert "more than 8 terms in a row" in sentence and "nested more than 8 levels deep" in sentence
+    flat = parse_arith(parse_expression("+".join(["1"] * 9) + " + COUNT(t[sd])"), None)
+    assert flat.reasons == (dax_arith.REASON_ARITH_CAP_DEPTH,)

@@ -66,10 +66,19 @@ REASON_ARITH_LITERAL = "a number in the arithmetic is beyond the 64-bit whole-nu
 REASON_ARITH_DIVIDE_ALT = "the third argument of DIVIDE must be a number"
 REASON_ARITH_CAP_LEAVES = f"arithmetic over more than {MAX_ARITH_LEAVES} different totals is not on the store whitelist"
 REASON_ARITH_CAP_NODES = f"arithmetic with more than {MAX_ARITH_NODES} parts is not on the store whitelist"
-REASON_ARITH_CAP_DEPTH = f"arithmetic nested more than {MAX_ARITH_DEPTH} levels deep is not on the store whitelist"
+REASON_ARITH_CAP_DEPTH = (
+    f"arithmetic with more than {MAX_ARITH_DEPTH} terms in a row or nested more than {MAX_ARITH_DEPTH} levels deep "
+    "is not on the store whitelist"
+)
 REASON_ARITH_IN_CALCULATE = "CALCULATE over an arithmetic measure is not on the store whitelist"
 REASON_ARITH_WHOLE_BEYOND_64 = "a whole-number total is beyond the 64-bit range, which arithmetic on large tables does not handle"
 REASON_ARITH_DIVIDE_NON_FINITE = "DIVIDE of a number that is infinite or not a number is not on the store whitelist"
+REASON_ARITH_SIGNED_ZERO_DIVISOR = (
+    "a division by MIN or MAX of a column is not on the store whitelist, because a minus zero in the column changes the sign"
+)
+REASON_ARITH_DIVIDE_SUBNORMAL = (
+    "DIVIDE by a number smaller than the smallest normal double is not on the store whitelist"
+)
 MEASURE_CHAIN_TOO_DEEP = "measure reference chain too deep"  # the same text as dax_whitelist.REASON_MAX_DEPTH_EXCEEDED
 REASON_ARITH_OPERATOR = "arithmetic is not on the store whitelist"  # the same text as dax_whitelist.REASON_ARITHMETIC
 
@@ -410,6 +419,8 @@ class _Walker:
             self.count()
             left = self.walk(node[2], depth + 1, path, chain)
             right = self.walk(node[3], depth + 1, path, chain)
+            if node[1] == "/" and _may_be_signed_zero(right, self.leaves):
+                raise _Stop(REASON_ARITH_SIGNED_ZERO_DIVISOR)
             return ("bin", node[1], left, right)
         if kind == "unary":
             if node[1] != "-":
@@ -432,7 +443,11 @@ class _Walker:
                 alternate = self.alternate(arguments[2])
                 self.count()
             top = self.walk(arguments[0], depth + 1, path, chain)
+            if _is_subnormal_literal(arguments[1]):
+                raise _Stop(REASON_ARITH_DIVIDE_SUBNORMAL)
             bottom = self.walk(arguments[1], depth + 1, path, chain)
+            if _may_be_signed_zero(bottom, self.leaves):
+                raise _Stop(REASON_ARITH_SIGNED_ZERO_DIVISOR)
             return ("divide", top, bottom, alternate)
         if kind == "reference" and not node[1]:
             name = str(node[2])
@@ -512,6 +527,35 @@ class _Walker:
             return self._is_arithmetic(parse_expression(self.measures[target]), seen | {target}, depth + 1)
         except MeasureError:
             return False
+
+
+_MIN_MAX_CALL = re.compile(r"\b(?:MIN|MAX)\s*\(", re.IGNORECASE)
+
+
+def _may_be_signed_zero(tree: ArithTree, leaves: Sequence[ArithLeaf]) -> bool:
+    """Can this subtree hold a minus zero? A MIN or MAX of a column can (the store returns an unsigned 0)."""
+    kind = tree[0]
+    if kind == "leaf":
+        return _MIN_MAX_CALL.search(leaves[tree[1]].text) is not None
+    if kind in {"neg", "ref"}:
+        return _may_be_signed_zero(tree[1], leaves)
+    if kind == "bin":
+        return _may_be_signed_zero(tree[2], leaves) or _may_be_signed_zero(tree[3], leaves)
+    if kind == "divide":
+        return _may_be_signed_zero(tree[1], leaves) or _may_be_signed_zero(tree[2], leaves)
+    return False
+
+
+def _is_subnormal_literal(node: Any) -> bool:
+    """A DIVIDE denominator that is a number literal (optionally negated) with 0 < |value| < the smallest normal double."""
+    if isinstance(node, tuple) and node and node[0] == "unary" and node[1] == "-":
+        node = node[2]
+    if not (isinstance(node, tuple) and node and node[0] == "number"):
+        return False
+    literal = _literal(node)
+    if isinstance(literal, str) or literal.value is None:
+        return False
+    return 0 < abs(literal.value) < _DBL_MIN
 
 
 def _calculates_a_measure(node: tuple[Any, ...]) -> bool:

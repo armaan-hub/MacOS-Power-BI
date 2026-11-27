@@ -286,6 +286,10 @@ class StoreReader:
     def closed(self) -> bool:
         return self._closed
 
+    def table_version(self, name: str) -> int:
+        """The owner store's change token for a table (the same stamp as DuckStore.table_version; takes no lock)."""
+        return self._owner.table_version(name)
+
     def execute(self, sql: str, params: Sequence[Any] = ()) -> List[Tuple[Any, ...]]:
         """Run a single read query (SELECT only) and return list of tuples (same rules as DuckStore.execute)."""
         with self._state:
