@@ -56,7 +56,7 @@ APP_MAX_CELLS = MAX_CELLS  # the engine's own import limit (500,000); `MAX_CELLS
 @contextmanager
 def raised_engine_limits():
     """Run the real engine with import limits raised so the store path can exceed them."""
-    if transformations.MAX_CELLS < 500_000:
+    if transformations.MAX_CELLS < APP_MAX_CELLS:
         yield
         return
     with patch.object(file_import, "MAX_DATA_ROWS", 1_000_000), \
@@ -732,6 +732,8 @@ def _map_pivot_column(
     col_meta: dict[str, dict[str, Any]] | None,
     store: DuckStore | None,
     prev_convert: dict[str, Any] | None,
+    key_col_types: dict[str, str] | None = None,
+    unpivot_attr: list[tuple[bool | None, str | None, Any, bool]] | None = None,
 ) -> tuple[str, list[str]] | Refusal:
     """pivot_column (`_pivot_column`, engine order). Rule table:
       validation  three text choices, not blank; attribute and value differ after trimming; aggregation in the set.
@@ -746,6 +748,11 @@ def _map_pivot_column(
                   case-folded ascending; blanks last; ties in first-seen order.
       refused     sum, average, median, min, max (named: the Decimal rules are not mirrored here); text that looks like an
                   error cell in an attribute or key column when the step does not come straight after convert_type.
+      typed       the types set by convert_type steps before this one (`key_col_types`, followed through row steps) and the
+                  typed attribute cells of an unpivot (`unpivot_attr`) add, always AFTER the engine's own errors above:
+                  a typed-category conflict (the engine raises it in the attribute loop, row by row after the error
+                  and blank checks); named refusals for a datetime or boolean attribute (the engine writes ISO 'T'
+                  headers and TRUE/FALSE) and for decimal keys whose text forms differ but whose values are equal.
     """
     if store is None:
         return Refusal("pivot_column needs the store.")
@@ -773,36 +780,34 @@ def _map_pivot_column(
     def is_error_text(v: Any) -> bool:
         return isinstance(v, str) and v.startswith(CONVERT_ERROR_PREFIX)
 
-    if _d1e_marked(prev_convert, attr) and prev_convert.get("type") == "boolean":
-        if any(rec[0] is not None and not is_error_text(rec[0]) for rec in scan):
-            return Refusal("Boolean text in the attribute column is written TRUE or FALSE by the engine, not True or False.")
-    if _d1e_marked(prev_convert, attr) and prev_convert.get("type") == "datetime":
-        return Refusal("Datetime attribute column headers use ISO 'T' formatting in the engine; SQL uses space.")
-    # F1: Decimal key merging check
-    if prev_convert is not None and prev_convert.get("type") in {"decimal_number", "number"}:
-        for j, k in enumerate(key_headers):
-            if prev_convert.get("column") == k:
-                k_cells = [rec[2 + j] for rec in scan if rec[2 + j] is not None and rec[2 + j] != ""]
-                non_err = [c for c in k_cells if not is_error_text(c)]
-                def _d_norm(v: str) -> str:
-                    s = v.strip()
-                    try:
-                        d = Decimal(s)
-                        return "0" if d == 0 else str(d.normalize())
-                    except Exception:
-                        return s
-                if len(set(non_err)) != len({_d_norm(c) for c in non_err}):
-                    return Refusal(
-                        f"Key column {k!r} holds decimal values whose text forms differ; SQL groups by text while the engine groups by value."
-                    )
+    # Engine order, row by row: an error cell, a blank, then (attribute followed through an unpivot, `unpivot_attr`)
+    # a typed-category conflict, which the engine raises in the same loop.
+    if unpivot_attr is not None and len(unpivot_attr) != len(scan):
+        return Refusal("The attribute cells of the unpivot could not be matched to the rows of the pivot.")
+    seen_categories: dict[str, Any] = {}
     for pos, rec in enumerate(scan, 1):
         a = rec[0]
-        if _d1e_marked(prev_convert, attr) and is_error_text(a) and not overrides.get("mutant_pivot_no_attr_error_check"):
+        fact = unpivot_attr[pos - 1] if unpivot_attr is not None else None
+        if fact is not None and fact[0] is None:
+            return Refusal("A typed cell of the unpivoted columns could not be rebuilt on the store path.")
+        if (
+            (_d1e_marked(prev_convert, attr) and is_error_text(a) or (fact is not None and fact[0]))
+            and not overrides.get("mutant_pivot_no_attr_error_check")
+        ):
             message = f"Cannot pivot: row {pos} of {attr!r} contains an error."
             return Refusal(message, expected_error=message)
         if (a is None or a.strip() == "") and not overrides.get("mutant_pivot_no_blank_check"):
             message = f"Cannot pivot: row {pos} has a blank value in {attr!r}."
             return Refusal(message, expected_error=message)
+        if fact is not None:
+            text, key = fact[1], fact[2]
+            if text in seen_categories and seen_categories[text] != key:
+                message = (
+                    f"Cannot pivot: distinct typed categories in {attr!r} "
+                    f"produce the same output column {text!r}; convert the column to text first."
+                )
+                return Refusal(message, expected_error=message)
+            seen_categories.setdefault(text, key)
     pivot_values = list(dict.fromkeys(rec[0] for rec in scan if rec[0] is not None))
     if not pivot_values and not key_headers:
         message = "Cannot pivot an empty table without remaining key columns."
@@ -814,11 +819,39 @@ def _map_pivot_column(
     if len(key_headers) + len(pivot_values) > MAX_COLUMNS:
         message = f"Pivoting exceeds the {MAX_COLUMNS}-column import limit."
         return Refusal(message, expected_error=message)
+    # The type each column was converted to by the steps before this one (not only the step right before).
+    effective_col_types = dict(key_col_types or {})
+    if prev_convert is not None and prev_convert.get("type") in CONVERT_STORE_TYPES:
+        effective_col_types[prev_convert.get("column")] = prev_convert.get("type")
     for pos, rec in enumerate(scan, 1):
         for j, k in enumerate(key_headers):
-            if _d1e_marked(prev_convert, k) and is_error_text(rec[2 + j]):
+            if canonical_column_type(effective_col_types.get(k, "text")) not in {"text", "any"} and is_error_text(rec[2 + j]):
                 message = f"Cannot pivot: row {pos} of key column {k!r} contains an error."
                 return Refusal(message, expected_error=message)
+
+    if _d1e_marked(prev_convert, attr) and prev_convert.get("type") == "boolean":
+        if any(rec[0] is not None and not is_error_text(rec[0]) for rec in scan):
+            return Refusal("Boolean text in the attribute column is written TRUE or FALSE by the engine, not True or False.")
+    if (_d1e_marked(prev_convert, attr) and prev_convert.get("type") == "datetime") or (
+        unpivot_attr is not None and any(fact[3] for fact in unpivot_attr)
+    ):
+        return Refusal("Datetime attribute column headers use ISO 'T' formatting in the engine; SQL uses space.")
+    # F1: Decimal key merging check
+    for j, k in enumerate(key_headers):
+        if canonical_column_type(effective_col_types.get(k, "text")) == "decimal_number":
+            k_cells = [rec[2 + j] for rec in scan if rec[2 + j] is not None and rec[2 + j] != ""]
+            non_err = [c for c in k_cells if not is_error_text(c)]
+            def _d_norm(v: str) -> str:
+                s = v.strip()
+                try:
+                    d = Decimal(s)
+                    return "0" if d == 0 else str(d.normalize())
+                except Exception:
+                    return s
+            if len(set(non_err)) != len({_d_norm(c) for c in non_err}):
+                return Refusal(
+                    f"Key column {k!r} holds decimal values whose text forms differ; SQL groups by text while the engine groups by value."
+                )
     # Text that starts with the error prefix is an error cell only after convert_type on that column; anywhere else
     # the engine reads it as plain text, which the store cannot tell from an error cell: a named refusal (after the
     # engine's own errors above, which come first in the engine too).
@@ -3421,6 +3454,80 @@ def _d0h_shape_refusal(step: dict[str, Any]) -> Refusal | None:
     return None
 
 
+# Steps that keep every row's typed cells as they are (they only drop, reorder or select rows or columns, or add
+# a column), so the engine's typed value of a converted column is still there after them. Any other step may retype a
+# column (trim, replace, split, merge, group ...): the follow-up forgets the types then, and the pivot checks that
+# need a type are silent, which only ever makes the tool say `differs` (loud), never accept a wrong value.
+TYPE_KEEPING_OPS = frozenset({
+    "keep_columns", "remove_column", "reorder_columns", "duplicate_column", "keep_top_rows", "remove_top_rows",
+    "keep_bottom_rows", "remove_bottom_rows", "keep_range_rows", "remove_alternate_rows", "add_index_column",
+    "remove_blank_rows", "sort_rows", "sort_rows_by_columns", "filter_rows", "filter_rows_advanced",
+    "remove_duplicates", "keep_duplicates", "fill_down", "fill_up", "remove_rows_with_errors",
+    "keep_rows_with_errors", "table_pass_through",
+})
+
+
+def _unpivot_output_names(unpivot_step: dict[str, Any]) -> tuple[str, str]:
+    """The attribute and value column names an unpivot step writes (the mapper strips them)."""
+    return str(unpivot_step.get("attribute_name", "")).strip(), str(unpivot_step.get("value_name", "")).strip()
+
+
+def _follow_column_types(
+    step: dict[str, Any],
+    col_types: dict[str, str],
+    last_unpivot: tuple[dict[str, Any], dict[str, str]] | None,
+    headers_before: list[str],
+    headers_after: list[str],
+) -> tuple[dict[str, str], tuple[dict[str, Any], dict[str, str]] | None]:
+    """The convert_type types of the columns of the table a step produced (`col_types`), and the last unpivot.
+
+    `last_unpivot` is (the unpivot step, the types its source columns had); it is kept while later steps keep the
+    typed cells and both unpivot output columns, and dropped otherwise."""
+    op = step.get("op")
+    types = dict(col_types)
+    if op == "convert_type":
+        types[step["column"]] = step["type"]
+        if last_unpivot is not None and str(step["column"]).strip() == _unpivot_output_names(last_unpivot[0])[1]:
+            return types, None
+        return types, last_unpivot
+    if op in {"unpivot_columns", "unpivot_other_columns"}:
+        listed = set(step.get("columns", []))
+        moved = [h for h in headers_before if (h not in listed if op == "unpivot_other_columns" else h in listed)]
+        return {c: t for c, t in types.items() if c not in moved}, (step, {c: types.get(c, "text") for c in moved})
+    if op in TYPE_KEEPING_OPS:
+        keep = {c: t for c, t in types.items() if c in headers_after}
+        if last_unpivot is not None and not set(_unpivot_output_names(last_unpivot[0])) <= set(headers_after):
+            last_unpivot = None
+        return keep, last_unpivot
+    return {}, None
+
+
+def _unpivot_attr_facts(u_rows: list[Any], source_types: dict[str, str]) -> list[tuple[bool | None, str | None, Any, bool]]:
+    """One fact per cell of the pivot's attribute column when that column is the value column of an unpivot.
+
+    Each fact is (is the engine's error cell, the engine's text of the cell, the engine's key of the cell, is a
+    datetime), read from the store text with the type that cell's source column had (`source_types`, from the
+    convert_type steps before the unpivot). The first item is None when the typed value cannot be rebuilt."""
+    from analytics_studio.power_query_values import cell_key, cell_to_text
+    from analytics_studio.transformations import _convert_value
+
+    facts: list[tuple[bool | None, str | None, Any, bool]] = []
+    for pos, (source, raw) in enumerate(u_rows, 1):
+        kind = canonical_column_type(source_types.get(source, "text"))
+        if kind in {"text", "any"} or raw is None:
+            facts.append((False, raw, cell_key(raw), False))
+        elif isinstance(raw, str) and raw.startswith(CONVERT_ERROR_PREFIX):
+            facts.append((True, None, None, False))
+        else:
+            try:
+                typed = _convert_value(raw, kind, pos, source)
+            except TransformationError:
+                facts.append((None, None, None, False))
+                continue
+            facts.append((False, cell_to_text(typed), cell_key(typed), kind == "datetime"))
+    return facts
+
+
 def generate_sequence_sql(
     item: dict[str, Any],
     headers: list[str],
@@ -3440,57 +3547,25 @@ def generate_sequence_sql(
     current_name, current_headers, current_total, current_meta = table_name, list(headers), total_rows, col_meta
     steps = item["sequence"]
     result: tuple[str, list[str]] | Refusal | str = Refusal("An empty step sequence cannot run.")
+    seq_col_types: dict[str, str] = {}
+    last_unpivot: tuple[dict[str, Any], dict[str, str]] | None = None
     for index, step in enumerate(steps):
         # D1e: the step right after a convert_type sees that convert (its error cells are the "Error: " text).
         prev_convert = steps[index - 1] if index and steps[index - 1].get("op") == "convert_type" else None
-        step_item = {"id": item["id"], "step": step, **({"prev_convert": prev_convert} if prev_convert else {})}
-        # F4: Typed-category conflict check in sequence mode
-        if index and step.get("op") == "pivot_column":
-            col_types: dict[str, str] = {}
-            last_unpivot: dict[str, Any] | None = None
-            for s in steps[:index]:
-                if s.get("op") == "convert_type":
-                    col_types[s["column"]] = s["type"]
-                elif s.get("op") in {"unpivot_columns", "unpivot_other_columns"}:
-                    last_unpivot = s
-            if last_unpivot is not None:
-                at_col = last_unpivot.get("attribute_name", "Attribute")
-                val_col = last_unpivot.get("value_name", "Value")
-                pivot_attr = step.get("attribute_column")
-                if pivot_attr == val_col and store.has_table(current_name):
-                    try:
-                        u_rows = store.execute(f'SELECT "{at_col}", "{val_col}" FROM "{current_name}" ORDER BY {_RN}')
-                        from analytics_studio.power_query_values import cell_key, cell_to_text, is_cell_error
-                        from analytics_studio.transformations import _convert_value
-                        seen_piv: dict[str, Any] = {}
-                        for r_idx, (orig_c, raw_v) in enumerate(u_rows, 1):
-                            if raw_v is None:
-                                continue
-                            t = col_types.get(orig_c, "text")
-                            if t in ("text", "any"):
-                                cv = raw_v
-                            else:
-                                try:
-                                    cv = _convert_value(raw_v, t, r_idx, orig_c)
-                                except Exception:
-                                    cv = raw_v
-                            if is_cell_error(cv):
-                                continue
-                            v_txt = cell_to_text(cv)
-                            if not v_txt.strip():
-                                continue
-                            v_k = cell_key(cv)
-                            prev_k = seen_piv.get(v_txt)
-                            if prev_k is not None and prev_k != v_k:
-                                msg = (
-                                    f"Cannot pivot: distinct typed categories in {pivot_attr!r} "
-                                    f"produce the same output column {v_txt!r}; convert the column to text first."
-                                )
-                                return Refusal(msg, expected_error=msg)
-                            if prev_k is None:
-                                seen_piv[v_txt] = v_k
-                    except Exception:
-                        pass
+        step_item = {
+            "id": item["id"],
+            "step": step,
+            **({"prev_convert": prev_convert} if prev_convert else {}),
+            **({"key_col_types": dict(seq_col_types)} if seq_col_types else {}),
+        }
+        # F4 and F5 through unpivot: the pivot mapper gets one fact row per attribute cell and applies the engine's own
+        # errors first (error, blank, typed-category conflict, row by row) and the named refusals only afterwards.
+        if index and step.get("op") == "pivot_column" and last_unpivot is not None:
+            u_step, source_types = last_unpivot
+            names = _unpivot_output_names(u_step)
+            if str(step.get("attribute_column")).strip() == names[1] and store.has_table(current_name):
+                u_rows = store.execute(f'SELECT "{names[0]}", "{names[1]}" FROM "{current_name}" ORDER BY {_RN}')
+                step_item["unpivot_attr"] = _unpivot_attr_facts(u_rows, source_types)
         result = generate_step_sql(
             step_item, current_headers, current_name, current_total,
             overrides=overrides, col_meta=current_meta, store=store,
@@ -3507,10 +3582,12 @@ def generate_sequence_sql(
             store.append_rows(derived, [list(r) for r in out_rows])
         except Exception as exc:
             return str(exc)
+        headers_before = current_headers
         current_name = derived
         current_headers = list(out_headers)
         current_total = store.execute(f'SELECT COUNT(*) FROM "{derived}"')[0][0]
         current_meta = inspect_store_columns(store, derived, current_headers)
+        seq_col_types, last_unpivot = _follow_column_types(step, seq_col_types, last_unpivot, headers_before, current_headers)
     return result
 
 
@@ -4169,7 +4246,7 @@ def _mapped_sql(
             return Refusal("The step has missing or unsupported fields.", expected_error="has missing or unsupported fields.")
         return _map_remove_sparse_rows(headers, t_q, table_name, op == "remove_sparse_top_rows", overrides, store)
     if op == "pivot_column":
-        return _map_pivot_column(step, headers, t_q, table_name, overrides, col_meta, store, item.get("prev_convert"))
+        return _map_pivot_column(step, headers, t_q, table_name, overrides, col_meta, store, item.get("prev_convert"), item.get("key_col_types"), item.get("unpivot_attr"))
     if op in ERROR_ROW_OPS:
         return _map_error_rows(step, headers, t_q, op, overrides, store, table_name, item.get("prev_convert"))
     if op == "table_pass_through":
