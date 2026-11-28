@@ -1,28 +1,36 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Stage D1f fix pass 1: Team-Thinker TASK 23 findings on D1f (2026-11-28, uncommitted, branch d1f-pq-followups, base 8007c0c; Sonnet fixer after the first coder stalled)**
+Files: `tools/pq_store_diff.py`, `tests/test_pq_store_diff_tool_d1f.py` (28 tests), `tests/test_pq_store_diff_tool_d1g_fix2.py` (one assertion), `HANDOFF.md`. The engine folder is unchanged. Every number below was measured after the last edit.
+- **Fix 1 and 2 (group and merge validation, engine text, engine order):** `_group_by_validation_refusal` strips and case-folds `m_type` like the engine (padded or mixed-case spellings of the engine's own eight types now run), and refuses with the engine's exact text for an unsupported M type, a blank output name and more than 512 columns (keys plus aggregations, checked before the per-aggregation checks; the two later 512 checks were unreachable and are removed). `_map_merge_columns` now checks separator type, separator length, new name, and only then a missing column (the engine validates all steps before it runs them): `merge missing column + bad separator` was `refusal-reason-mismatch` and is `same`.
+- **Fix 3 (masking rule removed):** the `refused` rule in `run_pq_step_diff_many` is gone. `[keep_top_rows 1000001, add_custom_column]` is `refusal-reason-mismatch` again (loud). The G5 hole stays: the engine raises at `keep_top_rows` above 1,000,000, the store runs it (`differs` alone).
+- **Fix 4 (F3):** the engine's text steps are clean, lowercase, uppercase, capitalize each word, reverse, extract before/after delimiter and extract between delimiters; it raises "requires a text-typed column" for any tracked type but text (`any` included). The tool mirrors the text exactly (`same`), follows `add_index_column` (whole number) and `rename_column`, and leaves a step with bad fields to the engine's field error. The error-cell refusal (split, split to rows, split by positions, split by each delimiter, merge, conditional) fires only for a column typed neither text nor any, reads every column a conditional reads (clause columns, column-kind test values and outputs, a column-kind else), and the bare `except` is gone (the column is checked to exist first and the name is quoted, so a store error is a real fault and propagates). A text or any column holding the plain text "Error: raw" now runs (`same`).
+- **Fix 5 (rename):** `rename_column` follows the type (`TYPE_KEEPING_OPS`); `[convert k decimal, rename k to k2, pivot]` is refused by name (was `differs`). One assertion in `test_pq_store_diff_tool_d1g_fix2.py` changed because the rename rule moved (the helper keeps the type under the new name).
+- **Fix 6 (honesty):** `split_column` `from_end` (bool) is tested. NOT mirrored, open limits (probe g5, `differs`, loud): `missing_part` values "error", "null", "empty", "keep" (8 probe rows: 4 values on 2 steps), `from_end` that is not a bool (1 row), `from_end` on `split_column_by_each_delimiter` (1 row). F6: the test builds 20,000 strings and converts all of them three ways (0.4 to 0.6 s of CPU per way, test about 1.3 s). F5: only row scaling of the D1b tables was added (the extra date, datetime, time and locale columns were NOT added); the tool run is slower, rows 20000 sweeps take 111 to 112 s each (about 62 s before F5 scaling).
+- **Open limits found (loud, not fixed):** the type tracking forgets types after steps that are not type keeping, and ignores `convert_type_using_locale`, so `[convert_type_using_locale whole, lowercase_text]` is `differs` (1 probe row); the number `CONVERT_DECIMAL_MAX_ADJUSTED` check is unreachable end to end (a value that long is refused earlier by the 120-character and DECIMAL(38,18) rules); `group_by` sum, average and median followed by `keep_top_rows` are `differs` in probe g4 (3 rows, same on the base).
+- **Tests:** 28 in the d1f file (5.3 s alone), 501 across the 14 pq files (alone: 56, 12, 84, 64, 5, 5, 2, 14, 42, 28, 51, 29, 18, 91); together under `-n 4 --dist worksteal` 501 passed in 30.8 s. 51 mutants (A01 to A22 with sub-variants rewritten to the new source, B01 to B05, C01 to C05; A12 no longer exists because the bare except is gone), each run against the final tests, source restored and compared identical after each: all killed except B02 (unreachable check, above). Killed by an AssertionError except A19 (a TypeError: the broken rule crashes the run) and C04 (an AttributeError).
+- **Sweeps (exit 0):** rows 400 seeds 1..30 (113 s), rows 2000 seeds 1..12 (152 s), rows 20000 seeds 1..2 (112 s, 111 s), rows 30, 40, 41, 50, 513, 600 seed 5. Against the base at rows 30, 40, 41, 42, 50 (seeds 42 and 1) and 60: 603 items each, 0 changed.
+
 **Stage D1f: Power Query step tool: Reviewer D1b follow-ups and D1c Parts B & C (2026-11-28, uncommitted, branch d1f-pq-followups)**
-Files: `tools/pq_store_diff.py`, NEW `tests/test_pq_store_diff_tool_d1f.py` (19 tests), `HANDOFF.md`.
+Files: `tools/pq_store_diff.py`, NEW `tests/test_pq_store_diff_tool_d1f.py` (28 tests), `HANDOFF.md`.
 - **Part 0 (Engine diffs):**
   - G1: `_map_pivot_column` checks `attr_type = effective_col_types.get(attr) or (prev_convert.get("type") if _d1e_marked(prev_convert, attr) else None)`, following boolean/datetime attribute column types even when not directly adjacent.
   - G2: `_follow_column_types` propagates column types for `duplicate_column` and `rename_column`.
-  - G3/F4: In `run_pq_step_diff_many`, when a sequence step is refused by SQL and engine also throws, status is reported as `refused` rather than `refusal-reason-mismatch` when `refusal_obj.expected_error is None`.
+  - G3/F4: the `refused` rule in `run_pq_step_diff_many` was removed in fix pass 1 (it hid the G5 hole); see the fix pass 1 entry.
   - G4: In `generate_sequence_sql`, `store.append_rows` casts non-string, non-null values to `str(v)`.
   - G5: Documented row-step parameters above 1,000,000 as known unmirrored limits.
 - **Part 1 (Reviewer D1b follow-ups):**
   - F1: `CONVERT_DATETIME_PY` restricted to `([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]` rejecting 24:00:00 and leap second 23:59:60 as non-strict datetime; updated `D1B_CHOICES["b_dt"]` 25:00:00 to 23:00:00.
   - F2: 12 reviewer mutant/boundary tests implemented and passing (M28, S02, M16, L03, M05, M29, M30, M34, M01, M12, M11, G04).
   - F3: In `generate_sequence_sql`, text operations (`lowercase_text`, `uppercase_text`, `clean_text`, `proper_case_text`, `reverse_text`) on non-text converted columns are refused by name; string manipulations (`split_column`, `merge_columns`, etc.) on converted columns containing error cells are refused by name.
-  - F4: Sequence step 1 named refusals report `refused` even if engine fails.
-  - F5: `generate_d1b_csv` scaled via `rows = max(D1B_ROWS, rows)` when `--rows` is passed.
-  - F6: 20,000-string test verifies Decimal conversion accuracy and memory bounds.
+  - F4: withdrawn in fix pass 1 (the rule hid real differences).
+  - F5: `generate_d1b_csv` scaled via `rows = max(D1B_ROWS, rows)` when `--rows` is passed (row scaling only; no extra date, datetime, time or locale columns).
+  - F6: see fix pass 1 (20,000 strings, three conversions).
 - **Part 2 (D1c Parts B & C):**
   - Group by: `_group_by_validation_refusal` enforces `MAX_COLUMNS`, validates `GROUP_AGGREGATION_M_TYPES_FOLDED`, and refuses blank output column names.
   - Merge columns: `_map_merge_columns` refuses blank `new_name`, non-string separators, and separators exceeding `MAX_MERGE_SEPARATOR_CHARS` (32,767).
-  - Split column: `missing_part` and `from_end` options verified and tested.
-- **Verification:**
-  - 492 tests across all 13 pq test suites passing (`pytest -n 4 --dist worksteal` in 76.17s; `test_pq_store_diff_tool_d1f.py` 19 passed in 1.37s).
-  - Sweeps exit 0 with all 54 step ops tracked non-zero: 400 rows (seeds 1..30), 2000 rows (seeds 1..30), 20000 rows (seeds 1..3).
-  - pyflakes and python3.11 py_compile clean; zero forbidden path tokens. All changes uncommitted.
+  - Split column: `from_end` (bool) tested; `missing_part` and other `from_end` shapes are open limits, see fix pass 1.
+- **Verification:** superseded by the fix pass 1 entry above (its numbers were not re-measured after later edits).
 
 
 C4b merged (2026-11-28): gate on f416421 PASSED (45,385 passed, 2 skipped, 29 xfailed; real app 575 of 575; replay DIFF 0, CRASH 0), Team-Thinker PASS on c479caf (TASK 19) plus the F05 flag test. Open for later: Power BI answer checks listed in the C4b entry (sign of zero, subnormal divisors, 20,000-row double totals and others) have NOT been run; every zero MIN/MAX divisor is refused until then. Next: C5 (Parquet plan); Power Query tool branches d1c-pq-slice6 and d1d-limits-followups wait for merge and review.

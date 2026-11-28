@@ -1972,8 +1972,8 @@ def _group_by_validation_refusal(step: dict[str, Any], headers: list[str]) -> Re
     aggregations = step["aggregations"]
     if not isinstance(aggregations, list) or not aggregations:
         return Refusal("The group step needs one or more aggregations.", expected_error="needs one or more aggregations.")
-    if len(keys) > MAX_COLUMNS:
-        message = f"The group step exceeds the {MAX_COLUMNS}-column import limit."
+    if len(keys) + len(aggregations) > MAX_COLUMNS:
+        message = f"A grouped result cannot exceed the {MAX_COLUMNS}-column import limit."
         return Refusal(message, expected_error=message)
     outputs = set(keys)
     for number, aggregate in enumerate(aggregations, 1):
@@ -1985,20 +1985,17 @@ def _group_by_validation_refusal(step: dict[str, Any], headers: list[str]) -> Re
         expected = {"operation", "new_name"} | ({"column"} if operation in GROUP_COLUMN_OPERATIONS else set())
         if not expected <= set(aggregate) <= expected | {"m_type"} or any(not isinstance(v, str) for v in aggregate.values()):
             return Refusal(f"Aggregation {number} in step 1 has missing or invalid fields.", expected_error=f"Aggregation {number} in step 1 has missing or invalid fields.")
-        if "m_type" in aggregate and aggregate["m_type"] not in GROUP_AGGREGATION_M_TYPES_FOLDED:
-            return Refusal("unsupported m type in group aggregation", expected_error="unsupported m_type")
+        if "m_type" in aggregate and aggregate["m_type"].strip().casefold() not in GROUP_AGGREGATION_M_TYPES_FOLDED:
+            return Refusal(f"Aggregation {number} in step 1 has an unsupported M type.", expected_error=f"Aggregation {number} in step 1 has an unsupported M type.")
         name = aggregate["new_name"].strip()
         if not name:
-            return Refusal("The group step needs non-empty output column names.", expected_error="The group step needs non-empty output column names.")
+            return Refusal(f"Aggregation {number} in step 1 needs an output column name.", expected_error=f"Aggregation {number} in step 1 needs an output column name.")
         if name in outputs:
             return Refusal(
                 f"output column {name!r} conflicts",
                 expected_error=f"Group output column {name!r} conflicts with another output column.",
             )
         outputs.add(name)
-        if len(outputs) > MAX_COLUMNS:
-            message = f"The group step exceeds the {MAX_COLUMNS}-column import limit."
-            return Refusal(message, expected_error=message)
     for key in keys:
         if key not in headers:
             return missing_column_refusal(key)
@@ -2289,11 +2286,21 @@ def _map_merge_columns(
     columns = [c.strip() for c in columns]  # the engine looks the stripped names up
     if len(set(columns)) != len(columns):
         return Refusal("duplicate merge column", expected_error="contains a duplicate merge column.")
+    # The engine validates the whole step list first (separator type, separator length, new name, in that order)
+    # and only then runs the steps, where a missing column is found: so the validation texts win over a missing column.
+    if not isinstance(step.get("separator"), str):
+        message = "Transformation step 1 needs a text separator."
+        return Refusal(message, expected_error=message)
+    separator = step["separator"]
+    if len(separator) > MAX_MERGE_SEPARATOR_CHARS:
+        message = f"The merge separator may contain at most {MAX_MERGE_SEPARATOR_CHARS:,} characters."
+        return Refusal(message, expected_error=message)
+    if not isinstance(step.get("new_name"), str) or not step["new_name"].strip():
+        message = "Transformation step 1 needs a new column name."
+        return Refusal(message, expected_error=message)
     for name in columns:
         if name not in headers:
             return missing_column_refusal(name)
-    if not isinstance(step.get("new_name"), str) or not step["new_name"].strip():
-        return Refusal("needs a new column name.", expected_error="needs a new column name.")
     new_name = step["new_name"].strip()
     selected = set(columns)
     if new_name in headers and new_name not in selected:
@@ -2302,12 +2309,6 @@ def _map_merge_columns(
     reason = unsafe_header_reason(new_name)
     if reason:
         return Refusal(reason)
-    if not isinstance(step.get("separator"), str):
-        return Refusal("merge_columns requires a text separator", expected_error="separator must be a string.")
-    separator = step["separator"]
-    if len(separator) > MAX_MERGE_SEPARATOR_CHARS:
-        message = f"The separator exceeds the {MAX_MERGE_SEPARATOR_CHARS:,}-character limit."
-        return Refusal(message, expected_error=message)
     if overrides.get("mutant_merge_separator_off"):
         separator = separator[1:]
     sep_sql = sql_str(separator)
@@ -3480,7 +3481,7 @@ def _d0h_shape_refusal(step: dict[str, Any]) -> Refusal | None:
 # column (trim, replace, split, merge, group ...): the follow-up forgets the types then, and the pivot checks that
 # need a type are silent, which only ever makes the tool say `differs` (loud), never accept a wrong value.
 TYPE_KEEPING_OPS = frozenset({
-    "keep_columns", "remove_column", "reorder_columns", "duplicate_column", "keep_top_rows", "remove_top_rows",
+    "keep_columns", "remove_column", "reorder_columns", "rename_column", "duplicate_column", "keep_top_rows", "remove_top_rows",
     "keep_bottom_rows", "remove_bottom_rows", "keep_range_rows", "remove_alternate_rows", "add_index_column",
     "remove_blank_rows", "sort_rows", "sort_rows_by_columns", "filter_rows", "filter_rows_advanced",
     "remove_duplicates", "keep_duplicates", "fill_down", "fill_up", "remove_rows_with_errors",
@@ -3527,6 +3528,10 @@ def _follow_column_types(
             dst = step.get("new_name")
             if src in types and dst in headers_after:
                 keep[dst] = types[src]
+        elif op == "add_index_column":
+            dst = step.get("new_name")
+            if dst in headers_after:
+                keep[dst] = "whole_number"
         if last_unpivot is not None and not set(_unpivot_output_names(last_unpivot[0])) <= set(headers_after):
             last_unpivot = None
         return keep, last_unpivot
@@ -3559,6 +3564,55 @@ def _unpivot_attr_facts(u_rows: list[Any], source_types: dict[str, str]) -> list
     return facts
 
 
+TEXT_STEP_DISPLAY_NAMES = {
+    "clean_text": "Clean Text",
+    "lowercase_text": "Lowercase Text",
+    "uppercase_text": "Uppercase Text",
+    "proper_case_text": "Capitalize Each Word",
+    "reverse_text": "Reverse Text",
+    "extract_text_by_delimiter": "Extract Text Before/After Delimiter",
+    "extract_text_between_delimiters": "Extract Text Between Delimiters",
+}
+ERROR_CELL_STEP_OPS = frozenset({
+    "split_column", "merge_columns", "conditional_column", "split_column_to_rows",
+    "split_column_by_positions", "split_column_by_each_delimiter",
+})
+
+
+def _text_type_requirement_refusal(op: str, column: Any, types: dict[str, str]) -> Refusal | None:
+    """The engine's "requires a text-typed column" error (`column_types_after_steps`) for the seven text steps.
+
+    The engine raises when the tracked type of the column is anything but text (`any` too); a column it has no
+    type for counts as text."""
+    if op not in TEXT_STEP_DISPLAY_NAMES or column not in types or canonical_column_type(types[column]) == "text":
+        return None
+    message = f"{TEXT_STEP_DISPLAY_NAMES[op]} requires a text-typed column. Place it before a type conversion."
+    return Refusal(message, expected_error=message)
+
+
+def _error_cell_step_columns(step: dict[str, Any]) -> list[str]:
+    """The column names a split, merge or conditional step reads: `column`, `columns`, and for a conditional
+    column every clause column, every column-kind test value or output, and a column-kind else value."""
+    names: list[str] = []
+    column = step.get("column")
+    if isinstance(column, str):
+        names.append(column)
+    columns = step.get("columns")
+    if isinstance(columns, list):
+        names.extend(c for c in columns if isinstance(c, str))
+    if step.get("op") == "conditional_column":
+        for clause in step.get("clauses") if isinstance(step.get("clauses"), list) else []:
+            if not isinstance(clause, dict):
+                continue
+            for key, kind_key in (("column", None), ("test_value", "test_value_kind"), ("output", "output_kind")):
+                value = clause.get(key)
+                if isinstance(value, str) and (kind_key is None or str(clause.get(kind_key)).strip() == "column"):
+                    names.append(value.strip())
+        if str(step.get("else_kind")).strip() == "column" and isinstance(step.get("else_value"), str):
+            names.append(step["else_value"].strip())
+    return list(dict.fromkeys(names))
+
+
 def generate_sequence_sql(
     item: dict[str, Any],
     headers: list[str],
@@ -3584,21 +3638,22 @@ def generate_sequence_sql(
         step_op = step.get("op", "")
         target_col = step.get("column")
         prev_convert = steps[index - 1] if index and steps[index - 1].get("op") == "convert_type" else None
-        # F3 check 1: text-typed requirement after convert_type
-        if step_op in {"lowercase_text", "uppercase_text", "clean_text", "proper_case_text", "reverse_text"}:
-            if target_col in seq_col_types and canonical_column_type(seq_col_types[target_col]) not in {"text", "any"}:
-                return Refusal(f"Step {step_op} requires a text-typed column, but {target_col!r} is {seq_col_types[target_col]}.")
-        # F3 check 2: error cells in converted column for split, merge, conditional
-        target_cols = [target_col] if target_col else step.get("columns", [])
-        if step_op in {"split_column", "merge_columns", "conditional_column", "split_column_to_rows", "split_column_by_positions", "split_column_by_each_delimiter"}:
-            for tc in target_cols:
-                if (tc in seq_col_types or (prev_convert and prev_convert.get("column") == tc)) and store.has_table(current_name):
-                    try:
-                        cells = store.execute(f'SELECT "{tc}" FROM "{current_name}"')
-                        if any(r[0] is not None and str(r[0]).startswith("Error: ") for r in cells):
-                            return Refusal(f"Cannot run {step_op} on column {tc!r} containing error cells after convert_type.")
-                    except Exception:
-                        pass
+        # F3 check 1: the engine's type tracking (`column_types_after_steps`) raises for a text step on a column whose
+        # tracked type is anything but text, `any` included; the tool mirrors the engine's text exactly.
+        # The engine validates every step's fields before it tracks types, so a step with bad fields keeps the field error.
+        text_refusal = _text_type_requirement_refusal(step_op, target_col, seq_col_types) if _d0h_shape_refusal(step) is None else None
+        if text_refusal is not None:
+            return text_refusal
+        # F3 check 2: error cells ("Error: ..." text) in a converted column that a split, merge or conditional step reads.
+        # The refusal is only for a column whose tracked type is neither text nor any: a text or any column holds the
+        # plain text "Error: raw" as a value, and the engine runs on it like the store does.
+        if step_op in ERROR_CELL_STEP_OPS:
+            for tc in _error_cell_step_columns(step):
+                if tc in seq_col_types and tc in current_headers and canonical_column_type(seq_col_types[tc]) not in {"text", "any"}:
+                    quoted = tc.replace('"', '""')
+                    cells = store.execute(f'SELECT "{quoted}" FROM "{current_name}"')
+                    if any(r[0] is not None and str(r[0]).startswith(CONVERT_ERROR_PREFIX) for r in cells):
+                        return Refusal(f"Cannot run {step_op} on column {tc!r} containing error cells after convert_type.")
         # D1e: the step right after a convert_type sees that convert (its error cells are the "Error: " text).
         step_item = {
             "id": item["id"],
@@ -4546,9 +4601,6 @@ def run_pq_step_diff_many(
                         # Engine failed
                         if refusal_matches_engine_error(refusal_obj, engine_res):
                             status = "same"
-                        elif ("sequence" in item or item.get("step", {}).get("op") == "sequence") and refusal_obj.expected_error is None:
-                            status = "refused"
-                            diff_reason = f"SQL refused step: {refusal_obj.reason}"
                         else:
                             status = "refusal-reason-mismatch"
                             diff_reason = f"Refusal reason mismatch: expected {refusal_obj.expected_error!r} vs engine {engine_res!r}"

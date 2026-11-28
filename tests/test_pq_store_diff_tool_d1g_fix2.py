@@ -311,7 +311,7 @@ def test_type_follow_keeps_types_through_row_steps_and_forgets_them_after_other_
     forgotten, forgotten_unpivot = _follow_column_types({"op": "trim_text", "columns": ["k"]}, types, last, ["k", "x"], ["k", "x"])
     assert forgotten == {} and forgotten_unpivot is None
     renamed, renamed_unpivot = _follow_column_types({"op": "rename_column", "column": "k", "new_name": "k2"}, types, last, ["k", "x"], ["k2", "x"])
-    assert renamed == {} and renamed_unpivot is None
+    assert renamed == {"k2": "decimal_number", "x": "date"} and renamed_unpivot is None
     assert "pivot_column" not in TYPE_KEEPING_OPS and "trim_text" not in TYPE_KEEPING_OPS
 
 
