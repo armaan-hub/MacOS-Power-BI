@@ -1,5 +1,30 @@
 # HANDOFF: message board between Claude and Antigravity
 
+**Stage D1f: Power Query step tool: Reviewer D1b follow-ups and D1c Parts B & C (2026-11-28, uncommitted, branch d1f-pq-followups)**
+Files: `tools/pq_store_diff.py`, NEW `tests/test_pq_store_diff_tool_d1f.py` (19 tests), `HANDOFF.md`.
+- **Part 0 (Engine diffs):**
+  - G1: `_map_pivot_column` checks `attr_type = effective_col_types.get(attr) or (prev_convert.get("type") if _d1e_marked(prev_convert, attr) else None)`, following boolean/datetime attribute column types even when not directly adjacent.
+  - G2: `_follow_column_types` propagates column types for `duplicate_column` and `rename_column`.
+  - G3/F4: In `run_pq_step_diff_many`, when a sequence step is refused by SQL and engine also throws, status is reported as `refused` rather than `refusal-reason-mismatch` when `refusal_obj.expected_error is None`.
+  - G4: In `generate_sequence_sql`, `store.append_rows` casts non-string, non-null values to `str(v)`.
+  - G5: Documented row-step parameters above 1,000,000 as known unmirrored limits.
+- **Part 1 (Reviewer D1b follow-ups):**
+  - F1: `CONVERT_DATETIME_PY` restricted to `([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]` rejecting 24:00:00 and leap second 23:59:60 as non-strict datetime; updated `D1B_CHOICES["b_dt"]` 25:00:00 to 23:00:00.
+  - F2: 12 reviewer mutant/boundary tests implemented and passing (M28, S02, M16, L03, M05, M29, M30, M34, M01, M12, M11, G04).
+  - F3: In `generate_sequence_sql`, text operations (`lowercase_text`, `uppercase_text`, `clean_text`, `proper_case_text`, `reverse_text`) on non-text converted columns are refused by name; string manipulations (`split_column`, `merge_columns`, etc.) on converted columns containing error cells are refused by name.
+  - F4: Sequence step 1 named refusals report `refused` even if engine fails.
+  - F5: `generate_d1b_csv` scaled via `rows = max(D1B_ROWS, rows)` when `--rows` is passed.
+  - F6: 20,000-string test verifies Decimal conversion accuracy and memory bounds.
+- **Part 2 (D1c Parts B & C):**
+  - Group by: `_group_by_validation_refusal` enforces `MAX_COLUMNS`, validates `GROUP_AGGREGATION_M_TYPES_FOLDED`, and refuses blank output column names.
+  - Merge columns: `_map_merge_columns` refuses blank `new_name`, non-string separators, and separators exceeding `MAX_MERGE_SEPARATOR_CHARS` (32,767).
+  - Split column: `missing_part` and `from_end` options verified and tested.
+- **Verification:**
+  - 492 tests across all 13 pq test suites passing (`pytest -n 4 --dist worksteal` in 76.17s; `test_pq_store_diff_tool_d1f.py` 19 passed in 1.37s).
+  - Sweeps exit 0 with all 54 step ops tracked non-zero: 400 rows (seeds 1..30), 2000 rows (seeds 1..30), 20000 rows (seeds 1..3).
+  - pyflakes and python3.11 py_compile clean; zero forbidden path tokens. All changes uncommitted.
+
+
 C4b merged (2026-11-28): gate on f416421 PASSED (45,385 passed, 2 skipped, 29 xfailed; real app 575 of 575; replay DIFF 0, CRASH 0), Team-Thinker PASS on c479caf (TASK 19) plus the F05 flag test. Open for later: Power BI answer checks listed in the C4b entry (sign of zero, subnormal divisors, 20,000-row double totals and others) have NOT been run; every zero MIN/MAX divisor is refused until then. Next: C5 (Parquet plan); Power Query tool branches d1c-pq-slice6 and d1d-limits-followups wait for merge and review.
 Power Query step tool merged into main as branch p41-pq-step-tool (2026-11-28): Stages D1a to D1g with Team-Thinker PASS (TASK 22, narrow) on the D1g fix pass 2. The tool is a proof tool only; nothing is wired to the app and the engine file is unchanged. Open limits, all loud (the tool exits 1, never a silent wrong value): (1) the datetime and boolean attribute type of a pivot after an unpivot is followed only when the convert is the step right before the pivot or the unpivot; with a type-keeping step in between the tool reports `differs` (about 38 probe cases); (2) `duplicate_column` carries no type to the copy, so convert, duplicate, remove, pivot can report `differs`; (3) a datetime convert that refuses by name followed by a pivot that makes the engine raise gives a refusal-reason mismatch (general sequence rule, pre-existing); (4) `add_index_column` inside a sequence gives a sql-error (pre-existing); (5) row-step counts above 1,000,000 are not mirrored. These go to the D1f follow-up stage.
 

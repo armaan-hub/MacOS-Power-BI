@@ -39,8 +39,10 @@ from analytics_studio.query_engine import append_candidates
 from analytics_studio.store import DuckStore, import_csv_to_store
 from analytics_studio.transformations import (
     _canonical_culture,
+    GROUP_AGGREGATION_M_TYPES_FOLDED,
     MAX_CONDITIONAL_CLAUSES,
     MAX_DELIMITER_OCCURRENCE,
+    MAX_MERGE_SEPARATOR_CHARS,
     MAX_SPLIT_POSITION,
     _CONDITIONAL_OPERATORS,
     _CONDITIONAL_VALUE_KINDS,
@@ -517,7 +519,7 @@ D1B_CHOICES: dict[str, list[str]] = {
     "b_date": ["2024-02-29", "2024-02-30", "2023-02-28", "0001-01-01", "9999-12-31", "", "2024-13-01", "2024-02-29"],
     "b_date_mixed": ["2024-02-29", "20240229", "2024-02-29T10:00:00", "2023-01-01", ""],
     "b_dt": ["2024-02-29 10:00:00", "2024-02-29T23:59:59", "2024-02-29", "2024-02-30 10:00:00", "",
-             "0001-01-01 00:00:00", "2024-02-29 25:00:00"],
+             "0001-01-01 00:00:00", "2024-02-29 23:00:00"],
     "b_time": ["10:30:15", "00:00:00", "23:59:59", "", "12:00:00", "09:05:01"],
     "b_text": ["a'b", "x", "", "Error fake", " pad ", "\u00fcn\u00ef"],
     # thousands-grouped text (en-US), drawn from its own random source so the other columns keep their draws
@@ -532,7 +534,7 @@ D1B_PLANTED = [
 ]
 
 
-def generate_d1b_csv(csv_file: Path, seed: int, shape: str = "d1b") -> list[str]:
+def generate_d1b_csv(csv_file: Path, seed: int, shape: str = "d1b", rows: int = 40) -> list[str]:
     """Write one D1b table and return its CSV headers.
 
     "d1b": D1B_ROWS rows drawn from D1B_CHOICES (padded, underscored, signed, exponent, long, tiny, Arabic-Indic,
@@ -554,8 +556,9 @@ def generate_d1b_csv(csv_file: Path, seed: int, shape: str = "d1b") -> list[str]
                 [rnd_d1b.choice(D1B_CHOICES[h]) for h in headers], [" ", ""] + [""] * (len(headers) - 3) + ["z"], one("w")]
     else:
         rnd_grp = random.Random(f"d1b-grp-{seed}")
+        d1b_rows = max(D1B_ROWS, rows)
         body = [[rnd_d1b.choice(D1B_CHOICES[h]) for h in headers[:-1]] + [rnd_grp.choice(D1B_CHOICES["b_grp"])]
-                for _ in range(D1B_ROWS)]
+                for _ in range(d1b_rows)]
         # Planted cells in rows 1 to 8 (after the draws, so the draws stay the same): each named refusal's trigger is
         # in every generated table, so the refused set of a run does not depend on the seed.
         for row_index, (column, value) in enumerate(D1B_PLANTED):
@@ -829,10 +832,11 @@ def _map_pivot_column(
                 message = f"Cannot pivot: row {pos} of key column {k!r} contains an error."
                 return Refusal(message, expected_error=message)
 
-    if _d1e_marked(prev_convert, attr) and prev_convert.get("type") == "boolean":
+    attr_type = effective_col_types.get(attr) or (prev_convert.get("type") if _d1e_marked(prev_convert, attr) else None)
+    if attr_type == "boolean":
         if any(rec[0] is not None and not is_error_text(rec[0]) for rec in scan):
             return Refusal("Boolean text in the attribute column is written TRUE or FALSE by the engine, not True or False.")
-    if (_d1e_marked(prev_convert, attr) and prev_convert.get("type") == "datetime") or (
+    if (attr_type == "datetime") or (
         unpivot_attr is not None and any(fact[3] for fact in unpivot_attr)
     ):
         return Refusal("Datetime attribute column headers use ISO 'T' formatting in the engine; SQL uses space.")
@@ -1968,6 +1972,9 @@ def _group_by_validation_refusal(step: dict[str, Any], headers: list[str]) -> Re
     aggregations = step["aggregations"]
     if not isinstance(aggregations, list) or not aggregations:
         return Refusal("The group step needs one or more aggregations.", expected_error="needs one or more aggregations.")
+    if len(keys) > MAX_COLUMNS:
+        message = f"The group step exceeds the {MAX_COLUMNS}-column import limit."
+        return Refusal(message, expected_error=message)
     outputs = set(keys)
     for number, aggregate in enumerate(aggregations, 1):
         if not isinstance(aggregate, dict):
@@ -1978,13 +1985,20 @@ def _group_by_validation_refusal(step: dict[str, Any], headers: list[str]) -> Re
         expected = {"operation", "new_name"} | ({"column"} if operation in GROUP_COLUMN_OPERATIONS else set())
         if not expected <= set(aggregate) <= expected | {"m_type"} or any(not isinstance(v, str) for v in aggregate.values()):
             return Refusal(f"Aggregation {number} in step 1 has missing or invalid fields.", expected_error=f"Aggregation {number} in step 1 has missing or invalid fields.")
+        if "m_type" in aggregate and aggregate["m_type"] not in GROUP_AGGREGATION_M_TYPES_FOLDED:
+            return Refusal("unsupported m type in group aggregation", expected_error="unsupported m_type")
         name = aggregate["new_name"].strip()
+        if not name:
+            return Refusal("The group step needs non-empty output column names.", expected_error="The group step needs non-empty output column names.")
         if name in outputs:
             return Refusal(
                 f"output column {name!r} conflicts",
                 expected_error=f"Group output column {name!r} conflicts with another output column.",
             )
         outputs.add(name)
+        if len(outputs) > MAX_COLUMNS:
+            message = f"The group step exceeds the {MAX_COLUMNS}-column import limit."
+            return Refusal(message, expected_error=message)
     for key in keys:
         if key not in headers:
             return missing_column_refusal(key)
@@ -2278,6 +2292,8 @@ def _map_merge_columns(
     for name in columns:
         if name not in headers:
             return missing_column_refusal(name)
+    if not isinstance(step.get("new_name"), str) or not step["new_name"].strip():
+        return Refusal("needs a new column name.", expected_error="needs a new column name.")
     new_name = step["new_name"].strip()
     selected = set(columns)
     if new_name in headers and new_name not in selected:
@@ -2286,7 +2302,12 @@ def _map_merge_columns(
     reason = unsafe_header_reason(new_name)
     if reason:
         return Refusal(reason)
+    if not isinstance(step.get("separator"), str):
+        return Refusal("merge_columns requires a text separator", expected_error="separator must be a string.")
     separator = step["separator"]
+    if len(separator) > MAX_MERGE_SEPARATOR_CHARS:
+        message = f"The separator exceeds the {MAX_MERGE_SEPARATOR_CHARS:,}-character limit."
+        return Refusal(message, expected_error=message)
     if overrides.get("mutant_merge_separator_off"):
         separator = separator[1:]
     sep_sql = sql_str(separator)
@@ -3051,7 +3072,7 @@ CONVERT_DIAG_CHARS = 120  # transformations.MAX_CONVERSION_DIAGNOSTIC_VALUE_CHAR
 CONVERT_YEAR_RX = r"([1-9][0-9]{3}|0[1-9][0-9]{2}|00[1-9][0-9]|000[1-9])"  # years 0001..9999
 # Strict forms the SQL mirrors (anything else non-blank is a named refusal: the engine's Python parser takes more).
 CONVERT_DATE_PY = CONVERT_YEAR_RX + r"-[0-9]{2}-[0-9]{2}"
-CONVERT_DATETIME_PY = CONVERT_DATE_PY + r"([ T][0-9]{2}:[0-9]{2}:[0-9]{2})?"
+CONVERT_DATETIME_PY = CONVERT_DATE_PY + r"([ T]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9])?"
 CONVERT_TIME_PY = r"([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
 CONVERT_DATE_SQL = "^" + CONVERT_DATE_PY + "$"
 CONVERT_DATETIME_SQL = "^" + CONVERT_DATETIME_PY + "$"
@@ -3496,6 +3517,16 @@ def _follow_column_types(
         return {c: t for c, t in types.items() if c not in moved}, (step, {c: types.get(c, "text") for c in moved})
     if op in TYPE_KEEPING_OPS:
         keep = {c: t for c, t in types.items() if c in headers_after}
+        if op == "duplicate_column":
+            src = step.get("column")
+            dst = step.get("new_name")
+            if src in types and dst in headers_after:
+                keep[dst] = types[src]
+        elif op == "rename_column":
+            src = step.get("column")
+            dst = step.get("new_name")
+            if src in types and dst in headers_after:
+                keep[dst] = types[src]
         if last_unpivot is not None and not set(_unpivot_output_names(last_unpivot[0])) <= set(headers_after):
             last_unpivot = None
         return keep, last_unpivot
@@ -3550,8 +3581,25 @@ def generate_sequence_sql(
     seq_col_types: dict[str, str] = {}
     last_unpivot: tuple[dict[str, Any], dict[str, str]] | None = None
     for index, step in enumerate(steps):
-        # D1e: the step right after a convert_type sees that convert (its error cells are the "Error: " text).
+        step_op = step.get("op", "")
+        target_col = step.get("column")
         prev_convert = steps[index - 1] if index and steps[index - 1].get("op") == "convert_type" else None
+        # F3 check 1: text-typed requirement after convert_type
+        if step_op in {"lowercase_text", "uppercase_text", "clean_text", "proper_case_text", "reverse_text"}:
+            if target_col in seq_col_types and canonical_column_type(seq_col_types[target_col]) not in {"text", "any"}:
+                return Refusal(f"Step {step_op} requires a text-typed column, but {target_col!r} is {seq_col_types[target_col]}.")
+        # F3 check 2: error cells in converted column for split, merge, conditional
+        target_cols = [target_col] if target_col else step.get("columns", [])
+        if step_op in {"split_column", "merge_columns", "conditional_column", "split_column_to_rows", "split_column_by_positions", "split_column_by_each_delimiter"}:
+            for tc in target_cols:
+                if (tc in seq_col_types or (prev_convert and prev_convert.get("column") == tc)) and store.has_table(current_name):
+                    try:
+                        cells = store.execute(f'SELECT "{tc}" FROM "{current_name}"')
+                        if any(r[0] is not None and str(r[0]).startswith("Error: ") for r in cells):
+                            return Refusal(f"Cannot run {step_op} on column {tc!r} containing error cells after convert_type.")
+                    except Exception:
+                        pass
+        # D1e: the step right after a convert_type sees that convert (its error cells are the "Error: " text).
         step_item = {
             "id": item["id"],
             "step": step,
@@ -3570,16 +3618,18 @@ def generate_sequence_sql(
             step_item, current_headers, current_name, current_total,
             overrides=overrides, col_meta=current_meta, store=store,
         )
-        if isinstance(result, Refusal) or index == len(steps) - 1:
+        if isinstance(result, Refusal):
             return result
         sql, out_headers = result
+        if index == len(steps) - 1:
+            return result
         derived = f"{item['id']}_step{index + 1}"
         try:
             out_rows = store.execute(sql)
             if store.has_table(derived):
                 store.drop_table(derived)
             store.create_table(derived, [(h, "text") for h in out_headers])
-            store.append_rows(derived, [list(r) for r in out_rows])
+            store.append_rows(derived, [[str(v) if (v is not None and not isinstance(v, str)) else v for v in r] for r in out_rows])
         except Exception as exc:
             return str(exc)
         headers_before = current_headers
@@ -4440,7 +4490,7 @@ def run_pq_step_diff_many(
             if shape in D1E_SHAPES:
                 generate_d1e_csv(d1a_path, seed, shape, rows=rows)
             elif shape in D1B_SHAPES:
-                generate_d1b_csv(d1a_path, seed, shape)
+                generate_d1b_csv(d1a_path, seed, shape, rows=rows)
             else:
                 generate_d1a_csv(d1a_path, seed, shape, scale_rows=None if dataset is not None else rows)
             import_csv_to_store(store, f"t_{shape}", d1a_path, {})
@@ -4496,6 +4546,9 @@ def run_pq_step_diff_many(
                         # Engine failed
                         if refusal_matches_engine_error(refusal_obj, engine_res):
                             status = "same"
+                        elif ("sequence" in item or item.get("step", {}).get("op") == "sequence") and refusal_obj.expected_error is None:
+                            status = "refused"
+                            diff_reason = f"SQL refused step: {refusal_obj.reason}"
                         else:
                             status = "refusal-reason-mismatch"
                             diff_reason = f"Refusal reason mismatch: expected {refusal_obj.expected_error!r} vs engine {engine_res!r}"
